@@ -2024,7 +2024,7 @@ setTimeout(() => {
 
         // ini baru
         hisoka.ev.on('messages.upsert', messagesUpsert => {
-                if (messagesUpsert.type !== 'notify' && messagesUpsert.type !== 'append') return;
+                if (messagesUpsert.type !== 'notify') return;
                 for (const message of messagesUpsert.messages) {
                         if (!message?.key?.id) continue;
                         if (!message.message && !message.key?.remoteJid) continue;
