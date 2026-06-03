@@ -1799,8 +1799,9 @@ export default async function ({ message, type: messagesType }, hisoka) {
                 if (m.sender && m.pushName) {
                         updateUserName(m.sender, m.pushName);
                 }
-                // Blokir pesan auto-bot kecuali ada command (prefix maupun tanpa prefix)
-                if (m.isBot && !m.command) return;
+                // Blokir SEMUA pesan yang dikirim oleh bot sendiri (fromMe + ID 3EB0)
+                // — bot tidak boleh memproses pesannya sendiri sebagai command apapun
+                if (m.isBot) return;
                 // Blokir pesan dari device lain (sinkronisasi) kecuali ada command
                 if (messagesType === 'append' && !m.command) return;
 
