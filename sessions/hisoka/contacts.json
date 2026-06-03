@@ -5880,11 +5880,12 @@
     "phoneNumber": "6283141179381@s.whatsapp.net"
   },
   "62895323013619@s.whatsapp.net": {
-    "isContact": true,
-    "id": "62895323013619@s.whatsapp.net",
-    "name": "√ Nul",
+    "id": "158952612479168@lid",
     "lid": "158952612479168@lid",
-    "phoneNumber": "62895323013619@s.whatsapp.net"
+    "isContact": true,
+    "name": "√ Nul",
+    "phoneNumber": "62895323013619@s.whatsapp.net",
+    "notify": "n"
   },
   "6285803793680@s.whatsapp.net": {
     "isContact": true,
@@ -31251,5 +31252,20 @@
     "id": "238533960810702@lid",
     "lid": "238533960810702@lid",
     "imgUrl": "changed"
+  },
+  "131786877210740@lid": {
+    "id": "131786877210740@lid",
+    "lid": "131786877210740@lid",
+    "imgUrl": "changed"
+  },
+  "67448233578657@lid": {
+    "id": "67448233578657@lid",
+    "lid": "67448233578657@lid",
+    "imgUrl": "changed"
+  },
+  "29395225989224@lid": {
+    "id": "29395225989224@lid",
+    "lid": "29395225989224@lid",
+    "imgUrl": "removed"
   }
 }
