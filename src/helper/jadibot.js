@@ -1644,6 +1644,8 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
 
     for (const msg of messages) {
       if (!msg.message) continue
+      // Blokir pesan yang dikirim oleh bot sendiri (fromMe) — jangan proses sebagai command
+      if (msg.key?.fromMe) continue
 
       // Cache pesan + pre-download media untuk antidel
       if (msg.key?.id && !sock.cacheMsg.has(msg.key.id)) {
@@ -2001,6 +2003,8 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
     if (type !== 'notify') return
     for (const msg of messages) {
       if (!msg.message) continue
+      // Blokir pesan yang dikirim oleh bot sendiri (fromMe) — jangan proses sebagai command
+      if (msg.key?.fromMe) continue
 
       // Cache pesan + pre-download media untuk antidel
       if (msg.key?.id && !sock.cacheMsg.has(msg.key.id)) {
