@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 03/06/2026, 09.57.56  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 03/06/2026, 15.43.56  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  console.error
+│  #001  —  AuthState
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [31m[HotReload] ✗ Gagal reload 'src/handler/message.js', pakai versi lama.[39m
+│  [AuthState] Gagal tulis consolidated session: ENOENT: no such file or directory, open '/home/runner/workspace/sessions/hisoka/__consolidated-session.json'
 │
 │  DETAIL
-│  Sumber      : console.error
+│  Sumber      : AuthState
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 03/06/2026, 09.57.56
-│  Terakhir    : 03/06/2026, 09.57.56
+│  Pertama     : 03/06/2026, 15.43.56
+│  Terakhir    : 03/06/2026, 15.43.56
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [31m[HotReload] ✗ Gagal reload 'src/handler/message.js', pakai versi lama.[39m
-│     at console.error (file:///home/runner/workspace/index.js:391:27)
-│     at Timeout._onTimeout (file:///home/runner/workspace/src/helper/hotReload.js:102:29)
+│  ▶  Error: [AuthState] Gagal tulis consolidated session: ENOENT: no such file or directory, open '/home/runner/workspace/sessions/hisoka/__consolidated-session.json'
+│     at console.error (file:///home/runner/workspace/index.js:392:27)
+│     at file:///home/runner/workspace/src/helper/authState.js:71:49
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 03/06/2026, 09.57.56
+  Terakhir diperbarui: 03/06/2026, 15.43.56
 ════════════════════════════════════════════════════════════════════════
