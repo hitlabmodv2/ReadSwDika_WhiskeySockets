@@ -67,7 +67,6 @@ export async function useConsolidatedAuthState(folder) {
                         await lock.acquire().then(async (release) => {
                                 try {
                                         await writeFile(filePath, JSON.stringify(obj, BufferJSON.replacer))
-                                        console.log(`[AuthState] 💾 ${type}: ${store.size} entries (realtime update)`)
                                 } catch (err) {
                                         console.error(`[AuthState] Gagal tulis consolidated ${type}:`, err.message)
                                 } finally { release() }
