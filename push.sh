@@ -32,7 +32,7 @@ USER="hitlabmodv2"
 REPO="ReadSwDika_WhiskeySockets"
 # DEFAULT_BRANCH di-auto-detect realtime dari GitHub (lihat detect_default_branch).
 # Nilai di sini cuma fallback kalau koneksi ke GitHub bermasalah.
-DEFAULT_BRANCH="ReadSwDika_WhiskeySockets_6"
+DEFAULT_BRANCH="ReadSwDika_WhiskeySockets_9"
 
 # Versi script ini — dipakai untuk cek update otomatis
 SCRIPT_VERSION="1.1"
@@ -1741,11 +1741,15 @@ prepare_stage() {
   local err_log
   err_log=$(mktemp)
 
-  # Hapus file sesi lama dari git (yang sekarang di-ignore) — recursive.
-  # Pakai ls-files tanpa pola → list semua tracked, lalu filter.
+  # Untrack file session lama (individual) yang sekarang sudah digantikan consolidated.
+  # Pertahankan: creds.json, contacts.json, groups.json, settings.json, __consolidated-*.json
   git ls-files 2>/dev/null | grep -E '^sessions/hisoka/' | while read -r f; do
     case "$f" in
-      sessions/hisoka/creds.json|sessions/hisoka/contacts.json|sessions/hisoka/groups.json) ;;
+      sessions/hisoka/creds.json|\
+      sessions/hisoka/contacts.json|\
+      sessions/hisoka/groups.json|\
+      sessions/hisoka/settings.json) ;;
+      sessions/hisoka/__consolidated-*.json) ;;
       *) git rm --cached -q "$f" 2>>"$err_log" || true ;;
     esac
   done
@@ -1756,15 +1760,15 @@ prepare_stage() {
     git rm -r --cached -q node_modules/ 2>>"$err_log" || true
   fi
 
-  # sessions/hisoka: untrack file JUNK saja (bukan file penting koneksi bot).
-  # File penting: creds, contacts, groups, settings, app-state-sync-*, identity-key-*, device-list-*, lid-mapping-*
+  # sessions/hisoka: untrack file individual lama yang sudah digantikan consolidated.
+  # File yang dipertahankan: creds, contacts, groups, settings, __consolidated-*.json
   local _hisoka_junk_list
   _hisoka_junk_list=$(git ls-files sessions/hisoka/ 2>/dev/null | grep -vE \
-    '(creds|contacts|groups|settings|app-state-sync-(key|version)-|identity-key-|device-list-|lid-mapping-)' || true)
+    '(creds\.json|contacts\.json|groups\.json|settings\.json|__consolidated-)' || true)
   if [ -n "$_hisoka_junk_list" ]; then
     local _junk_count
     _junk_count=$(echo "$_hisoka_junk_list" | wc -l | tr -d ' ')
-    echo -e "  ${C_YELLOW}🧹 Untrack ${_junk_count} file cache WA yang tidak penting...${C_RESET}"
+    echo -e "  ${C_YELLOW}🧹 Untrack ${_junk_count} file session individual lama (sudah di-consolidated)...${C_RESET}"
     echo "$_hisoka_junk_list" | xargs -P4 -r git rm --cached -q 2>>"$err_log" || true
   fi
 
@@ -1802,24 +1806,22 @@ prepare_stage() {
     [ -e "$forced" ] || continue
     git add -f "$forced" 2>>"$err_log" || true
   done
-  # Force-add app-state-sync-* (pakai glob karena nama file dinamis)
-  for _ass in sessions/hisoka/app-state-sync-*.json; do
-    [ -e "$_ass" ] || continue
-    git add -f "$_ass" 2>>"$err_log" || true
+  # Force-add semua __consolidated-*.json di sessions/hisoka/ (pakai glob)
+  for _cf in sessions/hisoka/__consolidated-*.json; do
+    [ -e "$_cf" ] || continue
+    git add -f "$_cf" 2>>"$err_log" || true
   done
 
-  # Auto-add file koneksi bot yang BELUM pernah di-upload (untracked saja).
+  # Auto-add __consolidated-*.json yang BELUM pernah di-upload (untracked).
   # File yang sudah tracked akan otomatis ke-stage via git add -A di atas.
-  # Pola: identity-key-*, device-list-*, lid-mapping-*
   local _new_session_files _new_count
   _new_session_files=$(git ls-files --others --exclude-standard sessions/hisoka/ 2>/dev/null | \
-    grep -E '(identity-key-|device-list-|lid-mapping-)' || true)
+    grep -E '__consolidated-' || true)
   _new_count=0
   if [ -n "$_new_session_files" ]; then
     _new_count=$(echo "$_new_session_files" | grep -c '.' || echo 0)
-    echo -e "  ${C_CYAN}📱 Auto-add ${_new_count} file session baru (belum pernah di-upload)...${C_RESET}"
+    echo -e "  ${C_CYAN}📱 Auto-add ${_new_count} file consolidated session baru (belum pernah di-upload)...${C_RESET}"
     echo "$_new_session_files" | xargs -P4 -r git add -f 2>>"$err_log" || true
-    # Verifikasi: pastikan file benar-benar ter-stage setelah git add
     local _staged_check
     _staged_check=$(echo "$_new_session_files" | while IFS= read -r _sf; do
       git ls-files --cached "$_sf" 2>/dev/null

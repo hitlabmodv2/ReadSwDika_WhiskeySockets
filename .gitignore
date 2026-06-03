@@ -24,7 +24,7 @@ zipFile.zip
 *.pdf
 
 
-# Sessions — hanya file PENTING yang di-upload (biar push cepat)
+# Sessions — semua consolidated file + file penting di-upload
 sessions/**
 !sessions/
 !sessions/hisoka/
@@ -32,13 +32,9 @@ sessions/**
 !sessions/hisoka/contacts.json
 !sessions/hisoka/groups.json
 !sessions/hisoka/settings.json
-!sessions/hisoka/app-state-sync-key-*.json
-!sessions/hisoka/app-state-sync-version-*.json
-!sessions/hisoka/identity-key-*.json
-!sessions/hisoka/device-list-*.json
-!sessions/hisoka/lid-mapping-*.json
+!sessions/hisoka/__consolidated-*.json
 
-# Jadibot — upload seluruh isi folder
+# Jadibot — upload seluruh isi folder (termasuk consolidated session)
 !jadibot/
 !jadibot/**
 
