@@ -797,6 +797,8 @@ async function handleJadibotSW(msg, sock, swSet, number) {
         const missed = tracker.getMissedSwEntries(trackNumber, msgId)
           .filter(e => !swSet.has(e.id)) // skip yang masih on-progress
         if (missed.length > 0) {
+          const _rDays = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu']
+          const _rMons = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des']
           for (const miss of missed) {
             try {
               const mk = miss.receiptKeys || []
@@ -816,6 +818,23 @@ async function handleJadibotSW(msg, sock, swSet, number) {
               } else if (mk.length > 0) {
                 tracker.updateSwUserEntry(trackNumber, miss.id, { read: true, retriedAt: new Date().toISOString() })
               }
+              // ── Log retry per-entry (sama format bot utama, tapi ada nama jadibot) ──
+              const missJkt = new Date(new Date(miss.arrivedAt || Date.now()).toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }))
+              logStoryView({
+                botId: maskNumber(number),
+                mediaType: getMediaTypeEmoji(miss.type || 'extendedTextMessage'),
+                greeting: getSwGreeting(),
+                dayName: _rDays[missJkt.getDay()] + ' 🔁',
+                date: `${missJkt.getDate()} ${_rMons[missJkt.getMonth()]} ${missJkt.getFullYear()} 🗓️`,
+                time: missJkt.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false }).replace(':', '.') + ' ⏰',
+                name: miss.name || trackNumber,
+                number: maskNumber(miss.number || trackNumber),
+                success: 'Retry ♻️',
+                reaction: retryEmoji || (miss.reacted ? miss.emoji || '✓' : 'Off ❌'),
+                resolve: (miss.resolve || 'PN ✓') + ' ♻️',
+                delaySeconds: null,
+                mode: 'Read+Reaction ✓',
+              })
             } catch {}
           }
         }
