@@ -47,9 +47,9 @@
     "name": "知らないし、気にしない。",
     "type": "videoMessage",
     "arrivedAt": "2026-06-04T05:19:04.453Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "💦",
     "resolve": "Signal Lib ✓",
     "source": "status",
     "number": "6285216433695",
@@ -62,6 +62,25 @@
       "participant": "225670600900759@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-04T05:19:04.453Z"
+    "updatedAt": "2026-06-04T05:19:16.103Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285216433695@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC7B281215DE6F4D4295FCBFB516C08B",
+        "participant": "225670600900759@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285216433695@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC7B281215DE6F4D4295FCBFB516C08B",
+        "participant": "6285216433695@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-04T05:19:16.103Z"
   }
 }
