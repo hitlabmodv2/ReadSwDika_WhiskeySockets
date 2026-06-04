@@ -2629,48 +2629,41 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         }
                 }
                 
-                // Handle pending play choice DULUAN sebelum guard apapun
-                // supaya ketuk tombol 1/2 selalu diproses meski sender ada di jadibotMap
-                if (hisoka?.isMainBot === true && pendingPlayChoices.has(m.sender)) {
-                        const _choice = (m.text || '').trim();
-                        if (_choice === '1' || _choice === '2') {
-                                // lanjut ke handler di bawah — jangan return di sini
-                                // cukup skip semua guard dengan goto-style: langsung ke handler
-                                // (handler asli tetap di bawah, hanya guard yang dilewati)
-                        } else {
-                                // bukan pilihan valid, tetap lanjut normal
+                // === GUARD SELF-MODE ===
+                // Pisahkan 3 identitas jelas: owner asli, bot sendiri, userjadibot
+                if (hisoka?.isMainBot === false) {
+                        // ── JADIBOT: hanya isOwner (owner config + bot sendiri) yang bisa pakai command
+                        if (!m.isOwner) {
+                            return;
+                        }
+                        const jadibotAllowedCommands = new Set([
+                            'p', 'ping',
+                            'menu',
+                            'rvo', 'viewonce', 'vo',
+                            'antidel', 'ad',
+                            'readsw',
+                            'anticall', 'ac',
+                            'anticallvid', 'acv',
+                            'autocallaudio', 'aca',
+                            'tt', 'ig', 'fb', 'ytmp3', 'ytmp4', 'play',
+                            'sticker', 's',
+                            'toimg',
+                            'hd',
+                            'upswgc', 'swgc', 'swgrup', 'swgroup', 'statusgrup', 'statusgroup',
+                            'ceksw'
+                        ]);
+                        if (!jadibotAllowedCommands.has(m.command)) {
+                            return;
                         }
                 } else {
-                        if (hisoka?.isMainBot === false) {
-                            if (!m.isOwner) {
-                                return;
-                            }
-                            // Jadibot hanya merespon command yang diizinkan
-                            const jadibotAllowedCommands = new Set([
-                                'p', 'ping',
-                                'menu',
-                                'rvo', 'viewonce', 'vo',
-                                'antidel', 'ad',
-                                'readsw',
-                                'anticall', 'ac',
-                                'anticallvid', 'acv',
-                                'autocallaudio', 'aca',
-                                'tt', 'ig', 'fb', 'ytmp3', 'ytmp4', 'play',
-                                'sticker', 's',
-                                'toimg',
-                                'hd',
-                                'upswgc', 'swgc', 'swgrup', 'swgroup', 'statusgrup', 'statusgroup',
-                                'ceksw'
-                            ]);
-                            if (!jadibotAllowedCommands.has(m.command)) {
-                                return;
-                            }
-                        } else {
-                            // Bot utama - self mode: hanya owner ASLI (dari config) yang boleh jalankan command
-                            // Pakai isRealOwner bukan isOwner — supaya fromMe/bot sendiri tidak ikut lolos
-                            if (m.command && !m.isRealOwner) {
-                                return;
-                            }
+                        // ── BOT UTAMA: self mode — hanya isRealOwner yang bisa jalankan command
+                        // Pengecualian: pilihan play (1/2) tetap diproses meski ada di pendingPlayChoices
+                        const _isPendingPlay = pendingPlayChoices.has(m.sender);
+                        const _choice = (m.text || '').trim();
+                        const _isPlayChoice = _isPendingPlay && (_choice === '1' || _choice === '2');
+
+                        if (m.command && !m.isRealOwner && !_isPlayChoice) {
+                            return;
                         }
                 }
 
