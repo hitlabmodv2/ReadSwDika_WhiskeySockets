@@ -40,5 +40,28 @@
       }
     ],
     "processedAt": "2026-06-04T04:42:58.976Z"
+  },
+  "ACDB103474E95E57603EDFF951D37521": {
+    "id": "ACDB103474E95E57603EDFF951D37521",
+    "sender": "6281222884622@s.whatsapp.net",
+    "name": "~ Alfian",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-04T05:19:09.178Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "Signal Lib ✓",
+    "source": "status",
+    "number": "6281222884622",
+    "resolvedPn": "6281222884622@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6281222884622@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACDB103474E95E57603EDFF951D37521",
+      "participant": "23274595578098@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-04T05:19:09.178Z"
   }
 }

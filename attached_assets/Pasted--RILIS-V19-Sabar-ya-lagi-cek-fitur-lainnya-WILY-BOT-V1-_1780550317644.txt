@@ -1,0 +1,214 @@
+🚀 *RILIS V19*
+_Sabar ya, lagi cek fitur lainnya_ 👀
+
+━━━━━━━━━━━━━━━━━━━━━━
+
+🤖 *WILY BOT — V19*
+
+✨ *7 Fitur Baru*
+🔧 *10 Bug Fix*
+🚀 *12 Improvement*
+
+━━━━━━━━━━━━━━━━━━━━━━
+✨ *FITUR BARU*
+━━━━━━━━━━━━━━━━━━━━━━
+
+> 🛡️ *Anti-Tag SW — Cegah Tag Grup Lewat Status*
+> Cegah member mentag grup via status WA di grup manapun
+> Deteksi 3 metode sekaligus: tag status langsung, caption media, dan reply
+> Warning bertahap dengan progress bar (◆◆◇ 2/3)
+> Auto-kick + hapus pesan saat batas warning tercapai (default 3x)
+> Admin grup diizinkan — hanya diberi notif, tanpa warning/kick
+> Log pelanggaran tersimpan otomatis, maks 500 entri per bot
+> Toggle per grup: `.antitagsw on/off` | Global: `.antitagsw global on/off`
+> Atur batas warning: `.antitagsw warn <angka>`
+
+> 📊 *SwTrack — Tracking Per-User AutoRead SW*
+> Setiap SW yang dibaca/direact kini dicatat per kontak
+> Data disimpan di `data/swtrack/users/<nomor>.json`
+> TTL otomatis 26 jam — data lama dibersihkan sendiri
+> Dilengkapi dedup in-memory agar 1 SW tidak diproses 2x
+
+> 📡 *AutoRead Group Linked Status (SW Grup)*
+> Bot kini otomatis baca & react SW yang dikirim ke grup
+> Sebelumnya hanya handle `status@broadcast` (SW biasa)
+> Kini juga handle `groupStatusMessageV2` (SW via grup/upswgc)
+> Reaksi, delay, dan SwTrack berlaku sama seperti SW biasa
+
+> ⚙️ *Random Delay Configurable*
+> Delay sebelum baca/react SW kini bisa diatur di config
+> Mode random: `delayMinMs` (default 1s) — `delayMaxMs` (default 20s)
+> Mode fixed: `fixedDelayMs` (default 3s) saat `randomDelay: false`
+> Berlaku untuk SW biasa maupun SW grup
+
+> 🤖 *SwTrack di Jadibot — Tracking SW per Sesi Jadibot*
+> Jadibot kini punya handler SW sendiri (`handleJadibotSW`)
+> Support `status@broadcast` dan `groupStatusMessageV2`
+> LID resolve 3-layer: PN langsung → Signal Lib → Cache Grup Global
+> Read receipt, reaksi, SwStats, SwTrack — semua berjalan di jadibot
+> Console log AutoReadStory tampil dengan label nomor jadibot
+> Data SwTrack tersimpan terpisah per-jadibot (tidak campur bot utama)
+> Folder: `data/swtrack/jadibot/<nomor>/users/<kontak>.json`
+
+> 🤖 *AI Caption untuk `.fb` — Facebook Downloader*
+> `.fb` kini dilengkapi AI caption otomatis seperti `.ig`
+> Gemini Vision menganalisis thumbnail video sebelum generate caption
+> Caption muncul langsung di video — tidak perlu pesan terpisah
+> Format WA lengkap: *bold*, _italic_, `monospace`, > quote
+> Data: nama page, views, deskripsi, hashtag, tipe media (reel/story/video)
+> File baru: `src/helper/AiPromptFb.js`
+
+> 🏓 *`.ping` — Tampilan Baru dengan Visual Bar*
+> Tampilan ping total dirombak — lebih informatif dan estetik
+> Bar visual `▓▓▓▓░░░░░░` untuk latency, RAM sistem, RAM bot
+> Speed lebih detail: Sangat Cepat / Cepat / Normal / Lambat (4 level)
+> Tambah info Total Pesan & Total Perintah yang sudah diproses
+> Seksi dipisah dengan header `├─「 📡 KONEKSI 」──`
+
+━━━━━━━━━━━━━━━━━━━━━━
+🔧 *BUG FIX*
+━━━━━━━━━━━━━━━━━━━━━━
+
+> 🛡️ *Anti-Tag SW — Konflik dengan Anti-Delete*
+> Pesan yang dihapus otomatis oleh AntiTagSW ikut ditrigger anti-delete
+> Bot kirim notif "PESAN DIHAPUS" padahal itu dari fitur sendiri
+> Kini pakai `global.__antiTagSWDeletedIds` sebagai penanda
+> Anti-delete akan skip pesan yang sudah ditandai AntiTagSW
+
+> 🛡️ *Anti-Tag SW — Sender LID Tidak Teridentifikasi*
+> WA kini kirim participant dalam format LID (@lid) bukan PN
+> Bot tidak bisa identifikasi siapa yang mentag → warning tidak akurat
+> Kini ada 4-layer LID resolve khusus AntiTagSW:
+> 1️⃣ Dari `hisoka.contacts.read(lid)`
+> 2️⃣ Dari participants grup (lid ↔ phoneNumber)
+> 3️⃣ Reverse lookup dari `contacts.json` file (paling akurat)
+> 4️⃣ `hisoka.resolveLidToPN()` sebagai async fallback terakhir
+
+> 🛡️ *Anti-Tag SW — Status Bot Admin Tidak Akurat*
+> Bot kadang gagal hapus/kick karena status admin di-cache terlalu lama
+> Kini fetch live `groupMetadata` setiap ada pelanggaran
+> Fallback ke cache file → cache memory jika fetch gagal
+
+> 📡 *AutoRead SW — LID Tidak Bisa Direact*
+> WA kini kirim sender dalam format LID (@lid) bukan PN (@s.whatsapp.net)
+> Bot gagal kirim reaksi karena LID tidak dikenali sebagai JID valid
+> Kini ada 3-layer LID resolve sebelum react:
+> 1️⃣ PN langsung dari `m.sender` jika bukan @lid
+> 2️⃣ Signal Lib via `signalRepository.lidMapping.getPNForLID()`
+> 3️⃣ Cache Grup via `global.__lookupLidPn()` (fallback runtime)
+> Jika semua gagal → react di-skip & tandai `⏭️ Skip (LID belum resolve)`
+
+> 📡 *AutoRead SW — SW Sama Diproses 2x*
+> SW yang masuk berbarengan kadang diproses lebih dari sekali
+> Penyebab: tidak ada guard sebelum async delay berjalan
+> Kini pakai `swProcessingSet` (in-memory Set) sebagai dedup pertama
+> Dan `isSwUserTracked()` (disk) sebagai validasi kedua
+
+> 📡 *AutoRead SW — SW Terlewat Saat readReceipt Gagal*
+> Beberapa SW tidak tercatat sebagai dibaca meski sudah diproses
+> Penyebab: `receiptKeys` tidak disimpan → tidak bisa di-retry
+> Kini `receiptKeys` disimpan ke SwTrack entry untuk anti-miss retry
+> SW yang masih in-progress di-skip dari retry agar tidak dobel
+
+> 📡 *AutoRead SW — `participantAlt` Tidak Diambil*
+> LID kadang ada di `m.key.participantAlt`, bukan di `participant` biasa
+> Bot melewatkan field ini sehingga LID tidak terdeteksi sama sekali
+> Kini `participantAlt` dicek sebagai fallback source LID
+
+> 🤖 *`.fb` — Caption AI Muncul Kalimat Pembuka*
+> AI kadang menambahkan "Oke siap, Wily bantu bikinin caption-nya ya!"
+> Sebelum isi caption yang sebenarnya
+> Prompt diperketat: DILARANG KERAS menambahkan kalimat pembuka/penutup
+> Prompt diakhiri `Caption (langsung, tanpa kalimat pembuka):` agar AI langsung ke isi
+
+> 🤖 *`.fb` — Method 2 Fallback Gagal Ekstrak URL Video*
+> Method 2 (fallback) pakai HTML dari `facebookexternalhit` UA
+> `browser_native_hd_url` tidak ada di HTML crawler — hanya muncul di Chrome UA
+> Fix: Method 2 sekarang fetch ulang halaman FB dengan Chrome UA secara terpisah
+
+> 🗑️ *Hapus Fitur `autoCallAudio`*
+> Fitur tolak panggilan + kirim voice note otomatis dihapus permanen
+> Dihapus dari: `config.json`, `index.js` (logika), `message.js` (command `.aca`)
+
+━━━━━━━━━━━━━━━━━━━━━━
+🚀 *IMPROVEMENT*
+━━━━━━━━━━━━━━━━━━━━━━
+
+> 🔁 *Baileys — Migrasi ke @whiskeysockets/baileys Official Latest*
+> Sebelumnya pakai fork custom Baileys
+> Kini langsung pakai `@whiskeysockets/baileys@latest` (official)
+> Lebih stabil, up-to-date, dan kompatibel dengan perubahan WA terbaru
+
+> 🛡️ *Anti-Tag SW — Deteksi Caption & Reply Tag*
+> Sebelumnya hanya deteksi pesan status langsung (`groupStatusMentionMessage`)
+> Kini juga deteksi tag grup via caption media (gambar/video/audio/dokumen)
+> Dan deteksi tag via reply ke pesan status — semua metode tercakup
+> Label konten tampil di notif: Gambar 🖼️ / Video 🎥 / Teks 💬 dll
+
+> 📊 *`.ceksw` — Stats Emoji & Active SW 24 Jam*
+> Stats per kontak kini lebih detail:
+> • Total baca & react sepanjang waktu
+> • `activeSW`: jumlah SW aktif dalam 24 jam terakhir
+> • Emoji yang paling sering dipakai untuk react (ranking)
+> Toggle tracking: `.ceksw on/off` — Reset: `.ceksw reset`
+
+> 📩 *AutoRead SW — Metode Resolve Tampil di Notif*
+> Notif SW kini tampilkan bagaimana sender berhasil di-resolve
+> Contoh: `PN langsung ✓` / `Signal Lib ✓` / `Cache Grup ✓`
+> `LID belum ke-resolve ❌` jika semua layer gagal
+> Memudahkan debug masalah LID tanpa buka log terminal
+
+> 📊 *`.ceksw` — Sorted by Reactions*
+> Daftar kontak otomatis diurutkan dari yang paling sering direact
+> Sebelumnya urutan tidak konsisten (urutan masuk)
+
+> 📡 *AutoRead SW — Notif Telegram Support Group Status*
+> SW dari grup (groupStatusMessageV2) kini juga dikirim ke Telegram
+> Termasuk media (gambar/video) jika tersedia di dalam status grup
+
+> 🧹 *Refactor — Fungsi Duplikat Dipindah ke `swtrack.js`*
+> Semua fungsi SwTrack lokal di `event.js` dihapus (±220 baris)
+> Dipindah ke modul shared `src/helper/swtrack.js`
+> Berlaku: `updateSwStats`, `isSwUserTracked`, `markSwUserEntry`,
+> `updateSwUserEntry`, `getMissedSwEntries`, `extractSwNumber`,
+> `getMediaTypeEmoji`, `maskNumber`, `logStoryView`, `storyDebounce`
+> Tidak ada perubahan fungsional — hanya lebih rapi dan tidak redundan
+
+> 🏭 *`createSwTracker(dir)` — Factory Tracker Terisolasi*
+> Fungsi baru di `swtrack.js`: buat instance tracker per-folder custom
+> Return: `{ isSwUserTracked, markSwUserEntry, updateSwUserEntry, getMissedSwEntries }`
+> Digunakan jadibot agar data tidak tercampur dengan bot utama
+> Setiap jadibot punya tracker sendiri via `getJadibotTracker(number)`
+> Tracker & Set dedup dibersihkan otomatis saat jadibot di-stop
+
+> 🧹 *SessionCleaner — Pruning 6 Kategori File*
+> Sebelumnya hanya hapus pre-key & session-* & sender-key & lid-mapping
+> Sekarang mencakup semua akumulasi: 6 kategori dengan batas usia berbeda
+> `pre-key`         → ID < (nextPreKeyId - 200) — aman secara protokol
+> `session-*`       → > 30 hari tidak dipakai
+> `sender-key-*`    → > 14 hari (diperpendek dari 30 hari)
+> `identity-key-*`  → > 60 hari (konservatif, Signal protocol)
+> `device-list-*`   → > 30 hari tidak dipakai
+> `app-state-sync-key-*` → simpan 10 terbaru saja (by mtime)
+> `lid-mapping-*`   → SELALU hapus (cache sementara, WA buat ulang otomatis)
+> Log baru: `Hapus: X pre-key + Y app-state-key + Z sender-key → hemat XX KB`
+
+> 📊 *`.ceksesi` — Tampilkan 7 Kategori File + Info Pruning*
+> Sebelumnya hanya tampilkan 5 kategori (session, pre-key, sender-key, app-state-*)
+> Sekarang tampilkan: identity-key 🪪, device-list 📱, lid-mapping 🗺️ juga
+> Setiap baris dilengkapi deskripsi kebijakan pruning (kapan file dihapus)
+> Misal: "Kunci enkripsi per grup/SW — pruned >14 hari"
+
+> 🤖 *`.fb` — Paralel Fetch Media + Meta HTML*
+> Sebelumnya fetch archive API dan meta HTML dilakukan berurutan
+> Kini keduanya jalan paralel via `Promise.allSettled` — lebih cepat
+> Thumbnail dari archive API dipakai untuk Gemini Vision analysis
+
+> 🤖 *AI Prompt `.ig` & `.fb` — Caption Langsung Tanpa Basa-basi*
+> Caption dikirim sebagai bagian dari pesan video/foto
+> Tidak ada batas panjang buatan — AI bebas generate sesuai konten
+> Label "HD/SD" dihapus dari caption — tidak ada di dalam video
+> Prompt diperketat: no kalimat pembuka, batas 8 baris, langsung ke isi
+
+━━━━━━━━━━━━━━━━━━━━━━
+🤖 *Wily-Bot* | *V19* | _31 Mei 2026_
