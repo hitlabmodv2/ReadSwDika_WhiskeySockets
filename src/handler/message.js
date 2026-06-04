@@ -5726,8 +5726,8 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 break;
                         }
 
-                                case 'p':
-                                case 'ping' : {
+                                case 'ping':
+                                case 'p': {
                                 if (!m.prefix && m.query) break;
                                 try {
                                         const msg = await tolak(hisoka, m, '⏳ _Checking..._');

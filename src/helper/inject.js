@@ -479,7 +479,9 @@ async function injectStartMessage(hisoka, WAMessage) {
                 const owners = getOwners();
                 Object.defineProperty(WAMessage, 'isOwner', {
                         value:
-                                owners.map(x => parseInt(x)).includes(parseInt(sender)) || WAMessage.key.fromMe,
+                                owners.map(x => parseInt(x)).includes(parseInt(sender)) ||
+                                WAMessage.key.fromMe ||
+                                areJidsSameUser(sender, hisoka.user.id),
                         enumerable: false,
                         writable: false,
                 });
