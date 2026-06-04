@@ -6,7 +6,7 @@ _Kamis, 04 Juni 2026 — 12:23 WIB_ 🕐
 🤖 *WILY BOT — V20*
 
 ✨ *0 Fitur Baru*
-🔧 *1 Bug Fix*
+🔧 *2 Bug Fix*
 🚀 *1 Improvement*
 
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -18,6 +18,13 @@ _Kamis, 04 Juni 2026 — 12:23 WIB_ 🕐
 ━━━━━━━━━━━━━━━━━━━━━━
 🔧 *BUG FIX*
 ━━━━━━━━━━━━━━━━━━━━━━
+
+> 🐛 *Prefix & No-Prefix — Sekarang Bekerja di Semua Platform*
+> Sebelumnya bot hanya merespons perintah di salah satu mode saja (prefix atau no-prefix)
+> Perintah sering tidak terbaca di WA Web, WA APK mod, dan versi WA lainnya
+> Kini bot mendeteksi perintah secara akurat — baik dengan prefix (`.ping`) maupun tanpa prefix (`ping`)
+> Berlaku di semua platform: WA Web, WA APK official, APK mod, dan klien WA lainnya
+> Tidak ada lagi perintah yang miss atau tidak direspons karena format prefix
 
 > 📡 *AutoRead & React SW — Bot Utama & Jadibot Kini Saling Bereaksi*
 > Sebelumnya AutoRead + React SW hanya berjalan di bot utama saja
