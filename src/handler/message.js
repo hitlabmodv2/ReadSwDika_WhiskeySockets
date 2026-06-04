@@ -2670,7 +2670,9 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                 // Log CMD setelah semua guard lolos — jadibot & bot utama sama-sama tercatat
                 // Skip status/story WA (status@broadcast) — bukan command sungguhan
-                if (m.command && m.from !== 'status@broadcast') {
+                // Hanya log jika command dikenal (ada di _commandSet) ATAU pengirim adalah owner
+                const _isKnownCmd = hisoka._commandSet?.has(m.command);
+                if (m.command && m.from !== 'status@broadcast' && (_isKnownCmd || m.isOwner)) {
                         const _loc = m.isGroup ? `"${hisoka.getName(m.from)}"` : 'Private';
                         const _tag = hisoka?.isMainBot === false ? '\x1b[35m[JADIBOT]\x1b[39m ' : '';
                         const _who = m.isBot ? '\x1b[35m[BOT]\x1b[39m' : (m.isOwner ? '\x1b[33m[OWNER]\x1b[39m' : '');
