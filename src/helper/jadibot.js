@@ -1174,7 +1174,7 @@ function msgLoggedOutDirect(number) {
 }
 
 /* ================= START JADIBOT ================= */
-async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, sendPairingMsg = null, durationMs = undefined, mainBotSock = null, reactFn = null) {
+async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, sendPairingMsg = null, durationMs = undefined, mainBotSock = null, reactFn = null, requesterNumber = null) {
   number = number.replace(/[^0-9]/g, '')
   const hasRequestedDuration = durationMs !== undefined && durationMs !== null
 
@@ -1241,6 +1241,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
 
   sock.isMainBot = false
   sock.mainBotNumber = mainBotNumber
+  sock.jadibotUserNumber = requesterNumber || null
 
   injectClient(
     sock,
@@ -1694,8 +1695,9 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
 
     for (const msg of messages) {
       if (!msg.message) continue
-      // Blokir pesan yang dikirim oleh bot sendiri (fromMe) — jangan proses sebagai command
-      if (msg.key?.fromMe) continue
+      // Blokir pesan yang dikirim oleh kode bot sendiri (ada di _botSentIds)
+      // fromMe=true bisa juga dari WA user asli (multi-device) — jangan skip itu
+      if (msg.key?.fromMe && sock._botSentIds?.has(msg.key?.id)) continue
 
       // Cache pesan + pre-download media untuk antidel
       if (msg.key?.id && !sock.cacheMsg.has(msg.key.id)) {
@@ -1731,7 +1733,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
 }
 
 /* ================= START JADIBOT QR ================= */
-async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durationMs = undefined, mainBotSock = null, reactFn = null) {
+async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durationMs = undefined, mainBotSock = null, reactFn = null, requesterNumber = null) {
   number = number.replace(/[^0-9]/g, '')
   const hasRequestedDuration = durationMs !== undefined && durationMs !== null
 
@@ -1778,6 +1780,7 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
 
   sock.isMainBot = false
   sock.mainBotNumber = mainBotNumber
+  sock.jadibotUserNumber = requesterNumber || null
 
   injectClient(
     sock,
@@ -2053,8 +2056,9 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
     if (type !== 'notify') return
     for (const msg of messages) {
       if (!msg.message) continue
-      // Blokir pesan yang dikirim oleh bot sendiri (fromMe) — jangan proses sebagai command
-      if (msg.key?.fromMe) continue
+      // Blokir pesan yang dikirim oleh kode bot sendiri (ada di _botSentIds)
+      // fromMe=true bisa juga dari WA user asli (multi-device) — jangan skip itu
+      if (msg.key?.fromMe && sock._botSentIds?.has(msg.key?.id)) continue
 
       // Cache pesan + pre-download media untuk antidel
       if (msg.key?.id && !sock.cacheMsg.has(msg.key.id)) {

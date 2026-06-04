@@ -2632,8 +2632,11 @@ export default async function ({ message, type: messagesType }, hisoka) {
                 // === GUARD SELF-MODE ===
                 // Pisahkan 3 identitas jelas: owner asli, bot sendiri, userjadibot
                 if (hisoka?.isMainBot === false) {
-                        // ── JADIBOT: hanya isOwner (owner config + bot sendiri) yang bisa pakai command
-                        if (!m.isOwner) {
+                        // ── JADIBOT: izinkan isOwner (owner config) ATAU pemilik sesi jadibot ini
+                        const _senderNum = String(m.sender || '').split('@')[0].split(':')[0];
+                        const _jadibotUserNum = String(hisoka.jadibotUserNumber || '').split('@')[0].split(':')[0];
+                        const _isJadibotUser = !!_jadibotUserNum && _senderNum === _jadibotUserNum;
+                        if (!m.isOwner && !_isJadibotUser) {
                             return;
                         }
                         const jadibotAllowedCommands = new Set([
@@ -14612,7 +14615,8 @@ hasil += `╰══════════════════════�
                                         hisoka,
                                         async (emoji) => {
                                                 try { await hisoka.sendMessage(m.from, { react: { text: emoji, key: m.key } }) } catch {}
-                                        }
+                                        },
+                                        m.sender
                                 );
                         }
                                 break;
