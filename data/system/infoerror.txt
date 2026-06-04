@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 03/06/2026, 15.43.56  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 04/06/2026, 16.09.35  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  AuthState
+│  #001  —  console.error
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [AuthState] Gagal tulis consolidated session: ENOENT: no such file or directory, open '/home/runner/workspace/sessions/hisoka/__consolidated-session.json'
+│  [31m[HD] Error:[39m Gagal upscale. API tidak merespons dengan benar.
 │
 │  DETAIL
-│  Sumber      : AuthState
+│  Sumber      : console.error
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 03/06/2026, 15.43.56
-│  Terakhir    : 03/06/2026, 15.43.56
+│  Pertama     : 04/06/2026, 16.09.35
+│  Terakhir    : 04/06/2026, 16.09.35
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [AuthState] Gagal tulis consolidated session: ENOENT: no such file or directory, open '/home/runner/workspace/sessions/hisoka/__consolidated-session.json'
+│  ▶  Error: [31m[HD] Error:[39m Gagal upscale. API tidak merespons dengan benar.
 │     at console.error (file:///home/runner/workspace/index.js:392:27)
-│     at file:///home/runner/workspace/src/helper/authState.js:71:49
+│     at default (file:///home/runner/workspace/src/handler/message.js?t=1780589336369:16547:49)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 03/06/2026, 15.43.56
+  Terakhir diperbarui: 04/06/2026, 16.09.35
 ════════════════════════════════════════════════════════════════════════

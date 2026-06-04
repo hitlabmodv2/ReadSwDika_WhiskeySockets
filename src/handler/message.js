@@ -2665,6 +2665,11 @@ export default async function ({ message, type: messagesType }, hisoka) {
                             if (!jadibotAllowedCommands.has(m.command)) {
                                 return;
                             }
+                        } else {
+                            // Bot utama - self mode: hanya owner yang boleh jalankan command
+                            if (m.command && !m.isOwner) {
+                                return;
+                            }
                         }
                 }
 
