@@ -899,46 +899,7 @@ async function handleJadibotSW(msg, sock, swSet, number) {
     }
 
     // msgId TIDAK dihapus dari swSet — cegah spam kalau WA re-deliver story yang sama
-
-    // ── Console log ──
-    const botId = sock.user?.id?.split(':')[0] || ''
-    const debounceKey = `jb:${botId}:${from}`
-    if (!storyDebounce.has(debounceKey)) {
-      storyDebounce.set(debounceKey, { time: Date.now(), count: 1 })
-
-      const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
-      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']
-      const jakartaDate = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }))
-
-      const innerType = isGroupStatus
-        ? (() => { const inner = msg.message?.groupStatusMessageV2?.message; return inner ? Object.keys(inner).find(k => k !== 'messageContextInfo') : null })()
-        : getContentType(msg.message)
-
-      logStoryView({
-        botId: maskNumber(botId),
-        mediaType: getMediaTypeEmoji(innerType),
-        greeting: getSwGreeting(),
-        dayName: dayNames[jakartaDate.getDay()],
-        date: `${jakartaDate.getDate()} ${monthNames[jakartaDate.getMonth()]} ${jakartaDate.getFullYear()} 🗓️`,
-        time: jakartaDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false }).replace(':', '.') + ' ⏰',
-        name: storyName,
-        number: maskNumber(storyNumber),
-        success: reactionSuccess ? 'Iya ✓' : (readOk ? 'Baca ✓' : 'Gagal ❌'),
-        reaction: shouldReact ? usedReaction : 'Off ❌',
-        resolve: resolveMethod,
-        delaySeconds: (delayMs / 1000).toFixed(1),
-        mode: shouldReact ? `Read+Reaction ✓${isGroupStatus ? ' [Grup]' : ''}` : 'Read Only 👁️',
-      })
-
-      setTimeout(() => {
-        const d = storyDebounce.get(debounceKey)
-        if (d && d.count > 1) console.log(`\x1b[33m   └─ +${d.count - 1} story lainnya dari ${storyName}\x1b[39m`)
-        storyDebounce.delete(debounceKey)
-      }, 3000)
-    } else {
-      const d = storyDebounce.get(debounceKey)
-      if (d) { d.count++; storyDebounce.set(debounceKey, d) }
-    }
+    // Log ditangani oleh event.js (listenEvent) yang dipanggil via messageHandler
   } catch (err) {
     console.error('\x1b[31m[Jadibot SW Error]\x1b[39m', err?.message || String(err))
   }

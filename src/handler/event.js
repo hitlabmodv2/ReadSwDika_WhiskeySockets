@@ -439,7 +439,7 @@ export default async function (m, hisoka) {
                      /* ini tambahan */ botId: hisoka.isMainBot ? null : (hisoka.user.name || maskNumber(botId)),
                                         mediaType: getMediaTypeEmoji(m.type),
                                         greeting: getGreeting(),
-                                        dayName: dayName + ' 🔁',
+                                        dayName: dayName,
                                         date: dateStr + ' 🗓️',
                                         time: timeStr + ' ⏰',
                                         name: storyName,
