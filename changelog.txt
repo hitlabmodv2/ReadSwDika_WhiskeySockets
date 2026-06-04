@@ -1,24 +1,38 @@
+╔══════════════════════════╗
+║   🤖  *WILY BOT — V20*   ║
+╚══════════════════════════╝
+
 🚀 *RILIS V20*
-_Bug fix kritikal — prefix & no-prefix kini akurat di semua platform_ ✅
+✅ _Bug fix kritikal — prefix & no-prefix kini akurat di semua platform_
 
-━━━━━━━━━━━━━━━━━━━━━━
+┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 
-🤖 *WILY BOT — V20*
+📋 *RINGKASAN*
+┃ 🔧 1 Bug Fix Kritikal
 
-🔧 *1 Bug Fix Kritikal*
-
-━━━━━━━━━━━━━━━━━━━━━━
+┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 🔧 *BUG FIX*
-━━━━━━━━━━━━━━━━━━━━━━
+┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 
-> 🐛 *Prefix & No-Prefix Tidak Terbaca di WA Web & APK Lain*
-> Bot sebelumnya gagal mendeteksi perintah dengan prefix maupun tanpa prefix
-> ketika dikirim dari WhatsApp Web, WA Business, atau APK modifikasi lainnya
-> Penyebab: parsing teks pesan tidak konsisten akibat perbedaan format karakter
-> yang dikirim antar platform (WA Android, WA Web, WA Business, dll)
-> Fix: normalisasi teks pesan dilakukan sebelum proses deteksi prefix
-> Kini prefix regex dan no-prefix handler berjalan akurat di semua platform
-> Berlaku untuk semua jenis pesan: teks biasa, reply, dan forward
+🐛 *Prefix & No-Prefix Tidak Terbaca di WA Web & APK Lain*
 
-━━━━━━━━━━━━━━━━━━━━━━
-🤖 *Wily-Bot* | *V20* | _4 Juni 2026_
+┃ ❌ *Masalah:*
+┃ Bot gagal mendeteksi perintah dengan prefix maupun
+┃ tanpa prefix saat dikirim dari WhatsApp Web,
+┃ WA Business, atau APK modifikasi lainnya.
+┃ Penyebab: format karakter antar platform tidak konsisten.
+┃
+┃ ✅ *Fix:*
+┃ Normalisasi teks pesan kini dilakukan sebelum
+┃ proses deteksi prefix berjalan.
+┃ Prefix regex & no-prefix handler akurat di semua platform.
+┃
+┃ 📌 *Berlaku untuk:*
+┃ • WA Android
+┃ • WA Web
+┃ • WA Business
+┃ • APK modifikasi lainnya
+┃ • Semua jenis pesan: teks, reply, dan forward
+
+┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+🤖 *Wily-Bot* | *V20* | 📅 _4 Juni 2026_
