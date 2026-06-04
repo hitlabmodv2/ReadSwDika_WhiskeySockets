@@ -668,6 +668,10 @@ async function handleJadibotSW(msg, sock, swSet, number) {
     const msgId = msg.key?.id
     if (!msgId || swSet.has(msgId)) return
     swSet.add(msgId)
+    // Klaim msgId ke global set SEKARANG (sebelum await apapun) supaya event.js
+    // tidak lolos race condition dan ikut kirim reaksi duplikat
+    if (!global.__swProcessingSet) global.__swProcessingSet = new Set()
+    global.__swProcessingSet.add(msgId)
 
     // Tracker terisolasi per-jadibot → data/swtrack/jadibot/<number>/users/
     const tracker = getJadibotTracker(number)
