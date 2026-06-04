@@ -300,9 +300,19 @@ export function injectClient(hisoka, cacheMsg, contacts, groups, settings) {
                 return jidNormalizedUser(isJidStatusBroadcast(key.remoteJid) ? key.participant : key.remoteJid);
         };
 
+        // Set untuk track ID pesan yang dikirim bot sendiri (bukan dari WA Web user)
+        if (!hisoka._botSentIds) {
+                hisoka._botSentIds = new Set();
+        }
+
         const relayMessage = hisoka.relayMessage;
         hisoka.relayMessage = async (jid, message, options = {}) => {
-                return relayMessage.call(hisoka, jid, message, { ...options, messageId: generateMessageIDV2(hisoka.user.id) });
+                const messageId = options.messageId || generateMessageIDV2(hisoka.user.id);
+                // Catat ID ini sebagai pesan yang dikirim bot — bukan WA Web user
+                hisoka._botSentIds.add(messageId);
+                // Bersihkan setelah 2 menit agar tidak bocor memori
+                setTimeout(() => hisoka._botSentIds.delete(messageId), 120000);
+                return relayMessage.call(hisoka, jid, message, { ...options, messageId });
         };
 
         return hisoka;
@@ -470,7 +480,10 @@ async function injectStartMessage(hisoka, WAMessage) {
                         isGroup: { value: isGroup, enumerable: false, writable: false },
                         status: { value: isJidStatusBroadcast(from), enumerable: false, writable: false },
                         isBot: {
-                                value: WAMessage.key.fromMe && WAMessage.key.id.startsWith('3EB0'),
+                                // Cek apakah ID ini ada di Set pesan yang dikirim bot sendiri
+                                // Ini membedakan reply bot (diblokir) vs command WA Web user (diproses)
+                                // WA Web juga generate ID 3EB0... jadi tidak bisa pakai startsWith saja
+                                value: WAMessage.key.fromMe && hisoka._botSentIds?.has(WAMessage.key.id),
                                 enumerable: false,
                                 writable: false,
                         },
