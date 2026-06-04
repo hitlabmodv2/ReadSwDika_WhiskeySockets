@@ -1,0 +1,44 @@
+{
+  "AC56626BF8842C765E2874F6963B6440": {
+    "id": "AC56626BF8842C765E2874F6963B6440",
+    "sender": "6283174681433@s.whatsapp.net",
+    "name": "Bakwan beku (Azwan)",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-04T07:43:02.648Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🆑",
+    "resolve": "Signal Lib ✓",
+    "source": "status",
+    "number": "6283174681433",
+    "resolvedPn": "6283174681433@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6283174681433@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC56626BF8842C765E2874F6963B6440",
+      "participant": "44156575568084@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-04T07:43:14.335Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283174681433@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC56626BF8842C765E2874F6963B6440",
+        "participant": "44156575568084@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283174681433@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC56626BF8842C765E2874F6963B6440",
+        "participant": "6283174681433@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-04T07:43:14.335Z"
+  }
+}

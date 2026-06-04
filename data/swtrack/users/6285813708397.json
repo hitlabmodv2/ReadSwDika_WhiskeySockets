@@ -1,0 +1,44 @@
+{
+  "ACE030D103BA7E09A654B003A37F5429": {
+    "id": "ACE030D103BA7E09A654B003A37F5429",
+    "sender": "6285813708397@s.whatsapp.net",
+    "name": "FallZx Infinity",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-04T07:37:28.516Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🍱",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285813708397",
+    "resolvedPn": "6285813708397@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285813708397@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACE030D103BA7E09A654B003A37F5429",
+      "participant": "116905151086739@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-04T07:37:42.845Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285813708397@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACE030D103BA7E09A654B003A37F5429",
+        "participant": "116905151086739@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285813708397@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACE030D103BA7E09A654B003A37F5429",
+        "participant": "6285813708397@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-04T07:37:42.845Z"
+  }
+}

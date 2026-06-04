@@ -1,0 +1,44 @@
+{
+  "AC034B4D957CD15529CCA0993F671135": {
+    "id": "AC034B4D957CD15529CCA0993F671135",
+    "sender": "62895365483845@s.whatsapp.net",
+    "name": "Poetra",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-04T07:07:06.310Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🖤",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "62895365483845",
+    "resolvedPn": "62895365483845@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "62895365483845@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC034B4D957CD15529CCA0993F671135",
+      "participant": "269655310643411@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-04T07:07:13.128Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62895365483845@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC034B4D957CD15529CCA0993F671135",
+        "participant": "269655310643411@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62895365483845@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC034B4D957CD15529CCA0993F671135",
+        "participant": "62895365483845@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-04T07:07:13.128Z"
+  }
+}
