@@ -6,8 +6,8 @@ _Kamis, 04 Juni 2026 — 12:23 WIB_ 🕐
 🤖 *WILY BOT — V20*
 
 ✨ *0 Fitur Baru*
-🔧 *3 Bug Fix*
-🚀 *1 Improvement*
+🔧 *4 Bug Fix*
+🚀 *2 Improvement*
 
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
@@ -18,6 +18,12 @@ _Kamis, 04 Juni 2026 — 12:23 WIB_ 🕐
 ━━━━━━━━━━━━━━━━━━━━━━
 🔧 *BUG FIX*
 ━━━━━━━━━━━━━━━━━━━━━━
+
+> 🗑️ *Anti-Delete — Pemulihan Semua Jenis Media Kini Berfungsi*
+> Sebelumnya antidel gagal memulihkan sebagian media yang dihapus (sticker, gambar, video, dll)
+> Terutama bermasalah di sesi userjadibot — media sering tidak terkirim ulang
+> Kini semua jenis media berhasil dipulihkan: sticker, gambar, video, audio, dokumen
+> Berlaku normal di bot utama maupun di semua sesi userjadibot
 
 > ⚡ *Bot Utama — Koneksi Lebih Stabil, Tidak Ada Bug Saat Konek*
 > Sebelumnya bot utama kadang mengalami error atau tidak stabil saat proses koneksi
@@ -42,6 +48,13 @@ _Kamis, 04 Juni 2026 — 12:23 WIB_ 🕐
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *IMPROVEMENT*
 ━━━━━━━━━━━━━━━━━━━━━━
+
+> 📨 *RVO — Tujuan Kirim Kini Sesuai Konteks Chat*
+> Bot utama: `.rvo` di grup (GC) → hasil dikirim ke GC yang sama
+> Bot utama: `.rvo` di private → hasil dikirim balik ke private
+> Userjadibot: `.rvo` di GC → hasil dikirim ke private owner jadibot (bukan ke GC)
+> Userjadibot: `.rvo` di private → hasil dikirim ke private owner jadibot seperti biasa
+> Tidak ada lagi hasil RVO yang salah tujuan atau nyasar ke chat lain
 
 > 🧹 *Session Hisoka — Tidak Terlalu Pendek, Lebih Ringan & Simpel*
 > Sebelumnya sesi hisoka di-prune terlalu agresif sehingga sering terputus
