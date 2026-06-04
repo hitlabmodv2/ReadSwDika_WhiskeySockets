@@ -769,9 +769,10 @@ async function main() {
 
                                         const TTL = 26 * 60 * 60 * 1000;
                                         const now = Date.now();
-                                        let totalPending = 0;
                                         let totalRetried = 0;
 
+                                        // Pass 1: kumpulkan semua pending entry dari semua file
+                                        const swBatches = [];
                                         for (const file of userFiles) {
                                                 try {
                                                         const filePath = path.join(swUsersDir, file);
@@ -781,57 +782,64 @@ async function main() {
                                                                 if (!e || e.deleted) return false;
                                                                 const arrived = new Date(e.arrivedAt || 0).getTime();
                                                                 if (now - arrived >= TTL) return false;
-                                                                // Hanya retry SW yang arrivedAt SEBELUM bot connect
-                                                                // (SW setelah connect diurus oleh handler normal)
                                                                 if (arrived >= swStartupTime) return false;
                                                                 return !e.read || !e.reacted;
                                                         });
-                                                        if (!pending.length) continue;
-                                                        totalPending += pending.length;
+                                                        if (pending.length) swBatches.push({ filePath, data, pending });
+                                                } catch {}
+                                        }
 
-                                                        const _swDays=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
-                                                        const _swMons=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
-                                                        const _swPad=(s,w)=>{s=String(s||'');return s.length>=w?s:s+' '.repeat(w-s.length);};
-                                                        const _swBox=(entry,emoji,delMs)=>{
-                                                                const cy='\x1b[36m',wh='\x1b[37m',ye='\x1b[33m',gr='\x1b[32m',bl='\x1b[34m',or='\x1b[38;2;255;165;0m',pu='\x1b[38;2;180;120;255m',rs='\x1b[0m';
-                                                                const bW=35,cW=16,title='AutoReadStoryWhatsApp',tp=Math.floor((bW-title.length)/2);
-                                                                const d=new Date(new Date(entry.arrivedAt||Date.now()).toLocaleString('en-US',{timeZone:'Asia/Jakarta'}));
-                                                                const hh=d.getHours(),greeting=hh<10?'Subuh 🌙':hh<15?'Siang 🏙️':hh<18?'Sore 🌆':'Malam 🌙';
-                                                                const num=(entry.number||(entry.resolvedPn||'').split('@')[0])||'-';
-                                                                const masked=num.length>6?num.slice(0,4)+'****'+num.slice(-3):num;
-                                                                const rc=(entry.resolve||'').includes('PN')?gr:bl;
-                                                                console.log(`${cy}┌${'═'.repeat(bW)}┐${rs}`);
-                                                                console.log(`${cy}║${' '.repeat(tp)}${ye}${title}${rs}${cy}${' '.repeat(bW-tp-title.length)}║${rs}`);
-                                                                console.log(`${cy}├${'═'.repeat(bW)}┤${rs}`);
-                                                                console.log(`${cy}│${rs} ${wh}⭔ Mode        : ${gr}${_swPad('Read+Reaction ✓',cW)}${rs}`);
-                                                                console.log(`${cy}│${rs} ${wh}⭔ Tipe Story  : ${or}${_swPad(entry.type||'Teks 📝',cW)}${rs}`);
-                                                                console.log(`${cy}│${rs} ${wh}⭔ Selamat     : ${pu}${_swPad(greeting,cW)}${rs}`);
-                                                                console.log(`${cy}│${rs} ${wh}⭔ Hari        : ${bl}${_swPad(_swDays[d.getDay()]+' 🔁',cW)}${rs}`);
-                                                                console.log(`${cy}│${rs} ${wh}⭔ Tanggal     : ${ye}${_swPad(`${d.getDate()} ${_swMons[d.getMonth()]} ${d.getFullYear()} 🗓️`,cW)}${rs}`);
-                                                                console.log(`${cy}│${rs} ${wh}⭔ Waktu       : ${bl}${_swPad(d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',hour12:false}).replace(':','.')+' ⏰',cW)}${rs}`);
-                                                                console.log(`${cy}│${rs} ${wh}⭔ Nama        : ${wh}${_swPad(entry.name||num,cW)}${rs}`);
-                                                                console.log(`${cy}│${rs} ${wh}⭔ Nomor       : ${wh}${_swPad(masked,cW)}${rs}`);
-                                                                console.log(`${cy}│${rs} ${wh}⭔ Berhasil    : ${gr}${_swPad('Startup Retry ♻️',cW)}${rs}`);
-                                                                console.log(`${cy}│${rs} ${wh}⭔ Reaksi      : ${_swPad(emoji||'Off ❌',cW)}${rs}`);
-                                                                console.log(`${cy}│${rs} ${wh}⭔ Resolve     : ${rc}${_swPad((entry.resolve||'-')+' ♻️',cW)}${rs}`);
-                                                                console.log(`${cy}│${rs} ${wh}⭔ Delay       : ${or}${_swPad(delMs?(delMs/1000).toFixed(1)+' detik':'-',cW)}${rs}`);
-                                                                console.log(`${cy}└${'─'.repeat(13)}···${rs}`);
-                                                        };
+                                        const totalPending = swBatches.reduce((s, b) => s + b.pending.length, 0);
+
+                                        // Log SwTrack DULU sebelum box-box muncul
+                                        if (totalPending > 0) {
+                                                console.log(`\x1b[33m[SwTrack] Startup retry: ${totalPending} SW pending diproses\x1b[39m`);
+                                        }
+
+                                        // Pass 2: proses + tampilkan box per entry
+                                        const _swDays=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+                                        const _swMons=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+                                        const _swPad=(s,w)=>{s=String(s||'');return s.length>=w?s:s+' '.repeat(w-s.length);};
+                                        const _swBox=(entry,emoji,delMs)=>{
+                                                const cy='\x1b[36m',wh='\x1b[37m',ye='\x1b[33m',gr='\x1b[32m',bl='\x1b[34m',or='\x1b[38;2;255;165;0m',pu='\x1b[38;2;180;120;255m',rs='\x1b[0m';
+                                                const bW=35,cW=16,title='AutoReadStoryWhatsApp',tp=Math.floor((bW-title.length)/2);
+                                                const d=new Date(new Date(entry.arrivedAt||Date.now()).toLocaleString('en-US',{timeZone:'Asia/Jakarta'}));
+                                                const hh=d.getHours(),greeting=hh<10?'Subuh 🌙':hh<15?'Siang 🏙️':hh<18?'Sore 🌆':'Malam 🌙';
+                                                const num=(entry.number||(entry.resolvedPn||'').split('@')[0])||'-';
+                                                const masked=num.length>6?num.slice(0,4)+'****'+num.slice(-3):num;
+                                                const rc=(entry.resolve||'').includes('PN')?gr:bl;
+                                                console.log(`${cy}┌${'═'.repeat(bW)}┐${rs}`);
+                                                console.log(`${cy}║${' '.repeat(tp)}${ye}${title}${rs}${cy}${' '.repeat(bW-tp-title.length)}║${rs}`);
+                                                console.log(`${cy}├${'═'.repeat(bW)}┤${rs}`);
+                                                console.log(`${cy}│${rs} ${wh}⭔ Mode        : ${gr}${_swPad('Read+Reaction ✓',cW)}${rs}`);
+                                                console.log(`${cy}│${rs} ${wh}⭔ Tipe Story  : ${or}${_swPad(entry.type||'Teks 📝',cW)}${rs}`);
+                                                console.log(`${cy}│${rs} ${wh}⭔ Selamat     : ${pu}${_swPad(greeting,cW)}${rs}`);
+                                                console.log(`${cy}│${rs} ${wh}⭔ Hari        : ${bl}${_swPad(_swDays[d.getDay()]+' 🔁',cW)}${rs}`);
+                                                console.log(`${cy}│${rs} ${wh}⭔ Tanggal     : ${ye}${_swPad(`${d.getDate()} ${_swMons[d.getMonth()]} ${d.getFullYear()} 🗓️`,cW)}${rs}`);
+                                                console.log(`${cy}│${rs} ${wh}⭔ Waktu       : ${bl}${_swPad(d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',hour12:false}).replace(':','.')+' ⏰',cW)}${rs}`);
+                                                console.log(`${cy}│${rs} ${wh}⭔ Nama        : ${wh}${_swPad(entry.name||num,cW)}${rs}`);
+                                                console.log(`${cy}│${rs} ${wh}⭔ Nomor       : ${wh}${_swPad(masked,cW)}${rs}`);
+                                                console.log(`${cy}│${rs} ${wh}⭔ Berhasil    : ${gr}${_swPad('Startup Retry ♻️',cW)}${rs}`);
+                                                console.log(`${cy}│${rs} ${wh}⭔ Reaksi      : ${_swPad(emoji||'Off ❌',cW)}${rs}`);
+                                                console.log(`${cy}│${rs} ${wh}⭔ Resolve     : ${rc}${_swPad((entry.resolve||'-')+' ♻️',cW)}${rs}`);
+                                                console.log(`${cy}│${rs} ${wh}⭔ Delay       : ${or}${_swPad(delMs?(delMs/1000).toFixed(1)+' detik':'-',cW)}${rs}`);
+                                                console.log(`${cy}└${'─'.repeat(13)}···${rs}`);
+                                        };
+
+                                        for (const { filePath, data, pending } of swBatches) {
+                                                try {
                                                         for (const entry of pending) {
                                                                 try {
-                                                                        // Pakai delay dari config sama seperti handler normal
                                                                         const usedDelay = randDelay();
                                                                         await new Promise(r => setTimeout(r, usedDelay));
 
                                                                         const mKeys = entry.receiptKeys || [];
-                                                                        // Retry read
                                                                         if (mKeys.length > 0 && !entry.read) {
                                                                                 await Promise.all([
                                                                                         hisoka.readMessages(mKeys).catch(() => {}),
                                                                                         hisoka.sendReceipts(mKeys, 'read-self').catch(() => {}),
                                                                                 ]);
                                                                         }
-                                                                        // Retry reaction
                                                                         const mPn = entry.resolvedPn;
                                                                         let newEmoji = null;
                                                                         if (!entry.reacted && mPn && entry.messageKey) {
@@ -844,8 +852,6 @@ async function main() {
                                                                                         { statusJidList: [jidNormalizedUser(hisoka.user.id), jidNormalizedUser(mPn)] }
                                                                                 ).catch(() => { newEmoji = null; });
                                                                         }
-                                                                        // Update entry langsung + simpan ke disk per-entry
-                                                                        // (biar kalau bot restart lagi, tidak retry yang sama)
                                                                         data[entry.id] = {
                                                                                 ...entry,
                                                                                 read: true,
@@ -857,17 +863,11 @@ async function main() {
                                                                         };
                                                                         try { fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8'); } catch {}
                                                                         totalRetried++;
-                                                                        // Box log realtime per entry
                                                                         try { _swBox(entry, newEmoji||(entry.reacted?entry.emoji:null), usedDelay); } catch {}
                                                                 } catch {}
                                                         }
-                                                        // Final save (pastikan state terbaru tersimpan)
                                                         fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');
                                                 } catch {}
-                                        }
-
-                                        if (totalRetried > 0) {
-                                                console.log(`\x1b[33m[SwTrack] Startup retry: ${totalRetried}/${totalPending} SW pending diproses\x1b[39m`);
                                         }
                                 } catch {}
                         }, 35000); // Tunggu 35 detik agar session & grup stabil dulu

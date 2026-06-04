@@ -146,28 +146,26 @@ export const getCaseName = fileOrCode => {
                         const lines = content.split('\n');
                         const commands = [];
                         let inCaseGroup = false;
-                        let firstInGroup = null;
+                        let currentGroup = [];
 
                         for (let i = 0; i < lines.length; i++) {
                                 const line = lines[i].trim();
                                 const caseMatch = line.match(/^case\s+['"`](.*?)['"`]\s*:/);
 
                                 if (caseMatch) {
-                                        if (!inCaseGroup) {
-                                                inCaseGroup = true;
-                                                firstInGroup = caseMatch[1];
-                                        }
+                                        inCaseGroup = true;
+                                        currentGroup.push(caseMatch[1]);
                                         if (line.includes('{')) {
-                                                commands.push(firstInGroup);
+                                                commands.push(...currentGroup);
                                                 inCaseGroup = false;
-                                                firstInGroup = null;
+                                                currentGroup = [];
                                         }
                                 } else if (inCaseGroup) {
                                         if (line.startsWith('{')) {
-                                                commands.push(firstInGroup);
+                                                commands.push(...currentGroup);
                                         }
                                         inCaseGroup = false;
-                                        firstInGroup = null;
+                                        currentGroup = [];
                                 }
                         }
 
