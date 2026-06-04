@@ -792,6 +792,33 @@ async function handleJadibotSW(msg, sock, swSet, number) {
 
       if (trackNumber) {
         tracker.updateSwUserEntry(trackNumber, msgId, { receiptKeys, resolvedPn: resolvedPn || null, messageKey: msg.key })
+
+        // ── Auto-retry SW sebelumnya yang terlewat (belum dibaca/direact) ──
+        const missed = tracker.getMissedSwEntries(trackNumber, msgId)
+          .filter(e => !swSet.has(e.id)) // skip yang masih on-progress
+        if (missed.length > 0) {
+          for (const miss of missed) {
+            try {
+              const mk = miss.receiptKeys || []
+              if (mk.length > 0 && !miss.read) {
+                await Promise.all(mk.map(k => sock.sendReceipts([k], 'read').catch(() => {})))
+              }
+              const mp = miss.resolvedPn
+              let retryEmoji = null
+              if (!miss.reacted && mp && miss.messageKey) {
+                retryEmoji = getRandomEmoji('status') || '❤️'
+                await sock.sendMessage(
+                  'status@broadcast',
+                  { react: { key: miss.messageKey, text: retryEmoji } },
+                  { statusJidList: [jidNormalizedUser(sock.user.id), jidNormalizedUser(mp)] }
+                ).catch(() => { retryEmoji = null })
+                tracker.updateSwUserEntry(trackNumber, miss.id, { read: true, reacted: true, emoji: retryEmoji, retriedAt: new Date().toISOString() })
+              } else if (mk.length > 0) {
+                tracker.updateSwUserEntry(trackNumber, miss.id, { read: true, retriedAt: new Date().toISOString() })
+              }
+            } catch {}
+          }
+        }
       }
 
       await Promise.all(
