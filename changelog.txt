@@ -7,7 +7,7 @@ _Kamis, 04 Juni 2026 — 12:23 WIB_ 🕐
 
 ✨ *0 Fitur Baru*
 🔧 *1 Bug Fix*
-🚀 *0 Improvement*
+🚀 *1 Improvement*
 
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
@@ -30,7 +30,11 @@ _Kamis, 04 Juni 2026 — 12:23 WIB_ 🕐
 🚀 *IMPROVEMENT*
 ━━━━━━━━━━━━━━━━━━━━━━
 
-> _Tidak ada improvement di versi ini_
+> 🧹 *Session Hisoka — Tidak Terlalu Pendek, Lebih Ringan & Simpel*
+> Sebelumnya sesi hisoka di-prune terlalu agresif sehingga sering terputus
+> Kini batas pruning disesuaikan — tidak terlalu pendek agar koneksi tetap stabil
+> Proses session dibuat lebih simpel dan tidak membebani performa bot
+> Berlaku juga di sesi jadibot — setiap jadibot ikut mendapat penanganan session yang sama
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *Wily-Bot* | *V20* | _4 Juni 2026_
