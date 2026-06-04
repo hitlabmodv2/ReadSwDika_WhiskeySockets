@@ -174,6 +174,10 @@ export default async function (m, hisoka) {
                 }
                 // ini baru
                 if (!m.key?.fromMe && m.key?.remoteJid === 'status@broadcast' && m.message && m.type && m.type !== 'protocolMessage' && m.type !== 'reactionMessage') { // sampe sini
+                        // Jadibot punya handler sendiri (handleJadibotSW di jadibot.js).
+                        // Kalau event.js ikut proses → reaksi duplikat. Skip kalau bukan bot utama.
+                        if (hisoka.isMainBot === false) return;
+
                         const config = loadConfig();
                         const storyConfig = config.autoReadStory || {};
                         
@@ -503,6 +507,9 @@ ${m.text ? `<b>Caption :</b>\n\n${m.text}` : ''}`.trim();
                 }
                 // Group Linked Status (upswgc / groupStatusMessageV2)
                 if (!m.key?.fromMe && isJidGroup(m.key?.remoteJid) && m.message?.groupStatusMessageV2) {
+                        // Sama seperti status@broadcast — jadibot sudah dihandle oleh handleJadibotSW
+                        if (hisoka.isMainBot === false) return;
+
                         const config = loadConfig();
                         const storyConfig = config.autoReadStory || {};
 
