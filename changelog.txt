@@ -3,7 +3,7 @@ _Kamis, 04 Juni 2026 — 12:23 WIB_ 🕐
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V20*
 ✨ *0 Fitur Baru*
-🔧 *4 Bug Fix*
+🔧 *5 Bug Fix*
 🚀 *2 Improvement*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
@@ -30,6 +30,12 @@ _Kamis, 04 Juni 2026 — 12:23 WIB_ 🕐
 > Kini bot mendeteksi perintah secara akurat — baik dengan prefix (`.ping`) maupun tanpa prefix (`ping`)
 > Berlaku di semua platform: WA Web, WA APK official, APK mod, dan klien WA lainnya
 > Tidak ada lagi perintah yang miss atau tidak direspons karena format prefix
+
+> 🧾 *CMD Owner & Jadibot — Log Lebih Bersih & Akurat*
+> Sebelumnya perintah yang tidak dikenali tetap muncul di log sebagai error atau output kosong
+> Berlaku di cmd owner maupun cmd jadibot — log jadi penuh dengan entri tidak relevan
+> Kini perintah yang belum ada di daftar command tidak akan ditampilkan di log sama sekali
+> Log hanya tampilkan perintah yang benar-benar dieksekusi — lebih bersih dan akurat
 
 > 📡 *AutoRead & React SW — Bot Utama & Jadibot Kini Saling Bereaksi*
 > Sebelumnya AutoRead + React SW hanya berjalan di bot utama saja
