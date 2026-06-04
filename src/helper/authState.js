@@ -95,7 +95,7 @@ export async function useConsolidatedAuthState(folder) {
                         const raw = await readFile(consolidatedPath, 'utf-8')
                         const data = JSON.parse(raw, BufferJSON.reviver)
                         for (const [k, v] of Object.entries(data)) store.set(k, v)
-                        if (store.size > 0) console.log(`[AuthState] ✅ ${type}: ${store.size} entries dari consolidated file`)
+                        // log suppressed
                 } catch (_) {}
 
                 // Migrasi file individual yang masih tersisa → hapus setelah merge
@@ -107,7 +107,6 @@ export async function useConsolidatedAuthState(folder) {
                         )
 
                         if (toMigrate.length > 0) {
-                                console.log(`[AuthState] 🔄 Migrasi ${toMigrate.length} file ${type}...`)
                                 let migrated = 0
                                 for (const file of toMigrate) {
                                         const filePath = join(folder, file)
@@ -121,7 +120,6 @@ export async function useConsolidatedAuthState(folder) {
                                         } catch (_) {}
                                 }
                                 if (migrated > 0) {
-                                        console.log(`[AuthState] ✅ Migrasi selesai: ${migrated} file ${type} → 1 file consolidated`)
                                         await writeConsolidatedNow(type)
                                 }
                         }
