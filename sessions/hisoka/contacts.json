@@ -10693,11 +10693,12 @@
     "phoneNumber": "6285212461403@s.whatsapp.net"
   },
   "6283869623386@s.whatsapp.net": {
-    "isContact": true,
-    "id": "6283869623386@s.whatsapp.net",
-    "name": "Iliyas",
+    "id": "176863162978388@lid",
     "lid": "176863162978388@lid",
-    "phoneNumber": "6283869623386@s.whatsapp.net"
+    "isContact": true,
+    "name": "Iliyas",
+    "phoneNumber": "6283869623386@s.whatsapp.net",
+    "imgUrl": "changed"
   },
   "6285893994287@s.whatsapp.net": {
     "isContact": true,
@@ -15651,7 +15652,8 @@
     "isContact": true,
     "name": "Agan Rizkia",
     "phoneNumber": "6289688206739@s.whatsapp.net",
-    "notify": "Wily"
+    "notify": "Wily",
+    "verifiedName": "Wily"
   },
   "6285796008729@s.whatsapp.net": {
     "isContact": true,
