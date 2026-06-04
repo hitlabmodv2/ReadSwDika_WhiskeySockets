@@ -497,9 +497,22 @@ async function injectStartMessage(hisoka, WAMessage) {
                 WAMessage.key.fromMe = areJidsSameUser(sender, hisoka.user.id) || WAMessage.key.fromMe;
 
                 const owners = getOwners();
+                const _senderNum = parseInt(String(sender).split('@')[0].split(':')[0]);
+                const _isInOwnerList = owners.map(x => parseInt(x)).includes(_senderNum);
+
+                // isRealOwner — HANYA cek daftar owners di config.json
+                // Tidak termasuk fromMe atau bot sendiri — murni untuk cek hak akses command
+                Object.defineProperty(WAMessage, 'isRealOwner', {
+                        value: _isInOwnerList,
+                        enumerable: false,
+                        writable: false,
+                });
+
+                // isOwner — kompatibel dengan kode lama (owner config + fromMe + bot sendiri)
+                // Dipakai untuk fitur lain yang butuh cek lebih luas
                 Object.defineProperty(WAMessage, 'isOwner', {
                         value:
-                                owners.map(x => parseInt(x)).includes(parseInt(sender)) ||
+                                _isInOwnerList ||
                                 WAMessage.key.fromMe ||
                                 areJidsSameUser(sender, hisoka.user.id),
                         enumerable: false,
