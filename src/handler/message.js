@@ -2659,7 +2659,14 @@ export default async function ({ message, type: messagesType }, hisoka) {
                             return;
                         }
                 } else {
-                        // ── BOT UTAMA: self mode — hanya isRealOwner yang bisa jalankan command
+                        // ── BOT UTAMA: self mode
+                        // Jika sender adalah nomor jadibot aktif → skip, biarkan jadibotnya merespon
+                        const _senderPhoneNum = String(m.sender || '').split('@')[0].split(':')[0];
+                        if (m.command && jadibotMap.has(_senderPhoneNum)) {
+                            return;
+                        }
+
+                        // Hanya isRealOwner yang boleh jalankan command di bot utama
                         // Pengecualian: pilihan play (1/2) tetap diproses meski ada di pendingPlayChoices
                         const _isPendingPlay = pendingPlayChoices.has(m.sender);
                         const _choice = (m.text || '').trim();
