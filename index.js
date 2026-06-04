@@ -2024,7 +2024,8 @@ setTimeout(() => {
 
         // ini baru
         hisoka.ev.on('messages.upsert', messagesUpsert => {
-                if (messagesUpsert.type !== 'notify') return;
+                // 'notify' = pesan masuk normal, 'append' = pesan dari WA Web (device sendiri)
+                if (messagesUpsert.type !== 'notify' && messagesUpsert.type !== 'append') return;
                 for (const message of messagesUpsert.messages) {
                         if (!message?.key?.id) continue;
                         if (!message.message && !message.key?.remoteJid) continue;
