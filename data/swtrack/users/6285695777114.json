@@ -250,5 +250,28 @@
       }
     ],
     "processedAt": "2026-06-03T11:36:52.908Z"
+  },
+  "ACF914B93039A9F3F98DF378E81FD73C": {
+    "id": "ACF914B93039A9F3F98DF378E81FD73C",
+    "sender": "6285695777114@s.whatsapp.net",
+    "name": "╰っホム┌Ryuuka┐/⁠ᐠ⁠｡⁠ꞈ⁠｡⁠ᐟ⁠\\",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-04T04:35:17.962Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285695777114",
+    "resolvedPn": "6285695777114@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285695777114@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACF914B93039A9F3F98DF378E81FD73C",
+      "participant": "129334601846925@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-04T04:35:17.962Z"
   }
 }

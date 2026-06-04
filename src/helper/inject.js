@@ -430,7 +430,14 @@ export async function injectMessage(hisoka, WAMessage) {
 async function injectStartMessage(hisoka, WAMessage) {
         if (WAMessage.key) {
                 const from = isLidUser(WAMessage.key.remoteJid) ? WAMessage.key.remoteJidAlt : WAMessage.key.remoteJid;
-                const sender = await hisoka.resolveLidToPN(WAMessage.key);
+                let sender = await hisoka.resolveLidToPN(WAMessage.key);
+
+                // Kalau sender masih LID (resolusi gagal), cari di contacts store
+                if (isLidUser(sender) && hisoka.contacts) {
+                        const contact = hisoka.contacts.find(c => areJidsSameUser(c.id, sender));
+                        if (contact?.phoneNumber) sender = jidNormalizedUser(contact.phoneNumber);
+                }
+
                 const isGroup = isJidGroup(from);
 
                 if (isGroup) {
