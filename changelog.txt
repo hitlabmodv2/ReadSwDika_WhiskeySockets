@@ -1,24 +1,17 @@
-🚀 *RILIS V20*
+🚀 *INFORMASI*
 _Kamis, 04 Juni 2026 — 12:23 WIB_ 🕐
-
 ━━━━━━━━━━━━━━━━━━━━━━
-
 🤖 *WILY BOT — V20*
-
 ✨ *0 Fitur Baru*
 🔧 *4 Bug Fix*
 🚀 *2 Improvement*
-
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
-
 > _Tidak ada fitur baru di versi ini_
-
 ━━━━━━━━━━━━━━━━━━━━━━
 🔧 *BUG FIX*
 ━━━━━━━━━━━━━━━━━━━━━━
-
 > 🗑️ *Anti-Delete — Pemulihan Semua Jenis Media Kini Berfungsi*
 > Sebelumnya antidel gagal memulihkan sebagian media yang dihapus (sticker, gambar, video, dll)
 > Terutama bermasalah di sesi userjadibot — media sering tidak terkirim ulang
@@ -44,11 +37,9 @@ _Kamis, 04 Juni 2026 — 12:23 WIB_ 🕐
 > Kini bot utama maupun semua sesi jadibot aktif ikut AutoRead & React SW secara bersamaan
 > Setiap jadibot memiliki handler SW sendiri — tidak bentrok dengan bot utama
 > React emoji, delay, dan SwTrack berjalan normal di bot utama maupun jadibot
-
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *IMPROVEMENT*
 ━━━━━━━━━━━━━━━━━━━━━━
-
 > 📨 *RVO — Tujuan Kirim Kini Sesuai Konteks Chat*
 > Bot utama: `.rvo` di grup (GC) → hasil dikirim ke GC yang sama
 > Bot utama: `.rvo` di private → hasil dikirim balik ke private
@@ -61,6 +52,4 @@ _Kamis, 04 Juni 2026 — 12:23 WIB_ 🕐
 > Kini batas pruning disesuaikan — tidak terlalu pendek agar koneksi tetap stabil
 > Proses session dibuat lebih simpel dan tidak membebani performa bot
 > Berlaku juga di sesi jadibot — setiap jadibot ikut mendapat penanganan session yang sama
-
 ━━━━━━━━━━━━━━━━━━━━━━
-🤖 *Wily-Bot* | *V20* | _4 Juni 2026_
