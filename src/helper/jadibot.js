@@ -1637,8 +1637,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
   })
 
   /* ================= MESSAGE ================= */
-  // Pakai global shared Set — sama dengan main bot di event.js, cegah duplikat lintas instance
-  if (!global.__swProcessingSet) global.__swProcessingSet = new Set()
+  const swSet = getJadibotSwSet(number)
   sock.ev.on('messages.upsert', async ({ messages, type }) => {
     if (type !== 'notify') return
 
@@ -1654,8 +1653,8 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
         preDownloadMediaForAntidel(msg, sock).catch(() => {})
       }
 
-      // AutoRead SW — pakai global.__swProcessingSet supaya tidak duplikat dengan main bot / jadibot lain
-      handleJadibotSW(msg, sock, global.__swProcessingSet, number).catch(err =>
+      // AutoRead SW — pakai Set terisolasi per-jadibot agar tidak bentrok dengan main bot / jadibot lain
+      handleJadibotSW(msg, sock, swSet, number).catch(err =>
         console.error('[JADIBOT SW ERROR]', err?.message || String(err))
       )
 
@@ -1998,7 +1997,7 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
     } catch (_) {}
   })
 
-  if (!global.__swProcessingSet) global.__swProcessingSet = new Set()
+  const swSet = getJadibotSwSet(number)
   sock.ev.on('messages.upsert', async ({ messages, type }) => {
     if (type !== 'notify') return
     for (const msg of messages) {
@@ -2013,8 +2012,8 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
         preDownloadMediaForAntidel(msg, sock).catch(() => {})
       }
 
-      // AutoRead SW — pakai global.__swProcessingSet supaya tidak duplikat lintas instance
-      handleJadibotSW(msg, sock, global.__swProcessingSet, number).catch(err =>
+      // AutoRead SW — pakai Set terisolasi per-jadibot agar tidak bentrok dengan main bot / jadibot lain
+      handleJadibotSW(msg, sock, swSet, number).catch(err =>
         console.error('[JADIBOT QR SW ERROR]', err?.message || String(err))
       )
 
