@@ -1,0 +1,44 @@
+{
+  "ACDDABB060ED2B7221211BF9C10FB5B1": {
+    "id": "ACDDABB060ED2B7221211BF9C10FB5B1",
+    "sender": "6283815424573@s.whatsapp.net",
+    "name": "(T)ipii kinetik",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-05T06:26:18.364Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🫸",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6283815424573",
+    "resolvedPn": "6283815424573@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6283815424573@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACDDABB060ED2B7221211BF9C10FB5B1",
+      "participant": "127393243132132@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-05T06:26:38.786Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283815424573@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACDDABB060ED2B7221211BF9C10FB5B1",
+        "participant": "127393243132132@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283815424573@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACDDABB060ED2B7221211BF9C10FB5B1",
+        "participant": "6283815424573@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-05T06:26:38.786Z"
+  }
+}

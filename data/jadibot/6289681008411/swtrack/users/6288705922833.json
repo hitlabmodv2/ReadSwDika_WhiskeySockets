@@ -1,0 +1,44 @@
+{
+  "A535A73ED9823FDC74194DB5F92B5A42": {
+    "id": "A535A73ED9823FDC74194DB5F92B5A42",
+    "sender": "6288705922833@s.whatsapp.net",
+    "name": "gaku'al",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-05T05:40:33.259Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "*️⃣",
+    "resolve": "Signal Lib ✓",
+    "source": "status",
+    "number": "6288705922833",
+    "resolvedPn": "6288705922833@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6288705922833@s.whatsapp.net",
+      "fromMe": false,
+      "id": "A535A73ED9823FDC74194DB5F92B5A42",
+      "participant": "200897581863137@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-05T05:40:52.326Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6288705922833@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A535A73ED9823FDC74194DB5F92B5A42",
+        "participant": "200897581863137@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6288705922833@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A535A73ED9823FDC74194DB5F92B5A42",
+        "participant": "6288705922833@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-05T05:40:52.326Z"
+  }
+}
