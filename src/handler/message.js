@@ -14842,18 +14842,23 @@ hasil += `╰══════════════════════�
                                 const EXCLUDED = new Set([
                                         'attached_assets', '.git', '.agents', 'sessions', 'jadibot',
                                         '.upm', 'node_modules', 'package-lock.json',
-                                        '.cache', '.local'
+                                        '.cache', '.local',
+                                        // File root spesifik yang tidak perlu di-backup
+                                        'zipFile.zip', 'zuhur.jpg', 'ashar.jpg', 'push.sh',
+                                        '.push_history.log', '.token.secret'
                                 ]);
                                 const EXCLUDED_FILES = new Set([
                                         'bin/yt-dlp'
                                 ]);
+                                // Semua file/folder tersembunyi di root (nama mulai '.') juga dikecualikan
+                                const isHidden = (name) => name.startsWith('.');
 
                                 const rootDir = process.cwd();
 
                                 // Kumpulkan semua item top-level yang akan di-backup
                                 const allItems = fs.readdirSync(rootDir);
-                                const includedItems = allItems.filter(i => !EXCLUDED.has(i));
-                                const excludedItems = allItems.filter(i => EXCLUDED.has(i));
+                                const includedItems = allItems.filter(i => !EXCLUDED.has(i) && !isHidden(i));
+                                const excludedItems = allItems.filter(i => EXCLUDED.has(i) || isHidden(i));
 
                                 // Hitung total file rekursif (real-time)
                                 function countFilesRecursive(dir, relBase = '') {
@@ -14862,6 +14867,8 @@ hasil += `╰══════════════════════�
                                                 const items = fs.readdirSync(dir, { withFileTypes: true });
                                                 for (const item of items) {
                                                         if (EXCLUDED.has(item.name)) continue;
+                                                        // Di root level, skip juga file tersembunyi (nama mulai '.')
+                                                        if (!relBase && isHidden(item.name)) continue;
                                                         const relPath = relBase ? `${relBase}/${item.name}` : item.name;
                                                         if (EXCLUDED_FILES.has(relPath)) continue;
                                                         if (item.isDirectory()) {
@@ -14928,7 +14935,8 @@ hasil += `╰══════════════════════�
                                         `├─ 🗂️ *Total keseluruhan:* ${totalFiles} file\n` +
                                         `│\n` +
                                         `├─ 🚫 *Dikecualikan (${excludedItems.length}):*\n` +
-                                        `│  ├─ ${excludedItems.join(', ')}\n` +
+                                        `│  ├─ ${allItems.filter(i => EXCLUDED.has(i)).join(', ')}\n` +
+                                        `│  ├─ _semua file tersembunyi (.*)_\n` +
                                         `│  └─ bin/yt-dlp _(auto-download)_\n` +
                                         `│\n` +
                                         `╰─ _Membuat zip, harap tunggu..._`
@@ -15007,7 +15015,7 @@ hasil += `╰══════════════════════�
                                         `│\n` +
                                         `├─ ${envInfoLine}\n` +
                                         `│\n` +
-                                        `├─ 🚫 *Exclude :* ${excludedItems.join(', ')}, bin/yt-dlp\n` +
+                                        `├─ 🚫 *Exclude :* ${allItems.filter(i => EXCLUDED.has(i)).join(', ')}, semua file tersembunyi (.*), bin/yt-dlp\n` +
                                         `│\n` +
                                         `╰─ 🕐 ${new Date().toLocaleString('id-ID')}`;
 

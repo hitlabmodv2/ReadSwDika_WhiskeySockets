@@ -82,5 +82,47 @@
       }
     ],
     "processedAt": "2026-06-04T16:10:32.773Z"
+  },
+  "ACF6FF3C472DF4F45AE0A2CC027DAA42": {
+    "id": "ACF6FF3C472DF4F45AE0A2CC027DAA42",
+    "sender": "628388589625@s.whatsapp.net",
+    "name": "𝙢𝙖𝙪𝙡𝙖𝙣𝙖 𝙣𝙜𝙚𝙣",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-05T05:40:18.985Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🤱",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "628388589625",
+    "resolvedPn": "628388589625@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "628388589625@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACF6FF3C472DF4F45AE0A2CC027DAA42",
+      "participant": "82828679200798@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-05T05:40:40.382Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "628388589625@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACF6FF3C472DF4F45AE0A2CC027DAA42",
+        "participant": "82828679200798@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "628388589625@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACF6FF3C472DF4F45AE0A2CC027DAA42",
+        "participant": "628388589625@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-05T05:40:40.382Z"
   }
 }
