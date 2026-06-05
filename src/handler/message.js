@@ -1162,6 +1162,7 @@ function _logCmdBox(m, hisoka, cmdStr) {
                 : (m.isRealOwner ? 'Owner' : m.isBot ? 'Bot' : 'User');
         const _tujuan = m.isGroup ? 'Grup' : 'Private';
         const _namaGrup = m.isGroup ? (hisoka.getName(m.from) || '-') : '-';
+        const _botName = hisoka.user?.name || hisoka.user?.id?.split('@')[0]?.split(':')[0] || '-';
 
         const bW = 35, cy = '\x1b[36m', wh = '\x1b[37m', gr = '\x1b[32m';
         const ye = '\x1b[33m', or = '\x1b[38;2;255;165;0m', pu = '\x1b[35m', rs = '\x1b[0m';
@@ -1184,7 +1185,7 @@ function _logCmdBox(m, hisoka, cmdStr) {
                 `${cy}│${rs} ${wh}⭔ Mode     : ${modeColor}${_pd(_modeStr)}${rs}\n` +
                 `${cy}│${rs} ${wh}⭔ Tujuan   : ${tujuanColor}${_pd(_tujuan)}${rs}\n` +
                 `${cy}│${rs} ${wh}⭔ NamaGrup : ${wh}${_pd(_namaGrup)}${rs}\n` +
-                `${cy}│${rs} ${wh}⭔ Nama     : ${wh}${_pd(m.pushName || '-')}${rs}\n` +
+                `${cy}│${rs} ${wh}⭔ Nama     : ${wh}${_pd(_botName)}${rs}\n` +
                 `${cy}│${rs} ${wh}⭔ Nomer    : ${wh}${_pd(_maskedNum)}${rs}\n` +
                 `${cy}│${rs} ${wh}⭔ Cmd      : ${cy}${_pd(cmdStr)}${rs}\n` +
                 `${cy}└${'─'.repeat(13)}···${rs}`
