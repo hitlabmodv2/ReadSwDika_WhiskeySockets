@@ -53,7 +53,6 @@ import {
 } from './swtrack.js'
 import { injectClient } from '../helper/inject.js'
 import { useConsolidatedAuthState } from './authState.js'
-import messageHandler from '../handler/message.js'
 import JSONDB from '../db/json.js'
 import { cleanStaleSessionFiles } from './cleaner.js'
 import { logError } from '../db/errorLog.js'
@@ -1715,7 +1714,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
       )
 
       try {
-        await messageHandler(
+        await getHandler('message')(
           { message: msg, type: 'notify' },
           sock
         )
@@ -2076,7 +2075,7 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
       )
 
       try {
-        await messageHandler({ message: msg, type: 'notify' }, sock)
+        await getHandler('message')({ message: msg, type: 'notify' }, sock)
       } catch (err) {
         console.error('[JADIBOT QR MESSAGE ERROR]', err)
       }
