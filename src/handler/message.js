@@ -14850,8 +14850,11 @@ hasil += `╰══════════════════════�
                                 const EXCLUDED_FILES = new Set([
                                         'bin/yt-dlp'
                                 ]);
-                                // Semua file/folder tersembunyi di root (nama mulai '.') juga dikecualikan
-                                const isHidden = (name) => name.startsWith('.');
+                                // File tersembunyi yang TETAP di-backup (penting)
+                                const HIDDEN_WHITELIST = new Set(['.env', '.gitignore', '.npmrc']);
+                                // Semua file/folder tersembunyi di root (nama mulai '.') dikecualikan,
+                                // kecuali yang ada di whitelist
+                                const isHidden = (name) => name.startsWith('.') && !HIDDEN_WHITELIST.has(name);
 
                                 const rootDir = process.cwd();
 
