@@ -1158,7 +1158,7 @@ function _logCmdBox(m, hisoka, cmdStr) {
         const _senderNum = (m.sender || '').split('@')[0].split(':')[0];
         const _maskedNum = maskNumber(_senderNum);
         const _modeStr = _isJadibot
-                ? (m.isRealOwner ? 'Di Kendalikan Owner' : m.isBot ? 'Di Kendalikan Bot' : 'Di Kendalikan User')
+                ? 'Jadibot'
                 : (m.isRealOwner ? 'Owner' : m.isBot ? 'Bot' : 'User');
         const _tujuan = m.isGroup ? 'Grup' : 'Private';
         const _namaGrup = m.isGroup ? (hisoka.getName(m.from) || '-') : '-';
