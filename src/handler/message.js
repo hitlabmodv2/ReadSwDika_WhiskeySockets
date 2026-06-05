@@ -1153,12 +1153,46 @@ async function listbut2(jid, teks, listnye, m, hisoka) {
     });
 }
 
-function logCommand(m, hisoka, command) {
+function _logCmdBox(m, hisoka, cmdStr) {
         const _isJadibot = hisoka?.isMainBot === false;
-        const _botLabel = _isJadibot ? '\x1b[35m[ JADIBOT ]\x1b[39m' : '\x1b[32m[ BOT UTAMA ]\x1b[39m';
-        const _locLabel = m.isGroup ? `\x1b[36m[ GRUP ${hisoka.getName(m.from)} ]\x1b[39m` : '\x1b[36m[ PRIVATE ]\x1b[39m';
-        const _who = m.isBot ? '\x1b[35m[BOT]\x1b[39m ' : (m.isRealOwner ? '\x1b[33m[OWNER]\x1b[39m ' : '');
-        console.log(`${_botLabel}\x1b[90m~\x1b[39m${_locLabel}\n\x1b[32m[ CMD ]\x1b[39m \x1b[90m~\x1b[39m ${_who}\x1b[36m.${command}\x1b[39m\n\x1b[37m[ NAMA ]\x1b[39m \x1b[90m~\x1b[39m ${m.pushName}`);
+        const _senderNum = (m.sender || '').split('@')[0].split(':')[0];
+        const _maskedNum = maskNumber(_senderNum);
+        const _modeStr = _isJadibot
+                ? (m.isRealOwner ? 'JADIBOT ~ OWNER' : m.isBot ? 'JADIBOT ~ BOT' : 'JADIBOT ~ USER')
+                : (m.isRealOwner ? 'OWNER' : m.isBot ? 'BOT' : 'USER');
+        const _tujuan = m.isGroup ? 'Grup' : 'Private';
+        const _namaGrup = m.isGroup ? (hisoka.getName(m.from) || '-') : '-';
+
+        const bW = 35, cy = '\x1b[36m', wh = '\x1b[37m', gr = '\x1b[32m';
+        const ye = '\x1b[33m', or = '\x1b[38;2;255;165;0m', pu = '\x1b[35m', rs = '\x1b[0m';
+        const cW = 18;
+        const _pd = (s) => {
+                s = String(s).slice(0, cW + 5);
+                let w = 0;
+                for (const c of s) w += c.codePointAt(0) > 0x2E7F ? 2 : 1;
+                return s + ' '.repeat(Math.max(0, cW - w));
+        };
+        const title = 'InformasiBotCommand';
+        const tp = Math.floor((bW - title.length) / 2);
+        const modeColor = m.isRealOwner ? ye : m.isBot ? pu : wh;
+        const tujuanColor = m.isGroup ? or : cy;
+
+        console.log(
+                `${cy}┌${'═'.repeat(bW)}┐${rs}\n` +
+                `${cy}║${' '.repeat(tp)}${ye}${title}${rs}${cy}${' '.repeat(bW - tp - title.length)}║${rs}\n` +
+                `${cy}├${'═'.repeat(bW)}┤${rs}\n` +
+                `${cy}│${rs} ${wh}⭔ Mode     : ${modeColor}${_pd(_modeStr)}${rs}\n` +
+                `${cy}│${rs} ${wh}⭔ Tujuan   : ${tujuanColor}${_pd(_tujuan)}${rs}\n` +
+                `${cy}│${rs} ${wh}⭔ NamaGrup : ${wh}${_pd(_namaGrup)}${rs}\n` +
+                `${cy}│${rs} ${wh}⭔ Nama     : ${wh}${_pd(m.pushName || '-')}${rs}\n` +
+                `${cy}│${rs} ${wh}⭔ Nomer    : ${wh}${_pd(_maskedNum)}${rs}\n` +
+                `${cy}│${rs} ${wh}⭔ Cmd      : ${cy}${_pd(cmdStr)}${rs}\n` +
+                `${cy}└${'─'.repeat(13)}···${rs}`
+        );
+}
+
+function logCommand(m, hisoka, command) {
+        _logCmdBox(m, hisoka, `${m.prefix || '.'}${command}`);
 }
 
 // ── ZIP FILE PARSER (pure Node.js, no external lib) ──
@@ -2685,11 +2719,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                 // Hanya log jika command benar-benar terdaftar di _commandSet
                 const _isKnownCmd = hisoka._commandSet?.has(m.command);
                 if (m.command && m.from !== 'status@broadcast' && _isKnownCmd) {
-                        const _isJadibot = hisoka?.isMainBot === false;
-                        const _botLabel = _isJadibot ? '\x1b[35m[ JADIBOT ]\x1b[39m' : '\x1b[32m[ BOT UTAMA ]\x1b[39m';
-                        const _locLabel = m.isGroup ? `\x1b[36m[ GRUP ${hisoka.getName(m.from)} ]\x1b[39m` : '\x1b[36m[ PRIVATE ]\x1b[39m';
-                        const _who = m.isBot ? '\x1b[35m[BOT]\x1b[39m ' : (m.isRealOwner ? '\x1b[33m[OWNER]\x1b[39m ' : '');
-                        console.log(`${_botLabel}\x1b[90m~\x1b[39m${_locLabel}\n\x1b[32m[ CMD ]\x1b[39m \x1b[90m~\x1b[39m ${_who}\x1b[36m${m.prefix || '.'}${m.command}\x1b[39m\n\x1b[37m[ NAMA ]\x1b[39m \x1b[90m~\x1b[39m ${m.pushName}`);
+                        _logCmdBox(m, hisoka, `${m.prefix || '.'}${m.command}`);
                 }
 
                 if (hisoka?.isMainBot === true && m.isOwner) {
