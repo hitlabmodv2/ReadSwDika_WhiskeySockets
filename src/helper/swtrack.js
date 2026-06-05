@@ -327,7 +327,7 @@ export function logStoryView(data) {
         console.log(`${cyan}│${reset} ${white}⭔ Nama        : ${white}${padEnd(String(name || '').slice(0, contentWidth - 2), contentWidth)}${reset}${cyan}${reset}`);
         console.log(`${cyan}│${reset} ${white}⭔ Nomor       : ${white}${padEnd(number, contentWidth)}${reset}${cyan}${reset}`);
         if (storyCount != null) {
-                console.log(`${cyan}│${reset} ${white}⭔ Jumlah Story: ${orange}${padEnd(String(storyCount), contentWidth)}${reset}${cyan}${reset}`);
+                console.log(`${cyan}│${reset} ${white}⭔ TotalStory  : ${orange}${padEnd(String(storyCount), contentWidth)}${reset}${cyan}${reset}`);
         }
         console.log(`${cyan}│${reset} ${white}⭔ Berhasil    : ${green}${padEnd(success, contentWidth)}${reset}${cyan}${reset}`);
         console.log(`${cyan}│${reset} ${white}⭔ Reaksi      : ${padEnd(reaction, contentWidth)}${reset}${cyan}${reset}`);
