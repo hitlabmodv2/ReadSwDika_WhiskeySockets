@@ -812,7 +812,7 @@ async function main() {
                                                 console.log(`${cy}║${' '.repeat(tp)}${ye}${title}${rs}${cy}${' '.repeat(bW-tp-title.length)}║${rs}`);
                                                 console.log(`${cy}├${'═'.repeat(bW)}┤${rs}`);
                                                 console.log(`${cy}│${rs} ${wh}⭔ Mode        : ${gr}${_swPad('Read+Reaction ✓',cW)}${rs}`);
-                                                console.log(`${cy}│${rs} ${wh}⭔ Tipe Story  : ${or}${_swPad(entry.type||'Teks 📝',cW)}${rs}`);
+                                                console.log(`${cy}│${rs} ${wh}⭔ TipeStory   : ${or}${_swPad(entry.type||'Teks 📝',cW)}${rs}`);
                                                 console.log(`${cy}│${rs} ${wh}⭔ Selamat     : ${pu}${_swPad(greeting,cW)}${rs}`);
                                                 console.log(`${cy}│${rs} ${wh}⭔ Hari        : ${bl}${_swPad(_swDays[d.getDay()]+' 🔁',cW)}${rs}`);
                                                 console.log(`${cy}│${rs} ${wh}⭔ Tanggal     : ${ye}${_swPad(`${d.getDate()} ${_swMons[d.getMonth()]} ${d.getFullYear()}`,cW)}${rs}`);
