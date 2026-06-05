@@ -43,6 +43,7 @@ import {
         maskNumber,
         logStoryView,
         getMediaTypeEmoji,
+        getStoryCountToday,
 } from '../helper/swtrack.js';
 
 function loadConfig() {
@@ -349,6 +350,7 @@ export default async function (m, hisoka) {
                                                                 time: missJkt.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false }).replace(':', '.'),
                                                                 name: miss.name || trackNumber,
                                                                 number: maskNumber(miss.number || trackNumber),
+                                                                storyCount: getStoryCountToday(miss.number || trackNumber),
                                                                 success: 'Retry ♻️',
                                                                 reaction: retryEmoji || (miss.reacted ? miss.emoji || '✓' : 'Off ❌'),
                                                                 resolve: (miss.resolve || 'PN ✓') + ' ♻️',
@@ -448,6 +450,7 @@ export default async function (m, hisoka) {
                                         time: timeStr,
                                         name: storyName,
                                         number: maskNumber(storyNumber),
+                                        storyCount: getStoryCountToday(storyNumber),
                                         success: successMsg,
                                         reaction: shouldReact ? usedReaction : 'Off ❌',
                                         resolve: resolveMethod,
@@ -629,6 +632,7 @@ ${m.text ? `<b>Caption :</b>\n\n${m.text}` : ''}`.trim();
                                         time: timeStr,
                                         name: storyName,
                                         number: maskNumber(storyNumber),
+                                        storyCount: getStoryCountToday(storyNumber),
                                         success: 'Grup SW ✓',
                                         reaction: shouldReact ? usedReaction : 'Off ❌',
                                         delaySeconds,

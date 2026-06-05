@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 04/06/2026, 16.09.35  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 05/06/2026, 06.09.11  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -26,21 +26,21 @@
 │  #001  —  console.error
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [31m[HD] Error:[39m Gagal upscale. API tidak merespons dengan benar.
+│  [31m[HotReload] ✗ Gagal reload 'src/handler/event.js', pakai versi lama.[39m
 │
 │  DETAIL
 │  Sumber      : console.error
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 04/06/2026, 16.09.35
-│  Terakhir    : 04/06/2026, 16.09.35
+│  Pertama     : 05/06/2026, 06.09.11
+│  Terakhir    : 05/06/2026, 06.09.11
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [31m[HD] Error:[39m Gagal upscale. API tidak merespons dengan benar.
+│  ▶  Error: [31m[HotReload] ✗ Gagal reload 'src/handler/event.js', pakai versi lama.[39m
 │     at console.error (file:///home/runner/workspace/index.js:392:27)
-│     at default (file:///home/runner/workspace/src/handler/message.js?t=1780589336369:16547:49)
+│     at Timeout._onTimeout (file:///home/runner/workspace/src/helper/hotReload.js:102:29)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 04/06/2026, 16.09.35
+  Terakhir diperbarui: 05/06/2026, 06.09.11
 ════════════════════════════════════════════════════════════════════════

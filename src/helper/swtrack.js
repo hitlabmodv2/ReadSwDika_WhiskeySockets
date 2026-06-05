@@ -164,6 +164,29 @@ export function extractSwNumber(jid) {
         try { return jidDecode(jid)?.user || null; } catch { return null; }
 }
 
+// Hitung berapa story dari kontak ini yang sudah dibaca hari ini (WIB)
+// userDir default = bot utama, bisa di-override untuk jadibot
+export function getStoryCountToday(number, userDir = SW_TRACK_USER_DIR) {
+        try {
+                const num = String(number).replace(/[^0-9]/g, '');
+                if (!num) return 0;
+                const filePath = path.join(userDir, `${num}.json`);
+                if (!fs.existsSync(filePath)) return 0;
+                const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+                // Ambil tanggal hari ini di zona WIB (UTC+7)
+                const nowWib = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }));
+                const todayStr = `${nowWib.getFullYear()}-${String(nowWib.getMonth()+1).padStart(2,'0')}-${String(nowWib.getDate()).padStart(2,'0')}`;
+                let count = 0;
+                for (const entry of Object.values(data)) {
+                        if (!entry.arrivedAt) continue;
+                        const entryWib = new Date(new Date(entry.arrivedAt).toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }));
+                        const entryStr = `${entryWib.getFullYear()}-${String(entryWib.getMonth()+1).padStart(2,'0')}-${String(entryWib.getDate()).padStart(2,'0')}`;
+                        if (entryStr === todayStr) count++;
+                }
+                return count;
+        } catch { return 0; }
+}
+
 // ─── Factory: buat SwTracker dengan folder custom (untuk jadibot) ─────────────
 // Kembalikan { isSwUserTracked, markSwUserEntry, updateSwUserEntry, getMissedSwEntries }
 // yang semuanya terisolasi ke `userDir` — tidak campur dengan bot utama.
@@ -269,7 +292,7 @@ function padEnd(str, targetWidth) {
 }
 
 export function logStoryView(data) {
-        const { botId, mediaType, greeting, dayName, date, time, name, number, success, reaction, delaySeconds, mode, resolve } = data;
+        const { botId, mediaType, greeting, dayName, date, time, name, number, success, reaction, delaySeconds, mode, resolve, storyCount } = data;
         const cyan = '\x1b[36m';
         const white = '\x1b[37m';
         const yellow = '\x1b[33m';
@@ -303,6 +326,9 @@ export function logStoryView(data) {
         console.log(`${cyan}│${reset} ${white}⭔ Waktu       : ${blue}${padEnd(time, contentWidth)}${reset}${cyan}${reset}`);
         console.log(`${cyan}│${reset} ${white}⭔ Nama        : ${white}${padEnd(String(name || '').slice(0, contentWidth - 2), contentWidth)}${reset}${cyan}${reset}`);
         console.log(`${cyan}│${reset} ${white}⭔ Nomor       : ${white}${padEnd(number, contentWidth)}${reset}${cyan}${reset}`);
+        if (storyCount != null) {
+                console.log(`${cyan}│${reset} ${white}⭔ Story ke    : ${orange}${padEnd(`ke-${storyCount}`, contentWidth)}${reset}${cyan}${reset}`);
+        }
         console.log(`${cyan}│${reset} ${white}⭔ Berhasil    : ${green}${padEnd(success, contentWidth)}${reset}${cyan}${reset}`);
         console.log(`${cyan}│${reset} ${white}⭔ Reaksi      : ${padEnd(reaction, contentWidth)}${reset}${cyan}${reset}`);
         if (resolve) {

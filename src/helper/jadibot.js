@@ -48,6 +48,7 @@ import {
   maskNumber,
   logStoryView,
   getMediaTypeEmoji,
+  getStoryCountToday,
   createSwTracker,
 } from './swtrack.js'
 import { injectClient } from '../helper/inject.js'
@@ -829,6 +830,7 @@ async function handleJadibotSW(msg, sock, swSet, number) {
                 time: missJkt.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false }).replace(':', '.'),
                 name: miss.name || trackNumber,
                 number: maskNumber(miss.number || trackNumber),
+                storyCount: getStoryCountToday(miss.number || trackNumber, path.join(process.cwd(), 'data', 'jadibot', number, 'swtrack', 'users')),
                 success: 'Retry ♻️',
                 reaction: retryEmoji || (miss.reacted ? miss.emoji || '✓' : 'Off ❌'),
                 resolve: (miss.resolve || 'PN ✓') + ' ♻️',
@@ -923,6 +925,7 @@ async function handleJadibotSW(msg, sock, swSet, number) {
         time: jakartaDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false }).replace(':', '.'),
         name: storyName,
         number: maskNumber(storyNumber),
+        storyCount: getStoryCountToday(storyNumber, path.join(process.cwd(), 'data', 'jadibot', number, 'swtrack', 'users')),
         success: reactionSuccess ? 'Iya ✓' : (readOk ? 'Baca ✓' : 'Gagal ❌'),
         reaction: shouldReact ? usedReaction : 'Off ❌',
         resolve: resolveMethod,
