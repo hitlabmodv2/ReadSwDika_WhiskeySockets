@@ -3932,11 +3932,12 @@
     "phoneNumber": "62895332175908@s.whatsapp.net"
   },
   "62881010436955@s.whatsapp.net": {
-    "isContact": true,
-    "id": "62881010436955@s.whatsapp.net",
-    "name": "Dante Spardahhhhh",
+    "id": "167379455746234@lid",
     "lid": "167379455746234@lid",
-    "phoneNumber": "62881010436955@s.whatsapp.net"
+    "isContact": true,
+    "name": "Dante Spardahhhhh",
+    "phoneNumber": "62881010436955@s.whatsapp.net",
+    "imgUrl": "changed"
   },
   "6285877269294@s.whatsapp.net": {
     "isContact": true,
@@ -15679,7 +15680,9 @@
     "name": "Agan Rizkia",
     "phoneNumber": "6289688206739@s.whatsapp.net",
     "notify": "Wily",
-    "verifiedName": "Wily"
+    "verifiedName": "Wily",
+    "ephemeralDuration": 86400,
+    "ephemeralSettingTimestamp": 1778825463
   },
   "6285796008729@s.whatsapp.net": {
     "id": "265115983208575@lid",
