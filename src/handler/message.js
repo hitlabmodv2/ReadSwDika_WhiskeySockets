@@ -1155,7 +1155,7 @@ async function listbut2(jid, teks, listnye, m, hisoka) {
 
 function logCommand(m, hisoka, command) {
         const location = m.isGroup ? `"${hisoka.getName(m.from)}"` : 'Private Chat';
-        console.log(`\x1b[32m[CMD]\x1b[39m \x1b[36m.${command}\x1b[39m - ${m.pushName} @ ${location}`);
+        console.log(`\x1b[32m[CMD]\x1b[39m \x1b[36m.${command}\x1b[39m\n  \x1b[90m└\x1b[39m ${m.pushName} @ ${location}`);
 }
 
 // ── ZIP FILE PARSER (pure Node.js, no external lib) ──
@@ -2685,7 +2685,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         const _loc = m.isGroup ? `"${hisoka.getName(m.from)}"` : 'Private';
                         const _tag = hisoka?.isMainBot === false ? '\x1b[35m[JADIBOT]\x1b[39m ' : '';
                         const _who = m.isBot ? '\x1b[35m[BOT]\x1b[39m' : (m.isRealOwner ? '\x1b[33m[OWNER]\x1b[39m' : '');
-                        console.log(`\x1b[32m[CMD]\x1b[39m ${_tag}${_who ? _who + ' ' : ''}\x1b[36m${m.prefix || '.'}${m.command}\x1b[39m - ${m.pushName} @ ${_loc}`);
+                        console.log(`\x1b[32m[CMD]\x1b[39m ${_tag}${_who ? _who + ' ' : ''}\x1b[36m${m.prefix || '.'}${m.command}\x1b[39m\n  \x1b[90m└\x1b[39m ${m.pushName} @ ${_loc}`);
                 }
 
                 if (hisoka?.isMainBot === true && m.isOwner) {
