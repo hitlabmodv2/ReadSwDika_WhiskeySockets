@@ -1158,7 +1158,7 @@ function logCommand(m, hisoka, command) {
         const _botLabel = _isJadibot ? '\x1b[35m[ JADIBOT ]\x1b[39m' : '\x1b[32m[ BOT UTAMA ]\x1b[39m';
         const _locLabel = m.isGroup ? `\x1b[36m[ GRUP ${hisoka.getName(m.from)} ]\x1b[39m` : '\x1b[36m[ PRIVATE ]\x1b[39m';
         const _who = m.isBot ? '\x1b[35m[BOT]\x1b[39m ' : (m.isRealOwner ? '\x1b[33m[OWNER]\x1b[39m ' : '');
-        console.log(`${_botLabel}\x1b[90m~\x1b[39m${_locLabel}\n\x1b[32m[ CMD ]\x1b[39m ${_who}\x1b[36m.${command}\x1b[39m\n\x1b[37mNAMA >\x1b[39m ${m.pushName}`);
+        console.log(`${_botLabel}\x1b[90m~\x1b[39m${_locLabel}\n\x1b[32m[ CMD ]\x1b[39m \x1b[90m~\x1b[39m ${_who}\x1b[36m.${command}\x1b[39m\n\x1b[37m[ NAMA ]\x1b[39m \x1b[90m~\x1b[39m ${m.pushName}`);
 }
 
 // ── ZIP FILE PARSER (pure Node.js, no external lib) ──
@@ -2689,7 +2689,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         const _botLabel = _isJadibot ? '\x1b[35m[ JADIBOT ]\x1b[39m' : '\x1b[32m[ BOT UTAMA ]\x1b[39m';
                         const _locLabel = m.isGroup ? `\x1b[36m[ GRUP ${hisoka.getName(m.from)} ]\x1b[39m` : '\x1b[36m[ PRIVATE ]\x1b[39m';
                         const _who = m.isBot ? '\x1b[35m[BOT]\x1b[39m ' : (m.isRealOwner ? '\x1b[33m[OWNER]\x1b[39m ' : '');
-                        console.log(`${_botLabel}\x1b[90m~\x1b[39m${_locLabel}\n\x1b[32m[ CMD ]\x1b[39m ${_who}\x1b[36m${m.prefix || '.'}${m.command}\x1b[39m\n\x1b[37mNAMA >\x1b[39m ${m.pushName}`);
+                        console.log(`${_botLabel}\x1b[90m~\x1b[39m${_locLabel}\n\x1b[32m[ CMD ]\x1b[39m \x1b[90m~\x1b[39m ${_who}\x1b[36m${m.prefix || '.'}${m.command}\x1b[39m\n\x1b[37m[ NAMA ]\x1b[39m \x1b[90m~\x1b[39m ${m.pushName}`);
                 }
 
                 if (hisoka?.isMainBot === true && m.isOwner) {
