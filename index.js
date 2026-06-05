@@ -815,8 +815,8 @@ async function main() {
                                                 console.log(`${cy}│${rs} ${wh}⭔ Tipe Story  : ${or}${_swPad(entry.type||'Teks 📝',cW)}${rs}`);
                                                 console.log(`${cy}│${rs} ${wh}⭔ Selamat     : ${pu}${_swPad(greeting,cW)}${rs}`);
                                                 console.log(`${cy}│${rs} ${wh}⭔ Hari        : ${bl}${_swPad(_swDays[d.getDay()]+' 🔁',cW)}${rs}`);
-                                                console.log(`${cy}│${rs} ${wh}⭔ Tanggal     : ${ye}${_swPad(`${d.getDate()} ${_swMons[d.getMonth()]} ${d.getFullYear()} 🗓️`,cW)}${rs}`);
-                                                console.log(`${cy}│${rs} ${wh}⭔ Waktu       : ${bl}${_swPad(d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',hour12:false}).replace(':','.')+' ⏰',cW)}${rs}`);
+                                                console.log(`${cy}│${rs} ${wh}⭔ Tanggal     : ${ye}${_swPad(`${d.getDate()} ${_swMons[d.getMonth()]} ${d.getFullYear()}`,cW)}${rs}`);
+                                                console.log(`${cy}│${rs} ${wh}⭔ Waktu       : ${bl}${_swPad(d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',hour12:false}).replace(':','.'),cW)}${rs}`);
                                                 console.log(`${cy}│${rs} ${wh}⭔ Nama        : ${wh}${_swPad(entry.name||num,cW)}${rs}`);
                                                 console.log(`${cy}│${rs} ${wh}⭔ Nomor       : ${wh}${_swPad(masked,cW)}${rs}`);
                                                 console.log(`${cy}│${rs} ${wh}⭔ Berhasil    : ${gr}${_swPad('Startup Retry ♻️',cW)}${rs}`);
