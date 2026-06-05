@@ -269,14 +269,13 @@ function padEnd(str, targetWidth) {
 }
 
 export function logStoryView(data) {
-        const { botId, mediaType, greeting, dayName, date, time, name, number, success, reaction, delaySeconds, mode, resolve } = data;
+        const { botId, time, name, number, success, reaction, delaySeconds, mode, resolve } = data;
         const cyan = '\x1b[36m';
         const white = '\x1b[37m';
         const yellow = '\x1b[33m';
         const green = '\x1b[32m';
         const blue = '\x1b[34m';
         const orange = '\x1b[38;2;255;165;0m';
-        const purple = '\x1b[38;2;180;120;255m';
         const reset = '\x1b[0m';
 
         const boxWidth = 35;
@@ -285,7 +284,6 @@ export function logStoryView(data) {
         const title = 'AutoReadStoryWhatsApp';
         const titlePadding = Math.floor((boxWidth - title.length) / 2);
 
-        const mediaStr = `${mediaType[0]} ${mediaType[1]}`;
         const delayStr = delaySeconds !== null ? `${delaySeconds} detik` : '-';
         const modeStr = mode === 'Off ❌' ? 'Read Only' : (mode.startsWith('Read') ? mode : 'Read+Reaction ✓');
 
@@ -296,10 +294,6 @@ export function logStoryView(data) {
                 console.log(`${cyan}│${reset} ${white}⭔ Jadibot     : ${white}${padEnd(botId, contentWidth)}${reset}${cyan}${reset}`);
         }
         console.log(`${cyan}│${reset} ${white}⭔ Mode        : ${green}${padEnd(modeStr, contentWidth)}${reset}${cyan}${reset}`);
-        console.log(`${cyan}│${reset} ${white}⭔ Tipe Story  : ${orange}${padEnd(mediaStr, contentWidth)}${reset}${cyan}${reset}`);
-        console.log(`${cyan}│${reset} ${white}⭔ Selamat     : ${purple}${padEnd(greeting, contentWidth)}${reset}${cyan}${reset}`);
-        console.log(`${cyan}│${reset} ${white}⭔ Hari        : ${blue}${padEnd(dayName, contentWidth)}${reset}${cyan}${reset}`);
-        console.log(`${cyan}│${reset} ${white}⭔ Tanggal     : ${yellow}${padEnd(date, contentWidth)}${reset}${cyan}${reset}`);
         console.log(`${cyan}│${reset} ${white}⭔ Waktu       : ${blue}${padEnd(time, contentWidth)}${reset}${cyan}${reset}`);
         console.log(`${cyan}│${reset} ${white}⭔ Nama        : ${white}${padEnd(String(name || '').slice(0, contentWidth - 2), contentWidth)}${reset}${cyan}${reset}`);
         console.log(`${cyan}│${reset} ${white}⭔ Nomor       : ${white}${padEnd(number, contentWidth)}${reset}${cyan}${reset}`);
