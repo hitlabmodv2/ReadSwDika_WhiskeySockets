@@ -20,7 +20,7 @@
       "participant": "82828679200798@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-08T07:40:13.791Z",
+    "updatedAt": "2026-06-08T07:42:03.038Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -39,6 +39,182 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-08T07:40:13.791Z"
+    "processedAt": "2026-06-08T07:40:13.791Z",
+    "deleted": true,
+    "deletedAt": "2026-06-08T07:42:03.038Z"
+  },
+  "ACC37EF9244D866A7255B63D2FDD6B9D": {
+    "id": "ACC37EF9244D866A7255B63D2FDD6B9D",
+    "sender": "628388589625@s.whatsapp.net",
+    "name": "𝙢𝙖𝙪𝙡𝙖𝙣𝙖 𝙣𝙜𝙚𝙣",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-08T07:42:03.040Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🦻",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "628388589625",
+    "resolvedPn": "628388589625@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "628388589625@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACC37EF9244D866A7255B63D2FDD6B9D",
+      "participant": "82828679200798@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-08T07:42:52.058Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "628388589625@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACC37EF9244D866A7255B63D2FDD6B9D",
+        "participant": "82828679200798@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "628388589625@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACC37EF9244D866A7255B63D2FDD6B9D",
+        "participant": "628388589625@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-08T07:42:06.769Z",
+    "deleted": true,
+    "deletedAt": "2026-06-08T07:42:52.058Z"
+  },
+  "ACC4369B96226733ECDF09FF81598DB4": {
+    "id": "ACC4369B96226733ECDF09FF81598DB4",
+    "sender": "628388589625@s.whatsapp.net",
+    "name": "𝙢𝙖𝙪𝙡𝙖𝙣𝙖 𝙣𝙜𝙚𝙣",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-08T07:42:17.566Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🧖‍♂️",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "628388589625",
+    "resolvedPn": "628388589625@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "628388589625@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACC4369B96226733ECDF09FF81598DB4",
+      "participant": "82828679200798@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-08T07:43:20.418Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "628388589625@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACC4369B96226733ECDF09FF81598DB4",
+        "participant": "82828679200798@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "628388589625@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACC4369B96226733ECDF09FF81598DB4",
+        "participant": "628388589625@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-08T07:42:29.105Z",
+    "deleted": true,
+    "deletedAt": "2026-06-08T07:43:20.418Z"
+  },
+  "AC1D8611968EF37D5DAD469DB531BF79": {
+    "id": "AC1D8611968EF37D5DAD469DB531BF79",
+    "sender": "628388589625@s.whatsapp.net",
+    "name": "𝙢𝙖𝙪𝙡𝙖𝙣𝙖 𝙣𝙜𝙚𝙣",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-08T07:43:29.980Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🔰",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "628388589625",
+    "resolvedPn": "628388589625@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "628388589625@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC1D8611968EF37D5DAD469DB531BF79",
+      "participant": "82828679200798@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-08T07:43:37.446Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "628388589625@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC1D8611968EF37D5DAD469DB531BF79",
+        "participant": "82828679200798@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "628388589625@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC1D8611968EF37D5DAD469DB531BF79",
+        "participant": "628388589625@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-08T07:43:37.446Z"
+  },
+  "ACE5E9EC7375724F6650D291212C2996": {
+    "id": "ACE5E9EC7375724F6650D291212C2996",
+    "sender": "628388589625@s.whatsapp.net",
+    "name": "𝙢𝙖𝙪𝙡𝙖𝙣𝙖 𝙣𝙜𝙚𝙣",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-08T07:43:29.982Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "4️⃣",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "628388589625",
+    "resolvedPn": "628388589625@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "628388589625@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACE5E9EC7375724F6650D291212C2996",
+      "participant": "82828679200798@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-08T07:52:09.230Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "628388589625@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACE5E9EC7375724F6650D291212C2996",
+        "participant": "82828679200798@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "628388589625@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACE5E9EC7375724F6650D291212C2996",
+        "participant": "628388589625@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-08T07:43:34.227Z",
+    "deleted": true,
+    "deletedAt": "2026-06-08T07:52:09.230Z"
   }
 }

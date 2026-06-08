@@ -640,6 +640,27 @@ function getJadibotTracker(number) {
   return jadibotTrackers.get(number)
 }
 
+const _JADIBOT_LOG_COLORS = [
+  '\x1b[36m',                   // cyan
+  '\x1b[35m',                   // magenta
+  '\x1b[33m',                   // yellow
+  '\x1b[32m',                   // green
+  '\x1b[34m',                   // blue
+  '\x1b[31m',                   // red
+  '\x1b[38;2;255;165;0m',       // orange
+  '\x1b[38;2;180;120;255m',     // purple
+  '\x1b[38;2;0;200;200m',       // teal
+  '\x1b[38;2;255;105;180m',     // pink
+  '\x1b[38;2;100;200;100m',     // lime
+  '\x1b[38;2;255;200;0m',       // gold
+]
+
+function getJadibotLogColor(number) {
+  const digits = String(number).replace(/[^0-9]/g, '')
+  const idx = digits ? (parseInt(digits.slice(-3), 10) % _JADIBOT_LOG_COLORS.length) : 0
+  return _JADIBOT_LOG_COLORS[idx]
+}
+
 function getSwGreeting() {
   const h = parseInt(new Date().toLocaleString('en-US', { timeZone: 'Asia/Jakarta', hour: 'numeric', hour12: false }))
   if (h >= 5 && h < 11) return 'Pagi 🌆'
@@ -1706,6 +1727,37 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
         sock.cacheMsg.set(msg.key.id, msg)
         setTimeout(() => sock.cacheMsg.delete(msg.key.id), 60000)
         preDownloadMediaForAntidel(msg, sock).catch(() => {})
+      }
+
+      // ── Deteksi SW dihapus realtime (terisolasi per-jadibot) ──
+      const _protoMsg = msg.message?.protocolMessage
+      if (_protoMsg && _protoMsg.type === 0) { // 0 = REVOKE
+        const _isStatusRevoke =
+          msg.key?.remoteJid === 'status@broadcast' ||
+          _protoMsg.key?.remoteJid === 'status@broadcast'
+        const _deletedId = _protoMsg.key?.id
+        if (_isStatusRevoke && _deletedId) {
+          try {
+            const _jadibotUserDir = path.join(process.cwd(), 'data', 'jadibot', number, 'swtrack', 'users')
+            if (fs.existsSync(_jadibotUserDir)) {
+              const _files = fs.readdirSync(_jadibotUserDir).filter(f => f.endsWith('.json'))
+              for (const _file of _files) {
+                const _fp = path.join(_jadibotUserDir, _file)
+                try {
+                  const _d = JSON.parse(fs.readFileSync(_fp, 'utf-8'))
+                  if (_d[_deletedId]) {
+                    _d[_deletedId] = { ..._d[_deletedId], deleted: true, deletedAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
+                    fs.writeFileSync(_fp, JSON.stringify(_d, null, 2), 'utf-8')
+                    const _contactNum = _file.replace('.json', '')
+                    const _color = getJadibotLogColor(number)
+                    console.log(`${_color}[SwTrack][JB:${number}] SW dihapus: ${_contactNum} → ${_deletedId}\x1b[39m`)
+                    break
+                  }
+                } catch {}
+              }
+            }
+          } catch {}
+        }
       }
 
       // AutoRead SW — pakai Set terisolasi per-jadibot agar tidak bentrok dengan main bot / jadibot lain
