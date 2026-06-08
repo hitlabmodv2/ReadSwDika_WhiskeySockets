@@ -1318,12 +1318,14 @@ async function main() {
                                                 const urlGbr  = await _as.buatGambarOverlay(cocok.nama, cocok.waktu);
                                                 const urlAud  = _as.getAudio(cocok.nama);
 
-                                                // Konversi MP3 → OGG/Opus sekali sebelum dikirim ke semua grup
-                                                let _asVnBuf = null;
+                                                // Konversi MP3 → OGG/Opus + generate waveform sekali sebelum dikirim ke semua grup
+                                                let _asVnBuf   = null;
+                                                let _asWaveform = null;
                                                 try {
-                                                        const { toVoiceNote: _asToVN } = _require(path.resolve('./src/scrape/audioconvert.cjs'));
+                                                        const { toVoiceNote: _asToVN, generateWaveform: _asGenWF } = _require(path.resolve('./src/scrape/audioconvert.cjs'));
                                                         const _asAudRes = await _require('axios').get(urlAud, { responseType: 'arraybuffer', timeout: 20000 });
-                                                        _asVnBuf = await _asToVN(Buffer.from(_asAudRes.data), 'audio/mpeg');
+                                                        _asVnBuf    = await _asToVN(Buffer.from(_asAudRes.data), 'audio/mpeg');
+                                                        _asWaveform = await _asGenWF(_asVnBuf, 'audio/ogg; codecs=opus').catch(() => null);
                                                 } catch (_asConvErr) {
                                                         console.error('[AutoSholat] Gagal konversi audio:', _asConvErr?.message);
                                                 }
@@ -1362,6 +1364,7 @@ async function main() {
                                                                                         audio   : _asVnBuf,
                                                                                         ptt     : true,
                                                                                         mimetype: 'audio/ogg; codecs=opus',
+                                                                                        ...(_asWaveform ? { waveform: _asWaveform } : {}),
                                                                                 }, { quoted: imgMsg });
                                                                         }
                                                                 } catch (e) {

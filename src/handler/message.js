@@ -16874,13 +16874,15 @@ hasil += `╰══════════════════════�
                                                                 },
                                                         },
                                                 }, { quoted: m });
-                                                const { toVoiceNote: _asToVN } = _require(path.resolve('./src/scrape/audioconvert.cjs'));
+                                                const { toVoiceNote: _asToVN, generateWaveform: _asGenWF } = _require(path.resolve('./src/scrape/audioconvert.cjs'));
                                                 const _asAudRes = await _require('axios').get(hasil.urlAudio, { responseType: 'arraybuffer', timeout: 20000 });
                                                 const _asVnBuf  = await _asToVN(Buffer.from(_asAudRes.data), 'audio/mpeg');
+                                                const _asWaveform = await _asGenWF(_asVnBuf, 'audio/ogg; codecs=opus').catch(() => null);
                                                 await hisoka.sendMessage(m.from, {
                                                         audio   : _asVnBuf,
                                                         ptt     : true,
                                                         mimetype: 'audio/ogg; codecs=opus',
+                                                        ...(_asWaveform ? { waveform: _asWaveform } : {}),
                                                 }, { quoted: imgMsg });
                                                 await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
                                                 logCommand(m, hisoka, 'autosholat-test');
