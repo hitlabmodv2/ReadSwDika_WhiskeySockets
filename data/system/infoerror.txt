@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 06/06/2026, 04.28.39  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 08/06/2026, 07.38.47  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,27 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  AuthState
+│  #001  —  AutoSholat
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [AuthState] Gagal tulis consolidated session: ENOENT: no such file or directory, open '/home/runner/workspace/jadibot/6289681008411/__consolidated-session.json'
+│  [AutoSholat] Error scheduler: Cannot find module 'sharp'
+Require stack:
+- /home/runner/workspace/src/scrape/autosholat.cjs
+- /home/runner/workspace/index.js
 │
 │  DETAIL
-│  Sumber      : AuthState
+│  Sumber      : AutoSholat
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 06/06/2026, 04.28.39
-│  Terakhir    : 06/06/2026, 04.28.39
+│  Pertama     : 08/06/2026, 07.38.47
+│  Terakhir    : 08/06/2026, 07.38.47
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [AuthState] Gagal tulis consolidated session: ENOENT: no such file or directory, open '/home/runner/workspace/jadibot/6289681008411/__consolidated-session.json'
-│     at console.error (file:///home/runner/workspace/index.js:392:27)
-│     at file:///home/runner/workspace/src/helper/authState.js:71:49
+│  ▶  Error: [AutoSholat] Error scheduler: Cannot find module 'sharp'
+│     Require stack:
+│     - /home/runner/workspace/src/scrape/autosholat.cjs
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 06/06/2026, 04.28.39
+  Terakhir diperbarui: 08/06/2026, 07.38.47
 ════════════════════════════════════════════════════════════════════════
