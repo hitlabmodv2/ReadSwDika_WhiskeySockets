@@ -1,0 +1,44 @@
+{
+  "ACD563FE247B85C6173CB73CAB2D0335": {
+    "id": "ACD563FE247B85C6173CB73CAB2D0335",
+    "sender": "6289503411254@s.whatsapp.net",
+    "name": "heart break december",
+    "type": "conversation",
+    "arrivedAt": "2026-06-08T07:40:00.893Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "📅",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6289503411254",
+    "resolvedPn": "6289503411254@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6289503411254@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACD563FE247B85C6173CB73CAB2D0335",
+      "participant": "68380191097053@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-08T07:40:11.918Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289503411254@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACD563FE247B85C6173CB73CAB2D0335",
+        "participant": "68380191097053@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289503411254@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACD563FE247B85C6173CB73CAB2D0335",
+        "participant": "6289503411254@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-08T07:40:11.918Z"
+  }
+}

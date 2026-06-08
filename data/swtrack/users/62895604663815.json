@@ -1,0 +1,44 @@
+{
+  "AC0AA10D19AF797E1CBAEF1D00B638C5": {
+    "id": "AC0AA10D19AF797E1CBAEF1D00B638C5",
+    "sender": "62895604663815@s.whatsapp.net",
+    "name": "Sylphy _df💕💕",
+    "type": "conversation",
+    "arrivedAt": "2026-06-08T07:38:55.543Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "📩",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "62895604663815",
+    "resolvedPn": "62895604663815@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "62895604663815@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC0AA10D19AF797E1CBAEF1D00B638C5",
+      "participant": "230459506172039@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-08T07:39:15.393Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62895604663815@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC0AA10D19AF797E1CBAEF1D00B638C5",
+        "participant": "230459506172039@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62895604663815@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC0AA10D19AF797E1CBAEF1D00B638C5",
+        "participant": "62895604663815@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-08T07:39:15.392Z"
+  }
+}

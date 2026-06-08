@@ -1,0 +1,44 @@
+{
+  "AC8CC8933BCB28469CAFB7E9C23DDD60": {
+    "id": "AC8CC8933BCB28469CAFB7E9C23DDD60",
+    "sender": "6283141173926@s.whatsapp.net",
+    "name": "Voyager",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-08T07:41:08.511Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "✝️",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6283141173926",
+    "resolvedPn": "6283141173926@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6283141173926@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC8CC8933BCB28469CAFB7E9C23DDD60",
+      "participant": "139410695827562@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-08T07:41:21.678Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283141173926@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC8CC8933BCB28469CAFB7E9C23DDD60",
+        "participant": "139410695827562@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283141173926@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC8CC8933BCB28469CAFB7E9C23DDD60",
+        "participant": "6283141173926@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-08T07:41:21.678Z"
+  }
+}
