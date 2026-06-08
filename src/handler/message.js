@@ -16779,7 +16779,7 @@ hasil += `╰══════════════════════�
                                 }
 
                                 // ── ADD ───────────────────────────────────────────────────────────
-                                if (sub === 'add') {
+                                if (sub === 'add' || sub === 'on') {
                                         if (!m.isGroup) return tolak(hisoka, m, '❌ Perintah ini hanya bisa digunakan di dalam grup!');
                                         const berhasil = _as.addGroup(jidGrup);
                                         await tolak(hisoka, m,
@@ -16793,7 +16793,7 @@ hasil += `╰══════════════════════�
                                 }
 
                                 // ── REMOVE / DEL ──────────────────────────────────────────────────
-                                if (sub === 'remove' || sub === 'del') {
+                                if (sub === 'remove' || sub === 'del' || sub === 'off') {
                                         if (!m.isGroup) return tolak(hisoka, m, '❌ Perintah ini hanya bisa digunakan di dalam grup!');
                                         const berhasil = _as.removeGroup(jidGrup);
                                         await tolak(hisoka, m,

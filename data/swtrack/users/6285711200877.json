@@ -1,13 +1,13 @@
 {
-  "A55FAF17BC1F738D89D7726AF3541105": {
-    "id": "A55FAF17BC1F738D89D7726AF3541105",
+  "A57EC237F4432C4CA7CB67261BDF3E40": {
+    "id": "A57EC237F4432C4CA7CB67261BDF3E40",
     "sender": "6285711200877@s.whatsapp.net",
     "name": "Albiverstappen",
-    "type": "videoMessage",
-    "arrivedAt": "2026-06-06T03:15:22.404Z",
+    "type": "conversation",
+    "arrivedAt": "2026-06-08T08:01:34.424Z",
     "read": true,
     "reacted": true,
-    "emoji": "🫲",
+    "emoji": "🇲🇩",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6285711200877",
@@ -16,17 +16,17 @@
       "remoteJid": "status@broadcast",
       "remoteJidAlt": "6285711200877@s.whatsapp.net",
       "fromMe": false,
-      "id": "A55FAF17BC1F738D89D7726AF3541105",
+      "id": "A57EC237F4432C4CA7CB67261BDF3E40",
       "participant": "168736715731040@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-06T03:16:09.888Z",
+    "updatedAt": "2026-06-08T08:01:37.121Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6285711200877@s.whatsapp.net",
         "fromMe": false,
-        "id": "A55FAF17BC1F738D89D7726AF3541105",
+        "id": "A57EC237F4432C4CA7CB67261BDF3E40",
         "participant": "168736715731040@lid",
         "addressingMode": "lid"
       },
@@ -34,13 +34,11 @@
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6285711200877@s.whatsapp.net",
         "fromMe": false,
-        "id": "A55FAF17BC1F738D89D7726AF3541105",
+        "id": "A57EC237F4432C4CA7CB67261BDF3E40",
         "participant": "6285711200877@s.whatsapp.net",
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-06T03:15:34.609Z",
-    "deleted": true,
-    "deletedAt": "2026-06-06T03:16:09.888Z"
+    "processedAt": "2026-06-08T08:01:37.121Z"
   }
 }
