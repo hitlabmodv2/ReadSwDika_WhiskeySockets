@@ -16022,68 +16022,59 @@ hasil += `╰══════════════════════�
                                 if (!m.isOwner && !isJadibotUser) return tolak(hisoka, m, '❌ Fitur ini hanya untuk owner!');
 
                                 try {
-                                        // Ambil quoted message content secara aman
-                                        const quotedRaw = m.message?.extendedTextMessage?.contextInfo?.quotedMessage
-                                                || m.quoted?.raw?.message
-                                                || m.quoted?.message;
-
-                                        let mediaType = null;
-                                        let mediaContent = null;
-
-                                        if (quotedRaw) {
-                                                if (quotedRaw.imageMessage) {
-                                                        mediaType = 'imageMessage';
-                                                        mediaContent = quotedRaw.imageMessage;
-                                                } else if (quotedRaw.videoMessage) {
-                                                        mediaType = 'videoMessage';
-                                                        mediaContent = quotedRaw.videoMessage;
-                                                } else if (quotedRaw.audioMessage) {
-                                                        mediaType = 'audioMessage';
-                                                        mediaContent = quotedRaw.audioMessage;
-                                                } else if (quotedRaw.viewOnceMessageV2?.message?.imageMessage) {
-                                                        mediaType = 'imageMessage';
-                                                        mediaContent = quotedRaw.viewOnceMessageV2.message.imageMessage;
-                                                } else if (quotedRaw.viewOnceMessageV2?.message?.videoMessage) {
-                                                        mediaType = 'videoMessage';
-                                                        mediaContent = quotedRaw.viewOnceMessageV2.message.videoMessage;
-                                                }
-                                        }
-
                                         let content = {};
+                                        let hasMedia = false;
 
-                                        if (mediaType && mediaContent) {
-                                                const downloadType = mediaType.replace('Message', '');
-                                                const stream = await downloadContentFromMessage(mediaContent, downloadType);
-                                                let buffer = Buffer.from([]);
-                                                for await (const chunk of stream) {
-                                                        buffer = Buffer.concat([buffer, chunk]);
+                                        // PRIORITAS 1: Media di pesan saat ini (kirim foto/video/audio + caption .upswgc)
+                                        if (m.isMedia && /image|video|audio/i.test(m.type || '')) {
+                                                await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
+                                                const buf = await m.downloadMedia();
+                                                if (!buf || buf.length === 0) return reply('❌ Gagal download media pesan ini.');
+                                                const mime = m.content?.mimetype || 'application/octet-stream';
+                                                if (/image/i.test(m.type)) {
+                                                        content = { image: buf, caption: query || m.content?.caption || '' };
+                                                } else if (/video/i.test(m.type)) {
+                                                        content = { video: buf, caption: query || m.content?.caption || '' };
+                                                } else if (/audio/i.test(m.type)) {
+                                                        content = { audio: buf, mimetype: mime, ptt: false };
                                                 }
-                                                if (!buffer || buffer.length === 0) return reply('❌ Gagal download media.');
+                                                hasMedia = true;
 
-                                                if (mediaType === 'imageMessage') {
-                                                        content.image = buffer;
-                                                        content.caption = query || mediaContent.caption || '';
-                                                } else if (mediaType === 'videoMessage') {
-                                                        content.video = buffer;
-                                                        content.caption = query || mediaContent.caption || '';
-                                                } else if (mediaType === 'audioMessage') {
-                                                        content.audio = buffer;
-                                                        content.mimetype = mediaContent.mimetype || 'audio/mp4';
-                                                        content.ptt = true;
+                                        // PRIORITAS 2: Reply ke pesan yang berisi media
+                                        } else if (m.isQuoted && m.quoted?.isMedia && /image|video|audio/i.test(m.quoted.type || '')) {
+                                                await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
+                                                const buf = await m.quoted.downloadMedia();
+                                                if (!buf || buf.length === 0) return reply('❌ Gagal download media quoted.');
+                                                const mime = m.quoted.content?.mimetype || 'application/octet-stream';
+                                                const qType = m.quoted.type || '';
+                                                if (/image/i.test(qType)) {
+                                                        content = { image: buf, caption: query || m.quoted.content?.caption || '' };
+                                                } else if (/video/i.test(qType)) {
+                                                        content = { video: buf, caption: query || m.quoted.content?.caption || '' };
+                                                } else if (/audio/i.test(qType)) {
+                                                        content = { audio: buf, mimetype: mime, ptt: false };
                                                 }
+                                                hasMedia = true;
+
+                                        // PRIORITAS 3: Teks saja
                                         } else if (query) {
-                                                content.text = query;
+                                                // ditangani di blok inside di bawah
+
                                         } else {
                                                 return reply(
                                                         `⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛\n` +
                                                         `✦ 📢 *.UPSWGC* — CARA PAKAI ✦\n` +
                                                         `⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛\n\n` +
                                                         `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
-                                                        `  🔁 *Reply foto/video/audio*\n` +
+                                                        `  🖼️ *Cara 1 — Kirim Langsung*\n` +
                                                         `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
-                                                        `▸ Reply media + *.upswgc [caption]*\n\n` +
+                                                        `▸ Kirim foto/video/audio + caption *.upswgc [teks]*\n\n` +
                                                         `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
-                                                        `  💬 *Kirim Teks*\n` +
+                                                        `  🔁 *Cara 2 — Reply Pesan*\n` +
+                                                        `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
+                                                        `▸ Reply foto/video/audio + *.upswgc [caption]*\n\n` +
+                                                        `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
+                                                        `  💬 *Cara 3 — Teks*\n` +
                                                         `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
                                                         `▸ *.upswgc teks pesan kamu*`
                                                 );
@@ -16092,7 +16083,7 @@ hasil += `╰══════════════════════�
                                         const messageSecret = crypto.randomBytes(32);
                                         let inside;
 
-                                        if (mediaType && mediaContent) {
+                                        if (hasMedia) {
                                                 inside = await generateWAMessageContent(content, { upload: hisoka.waUploadToServer });
                                         } else {
                                                 // Teks status — harus extendedTextMessage dengan backgroundArgb

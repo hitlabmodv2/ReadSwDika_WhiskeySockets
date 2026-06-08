@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 08/06/2026, 07.39.47  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 08/06/2026, 09.24.24  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,27 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  AutoSholat
+│  #001  —  console.error
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [AutoSholat] Error scheduler: Cannot find module 'sharp'
-Require stack:
-- /home/runner/workspace/src/scrape/autosholat.cjs
-- /home/runner/workspace/index.js
+│  [31m[AntiTagSW] Error:[39m _pelanggarLabel is not defined
 │
 │  DETAIL
-│  Sumber      : AutoSholat
+│  Sumber      : console.error
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 08/06/2026, 07.39.47
-│  Terakhir    : 08/06/2026, 07.39.47
+│  Pertama     : 08/06/2026, 09.24.24
+│  Terakhir    : 08/06/2026, 09.24.24
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [AutoSholat] Error scheduler: Cannot find module 'sharp'
-│     Require stack:
-│     - /home/runner/workspace/src/scrape/autosholat.cjs
+│  ▶  Error: [31m[AntiTagSW] Error:[39m _pelanggarLabel is not defined
+│     at console.error (file:///home/runner/workspace/index.js:392:27)
+│     at handleAntiTagSW (file:///home/runner/workspace/src/handler/antitagsw.js?t=1780910592576:607:17)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 08/06/2026, 07.39.47
+  Terakhir diperbarui: 08/06/2026, 09.24.24
 ════════════════════════════════════════════════════════════════════════
