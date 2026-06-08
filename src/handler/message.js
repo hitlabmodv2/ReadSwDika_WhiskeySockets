@@ -16088,20 +16088,18 @@ hasil += `╰══════════════════════�
                                                 };
                                         }
 
-                                        // messageContextInfo WAJIB ada di level atas agar WhatsApp kenali sebagai status
-                                        const msgContent = generateWAMessageFromContent(
-                                                m.from,
-                                                {
-                                                        messageContextInfo: { messageSecret },
-                                                        groupStatusMessageV2: {
-                                                                message: {
-                                                                        ...inside,
-                                                                        messageContextInfo: { messageSecret }
-                                                                }
+                                        // Gunakan proto.Message.fromObject() untuk deep recursive encoding
+                                        // (WAProto.Message.create() hanya shallow — binary fields di nested imageMessage tidak ter-encode dengan benar)
+                                        const protoMsg = proto.Message.fromObject({
+                                                messageContextInfo: { messageSecret },
+                                                groupStatusMessageV2: {
+                                                        message: {
+                                                                ...inside,
+                                                                messageContextInfo: { messageSecret }
                                                         }
-                                                },
-                                                {}
-                                        );
+                                                }
+                                        });
+                                        const msgContent = generateWAMessageFromContent(m.from, protoMsg, {});
 
                                         await hisoka.relayMessage(m.from, msgContent.message, { messageId: msgContent.key.id });
                                         await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
