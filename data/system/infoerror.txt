@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 08/06/2026, 07.38.47  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 08/06/2026, 07.39.47  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -34,8 +34,8 @@ Require stack:
 │  DETAIL
 │  Sumber      : AutoSholat
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 08/06/2026, 07.38.47
-│  Terakhir    : 08/06/2026, 07.38.47
+│  Pertama     : 08/06/2026, 07.39.47
+│  Terakhir    : 08/06/2026, 07.39.47
 │
 │  STACK TRACE (3 baris pertama)
 │  ▶  Error: [AutoSholat] Error scheduler: Cannot find module 'sharp'
@@ -45,5 +45,5 @@ Require stack:
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 08/06/2026, 07.38.47
+  Terakhir diperbarui: 08/06/2026, 07.39.47
 ════════════════════════════════════════════════════════════════════════

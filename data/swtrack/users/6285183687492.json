@@ -1,13 +1,13 @@
 {
-  "A5593DF2299A13E2D0E23B68D82E5D6B": {
-    "id": "A5593DF2299A13E2D0E23B68D82E5D6B",
+  "A574646C038013E2CC01F7BA842C0D1E": {
+    "id": "A574646C038013E2CC01F7BA842C0D1E",
     "sender": "6285183687492@s.whatsapp.net",
     "name": "MAULANA",
-    "type": "videoMessage",
-    "arrivedAt": "2026-06-05T16:00:06.430Z",
+    "type": "conversation",
+    "arrivedAt": "2026-06-08T07:39:48.801Z",
     "read": true,
     "reacted": true,
-    "emoji": "🎀",
+    "emoji": "👤",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6285183687492",
@@ -16,17 +16,17 @@
       "remoteJid": "status@broadcast",
       "remoteJidAlt": "6285183687492@s.whatsapp.net",
       "fromMe": false,
-      "id": "A5593DF2299A13E2D0E23B68D82E5D6B",
+      "id": "A574646C038013E2CC01F7BA842C0D1E",
       "participant": "154481887056083@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-05T16:00:13.810Z",
+    "updatedAt": "2026-06-08T07:40:08.740Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6285183687492@s.whatsapp.net",
         "fromMe": false,
-        "id": "A5593DF2299A13E2D0E23B68D82E5D6B",
+        "id": "A574646C038013E2CC01F7BA842C0D1E",
         "participant": "154481887056083@lid",
         "addressingMode": "lid"
       },
@@ -34,11 +34,11 @@
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6285183687492@s.whatsapp.net",
         "fromMe": false,
-        "id": "A5593DF2299A13E2D0E23B68D82E5D6B",
+        "id": "A574646C038013E2CC01F7BA842C0D1E",
         "participant": "6285183687492@s.whatsapp.net",
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-05T16:00:13.810Z"
+    "processedAt": "2026-06-08T07:40:08.739Z"
   }
 }
