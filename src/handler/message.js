@@ -16874,10 +16874,13 @@ hasil += `╰══════════════════════�
                                                                 },
                                                         },
                                                 }, { quoted: m });
+                                                const { toVoiceNote: _asToVN } = _require(path.resolve('./src/scrape/audioconvert.cjs'));
+                                                const _asAudRes = await _require('axios').get(hasil.urlAudio, { responseType: 'arraybuffer', timeout: 20000 });
+                                                const _asVnBuf  = await _asToVN(Buffer.from(_asAudRes.data), 'audio/mpeg');
                                                 await hisoka.sendMessage(m.from, {
-                                                        audio   : { url: hasil.urlAudio },
+                                                        audio   : _asVnBuf,
                                                         ptt     : true,
-                                                        mimetype: 'audio/mpeg',
+                                                        mimetype: 'audio/ogg; codecs=opus',
                                                 }, { quoted: imgMsg });
                                                 await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
                                                 logCommand(m, hisoka, 'autosholat-test');

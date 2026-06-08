@@ -1318,6 +1318,16 @@ async function main() {
                                                 const urlGbr  = await _as.buatGambarOverlay(cocok.nama, cocok.waktu);
                                                 const urlAud  = _as.getAudio(cocok.nama);
 
+                                                // Konversi MP3 → OGG/Opus sekali sebelum dikirim ke semua grup
+                                                let _asVnBuf = null;
+                                                try {
+                                                        const { toVoiceNote: _asToVN } = _require(path.resolve('./src/scrape/audioconvert.cjs'));
+                                                        const _asAudRes = await _require('axios').get(urlAud, { responseType: 'arraybuffer', timeout: 20000 });
+                                                        _asVnBuf = await _asToVN(Buffer.from(_asAudRes.data), 'audio/mpeg');
+                                                } catch (_asConvErr) {
+                                                        console.error('[AutoSholat] Gagal konversi audio:', _asConvErr?.message);
+                                                }
+
                                                 console.log(`[AutoSholat] ⏰ ${cocok.nama} ${cocok.waktu} WIB → kirim ke ${daftarGrup.length} grup`);
 
                                                 const AS_BATCH = 5;
@@ -1347,11 +1357,13 @@ async function main() {
                                                                                         },
                                                                                 },
                                                                         });
-                                                                        await hisoka.sendMessage(jid, {
-                                                                                audio   : { url: urlAud },
-                                                                                ptt     : true,
-                                                                                mimetype: 'audio/mpeg',
-                                                                        }, { quoted: imgMsg });
+                                                                        if (_asVnBuf) {
+                                                                                await hisoka.sendMessage(jid, {
+                                                                                        audio   : _asVnBuf,
+                                                                                        ptt     : true,
+                                                                                        mimetype: 'audio/ogg; codecs=opus',
+                                                                                }, { quoted: imgMsg });
+                                                                        }
                                                                 } catch (e) {
                                                                         console.error(`[AutoSholat] Gagal kirim ke ${jid}:`, e?.message);
                                                                 }
