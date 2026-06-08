@@ -16022,38 +16022,33 @@ hasil += `╰══════════════════════�
                                 if (!m.isOwner && !isJadibotUser) return tolak(hisoka, m, '❌ Fitur ini hanya untuk owner!');
 
                                 try {
-                                        let content = {};
                                         let hasMedia = false;
+                                        let inside = null;
 
                                         // PRIORITAS 1: Media di pesan saat ini (kirim foto/video/audio + caption .upswgc)
                                         if (m.isMedia && /image|video|audio/i.test(m.type || '')) {
                                                 await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
-                                                const buf = await m.downloadMedia();
-                                                if (!buf || buf.length === 0) return reply('❌ Gagal download media pesan ini.');
-                                                const mime = m.content?.mimetype || 'application/octet-stream';
-                                                if (/image/i.test(m.type)) {
-                                                        content = { image: buf, caption: query || m.content?.caption || '' };
-                                                } else if (/video/i.test(m.type)) {
-                                                        content = { video: buf, caption: query || m.content?.caption || '' };
-                                                } else if (/audio/i.test(m.type)) {
-                                                        content = { audio: buf, mimetype: mime, ptt: false };
-                                                }
+                                                // Gunakan media asli langsung — tidak perlu re-upload (URL + mediaKey CDN masih valid)
+                                                const srcMedia = (m.raw || {})[m.type];
+                                                if (!srcMedia || (!srcMedia.url && !srcMedia.directPath)) return reply('❌ Media tidak valid.');
+                                                const { contextInfo: _c1, viewOnce: _v1, interactiveAnnotations: _ia1, scanLengths: _sl1, annotations: _an1, ...cleanMedia } = srcMedia;
+                                                const mediaFields = { ...cleanMedia, caption: query || cleanMedia.caption || '' };
+                                                if (/audio/i.test(m.type)) { mediaFields.ptt = false; delete mediaFields.caption; }
+                                                inside = { [m.type]: mediaFields };
                                                 hasMedia = true;
 
                                         // PRIORITAS 2: Reply ke pesan yang berisi media
                                         } else if (m.isQuoted && m.quoted?.isMedia && /image|video|audio/i.test(m.quoted.type || '')) {
                                                 await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
-                                                const buf = await m.quoted.downloadMedia();
-                                                if (!buf || buf.length === 0) return reply('❌ Gagal download media quoted.');
-                                                const mime = m.quoted.content?.mimetype || 'application/octet-stream';
+                                                // Gunakan media asli langsung dari quoted message
                                                 const qType = m.quoted.type || '';
-                                                if (/image/i.test(qType)) {
-                                                        content = { image: buf, caption: query || m.quoted.content?.caption || '' };
-                                                } else if (/video/i.test(qType)) {
-                                                        content = { video: buf, caption: query || m.quoted.content?.caption || '' };
-                                                } else if (/audio/i.test(qType)) {
-                                                        content = { audio: buf, mimetype: mime, ptt: false };
-                                                }
+                                                const qRaw = m.quoted.raw || m.quoted.message || {};
+                                                const srcMedia = qRaw[qType];
+                                                if (!srcMedia || (!srcMedia.url && !srcMedia.directPath)) return reply('❌ Media quoted tidak valid.');
+                                                const { contextInfo: _c2, viewOnce: _v2, interactiveAnnotations: _ia2, scanLengths: _sl2, annotations: _an2, ...cleanMedia } = srcMedia;
+                                                const mediaFields = { ...cleanMedia, caption: query || cleanMedia.caption || '' };
+                                                if (/audio/i.test(qType)) { mediaFields.ptt = false; delete mediaFields.caption; }
+                                                inside = { [qType]: mediaFields };
                                                 hasMedia = true;
 
                                         // PRIORITAS 3: Teks saja
@@ -16081,11 +16076,8 @@ hasil += `╰══════════════════════�
                                         }
 
                                         const messageSecret = crypto.randomBytes(32);
-                                        let inside;
 
-                                        if (hasMedia) {
-                                                inside = await generateWAMessageContent(content, { upload: hisoka.waUploadToServer });
-                                        } else {
+                                        if (!hasMedia) {
                                                 // Teks status — harus extendedTextMessage dengan backgroundArgb
                                                 inside = {
                                                         extendedTextMessage: {
