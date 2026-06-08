@@ -1,0 +1,134 @@
+{
+  "ACA3CFC4D2C18C07DD07EBA9B30D41F5": {
+    "id": "ACA3CFC4D2C18C07DD07EBA9B30D41F5",
+    "sender": "6285136314199@s.whatsapp.net",
+    "name": "nurull",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-05T15:59:31.803Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "👂",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285136314199",
+    "resolvedPn": "6285136314199@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285136314199@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACA3CFC4D2C18C07DD07EBA9B30D41F5",
+      "participant": "90916371062907@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-05T15:59:39.505Z",
+    "deleted": true,
+    "deletedAt": "2026-06-05T15:59:35.986Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285136314199@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACA3CFC4D2C18C07DD07EBA9B30D41F5",
+        "participant": "90916371062907@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285136314199@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACA3CFC4D2C18C07DD07EBA9B30D41F5",
+        "participant": "6285136314199@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-05T15:59:39.505Z"
+  },
+  "AC1E2CCC2F21FFFC8817B09A32C8B4D6": {
+    "id": "AC1E2CCC2F21FFFC8817B09A32C8B4D6",
+    "sender": "6285136314199@s.whatsapp.net",
+    "name": "nurull",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-06T03:15:22.478Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🧟‍♂️",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285136314199",
+    "resolvedPn": "6285136314199@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285136314199@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC1E2CCC2F21FFFC8817B09A32C8B4D6",
+      "participant": "90916371062907@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-06T03:15:43.751Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285136314199@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC1E2CCC2F21FFFC8817B09A32C8B4D6",
+        "participant": "90916371062907@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285136314199@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC1E2CCC2F21FFFC8817B09A32C8B4D6",
+        "participant": "6285136314199@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-06T03:15:34.632Z",
+    "deleted": true,
+    "deletedAt": "2026-06-06T03:15:43.751Z"
+  },
+  "ACE76C62189BD3D512DBA27DBE223D09": {
+    "id": "ACE76C62189BD3D512DBA27DBE223D09",
+    "sender": "6285136314199@s.whatsapp.net",
+    "name": "nurull",
+    "type": "extendedTextMessage",
+    "arrivedAt": "2026-06-06T03:15:22.479Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🔒",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285136314199",
+    "resolvedPn": "6285136314199@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285136314199@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACE76C62189BD3D512DBA27DBE223D09",
+      "participant": "90916371062907@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-06T03:15:43.753Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285136314199@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACE76C62189BD3D512DBA27DBE223D09",
+        "participant": "90916371062907@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285136314199@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACE76C62189BD3D512DBA27DBE223D09",
+        "participant": "6285136314199@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-06T03:15:29.431Z",
+    "deleted": true,
+    "deletedAt": "2026-06-06T03:15:43.753Z"
+  }
+}

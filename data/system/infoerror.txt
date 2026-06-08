@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 05/06/2026, 06.09.11  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 06/06/2026, 04.28.39  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  console.error
+│  #001  —  AuthState
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [31m[HotReload] ✗ Gagal reload 'src/handler/event.js', pakai versi lama.[39m
+│  [AuthState] Gagal tulis consolidated session: ENOENT: no such file or directory, open '/home/runner/workspace/jadibot/6289681008411/__consolidated-session.json'
 │
 │  DETAIL
-│  Sumber      : console.error
+│  Sumber      : AuthState
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 05/06/2026, 06.09.11
-│  Terakhir    : 05/06/2026, 06.09.11
+│  Pertama     : 06/06/2026, 04.28.39
+│  Terakhir    : 06/06/2026, 04.28.39
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [31m[HotReload] ✗ Gagal reload 'src/handler/event.js', pakai versi lama.[39m
+│  ▶  Error: [AuthState] Gagal tulis consolidated session: ENOENT: no such file or directory, open '/home/runner/workspace/jadibot/6289681008411/__consolidated-session.json'
 │     at console.error (file:///home/runner/workspace/index.js:392:27)
-│     at Timeout._onTimeout (file:///home/runner/workspace/src/helper/hotReload.js:102:29)
+│     at file:///home/runner/workspace/src/helper/authState.js:71:49
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 05/06/2026, 06.09.11
+  Terakhir diperbarui: 06/06/2026, 04.28.39
 ════════════════════════════════════════════════════════════════════════

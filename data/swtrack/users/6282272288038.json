@@ -1,0 +1,44 @@
+{
+  "AC70B893F5615D9F466A17E726D04332": {
+    "id": "AC70B893F5615D9F466A17E726D04332",
+    "sender": "6282272288038@s.whatsapp.net",
+    "name": "Akbar",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-05T15:58:47.012Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "↪️",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6282272288038",
+    "resolvedPn": "6282272288038@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6282272288038@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC70B893F5615D9F466A17E726D04332",
+      "participant": "95666571350028@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-05T15:58:55.152Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282272288038@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC70B893F5615D9F466A17E726D04332",
+        "participant": "95666571350028@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282272288038@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC70B893F5615D9F466A17E726D04332",
+        "participant": "6282272288038@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-05T15:58:55.152Z"
+  }
+}

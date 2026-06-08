@@ -1,0 +1,44 @@
+{
+  "AC8F9D5E9413E0DA8320E7994E05C7B2": {
+    "id": "AC8F9D5E9413E0DA8320E7994E05C7B2",
+    "sender": "6285823980633@s.whatsapp.net",
+    "name": "m rafly buchori setyawan",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-05T15:59:14.883Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "💂‍♀️",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285823980633",
+    "resolvedPn": "6285823980633@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285823980633@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC8F9D5E9413E0DA8320E7994E05C7B2",
+      "participant": "8697359138827@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-05T15:59:20.131Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285823980633@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC8F9D5E9413E0DA8320E7994E05C7B2",
+        "participant": "8697359138827@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285823980633@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC8F9D5E9413E0DA8320E7994E05C7B2",
+        "participant": "6285823980633@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-05T15:59:20.130Z"
+  }
+}
