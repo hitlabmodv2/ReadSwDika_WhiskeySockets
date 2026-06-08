@@ -16089,25 +16089,35 @@ hasil += `╰══════════════════════�
                                                 );
                                         }
 
-                                        // Background status default hitam
-                                        content.backgroundColor = '#000000';
-
-                                        const inside = await generateWAMessageContent(content, { upload: hisoka.waUploadToServer });
                                         const messageSecret = crypto.randomBytes(32);
+                                        let inside;
 
+                                        if (mediaType && mediaContent) {
+                                                inside = await generateWAMessageContent(content, { upload: hisoka.waUploadToServer });
+                                        } else {
+                                                // Teks status — harus extendedTextMessage dengan backgroundArgb
+                                                inside = {
+                                                        extendedTextMessage: {
+                                                                text: query,
+                                                                backgroundArgb: 4278190080,
+                                                                font: 0
+                                                        }
+                                                };
+                                        }
+
+                                        // messageContextInfo WAJIB ada di level atas agar WhatsApp kenali sebagai status
                                         const msgContent = generateWAMessageFromContent(
                                                 m.from,
                                                 {
+                                                        messageContextInfo: { messageSecret },
                                                         groupStatusMessageV2: {
                                                                 message: {
                                                                         ...inside,
-                                                                        messageContextInfo: {
-                                                                                messageSecret
-                                                                        }
+                                                                        messageContextInfo: { messageSecret }
                                                                 }
                                                         }
                                                 },
-                                                { userJid: hisoka.user.id }
+                                                {}
                                         );
 
                                         await hisoka.relayMessage(m.from, msgContent.message, { messageId: msgContent.key.id });
