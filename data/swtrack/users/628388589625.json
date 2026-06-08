@@ -216,5 +216,28 @@
     "processedAt": "2026-06-08T07:43:34.227Z",
     "deleted": true,
     "deletedAt": "2026-06-08T07:52:09.230Z"
+  },
+  "AC41E03BCB77ED5539081895A6607A28": {
+    "id": "AC41E03BCB77ED5539081895A6607A28",
+    "sender": "628388589625@s.whatsapp.net",
+    "name": "𝙢𝙖𝙪𝙡𝙖𝙣𝙖 𝙣𝙜𝙚𝙣",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-08T10:07:12.233Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "628388589625",
+    "resolvedPn": "628388589625@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "628388589625@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC41E03BCB77ED5539081895A6607A28",
+      "participant": "82828679200798@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-08T10:07:12.233Z"
   }
 }
