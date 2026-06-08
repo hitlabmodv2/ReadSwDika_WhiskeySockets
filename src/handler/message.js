@@ -26,7 +26,7 @@ import os from 'os';
 import { PassThrough } from 'stream';
 import { createRequire } from 'module';
 const _require = createRequire(import.meta.url);
-const { isJidGroup, downloadMediaMessage, getContentType, generateWAMessageFromContent, generateWAMessageContent, prepareWAMessageMedia, proto, jidDecode, jidNormalizedUser } = _require('@whiskeysockets/baileys');
+const { isJidGroup, downloadMediaMessage, downloadContentFromMessage, getContentType, generateWAMessageFromContent, generateWAMessageContent, prepareWAMessageMedia, proto, jidDecode, jidNormalizedUser } = _require('@whiskeysockets/baileys');
 import crypto from 'crypto';
 import { exec } from 'child_process';
 import util from 'util';
@@ -16021,309 +16021,102 @@ hasil += `╰══════════════════════�
                                 const isJadibotUser = hisoka?.isMainBot === false;
                                 if (!m.isOwner && !isJadibotUser) return tolak(hisoka, m, '❌ Fitur ini hanya untuk owner!');
 
-                                const swgcCaption = query ? query.trim() : '';
-                                let swgcMeta = {};
-                                let swgcTempFile = null;
-
-                                // PRIORITAS 1: Media di pesan saat ini (kirim gambar/video/audio dengan caption .upswgc teks)
-                                const swgcSelfType = m.type || '';
-                                if (m.isMedia && /image|video|audio/i.test(swgcSelfType)) {
-                                        try {
-                                                const swgcBuf = await m.downloadMedia();
-                                                if (!swgcBuf) return tolak(hisoka, m, '❌ Gagal mengambil media.');
-
-                                                const swgcMime = m.content?.mimetype || 'application/octet-stream';
-                                                const swgcExt = swgcMime.split('/')[1]?.split(';')[0]?.trim() || 'bin';
-                                                swgcTempFile = path.join(process.cwd(), 'tmp', `upswgc_${Date.now()}.${swgcExt}`);
-                                                fs.writeFileSync(swgcTempFile, swgcBuf);
-
-                                                if (/image/i.test(swgcSelfType)) {
-                                                        swgcMeta = { type: 'image', file: swgcTempFile, mime: swgcMime };
-                                                        if (swgcCaption) swgcMeta.caption = swgcCaption;
-                                                } else if (/video/i.test(swgcSelfType)) {
-                                                        swgcMeta = { type: 'video', file: swgcTempFile, mime: swgcMime };
-                                                        if (swgcCaption) swgcMeta.caption = swgcCaption;
-                                                } else if (/audio/i.test(swgcSelfType)) {
-                                                        swgcMeta = { type: 'audio', file: swgcTempFile, mime: swgcMime };
-                                                        if (swgcCaption) swgcMeta.caption = swgcCaption;
-                                                }
-                                        } catch (e) {
-                                                if (swgcTempFile && fs.existsSync(swgcTempFile)) fs.unlinkSync(swgcTempFile);
-                                                return tolak(hisoka, m, '❌ Gagal memproses media: ' + (e.message || e));
-                                        }
-                                // PRIORITAS 2: Reply ke pesan lain yang berisi media
-                                } else if (m.isQuoted && m.quoted) {
-                                        try {
-                                                const qType = m.quoted.type || '';
-                                                if (!/image|video|audio/i.test(qType)) {
-                                                        return tolak(hisoka, m, '❌ Reply harus berupa image/video/audio.');
-                                                }
-
-                                                const swgcBuf = await m.quoted.downloadMedia();
-                                                if (!swgcBuf) return tolak(hisoka, m, '❌ Gagal mengambil media quoted.');
-
-                                                const swgcMime = m.quoted.content?.mimetype || 'application/octet-stream';
-                                                const swgcExt = swgcMime.split('/')[1]?.split(';')[0]?.trim() || 'bin';
-                                                swgcTempFile = path.join(process.cwd(), 'tmp', `upswgc_${Date.now()}.${swgcExt}`);
-                                                fs.writeFileSync(swgcTempFile, swgcBuf);
-
-                                                if (/image/i.test(qType)) {
-                                                        swgcMeta = { type: 'image', file: swgcTempFile, mime: swgcMime };
-                                                        if (swgcCaption) swgcMeta.caption = swgcCaption;
-                                                } else if (/video/i.test(qType)) {
-                                                        swgcMeta = { type: 'video', file: swgcTempFile, mime: swgcMime };
-                                                        if (swgcCaption) swgcMeta.caption = swgcCaption;
-                                                } else if (/audio/i.test(qType)) {
-                                                        swgcMeta = { type: 'audio', file: swgcTempFile, mime: swgcMime };
-                                                        if (swgcCaption) swgcMeta.caption = swgcCaption;
-                                                }
-                                        } catch (e) {
-                                                if (swgcTempFile && fs.existsSync(swgcTempFile)) fs.unlinkSync(swgcTempFile);
-                                                return tolak(hisoka, m, '❌ Media tidak valid atau gagal diproses: ' + (e.message || e));
-                                        }
-                                } else if (swgcCaption) {
-                                        swgcMeta = { type: 'text', text: swgcCaption };
-                                } else {
-                                        return tolak(hisoka, m, 
-                                                `⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛\n` +
-                                                `✦ 📢 *.UPSWGC* — CARA PAKAI ✦\n` +
-                                                `⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛\n\n` +
-                                                `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
-                                                `  🖼️ *Cara 1 — Kirim Langsung*\n` +
-                                                `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
-                                                `▸ Kirim *foto* dengan caption *.upswgc [teks]*\n` +
-                                                `▸ Kirim *video* dengan caption *.upswgc [teks]*\n` +
-                                                `▸ Kirim *audio* dengan caption *.upswgc [teks]*\n\n` +
-                                                `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
-                                                `  🔁 *Cara 2 — Reply Pesan*\n` +
-                                                `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
-                                                `▸ Reply *foto/video/audio* + *.upswgc [caption]*\n\n` +
-                                                `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
-                                                `  💬 *Cara 3 — Kirim Teks*\n` +
-                                                `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
-                                                `▸ *.upswgc teks pesan kamu*\n\n` +
-                                                `_Bot akan menampilkan pilihan grup tujuan_ 👇`
-                                        );
-                                }
-
-                                const allGids = hisoka.groups.keys().filter(id => id.endsWith('@g.us'));
-                                if (!allGids.length) {
-                                        if (swgcTempFile && fs.existsSync(swgcTempFile)) fs.unlinkSync(swgcTempFile);
-                                        return tolak(hisoka, m, '❌ Tidak ada grup dalam database bot.');
-                                }
-
-                                const swgcEncoded = encodeURIComponent(JSON.stringify(swgcMeta));
-                                const swgcPrefix = m.prefix || '.';
-
-                                // Hitung total stats semua grup
-                                let swgcTotalMember = 0;
-                                let swgcTotalAdmin = 0;
-                                for (const gid of allGids) {
-                                        try {
-                                                const gm = hisoka.groups.read(gid);
-                                                if (!gm?.participants) continue;
-                                                swgcTotalMember += gm.participants.length;
-                                                swgcTotalAdmin += gm.participants.filter(p => p.admin).length;
-                                        } catch (_) {}
-                                }
-
-                                const swgcRows = [
-                                        {
-                                                title: '📢 Semua Grup',
-                                                description: `◆ ${allGids.length} grup  ◆ 👥 ${swgcTotalMember} member  ◆ 🛡️ ${swgcTotalAdmin} admin`,
-                                                id: `${swgcPrefix}sendstatus all ${swgcEncoded}`
-                                        }
-                                ];
-
-                                for (const gid of allGids) {
-                                        try {
-                                                const meta = hisoka.groups.read(gid);
-                                                if (!meta) continue;
-                                                const pts = meta.participants || [];
-                                                const mTotal = pts.length;
-                                                const aTotal = pts.filter(p => p.admin).length;
-                                                const aPct = mTotal > 0 ? Math.round((aTotal / mTotal) * 10) : 0;
-                                                const aBar = '█'.repeat(aPct) + '░'.repeat(10 - aPct);
-                                                swgcRows.push({
-                                                        title: (meta.subject || gid).substring(0, 24),
-                                                        description: `👥 ${mTotal} member  ◆  🛡️ ${aTotal} admin\n[${aBar}]`,
-                                                        id: `${swgcPrefix}sendstatus ${gid} ${swgcEncoded}`
-                                                });
-                                        } catch (_) {}
-                                }
-
-                                // Tentukan label tipe konten
-                                const swgcTypeLabel = swgcMeta.type === 'image' ? '🖼️ Gambar'
-                                        : swgcMeta.type === 'video' ? '🎥 Video'
-                                        : swgcMeta.type === 'audio' ? '🎵 Audio'
-                                        : '💬 Teks';
-                                const swgcCaptionInfo = swgcMeta.caption ? `\n◆ Caption: _${swgcMeta.caption.substring(0, 40)}${swgcMeta.caption.length > 40 ? '...' : ''}_` : '';
-
-                                const swgcBodyText =
-                                        `⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛\n` +
-                                        `✦ 📢 *KIRIM GROUP STATUS* ✦\n` +
-                                        `⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛\n\n` +
-                                        `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
-                                        `  📦 *INFO KONTEN*\n` +
-                                        `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
-                                        `${swgcTypeLabel}${swgcCaptionInfo}\n\n` +
-                                        `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
-                                        `  🏘️ *STATS SEMUA GRUP*\n` +
-                                        `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
-                                        `🗂️ Total Grup   ﹕ ${allGids.length} grup\n` +
-                                        `👥 Total Member ﹕ ${swgcTotalMember} orang\n` +
-                                        `🛡️ Total Admin  ﹕ ${swgcTotalAdmin} orang\n` +
-                                        `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n\n` +
-                                        `_Pilih grup tujuan di bawah_ 👇`;
-
-                                const swgcMsg = generateWAMessageFromContent(
-                                        m.from,
-                                        {
-                                                viewOnceMessage: {
-                                                        message: {
-                                                                messageContextInfo: { deviceListMetadata: {}, deviceListMetadataVersion: 2 },
-                                                                interactiveMessage: {
-                                                                        body: { text: swgcBodyText },
-                                                                        nativeFlowMessage: {
-                                                                                buttons: [
-                                                                                        {
-                                                                                                name: 'single_select',
-                                                                                                buttonParamsJson: JSON.stringify({
-                                                                                                        title: '🏘️ PILIH GRUP TUJUAN',
-                                                                                                        sections: [
-                                                                                                                { title: '🏘️ Daftar Grup Bot', rows: swgcRows }
-                                                                                                        ]
-                                                                                                })
-                                                                                        }
-                                                                                ]
-                                                                        }
-                                                                }
-                                                        }
-                                                }
-                                        },
-                                        { quoted: m },
-                                        {}
-                                );
-
-                                await hisoka.relayMessage(swgcMsg.key.remoteJid, swgcMsg.message, {
-                                        messageId: swgcMsg.key.id
-                                });
-
-                                logCommand(m, hisoka, m.command);
-                                break;
-                        }
-
-                        case 'sendstatus': {
-                                if (!m.isOwner) return;
-
-                                const ssArgs = m.text.trim().split(/ +/);
-                                if (ssArgs.length < 3) return;
-
-                                const ssTarget = ssArgs[1];
-                                const ssEncoded = ssArgs.slice(2).join(' ');
-
-                                let ssMeta;
                                 try {
-                                        ssMeta = JSON.parse(decodeURIComponent(ssEncoded));
-                                } catch (e) {
-                                        return tolak(hisoka, m, '❌ Gagal memparse konten: ' + (e.message || e));
-                                }
+                                        // Ambil quoted message content secara aman
+                                        const quotedRaw = m.message?.extendedTextMessage?.contextInfo?.quotedMessage
+                                                || m.quoted?.raw?.message
+                                                || m.quoted?.message;
 
-                                const ssAllGids = hisoka.groups.keys().filter(id => id.endsWith('@g.us'));
-                                const ssTargets = ssTarget === 'all' ? ssAllGids : [ssTarget];
+                                        let mediaType = null;
+                                        let mediaContent = null;
 
-                                if (!ssTargets.length) return tolak(hisoka, m, '❌ Tidak ada grup tujuan.');
-
-                                let ssRawContent;
-                                let ssAudioCaption = null;
-                                let ssTextDirect = null;
-                                if (ssMeta.type === 'text') {
-                                        ssTextDirect = ssMeta.text;
-                                } else if (ssMeta.type === 'image') {
-                                        ssRawContent = { image: { url: ssMeta.file } };
-                                        if (ssMeta.caption) ssRawContent.caption = ssMeta.caption;
-                                } else if (ssMeta.type === 'video') {
-                                        ssRawContent = { video: { url: ssMeta.file } };
-                                        if (ssMeta.caption) ssRawContent.caption = ssMeta.caption;
-                                } else if (ssMeta.type === 'audio') {
-                                        ssRawContent = { audio: { url: ssMeta.file }, mimetype: ssMeta.mime || 'audio/ogg; codecs=opus', ptt: false };
-                                        // Caption audio dikirim terpisah sebagai teks status
-                                        if (ssMeta.caption) ssAudioCaption = ssMeta.caption;
-                                } else {
-                                        return tolak(hisoka, m, '❌ Tipe konten tidak dikenali.');
-                                }
-
-                                await tolak(hisoka, m, `⏳ Mengirim sebagai Group Status ke *${ssTargets.length}* grup, mohon tunggu...`);
-
-                                let ssOk = 0, ssFail = 0;
-                                for (const gid of ssTargets) {
-                                        try {
-                                                let ssInside;
-                                                if (ssTextDirect !== null) {
-                                                        ssInside = {
-                                                                extendedTextMessage: {
-                                                                        text: ssTextDirect,
-                                                                        backgroundArgb: 4278190080,
-                                                                        font: 0
-                                                                }
-                                                        };
-                                                } else {
-                                                        ssInside = await generateWAMessageContent(ssRawContent, {
-                                                                upload: hisoka.waUploadToServer
-                                                        });
+                                        if (quotedRaw) {
+                                                if (quotedRaw.imageMessage) {
+                                                        mediaType = 'imageMessage';
+                                                        mediaContent = quotedRaw.imageMessage;
+                                                } else if (quotedRaw.videoMessage) {
+                                                        mediaType = 'videoMessage';
+                                                        mediaContent = quotedRaw.videoMessage;
+                                                } else if (quotedRaw.audioMessage) {
+                                                        mediaType = 'audioMessage';
+                                                        mediaContent = quotedRaw.audioMessage;
+                                                } else if (quotedRaw.viewOnceMessageV2?.message?.imageMessage) {
+                                                        mediaType = 'imageMessage';
+                                                        mediaContent = quotedRaw.viewOnceMessageV2.message.imageMessage;
+                                                } else if (quotedRaw.viewOnceMessageV2?.message?.videoMessage) {
+                                                        mediaType = 'videoMessage';
+                                                        mediaContent = quotedRaw.viewOnceMessageV2.message.videoMessage;
                                                 }
-                                                const ssSecret = crypto.randomBytes(32);
-                                                const ssMsg = generateWAMessageFromContent(gid, {
-                                                        messageContextInfo: { messageSecret: ssSecret },
+                                        }
+
+                                        let content = {};
+
+                                        if (mediaType && mediaContent) {
+                                                const downloadType = mediaType.replace('Message', '');
+                                                const stream = await downloadContentFromMessage(mediaContent, downloadType);
+                                                let buffer = Buffer.from([]);
+                                                for await (const chunk of stream) {
+                                                        buffer = Buffer.concat([buffer, chunk]);
+                                                }
+                                                if (!buffer || buffer.length === 0) return reply('❌ Gagal download media.');
+
+                                                if (mediaType === 'imageMessage') {
+                                                        content.image = buffer;
+                                                        content.caption = query || mediaContent.caption || '';
+                                                } else if (mediaType === 'videoMessage') {
+                                                        content.video = buffer;
+                                                        content.caption = query || mediaContent.caption || '';
+                                                } else if (mediaType === 'audioMessage') {
+                                                        content.audio = buffer;
+                                                        content.mimetype = mediaContent.mimetype || 'audio/mp4';
+                                                        content.ptt = true;
+                                                }
+                                        } else if (query) {
+                                                content.text = query;
+                                        } else {
+                                                return reply(
+                                                        `⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛\n` +
+                                                        `✦ 📢 *.UPSWGC* — CARA PAKAI ✦\n` +
+                                                        `⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛\n\n` +
+                                                        `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
+                                                        `  🔁 *Reply foto/video/audio*\n` +
+                                                        `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
+                                                        `▸ Reply media + *.upswgc [caption]*\n\n` +
+                                                        `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
+                                                        `  💬 *Kirim Teks*\n` +
+                                                        `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
+                                                        `▸ *.upswgc teks pesan kamu*`
+                                                );
+                                        }
+
+                                        // Background status default hitam
+                                        content.backgroundColor = '#000000';
+
+                                        const inside = await generateWAMessageContent(content, { upload: hisoka.waUploadToServer });
+                                        const messageSecret = crypto.randomBytes(32);
+
+                                        const msgContent = generateWAMessageFromContent(
+                                                m.from,
+                                                {
                                                         groupStatusMessageV2: {
                                                                 message: {
-                                                                        ...ssInside,
-                                                                        messageContextInfo: { messageSecret: ssSecret }
-                                                                }
-                                                        }
-                                                }, {});
-                                                await hisoka.relayMessage(gid, ssMsg.message, { messageId: ssMsg.key.id });
-
-                                                // Kirim caption audio sebagai status teks terpisah
-                                                if (ssAudioCaption) {
-                                                        await new Promise(r => setTimeout(r, 800));
-                                                        const ssCaptionInside = await generateWAMessageContent({ text: ssAudioCaption }, {
-                                                                upload: hisoka.waUploadToServer
-                                                        });
-                                                        const ssCaptionSecret = crypto.randomBytes(32);
-                                                        const ssCaptionMsg = generateWAMessageFromContent(gid, {
-                                                                messageContextInfo: { messageSecret: ssCaptionSecret },
-                                                                groupStatusMessageV2: {
-                                                                        message: {
-                                                                                ...ssCaptionInside,
-                                                                                messageContextInfo: { messageSecret: ssCaptionSecret }
+                                                                        ...inside,
+                                                                        messageContextInfo: {
+                                                                                messageSecret
                                                                         }
                                                                 }
-                                                        }, {});
-                                                        await hisoka.relayMessage(gid, ssCaptionMsg.message, { messageId: ssCaptionMsg.key.id });
-                                                }
+                                                        }
+                                                },
+                                                { userJid: hisoka.user.id }
+                                        );
 
-                                                ssOk++;
-                                                if (ssTargets.length > 1) await new Promise(r => setTimeout(r, 1000));
-                                        } catch (e) {
-                                                console.error(`[sendstatus] Gagal ke ${gid}:`, e.message);
-                                                ssFail++;
-                                        }
+                                        await hisoka.relayMessage(m.from, msgContent.message, { messageId: msgContent.key.id });
+                                        await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+                                        logCommand(m, hisoka, m.command);
+                                } catch (e) {
+                                        console.error('[upswgc] Error:', e.message);
+                                        await reply('❌ Gagal kirim SW GC:\n' + e.message);
                                 }
-
-                                if (ssMeta.file && fs.existsSync(ssMeta.file)) {
-                                        try { fs.unlinkSync(ssMeta.file); } catch (_) {}
-                                }
-
-                                await tolak(hisoka, m, 
-                                        `✅ *Selesai Kirim Group Status!*\n\n` +
-                                        `📊 *Hasil:*\n` +
-                                        `• ✅ Berhasil : ${ssOk} grup\n` +
-                                        `• ❌ Gagal    : ${ssFail} grup\n` +
-                                        `• 📦 Total    : ${ssTargets.length} grup`
-                                );
-
-                                logCommand(m, hisoka, 'sendstatus');
                                 break;
                         }
 
