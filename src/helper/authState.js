@@ -244,10 +244,36 @@ export async function useConsolidatedAuthState(folder) {
 }
 
 // ─────────────────────────────────────────────────────────────────
-//  useSingleFileAuthState — seluruh auth state dalam 1 file JSON
-//  Format: { creds: {...}, keys: { "session": { id: val }, ... } }
-//  filePath : path ke .json  (misal: sessions/hisoka.json)
-//  Migrasi otomatis dari folder lama jika file belum ada.
+//  InMemorySection — JSONDB-compatible adapter
+//  Data disimpan di object in-memory, flush ke file induk via scheduleFlush.
+// ─────────────────────────────────────────────────────────────────
+class InMemorySection {
+        constructor(data, schedule) {
+                this._d = data
+                this._s = schedule
+                this.hasLoaded = true
+        }
+        loadIfNeeded() {}
+        flushSync()       { this._s() }
+        exists(key)       { return Object.prototype.hasOwnProperty.call(this._d, key) }
+        read(key)         { return this.exists(key) ? this._d[key] : null }
+        write(key, v)     { this._d[key] = v; this._s(); return v }
+        delete(key)       { delete this._d[key]; this._s() }
+        keys()            { return Object.keys(this._d) }
+        values()          { return Object.values(this._d) }
+        entries()         { return Object.entries(this._d) }
+        find(fn)          { return this.values().find(fn) }
+}
+
+// ─────────────────────────────────────────────────────────────────
+//  useSingleFileAuthState — SATU file JSON untuk segalanya:
+//  creds + keys + contacts + groups + settings
+//
+//  Format: { creds, keys, contacts, groups, settings }
+//  filePath: path ke .json  (contoh: sessions/hisoka.json)
+//  Return : { state, saveCreds, contacts, groups, settings }
+//
+//  Migrasi otomatis dari folder lama + hapus folder setelah selesai.
 // ─────────────────────────────────────────────────────────────────
 export async function useSingleFileAuthState(filePath) {
         await mkdir(dirname(filePath), { recursive: true })
@@ -257,21 +283,30 @@ export async function useSingleFileAuthState(filePath) {
 
         let creds = null
         const keyStore = new Map()
-        const memStore  = new Map()
+        const memStore = new Map()
+        const _contacts = {}
+        const _groups   = {}
+        const _settings = {}
 
         for (const type of CONSOLIDATED_TYPES) keyStore.set(type, new Map())
         memStore.set('sender-key-memory', new Map())
 
-        // ── tulis seluruh state ke satu file ──
+        // ── tulis semua ke satu file ──
         async function flushNow() {
                 const keysObj = {}
                 for (const [type, store] of keyStore) {
                         if (store.size === 0) continue
-                        const entries = {}
-                        for (const [id, val] of store) entries[id] = val
-                        keysObj[type] = entries
+                        const obj = {}
+                        for (const [id, val] of store) obj[id] = val
+                        keysObj[type] = obj
                 }
-                const payload = JSON.stringify({ creds, keys: keysObj }, BufferJSON.replacer)
+                const payload = JSON.stringify({
+                        creds,
+                        keys:     keysObj,
+                        contacts: _contacts,
+                        groups:   _groups,
+                        settings: _settings,
+                }, BufferJSON.replacer)
                 const release = await writeMutex.acquire()
                 try {
                         await writeFile(filePath, payload)
@@ -287,23 +322,34 @@ export async function useSingleFileAuthState(filePath) {
                 writeTimer = setTimeout(() => { writeTimer = null; flushNow().catch(() => {}) }, 300)
         }
 
+        // ── hapus folder lama ──
+        async function deleteFolder(folder) {
+                try {
+                        const { rm } = await import('fs/promises')
+                        await rm(folder, { recursive: true, force: true })
+                } catch (_) {}
+        }
+
         // ── load dari file tunggal ──
-        const loadFile = async () => {
+        async function loadFile() {
                 try {
                         const raw = await readFile(filePath, 'utf-8')
                         const data = JSON.parse(raw, BufferJSON.reviver)
                         creds = data.creds || null
-                        if (data.keys && typeof data.keys === 'object') {
+                        if (data.keys) {
                                 for (const [type, entries] of Object.entries(data.keys)) {
                                         if (!keyStore.has(type)) keyStore.set(type, new Map())
                                         for (const [id, val] of Object.entries(entries)) keyStore.get(type).set(id, val)
                                 }
                         }
+                        if (data.contacts) Object.assign(_contacts, data.contacts)
+                        if (data.groups)   Object.assign(_groups, data.groups)
+                        if (data.settings) Object.assign(_settings, data.settings)
                 } catch (_) { creds = null }
         }
 
-        // ── migrasi dari folder lama (path tanpa .json) ──
-        const migrateFolder = async (folder) => {
+        // ── migrasi dari folder lama → baca semua lalu hapus folder ──
+        async function migrateFolder(folder) {
                 try {
                         const raw = await readFile(join(folder, 'creds.json'), 'utf-8')
                         creds = JSON.parse(raw, BufferJSON.reviver)
@@ -316,7 +362,6 @@ export async function useSingleFileAuthState(filePath) {
                                 const store = keyStore.get(type)
                                 for (const [k, v] of Object.entries(entries)) store.set(k, v)
                         } catch (_) {}
-
                         try {
                                 const allFiles = await readdir(folder)
                                 for (const file of allFiles) {
@@ -325,32 +370,53 @@ export async function useSingleFileAuthState(filePath) {
                                         const store = keyStore.get(type)
                                         if (store.has(id)) continue
                                         try {
-                                                const raw = await readFile(join(folder, file), 'utf-8')
-                                                store.set(id, JSON.parse(raw, BufferJSON.reviver))
+                                                store.set(id, JSON.parse(await readFile(join(folder, file), 'utf-8'), BufferJSON.reviver))
                                         } catch (_) {}
                                 }
                         } catch (_) {}
                 }
+
+                for (const [name, target] of [['contacts', _contacts], ['groups', _groups], ['settings', _settings]]) {
+                        try {
+                                const raw = await readFile(join(folder, `${name}.json`), 'utf-8')
+                                Object.assign(target, JSON.parse(raw))
+                        } catch (_) {}
+                }
+
+                await deleteFolder(folder)
         }
 
-        // ── inisialisasi: pilih sumber ──
+        // ── inisialisasi ──
         let fileExists = false
         try { await readFile(filePath); fileExists = true } catch (_) {}
 
+        const legacyFolder = filePath.replace(/\.json$/, '')
+
         if (fileExists) {
                 await loadFile()
+                // hapus folder lama jika masih tersisa
+                try {
+                        const s = await stat(legacyFolder)
+                        if (s.isDirectory()) {
+                                await deleteFolder(legacyFolder)
+                                console.log(`[SingleFile] 🗑️  Folder lama ${legacyFolder} dihapus`)
+                        }
+                } catch (_) {}
         } else {
-                const legacyFolder = filePath.replace(/\.json$/, '')
                 let folderOk = false
                 try { const s = await stat(legacyFolder); folderOk = s.isDirectory() } catch (_) {}
                 if (folderOk) {
                         await migrateFolder(legacyFolder)
                         await flushNow()
-                        console.log(`[SingleFile] ✅ Migrasi ${legacyFolder} → ${filePath}`)
+                        console.log(`[SingleFile] ✅ Migrasi ${legacyFolder} → ${filePath} (folder dihapus)`)
                 }
         }
 
         if (!creds) creds = initAuthCreds()
+
+        const contacts = new InMemorySection(_contacts, scheduleFlush)
+        const groups   = new InMemorySection(_groups,   scheduleFlush)
+        const settings = new InMemorySection(_settings, scheduleFlush)
 
         return {
                 state: {
@@ -396,6 +462,9 @@ export async function useSingleFileAuthState(filePath) {
                                 }
                         }
                 },
-                saveCreds: () => scheduleFlush()
+                saveCreds: () => scheduleFlush(),
+                contacts,
+                groups,
+                settings,
         }
 }

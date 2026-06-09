@@ -456,7 +456,8 @@ async function main() {
         // Ini yang menyebabkan delay parah setelah offline lama
         cleanStaleSessionFiles(sessionDir)
 
-        const { state, saveCreds } = await useSingleFileAuthState(sessionFile);
+        const { state, saveCreds, contacts, groups, settings } = await useSingleFileAuthState(sessionFile);
+        global.__mainBotGroups = groups;
         const { version, isLatest } = await fetchLatestBaileysVersion();
 
         console.info(`\x1b[32m→ Baileys  :\x1b[39m v${version.join('.')}${isLatest ? '' : ' (update tersedia)'}`);
@@ -472,10 +473,6 @@ async function main() {
                 console.log('[CACHE] Message cache cleared');
                 }
         }, 60000); // sampe sini
-        const groups = new JSONDB('groups', sessionDir);
-        global.__mainBotGroups = groups; // Shared ke jadibot untuk fallback nama grup
-        const contacts = new JSONDB('contacts', sessionDir);
-        const settings = new JSONDB('settings', sessionDir);
 
         // Cache pemetaan LID -> nomor PN asli (persisten selama runtime)
         const lidPnCache = new Map();
@@ -1502,14 +1499,8 @@ setTimeout(() => {
 
                                         cleanupSocket();
 
-                                        try {
-                                                const dirContents = await fs.promises.readdir(sessionDir);
-                                                for (const file of dirContents) {
-                                                        if (file.startsWith('.env')) continue;
-                                                        await fs.promises.rm(path.join(sessionDir, file), { recursive: true, force: true });
-                                                }
-                                        } catch {}
                                         try { await fs.promises.unlink(sessionFile) } catch {}
+                                        try { await fs.promises.rm(sessionDir, { recursive: true, force: true }) } catch {}
 
                                         await delay(2000);
                                         reconnectCount = 0;

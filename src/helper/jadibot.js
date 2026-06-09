@@ -1254,9 +1254,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
   const sessionDir = path.join(process.cwd(), 'jadibot', number)
   const sessionFile = sessionDir + '.json'
 
-  fs.mkdirSync(sessionDir, { recursive: true })
-
-  const { state, saveCreds } = await useSingleFileAuthState(sessionFile)
+  const { state, saveCreds, contacts: jbContacts, groups: jbGroups, settings: jbSettings } = await useSingleFileAuthState(sessionFile)
   const { version } = await fetchLatestBaileysVersion()
 
   const sock = makeWASocket({
@@ -1279,9 +1277,9 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
   injectClient(
     sock,
     new Map(),
-    new JSONDB('contacts', sessionDir),
-    new JSONDB('groups', sessionDir),
-    new JSONDB('settings', sessionDir)
+    jbContacts,
+    jbGroups,
+    jbSettings
   )
 
   sock.loadedCommands = [
@@ -1827,9 +1825,7 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
   const sessionDir = path.join(process.cwd(), 'jadibot', number)
   const sessionFile = sessionDir + '.json'
 
-  fs.mkdirSync(sessionDir, { recursive: true })
-
-  const { state, saveCreds } = await useSingleFileAuthState(sessionFile)
+  const { state, saveCreds, contacts: jbContacts, groups: jbGroups, settings: jbSettings } = await useSingleFileAuthState(sessionFile)
   const { version } = await fetchLatestBaileysVersion()
 
   const sock = makeWASocket({
@@ -1852,9 +1848,9 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
   injectClient(
     sock,
     new Map(),
-    new JSONDB('contacts', sessionDir),
-    new JSONDB('groups', sessionDir),
-    new JSONDB('settings', sessionDir)
+    jbContacts,
+    jbGroups,
+    jbSettings
   )
 
   sock.loadedCommands = [
