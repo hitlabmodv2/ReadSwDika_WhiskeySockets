@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 09/06/2026, 09.33.40  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 09/06/2026, 09.42.13  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  console.error
+│  #001  —  TwitterDl
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [31m[TwitterDl] Error:[39m handleTwitterDl is not a function
+│  [TwitterDl] Error: Failed to fetch stream from https://api.x-downloader.com/download/v/GAUxmP/X_Downloader_-_Downloader_your_favorite_videos_from_X_-_bookmark_it_SJivsP.mp4
 │
 │  DETAIL
-│  Sumber      : console.error
+│  Sumber      : TwitterDl
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 09/06/2026, 09.33.40
-│  Terakhir    : 09/06/2026, 09.33.40
+│  Pertama     : 09/06/2026, 09.42.13
+│  Terakhir    : 09/06/2026, 09.42.13
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [31m[TwitterDl] Error:[39m handleTwitterDl is not a function
+│  ▶  Error: [TwitterDl] Error: Failed to fetch stream from https://api.x-downloader.com/download/v/GAUxmP/X_Downloader_-_Downloader_your_favorite_videos_from_X_-_bookmark_it_SJivsP.mp4
 │     at console.error (file:///home/runner/workspace/index.js:393:27)
-│     at default (file:///home/runner/workspace/src/handler/message.js?t=1780997554640:13797:49)
+│     at handleTwitterDl (/home/runner/workspace/src/scrape/twitter-dl.cjs:280:17)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 09/06/2026, 09.33.40
+  Terakhir diperbarui: 09/06/2026, 09.42.13
 ════════════════════════════════════════════════════════════════════════
