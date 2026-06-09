@@ -1522,7 +1522,7 @@ scan_changes() {
 scan_ignored_recent() {
   IGN_LIST=""; IGN_TOTAL=0
   # Folder yang sering jadi target user pengen upload tapi ke-ignore
-  local watch_paths=("data" "jadibot" "sessions/hisoka" "src" ".agents" "attached_assets")
+  local watch_paths=("data" "jadibot" "sessions" "src" ".agents" "attached_assets")
 
   local now mtime ageS rel
   now=$(date +%s)
@@ -1741,17 +1741,9 @@ prepare_stage() {
   local err_log
   err_log=$(mktemp)
 
-  # Untrack file session lama (individual) yang sekarang sudah digantikan consolidated.
-  # Pertahankan: creds.json, contacts.json, groups.json, settings.json, __consolidated-*.json
+  # Untrack file session format lama (folder-based) — sekarang pakai single file .json
   git ls-files 2>/dev/null | grep -E '^sessions/hisoka/' | while read -r f; do
-    case "$f" in
-      sessions/hisoka/creds.json|\
-      sessions/hisoka/contacts.json|\
-      sessions/hisoka/groups.json|\
-      sessions/hisoka/settings.json) ;;
-      sessions/hisoka/__consolidated-*.json) ;;
-      *) git rm --cached -q "$f" 2>>"$err_log" || true ;;
-    esac
+    git rm --cached -q "$f" 2>>"$err_log" || true
   done
 
   # node_modules: SELALU untrack penuh — tidak pernah di-upload ke GitHub.
@@ -1760,16 +1752,14 @@ prepare_stage() {
     git rm -r --cached -q node_modules/ 2>>"$err_log" || true
   fi
 
-  # sessions/hisoka: untrack file individual lama yang sudah digantikan consolidated.
-  # File yang dipertahankan: creds, contacts, groups, settings, __consolidated-*.json
-  local _hisoka_junk_list
-  _hisoka_junk_list=$(git ls-files sessions/hisoka/ 2>/dev/null | grep -vE \
-    '(creds\.json|contacts\.json|groups\.json|settings\.json|__consolidated-)' || true)
-  if [ -n "$_hisoka_junk_list" ]; then
+  # Untrack semua sisa file session folder lama jika masih ada
+  local _hisoka_folder_list
+  _hisoka_folder_list=$(git ls-files sessions/hisoka/ 2>/dev/null || true)
+  if [ -n "$_hisoka_folder_list" ]; then
     local _junk_count
-    _junk_count=$(echo "$_hisoka_junk_list" | wc -l | tr -d ' ')
-    echo -e "  ${C_YELLOW}🧹 Untrack ${_junk_count} file session individual lama (sudah di-consolidated)...${C_RESET}"
-    echo "$_hisoka_junk_list" | xargs -P4 -r git rm --cached -q 2>>"$err_log" || true
+    _junk_count=$(echo "$_hisoka_folder_list" | wc -l | tr -d ' ')
+    echo -e "  ${C_YELLOW}🧹 Untrack ${_junk_count} file session folder lama (sudah migrasi ke single-file)...${C_RESET}"
+    echo "$_hisoka_folder_list" | xargs -P4 -r git rm --cached -q 2>>"$err_log" || true
   fi
 
   # ⚠️  KEAMANAN: Auto-untrack .token.secret agar token asli tidak pernah ke-commit.
@@ -1795,10 +1785,6 @@ prepare_stage() {
   # Force-add file penting yang biasanya di-ignore.
   # CATATAN: .token.secret SENGAJA TIDAK di-force-add (keamanan token).
   for forced in package-lock.json .env \
-                sessions/hisoka/creds.json \
-                sessions/hisoka/contacts.json \
-                sessions/hisoka/groups.json \
-                sessions/hisoka/settings.json \
                 attached_assets .agents \
                 jadibot \
                 data \
@@ -1806,29 +1792,16 @@ prepare_stage() {
     [ -e "$forced" ] || continue
     git add -f "$forced" 2>>"$err_log" || true
   done
-  # Force-add semua __consolidated-*.json di sessions/hisoka/ (pakai glob)
-  for _cf in sessions/hisoka/__consolidated-*.json; do
-    [ -e "$_cf" ] || continue
-    git add -f "$_cf" 2>>"$err_log" || true
+
+  # Force-add session file tunggal (format baru: sessions/hisoka.json, dsb)
+  for _sf in sessions/*.json; do
+    [ -e "$_sf" ] || continue
+    git add -f "$_sf" 2>>"$err_log" || true
   done
 
-  # Auto-add __consolidated-*.json yang BELUM pernah di-upload (untracked).
-  # File yang sudah tracked akan otomatis ke-stage via git add -A di atas.
-  local _new_session_files _new_count
-  _new_session_files=$(git ls-files --others --exclude-standard sessions/hisoka/ 2>/dev/null | \
-    grep -E '__consolidated-' || true)
-  _new_count=0
-  if [ -n "$_new_session_files" ]; then
-    _new_count=$(echo "$_new_session_files" | grep -c '.' || echo 0)
-    echo -e "  ${C_CYAN}📱 Auto-add ${_new_count} file consolidated session baru (belum pernah di-upload)...${C_RESET}"
-    echo "$_new_session_files" | xargs -P4 -r git add -f 2>>"$err_log" || true
-    local _staged_check
-    _staged_check=$(echo "$_new_session_files" | while IFS= read -r _sf; do
-      git ls-files --cached "$_sf" 2>/dev/null
-    done | grep -c '.' || echo 0)
-    _new_count="$_staged_check"
-  fi
-  # Simpan ke global agar bisa ditampilkan di summary/banner
+  # Hitung berapa session file baru yang berhasil di-stage
+  local _new_count
+  _new_count=$(git diff --cached --name-only 2>/dev/null | grep -c '^sessions/' || echo 0)
   _PUSH_SESSION_NEW="$_new_count"
 
   # node_modules TIDAK di-upload — sudah di-exclude penuh via .gitignore.

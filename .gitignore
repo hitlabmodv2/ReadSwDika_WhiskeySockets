@@ -24,15 +24,10 @@ zipFile.zip
 *.pdf
 
 
-# Sessions — semua consolidated file + file penting di-upload
+# Sessions — single-file format (.json) di-upload, folder lama di-exclude
 sessions/**
 !sessions/
-!sessions/hisoka/
-!sessions/hisoka/creds.json
-!sessions/hisoka/contacts.json
-!sessions/hisoka/groups.json
-!sessions/hisoka/settings.json
-!sessions/hisoka/__consolidated-*.json
+!sessions/*.json
 
 # Jadibot — upload seluruh isi folder (termasuk consolidated session)
 !jadibot/
