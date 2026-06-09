@@ -1,0 +1,44 @@
+{
+  "ACBD361373F050E7FB3EE641337578FE": {
+    "id": "ACBD361373F050E7FB3EE641337578FE",
+    "sender": "6285326821295@s.whatsapp.net",
+    "name": "Sevenfold",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-09T06:22:25.675Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🏡",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285326821295",
+    "resolvedPn": "6285326821295@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285326821295@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACBD361373F050E7FB3EE641337578FE",
+      "participant": "47815887736878@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-09T06:22:28.432Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285326821295@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACBD361373F050E7FB3EE641337578FE",
+        "participant": "47815887736878@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285326821295@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACBD361373F050E7FB3EE641337578FE",
+        "participant": "6285326821295@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-09T06:22:28.432Z"
+  }
+}

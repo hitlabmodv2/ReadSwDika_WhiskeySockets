@@ -124,5 +124,47 @@
       }
     ],
     "processedAt": "2026-06-08T07:43:41.594Z"
+  },
+  "AC5110D3A0A518A2973733569AF9C69D": {
+    "id": "AC5110D3A0A518A2973733569AF9C69D",
+    "sender": "6283121471949@s.whatsapp.net",
+    "name": "Sgt",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-09T06:23:01.758Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🎐",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6283121471949",
+    "resolvedPn": "6283121471949@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6283121471949@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC5110D3A0A518A2973733569AF9C69D",
+      "participant": "127461811601572@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-09T06:23:10.262Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283121471949@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC5110D3A0A518A2973733569AF9C69D",
+        "participant": "127461811601572@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283121471949@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC5110D3A0A518A2973733569AF9C69D",
+        "participant": "6283121471949@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-09T06:23:10.262Z"
   }
 }

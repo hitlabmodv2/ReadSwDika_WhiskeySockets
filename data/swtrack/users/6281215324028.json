@@ -84,5 +84,47 @@
       }
     ],
     "processedAt": "2026-06-08T07:43:51.564Z"
+  },
+  "ACA5EC3FA9662C0CBC02790DC93B95AD": {
+    "id": "ACA5EC3FA9662C0CBC02790DC93B95AD",
+    "sender": "6281215324028@s.whatsapp.net",
+    "name": "harisulijar",
+    "type": "extendedTextMessage",
+    "arrivedAt": "2026-06-09T06:19:38.271Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "♂️",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6281215324028",
+    "resolvedPn": "6281215324028@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6281215324028@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACA5EC3FA9662C0CBC02790DC93B95AD",
+      "participant": "176931194552515@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-09T06:19:51.836Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281215324028@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACA5EC3FA9662C0CBC02790DC93B95AD",
+        "participant": "176931194552515@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281215324028@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACA5EC3FA9662C0CBC02790DC93B95AD",
+        "participant": "6281215324028@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-09T06:19:51.836Z"
   }
 }

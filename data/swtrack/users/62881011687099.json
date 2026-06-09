@@ -20,7 +20,7 @@
       "participant": "206918907871331@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-08T07:43:22.022Z",
+    "updatedAt": "2026-06-09T06:20:38.848Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -39,7 +39,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-08T07:43:22.021Z"
+    "processedAt": "2026-06-08T07:43:22.021Z",
+    "deleted": true,
+    "deletedAt": "2026-06-09T06:20:38.848Z"
   },
   "AC7EBC49E7CF97F65A49CB49386B6C97": {
     "id": "AC7EBC49E7CF97F65A49CB49386B6C97",
@@ -82,5 +84,49 @@
       }
     ],
     "processedAt": "2026-06-08T08:00:01.660Z"
+  },
+  "AC67C59ADACD2A71D112FCCFF757E343": {
+    "id": "AC67C59ADACD2A71D112FCCFF757E343",
+    "sender": "62881011687099@s.whatsapp.net",
+    "name": "HERU KURNIAWAN",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-09T06:20:36.636Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🇦🇹",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "62881011687099",
+    "resolvedPn": "62881011687099@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "62881011687099@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC67C59ADACD2A71D112FCCFF757E343",
+      "participant": "206918907871331@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-09T06:34:09.331Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62881011687099@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC67C59ADACD2A71D112FCCFF757E343",
+        "participant": "206918907871331@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62881011687099@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC67C59ADACD2A71D112FCCFF757E343",
+        "participant": "62881011687099@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-09T06:20:52.247Z",
+    "deleted": true,
+    "deletedAt": "2026-06-09T06:34:09.331Z"
   }
 }
