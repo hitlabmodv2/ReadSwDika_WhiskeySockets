@@ -9337,6 +9337,7 @@ ${masaAktifLine}
 ├➤ *.tt [link]* — Download TikTok
 ├➤ *.ig [link]* — Download Instagram
 ├➤ *.fb [link]* — Download Facebook
+├➤ *.twdl [link]* — Download Twitter/X
 ├➤ *.ytmp3 [link]* — YouTube → Audio
 ├➤ *.ytmp4 [link]* — YouTube → Video
 ╰➤ *.play [judul]* — Cari & download lagu
@@ -9441,6 +9442,7 @@ _📦 Powered by Wily Bot V19_ 🤖`;
 │ .tt
 │ .ig
 │ .fb
+│ .twdl
 │ .ytmp3
 │ .ytmp4
 │ .play
@@ -9610,6 +9612,7 @@ _📦 Powered by Wily Bot V19_ 🤖`;
                                                         `.tt\n` +
                                                         `.ig\n` +
                                                         `.fb\n` +
+                                                        `.twdl\n` +
                                                         `.ytmp3\n` +
                                                         `.ytmp4\n` +
                                                         `.play\n` +
@@ -9912,6 +9915,8 @@ cekerror | cekerror reset | contact
 │   _Download reels/foto Instagram_
 ├➤ *.fb [link]*
 │   _Download video Facebook_
+├➤ *.twdl [link]*
+│   _Download video/foto Twitter (X)_
 ├➤ *.ytmp3 [link]*
 │   _YouTube → MP3 audio_
 ├➤ *.ytmp4 [link]*
@@ -13776,6 +13781,20 @@ hasil += `╰══════════════════════�
                                         await handleFacebookDl(hisoka, m, query, { gemini, tolak, logCommand, buildFbVisionPrompt, buildFbCaptionPrompt, buildFbFallbackCaption, parseFbMetaHtml, formatFbCount });
                                 } catch (error) {
                                         console.error('\x1b[31m[Facebook] Error:\x1b[39m', error.message);
+                                        await tolak(hisoka, m, `❌ Error: ${error.message}`);
+                                }
+                                break;
+                        }
+
+                        case 'twdl':
+                        case 'xdl':
+                        case 'twitterdl':
+                        case 'twitter': {
+                                try {
+                                        const { handleTwitterDl } = _require(path.resolve('./src/scrape/downloader.cjs'));
+                                        await handleTwitterDl(hisoka, m, query, { tolak, logCommand });
+                                } catch (error) {
+                                        console.error('\x1b[31m[TwitterDl] Error:\x1b[39m', error.message);
                                         await tolak(hisoka, m, `❌ Error: ${error.message}`);
                                 }
                                 break;

@@ -206,28 +206,14 @@ async function handleAllUnduh(hisoka, m, query, ctx) {
         }
 
         if (platform === 'twitter') {
-            await m.reply({ edit: loadingMsg.key, text: '⏳ Mengambil video Twitter/X...' }).catch(() => {});
-
-            const twData = await fetchTwitter(rawUrl);
-            if (!twData) {
-                await m.reply({ edit: loadingMsg.key, text: '❌ Gagal mengunduh dari Twitter/X. Video mungkin privat atau tidak tersedia.' }).catch(() => {});
-                return;
-            }
-
-            const videoUrl = twData.url || twData.video_url || twData.hd || twData.sd;
-            if (!videoUrl) {
-                await m.reply({ edit: loadingMsg.key, text: '❌ Tidak ada video ditemukan di link Twitter/X ini.' }).catch(() => {});
-                return;
-            }
-
-            await m.reply({ edit: loadingMsg.key, text: '📥 Mengirim video Twitter/X...' }).catch(() => {});
-            await hisoka.sendMessage(m.chat, {
-                video: { url: videoUrl },
-                caption: `🐦 *Twitter/X Download*\n\n🔗 ${rawUrl}`,
-                mimetype: 'video/mp4',
-            }, { quoted: m });
-
-            logCommand && logCommand(m, hisoka, 'allunduh-twitter');
+            const { handleTwitterDl } = require(path.resolve('./src/scrape/twitter-dl.cjs'));
+            await handleTwitterDl(hisoka, m, rawUrl, {
+                tolak: async (s, msg, text) => {
+                    await m.reply({ edit: loadingMsg.key, text }).catch(() => {});
+                    return { key: loadingMsg.key };
+                },
+                logCommand,
+            });
             return;
         }
 

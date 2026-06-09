@@ -13,6 +13,7 @@ const { handleInstagramDl } = require('./instagram-dl.cjs');
 const { handleFacebookDl }  = require('./facebook-dl.cjs');
 const { handlePlay, handleYtmp3, handleYtmp4 } = require('./youtube-dl.cjs');
 const { handleAllUnduh }    = require('./allunduh.cjs');
+const { handleTwitterDl }   = require('./twitter-dl.cjs');
 
 module.exports = {
     handleTiktokDl,
@@ -22,4 +23,5 @@ module.exports = {
     handleYtmp3,
     handleYtmp4,
     handleAllUnduh,
+    handleTwitterDl,
 };
