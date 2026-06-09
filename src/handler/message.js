@@ -9322,6 +9322,7 @@ ${masaAktifLine}
 ╰➤ *.upswgc [caption]* — Upload status ke semua grup
 
 ╭─「 📥 *DOWNLOAD* 」
+├➤ *.allunduh [link]* — Download dari semua platform
 ├➤ *.tt [link]* — Download TikTok
 ├➤ *.ig [link]* — Download Instagram
 ├➤ *.fb [link]* — Download Facebook
@@ -9425,6 +9426,7 @@ _📦 Powered by Wily Bot V19_ 🤖`;
 ├═════════════════════┤
 ║   📥 *DOWNLOAD*   
 ├═════════════════════┤
+│ .allunduh
 │ .tt
 │ .ig
 │ .fb
@@ -9593,6 +9595,7 @@ _📦 Powered by Wily Bot V19_ 🤖`;
                                                         `.toimg\n` +
                                                         `.stickerly\n` +
                                                         `.listgroup\n` +
+                                                        `.allunduh\n` +
                                                         `.tt\n` +
                                                         `.ig\n` +
                                                         `.fb\n` +
@@ -9889,6 +9892,9 @@ cekerror | cekerror reset | contact
                                 const dlTeks =
 `╭─「 📥 *SOSMED & MUSIK* 」
 │
+├➤ *.allunduh [link]*
+│   _Download dari semua platform otomatis_
+│   _(IG, TikTok, YT, FB, Twitter, Pinterest)_
 ├➤ *.tt [link]*
 │   _Download video/audio TikTok_
 ├➤ *.ig [link]*
@@ -13759,6 +13765,24 @@ hasil += `╰══════════════════════�
                                         await handleFacebookDl(hisoka, m, query, { gemini, tolak, logCommand, buildFbVisionPrompt, buildFbCaptionPrompt, buildFbFallbackCaption, parseFbMetaHtml, formatFbCount });
                                 } catch (error) {
                                         console.error('\x1b[31m[Facebook] Error:\x1b[39m', error.message);
+                                        await tolak(hisoka, m, `❌ Error: ${error.message}`);
+                                }
+                                break;
+                        }
+
+                        case 'allunduh':
+                        case 'unduhsemua':
+                        case 'dl': {
+                                try {
+                                        const { handleAllUnduh } = _require(path.resolve('./src/scrape/downloader.cjs'));
+                                        await handleAllUnduh(hisoka, m, query, {
+                                                gemini, tolak, logCommand, exec, util,
+                                                buildVideoDownloadCaptionPrompt,
+                                                buildIgVisionPrompt, buildIgCaptionPrompt, buildIgFallbackCaption, parseIgMetaHtml, formatIgCount,
+                                                buildFbVisionPrompt, buildFbCaptionPrompt, buildFbFallbackCaption, parseFbMetaHtml, formatFbCount,
+                                        });
+                                } catch (error) {
+                                        console.error('\x1b[31m[AllUnduh] Error:\x1b[39m', error.message);
                                         await tolak(hisoka, m, `❌ Error: ${error.message}`);
                                 }
                                 break;
