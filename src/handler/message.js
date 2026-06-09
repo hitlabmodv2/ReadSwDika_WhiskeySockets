@@ -13791,7 +13791,9 @@ hasil += `╰══════════════════════�
                         case 'twitterdl':
                         case 'twitter': {
                                 try {
-                                        const { handleTwitterDl } = _require(path.resolve('./src/scrape/downloader.cjs'));
+                                        const _twPath = path.resolve('./src/scrape/twitter-dl.cjs');
+                                        delete _require.cache[_twPath];
+                                        const { handleTwitterDl } = _require(_twPath);
                                         await handleTwitterDl(hisoka, m, query, { tolak, logCommand });
                                 } catch (error) {
                                         console.error('\x1b[31m[TwitterDl] Error:\x1b[39m', error.message);

@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 09/06/2026, 07.43.06  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 09/06/2026, 09.33.40  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  JADIBOT
+│  #001  —  console.error
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [JADIBOT][v1-notif] Gagal kirim ke GC: not-acceptable
+│  [31m[TwitterDl] Error:[39m handleTwitterDl is not a function
 │
 │  DETAIL
-│  Sumber      : JADIBOT
+│  Sumber      : console.error
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 09/06/2026, 07.43.06
-│  Terakhir    : 09/06/2026, 07.43.06
+│  Pertama     : 09/06/2026, 09.33.40
+│  Terakhir    : 09/06/2026, 09.33.40
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [JADIBOT][v1-notif] Gagal kirim ke GC: not-acceptable
+│  ▶  Error: [31m[TwitterDl] Error:[39m handleTwitterDl is not a function
 │     at console.error (file:///home/runner/workspace/index.js:393:27)
-│     at hisoka.sendMessage.edit (file:///home/runner/workspace/src/handler/message.js?t=1780990696695:14661:65)
+│     at default (file:///home/runner/workspace/src/handler/message.js?t=1780997554640:13797:49)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 09/06/2026, 07.43.06
+  Terakhir diperbarui: 09/06/2026, 09.33.40
 ════════════════════════════════════════════════════════════════════════
