@@ -158,7 +158,7 @@ global.autoStartedJadibot = new Set();
 
 function isJadibotSessionValid(number) {
   const dir = path.join(process.cwd(), 'jadibot', number);
-  return fs.existsSync(path.join(dir, 'creds.json'));
+  return fs.existsSync(dir + '.json') || fs.existsSync(path.join(dir, 'creds.json'));
 }
 
 /* ================= BOT ADMIN STATUS TRACKER ================= */
@@ -1397,10 +1397,22 @@ setTimeout(() => {
   restoreConnectedAtMap();
   const expiredBots = purgeExpiredJadibotSessions();
 
-  const bots = fs.readdirSync(jadibotDir).filter(name => {
+  const _seen = new Set();
+  const bots = fs.readdirSync(jadibotDir).reduce((acc, name) => {
     const fullPath = path.join(jadibotDir, name);
-    return fs.statSync(fullPath).isDirectory() && /^\d+$/.test(name);
-  });
+    const stat = fs.statSync(fullPath);
+    let number = null;
+    if (stat.isFile() && name.endsWith('.json') && /^\d+\.json$/.test(name)) {
+      number = name.replace('.json', '');
+    } else if (stat.isDirectory() && /^\d+$/.test(name)) {
+      number = name;
+    }
+    if (number && !_seen.has(number)) {
+      _seen.add(number);
+      acc.push(number);
+    }
+    return acc;
+  }, []);
 
   if (!bots.length) return;
 

@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 08/06/2026, 07.39.47  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 09/06/2026, 07.43.06  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,27 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  AutoSholat
+│  #001  —  JADIBOT
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [AutoSholat] Error scheduler: Cannot find module 'sharp'
-Require stack:
-- /home/runner/workspace/src/scrape/autosholat.cjs
-- /home/runner/workspace/index.js
+│  [JADIBOT][v1-notif] Gagal kirim ke GC: not-acceptable
 │
 │  DETAIL
-│  Sumber      : AutoSholat
+│  Sumber      : JADIBOT
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 08/06/2026, 07.39.47
-│  Terakhir    : 08/06/2026, 07.39.47
+│  Pertama     : 09/06/2026, 07.43.06
+│  Terakhir    : 09/06/2026, 07.43.06
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [AutoSholat] Error scheduler: Cannot find module 'sharp'
-│     Require stack:
-│     - /home/runner/workspace/src/scrape/autosholat.cjs
+│  ▶  Error: [JADIBOT][v1-notif] Gagal kirim ke GC: not-acceptable
+│     at console.error (file:///home/runner/workspace/index.js:393:27)
+│     at hisoka.sendMessage.edit (file:///home/runner/workspace/src/handler/message.js?t=1780990696695:14661:65)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 08/06/2026, 07.39.47
+  Terakhir diperbarui: 09/06/2026, 07.43.06
 ════════════════════════════════════════════════════════════════════════
