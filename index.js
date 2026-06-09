@@ -52,7 +52,7 @@ import { MemoryMonitor } from './src/helper/memoryMonitor.js';
 import { getPhoneRegion, formatPhoneWithRegion } from './src/helper/phoneRegion.js';
 import { ensureTmpDir, startAutoCleaner, stopAutoCleaner, restartAutoCleaner, cleanStaleSessionFiles } from './src/helper/cleaner.js'; // ini baru
 import { pruneSwStats } from './src/helper/swtrack.js';
-import { useConsolidatedAuthState } from './src/helper/authState.js';
+import { useSingleFileAuthState } from './src/helper/authState.js';
 import { startJadibot, jadibotMap, purgeExpiredJadibotSessions, getJadibotExpiry, formatRemainingTime, pauseAllJadibotTimers, resumeAllJadibotTimers, restoreConnectedAtMap } from './src/helper/jadibot.js';
 import { safeGetPNForLID } from './src/helper/socketCompat.js';
 import { saveViewOnceCache, cleanOldViewOnceCache, hasViewOnceCache } from './src/helper/voCache.js';
@@ -245,6 +245,7 @@ if (!process.env.BOT_NUMBER_OWNER) process.env.BOT_NUMBER_OWNER = '1';
 const botStats = initBotStats();
 
 const sessionDir = (global.sessionDir = path.join(process.cwd(), 'sessions', process.env.BOT_SESSION_NAME));
+const sessionFile = path.join(process.cwd(), 'sessions', process.env.BOT_SESSION_NAME + '.json');
 
 if (process.env.BOT_MAX_RETRIES && isNaN(Number(process.env.BOT_MAX_RETRIES))) {
         console.warn('\x1b[33mWarning: BOT_MAX_RETRIES is not a valid number. Disabling max retry limit.\x1b[39m');
@@ -455,7 +456,7 @@ async function main() {
         // Ini yang menyebabkan delay parah setelah offline lama
         cleanStaleSessionFiles(sessionDir)
 
-        const { state, saveCreds } = await useConsolidatedAuthState(sessionDir);
+        const { state, saveCreds } = await useSingleFileAuthState(sessionFile);
         const { version, isLatest } = await fetchLatestBaileysVersion();
 
         console.info(`\x1b[32m→ Baileys  :\x1b[39m v${version.join('.')}${isLatest ? '' : ' (update tersedia)'}`);
@@ -1508,6 +1509,7 @@ setTimeout(() => {
                                                         await fs.promises.rm(path.join(sessionDir, file), { recursive: true, force: true });
                                                 }
                                         } catch {}
+                                        try { await fs.promises.unlink(sessionFile) } catch {}
 
                                         await delay(2000);
                                         reconnectCount = 0;

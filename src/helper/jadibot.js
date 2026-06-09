@@ -52,7 +52,7 @@ import {
   createSwTracker,
 } from './swtrack.js'
 import { injectClient } from '../helper/inject.js'
-import { useConsolidatedAuthState } from './authState.js'
+import { useSingleFileAuthState } from './authState.js'
 import JSONDB from '../db/json.js'
 import { cleanStaleSessionFiles } from './cleaner.js'
 import { logError } from '../db/errorLog.js'
@@ -139,7 +139,8 @@ function loadConfig() {
 }
 
 function isSessionValid(sessionDir) {
-  return fs.existsSync(path.join(sessionDir, 'creds.json'))
+  const sessionFile = sessionDir + '.json'
+  return fs.existsSync(sessionFile) || fs.existsSync(path.join(sessionDir, 'creds.json'))
 }
 
 function ensureJadibotDataDir() {
@@ -507,10 +508,14 @@ async function expireJadibot(number, sendReply = null) {
   // Langkah 5: hapus data expiry dari JSON
   removeJadibotExpiry(number)
 
-  // Langkah 6: hapus folder sesi (delay 500ms beri waktu socket close)
+  // Langkah 6: hapus folder sesi + file json (delay 500ms beri waktu socket close)
   setTimeout(() => {
     try {
       if (fs.existsSync(sessionDir)) fs.rmSync(sessionDir, { recursive: true, force: true })
+    } catch {}
+    try {
+      const _sf = sessionDir + '.json'
+      if (fs.existsSync(_sf)) fs.unlinkSync(_sf)
     } catch {}
   }, 500)
 
@@ -609,6 +614,10 @@ function purgeExpiredJadibotSessions() {
     const sessionDir = path.join(process.cwd(), 'jadibot', number)
     try {
       if (fs.existsSync(sessionDir)) fs.rmSync(sessionDir, { recursive: true, force: true })
+    } catch {}
+    try {
+      const _sf = sessionDir + '.json'
+      if (fs.existsSync(_sf)) fs.unlinkSync(_sf)
     } catch {}
     delete data.bots[number]
     if (typeof global.autoStartedJadibot !== 'undefined') {
@@ -1243,10 +1252,11 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
   }
 
   const sessionDir = path.join(process.cwd(), 'jadibot', number)
+  const sessionFile = sessionDir + '.json'
 
   fs.mkdirSync(sessionDir, { recursive: true })
 
-  const { state, saveCreds } = await useConsolidatedAuthState(sessionDir)
+  const { state, saveCreds } = await useSingleFileAuthState(sessionFile)
   const { version } = await fetchLatestBaileysVersion()
 
   const sock = makeWASocket({
@@ -1441,6 +1451,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
           if (fs.existsSync(sessionDir)) {
             fs.rmSync(sessionDir, { recursive: true, force: true })
           }
+          try { const _sf = sessionDir + '.json'; if (fs.existsSync(_sf)) fs.unlinkSync(_sf) } catch {}
           removeJadibotExpiry(number)
         }, 500)
 
@@ -1618,6 +1629,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
           if (fs.existsSync(sessionDir)) {
             fs.rmSync(sessionDir, { recursive: true, force: true })
           }
+          try { if (fs.existsSync(sessionFile)) fs.unlinkSync(sessionFile) } catch {}
           removeJadibotExpiry(number)
         }, 300)
         return
@@ -1813,10 +1825,11 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
   }
 
   const sessionDir = path.join(process.cwd(), 'jadibot', number)
+  const sessionFile = sessionDir + '.json'
 
   fs.mkdirSync(sessionDir, { recursive: true })
 
-  const { state, saveCreds } = await useConsolidatedAuthState(sessionDir)
+  const { state, saveCreds } = await useSingleFileAuthState(sessionFile)
   const { version } = await fetchLatestBaileysVersion()
 
   const sock = makeWASocket({
@@ -2010,6 +2023,7 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
           if (fs.existsSync(sessionDir)) {
             fs.rmSync(sessionDir, { recursive: true, force: true })
           }
+          try { if (fs.existsSync(sessionFile)) fs.unlinkSync(sessionFile) } catch {}
           removeJadibotExpiry(number)
         }, 300)
         return
@@ -2148,9 +2162,10 @@ async function stopJadibot(number, sendReply) {
   number = number.replace(/[^0-9]/g, '')
   const sock = jadibotMap.get(number)
   const sessionDir = path.join(process.cwd(), 'jadibot', number)
+  const sessionFile = sessionDir + '.json'
 
   if (!sock) {
-    const hadData = fs.existsSync(sessionDir) || !!getJadibotExpiry(number)
+    const hadData = fs.existsSync(sessionDir) || fs.existsSync(sessionFile) || !!getJadibotExpiry(number)
     jadibotMap.delete(number)
     pairingRequested.delete(number)
     reconnectingJadibot.delete(number)
@@ -2172,6 +2187,7 @@ async function stopJadibot(number, sendReply) {
     try {
       if (fs.existsSync(sessionDir)) fs.rmSync(sessionDir, { recursive: true, force: true })
     } catch {}
+    try { if (fs.existsSync(sessionFile)) fs.unlinkSync(sessionFile) } catch {}
     return await sendReply(
       hadData
         ? (
@@ -2218,6 +2234,7 @@ async function stopJadibot(number, sendReply) {
     if (fs.existsSync(sessionDir)) {
       fs.rmSync(sessionDir, { recursive: true, force: true })
     }
+    try { if (fs.existsSync(sessionFile)) fs.unlinkSync(sessionFile) } catch {}
     removeJadibotExpiry(number)
   }, 500)
 
