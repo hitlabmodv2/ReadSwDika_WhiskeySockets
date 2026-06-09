@@ -175,9 +175,9 @@
     "name": "⁉️",
     "type": "imageMessage",
     "arrivedAt": "2026-06-09T07:12:22.437Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "🇬🇮",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6285281547018",
@@ -190,6 +190,8 @@
       "participant": "64793977294905@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-09T07:12:22.437Z"
+    "updatedAt": "2026-06-09T07:13:21.418Z",
+    "retriedOnStartup": true,
+    "retriedAt": "2026-06-09T07:13:21.418Z"
   }
 }

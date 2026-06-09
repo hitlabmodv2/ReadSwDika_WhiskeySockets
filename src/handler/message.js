@@ -9260,6 +9260,9 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                 const masaAktifLine = expSum.status === 'permanent'
                                                         ? `♾️ *Masa Aktif* : Permanent`
                                                         : `⏳ *Masa Aktif* : ${expSum.remaining}`;
+                                                const _jbNow = new Date();
+                                                const _jbTglFmt = new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }).format(_jbNow);
+                                                const _jbJamFmt = new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).format(_jbNow);
                                                 const menuTeks =
 `╔══════════════════════════╗
 ║   🤖  *MENU JADIBOT*   🤖   ║
@@ -9269,6 +9272,8 @@ export default async function ({ message, type: messagesType }, hisoka) {
 📱 *Nomor*  : +${jadibotNum}
 ⏱️ *Uptime* : ${juh}j ${jum}m ${jus}d
 ${masaAktifLine}
+📅 *Tanggal* : ${_jbTglFmt}
+🕐 *Waktu*   : ${_jbJamFmt} WIB
 🌐 *Status* : Online 🟢
 
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -9350,6 +9355,9 @@ _📦 Powered by Wily Bot V19_ 🤖`;
                                         const uptimeStr = `${uh} Jam ${um} Menit ${us} Detik`;
                                         const allCmds = await getCaseName(path.join(process.cwd(), 'src', 'handler', 'message.js'));
                                         const totalCmd = allCmds.length || 0;
+                                        const _mnNow = new Date();
+                                        const _mnTgl = new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }).format(_mnNow);
+                                        const _mnJam = new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).format(_mnNow);
 
                                         await hisoka.sendMessage(m.from, { react: { text: `🌊`, key: m.key } }).catch(() => {});
 
@@ -9359,6 +9367,8 @@ _📦 Powered by Wily Bot V19_ 🤖`;
 ├═════════════════════┤
 │ 👤 » ${m.pushName || 'User'} ${m.isOwner ? '👑' : ''}
 │ ⏱️ » ${uptimeStr}
+│ 📅 » ${_mnTgl}
+│ 🕐 » ${_mnJam} WIB
 │ 📦 » ${totalCmd} fitur aktif
 │ 🌐 » Online 🟢
 ├═════════════════════┤
