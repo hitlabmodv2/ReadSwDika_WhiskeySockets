@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 09/06/2026, 09.42.13  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 09/06/2026, 09.44.37  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  TwitterDl
+│  #001  —  AllUnduh
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [TwitterDl] Error: Failed to fetch stream from https://api.x-downloader.com/download/v/GAUxmP/X_Downloader_-_Downloader_your_favorite_videos_from_X_-_bookmark_it_SJivsP.mp4
+│  [AllUnduh] Error: buildVideoDownloadCaptionPrompt is not a function
 │
 │  DETAIL
-│  Sumber      : TwitterDl
+│  Sumber      : AllUnduh
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 09/06/2026, 09.42.13
-│  Terakhir    : 09/06/2026, 09.42.13
+│  Pertama     : 09/06/2026, 09.44.37
+│  Terakhir    : 09/06/2026, 09.44.37
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [TwitterDl] Error: Failed to fetch stream from https://api.x-downloader.com/download/v/GAUxmP/X_Downloader_-_Downloader_your_favorite_videos_from_X_-_bookmark_it_SJivsP.mp4
+│  ▶  Error: [AllUnduh] Error: buildVideoDownloadCaptionPrompt is not a function
 │     at console.error (file:///home/runner/workspace/index.js:393:27)
-│     at handleTwitterDl (/home/runner/workspace/src/scrape/twitter-dl.cjs:280:17)
+│     at handleAllUnduh (/home/runner/workspace/src/scrape/allunduh.cjs:252:17)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 09/06/2026, 09.42.13
+  Terakhir diperbarui: 09/06/2026, 09.44.37
 ════════════════════════════════════════════════════════════════════════
