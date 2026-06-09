@@ -424,5 +424,47 @@
       }
     ],
     "processedAt": "2026-06-09T06:26:00.492Z"
+  },
+  "ACB9BF1048817CF8870B450B044A4378": {
+    "id": "ACB9BF1048817CF8870B450B044A4378",
+    "sender": "6281346000596@s.whatsapp.net",
+    "name": "Rafi_ajah",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-09T07:53:41.129Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🏴󠁧󠁢󠁷󠁬󠁳󠁿",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6281346000596",
+    "resolvedPn": "6281346000596@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6281346000596@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACB9BF1048817CF8870B450B044A4378",
+      "participant": "173430896894091@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-09T07:53:44.119Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281346000596@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACB9BF1048817CF8870B450B044A4378",
+        "participant": "173430896894091@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281346000596@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACB9BF1048817CF8870B450B044A4378",
+        "participant": "6281346000596@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-09T07:53:44.119Z"
   }
 }
