@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 10/06/2026, 03.59.28  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 10/06/2026, 04.08.30  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -33,8 +33,8 @@ Require stack:
 │  DETAIL
 │  Sumber      : unhandledRejection
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 10/06/2026, 03.59.28
-│  Terakhir    : 10/06/2026, 03.59.28
+│  Pertama     : 10/06/2026, 04.08.30
+│  Terakhir    : 10/06/2026, 04.08.30
 │
 │  STACK TRACE (3 baris pertama)
 │  ▶  Error: Cannot find module '/home/runner/workspace/src/scrape/infowibu.cjs'
@@ -44,5 +44,5 @@ Require stack:
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 10/06/2026, 03.59.28
+  Terakhir diperbarui: 10/06/2026, 04.08.30
 ════════════════════════════════════════════════════════════════════════

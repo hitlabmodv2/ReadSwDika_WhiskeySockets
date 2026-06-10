@@ -931,7 +931,7 @@ async function main() {
                                 global.infoWibuInterval = null;
                         }
                         {
-                                const _iw = _require(path.join(process.cwd(), 'src', 'scrape', 'infowibu.cjs'));
+                                const _iw = _require(path.join(process.cwd(), 'src', 'scrape', 'anime', 'infowibu.cjs'));
                                 // Cek setiap 5 menit — langsung kirim saat ada episode baru tayang
                                 const IW_INTERVAL_MS = 5 * 60 * 1000;
 
@@ -998,7 +998,7 @@ async function main() {
                                 global.animasuInterval = null;
                         }
                         {
-                                const _am = _require(path.join(process.cwd(), 'src', 'scrape', 'animasu.cjs'));
+                                const _am = _require(path.join(process.cwd(), 'src', 'scrape', 'anime', 'animasu.cjs'));
                                 const AM_INTERVAL_MS = 5 * 60 * 1000;
 
                                 const runAnimasu = async () => {
@@ -1070,10 +1070,10 @@ async function main() {
                                 global.alqanimeInterval = null;
                         }
                         {
-                                const ALQ_PATH       = path.join(process.cwd(), 'src', 'scrape', 'alqanime-monitor.cjs');
+                                const ALQ_PATH       = path.join(process.cwd(), 'src', 'scrape', 'anime', 'alqanime-monitor.cjs');
                                 const ALQ_INTERVAL_MS = 60 * 1000;
 
-                                const ALQ_SCRAPE_PATH = path.join(process.cwd(), 'src', 'scrape', 'alqanime.cjs');
+                                const ALQ_SCRAPE_PATH = path.join(process.cwd(), 'src', 'scrape', 'anime', 'alqanime.cjs');
 
                                 const runAlqanime = async () => {
                                         if (global.alqanimeRunning) return;
@@ -1150,7 +1150,7 @@ async function main() {
                                 global.tvoneInterval = null;
                         }
                         {
-                                const TV_TVPATH    = path.join(process.cwd(), 'src', 'scrape', 'tvonenews.cjs');
+                                const TV_TVPATH    = path.join(process.cwd(), 'src', 'scrape', 'news', 'tvonenews.cjs');
                                 const TV_INTERVAL_MS = 5 * 60 * 1000;
 
                                 const runTVOne = async () => {
@@ -1226,7 +1226,7 @@ async function main() {
                                 global.malnewsInterval = null;
                         }
                         {
-                                const MAL_PATH        = path.join(process.cwd(), 'src', 'scrape', 'malnews.cjs');
+                                const MAL_PATH        = path.join(process.cwd(), 'src', 'scrape', 'news', 'malnews.cjs');
                                 const MAL_INTERVAL_MS = 5 * 60 * 1000;
 
                                 const runMALNews = async () => {
@@ -1288,7 +1288,7 @@ async function main() {
                                 global.autoSholatInterval = null;
                         }
                         {
-                                const AS_PATH = path.join(process.cwd(), 'src', 'scrape', 'autosholat.cjs');
+                                const AS_PATH = path.join(process.cwd(), 'src', 'scrape', 'tools', 'autosholat.cjs');
                                 // Lacak sholat yang sudah dikirim hari ini (reset otomatis tiap hari baru)
                                 let _sholatTerkirimHariIni = new Set();
                                 let _hariTerakhirSholat    = '';
