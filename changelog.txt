@@ -32,6 +32,14 @@ _Rabu, 10 Juni 2026 — WIB_ 🕐
 ━━━━━━━━━━━━━━━━━━━━━━
 > _Tidak ada bug fix di versi ini_
 ━━━━━━━━━━━━━━━━━━━━━━
+📋 *FITUR TAMBAHAN*
+━━━━━━━━━━━━━━━━━━━━━━
+> 🔔 *SwTrack — Notif Log Siapa yang Menghapus SW*
+> Bot kini mencatat & menampilkan notifikasi di log saat ada kontak yang menghapus SW (story/status)
+> Berlaku di bot utama maupun di setiap sesi userjadibot masing-masing
+> Log menampilkan nomor/kontak siapa yang menghapus, sehingga mudah dipantau secara realtime
+> Setiap userjadibot punya SwTrack sendiri — tidak campur dengan data jadibot lain
+━━━━━━━━━━━━━━━━━━━━━━
 🚀 *IMPROVEMENT*
 ━━━━━━━━━━━━━━━━━━━━━━
 > 🗂️ *Folder src/scrape — Dirapikan Per Kategori*
