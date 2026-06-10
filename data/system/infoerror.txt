@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 09/06/2026, 09.44.37  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 10/06/2026, 03.59.28  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,26 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  AllUnduh
+│  #001  —  unhandledRejection
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [AllUnduh] Error: buildVideoDownloadCaptionPrompt is not a function
+│  Cannot find module '/home/runner/workspace/src/scrape/infowibu.cjs'
+Require stack:
+- /home/runner/workspace/index.js
 │
 │  DETAIL
-│  Sumber      : AllUnduh
+│  Sumber      : unhandledRejection
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 09/06/2026, 09.44.37
-│  Terakhir    : 09/06/2026, 09.44.37
+│  Pertama     : 10/06/2026, 03.59.28
+│  Terakhir    : 10/06/2026, 03.59.28
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [AllUnduh] Error: buildVideoDownloadCaptionPrompt is not a function
-│     at console.error (file:///home/runner/workspace/index.js:393:27)
-│     at handleAllUnduh (/home/runner/workspace/src/scrape/allunduh.cjs:252:17)
+│  ▶  Error: Cannot find module '/home/runner/workspace/src/scrape/infowibu.cjs'
+│     Require stack:
+│     - /home/runner/workspace/index.js
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 09/06/2026, 09.44.37
+  Terakhir diperbarui: 10/06/2026, 03.59.28
 ════════════════════════════════════════════════════════════════════════

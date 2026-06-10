@@ -2922,7 +2922,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                 await tolak(hisoka, m, `📡 Mengambil detail *${chosen.title}*...`);
 
                                                 try {
-                                                        const _alqPath = path.resolve('./src/scrape/alqanime.cjs');
+                                                        const _alqPath = path.resolve('./src/scrape/anime/alqanime.cjs');
                                                         delete _require.cache[_alqPath];
                                                         const { getDetailAlqanime } = _require(_alqPath);
                                                         const detail = await getDetailAlqanime(chosen.url);
@@ -2942,7 +2942,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                                         return;
                                                                 }
 
-                                                                const _dlPath = path.resolve('./src/scrape/alqanime-dl.cjs');
+                                                                const _dlPath = path.resolve('./src/scrape/anime/alqanime-dl.cjs');
                                                                 delete _require.cache[_dlPath];
                                                                 const { resolveDirectLink: alqResolve, downloadToTmp: alqDownload, formatSize: alqSize } = _require(_dlPath);
 
@@ -3121,7 +3121,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                         return;
                                                 }
 
-                                                const _dlPath2 = path.resolve('./src/scrape/alqanime-dl.cjs');
+                                                const _dlPath2 = path.resolve('./src/scrape/anime/alqanime-dl.cjs');
                                                 delete _require.cache[_dlPath2];
                                                 const { resolveDirectLink: alqResolve, downloadToTmp: alqDownload, formatSize: alqSize } = _require(_dlPath2);
 
@@ -3358,7 +3358,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 );
 
                                 try {
-                                        const { cosplayteleGetPost, downloadBuffer, formatCosplayteleCaption } = _require(path.resolve('./src/scrape/cosplaytele.cjs'));
+                                        const { cosplayteleGetPost, downloadBuffer, formatCosplayteleCaption } = _require(path.resolve('./src/scrape/anime/cosplaytele.cjs'));
                                         const post = await cosplayteleGetPost(chosen.id);
 
                                         if (loadMsg?.key) {
@@ -3559,7 +3559,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                 return;
                                         }
 
-                                        const { komiktapDetail, komiktapPdf, komiktapChapterImages, makeProgressBar, formatDetailText } = _require(path.resolve('./src/scrape/komiktap.cjs'));
+                                        const { komiktapDetail, komiktapPdf, komiktapChapterImages, makeProgressBar, formatDetailText } = _require(path.resolve('./src/scrape/anime/komiktap.cjs'));
 
                                         // ── FASE 1: user balas nomor dari daftar pencarian ──
                                         if (pendingKomik.phase === 'search') {
@@ -4417,7 +4417,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                 // ─── MusicAI generate helper ──────────────────────────────────────────
                 const _generateMusik = async (hisoka, m, params) => {
-                        const { ChatMusicAPI, buildCaption } = _require(path.resolve('./src/scrape/chatmusic.cjs'));
+                        const { ChatMusicAPI, buildCaption } = _require(path.resolve('./src/scrape/music/chatmusic.cjs'));
                         await hisoka.sendMessage(m.from, { react: { text: '🎵', key: m.key } }).catch(() => {});
 
                         const txtLoading =
@@ -4469,7 +4469,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } }).catch(() => {});
 
                                 // Simpan audio ke cache sementara (10 menit)
-                                const { formatDuration: fmtDur } = _require(path.resolve('./src/scrape/chatmusic.cjs'));
+                                const { formatDuration: fmtDur } = _require(path.resolve('./src/scrape/music/chatmusic.cjs'));
                                 const cacheKey = `${m.from}_${Date.now()}`;
                                 pendingMusikaiCache.set(cacheKey, { results, params, ts: Date.now() });
                                 setTimeout(() => pendingMusikaiCache.delete(cacheKey), 10 * 60 * 1000);
@@ -4496,7 +4496,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                         `╰──────────────────────────────`;
 
                                 // ── Multi-section single_select ─────────────────────────────────
-                                const { MODELS: MusicModels } = _require(path.resolve('./src/scrape/chatmusic.cjs'));
+                                const { MODELS: MusicModels } = _require(path.resolve('./src/scrape/music/chatmusic.cjs'));
                                 const genreLabel = params.musicStyle || 'pop';
                                 const numEmoji = ['1️⃣','2️⃣','3️⃣','4️⃣'];
                                 const activeModelId = params.modelId || 6;
@@ -4589,7 +4589,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                 // ─── MusicAI2 generate helper ─────────────────────────────────────────
                 const _generateMusik2 = async (hisoka, m, params) => {
-                        const { ChatMusicAPI2, buildCaption2 } = _require(path.resolve('./src/scrape/chatmusic2.cjs'));
+                        const { ChatMusicAPI2, buildCaption2 } = _require(path.resolve('./src/scrape/music/chatmusic2.cjs'));
                         await hisoka.sendMessage(m.from, { react: { text: '🎵', key: m.key } }).catch(() => {});
 
                         const txtLoading =
@@ -4639,7 +4639,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                                 await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } }).catch(() => {});
 
-                                const { formatDuration2: fmtDur2, MODELS2: MusicModels2 } = _require(path.resolve('./src/scrape/chatmusic2.cjs'));
+                                const { formatDuration2: fmtDur2, MODELS2: MusicModels2 } = _require(path.resolve('./src/scrape/music/chatmusic2.cjs'));
                                 const cacheKey = `${m.from}_${Date.now()}`;
                                 pendingMusikai2Cache.set(cacheKey, { results, params, ts: Date.now() });
                                 setTimeout(() => pendingMusikai2Cache.delete(cacheKey), 10 * 60 * 1000);
@@ -4906,7 +4906,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                 if (typeof m.text === 'string' && /^__musikai_rlang__(id|jp|en)$/.test(m.text)) {
                         const lang = m.text.replace('__musikai_rlang__', '');
                         const langLabel = lang === 'jp' ? '🇯🇵 Jepang' : lang === 'en' ? '🇬🇧 English' : '🇮🇩 Indonesia';
-                        const { _GENRES, _GENRES_JP, _GENRES_EN } = _require(path.resolve('./src/scrape/chatmusic.cjs'));
+                        const { _GENRES, _GENRES_JP, _GENRES_EN } = _require(path.resolve('./src/scrape/music/chatmusic.cjs'));
                         const pool = lang === 'jp' ? _GENRES_JP : lang === 'en' ? _GENRES_EN : _GENRES;
                         const sampleGenre = pool[Math.floor(Math.random() * pool.length)];
                         const modeMsg = generateWAMessageFromContent(
@@ -4974,7 +4974,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         const langLabel = lang === 'jp' ? '🇯🇵 Jepang' : lang === 'en' ? '🇬🇧 English' : '🇮🇩 Indonesia';
                         const modeLabel = forceMode === 'vocal' ? '🎤 Vokal' : '🎹 Instrumental';
                         try {
-                                const _chatmusicPath = path.resolve('./src/scrape/chatmusic.cjs');
+                                const _chatmusicPath = path.resolve('./src/scrape/music/chatmusic.cjs');
                                 delete _require.cache[_chatmusicPath];
                                 const { ChatMusicAPI, _GENRES, _GENRES_JP, _GENRES_EN } = _require(_chatmusicPath);
                                 const api = new ChatMusicAPI();
@@ -5014,7 +5014,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         const forceMode = m.text === '__musikai_random__vocal__' ? 'vocal' : 'instrumental';
                         const modeLabel = forceMode === 'vocal' ? '🎤 Vokal' : '🎹 Instrumental';
                         try {
-                                const _chatmusicPath = path.resolve('./src/scrape/chatmusic.cjs');
+                                const _chatmusicPath = path.resolve('./src/scrape/music/chatmusic.cjs');
                                 delete _require.cache[_chatmusicPath];
                                 const { ChatMusicAPI, _GENRES } = _require(_chatmusicPath);
                                 const api = new ChatMusicAPI();
@@ -5057,7 +5057,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                 if (typeof m.text === 'string' && m.text.startsWith('__musikai_genre__')) {
                         const selectedGenre = m.text.replace('__musikai_genre__', '').trim();
                         try {
-                                const _chatmusicPath2 = path.resolve('./src/scrape/chatmusic.cjs');
+                                const _chatmusicPath2 = path.resolve('./src/scrape/music/chatmusic.cjs');
                                 delete _require.cache[_chatmusicPath2];
                                 const { ChatMusicAPI } = _require(_chatmusicPath2);
                                 const api = new ChatMusicAPI();
@@ -5146,7 +5146,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 await tolak(hisoka, m, `⏰ *Cache expired.* Silakan generate ulang dengan *.musikai*`);
                                 return;
                         }
-                        const { MODELS: MusicModels } = _require(path.resolve('./src/scrape/chatmusic.cjs'));
+                        const { MODELS: MusicModels } = _require(path.resolve('./src/scrape/music/chatmusic.cjs'));
                         const modelVer = MusicModels.find(md => md.id === modelId)?.version || `id:${modelId}`;
                         await hisoka.sendMessage(m.from, { react: { text: '🤖', key: m.key } }).catch(() => {});
                         const newParams = { ...cached.params, modelId };
@@ -5363,7 +5363,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                 if (typeof m.text === 'string' && /^__musikai2_rlang__(id|jp|en)$/.test(m.text)) {
                         const lang2      = m.text.replace('__musikai2_rlang__', '');
                         const langLabel2 = lang2 === 'jp' ? '🇯🇵 Jepang' : lang2 === 'en' ? '🇬🇧 English' : '🇮🇩 Indonesia';
-                        const { _GENRES: G2, _GENRES_JP: GJP2, _GENRES_EN: GEN2 } = _require(path.resolve('./src/scrape/chatmusic2.cjs'));
+                        const { _GENRES: G2, _GENRES_JP: GJP2, _GENRES_EN: GEN2 } = _require(path.resolve('./src/scrape/music/chatmusic2.cjs'));
                         const pool2 = lang2 === 'jp' ? GJP2 : lang2 === 'en' ? GEN2 : G2;
                         const sampleGenre2 = pool2[Math.floor(Math.random() * pool2.length)];
                         const modeMsg2 = generateWAMessageFromContent(
@@ -5431,7 +5431,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         const langLabel2 = lang2 === 'jp' ? '🇯🇵 Jepang' : lang2 === 'en' ? '🇬🇧 English' : '🇮🇩 Indonesia';
                         const modeLabel2 = forceMode2 === 'vocal' ? '🎤 Vokal' : '🎹 Instrumental';
                         try {
-                                const _cm2Path = path.resolve('./src/scrape/chatmusic2.cjs');
+                                const _cm2Path = path.resolve('./src/scrape/music/chatmusic2.cjs');
                                 delete _require.cache[_cm2Path];
                                 const { ChatMusicAPI2, _GENRES: G2, _GENRES_JP: GJP2, _GENRES_EN: GEN2 } = _require(_cm2Path);
                                 const api2 = new ChatMusicAPI2();
@@ -5519,7 +5519,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 await tolak(hisoka, m, `⏰ *Cache expired.* Silakan generate ulang dengan *.musikai2*`);
                                 return;
                         }
-                        const { MODELS2: MusicModels2 } = _require(path.resolve('./src/scrape/chatmusic2.cjs'));
+                        const { MODELS2: MusicModels2 } = _require(path.resolve('./src/scrape/music/chatmusic2.cjs'));
                         const modelVer = MusicModels2.find(md => md.id === modelId)?.version || `id:${modelId}`;
                         await hisoka.sendMessage(m.from, { react: { text: '🤖', key: m.key } }).catch(() => {});
                         await _generateMusik2(hisoka, m, { ...cached.params, modelId });
@@ -5536,7 +5536,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                 if (typeof m.text === 'string' && m.text.startsWith('__musikai2_genre__')) {
                         const selectedGenre2 = m.text.replace('__musikai2_genre__', '').trim();
                         try {
-                                const _cm2PathG = path.resolve('./src/scrape/chatmusic2.cjs');
+                                const _cm2PathG = path.resolve('./src/scrape/music/chatmusic2.cjs');
                                 delete _require.cache[_cm2PathG];
                                 const { ChatMusicAPI2 } = _require(_cm2PathG);
                                 const api2g = new ChatMusicAPI2();
@@ -5893,7 +5893,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 if (!m.prefix && m.query) break;
                                 try {
                                         const msg = await m.reply('🌐 _Mengukur kecepatan internet... harap tunggu ~5 detik_');
-                                        const _st   = _require(path.resolve('./src/scrape/speedtest.cjs'));
+                                        const _st   = _require(path.resolve('./src/scrape/tools/speedtest.cjs'));
                                         const hasil   = await _st.jalankanSpeedtest();
                                         const caption = _st.buatCaption(hasil);
                                         const imgBuf  = await _st.buatGambar(hasil);
@@ -5918,7 +5918,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 if (!m.isOwner) return tolak(hisoka, m, '❌ Hanya owner yang bisa menggunakan perintah ini!');
                                 if (!m.prefix && m.query) break;
                                 try {
-                                        const { cekSizeWithProgress, buatPesanLoading } = _require(path.resolve('./src/scrape/ceksize.cjs'));
+                                        const { cekSizeWithProgress, buatPesanLoading } = _require(path.resolve('./src/scrape/tools/ceksize.cjs'));
 
                                         // Kirim pesan loading awal
                                         const _csMsg = await hisoka.sendMessage(m.from, {
@@ -6011,7 +6011,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'matiin': {
                                 if (!m.isOwner) return tolak(hisoka, m, '❌ Hanya owner yang bisa mematikan bot!');
                                 if (!m.prefix && m.query) break;
-                                const { shutdownBot } = _require(path.resolve('./src/scrape/shutdown.cjs'));
+                                const { shutdownBot } = _require(path.resolve('./src/scrape/system/shutdown.cjs'));
                                 await hisoka.sendMessage(m.from, {
                                         text:
                                                 `╔══════════════════════╗\n` +
@@ -6034,7 +6034,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'rb': {
                                 if (!m.isOwner) return tolak(hisoka, m, '❌ Hanya owner yang bisa merestart bot!');
                                 if (!m.prefix && m.query) break;
-                                const { restartBot } = _require(path.resolve('./src/scrape/shutdown.cjs'));
+                                const { restartBot } = _require(path.resolve('./src/scrape/system/shutdown.cjs'));
                                 const _rstSent = await hisoka.sendMessage(m.from, {
                                         text:
                                                 `╔══════════════════════╗\n` +
@@ -6067,7 +6067,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                         break;
                                 }
                                 try {
-                                        const { cleanNomor, startCredsJsonSession } = _require(path.resolve('./src/scrape/credsjson.cjs'));
+                                        const { cleanNomor, startCredsJsonSession } = _require(path.resolve('./src/scrape/tools/credsjson.cjs'));
 
                                         const _cjBuildCaption = (tgl, jam) =>
                                                 `╔══════════════════════╗\n` +
@@ -6409,7 +6409,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                 break;
                                         }
 
-                                        const { getWeather, formatWeatherReport, getWeatherMapImage } = _require(path.resolve('./src/scrape/cuaca.cjs'));
+                                        const { getWeather, formatWeatherReport, getWeatherMapImage } = _require(path.resolve('./src/scrape/tools/cuaca.cjs'));
                                         await hisoka.sendMessage(m.from, { react: { text: '🔎', key: m.key } });
                                         const loadingMsg = await tolak(hisoka, m, `🔎 Mengambil data cuaca & peta hujan realtime untuk *${input}*...`);
                                         const result = await getWeather(input);
@@ -6454,7 +6454,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'tmwait':
                         case 'tmdel': {
                                 try {
-                                        const Tmail = _require(path.resolve('./src/scrape/tmail.cjs'));
+                                        const Tmail = _require(path.resolve('./src/scrape/tools/tmail.cjs'));
                                         const fs = _require('fs');
                                         const TMAIL_DB = path.resolve('./data/tmail/db.json');
                                         if (!global.__tmailSessions) global.__tmailSessions = new Map();
@@ -7079,7 +7079,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                 break;
                                         }
 
-                                        const { pixivFetch, pixivFetchMultiple, formatPixivCaption } = _require(path.resolve('./src/scrape/pixiv.cjs'));
+                                        const { pixivFetch, pixivFetchMultiple, formatPixivCaption } = _require(path.resolve('./src/scrape/anime/pixiv.cjs'));
                                         await hisoka.sendMessage(m.from, { react: { text: '🔍', key: m.key } });
 
                                         const loadMsg = await tolak(hisoka, m,
@@ -7167,7 +7167,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                 break;
                                         }
 
-                                        const { nhentaiSearch, nhentaiRandom, nhentaiCover, formatSearchResults, formatGalleryInfo } = _require(path.resolve('./src/scrape/nhentai.cjs'));
+                                        const { nhentaiSearch, nhentaiRandom, nhentaiCover, formatSearchResults, formatGalleryInfo } = _require(path.resolve('./src/scrape/anime/nhentai.cjs'));
 
                                         if (input.toLowerCase() === 'random') {
                                                 await hisoka.sendMessage(m.from, { react: { text: '🎲', key: m.key } });
@@ -7201,7 +7201,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 if (!m.prefix && m.query) break;
                                 try {
                                         const pfx = m.prefix || '.';
-                                        const { nhentaiRandom, nhentaiCover, formatGalleryInfo } = _require(path.resolve('./src/scrape/nhentai.cjs'));
+                                        const { nhentaiRandom, nhentaiCover, formatGalleryInfo } = _require(path.resolve('./src/scrape/anime/nhentai.cjs'));
                                         await hisoka.sendMessage(m.from, { react: { text: '🎲', key: m.key } });
                                         await tolak(hisoka, m, `🎲 Mengambil doujin random dari nhentai...`);
                                         const gallery = await nhentaiRandom();
@@ -7249,7 +7249,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                 break;
                                         }
 
-                                        const { nhentaiGallery, nhentaiRandom, nhentaiPdf, nhentaiCover, formatGalleryInfo, makeProgressBar } = _require(path.resolve('./src/scrape/nhentai.cjs'));
+                                        const { nhentaiGallery, nhentaiRandom, nhentaiPdf, nhentaiCover, formatGalleryInfo, makeProgressBar } = _require(path.resolve('./src/scrape/anime/nhentai.cjs'));
 
                                         const isRandom = input.toLowerCase() === 'random';
                                         let galleryId = input;
@@ -7367,7 +7367,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                 break;
                                         }
 
-                                        const { komiktapSearch, formatSearchResults } = _require(path.resolve('./src/scrape/komiktap.cjs'));
+                                        const { komiktapSearch, formatSearchResults } = _require(path.resolve('./src/scrape/anime/komiktap.cjs'));
 
                                         await hisoka.sendMessage(m.from, { react: { text: '🔍', key: m.key } });
                                         await tolak(hisoka, m, `🔍 Mencari *${input}* di Komiktap...`);
@@ -7481,7 +7481,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                 break;
                                         }
 
-                                        const { komiktapDetail, formatDetailText } = _require(path.resolve('./src/scrape/komiktap.cjs'));
+                                        const { komiktapDetail, formatDetailText } = _require(path.resolve('./src/scrape/anime/komiktap.cjs'));
 
                                         await hisoka.sendMessage(m.from, { react: { text: '📖', key: m.key } });
                                         await tolak(hisoka, m, `📖 Mengambil detail manga...`);
@@ -7538,7 +7538,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                 break;
                                         }
 
-                                        const { komiktapPdf, komiktapChapterImages, makeProgressBar } = _require(path.resolve('./src/scrape/komiktap.cjs'));
+                                        const { komiktapPdf, komiktapChapterImages, makeProgressBar } = _require(path.resolve('./src/scrape/anime/komiktap.cjs'));
 
                                         const parts = input.split(/\s+/);
                                         const chapterUrl = parts[0];
@@ -7613,7 +7613,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'komikup': {
                                 if (!m.prefix && m.query) break;
                                 try {
-                                        const { komiktapLatestUpdates } = _require(path.resolve('./src/scrape/komiktap.cjs'));
+                                        const { komiktapLatestUpdates } = _require(path.resolve('./src/scrape/anime/komiktap.cjs'));
                                         const ax = _require('axios');
 
                                         await hisoka.sendMessage(m.from, { react: { text: '🔄', key: m.key } });
@@ -7720,7 +7720,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                 break;
                                         }
 
-                                        const _kusoPath = path.resolve('./src/scrape/kusonime.cjs');
+                                        const _kusoPath = path.resolve('./src/scrape/anime/kusonime.cjs');
                                         delete _require.cache[_kusoPath];
                                         const {
                                                 searchKusonime, getDetailKusonime, formatDetailText,
@@ -7787,7 +7787,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                         });
                                                 } catch (_) {}
 
-                                                const _pdfPath = path.resolve('./src/scrape/kusonime-pdf.cjs');
+                                                const _pdfPath = path.resolve('./src/scrape/anime/kusonime-pdf.cjs');
                                                 delete _require.cache[_pdfPath];
                                                 const { generateSeasonPdf } = _require(_pdfPath);
                                                 const pdfBuf = await generateSeasonPdf(season, year, details);
@@ -7885,7 +7885,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'animeupdate': {
                                 if (!m.prefix && m.query) break;
                                 try {
-                                        const _kusoPath2 = path.resolve('./src/scrape/kusonime.cjs');
+                                        const _kusoPath2 = path.resolve('./src/scrape/anime/kusonime.cjs');
                                         delete _require.cache[_kusoPath2];
                                         const { getLatestUpdates, formatLatestUpdates } = _require(_kusoPath2);
 
@@ -7929,7 +7929,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                 break;
                                         }
 
-                                        const _alqPath = path.resolve('./src/scrape/alqanime.cjs');
+                                        const _alqPath = path.resolve('./src/scrape/anime/alqanime.cjs');
                                         delete _require.cache[_alqPath];
                                         const { searchAlqanime, getDetailAlqanime } = _require(_alqPath);
 
@@ -8059,7 +8059,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'alqanimeupdate': {
                                 if (!m.prefix && m.query) break;
                                 try {
-                                        const _alqPath2 = path.resolve('./src/scrape/alqanime.cjs');
+                                        const _alqPath2 = path.resolve('./src/scrape/anime/alqanime.cjs');
                                         delete _require.cache[_alqPath2];
                                         const { getLatestAlqanime } = _require(_alqPath2);
 
@@ -8148,7 +8148,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                         const rawUrl  = parts[0];
                                         const wantZip = parts.slice(1).some(p => p.toLowerCase() === 'zip');
 
-                                        const _dlPath = path.resolve('./src/scrape/alqanime-dl.cjs');
+                                        const _dlPath = path.resolve('./src/scrape/anime/alqanime-dl.cjs');
                                         delete _require.cache[_dlPath];
                                         const { resolveDirectLink, downloadToTmp, formatSize } = _require(_dlPath);
 
@@ -8306,7 +8306,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                         }
 
                                         if (isRandom) {
-                                                const { cosplayteleRandom, downloadBuffer, formatCosplayteleCaption } = _require(path.resolve('./src/scrape/cosplaytele.cjs'));
+                                                const { cosplayteleRandom, downloadBuffer, formatCosplayteleCaption } = _require(path.resolve('./src/scrape/anime/cosplaytele.cjs'));
                                                 await hisoka.sendMessage(m.from, { react: { text: '🎲', key: m.key } });
                                                 const loadMsg = await tolak(hisoka, m, `🎲 Mengambil cosplay *random* dari cosplaytele.com...`);
                                                 try {
@@ -8347,7 +8347,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                 break;
                                         }
 
-                                        const { cosplayteleSearch, formatCosplayteleSearchList } = _require(path.resolve('./src/scrape/cosplaytele.cjs'));
+                                        const { cosplayteleSearch, formatCosplayteleSearchList } = _require(path.resolve('./src/scrape/anime/cosplaytele.cjs'));
                                         await hisoka.sendMessage(m.from, { react: { text: '🔍', key: m.key } });
 
                                         const loadMsg = await tolak(hisoka, m, `🔍 Mencari cosplay *"${input}"* di cosplaytele.com...`);
@@ -8450,7 +8450,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                 break;
                                         }
 
-                                        const { pixivR18Fetch, pixivR18FetchMultiple, formatPixivR18Caption } = _require(path.resolve('./src/scrape/pixivr18.cjs'));
+                                        const { pixivR18Fetch, pixivR18FetchMultiple, formatPixivR18Caption } = _require(path.resolve('./src/scrape/anime/pixivr18.cjs'));
                                         await hisoka.sendMessage(m.from, { react: { text: '🔍', key: m.key } });
 
                                         const loadMsg = await tolak(hisoka, m,
@@ -8533,7 +8533,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                 break;
                                         }
 
-                                        const { cekHP, getHPImage, formatHPSpecs } = _require(path.resolve('./src/scrape/cekhp.cjs'));
+                                        const { cekHP, getHPImage, formatHPSpecs } = _require(path.resolve('./src/scrape/tools/cekhp.cjs'));
                                         await hisoka.sendMessage(m.from, { react: { text: '🔎', key: m.key } });
                                         const loadingMsg = await tolak(hisoka, m, `🔎 Mencari data spesifikasi *${input}* + estimasi harga pasar Indonesia...`);
 
@@ -8633,8 +8633,8 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                         const queryA = sepMatch[1].trim();
                                         const queryB = sepMatch[2].trim();
 
-                                        const { bandingkanHP } = _require(path.resolve('./src/scrape/bandingkanhp.cjs'));
-                                        const { buildComparisonPDF } = _require(path.resolve('./src/scrape/bandingkanpdf.cjs'));
+                                        const { bandingkanHP } = _require(path.resolve('./src/scrape/tools/bandingkanhp.cjs'));
+                                        const { buildComparisonPDF } = _require(path.resolve('./src/scrape/tools/bandingkanpdf.cjs'));
                                         await hisoka.sendMessage(m.from, { react: { text: '🔎', key: m.key } });
                                         const loadingMsg = await tolak(hisoka, m,
                                                 `🔎 Mencari data *${queryA}* dan *${queryB}*...\nMohon tunggu sebentar ⏳`
@@ -8759,7 +8759,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                 break;
                                         }
 
-                                        const { baChar, formatBaChar } = _require(path.resolve('./src/scrape/bluearchive.cjs'));
+                                        const { baChar, formatBaChar } = _require(path.resolve('./src/scrape/anime/bluearchive.cjs'));
                                         await hisoka.sendMessage(m.from, { react: { text: '🎮', key: m.key } });
                                         const loadingMsg = await tolak(hisoka, m, `🔎 Mencari data karakter *${input}* di Blue Archive...`);
 
@@ -8823,7 +8823,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                 break;
                                         }
 
-                                        const { geniusSearch, formatGeniusSearch } = _require(path.resolve('./src/scrape/genius.cjs'));
+                                        const { geniusSearch, formatGeniusSearch } = _require(path.resolve('./src/scrape/music/genius.cjs'));
                                         await hisoka.sendMessage(m.from, { react: { text: '🔎', key: m.key } });
                                         const loadingMsg = await tolak(hisoka, m, `🔎 Mencari lagu *${input}* di Genius...`);
 
@@ -8883,7 +8883,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                 break;
                                         }
 
-                                        const { ChatMusicAPI } = _require(path.resolve('./src/scrape/chatmusic.cjs'));
+                                        const { ChatMusicAPI } = _require(path.resolve('./src/scrape/music/chatmusic.cjs'));
 
                                         // Tema bebas: input tanpa separator | → AI tentukan genre+judul+lirik
                                         if (!input.includes('|')) {
@@ -9014,7 +9014,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                 break;
                                         }
 
-                                        const { ChatMusicAPI2 } = _require(path.resolve('./src/scrape/chatmusic2.cjs'));
+                                        const { ChatMusicAPI2 } = _require(path.resolve('./src/scrape/music/chatmusic2.cjs'));
 
                                         // Tema bebas: input tanpa separator | → AI tentukan genre+judul+lirik
                                         if (!input.includes('|')) {
@@ -9117,7 +9117,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                 break;
                                         }
 
-                                        const { geniusDetail, formatGeniusDetail } = _require(path.resolve('./src/scrape/genius.cjs'));
+                                        const { geniusDetail, formatGeniusDetail } = _require(path.resolve('./src/scrape/music/genius.cjs'));
                                         await hisoka.sendMessage(m.from, { react: { text: '🎼', key: m.key } });
                                         const loadingMsg = await tolak(hisoka, m, `🎼 Mengambil detail lagu ID *${input}*...`);
 
@@ -9160,7 +9160,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'carijudullagu': {
                                 try {
                                         const pfx = m.prefix || '.';
-                                        const { identifyWhatsMusic, identifyWhatsMusicFromYoutube, downloadWhatsMusicVoiceNote, formatWhatsMusic, isYoutubeUrl, extractYoutubeUrl } = _require(path.resolve('./src/scrape/whatsmusik.cjs'));
+                                        const { identifyWhatsMusic, identifyWhatsMusicFromYoutube, downloadWhatsMusicVoiceNote, formatWhatsMusic, isYoutubeUrl, extractYoutubeUrl } = _require(path.resolve('./src/scrape/music/whatsmusik.cjs'));
                                         const currentType = getMediaTypeFromMessage(m);
                                         const quotedType = m.isQuoted ? getMediaTypeFromMessage(m.quoted) : '';
                                         const currentMime = m.content?.mimetype || m.msg?.mimetype || m.message?.audioMessage?.mimetype || m.message?.videoMessage?.mimetype || m.message?.documentMessage?.mimetype || '';
@@ -13755,7 +13755,7 @@ hasil += `╰══════════════════════�
 
                         case 'tt': {
                                 try {
-                                        const { handleTiktokDl } = _require(path.resolve('./src/scrape/downloader.cjs'));
+                                        const { handleTiktokDl } = _require(path.resolve('./src/scrape/download/downloader.cjs'));
                                         await handleTiktokDl(hisoka, m, query, { gemini, tolak, logCommand, buildVideoDownloadCaptionPrompt });
                                 } catch (error) {
                                         console.error('\x1b[31m[TikTok] Error:\x1b[39m', error.message);
@@ -13766,7 +13766,7 @@ hasil += `╰══════════════════════�
 
                         case 'ig': {
                                 try {
-                                        const { handleInstagramDl } = _require(path.resolve('./src/scrape/downloader.cjs'));
+                                        const { handleInstagramDl } = _require(path.resolve('./src/scrape/download/downloader.cjs'));
                                         await handleInstagramDl(hisoka, m, query, { gemini, tolak, logCommand, exec, util, buildIgVisionPrompt, buildIgCaptionPrompt, buildIgFallbackCaption, parseIgMetaHtml, formatIgCount });
                                 } catch (error) {
                                         console.error('\x1b[31m[Instagram] Error:\x1b[39m', error.message);
@@ -13777,7 +13777,7 @@ hasil += `╰══════════════════════�
 
                         case 'fb': {
                                 try {
-                                        const { handleFacebookDl } = _require(path.resolve('./src/scrape/downloader.cjs'));
+                                        const { handleFacebookDl } = _require(path.resolve('./src/scrape/download/downloader.cjs'));
                                         await handleFacebookDl(hisoka, m, query, { gemini, tolak, logCommand, buildFbVisionPrompt, buildFbCaptionPrompt, buildFbFallbackCaption, parseFbMetaHtml, formatFbCount });
                                 } catch (error) {
                                         console.error('\x1b[31m[Facebook] Error:\x1b[39m', error.message);
@@ -13791,7 +13791,7 @@ hasil += `╰══════════════════════�
                         case 'twitterdl':
                         case 'twitter': {
                                 try {
-                                        const _twPath = path.resolve('./src/scrape/twitter-dl.cjs');
+                                        const _twPath = path.resolve('./src/scrape/download/twitter-dl.cjs');
                                         delete _require.cache[_twPath];
                                         const { handleTwitterDl } = _require(_twPath);
                                         await handleTwitterDl(hisoka, m, query, { tolak, logCommand });
@@ -13806,7 +13806,7 @@ hasil += `╰══════════════════════�
                         case 'unduhsemua':
                         case 'dl': {
                                 try {
-                                        const { handleAllUnduh } = _require(path.resolve('./src/scrape/downloader.cjs'));
+                                        const { handleAllUnduh } = _require(path.resolve('./src/scrape/download/downloader.cjs'));
                                         await handleAllUnduh(hisoka, m, query, {
                                                 gemini, tolak, logCommand, exec, util,
                                                 buildVideoDownloadCaptionPrompt,
@@ -13845,7 +13845,7 @@ hasil += `╰══════════════════════�
                                                 break;
                                         }
 
-                                        const { search, detail, downloadStickerBuffer, extractPackId } = _require(path.resolve('./src/scrape/stickerly.cjs'));
+                                        const { search, detail, downloadStickerBuffer, extractPackId } = _require(path.resolve('./src/scrape/download/stickerly.cjs'));
                                         await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
 
                                         const isSearchOnly = /^search\s+/i.test(input);
@@ -14225,7 +14225,7 @@ hasil += `╰══════════════════════�
                                                 break;
                                         }
 
-                                        const { toVoiceNote } = _require(path.resolve('./src/scrape/audioconvert.cjs'));
+                                        const { toVoiceNote } = _require(path.resolve('./src/scrape/tools/audioconvert.cjs'));
                                         const vnBuffer = await toVoiceNote(audioBuffer, quotedMime || 'audio/mpeg');
 
                                         await hisoka.sendMessage(m.from, {
@@ -14274,7 +14274,7 @@ hasil += `╰══════════════════════�
                                                 break;
                                         }
 
-                                        const { toMP3 } = _require(path.resolve('./src/scrape/audioconvert.cjs'));
+                                        const { toMP3 } = _require(path.resolve('./src/scrape/tools/audioconvert.cjs'));
                                         const mp3Buffer = await toMP3(audioBuffer, quotedMime || 'audio/ogg; codecs=opus');
 
                                         await hisoka.sendMessage(m.from, {
@@ -14342,7 +14342,7 @@ hasil += `╰══════════════════════�
                                                 break;
                                         }
 
-                                        const { analyzeAudio } = _require(path.resolve('./src/scrape/whatgenre.cjs'));
+                                        const { analyzeAudio } = _require(path.resolve('./src/scrape/music/whatgenre.cjs'));
                                         const result = await analyzeAudio(audioBuffer, targetMime);
 
                                         await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
@@ -15415,7 +15415,7 @@ hasil += `╰══════════════════════�
 
                         case 'play': {
                                 try {
-                                        const { handlePlay } = _require(path.resolve('./src/scrape/downloader.cjs'));
+                                        const { handlePlay } = _require(path.resolve('./src/scrape/download/downloader.cjs'));
                                         await handlePlay(hisoka, m, query, { tolak, logCommand, pendingPlayChoices, Button });
                                 } catch (error) {
                                         console.error('\x1b[31m[Play] Error:\x1b[39m', error.message);
@@ -15434,7 +15434,7 @@ hasil += `╰══════════════════════�
 
                         case 'ytmp3': {
                                 try {
-                                        const { handleYtmp3 } = _require(path.resolve('./src/scrape/downloader.cjs'));
+                                        const { handleYtmp3 } = _require(path.resolve('./src/scrape/download/downloader.cjs'));
                                         await handleYtmp3(hisoka, m, query, { gemini, tolak, logCommand, buildVideoDownloadCaptionPrompt });
                                 } catch (error) {
                                         console.error('\x1b[31m[YTMP3] Error:\x1b[39m', error.message);
@@ -15457,7 +15457,7 @@ hasil += `╰══════════════════════�
 
                         case 'ytmp4': {
                                 try {
-                                        const { handleYtmp4 } = _require(path.resolve('./src/scrape/downloader.cjs'));
+                                        const { handleYtmp4 } = _require(path.resolve('./src/scrape/download/downloader.cjs'));
                                         await handleYtmp4(hisoka, m, query, { gemini, tolak, logCommand, buildVideoDownloadCaptionPrompt });
                                 } catch (error) {
                                         console.error('\x1b[31m[YTMP4] Error:\x1b[39m', error.message);
@@ -16545,8 +16545,8 @@ hasil += `╰══════════════════════�
                         case 'vidhd':
                         case 'hdvideo': {
                                 try {
-                                        const { hdvideo } = _require(path.resolve('./src/scrape/hdvid.cjs'));
-                                        const { sparkpixHdUpscale } = _require(path.resolve('./src/scrape/sparkpix.cjs'));
+                                        const { hdvideo } = _require(path.resolve('./src/scrape/download/hdvid.cjs'));
+                                        const { sparkpixHdUpscale } = _require(path.resolve('./src/scrape/ai/sparkpix.cjs'));
 
                                         const isMediaMsg = m.isMedia && (m.type === 'imageMessage' || m.type === 'videoMessage' || m.type === 'stickerMessage');
                                         const isQuotedMedia = m.isQuoted && quoted.isMedia && (quoted.type === 'imageMessage' || quoted.type === 'videoMessage' || quoted.type === 'stickerMessage');
@@ -16681,7 +16681,7 @@ hasil += `╰══════════════════════�
                         case 'ss':
                         case 'screenshot': {
                                 try {
-                                        const { screenshotWeb } = _require(path.resolve('./src/scrape/screenshot.cjs'));
+                                        const { screenshotWeb } = _require(path.resolve('./src/scrape/tools/screenshot.cjs'));
 
                                         const targetUrl = query || '';
                                         if (!targetUrl) {
@@ -16721,7 +16721,7 @@ hasil += `╰══════════════════════�
                         case 'scrapeweb':
                         case 'webinfo': {
                                 try {
-                                        const { screenshotWeb, checkWebStatus } = _require(path.resolve('./src/scrape/screenshot.cjs'));
+                                        const { screenshotWeb, checkWebStatus } = _require(path.resolve('./src/scrape/tools/screenshot.cjs'));
 
                                         const targetUrl = (query || '').trim();
                                         if (!targetUrl) {
@@ -16819,7 +16819,7 @@ hasil += `╰══════════════════════�
                         case 'autosholat': {
                                 if (!m.isOwner) return tolak(hisoka, m, '❌ Hanya owner yang bisa gunakan perintah ini.');
 
-                                const _as  = _require(path.resolve('./src/scrape/autosholat.cjs'));
+                                const _as  = _require(path.resolve('./src/scrape/tools/autosholat.cjs'));
                                 const sub  = (query || '').trim().toLowerCase();
                                 const pfx  = m.prefix || '.';
                                 const jidGrup = m.from;
@@ -16945,7 +16945,7 @@ hasil += `╰══════════════════════�
                                                                 },
                                                         },
                                                 }, { quoted: m });
-                                                const { toVoiceNote: _asToVN, generateWaveform: _asGenWF } = _require(path.resolve('./src/scrape/audioconvert.cjs'));
+                                                const { toVoiceNote: _asToVN, generateWaveform: _asGenWF } = _require(path.resolve('./src/scrape/tools/audioconvert.cjs'));
                                                 const _asAudRes = await _require('axios').get(hasil.urlAudio, { responseType: 'arraybuffer', timeout: 20000 });
                                                 const _asVnBuf  = await _asToVN(Buffer.from(_asAudRes.data), 'audio/mpeg');
                                                 const _asWaveform = await _asGenWF(_asVnBuf, 'audio/ogg; codecs=opus').catch(() => null);
@@ -16972,7 +16972,7 @@ hasil += `╰══════════════════════�
                                 if (!m.isOwner) return tolak(hisoka, m, '❌ Hanya owner yang bisa gunakan perintah ini.');
                                 if (!m.isGroup) return tolak(hisoka, m, '❌ Perintah ini hanya untuk grup.');
 
-                                const { simulate: simulasiIW } = _require(path.resolve('./src/scrape/infowibu.cjs'));
+                                const { simulate: simulasiIW } = _require(path.resolve('./src/scrape/anime/infowibu.cjs'));
                                 const cfgPathIW = path.join(process.cwd(), 'config.json');
                                 const sub = (query || '').trim().toLowerCase();
                                 const pfx = m.prefix || '.';
@@ -17093,7 +17093,7 @@ hasil += `╰══════════════════════�
                                 if (!m.isOwner) return tolak(hisoka, m, '❌ Hanya owner yang bisa gunakan perintah ini.');
                                 if (!m.isGroup) return tolak(hisoka, m, '❌ Perintah ini hanya untuk grup.');
 
-                                const { simulasi: simulasiAM, getAiringStatus, getEnabledGroups: getEnabledGroupsAM } = _require(path.resolve('./src/scrape/animasu.cjs'));
+                                const { simulasi: simulasiAM, getAiringStatus, getEnabledGroups: getEnabledGroupsAM } = _require(path.resolve('./src/scrape/anime/animasu.cjs'));
                                 const cfgPathAM = path.join(process.cwd(), 'config.json');
                                 const sub = (query || '').trim().toLowerCase().replace(/\s+/g, ' ');
                                 const pfx = m.prefix || '.';
@@ -17322,7 +17322,7 @@ hasil += `╰══════════════════════�
                                 if (!m.isOwner) return tolak(hisoka, m, '❌ Hanya owner yang bisa gunakan perintah ini.');
                                 if (!m.isGroup) return tolak(hisoka, m, '❌ Perintah ini hanya untuk grup.');
 
-                                const { simulasi: simulasiALQ, getEnabledGroups: getEnabledGroupsALQ } = _require(path.resolve('./src/scrape/alqanime-monitor.cjs'));
+                                const { simulasi: simulasiALQ, getEnabledGroups: getEnabledGroupsALQ } = _require(path.resolve('./src/scrape/anime/alqanime-monitor.cjs'));
                                 const cfgPathALQ = path.join(process.cwd(), 'config.json');
                                 const sub = (query || '').trim().toLowerCase().replace(/\s+/g, ' ');
                                 const pfx = m.prefix || '.';
@@ -17486,7 +17486,7 @@ hasil += `╰══════════════════════�
                         }
 
                         case 'tvone': {
-                                const { simulasi: simulasiTV, getEnabledGroups: getEnabledGroupsTV, setGroupEnabled: setGroupEnabledTV, getRecentLog: getRecentLogTV } = _require(path.resolve('./src/scrape/tvonenews.cjs'));
+                                const { simulasi: simulasiTV, getEnabledGroups: getEnabledGroupsTV, setGroupEnabled: setGroupEnabledTV, getRecentLog: getRecentLogTV } = _require(path.resolve('./src/scrape/news/tvonenews.cjs'));
                                 const cfgPathTV = path.join(process.cwd(), 'config.json');
                                 const sub = (query || '').trim().toLowerCase().replace(/\s+/g, ' ');
                                 const pfx = m.prefix || '.';
@@ -17671,7 +17671,7 @@ hasil += `╰══════════════════════�
                         }
 
                         case 'malnews': {
-                                const _malPath = path.resolve('./src/scrape/malnews.cjs');
+                                const _malPath = path.resolve('./src/scrape/news/malnews.cjs');
                                 delete _require.cache[_malPath];
                                 const { simulasi: simulasiMAL, getEnabledGroups: getEnabledGroupsMAL, setGroupEnabled: setGroupEnabledMAL, getRecentLog: getRecentLogMAL } = _require(_malPath);
                                 const cfgPathMAL = path.join(process.cwd(), 'config.json');

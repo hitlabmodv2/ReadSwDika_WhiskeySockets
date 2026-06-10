@@ -82,5 +82,47 @@
       }
     ],
     "processedAt": "2026-06-10T03:37:25.342Z"
+  },
+  "AC6729ED466F30A4396968B5E3C19B39": {
+    "id": "AC6729ED466F30A4396968B5E3C19B39",
+    "sender": "6283133705611@s.whatsapp.net",
+    "name": "bi meli",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-10T03:38:34.385Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "♀️",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6283133705611",
+    "resolvedPn": "6283133705611@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6283133705611@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC6729ED466F30A4396968B5E3C19B39",
+      "participant": "65743584522460@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-10T03:38:42.481Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283133705611@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC6729ED466F30A4396968B5E3C19B39",
+        "participant": "65743584522460@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283133705611@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC6729ED466F30A4396968B5E3C19B39",
+        "participant": "6283133705611@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-10T03:38:42.480Z"
   }
 }

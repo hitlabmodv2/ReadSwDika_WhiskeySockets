@@ -5,9 +5,9 @@
     "name": "Bakwan beku (Azwan)",
     "type": "videoMessage",
     "arrivedAt": "2026-06-10T03:37:18.083Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "©️",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6283174681433",
@@ -20,6 +20,25 @@
       "participant": "44156575568084@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-10T03:37:18.083Z"
+    "updatedAt": "2026-06-10T03:37:36.597Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283174681433@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACE393C3C1DA0ADC6FEDFD7ECB37D11D",
+        "participant": "44156575568084@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283174681433@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACE393C3C1DA0ADC6FEDFD7ECB37D11D",
+        "participant": "6283174681433@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-10T03:37:36.597Z"
   }
 }
