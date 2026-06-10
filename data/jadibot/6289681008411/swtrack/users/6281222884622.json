@@ -47,9 +47,9 @@
     "name": "~ Alfian",
     "type": "imageMessage",
     "arrivedAt": "2026-06-10T05:27:27.920Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "🗯️",
     "resolve": "Signal Lib ✓",
     "source": "status",
     "number": "6281222884622",
@@ -62,6 +62,25 @@
       "participant": "23274595578098@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-10T05:27:27.920Z"
+    "updatedAt": "2026-06-10T05:27:32.752Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281222884622@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACD0DDEED284259CDF8DE5CED499BE9B",
+        "participant": "23274595578098@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281222884622@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACD0DDEED284259CDF8DE5CED499BE9B",
+        "participant": "6281222884622@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-10T05:27:32.752Z"
   }
 }

@@ -1,14 +1,19 @@
 🚀 *INFORMASI*
-_Kamis, 04 Juni 2026 — 12:23 WIB_ 🕐
+_Rabu, 10 Juni 2026 — WIB_ 🕐
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V20*
-✨ *0 Fitur Baru*
+✨ *1 Fitur Baru*
 🔧 *5 Bug Fix*
-🚀 *2 Improvement*
+🚀 *3 Improvement*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
-> _Tidak ada fitur baru di versi ini_
+> 🎨 *Edit Gambar AI — .editgambar / .editai / .aiedit*
+> Fitur baru untuk mengedit gambar menggunakan kecerdasan buatan!
+> Kirim atau reply gambar dengan perintah + deskripsi editan
+> Contoh: _.editgambar make it cinematic_ atau _.editgambar ubah jadi malam hari_
+> Didukung DeepAI Image Editor — gratis, tanpa API key, retry otomatis hingga 6x
+> Tersedia 3 alias perintah: .editgambar / .editai / .aiedit
 ━━━━━━━━━━━━━━━━━━━━━━
 🔧 *BUG FIX*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -53,7 +58,14 @@ _Kamis, 04 Juni 2026 — 12:23 WIB_ 🕐
 > Userjadibot: `.rvo` di private → hasil dikirim ke private owner jadibot seperti biasa
 > Tidak ada lagi hasil RVO yang salah tujuan atau nyasar ke chat lain
 
-> 🧹 *Session Hisoka — Tidak Terlalu Pendek, Lebih Ringan & Simpel*
+> 🧹 *Session Bot Utama & Jadibot — Terpisah Penuh, Tidak Bentrok*
+> Bot utama menyimpan sesi di `sessions/{nama_sesi}.json` — satu file ringkas per sesi
+> Setiap jadibot punya file sesi sendiri di `jadibot/{nomor}.json` — benar-benar terpisah
+> Data jadibot (swtrack, ceksw, stats) tersimpan di folder `data/jadibot/{nomor}/` per-nomor
+> Tidak ada lagi tumpang-tindih atau bentrok antara sesi bot utama dan sesi userjadibot
+> Sesi lama jadibot otomatis dihapus saat masa aktif habis — tidak ada sisa file yang mengganggu
+
+> 🔄 *Session Hisoka — Lebih Ringan & Tidak Terlalu Agresif*
 > Sebelumnya sesi hisoka di-prune terlalu agresif sehingga sering terputus
 > Kini batas pruning disesuaikan — tidak terlalu pendek agar koneksi tetap stabil
 > Proses session dibuat lebih simpel dan tidak membebani performa bot
