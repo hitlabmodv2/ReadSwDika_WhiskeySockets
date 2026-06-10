@@ -3,7 +3,7 @@ _Rabu, 10 Juni 2026 — WIB_ 🕐
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V21*
 ✨ *3 Fitur Baru*
-🔧 *2 Bug Fix*
+🔧 *3 Bug Fix*
 🚀 *3 Improvement*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
@@ -47,6 +47,12 @@ _Rabu, 10 Juni 2026 — WIB_ 🕐
 > Bug: perintah .hd sebelumnya tidak bekerja / gagal memproses gambar
 > Fix: fitur HD Upscaler (.hd / .remini / .hdr) kini berjalan normal
 > Gambar berhasil diupscale dengan kualitas 4K / 6K / 8K via SparkPix AI
+
+> NO.3 🛡️ *Eval — ReferenceError Tidak Lagi Bocor ke Log*
+> Bug: perintah .eval / .> melempar ReferenceError ke console meski sudah ada try-catch
+> Penyebab: error dari async eval tidak tertangkap dengan benar, bocor keluar handler
+> Fix: async eval kini pakai Promise.resolve().catch() — semua error tertangkap bersih
+> Tambahan: perintah .eval sekarang hanya bisa dipakai owner, non-owner diabaikan diam-diam
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *IMPROVEMENT*
 ━━━━━━━━━━━━━━━━━━━━━━

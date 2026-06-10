@@ -5970,10 +5970,19 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                         case '>':
                         case 'eval': {
+                                if (!m.isOwner) return;
                                 let result;
                                 try {
                                         const code = query || text;
-                                        result = /await/i.test(code) ? await eval('(async() => { ' + code + ' })()') : await eval(code);
+                                        if (!code || !code.trim()) {
+                                                await tolak(hisoka, m, '❌ Masukkan kode yang ingin di-eval.');
+                                                break;
+                                        }
+                                        if (/await/i.test(code)) {
+                                                result = await Promise.resolve(eval('(async() => { ' + code + ' })()')).catch(e => e);
+                                        } else {
+                                                try { result = eval(code); } catch (e) { result = e; }
+                                        }
                                 } catch (error) {
                                         result = error;
                                 }
