@@ -39,6 +39,12 @@ _Rabu, 10 Juni 2026 — WIB_ 🕐
 > Berlaku di bot utama maupun di setiap sesi userjadibot masing-masing
 > Log menampilkan nomor/kontak siapa yang menghapus, sehingga mudah dipantau secara realtime
 > Setiap userjadibot punya SwTrack sendiri — tidak campur dengan data jadibot lain
+
+> 📟 *Notif CMD — Log Bot Utama & Userjadibot Lebih Bersih*
+> Tampilan log perintah (cmd) di bot utama maupun userjadibot kini lebih rapi dan ringkas
+> Hanya perintah yang benar-benar dieksekusi yang ditampilkan — tidak ada log yang tidak perlu
+> Notif cmd userjadibot tampil terpisah dari bot utama — mudah dibedakan di log
+> Log lebih sedikit, lebih mudah dibaca, dan tetap informatif
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *IMPROVEMENT*
 ━━━━━━━━━━━━━━━━━━━━━━
