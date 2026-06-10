@@ -1,13 +1,13 @@
 {
-  "ACFC22757D045466D897B4556B32B515": {
-    "id": "ACFC22757D045466D897B4556B32B515",
+  "ACE393C3C1DA0ADC6FEDFD7ECB37D11D": {
+    "id": "ACE393C3C1DA0ADC6FEDFD7ECB37D11D",
     "sender": "6283174681433@s.whatsapp.net",
     "name": "Bakwan beku (Azwan)",
     "type": "videoMessage",
-    "arrivedAt": "2026-06-08T07:42:15.346Z",
-    "read": true,
-    "reacted": true,
-    "emoji": "🐅",
+    "arrivedAt": "2026-06-10T03:37:18.083Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6283174681433",
@@ -16,29 +16,10 @@
       "remoteJid": "status@broadcast",
       "remoteJidAlt": "6283174681433@s.whatsapp.net",
       "fromMe": false,
-      "id": "ACFC22757D045466D897B4556B32B515",
+      "id": "ACE393C3C1DA0ADC6FEDFD7ECB37D11D",
       "participant": "44156575568084@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-08T07:42:31.804Z",
-    "receiptKeys": [
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6283174681433@s.whatsapp.net",
-        "fromMe": false,
-        "id": "ACFC22757D045466D897B4556B32B515",
-        "participant": "44156575568084@lid",
-        "addressingMode": "lid"
-      },
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6283174681433@s.whatsapp.net",
-        "fromMe": false,
-        "id": "ACFC22757D045466D897B4556B32B515",
-        "participant": "6283174681433@s.whatsapp.net",
-        "addressingMode": "lid"
-      }
-    ],
-    "processedAt": "2026-06-08T07:42:31.804Z"
+    "updatedAt": "2026-06-10T03:37:18.083Z"
   }
 }
