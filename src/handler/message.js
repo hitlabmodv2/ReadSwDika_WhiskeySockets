@@ -5987,7 +5987,10 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                         result = error;
                                 }
 
-                                await tolak(hisoka, m, util.format(result));
+                                const evalOut = result instanceof Error
+                                        ? `❌ *${result.name}:* ${result.message}`
+                                        : util.format(result);
+                                await tolak(hisoka, m, evalOut);
                                 logCommand(m, hisoka, 'eval');
                                 break;
                         }
