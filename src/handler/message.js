@@ -1184,10 +1184,16 @@ function _logCmdBox(m, hisoka, cmdStr) {
                 for (const c of s) w += c.codePointAt(0) > 0x2E7F ? 2 : 1;
                 return s + ' '.repeat(Math.max(0, cW - w));
         };
+        // small caps + superscript digits — apply AFTER _pd so padding is counted on raw string
+        const _scMap = {a:'ᴀ',b:'ʙ',c:'ᴄ',d:'ᴅ',e:'ᴇ',f:'ꜰ',g:'ɢ',h:'ʜ',i:'ɪ',j:'ᴊ',k:'ᴋ',l:'ʟ',m:'ᴍ',n:'ɴ',o:'ᴏ',p:'ᴘ',q:'ꞯ',r:'ʀ',s:'ꜱ',t:'ᴛ',u:'ᴜ',v:'ᴠ',w:'ᴡ',x:'x',y:'ʏ',z:'ᴢ'};
+        const _snMap = {'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
+        const _sm = s => String(s)
+                .replace(/[a-zA-Z]/g, c => _scMap[c.toLowerCase()] || c)
+                .replace(/[0-9]/g, c => _snMap[c]);
         const _now = new Date();
         const _tgl = new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', day: '2-digit', month: 'long', year: 'numeric' }).format(_now);
         const _jam = new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).format(_now);
-        const title = 'InformasiBotCommand';
+        const title = _sm('InformasiBotCommand');
         const tp = Math.floor((bW - title.length) / 2);
         const modeColor = m.isRealOwner ? ye : m.isBot ? pu : wh;
         const tujuanColor = m.isGroup ? or : cy;
@@ -1196,14 +1202,14 @@ function _logCmdBox(m, hisoka, cmdStr) {
                 `${cy}┌${'═'.repeat(bW)}┐${rs}\n` +
                 `${cy}║${' '.repeat(tp)}${ye}${title}${rs}${cy}${' '.repeat(bW - tp - title.length)}║${rs}\n` +
                 `${cy}├${'═'.repeat(bW)}┤${rs}\n` +
-                `${cy}│${rs} ${wh}⭔ Mode     : ${modeColor}${_pd(_modeStr)}${rs}\n` +
-                `${cy}│${rs} ${wh}⭔ Tujuan   : ${tujuanColor}${_pd(_tujuan)}${rs}\n` +
-                `${cy}│${rs} ${wh}⭔ NamaGrup : ${wh}${_pd(_namaGrup)}${rs}\n` +
-                `${cy}│${rs} ${wh}⭔ Nama     : ${wh}${_pd(_botName)}${rs}\n` +
-                `${cy}│${rs} ${wh}⭔ Nomer    : ${wh}${_pd(_maskedNum)}${rs}\n` +
-                `${cy}│${rs} ${wh}⭔ Cmd      : ${cy}${_pd(cmdStr)}${rs}\n` +
-                `${cy}│${rs} ${wh}⭔ Tanggal  : ${gr}${_pd(_tgl)}${rs}\n` +
-                `${cy}│${rs} ${wh}⭔ Waktu    : ${gr}${_pd(_jam + ' WIB')}${rs}\n` +
+                `${cy}│${rs} ${wh}⭔ ᴍᴏᴅᴇ     : ${modeColor}${_sm(_pd(_modeStr))}${rs}\n` +
+                `${cy}│${rs} ${wh}⭔ ᴛᴜᴊᴜᴀɴ   : ${tujuanColor}${_sm(_pd(_tujuan))}${rs}\n` +
+                `${cy}│${rs} ${wh}⭔ ɴᴀᴍᴀɢʀᴜᴘ : ${wh}${_sm(_pd(_namaGrup))}${rs}\n` +
+                `${cy}│${rs} ${wh}⭔ ɴᴀᴍᴀ     : ${wh}${_sm(_pd(_botName))}${rs}\n` +
+                `${cy}│${rs} ${wh}⭔ ɴᴏᴍᴇʀ    : ${wh}${_sm(_pd(_maskedNum))}${rs}\n` +
+                `${cy}│${rs} ${wh}⭔ ᴄᴍᴅ      : ${cy}${_sm(_pd(cmdStr))}${rs}\n` +
+                `${cy}│${rs} ${wh}⭔ ᴛᴀɴɢɢᴀʟ  : ${gr}${_sm(_pd(_tgl))}${rs}\n` +
+                `${cy}│${rs} ${wh}⭔ ᴡᴀᴋᴛᴜ    : ${gr}${_sm(_pd(_jam + ' WIB'))}${rs}\n` +
                 `${cy}└${'─'.repeat(13)}···${rs}`
         );
 }
