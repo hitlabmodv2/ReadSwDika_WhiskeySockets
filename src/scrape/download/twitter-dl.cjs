@@ -93,6 +93,62 @@ async function fetchXDownloader(url) {
     };
 }
 
+/* ──────────────── ssstwitter fallback ──────────────── */
+
+async function fetchSssTwitter(url) {
+    try {
+        // Step 1: ambil token dari halaman utama
+        const page = await fetch('https://ssstwitter.com/', {
+            headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36' },
+            signal: AbortSignal.timeout(10000),
+        });
+        const html = await page.text();
+        const ttMatch = html.match(/name=["']tt["']\s+value=["']([^"']+)["']/);
+        const tt = ttMatch?.[1] || '';
+
+        // Step 2: POST request dengan token
+        const form = new URLSearchParams();
+        form.append('id', url);
+        form.append('locale', 'en');
+        form.append('tt', tt);
+        form.append('source', 'input');
+
+        const res = await fetch('https://ssstwitter.com/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Origin': 'https://ssstwitter.com',
+                'Referer': 'https://ssstwitter.com/',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'HX-Request': 'true',
+                'HX-Target': 'target',
+                'HX-Current-URL': 'https://ssstwitter.com/',
+            },
+            body: form.toString(),
+            signal: AbortSignal.timeout(20000),
+        });
+
+        if (!res.ok) return null;
+        const body = await res.text();
+
+        // Parse video URL dari HTML response
+        const videoUrls = [...body.matchAll(/href=["'](https?:\/\/[^"']*\.mp4[^"']*)/gi)]
+            .map(m => m[1]);
+        const bestUrl = videoUrls[0] || null;
+        if (!bestUrl) return null;
+
+        // Parse title/author dari HTML
+        const titleMatch = body.match(/<p[^>]*class="[^"]*maintext[^"]*"[^>]*>([^<]+)<\/p>/i);
+
+        return {
+            source: 'ssstwitter',
+            videoUrl: bestUrl,
+            title: titleMatch?.[1]?.trim() || '',
+            author: '',
+        };
+    } catch { return null; }
+}
+
 /* ──────────────── fxtwitter fallback ──────────────── */
 
 async function fetchFxTwitter(user, statusId) {
@@ -209,10 +265,16 @@ async function handleTwitterDl(hisoka, m, query, ctx = {}) {
         await editLoad('🔍 Mengambil info tweet...');
         let result = await fetchFxTwitter(parsed.user, parsed.statusId).catch(() => null);
 
-        // ── Fallback x-downloader (metadata only, coba jika fxtwitter gagal) ──
+        // ── Fallback 2: x-downloader.com ──
         if (!result) {
             await editLoad('🔄 Mencoba x-downloader.com...');
             result = await fetchXDownloader(rawUrl).catch(() => null);
+        }
+
+        // ── Fallback 3: ssstwitter.com ──
+        if (!result) {
+            await editLoad('🔄 Mencoba ssstwitter.com...');
+            result = await fetchSssTwitter(rawUrl).catch(() => null);
         }
 
         if (!result) {
