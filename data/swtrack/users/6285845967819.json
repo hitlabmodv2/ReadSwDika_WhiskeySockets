@@ -1,0 +1,44 @@
+{
+  "A5199DEED77562866A29B35E0C0C0C5C": {
+    "id": "A5199DEED77562866A29B35E0C0C0C5C",
+    "sender": "6285845967819@s.whatsapp.net",
+    "name": "Ikbal",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-10T03:38:03.113Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "♠️",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285845967819",
+    "resolvedPn": "6285845967819@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285845967819@s.whatsapp.net",
+      "fromMe": false,
+      "id": "A5199DEED77562866A29B35E0C0C0C5C",
+      "participant": "81303965798410@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-10T03:38:20.141Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285845967819@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A5199DEED77562866A29B35E0C0C0C5C",
+        "participant": "81303965798410@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285845967819@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A5199DEED77562866A29B35E0C0C0C5C",
+        "participant": "6285845967819@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-10T03:38:20.140Z"
+  }
+}
