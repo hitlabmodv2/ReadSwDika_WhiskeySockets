@@ -3,74 +3,53 @@ _Rabu, 10 Juni 2026 — WIB_ 🕐
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V21*
 ✨ *3 Fitur Baru*
-🔧 *0 Bug Fix*
+🔧 *1 Bug Fix*
 🚀 *3 Improvement*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
-> 🎨 *Edit Gambar AI — .editgambar / .editai / .aiedit*
-> Fitur baru untuk mengedit gambar menggunakan kecerdasan buatan!
-> Kirim atau reply gambar dengan perintah + deskripsi editan
-> Contoh: _.editgambar make it cinematic_ atau _.editgambar ubah jadi malam hari_
-> Didukung DeepAI Image Editor — gratis, tanpa API key, retry otomatis hingga 6x
-> Tersedia 3 alias perintah: .editgambar / .editai / .aiedit
+> NO.1 🎨 *Edit Gambar AI — .editgambar / .editai / .aiedit*
+> Fitur baru edit gambar pakai AI (DeepAI Image Editor)
+> Kirim/reply gambar + caption deskripsi editan
+> Contoh: _.editgambar make it cinematic_
+> Gratis, tanpa API key, retry otomatis hingga 6x
+> 3 alias: .editgambar / .editai / .aiedit
 
-> 🐦 *Twitter / X Downloader — 3 API Fallback*
-> Download video & foto dari Twitter/X kini jauh lebih stabil!
-> API 1: fxtwitter (utama, link streaming langsung dari twimg.com)
-> API 2: x-downloader.com (fallback, resolusi tertinggi otomatis)
-> API 3: ssstwitter.com (fallback terakhir, token-based)
-> Jika satu API gagal, bot otomatis coba ke API berikutnya tanpa perlu kirim ulang
+> NO.2 🐦 *Twitter / X Downloader — 3 API Fallback*
+> Download video & foto Twitter/X kini pakai 3 API sekaligus
+> API 1 (Utama): fxtwitter — link streaming langsung dari twimg.com
+> API 2 (Fallback): x-downloader.com — resolusi tertinggi otomatis
+> API 3 (Fallback): ssstwitter.com — cadangan terakhir berbasis token
+> Jika satu API gagal, otomatis lanjut ke API berikutnya tanpa kirim ulang
 
-> 🌐 *Allunduh — Support Reddit*
-> Platform baru di .allunduh: sekarang bisa download konten Reddit!
-> Support video Reddit, foto tunggal, galeri foto (multi-gambar), dan GIF/gifv
-> Cukup kirim link Reddit: _.allunduh https://reddit.com/r/..._
-> Shortlink redd.it juga didukung secara otomatis
+> NO.3 🌐 *Allunduh — Support Reddit*
+> Platform baru di .allunduh: download konten Reddit!
+> Support: video, foto tunggal, galeri foto, dan GIF/gifv
+> Shortlink redd.it juga didukung otomatis
+> Contoh: _.allunduh https://reddit.com/r/..._
 ━━━━━━━━━━━━━━━━━━━━━━
 🔧 *BUG FIX*
 ━━━━━━━━━━━━━━━━━━━━━━
-> ⚡ *Koneksi Userjadibot & Bot Utama — Kini Jauh Lebih Cepat*
-> Sebelumnya folder session menyimpan banyak file yang terus bertambah — bikin bot lambat dan spam di storage
-> File-file session yang menumpuk memperlambat proses koneksi, terutama saat jadibot baru pertama konek
-> Kini semua data session dipadatkan jadi 1 file per sesi — bot utama maupun setiap userjadibot
-> Hasilnya koneksi jauh lebih cepat (fast connect), tidak ada lagi spam file di folder session
-> Berlaku merata: bot utama cepat konek, jadibot cepat konek, tidak ada yang terhambat file lama
-━━━━━━━━━━━━━━━━━━━━━━
-📋 *FITUR TAMBAHAN*
-━━━━━━━━━━━━━━━━━━━━━━
-> 🔔 *SwTrack — Notif Log Siapa yang Menghapus SW*
-> Bot kini mencatat & menampilkan notifikasi di log saat ada kontak yang menghapus SW (story/status)
-> Berlaku di bot utama maupun di setiap sesi userjadibot masing-masing
-> Log menampilkan nomor/kontak siapa yang menghapus, sehingga mudah dipantau secara realtime
-> Setiap userjadibot punya SwTrack sendiri — tidak campur dengan data jadibot lain
-
-> 📟 *Notif CMD — Log Bot Utama & Userjadibot Lebih Bersih*
-> Tampilan log perintah (cmd) di bot utama maupun userjadibot kini lebih rapi dan ringkas
-> Hanya perintah yang benar-benar dieksekusi yang ditampilkan — tidak ada log yang tidak perlu
-> Notif cmd userjadibot tampil terpisah dari bot utama — mudah dibedakan di log
-> Log lebih sedikit, lebih mudah dibaca, dan tetap informatif
+> NO.1 ⚡ *Koneksi Bot Utama & Userjadibot — Lambat karena File Session Menumpuk*
+> Bug: folder session menyimpan banyak file yang terus bertambah → bot lambat konek & spam storage
+> Fix: semua data session dipadatkan jadi 1 file per sesi (bot utama & setiap userjadibot)
+> Hasil: koneksi jauh lebih cepat, tidak ada lagi spam file di folder session
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *IMPROVEMENT*
 ━━━━━━━━━━━━━━━━━━━━━━
-> 🗂️ *Folder src/scrape — Dirapikan Per Kategori*
-> File scraper yang sebelumnya campur kini dipisah ke folder sesuai fungsinya
-> ai/ → semua scraper AI (gemini, sparkpix, imageEdit, dll)
-> download/ → semua downloader (yt, ig, tt, fb, twitter, reddit, allunduh, dll)
-> anime/ → scraper konten anime (alqanime, animasu, pixiv, nhentai, dll)
-> music/ → scraper musik (chatmusic, genius, whatsmusik, dll)
-> news/ → scraper berita (malnews, tvonenews)
-> tools/ → scraper utilitas (screenshot, cuaca, speedtest, dll)
-> system/ → file sistem bot (welcomeCard, shutdown)
+> NO.1 🗂️ *Folder src/scrape — Dirapikan Per Kategori*
+> Sebelumnya file scraper campur jadi satu tanpa kategori
+> Kini dipisah ke folder sesuai fungsinya:
+> ai/ • download/ • anime/ • music/ • news/ • tools/ • system/
+> Lebih mudah dikelola dan dikembangkan
 
-> 🧹 *Session Bot Utama — Disatukan Jadi 1 File*
-> Sebelumnya sesi bot utama tersebar di banyak file dalam satu folder
-> Kini semua data sesi bot utama disatukan ke dalam 1 file JSON saja: `sessions/{nama_sesi}.json`
-> Lebih ringan, lebih rapi, tidak ada file sisa yang menumpuk
+> NO.2 🔔 *SwTrack — Notif Log Siapa yang Menghapus SW*
+> Bot kini mencatat di log saat ada kontak yang menghapus SW (story/status)
+> Berlaku di bot utama & tiap sesi userjadibot masing-masing
+> Setiap userjadibot punya SwTrack sendiri, tidak campur satu sama lain
 
-> 🔀 *Session Userjadibot — 1 File Per Nomor, Benar-Benar Terpisah*
-> Setiap userjadibot kini punya 1 file sesi sendiri: `jadibot/{nomor}.json`
-> Tidak ada campur-aduk antara sesi bot utama dan sesi masing-masing userjadibot
-> Tidak ada bentrok — setiap jadibot berjalan independen di filenya sendiri
-> Sesi jadibot otomatis dihapus saat masa aktif habis, tidak ada sisa file yang mengganggu
+> NO.3 📟 *Log CMD Bot Utama & Userjadibot — Lebih Bersih & Ringkas*
+> Sebelumnya log cmd penuh entri tidak perlu dari bot utama & jadibot
+> Kini hanya cmd yang benar-benar dieksekusi yang tampil di log
+> Log userjadibot tampil terpisah dari bot utama — mudah dibedakan
 ━━━━━━━━━━━━━━━━━━━━━━
