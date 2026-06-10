@@ -1433,15 +1433,20 @@ setTimeout(() => {
 
   if (!validBots.length && !invalidBots.length && !expiredBots.length) return;
 
+  const totalSesi = validBots.length + invalidBots.length + expiredBots.length;
   console.log(`${C}╔══════════════════════════════════╗${R}`);
   console.log(`${C}║${R}   ${B}${Y}🤖  A U T O  J A D I B O T${R}         ${C}║${R}`);
   console.log(`${C}╠══════════════════════════════════╣${R}`);
-  console.log(`${C}║${R} ${Y}📦${R} Total  : ${B}${validBots.length + invalidBots.length + expiredBots.length} sesi tersimpan${R}`);
-  for (const number of expiredBots) {
-    console.log(`${C}║${R} ${Y}⏰ ${R} ${number} - expired, dihapus`);
+  console.log(`${C}║${R} ${Y}📦${R} Total  : ${B}${totalSesi} sesi tersimpan${R}`);
+  if (expiredBots.length) {
+    for (const number of expiredBots) {
+      console.log(`${C}║${R} ${Y}⏰${R}  ${DIM}${number}${R} — expired, dihapus`);
+    }
   }
-  for (const number of invalidBots) {
-    console.log(`${C}║${R} ${Y}⚠️ ${R} ${number} - tidak valid`);
+  if (invalidBots.length) {
+    for (const number of invalidBots) {
+      console.log(`${C}║${R} ${Y}⚠️${R}  ${DIM}${number}${R} — tidak valid`);
+    }
   }
   for (const number of validBots) {
     const meta = getJadibotExpiry(number);
@@ -1462,7 +1467,7 @@ setTimeout(() => {
         sisaColor = G;   icon = '🟢'; sisaLabel = formatRemainingTime(remainingMs);
       }
     }
-    console.log(`${C}║${R} ${G}▶  ${R}${B}${number}${R} ${icon} ${sisaColor}${sisaLabel}${R}`);
+    console.log(`${C}║${R} ${G}▶${R}  ${B}${number}${R} ${icon} ${sisaColor}${sisaLabel}${R} ${DIM}→ 🔄 menghubungkan...${R}`);
   }
   console.log(`${C}╚══════════════════════════════════╝${R}`);
 
