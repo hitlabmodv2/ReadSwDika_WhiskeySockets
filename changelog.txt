@@ -22,11 +22,19 @@ _Rabu, 10 Juni 2026 — WIB_ 🕐
 > API 3 (Fallback): ssstwitter.com — cadangan terakhir berbasis token
 > Jika satu API gagal, otomatis lanjut ke API berikutnya tanpa kirim ulang
 
-> NO.3 🌐 *Allunduh — Support Reddit*
-> Platform baru di .allunduh: download konten Reddit!
-> Support: video, foto tunggal, galeri foto, dan GIF/gifv
-> Shortlink redd.it juga didukung otomatis
-> Contoh: _.allunduh https://reddit.com/r/..._
+> NO.3 🌐 *Allunduh — Support Reddit (Platform Baru)*
+> .allunduh / .unduhsemua / .dl — Universal downloader, kirim link dari platform apapun
+> Platform yang sudah didukung:
+> ▸ .ig — Instagram (Reel, Feed, Story, Carousel)
+> ▸ .tt — TikTok (Video, Slide/Foto)
+> ▸ .fb — Facebook (Video, Reel)
+> ▸ .twdl / .xdl — Twitter / X (Video, Foto, GIF)
+> ▸ .play — YouTube (Cari & putar lagu)
+> ▸ .ytmp3 — YouTube (Download audio MP3)
+> ▸ .ytmp4 — YouTube (Download video MP4)
+> ▸ Pinterest (Foto & Video) — via .allunduh
+> ▸ *Reddit (BARU!)* — Video, Foto, Galeri, GIF — via .allunduh
+> Shortlink redd.it & semua format link Reddit didukung otomatis
 ━━━━━━━━━━━━━━━━━━━━━━
 🔧 *BUG FIX*
 ━━━━━━━━━━━━━━━━━━━━━━
