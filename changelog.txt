@@ -30,7 +30,12 @@ _Rabu, 10 Juni 2026 — WIB_ 🕐
 ━━━━━━━━━━━━━━━━━━━━━━
 🔧 *BUG FIX*
 ━━━━━━━━━━━━━━━━━━━━━━
-> _Tidak ada bug fix di versi ini_
+> ⚡ *Koneksi Userjadibot & Bot Utama — Kini Jauh Lebih Cepat*
+> Sebelumnya folder session menyimpan banyak file yang terus bertambah — bikin bot lambat dan spam di storage
+> File-file session yang menumpuk memperlambat proses koneksi, terutama saat jadibot baru pertama konek
+> Kini semua data session dipadatkan jadi 1 file per sesi — bot utama maupun setiap userjadibot
+> Hasilnya koneksi jauh lebih cepat (fast connect), tidak ada lagi spam file di folder session
+> Berlaku merata: bot utama cepat konek, jadibot cepat konek, tidak ada yang terhambat file lama
 ━━━━━━━━━━━━━━━━━━━━━━
 📋 *FITUR TAMBAHAN*
 ━━━━━━━━━━━━━━━━━━━━━━
