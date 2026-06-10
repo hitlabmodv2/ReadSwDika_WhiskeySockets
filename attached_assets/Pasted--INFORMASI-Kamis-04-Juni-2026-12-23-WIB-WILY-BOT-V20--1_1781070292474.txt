@@ -1,0 +1,61 @@
+🚀 *INFORMASI*
+_Kamis, 04 Juni 2026 — 12:23 WIB_ 🕐
+━━━━━━━━━━━━━━━━━━━━━━
+🤖 *WILY BOT — V20*
+✨ *0 Fitur Baru*
+🔧 *5 Bug Fix*
+🚀 *2 Improvement*
+━━━━━━━━━━━━━━━━━━━━━━
+✨ *FITUR BARU*
+━━━━━━━━━━━━━━━━━━━━━━
+> _Tidak ada fitur baru di versi ini_
+━━━━━━━━━━━━━━━━━━━━━━
+🔧 *BUG FIX*
+━━━━━━━━━━━━━━━━━━━━━━
+> 🗑️ *Anti-Delete — Pemulihan Semua Jenis Media Kini Berfungsi*
+> Sebelumnya antidel gagal memulihkan sebagian media yang dihapus (sticker, gambar, video, dll)
+> Terutama bermasalah di sesi userjadibot — media sering tidak terkirim ulang
+> Kini semua jenis media berhasil dipulihkan: sticker, gambar, video, audio, dokumen
+> Berlaku normal di bot utama maupun di semua sesi userjadibot
+
+> ⚡ *Bot Utama — Koneksi Lebih Stabil, Tidak Ada Bug Saat Konek*
+> Sebelumnya bot utama kadang mengalami error atau tidak stabil saat proses koneksi
+> Kini proses konek berjalan mulus — paling lama hanya perlu menunggu sekitar 1 menit
+> Setelah menunggu sebentar, bot langsung normal dan stabil kembali seperti biasa
+> Tidak ada lagi bug yang muncul di tengah proses koneksi bot utama
+
+> 🐛 *Prefix & No-Prefix — Sekarang Bekerja di Semua Platform*
+> Sebelumnya bot hanya merespons perintah di salah satu mode saja (prefix atau no-prefix)
+> Perintah sering tidak terbaca di WA Web, WA APK mod, dan versi WA lainnya
+> Kini bot mendeteksi perintah secara akurat — baik dengan prefix (`.ping`) maupun tanpa prefix (`ping`)
+> Berlaku di semua platform: WA Web, WA APK official, APK mod, dan klien WA lainnya
+> Tidak ada lagi perintah yang miss atau tidak direspons karena format prefix
+
+> 🧾 *CMD Owner & Jadibot — Log Lebih Bersih & Akurat*
+> Sebelumnya perintah yang tidak dikenali tetap muncul di log sebagai error atau output kosong
+> Berlaku di cmd owner maupun cmd jadibot — log jadi penuh dengan entri tidak relevan
+> Kini perintah yang belum ada di daftar command tidak akan ditampilkan di log sama sekali
+> Log hanya tampilkan perintah yang benar-benar dieksekusi — lebih bersih dan akurat
+
+> 📡 *AutoRead & React SW — Bot Utama & Jadibot Kini Saling Bereaksi*
+> Sebelumnya AutoRead + React SW hanya berjalan di bot utama saja
+> Jadibot tidak ikut membaca atau mereact SW yang masuk
+> Kini bot utama maupun semua sesi jadibot aktif ikut AutoRead & React SW secara bersamaan
+> Setiap jadibot memiliki handler SW sendiri — tidak bentrok dengan bot utama
+> React emoji, delay, dan SwTrack berjalan normal di bot utama maupun jadibot
+━━━━━━━━━━━━━━━━━━━━━━
+🚀 *IMPROVEMENT*
+━━━━━━━━━━━━━━━━━━━━━━
+> 📨 *RVO — Tujuan Kirim Kini Sesuai Konteks Chat*
+> Bot utama: `.rvo` di grup (GC) → hasil dikirim ke GC yang sama
+> Bot utama: `.rvo` di private → hasil dikirim balik ke private
+> Userjadibot: `.rvo` di GC → hasil dikirim ke private owner jadibot (bukan ke GC)
+> Userjadibot: `.rvo` di private → hasil dikirim ke private owner jadibot seperti biasa
+> Tidak ada lagi hasil RVO yang salah tujuan atau nyasar ke chat lain
+
+> 🔄 *Session Hisoka — Tidak Terlalu Pendek, Lebih Ringan & Simpel*
+> Sebelumnya sesi hisoka di-prune terlalu agresif sehingga sering terputus
+> Kini batas pruning disesuaikan — tidak terlalu pendek agar koneksi tetap stabil
+> Proses session dibuat lebih simpel dan tidak membebani performa bot
+> Berlaku juga di sesi jadibot — setiap jadibot ikut mendapat penanganan session yang sama
+━━━━━━━━━━━━━━━━━━━━━━
