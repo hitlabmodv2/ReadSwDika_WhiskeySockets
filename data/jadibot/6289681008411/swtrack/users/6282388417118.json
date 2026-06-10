@@ -208,5 +208,28 @@
       }
     ],
     "processedAt": "2026-06-10T04:36:32.749Z"
+  },
+  "AC80D7940F3B0261E6A3D4DB5709EF28": {
+    "id": "AC80D7940F3B0261E6A3D4DB5709EF28",
+    "sender": "6282388417118@s.whatsapp.net",
+    "name": "Kaguya",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-10T06:24:01.802Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "Signal Lib ✓",
+    "source": "status",
+    "number": "6282388417118",
+    "resolvedPn": "6282388417118@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6282388417118@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC80D7940F3B0261E6A3D4DB5709EF28",
+      "participant": "20749339349072@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-10T06:24:01.802Z"
   }
 }
