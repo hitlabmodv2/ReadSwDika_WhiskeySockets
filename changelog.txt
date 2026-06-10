@@ -1,10 +1,10 @@
 🚀 *INFORMASI*
 _Rabu, 10 Juni 2026 — WIB_ 🕐
 ━━━━━━━━━━━━━━━━━━━━━━
-🤖 *WILY BOT — V20*
+🤖 *WILY BOT — V21*
 ✨ *1 Fitur Baru*
-🔧 *5 Bug Fix*
-🚀 *3 Improvement*
+🔧 *0 Bug Fix*
+🚀 *1 Improvement*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -14,6 +14,33 @@ _Rabu, 10 Juni 2026 — WIB_ 🕐
 > Contoh: _.editgambar make it cinematic_ atau _.editgambar ubah jadi malam hari_
 > Didukung DeepAI Image Editor — gratis, tanpa API key, retry otomatis hingga 6x
 > Tersedia 3 alias perintah: .editgambar / .editai / .aiedit
+━━━━━━━━━━━━━━━━━━━━━━
+🔧 *BUG FIX*
+━━━━━━━━━━━━━━━━━━━━━━
+> _Tidak ada bug fix di versi ini_
+━━━━━━━━━━━━━━━━━━━━━━
+🚀 *IMPROVEMENT*
+━━━━━━━━━━━━━━━━━━━━━━
+> 🧹 *Session Bot Utama & Jadibot — Terpisah Penuh, Tidak Bentrok*
+> Bot utama menyimpan sesi di `sessions/{nama_sesi}.json` — satu file ringkas per sesi
+> Setiap jadibot punya file sesi sendiri di `jadibot/{nomor}.json` — benar-benar terpisah
+> Data jadibot (swtrack, ceksw, stats) tersimpan di folder `data/jadibot/{nomor}/` per-nomor
+> Tidak ada lagi tumpang-tindih atau bentrok antara sesi bot utama dan sesi userjadibot
+> Sesi lama jadibot otomatis dihapus saat masa aktif habis — tidak ada sisa file yang mengganggu
+━━━━━━━━━━━━━━━━━━━━━━
+
+
+🚀 *INFORMASI*
+_Kamis, 04 Juni 2026 — 12:23 WIB_ 🕐
+━━━━━━━━━━━━━━━━━━━━━━
+🤖 *WILY BOT — V20*
+✨ *0 Fitur Baru*
+🔧 *5 Bug Fix*
+🚀 *2 Improvement*
+━━━━━━━━━━━━━━━━━━━━━━
+✨ *FITUR BARU*
+━━━━━━━━━━━━━━━━━━━━━━
+> _Tidak ada fitur baru di versi ini_
 ━━━━━━━━━━━━━━━━━━━━━━
 🔧 *BUG FIX*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -58,14 +85,7 @@ _Rabu, 10 Juni 2026 — WIB_ 🕐
 > Userjadibot: `.rvo` di private → hasil dikirim ke private owner jadibot seperti biasa
 > Tidak ada lagi hasil RVO yang salah tujuan atau nyasar ke chat lain
 
-> 🧹 *Session Bot Utama & Jadibot — Terpisah Penuh, Tidak Bentrok*
-> Bot utama menyimpan sesi di `sessions/{nama_sesi}.json` — satu file ringkas per sesi
-> Setiap jadibot punya file sesi sendiri di `jadibot/{nomor}.json` — benar-benar terpisah
-> Data jadibot (swtrack, ceksw, stats) tersimpan di folder `data/jadibot/{nomor}/` per-nomor
-> Tidak ada lagi tumpang-tindih atau bentrok antara sesi bot utama dan sesi userjadibot
-> Sesi lama jadibot otomatis dihapus saat masa aktif habis — tidak ada sisa file yang mengganggu
-
-> 🔄 *Session Hisoka — Lebih Ringan & Tidak Terlalu Agresif*
+> 🔄 *Session Hisoka — Tidak Terlalu Pendek, Lebih Ringan & Simpel*
 > Sebelumnya sesi hisoka di-prune terlalu agresif sehingga sering terputus
 > Kini batas pruning disesuaikan — tidak terlalu pendek agar koneksi tetap stabil
 > Proses session dibuat lebih simpel dan tidak membebani performa bot
