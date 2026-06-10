@@ -1491,15 +1491,6 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
         pairingTimeout.delete(number)
       }
 
-      const C = '\x1b[36m', G = '\x1b[32m', R = '\x1b[0m', B = '\x1b[1m', DIM = '\x1b[2m';
-      const _exMeta = getJadibotExpiry(number);
-      const _exLabel = !_exMeta ? '' : _exMeta.permanent === true ? ` ${C}♾️ Permanent${R}` : (() => {
-        const ms = Number(_exMeta.expiresAt) - Date.now();
-        return ms > 0 ? ` ${G}⏳ ${formatRemainingTime(ms)}${R}` : ` \x1b[31m💀 kedaluwarsa${R}`;
-      })();
-      console.log(`${C}╠══════════════════════════════════╣${R}`);
-      console.log(`${C}║${R} ${G}✅${R} ${B}+${number}${R} ${G}CONNECTED${R}${_exLabel}`);
-      console.log(`${C}╚══════════════════════════════════╝${R}`);
 
       // Edit pesan pairing secara realtime → tandai sudah terhubung
       if (pairingMsgKey && editMsg) {
