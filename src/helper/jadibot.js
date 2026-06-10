@@ -1580,7 +1580,10 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
         stoppingJadibot.delete(number)
         jadibotMap.delete(number)
         activeOrStartingJadibot.delete(number)
-        console.log(`[JADIBOT] ${number} STOPPED BY MAIN BOT`)
+        const _C = '\x1b[36m', _R = '\x1b[0m', _B = '\x1b[1m';
+        console.log(`${_C}╠══════════════════════════════════╣${_R}`);
+        console.log(`${_C}║${_R} ⏹️  ${_B}+${number}${_R} STOPPED`);
+        console.log(`${_C}╚══════════════════════════════════╝${_R}`);
         return
       }
 
@@ -1590,8 +1593,10 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
         jadibotMap.delete(number)
         activeOrStartingJadibot.delete(number)
 
-        const _Y = '\x1b[33m', _R = '\x1b[0m', _B = '\x1b[1m';
-        console.log(`${_Y}[JADIBOT]${_R} ⚠️  ${_B}${number}${_R} logout paksa → sesi dihapus`);
+        const _C = '\x1b[36m', _R2 = '\x1b[0m', _B2 = '\x1b[1m';
+        console.log(`${_C}╠══════════════════════════════════╣${_R2}`);
+        console.log(`${_C}║${_R2} 🚫 ${_B2}+${number}${_R2} LOGOUT PAKSA → sesi dihapus`);
+        console.log(`${_C}╚══════════════════════════════════╝${_R2}`);
 
         // Beri tahu owner via react ❌ (realtime)
         try { if (reactFn) await reactFn('❌') } catch {}
@@ -1644,7 +1649,10 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
       if (!isSessionValid(sessionDir)) {
         jadibotMap.delete(number)
         activeOrStartingJadibot.delete(number)
-        console.log(`[JADIBOT] ${number} session tidak ada, tidak restart`)
+        const _C = '\x1b[36m', _R = '\x1b[0m', _B = '\x1b[1m';
+        console.log(`${_C}╠══════════════════════════════════╣${_R}`);
+        console.log(`${_C}║${_R} ❌ ${_B}+${number}${_R} SESSION INVALID → tidak restart`);
+        console.log(`${_C}╚══════════════════════════════════╝${_R}`);
         return
       }
 
@@ -1659,7 +1667,10 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
       // Hapus referensi socket lama dari map agar tidak stale
       jadibotMap.delete(number)
 
-      console.log(`\x1b[33m[JADIBOT]\x1b[0m 🔄 ${number} reconnecting...`)
+      const _C = '\x1b[36m', _R = '\x1b[0m', _B = '\x1b[1m';
+      console.log(`${_C}╠══════════════════════════════════╣${_R}`);
+      console.log(`${_C}║${_R} 🔄 ${_B}+${number}${_R} DISCONNECTED → reconnecting...`);
+      console.log(`${_C}╚══════════════════════════════════╝${_R}`);
       // Tutup socket lama DULU sebelum buat yang baru
       cleanupSocket()
       setTimeout(() => {
@@ -1977,14 +1988,20 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
         stoppingJadibot.delete(number)
         jadibotMap.delete(number)
         activeOrStartingJadibot.delete(number)
-        console.log(`[JADIBOT QR] ${number} STOPPED BY MAIN BOT`)
+        const _C = '\x1b[36m', _R = '\x1b[0m', _B = '\x1b[1m';
+        console.log(`${_C}╠══════════════════════════════════╣${_R}`);
+        console.log(`${_C}║${_R} ⏹️  ${_B}+${number}${_R} STOPPED`);
+        console.log(`${_C}╚══════════════════════════════════╝${_R}`);
         return
       }
 
       if (reason === DisconnectReason.loggedOut) {
         jadibotMap.delete(number)
         activeOrStartingJadibot.delete(number)
-        console.log(`[JADIBOT QR] ⚠️ ${number} LOGOUT PAKSA → session dihapus`)
+        const _C = '\x1b[36m', _R2 = '\x1b[0m', _B2 = '\x1b[1m';
+        console.log(`${_C}╠══════════════════════════════════╣${_R2}`);
+        console.log(`${_C}║${_R2} 🚫 ${_B2}+${number}${_R2} LOGOUT PAKSA → sesi dihapus`);
+        console.log(`${_C}╚══════════════════════════════════╝${_R2}`);
 
         // Beri tahu owner via react ❌ (realtime)
         try { if (reactFn) await reactFn('❌') } catch {}
@@ -2042,7 +2059,10 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
         }
         reconnectingJadibot.add(number)
         jadibotMap.delete(number)
-        console.log(`[JADIBOT QR] ${number} reconnecting via QR...`)
+        const _C = '\x1b[36m', _R = '\x1b[0m', _B = '\x1b[1m';
+        console.log(`${_C}╠══════════════════════════════════╣${_R}`);
+        console.log(`${_C}║${_R} 🔄 ${_B}+${number}${_R} DISCONNECTED → reconnecting...`);
+        console.log(`${_C}╚══════════════════════════════════╝${_R}`);
         // Tutup socket lama DULU sebelum buat yang baru
         // agar WA tidak kick socket lama dengan alasan loggedOut
         // yang akan memicu penghapusan sesi secara salah
@@ -2060,7 +2080,10 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
 
       jadibotMap.delete(number)
       activeOrStartingJadibot.delete(number)
-      console.log(`[JADIBOT QR] ${number} session tidak ada, tidak restart`)
+      const _C = '\x1b[36m', _R = '\x1b[0m', _B = '\x1b[1m';
+      console.log(`${_C}╠══════════════════════════════════╣${_R}`);
+      console.log(`${_C}║${_R} ❌ ${_B}+${number}${_R} SESSION INVALID → tidak restart`);
+      console.log(`${_C}╚══════════════════════════════════╝${_R}`);
     }
   })
 
