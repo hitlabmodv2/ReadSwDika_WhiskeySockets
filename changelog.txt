@@ -21,10 +21,14 @@ _Rabu, 10 Juni 2026 — WIB_ 🕐
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *IMPROVEMENT*
 ━━━━━━━━━━━━━━━━━━━━━━
-> 🧹 *Session Bot Utama & Jadibot — Terpisah Penuh, Tidak Bentrok*
-> Bot utama menyimpan sesi di `sessions/{nama_sesi}.json` — satu file ringkas per sesi
-> Setiap jadibot punya file sesi sendiri di `jadibot/{nomor}.json` — benar-benar terpisah
-> Data jadibot (swtrack, ceksw, stats) tersimpan di folder `data/jadibot/{nomor}/` per-nomor
-> Tidak ada lagi tumpang-tindih atau bentrok antara sesi bot utama dan sesi userjadibot
-> Sesi lama jadibot otomatis dihapus saat masa aktif habis — tidak ada sisa file yang mengganggu
+> 🧹 *Session Bot Utama — Disatukan Jadi 1 File*
+> Sebelumnya sesi bot utama tersebar di banyak file dalam satu folder
+> Kini semua data sesi bot utama disatukan ke dalam 1 file JSON saja: `sessions/{nama_sesi}.json`
+> Lebih ringan, lebih rapi, tidak ada file sisa yang menumpuk
+
+> 🔀 *Session Userjadibot — 1 File Per Nomor, Benar-Benar Terpisah*
+> Setiap userjadibot kini punya 1 file sesi sendiri: `jadibot/{nomor}.json`
+> Tidak ada campur-aduk antara sesi bot utama dan sesi masing-masing userjadibot
+> Tidak ada bentrok — setiap jadibot berjalan independen di filenya sendiri
+> Sesi jadibot otomatis dihapus saat masa aktif habis, tidak ada sisa file yang mengganggu
 ━━━━━━━━━━━━━━━━━━━━━━
