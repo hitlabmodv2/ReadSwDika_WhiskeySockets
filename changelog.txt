@@ -2,9 +2,9 @@
 _Rabu, 10 Juni 2026 — WIB_ 🕐
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V21*
-✨ *1 Fitur Baru*
+✨ *3 Fitur Baru*
 🔧 *0 Bug Fix*
-🚀 *1 Improvement*
+🚀 *3 Improvement*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -14,6 +14,19 @@ _Rabu, 10 Juni 2026 — WIB_ 🕐
 > Contoh: _.editgambar make it cinematic_ atau _.editgambar ubah jadi malam hari_
 > Didukung DeepAI Image Editor — gratis, tanpa API key, retry otomatis hingga 6x
 > Tersedia 3 alias perintah: .editgambar / .editai / .aiedit
+
+> 🐦 *Twitter / X Downloader — 3 API Fallback*
+> Download video & foto dari Twitter/X kini jauh lebih stabil!
+> API 1: fxtwitter (utama, link streaming langsung dari twimg.com)
+> API 2: x-downloader.com (fallback, resolusi tertinggi otomatis)
+> API 3: ssstwitter.com (fallback terakhir, token-based)
+> Jika satu API gagal, bot otomatis coba ke API berikutnya tanpa perlu kirim ulang
+
+> 🌐 *Allunduh — Support Reddit*
+> Platform baru di .allunduh: sekarang bisa download konten Reddit!
+> Support video Reddit, foto tunggal, galeri foto (multi-gambar), dan GIF/gifv
+> Cukup kirim link Reddit: _.allunduh https://reddit.com/r/..._
+> Shortlink redd.it juga didukung secara otomatis
 ━━━━━━━━━━━━━━━━━━━━━━
 🔧 *BUG FIX*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -21,6 +34,16 @@ _Rabu, 10 Juni 2026 — WIB_ 🕐
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *IMPROVEMENT*
 ━━━━━━━━━━━━━━━━━━━━━━
+> 🗂️ *Folder src/scrape — Dirapikan Per Kategori*
+> File scraper yang sebelumnya campur kini dipisah ke folder sesuai fungsinya
+> ai/ → semua scraper AI (gemini, sparkpix, imageEdit, dll)
+> download/ → semua downloader (yt, ig, tt, fb, twitter, reddit, allunduh, dll)
+> anime/ → scraper konten anime (alqanime, animasu, pixiv, nhentai, dll)
+> music/ → scraper musik (chatmusic, genius, whatsmusik, dll)
+> news/ → scraper berita (malnews, tvonenews)
+> tools/ → scraper utilitas (screenshot, cuaca, speedtest, dll)
+> system/ → file sistem bot (welcomeCard, shutdown)
+
 > 🧹 *Session Bot Utama — Disatukan Jadi 1 File*
 > Sebelumnya sesi bot utama tersebar di banyak file dalam satu folder
 > Kini semua data sesi bot utama disatukan ke dalam 1 file JSON saja: `sessions/{nama_sesi}.json`

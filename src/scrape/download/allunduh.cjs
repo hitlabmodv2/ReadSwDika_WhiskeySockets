@@ -23,7 +23,6 @@ function detectPlatform(url) {
         if (host === 'facebook.com' || host === 'fb.watch' || host === 'm.facebook.com' || host === 'fb.com') return 'facebook';
         if (host === 'twitter.com' || host === 'x.com' || host === 't.co') return 'twitter';
         if (host === 'pinterest.com' || host === 'pin.it') return 'pinterest';
-        if (host === 'reddit.com' || host === 'redd.it' || host === 'old.reddit.com' || host === 'www.reddit.com') return 'reddit';
         return 'unknown';
     } catch {
         return 'unknown';
@@ -85,80 +84,6 @@ async function fetchPinterest(url) {
     return null;
 }
 
-async function fetchReddit(url) {
-    try {
-        // Normalisasi redd.it shortlink → reddit.com
-        let finalUrl = url;
-        if (/redd\.it/.test(url)) {
-            const r = await fetch(url, { redirect: 'follow', signal: AbortSignal.timeout(8000) });
-            finalUrl = r.url || url;
-        }
-
-        // Tambahkan .json di akhir path
-        const u = new URL(finalUrl);
-        u.pathname = u.pathname.replace(/\/?$/, '.json');
-        u.search = '?raw_json=1&limit=1';
-
-        const res = await fetch(u.toString(), {
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (compatible; WilyBot/1.0)',
-                'Accept': 'application/json',
-            },
-            signal: AbortSignal.timeout(15000),
-        });
-        if (!res.ok) return null;
-
-        const json = await res.json().catch(() => null);
-        if (!Array.isArray(json) || !json[0]) return null;
-
-        const post = json[0]?.data?.children?.[0]?.data;
-        if (!post) return null;
-
-        const title   = post.title || '';
-        const author  = post.author || '';
-        const sub     = post.subreddit_name_prefixed || '';
-        const ups     = post.ups || 0;
-        const comments = post.num_comments || 0;
-
-        // ── Video ──
-        if (post.is_video && post.media?.reddit_video) {
-            const rv       = post.media.reddit_video;
-            const videoUrl = rv.fallback_url?.replace(/\?.*$/, '') || rv.hls_url || null;
-            if (!videoUrl) return null;
-            return { type: 'video', videoUrl, title, author, sub, ups, comments };
-        }
-
-        // ── Galeri (multi-foto) ──
-        if (post.is_gallery && post.gallery_data?.items) {
-            const photos = post.gallery_data.items
-                .map(item => {
-                    const mediaId = item.media_id;
-                    const meta    = post.media_metadata?.[mediaId];
-                    const src     = meta?.s?.u || meta?.s?.gif || '';
-                    return src.replace(/&amp;/g, '&');
-                })
-                .filter(Boolean);
-            if (!photos.length) return null;
-            return { type: 'gallery', photos, title, author, sub, ups, comments };
-        }
-
-        // ── Foto tunggal ──
-        const imgUrl = post.url_overridden_by_dest || post.url || '';
-        if (/\.(jpg|jpeg|png|gif|webp)(\?|$)/i.test(imgUrl)) {
-            return { type: 'photo', photoUrl: imgUrl, title, author, sub, ups, comments };
-        }
-
-        // ── GIF / gifv ──
-        if (post.preview?.reddit_video_preview) {
-            const rv = post.preview.reddit_video_preview;
-            const videoUrl = rv.fallback_url?.replace(/\?.*$/, '') || null;
-            if (videoUrl) return { type: 'video', videoUrl, title, author, sub, ups, comments };
-        }
-
-        return null;
-    } catch { return null; }
-}
-
 async function handleAllUnduh(hisoka, m, query, ctx) {
     const {
         tolak, logCommand, gemini,
@@ -182,9 +107,8 @@ async function handleAllUnduh(hisoka, m, query, ctx) {
             `│ ▸ TikTok (Video, Slide)\n` +
             `│ ▸ YouTube (Video)\n` +
             `│ ▸ Facebook (Video, Reel)\n` +
-            `│ ▸ Twitter / X (Video, Foto)\n` +
-            `│ ▸ Pinterest (Foto/Video)\n` +
-            `│ ▸ Reddit (Video, Foto, Galeri)\n│\n` +
+            `│ ▸ Twitter / X (Video)\n` +
+            `│ ▸ Pinterest (Foto/Video)\n│\n` +
             `│ *Contoh:*\n` +
             `│ ${pfx}allunduh https://www.instagram.com/reel/xxx\n` +
             `│ ${pfx}allunduh https://vt.tiktok.com/xxx\n` +
