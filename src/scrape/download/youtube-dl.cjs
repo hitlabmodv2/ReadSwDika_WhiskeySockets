@@ -211,7 +211,7 @@ async function handleYtmp3(hisoka, m, query, ctx) {
         caption: mp3Caption
     }, { quoted: m });
 
-    const { getDiskUsage, clearTmpFolder: clearTmpForYtmp3 } = await import('../helper/cleaner.js');
+    const { getDiskUsage, clearTmpFolder: clearTmpForYtmp3 } = await import('../../helper/cleaner.js');
     const diskInfoYtmp3 = getDiskUsage();
     if (diskInfoYtmp3.free < 80 * 1024 * 1024) {
         console.log(`\x1b[33m[YTMP3]\x1b[39m Disk hampir penuh (${diskInfoYtmp3.free} bytes), membersihkan tmp...`);
@@ -326,7 +326,7 @@ async function handleYtmp4(hisoka, m, query, ctx) {
         caption: mp4Caption
     }, { quoted: m });
 
-    const { getDiskUsage: getDiskYtmp4, clearTmpFolder: clearTmpForYtmp4 } = await import('../helper/cleaner.js');
+    const { getDiskUsage: getDiskYtmp4, clearTmpFolder: clearTmpForYtmp4 } = await import('../../helper/cleaner.js');
     const diskInfoYtmp4 = getDiskYtmp4();
     if (diskInfoYtmp4.free < 200 * 1024 * 1024) {
         console.log(`\x1b[33m[YTMP4]\x1b[39m Disk hampir penuh (${diskInfoYtmp4.free} bytes), membersihkan tmp...`);

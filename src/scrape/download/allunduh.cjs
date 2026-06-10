@@ -154,7 +154,7 @@ async function handleAllUnduh(hisoka, m, query, ctx) {
 
     try {
         if (platform === 'instagram') {
-            const { handleInstagramDl } = require(path.resolve('./src/scrape/instagram-dl.cjs'));
+            const { handleInstagramDl } = require(path.resolve('./src/scrape/download/instagram-dl.cjs'));
             await handleInstagramDl(hisoka, m, rawUrl, {
                 gemini, tolak: async (s, msg, text) => {
                     await m.reply({ edit: loadingMsg.key, text }).catch(() => {});
@@ -168,7 +168,7 @@ async function handleAllUnduh(hisoka, m, query, ctx) {
         }
 
         if (platform === 'tiktok') {
-            const { handleTiktokDl } = require(path.resolve('./src/scrape/tiktok-dl.cjs'));
+            const { handleTiktokDl } = require(path.resolve('./src/scrape/download/tiktok-dl.cjs'));
             await handleTiktokDl(hisoka, m, rawUrl, {
                 gemini, tolak: async (s, msg, text) => {
                     await m.reply({ edit: loadingMsg.key, text }).catch(() => {});
@@ -180,7 +180,7 @@ async function handleAllUnduh(hisoka, m, query, ctx) {
         }
 
         if (platform === 'youtube') {
-            const { handleYtmp4 } = require(path.resolve('./src/scrape/youtube-dl.cjs'));
+            const { handleYtmp4 } = require(path.resolve('./src/scrape/download/youtube-dl.cjs'));
             await handleYtmp4(hisoka, m, rawUrl, {
                 gemini, tolak: async (s, msg, text) => {
                     await m.reply({ edit: loadingMsg.key, text }).catch(() => {});
@@ -192,7 +192,7 @@ async function handleAllUnduh(hisoka, m, query, ctx) {
         }
 
         if (platform === 'facebook') {
-            const { handleFacebookDl } = require(path.resolve('./src/scrape/facebook-dl.cjs'));
+            const { handleFacebookDl } = require(path.resolve('./src/scrape/download/facebook-dl.cjs'));
             await handleFacebookDl(hisoka, m, rawUrl, {
                 gemini, tolak: async (s, msg, text) => {
                     await m.reply({ edit: loadingMsg.key, text }).catch(() => {});
@@ -206,7 +206,7 @@ async function handleAllUnduh(hisoka, m, query, ctx) {
         }
 
         if (platform === 'twitter') {
-            const { handleTwitterDl } = require(path.resolve('./src/scrape/twitter-dl.cjs'));
+            const { handleTwitterDl } = require(path.resolve('./src/scrape/download/twitter-dl.cjs'));
             await handleTwitterDl(hisoka, m, rawUrl, {
                 tolak: async (s, msg, text) => {
                     await m.reply({ edit: loadingMsg.key, text }).catch(() => {});
