@@ -1550,11 +1550,19 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
           if (mainBotSock) {
             try {
               await delay(800)
-              await mainBotSock.sendMessage(`${number}@s.whatsapp.net`, {
+
+              // Resolve JID yang benar dulu (support LID/linked device)
+              let welcomeTargetJid = `${number}@s.whatsapp.net`
+              try {
+                const [waRes] = await mainBotSock.onWhatsApp(`${number}@s.whatsapp.net`)
+                if (waRes?.exists && waRes?.jid) welcomeTargetJid = waRes.jid
+              } catch (_) {}
+
+              await mainBotSock.sendMessage(welcomeTargetJid, {
                 text: msgDirectWelcome(number)
               })
               directNotifSent = true
-              console.log(`[JADIBOT][V2] ✅ Notif realtime terkirim ke +${number} via main bot`)
+              console.log(`[JADIBOT][V2] ✅ Notif realtime terkirim ke +${number} via main bot (jid: ${welcomeTargetJid})`)
             } catch (e) {
               console.log(`[JADIBOT][V2] ⚠️ Gagal kirim notif ke +${number} via main bot: ${e?.message}`)
             }
