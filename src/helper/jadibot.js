@@ -1501,6 +1501,12 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
       startingSocketMap.delete(number)
       pairingRequested.delete(number)
 
+      // Pastikan registered = true tersimpan agar reconnect tidak trigger pairing ulang
+      if (!state.creds.registered) {
+        state.creds.registered = true
+        saveCreds()
+      }
+
       if (durationMs === 'permanent') {
         setPermanentJadibot(number, 'active')
       } else if (hasRequestedDuration) {
@@ -1950,6 +1956,12 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
       jadibotMap.set(number, sock)
       jadibotConnectedAt.set(number, _connectTs)
       persistConnectedAt(number, _connectTs)
+
+      // Pastikan registered = true tersimpan agar reconnect tidak trigger QR ulang
+      if (!state.creds.registered) {
+        state.creds.registered = true
+        saveCreds()
+      }
 
       if (durationMs === 'permanent') {
         setPermanentJadibot(number, 'active')
