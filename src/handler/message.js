@@ -1156,23 +1156,37 @@ async function listbut2(jid, teks, listnye, m, hisoka) {
 function _logCmdBox(m, hisoka, cmdStr) {
         const _isJadibot = hisoka?.isMainBot === false;
         const _senderNum = (m.sender || '').split('@')[0].split(':')[0];
-        const _jadibotOwnNum = _isJadibot
-                ? (hisoka.user?.id?.split('@')[0]?.split(':')[0] || '')
-                : '';
         const _modeStr = _isJadibot
-                ? `Jadibot ${maskNumber(_jadibotOwnNum)}`
+                ? 'Jadibot'
                 : (m.isRealOwner ? 'Owner' : m.isBot ? 'Bot' : 'User');
         const _tujuan = m.isGroup ? 'Grup' : 'Private';
         const _namaGrup = m.isGroup ? (hisoka.getName(m.from) || '-') : '-';
 
-        // Nama & Nomer: jadibot → sender yg menjalankan cmd (dari getUserName/realtime)
-        //               bot utama → nama bot itu sendiri atau pushName sender
-        let _botName, _numToShow;
+        // Nomer: jadibot → nomor jadibot itu sendiri; owner/user → nomor sender
+        const _numToShow = _isJadibot
+                ? (hisoka.user?.id?.split('@')[0]?.split(':')[0] || _senderNum)
+                : _senderNum;
+
+        // Nama: ambil nama realtime dari kontak/bot untuk nomor yang ditampilkan
+        // Jadibot → getName dari jadibot socket (realtime kontak), bukan pushName pengirim
+        // Bot utama → nama bot sendiri atau pushName sender kalau nama bot angka semua
+        let _botName;
         if (_isJadibot) {
-                _numToShow = _senderNum;
-                _botName = getUserName(m.sender, m.pushName || _senderNum || '-');
+                const _jadibotJid = hisoka.user?.id || '';
+                const _fromContacts = typeof hisoka.getName === 'function'
+                        ? (hisoka.getName(_jadibotJid) || hisoka.getName(_numToShow + '@s.whatsapp.net') || '')
+                        : '';
+                const _rawName = hisoka.user?.name || '';
+                const _nameIsNum = /^\+?\d[\d\s\-]+$/.test(_rawName.trim());
+                const _fromContactsIsNum = /^\+?\d[\d\s\-]+$/.test(_fromContacts.trim());
+                if (_fromContacts && !_fromContactsIsNum) {
+                        _botName = _fromContacts;
+                } else if (_rawName && !_nameIsNum) {
+                        _botName = _rawName;
+                } else {
+                        _botName = _fromContacts || _rawName || _numToShow || '-';
+                }
         } else {
-                _numToShow = _senderNum;
                 const _rawBotName = hisoka.user?.name || '';
                 const _nameIsJustNumber = /^\+?\d[\d\s\-]+$/.test(_rawBotName.trim());
                 _botName = (_rawBotName && !_nameIsJustNumber)
