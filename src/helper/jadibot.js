@@ -1351,26 +1351,36 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
               // ── V2: Kirim kode langsung ke nomor tujuan ──
               try {
                 const fmt = formatPairingCode(code)
-                await mainBotSock.sendMessage(`${number}@s.whatsapp.net`, {
-                  text:
-                    `╔══════════════════════╗\n` +
-                    `║   🤖  *J A D I B O T*  ║\n` +
-                    `╚══════════════════════╝\n\n` +
-                    `🔑 *Kode Pairing untuk nomormu:*\n\n` +
-                    `┌─────────────────┐\n` +
-                    `│   *${fmt}*   │\n` +
-                    `└─────────────────┘\n\n` +
-                    `📋 *Cara memasukkan kode:*\n` +
-                    `1️⃣ Buka WhatsApp di HP kamu\n` +
-                    `2️⃣ Ketuk ⋮ → *Perangkat Tertaut*\n` +
-                    `3️⃣ Ketuk *Tautkan Perangkat*\n` +
-                    `4️⃣ Pilih *Tautkan dengan nomor telepon*\n` +
-                    `5️⃣ Masukkan kode di atas\n\n` +
-                    `⏳ *Kode berlaku 3 menit*\n\n` +
-                    `\`\`\`${fmt}\`\`\``
-                })
+
+                // Resolve JID yang benar dulu (support LID/linked device)
+                let targetJid = `${number}@s.whatsapp.net`
+                try {
+                  const [waResult] = await mainBotSock.onWhatsApp(`${number}@s.whatsapp.net`)
+                  if (waResult?.exists && waResult?.jid) {
+                    targetJid = waResult.jid
+                  }
+                } catch (_) {}
+
+                const pairingText =
+                  `╔══════════════════════╗\n` +
+                  `║   🤖  *J A D I B O T*  ║\n` +
+                  `╚══════════════════════╝\n\n` +
+                  `🔑 *Kode Pairing untuk nomormu:*\n\n` +
+                  `┌─────────────────┐\n` +
+                  `│   *${fmt}*   │\n` +
+                  `└─────────────────┘\n\n` +
+                  `📋 *Cara memasukkan kode:*\n` +
+                  `1️⃣ Buka WhatsApp di HP kamu\n` +
+                  `2️⃣ Ketuk ⋮ → *Perangkat Tertaut*\n` +
+                  `3️⃣ Ketuk *Tautkan Perangkat*\n` +
+                  `4️⃣ Pilih *Tautkan dengan nomor telepon*\n` +
+                  `5️⃣ Masukkan kode di atas\n\n` +
+                  `⏳ *Kode berlaku 3 menit*\n\n` +
+                  `\`\`\`${fmt}\`\`\``
+
+                await mainBotSock.sendMessage(targetJid, { text: pairingText })
                 directPairingSent = true
-                console.log(`[JADIBOT][V2] ✅ Pairing code terkirim realtime ke +${number}`)
+                console.log(`[JADIBOT][V2] ✅ Pairing code terkirim realtime ke +${number} (jid: ${targetJid})`)
 
                 // Notif singkat ke owner bahwa kode sudah dikirim ke nomor tujuan
                 try {
@@ -1389,6 +1399,17 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
                 } catch {}
               } catch (e) {
                 console.log(`[JADIBOT][V2] ⚠️ Gagal kirim pairing code ke +${number}: ${e?.message}`)
+                // Fallback: kirim ke GC/owner jika pengiriman langsung gagal
+                if (!directPairingSent) {
+                  try {
+                    const sentInfo = await sendReply(msgPairingCode(code, number))
+                    if (sentInfo?.key) pairingMsgKey = sentInfo.key
+                    directPairingSent = true
+                    console.log(`[JADIBOT][V2→V1] ✅ Fallback: pairing code dikirim ke GC/owner`)
+                  } catch (e2) {
+                    console.log(`[JADIBOT][V2→V1] ⚠️ Fallback gagal juga: ${e2?.message}`)
+                  }
+                }
               }
             }
 
@@ -1467,6 +1488,13 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
       hasConnectedOnce = true
       const isFreshPairing = pairingRequested.has(number)
       const _connectTs = Date.now()
+
+      // Always log connection status — fresh pairing or reconnect
+      const _LC = '\x1b[36m', _LR = '\x1b[0m', _LB = '\x1b[1m'
+      console.log(`${_LC}╠══════════════════════════════════╣${_LR}`)
+      console.log(`${_LC}║${_LR} ✅ ${_LB}+${number}${_LR} ${isFreshPairing ? 'CONNECTED (pairing berhasil)' : 'RECONNECTED ✔'}`)
+      console.log(`${_LC}╚══════════════════════════════════╝${_LR}`)
+
       jadibotMap.set(number, sock)
       jadibotConnectedAt.set(number, _connectTs)
       persistConnectedAt(number, _connectTs)
