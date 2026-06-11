@@ -291,7 +291,7 @@ export async function useSingleFileAuthState(filePath) {
         for (const type of CONSOLIDATED_TYPES) keyStore.set(type, new Map())
         memStore.set('sender-key-memory', new Map())
 
-        // ── tulis semua ke satu file ──
+        // ── tulis semua ke satu file (atomic: tmp → rename) ──
         async function flushNow() {
                 const keysObj = {}
                 for (const [type, store] of keyStore) {
@@ -307,11 +307,15 @@ export async function useSingleFileAuthState(filePath) {
                         groups:   _groups,
                         settings: _settings,
                 }, BufferJSON.replacer)
+                const tmpPath = filePath + '.tmp'
                 const release = await writeMutex.acquire()
                 try {
-                        await writeFile(filePath, payload)
+                        await writeFile(tmpPath, payload)
+                        const { rename } = await import('fs/promises')
+                        await rename(tmpPath, filePath)
                 } catch (err) {
                         console.error(`[SingleFile] Gagal tulis ${filePath}:`, err.message)
+                        try { const { unlink } = await import('fs/promises'); await unlink(tmpPath) } catch (_) {}
                 } finally {
                         release()
                 }
