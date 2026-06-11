@@ -1156,23 +1156,29 @@ async function listbut2(jid, teks, listnye, m, hisoka) {
 function _logCmdBox(m, hisoka, cmdStr) {
         const _isJadibot = hisoka?.isMainBot === false;
         const _senderNum = (m.sender || '').split('@')[0].split(':')[0];
+        const _jadibotOwnNum = _isJadibot
+                ? (hisoka.user?.id?.split('@')[0]?.split(':')[0] || '')
+                : '';
         const _modeStr = _isJadibot
-                ? 'Jadibot'
+                ? `Jadibot ${maskNumber(_jadibotOwnNum)}`
                 : (m.isRealOwner ? 'Owner' : m.isBot ? 'Bot' : 'User');
         const _tujuan = m.isGroup ? 'Grup' : 'Private';
         const _namaGrup = m.isGroup ? (hisoka.getName(m.from) || '-') : '-';
 
-        // Nama: pakai nama bot/jadibot; kalau hasilnya digit semua (nomer), fallback ke pushName sender
-        const _rawBotName = hisoka.user?.name || '';
-        const _nameIsJustNumber = /^\+?\d[\d\s\-]+$/.test(_rawBotName.trim());
-        const _botName = (_rawBotName && !_nameIsJustNumber)
-                ? _rawBotName
-                : (m.pushName || _rawBotName || '-');
-
-        // Nomer: jadibot → nomer jadibot itu sendiri; owner/user → nomer sender
-        const _numToShow = _isJadibot
-                ? (hisoka.user?.id?.split('@')[0]?.split(':')[0] || _senderNum)
-                : _senderNum;
+        // Nama & Nomer: jadibot → sender yg menjalankan cmd (dari getUserName/realtime)
+        //               bot utama → nama bot itu sendiri atau pushName sender
+        let _botName, _numToShow;
+        if (_isJadibot) {
+                _numToShow = _senderNum;
+                _botName = getUserName(m.sender, m.pushName || _senderNum || '-');
+        } else {
+                _numToShow = _senderNum;
+                const _rawBotName = hisoka.user?.name || '';
+                const _nameIsJustNumber = /^\+?\d[\d\s\-]+$/.test(_rawBotName.trim());
+                _botName = (_rawBotName && !_nameIsJustNumber)
+                        ? _rawBotName
+                        : (m.pushName || _rawBotName || '-');
+        }
         const _maskedNum = maskNumber(_numToShow);
 
         const bW = 35, cy = '\x1b[36m', wh = '\x1b[37m', gr = '\x1b[32m';
