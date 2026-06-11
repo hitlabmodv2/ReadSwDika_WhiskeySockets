@@ -1709,7 +1709,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
       setTimeout(() => {
         reconnectingJadibot.delete(number)
         activeOrStartingJadibot.delete(number)
-        startJadibot(number, sendReply, mainBotNumber, editMsg, sendPairingMsg, hasConnectedOnce ? undefined : durationMs, mainBotSock)
+        startJadibot(number, sendReply, mainBotNumber, editMsg, sendPairingMsg, hasConnectedOnce ? undefined : durationMs, mainBotSock, null, requesterNumber)
       }, 3000)
     }
   })
@@ -2112,7 +2112,7 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
         setTimeout(() => {
           reconnectingJadibot.delete(number)
           activeOrStartingJadibot.delete(number)
-          startJadibotQR(number, sendReply, sendImage, mainBotNumber, hasConnected ? undefined : durationMs, mainBotSock)
+          startJadibotQR(number, sendReply, sendImage, mainBotNumber, hasConnected ? undefined : durationMs, mainBotSock, null, requesterNumber)
         }, 3000)
         return
       }
