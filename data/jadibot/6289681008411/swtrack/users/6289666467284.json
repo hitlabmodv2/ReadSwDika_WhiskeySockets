@@ -4,11 +4,11 @@
     "sender": "6289666467284@s.whatsapp.net",
     "name": "Parulll",
     "type": "imageMessage",
-    "arrivedAt": "2026-06-11T08:26:04.846Z",
+    "arrivedAt": "2026-06-11T08:26:04.867Z",
     "read": true,
     "reacted": true,
-    "emoji": "🧾",
-    "resolve": "PN langsung ✓",
+    "emoji": "🐦‍🔥",
+    "resolve": "Signal Lib ✓",
     "source": "status",
     "number": "6289666467284",
     "resolvedPn": "6289666467284@s.whatsapp.net",
@@ -20,7 +20,9 @@
       "participant": "22836525699074@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-11T08:26:07.035Z",
+    "updatedAt": "2026-06-11T08:26:17.119Z",
+    "deleted": true,
+    "deletedAt": "2026-06-11T08:26:06.510Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -39,20 +41,18 @@
         "addressingMode": "lid"
       }
     ],
-    "deleted": true,
-    "deletedAt": "2026-06-11T08:26:06.516Z",
-    "processedAt": "2026-06-11T08:26:07.035Z"
+    "processedAt": "2026-06-11T08:26:17.119Z"
   },
   "ACE2EDBC8267A2C4772037DFBA130568": {
     "id": "ACE2EDBC8267A2C4772037DFBA130568",
     "sender": "6289666467284@s.whatsapp.net",
     "name": "Parulll",
     "type": "imageMessage",
-    "arrivedAt": "2026-06-11T08:26:20.165Z",
+    "arrivedAt": "2026-06-11T08:26:20.178Z",
     "read": true,
     "reacted": true,
-    "emoji": "🌵",
-    "resolve": "PN langsung ✓",
+    "emoji": "🪀",
+    "resolve": "Signal Lib ✓",
     "source": "status",
     "number": "6289666467284",
     "resolvedPn": "6289666467284@s.whatsapp.net",
@@ -64,7 +64,7 @@
       "participant": "22836525699074@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-11T08:26:27.853Z",
+    "updatedAt": "2026-06-11T08:26:37.596Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -83,18 +83,18 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-11T08:26:27.853Z"
+    "processedAt": "2026-06-11T08:26:37.596Z"
   },
   "AC0B3E6776CE467F7FEA2F00D2FFCA67": {
     "id": "AC0B3E6776CE467F7FEA2F00D2FFCA67",
     "sender": "6289666467284@s.whatsapp.net",
     "name": "Parulll",
     "type": "videoMessage",
-    "arrivedAt": "2026-06-11T10:42:39.984Z",
+    "arrivedAt": "2026-06-11T10:42:39.995Z",
     "read": true,
     "reacted": true,
-    "emoji": "🪹",
-    "resolve": "PN langsung ✓",
+    "emoji": "⏪",
+    "resolve": "Signal Lib ✓",
     "source": "status",
     "number": "6289666467284",
     "resolvedPn": "6289666467284@s.whatsapp.net",
@@ -106,7 +106,7 @@
       "participant": "22836525699074@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-11T10:42:51.457Z",
+    "updatedAt": "2026-06-11T10:42:47.459Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -125,6 +125,6 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-11T10:42:51.457Z"
+    "processedAt": "2026-06-11T10:42:47.459Z"
   }
 }
