@@ -2365,6 +2365,7 @@ export {
   stopJadibot,
   jadibotMap,
   jadibotConnectedAt,
+  activeOrStartingJadibot,
   pendingJadibotChoices,
   formatPairingCode,
   maskNumber,

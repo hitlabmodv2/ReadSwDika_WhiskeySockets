@@ -53,7 +53,7 @@ import { getPhoneRegion, formatPhoneWithRegion } from './src/helper/phoneRegion.
 import { ensureTmpDir, startAutoCleaner, stopAutoCleaner, restartAutoCleaner, cleanStaleSessionFiles } from './src/helper/cleaner.js'; // ini baru
 import { pruneSwStats } from './src/helper/swtrack.js';
 import { useSingleFileAuthState } from './src/helper/authState.js';
-import { startJadibot, jadibotMap, purgeExpiredJadibotSessions, getJadibotExpiry, formatRemainingTime, pauseAllJadibotTimers, resumeAllJadibotTimers, restoreConnectedAtMap } from './src/helper/jadibot.js';
+import { startJadibot, jadibotMap, activeOrStartingJadibot, purgeExpiredJadibotSessions, getJadibotExpiry, formatRemainingTime, pauseAllJadibotTimers, resumeAllJadibotTimers, restoreConnectedAtMap } from './src/helper/jadibot.js';
 import { safeGetPNForLID } from './src/helper/socketCompat.js';
 import { saveViewOnceCache, cleanOldViewOnceCache, hasViewOnceCache } from './src/helper/voCache.js';
 // ini baru - yg bawah pindah ke sini
@@ -1453,8 +1453,9 @@ setTimeout(() => {
   const validBots = [];
   const invalidBots = [];
   for (const number of bots) {
-    if (global.autoStartedJadibot.has(number)) continue;
-    global.autoStartedJadibot.add(number);
+    // Guard real-time: skip jika bot sudah benar-benar terhubung ATAU sedang dalam proses start/reconnect
+    // Berbeda dari global.autoStartedJadibot yang tidak di-reset saat main() reconnect tanpa process exit
+    if (jadibotMap.has(number) || activeOrStartingJadibot.has(number)) continue;
     if (!isJadibotSessionValid(number)) {
       invalidBots.push(number);
     } else {
