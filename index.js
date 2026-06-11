@@ -1521,6 +1521,11 @@ setTimeout(() => {
                                 clearTimeout(global.__connectWatchdog);
                                 global.__connectWatchdog = null;
                         }
+                        // Pastikan registered = true tersimpan permanen setelah terhubung
+                        if (!state.creds.registered) {
+                                state.creds.registered = true;
+                                saveCreds();
+                        }
                 }
 
                 if (connection === 'close') {

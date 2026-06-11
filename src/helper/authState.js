@@ -466,7 +466,10 @@ export async function useSingleFileAuthState(filePath) {
                                 }
                         }
                 },
-                saveCreds: () => scheduleFlush(),
+                saveCreds: (update) => {
+                        if (update && typeof update === 'object') Object.assign(creds, update)
+                        scheduleFlush()
+                },
                 contacts,
                 groups,
                 settings,
