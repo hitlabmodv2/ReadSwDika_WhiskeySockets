@@ -2,78 +2,10 @@
 _Jumat, 12 Juni 2026 — WIB_ 🕐
 _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurna_ 🙏
 ━━━━━━━━━━━━━━━━━━━━━━
-🤖 *WILY BOT — V22*
-✨ *7 Fitur Baru*
-🔧 *0 Bug Fix*
-🚀 *4 Improvement*
-━━━━━━━━━━━━━━━━━━━━━━
-✨ *FITUR BARU*
-━━━━━━━━━━━━━━━━━━━━━━
-> NO.1 😊 *Sistem Emoji Per-Jadibot — File Emoji Terpisah per Nomor*
-> Setiap jadibot kini punya file emoji sendiri di data/jadibot/{nomor}/emoji.json
-> Tidak campur dengan bot utama maupun jadibot lain
-> Auto-init saat pertama connect: langsung copy 1900 emoji dari bot utama
-
-> NO.2 ➕ *Tambah Emoji Reaksi SW — .emojiadd*
-> Tambah emoji ke daftar milik jadibot sendiri
-> Format: .emojiadd 😊 atau .emojiadd 😊,😄,🔥 (bisa banyak sekaligus)
-> Cek duplikat otomatis — emoji yang sudah ada tidak ditambah dobel
-
-> NO.3 ➖ *Hapus Emoji Reaksi SW — .emojidel*
-> Hapus emoji dari daftar milik jadibot sendiri
-> Format: .emojidel 😊 atau .emojidel 😊,😄 (bisa banyak sekaligus)
-> Notif jika emoji tidak ditemukan di daftar
-
-> NO.4 📋 *Lihat Daftar Emoji — .emojilist*
-> Tampilkan semua emoji tersimpan + mode aktif saat ini (Default / Custom)
-> Hanya tampil emoji milik jadibot yang kirim command, tidak campur lain
-
-> NO.5 🌐 *Mode Default Emoji — .emojidefault*
-> Reaksi SW pakai emoji langsung dari bot utama (1900 emoji)
-> File emoji milik jadibot direset ke salinan bot utama + mode default aktif
-> Cocok kalau mau ikut update emoji bot utama otomatis
-
-> NO.6 🎨 *Mode Custom Emoji — .emojicustom*
-> Reaksi SW pakai emoji dari file milik jadibot sendiri
-> Bisa kustom sesuka hati via .emojiadd / .emojidel / .emojiclear
-> Mode custom tersimpan persistent — tidak hilang saat bot restart
-
-> NO.7 🧹 *Reset Emoji ke Seed WA — .emojiclear*
-> Hapus semua emoji & isi ulang dengan 12 emoji seed standar WA:
-> 💚 ❤️ 🔥 👍 😂 😮 😢 😡 🥰 🎉 💯 ✨
-> Tidak pernah benar-benar kosong — love ijo 💚 selalu ada
-> Mode otomatis beralih ke Custom setelah clear
-━━━━━━━━━━━━━━━━━━━━━━
-🔧 *BUG FIX*
-━━━━━━━━━━━━━━━━━━━━━━
-> Tidak ada bug fix pada versi ini
-━━━━━━━━━━━━━━━━━━━━━━
-🚀 *IMPROVEMENT*
-━━━━━━━━━━━━━━━━━━━━━━
-> NO.1 💾 *Auto-Init Emoji.json saat Jadibot Connect*
-> Tidak perlu setup manual — emoji.json langsung terbuat saat jadibot pertama online
-> Default 1900 emoji dari bot utama, mode default
-
-> NO.2 🔄 *Mode Toggle Persistent — Tidak Hilang saat Restart*
-> Mode emoji (default/custom) disimpan ke emoji.json per jadibot
-> Saat bot restart atau jadibot reconnect, mode tetap seperti terakhir diset
-
-> NO.3 🛡️ *Atomic Write untuk Semua Operasi Emoji*
-> Semua tulis file emoji pakai pola .tmp → rename
-> File tidak akan corrupt meskipun bot crash di tengah proses tulis
-
-> NO.4 📁 *Pindah Lokasi Data Jadibot — data/jadibot → data_jadibot*
-> Sebelumnya: semua data jadibot tersimpan di folder data/jadibot/{nomor}/
-> Sesudahnya: dipindah ke data_jadibot/ di root project (sejajar index.js)
-> Alasan: menghindari konflik dengan folder data/ bot utama & lebih mudah dikelola
-> Mencakup: settings.json, realtime.json, session, dan file emoji per jadibot
-> Semua referensi path di kode diupdate otomatis — tidak perlu migrasi manual
-━━━━━━━━━━━━━━━━━━━━━━
-
 🤖 *WILY BOT — V21*
-✨ *7 Fitur Baru*
+✨ *14 Fitur Baru*
 🔧 *7 Bug Fix*
-🚀 *7 Improvement*
+🚀 *11 Improvement*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -109,12 +41,12 @@ _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurn
 > Setiap jadibot kini bisa set status online/offline sendiri secara mandiri
 > Tidak saling bentrok dengan bot utama maupun jadibot lain
 > Perintah: .online on / .online off / .online set <detik>
-> Setting tersimpan persistent ke settings.json per nomor jadibot
+> Setting tersimpan persistent ke data_jadibot/settings.json per nomor jadibot
 > Interval berjalan otomatis saat jadibot connect/reconnect, berhenti saat stop
 
 > NO.5 📋 *Ringkasan Setting Jadibot — .ceksetting*
 > Tampilkan semua setting aktif jadibot dalam satu pesan ringkas
-> Mencakup: Read SW, Anti Delete, Anti Call, Anti VidCall, Auto Online
+> Mencakup: Read SW, Anti Delete, Anti Call, Anti VidCall, Auto Online, Auto Typing, Auto Recording
 > Lengkap dengan detail sub-setting (mode delay, private/group, interval, dll)
 > Hanya bisa diakses oleh pemilik jadibot tersebut
 
@@ -134,6 +66,41 @@ _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurn
 > Bisa diatur khusus per chat: .recording private on/off • .recording group on/off
 > Atur durasi indikator: .recording set <detik>
 > Setting tersimpan persistent ke data_jadibot/settings.json per nomor
+
+> NO.8 😊 *Sistem Emoji Per-Jadibot — File Emoji Terpisah per Nomor*
+> Setiap jadibot kini punya file emoji sendiri di data_jadibot/{nomor}/emoji.json
+> Tidak campur dengan bot utama maupun jadibot lain
+> Auto-init saat pertama connect: langsung copy 1900 emoji dari bot utama
+
+> NO.9 ➕ *Tambah Emoji Reaksi SW — .emojiadd*
+> Tambah emoji ke daftar milik jadibot sendiri
+> Format: .emojiadd 😊 atau .emojiadd 😊,😄,🔥 (bisa banyak sekaligus)
+> Cek duplikat otomatis — emoji yang sudah ada tidak ditambah dobel
+
+> NO.10 ➖ *Hapus Emoji Reaksi SW — .emojidel*
+> Hapus emoji dari daftar milik jadibot sendiri
+> Format: .emojidel 😊 atau .emojidel 😊,😄 (bisa banyak sekaligus)
+> Notif jika emoji tidak ditemukan di daftar
+
+> NO.11 📋 *Lihat Daftar Emoji — .emojilist*
+> Tampilkan semua emoji tersimpan + mode aktif saat ini (Default / Custom)
+> Hanya tampil emoji milik jadibot yang kirim command, tidak campur lain
+
+> NO.12 🌐 *Mode Default Emoji — .emojidefault*
+> Reaksi SW pakai emoji langsung dari bot utama (1900 emoji)
+> File emoji milik jadibot direset ke salinan bot utama + mode default aktif
+> Cocok kalau mau ikut update emoji bot utama otomatis
+
+> NO.13 🎨 *Mode Custom Emoji — .emojicustom*
+> Reaksi SW pakai emoji dari file milik jadibot sendiri
+> Bisa kustom sesuka hati via .emojiadd / .emojidel / .emojiclear
+> Mode custom tersimpan persistent — tidak hilang saat bot restart
+
+> NO.14 🧹 *Reset Emoji ke Seed WA — .emojiclear*
+> Hapus semua emoji & isi ulang dengan 12 emoji seed standar WA:
+> 💚 ❤️ 🔥 👍 😂 😮 😢 😡 🥰 🎉 💯 ✨
+> Tidak pernah benar-benar kosong — love ijo 💚 selalu ada
+> Mode otomatis beralih ke Custom setelah clear
 ━━━━━━━━━━━━━━━━━━━━━━
 🔧 *BUG FIX*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -217,4 +184,23 @@ _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurn
 > Auto Online punya interval timer sendiri (autoOnlineIntervalMap) per sesi jadibot
 > Auto Typing & Recording hanya aktif saat ada pesan masuk ke sesi jadibot masing-masing
 > Tidak ada shared state — restart bot utama / jadibot lain tidak reset setting jadibot ini
+
+> NO.8 💾 *Auto-Init Emoji.json saat Jadibot Connect*
+> Tidak perlu setup manual — emoji.json langsung terbuat saat jadibot pertama online
+> Default 1900 emoji dari bot utama, mode default
+
+> NO.9 🔄 *Mode Emoji Toggle Persistent — Tidak Hilang saat Restart*
+> Mode emoji (default/custom) disimpan ke emoji.json per jadibot
+> Saat bot restart atau jadibot reconnect, mode tetap seperti terakhir diset
+
+> NO.10 🛡️ *Atomic Write untuk Semua Operasi Emoji*
+> Semua tulis file emoji pakai pola .tmp → rename
+> File tidak akan corrupt meskipun bot crash di tengah proses tulis
+
+> NO.11 📁 *Pindah Lokasi Data Jadibot — data/jadibot → data_jadibot*
+> Sebelumnya: semua data jadibot tersimpan di folder data/jadibot/{nomor}/
+> Sesudahnya: dipindah ke data_jadibot/ di root project (sejajar index.js)
+> Alasan: menghindari konflik dengan folder data/ bot utama & lebih mudah dikelola
+> Mencakup: settings.json, realtime.json, session, dan file emoji per jadibot
+> Semua referensi path di kode diupdate otomatis — tidak perlu migrasi manual
 ━━━━━━━━━━━━━━━━━━━━━━
