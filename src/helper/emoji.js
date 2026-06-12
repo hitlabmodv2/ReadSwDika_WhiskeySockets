@@ -40,12 +40,44 @@ function loadEmojiData() {
 
 function saveEmojiData(data) {
     try {
-        fs.writeFileSync(EMOJI_JSON_PATH, JSON.stringify(data, null, 2), 'utf8');
+        const tmp = EMOJI_JSON_PATH + '.tmp';
+        fs.writeFileSync(tmp, JSON.stringify(data, null, 2), 'utf8');
+        fs.renameSync(tmp, EMOJI_JSON_PATH);
+        // Auto-sync defaultemoji.json ke semua jadibot mode=default
+        _syncAllJadibotDefaults(data.emojis || []);
         return true;
     } catch (error) {
         console.error('Error saving emoji.json:', error.message);
         return false;
     }
+}
+
+// Sync defaultemoji.json ke semua jadibot yang mode=default — realtime, no conflict
+function _syncAllJadibotDefaults(emojis) {
+    try {
+        if (!Array.isArray(emojis) || emojis.length === 0) return;
+        const jadibotDir = path.join(process.cwd(), 'data_jadibot');
+        if (!fs.existsSync(jadibotDir)) return;
+        const entries = fs.readdirSync(jadibotDir);
+        const obj = JSON.stringify({ source: 'main-bot', syncedAt: Date.now(), emojis }, null, 2);
+        for (const num of entries) {
+            try {
+                const numDir = path.join(jadibotDir, num);
+                if (!fs.statSync(numDir).isDirectory()) continue;
+                // Cek mode — hanya sync kalau mode=default (atau belum ada mode)
+                const emojiFile = path.join(numDir, 'emoji.json');
+                if (fs.existsSync(emojiFile)) {
+                    const userCfg = JSON.parse(fs.readFileSync(emojiFile, 'utf-8'));
+                    if (userCfg.mode && userCfg.mode !== 'default') continue;
+                }
+                // Atomic write ke defaultemoji.json
+                const outPath = path.join(numDir, 'defaultemoji.json');
+                const tmp = outPath + '.tmp';
+                fs.writeFileSync(tmp, obj, 'utf-8');
+                fs.renameSync(tmp, outPath);
+            } catch (_) {}
+        }
+    } catch (_) {}
 }
 
 function getStatusEmojis() {
