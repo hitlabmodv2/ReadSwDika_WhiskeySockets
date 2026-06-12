@@ -349,9 +349,9 @@
     "name": "Zacky Ariansyah",
     "type": "extendedTextMessage",
     "arrivedAt": "2026-06-12T10:46:06.063Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "🧔",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6289678522775",
@@ -364,6 +364,25 @@
       "participant": "193020829909081@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-12T10:46:06.063Z"
+    "updatedAt": "2026-06-12T10:46:16.865Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289678522775@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACDB44606CB089FC624FC520E2954E1F",
+        "participant": "193020829909081@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289678522775@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACDB44606CB089FC624FC520E2954E1F",
+        "participant": "6289678522775@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-12T10:46:16.865Z"
   }
 }
