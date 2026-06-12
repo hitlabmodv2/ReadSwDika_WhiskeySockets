@@ -31,7 +31,7 @@ import crypto from 'crypto';
 import { exec } from 'child_process';
 import util from 'util';
 
-import { msToTime, loadConfig, saveConfig, getCaseName, getAIPersonaName, getAIPersonaGreeting } from '../helper/utils.js';
+import { msToTime, loadConfig, saveConfig, getCaseName, getCaseGroups, getAIPersonaName, getAIPersonaGreeting } from '../helper/utils.js';
 import { stopAutoCleaner, restartAutoCleaner, cleanStaleSessionFiles, clearOldFiles, clearTmpFolder } from '../helper/cleaner.js';
 import { getUptimeFormatted, getBotStats } from '../db/botStats.js';
 import { logError, formatErrorReport, clearErrors, generateErrorFileTxt, getInfoErrorTxtPath, getErrorStats } from '../db/errorLog.js';
@@ -9298,8 +9298,29 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'menu': {
                                 if (!m.prefix && m.query) break;
                                 try {
+                                        const _allGroups = await getCaseGroups(path.join(process.cwd(), 'src', 'handler', 'message.js'));
                                         // ── JADIBOT: tampilkan menu khusus tanpa thumbnail ──
                                         if (hisoka?.isMainBot === false) {
+                                                const _jbAllowed = new Set([
+                                                        'p', 'ping', 'menu',
+                                                        'rvo', 'viewonce', 'vo',
+                                                        'antidel', 'ad',
+                                                        'readsw',
+                                                        'anticall', 'ac',
+                                                        'anticallvid', 'acv',
+                                                        'autocallaudio', 'aca',
+                                                        'online',
+                                                        'typing', 'typ',
+                                                        'recording', 'record',
+                                                        'tt', 'ig', 'fb', 'ytmp3', 'ytmp4', 'play',
+                                                        'sticker', 's',
+                                                        'toimg', 'hd',
+                                                        'upswgc', 'swgc', 'swgrup', 'swgroup', 'statusgrup', 'statusgroup',
+                                                        'ceksw', 'ceksetting',
+                                                        'emojiadd', 'emojidel', 'emojilist',
+                                                        'emojidefault', 'emojicustom', 'emojiclear'
+                                                ]);
+                                                const _jbFiturCount = _allGroups.filter(g => g.some(c => _jbAllowed.has(c))).length;
                                                 const _jbCfg       = loadConfig();
                                                 const _jbBotReply  = _jbCfg?.botReply || {};
                                                 const _jbFooter    = loadConfig()?.botReply?.footer || '';
@@ -9328,6 +9349,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
 ${masaAktifLine}
 📅 *Tanggal* : ${_jbTglFmt}
 🕐 *Waktu*   : ${_jbJamFmt} WIB
+📦 *Fitur*  : ${_jbFiturCount} fitur aktif
 🌐 *Status* : Online 🟢
 
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -9434,8 +9456,7 @@ _📦 Powered by Wily Bot V21_ 🤖`;
                                         const um = Math.floor((uptime % 3600) / 60);
                                         const us = Math.floor(uptime % 60);
                                         const uptimeStr = `${uh} Jam ${um} Menit ${us} Detik`;
-                                        const allCmds = await getCaseName(path.join(process.cwd(), 'src', 'handler', 'message.js'));
-                                        const totalCmd = allCmds.length || 0;
+                                        const totalCmd = _allGroups.length || 0;
                                         const _mnNow = new Date();
                                         const _mnTgl = new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }).format(_mnNow);
                                         const _mnJam = new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).format(_mnNow);

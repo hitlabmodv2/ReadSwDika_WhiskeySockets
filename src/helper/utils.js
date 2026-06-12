@@ -182,3 +182,46 @@ export const getCaseName = fileOrCode => {
                 });
         });
 };
+
+export const getCaseGroups = fileOrCode => {
+        return new Promise((resolve, reject) => {
+                const processContent = (content) => {
+                        const lines = content.split('\n');
+                        const groups = [];
+                        let inGroup = false;
+                        let current = [];
+
+                        for (let i = 0; i < lines.length; i++) {
+                                const line = lines[i].trim();
+                                const m = line.match(/^case\s+['"`](.*?)['"`]\s*:/);
+                                if (m) {
+                                        if (!inGroup) {
+                                                current = [];
+                                                inGroup = true;
+                                        }
+                                        current.push(m[1]);
+                                        if (line.includes('{')) {
+                                                if (current.length) groups.push([...current]);
+                                                inGroup = false;
+                                                current = [];
+                                        }
+                                } else if (inGroup) {
+                                        if (line.startsWith('{') && current.length) groups.push([...current]);
+                                        inGroup = false;
+                                        current = [];
+                                }
+                        }
+
+                        return groups;
+                };
+
+                if (!fs.existsSync(fileOrCode)) {
+                        return resolve(processContent(fileOrCode));
+                }
+
+                fs.readFile(fileOrCode, 'utf8', (err, content) => {
+                        if (err) return reject(err);
+                        resolve(processContent(content));
+                });
+        });
+};

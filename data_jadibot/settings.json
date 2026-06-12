@@ -12,5 +12,14 @@
       "message": "",
       "whitelist": []
     }
+  },
+  "6289681008411": {
+    "autoTyping": {
+      "enabled": false,
+      "delaySeconds": 5,
+      "privateChat": true,
+      "groupChat": true
+    },
+    "updatedAt": 1781280482356
   }
 }
