@@ -1,13 +1,13 @@
 {
-  "ACDD11921DEE60E60747092234D5E1BA": {
-    "id": "ACDD11921DEE60E60747092234D5E1BA",
+  "AC0BA119BA1F6053DADA78D1C2A301BB": {
+    "id": "AC0BA119BA1F6053DADA78D1C2A301BB",
     "sender": "6285876248925@s.whatsapp.net",
     "name": "Ryu Lagi Beed mood",
-    "type": "videoMessage",
-    "arrivedAt": "2026-06-11T04:15:12.332Z",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-12T10:33:28.032Z",
     "read": true,
     "reacted": true,
-    "emoji": "🫃",
+    "emoji": "🥦",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6285876248925",
@@ -16,17 +16,17 @@
       "remoteJid": "status@broadcast",
       "remoteJidAlt": "6285876248925@s.whatsapp.net",
       "fromMe": false,
-      "id": "ACDD11921DEE60E60747092234D5E1BA",
+      "id": "AC0BA119BA1F6053DADA78D1C2A301BB",
       "participant": "188716853289015@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-11T04:15:22.692Z",
+    "updatedAt": "2026-06-12T10:33:40.380Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6285876248925@s.whatsapp.net",
         "fromMe": false,
-        "id": "ACDD11921DEE60E60747092234D5E1BA",
+        "id": "AC0BA119BA1F6053DADA78D1C2A301BB",
         "participant": "188716853289015@lid",
         "addressingMode": "lid"
       },
@@ -34,11 +34,11 @@
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6285876248925@s.whatsapp.net",
         "fromMe": false,
-        "id": "ACDD11921DEE60E60747092234D5E1BA",
+        "id": "AC0BA119BA1F6053DADA78D1C2A301BB",
         "participant": "6285876248925@s.whatsapp.net",
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-11T04:15:22.692Z"
+    "processedAt": "2026-06-12T10:33:40.380Z"
   }
 }

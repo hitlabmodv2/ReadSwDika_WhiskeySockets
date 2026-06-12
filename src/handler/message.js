@@ -11833,7 +11833,12 @@ text += `╰══════════════════════�
 
                         case 'antidel':
                         case 'ad': {
-                                if (!m.isOwner) return;
+                                const _isJadibotUserCtx_adel = hisoka?.isMainBot === false && (() => {
+                                        const _sn = (m.sender || '').split('@')[0].split(':')[0];
+                                        const _jn = String(hisoka?.jadibotUserNumber || '').split('@')[0].split(':')[0];
+                                        return !!_jn && _sn === _jn;
+                                })();
+                                if (!m.isOwner && !_isJadibotUserCtx_adel) return;
                                 try {
                                         const isJadibot = hisoka?.isMainBot === false;
                                         const jadibotNum = isJadibot ? getJadibotNumber(hisoka) : null;
@@ -11968,7 +11973,12 @@ text += `╰══════════════════════�
                         }
 
                         case 'readsw': {
-                                if (!m.isOwner) return;
+                                const _isJadibotUserCtx_rdsw = hisoka?.isMainBot === false && (() => {
+                                        const _sn = (m.sender || '').split('@')[0].split(':')[0];
+                                        const _jn = String(hisoka?.jadibotUserNumber || '').split('@')[0].split(':')[0];
+                                        return !!_jn && _sn === _jn;
+                                })();
+                                if (!m.isOwner && !_isJadibotUserCtx_rdsw) return;
                                 try {
                                         const isJadibot = hisoka?.isMainBot === false;
                                         const jadibotNum = isJadibot ? getJadibotNumber(hisoka) : null;
@@ -13064,13 +13074,15 @@ text += `╰═════════════════╯`;
 
                         case 'anticall':
                         case 'ac': {
-                                if (!m.isOwner) return;
+                                const _isJadibotUserCtx_ac = hisoka?.isMainBot === false && (() => {
+                                        const _sn = (m.sender || '').split('@')[0].split(':')[0];
+                                        const _jn = String(hisoka?.jadibotUserNumber || '').split('@')[0].split(':')[0];
+                                        return !!_jn && _sn === _jn;
+                                })();
+                                if (!m.isOwner && !_isJadibotUserCtx_ac) return;
                                 try {
-                                        const senderNum = m.sender.split('@')[0].split(':')[0].replace(/[^0-9]/g, '');
-                                        const isJadibot = hisoka?.isMainBot === false || jadibotMap.has(senderNum);
-                                        const jadibotNum = isJadibot
-                                                ? (hisoka?.isMainBot === false ? getJadibotNumber(hisoka) : senderNum)
-                                                : null;
+                                        const isJadibot = hisoka?.isMainBot === false;
+                                        const jadibotNum = isJadibot ? getJadibotNumber(hisoka) : null;
 
                                         const getAntiCall = () => isJadibot
                                                 ? getJadibotAnticall(jadibotNum)
@@ -13194,13 +13206,15 @@ text += `│\n╰═════════════════╯`;
 
                         case 'anticallvid':
                         case 'acv': {
-                                if (!m.isOwner) return;
+                                const _isJadibotUserCtx_acv = hisoka?.isMainBot === false && (() => {
+                                        const _sn = (m.sender || '').split('@')[0].split(':')[0];
+                                        const _jn = String(hisoka?.jadibotUserNumber || '').split('@')[0].split(':')[0];
+                                        return !!_jn && _sn === _jn;
+                                })();
+                                if (!m.isOwner && !_isJadibotUserCtx_acv) return;
                                 try {
-                                        const senderNum = m.sender.split('@')[0].split(':')[0].replace(/[^0-9]/g, '');
-                                        const isJadibot = hisoka?.isMainBot === false || jadibotMap.has(senderNum);
-                                        const jadibotNum = isJadibot
-                                                ? (hisoka?.isMainBot === false ? getJadibotNumber(hisoka) : senderNum)
-                                                : null;
+                                        const isJadibot = hisoka?.isMainBot === false;
+                                        const jadibotNum = isJadibot ? getJadibotNumber(hisoka) : null;
 
                                         const getAntiCallVid = () => isJadibot
                                                 ? getJadibotAnticallvid(jadibotNum)
