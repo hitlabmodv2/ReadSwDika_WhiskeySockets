@@ -64,9 +64,9 @@ _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurn
 ━━━━━━━━━━━━━━━━━━━━━━
 
 🤖 *WILY BOT — V21*
-✨ *5 Fitur Baru*
+✨ *7 Fitur Baru*
 🔧 *7 Bug Fix*
-🚀 *3 Improvement*
+🚀 *6 Improvement*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -110,6 +110,23 @@ _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurn
 > Mencakup: Read SW, Anti Delete, Anti Call, Anti VidCall, Auto Online
 > Lengkap dengan detail sub-setting (mode delay, private/group, interval, dll)
 > Hanya bisa diakses oleh pemilik jadibot tersebut
+
+> NO.6 ⌨️ *Auto Typing per-Jadibot — .typing / .typ*
+> Jadibot otomatis tampil sedang mengetik (⌨️) saat terima pesan masuk
+> Bisa on/off per jadibot — tidak saling bentrok dengan jadibot lain
+> Perintah: .typing on / .typing off
+> Bisa diatur khusus per chat: .typing private on/off • .typing group on/off
+> Atur durasi indikator: .typing set <detik>
+> Setting tersimpan persistent ke data_jadibot/settings.json per nomor
+
+> NO.7 🎙️ *Auto Recording per-Jadibot — .recording / .record*
+> Jadibot otomatis tampil sedang merekam suara (🎙️) saat terima pesan masuk
+> Berjalan hanya jika Auto Typing sedang off (tidak tabrakan indikator)
+> Bisa on/off per jadibot — tidak saling bentrok dengan jadibot lain
+> Perintah: .recording on / .recording off
+> Bisa diatur khusus per chat: .recording private on/off • .recording group on/off
+> Atur durasi indikator: .recording set <detik>
+> Setting tersimpan persistent ke data_jadibot/settings.json per nomor
 ━━━━━━━━━━━━━━━━━━━━━━
 🔧 *BUG FIX*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -169,4 +186,20 @@ _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurn
 > Sebelumnya log cmd penuh entri tidak perlu dari bot utama & jadibot
 > Kini hanya cmd yang benar-benar dieksekusi yang tampil di log
 > Log userjadibot tampil terpisah dari bot utama — mudah dibedakan
+
+> NO.4 📦 *Hitungan Fitur Menu — Akurat Per-Fitur, Bukan Per-Alias*
+> Sebelumnya: setiap alias dihitung sendiri → `.tt / .tiktok / .tik` = 3 fitur (inflate)
+> Sesudahnya: satu case block = 1 fitur, alias tidak ikut dihitung
+> Hasilnya: 242 alias → 123 fitur unik yang benar-benar akurat & realtime
+> Berlaku di menu bot utama maupun menu jadibot
+
+> NO.5 🤖 *Menu Jadibot — Tambah Kategori AUTO PRESENCE & Info Fitur Aktif*
+> Menu jadibot kini tampilkan jumlah fitur yang tersedia untuk jadibot (realtime, per-block)
+> Tambah kategori baru: ╭─「 💬 AUTO PRESENCE 」 berisi .online / .typing / .recording
+> Header menu jadibot kini tampilkan: 📦 Fitur : X fitur aktif
+
+> NO.6 📋 *.ceksetting — Tampilkan Status Auto Typing & Auto Recording*
+> .ceksetting kini ikut tampilkan status ⌨️ Auto Typing dan 🎙️ Auto Recording
+> Lengkap dengan detail: private/group on/off + delay aktif per fitur
+> Footer hint diupdate: .typing • .recording masuk ke daftar perintah ubah setting
 ━━━━━━━━━━━━━━━━━━━━━━
