@@ -5,7 +5,7 @@ _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurn
 🤖 *WILY BOT — V21*
 ✨ *15 Fitur Baru*
 🔧 *7 Bug Fix*
-🚀 *11 Improvement*
+🚀 *14 Improvement*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -210,4 +210,22 @@ _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurn
 > Alasan: menghindari konflik dengan folder data/ bot utama & lebih mudah dikelola
 > Mencakup: settings.json, realtime.json, session, dan file emoji per jadibot
 > Semua referensi path di kode diupdate otomatis — tidak perlu migrasi manual
+
+> NO.12 🌐 *Response .online set Jadibot — Kini Sama Persis dengan Bot Utama*
+> Sebelumnya: .online set hanya balas "✅ Interval diset ke X detik" tanpa info lanjutan
+> Sesudahnya: jika auto online ON → tampil (timer restarted) — timer langsung pakai interval baru
+> Jika auto online OFF → tampil (akan aktif saat online dinyalakan)
+> Perilaku & response 100% identik antara jadibot dan bot utama
+
+> NO.13 ⌨️ *Response .typing set — Kini Informatif dengan Status Aktif*
+> Sebelumnya: .typing set hanya balas "✅ Delay Auto Typing diset ke X detik"
+> Sesudahnya: jika typing ON → (berlaku pada pesan masuk berikutnya)
+> Jika typing OFF → (akan berlaku saat typing dinyalakan)
+> Berlaku untuk bot utama dan jadibot sekaligus
+
+> NO.14 🎙️ *Response .recording set — Kini Informatif dengan Status Aktif*
+> Sebelumnya: .recording set hanya balas "✅ Delay Auto Recording diset ke X detik"
+> Sesudahnya: jika recording ON → (berlaku pada pesan masuk berikutnya)
+> Jika recording OFF → (akan berlaku saat recording dinyalakan)
+> Berlaku untuk bot utama dan jadibot sekaligus
 ━━━━━━━━━━━━━━━━━━━━━━
