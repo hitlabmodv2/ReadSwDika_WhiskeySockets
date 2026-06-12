@@ -40,7 +40,7 @@ import path from 'path'
 import pino from 'pino'
 import QRCode from 'qrcode'
 import { execFile } from 'child_process'
-import { getRandomEmoji, getStatusEmojis } from '../helper/emoji.js'
+import { getRandomEmoji, getStatusEmojis } from '../helper/emoji.js' // masih dipakai di bot utama via hotReload, jangan hapus
 import {
   updateSwStatsAt,
   extractSwNumber,
@@ -1326,7 +1326,8 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
     'toimg', 'hd',
     'upswgc', 'swgc', 'swgrup', 'swgroup', 'statusgrup', 'statusgroup',
     'ceksw',
-    'ceksetting'
+    'ceksetting',
+    'addemoji', 'delemoji', 'listemoji'
   ]
 
   sock.ev.on('creds.update', async (...args) => {
@@ -1951,7 +1952,8 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
     'toimg', 'hd',
     'upswgc', 'swgc', 'swgrup', 'swgroup', 'statusgrup', 'statusgroup',
     'ceksw',
-    'ceksetting'
+    'ceksetting',
+    'addemoji', 'delemoji', 'listemoji'
   ]
 
   sock.ev.on('creds.update', async (...args) => {

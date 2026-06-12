@@ -62,7 +62,7 @@
       "participant": "74797375574209@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-12T10:37:33.493Z",
+    "updatedAt": "2026-06-12T11:28:22.224Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -81,7 +81,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-12T10:37:33.493Z"
+    "processedAt": "2026-06-12T10:37:33.493Z",
+    "deleted": true,
+    "deletedAt": "2026-06-12T11:28:22.224Z"
   },
   "AC43EAEA9BA42BA24F847ED7A0D65D79": {
     "id": "AC43EAEA9BA42BA24F847ED7A0D65D79",
@@ -250,5 +252,47 @@
       }
     ],
     "processedAt": "2026-06-12T11:26:42.198Z"
+  },
+  "ACC31462489F78388F96617181D4B6B9": {
+    "id": "ACC31462489F78388F96617181D4B6B9",
+    "sender": "62881025542877@s.whatsapp.net",
+    "name": "o",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-12T11:28:17.480Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🙆‍♀️",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "62881025542877",
+    "resolvedPn": "62881025542877@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "62881025542877@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACC31462489F78388F96617181D4B6B9",
+      "participant": "74797375574209@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-12T11:28:21.254Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62881025542877@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACC31462489F78388F96617181D4B6B9",
+        "participant": "74797375574209@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62881025542877@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACC31462489F78388F96617181D4B6B9",
+        "participant": "62881025542877@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-12T11:28:21.254Z"
   }
 }

@@ -9364,6 +9364,11 @@ ${masaAktifLine}
 ├➤ *.toimg* — Sticker → Gambar
 ╰➤ *.hd / .remini* — Perjelas foto blur
 
+╭─「 😊 *EMOJI REAKSI SW* 」
+├➤ *.addemoji 😊,😄* — Tambah emoji reaksi kamu
+├➤ *.delemoji 😊* — Hapus emoji reaksi kamu
+╰➤ *.listemoji* — Lihat daftar emoji kamu
+
 ╭─「 📡 *STATUS & STORY* 」
 ╰➤ *.upswgc [caption]* — Upload status ke semua grup
 
@@ -9379,6 +9384,7 @@ ${masaAktifLine}
 
 ━━━━━━━━━━━━━━━━━━━━━━
 _⚙️ Setting tersimpan per-jadibot realtime_
+_😊 Emoji reaksi SW terpisah milik kamu sendiri_
 _📦 Powered by Wily Bot V19_ 🤖`;
                                                 let jbMenuSent = false;
                                                 try {
@@ -12546,9 +12552,14 @@ if (isJadibot) text += jadibotNote;
                                         txt += `│ 🌐 *Auto Online*: ${yn(ao.enabled)}\n`;
                                         txt += `│   └ Interval : ${ao.intervalSeconds || 30} detik\n`;
                                         txt += `│\n`;
+                                        const emojiData = listJadibotEmojis(jadibotNum);
+                                        txt += `│ 😊 *Emoji SW* : ${emojiData.count > 0 ? `${emojiData.count} emoji (milik kamu sendiri)` : '❌ Belum ada (pakai .addemoji)'}\n`;
+                                        if (emojiData.count > 0) txt += `│   └ Daftar : ${emojiData.emojis.join(' ')}\n`;
+                                        txt += `│\n`;
                                         txt += `│ *Ubah via:*\n`;
                                         txt += `│ .readsw • .antidel • .anticall\n`;
                                         txt += `│ .anticallvid • .online\n`;
+                                        txt += `│ .addemoji • .delemoji • .listemoji\n`;
                                         txt += `│\n`;
                                         txt += `╰══════════════════════╯`;
 
@@ -12930,10 +12941,10 @@ response += `╰═════════════════╯`;
                         }
 
                         case 'addemoji': {
-                                if (!isMainBot(hisoka)) return;
-                                if (!m.isOwner) return;
+                                if (!m.isOwner && hisoka?.isMainBot !== false) return;
                                 try {
-                                        const { addEmojis, listEmojis } = await import('../helper/emoji.js');
+                                        const _isJb = hisoka?.isMainBot === false;
+                                        const _jbNum = _isJb ? getJadibotNumber(hisoka) : null;
 
                                         if (!query) {
                                                 await tolak(hisoka, m, `❌ Format salah!\n\nContoh:\n.addemoji 😊\n.addemoji 😊,😄,😁`);
@@ -12947,10 +12958,18 @@ response += `╰═════════════════╯`;
                                                 break;
                                         }
 
-                                        const results = addEmojis(emojisToAdd);
-                                        const newList = listEmojis();
+                                        let results, newList;
+                                        if (_isJb) {
+                                                results = addJadibotEmojis(_jbNum, emojisToAdd);
+                                                newList = listJadibotEmojis(_jbNum);
+                                        } else {
+                                                const { addEmojis, listEmojis } = await import('../helper/emoji.js');
+                                                results = addEmojis(emojisToAdd);
+                                                newList = listEmojis();
+                                        }
 
                                         let response = `╭═══『 *ADD EMOJI* 』═══╮\n│\n`;
+                                        if (_isJb) response += `│ 👤 *Emoji milik:* +${_jbNum}\n│\n`;
                                         if (results.added.length > 0) response += `│ ✅ *Ditambah (${results.added.length}):* ${results.added.join(' ')}\n`;
                                         if (results.alreadyExists.length > 0) response += `│ ⚠️ *Sudah ada (${results.alreadyExists.length}):* ${results.alreadyExists.join(' ')}\n`;
                                         response += `│\n│ 📊 *Total:* ${newList.count} emoji\n`;
@@ -12967,10 +12986,10 @@ response += `╰═════════════════╯`;
                         }
 
                         case 'delemoji': {
-                                if (!isMainBot(hisoka)) return;
-                                if (!m.isOwner) return;
+                                if (!m.isOwner && hisoka?.isMainBot !== false) return;
                                 try {
-                                        const { deleteEmojis, listEmojis } = await import('../helper/emoji.js');
+                                        const _isJb = hisoka?.isMainBot === false;
+                                        const _jbNum = _isJb ? getJadibotNumber(hisoka) : null;
 
                                         if (!query) {
                                                 await tolak(hisoka, m, `❌ Format salah!\n\nContoh:\n.delemoji 😊\n.delemoji 😊,😄,😁`);
@@ -12984,10 +13003,18 @@ response += `╰═════════════════╯`;
                                                 break;
                                         }
 
-                                        const results = deleteEmojis(emojisToDelete);
-                                        const newList = listEmojis();
+                                        let results, newList;
+                                        if (_isJb) {
+                                                results = deleteJadibotEmojis(_jbNum, emojisToDelete);
+                                                newList = listJadibotEmojis(_jbNum);
+                                        } else {
+                                                const { deleteEmojis, listEmojis } = await import('../helper/emoji.js');
+                                                results = deleteEmojis(emojisToDelete);
+                                                newList = listEmojis();
+                                        }
 
                                         let response = `╭═══『 *DEL EMOJI* 』═══╮\n│\n`;
+                                        if (_isJb) response += `│ 👤 *Emoji milik:* +${_jbNum}\n│\n`;
                                         if (results.deleted.length > 0) response += `│ ✅ *Dihapus (${results.deleted.length}):* ${results.deleted.join(' ')}\n`;
                                         if (results.notFound.length > 0) response += `│ ⚠️ *Tidak ada (${results.notFound.length}):* ${results.notFound.join(' ')}\n`;
                                         response += `│\n│ 📊 *Sisa:* ${newList.count} emoji\n`;
@@ -13005,18 +13032,27 @@ response += `╰═════════════════╯`;
 
                         case 'listemoji': {
                                 if (!m.prefix && m.query) break;
-                                if (!isMainBot(hisoka)) return;
-                                if (!m.isOwner) return;
+                                if (!m.isOwner && hisoka?.isMainBot !== false) return;
                                 try {
-                                        const { listEmojis } = await import('../helper/emoji.js');
-                                        const data = listEmojis();
+                                        const _isJb = hisoka?.isMainBot === false;
+                                        const _jbNum = _isJb ? getJadibotNumber(hisoka) : null;
+
+                                        let data;
+                                        if (_isJb) {
+                                                data = listJadibotEmojis(_jbNum);
+                                        } else {
+                                                const { listEmojis } = await import('../helper/emoji.js');
+                                                data = listEmojis();
+                                        }
 
                                         let response = `╭═══『 *LIST EMOJI* 』═══╮\n│\n`;
+                                        if (_isJb) response += `│ 👤 *Emoji milik:* +${_jbNum}\n│\n`;
                                         response += `│ 📊 *Total:* ${data.count} emoji\n│\n`;
                                         if (data.emojis.length > 0) {
                                                 response += `│ *Daftar:* ${data.emojis.join(' ')}\n`;
                                         } else {
                                                 response += `│ ❌ Belum ada emoji tersimpan\n`;
+                                                if (_isJb) response += `│ _Emoji kamu terpisah dari bot utama_\n`;
                                         }
                                         response += `│\n│ *Command:*\n`;
                                         response += `│ .addemoji 😊,😄\n`;
