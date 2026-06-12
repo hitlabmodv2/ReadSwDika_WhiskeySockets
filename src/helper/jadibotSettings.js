@@ -106,3 +106,76 @@ export function getJadibotAutoOnline(number) {
 export function getJadibotNumber(hisoka) {
   return String(hisoka?.user?.id || '').split('@')[0].split(':')[0].replace(/[^0-9]/g, '')
 }
+
+/* ================= EMOJI PER-USER JADIBOT ================= */
+
+export function getJadibotEmojis(number) {
+  number = String(number || '').replace(/[^0-9]/g, '')
+  const settings = getJadibotUserSettings(number)
+  if (Array.isArray(settings.emojis) && settings.emojis.length > 0) {
+    return settings.emojis
+  }
+  return null
+}
+
+export function getJadibotRandomEmoji(number) {
+  const emojis = getJadibotEmojis(number)
+  if (!emojis || emojis.length === 0) return null
+  return emojis[Math.floor(Math.random() * emojis.length)]
+}
+
+export function addJadibotEmojis(number, emojisToAdd) {
+  number = String(number || '').replace(/[^0-9]/g, '')
+  const all = loadAllJadibotSettings()
+  if (!all[number]) all[number] = {}
+  const current = Array.isArray(all[number].emojis) ? all[number].emojis : []
+  const results = { added: [], alreadyExists: [] }
+  for (const emoji of emojisToAdd) {
+    const trimmed = emoji.trim()
+    if (!trimmed) continue
+    if (current.includes(trimmed)) {
+      results.alreadyExists.push(trimmed)
+    } else {
+      current.push(trimmed)
+      results.added.push(trimmed)
+    }
+  }
+  if (results.added.length > 0) {
+    all[number].emojis = current
+    all[number].updatedAt = Date.now()
+    saveAllJadibotSettings(all)
+  }
+  return results
+}
+
+export function deleteJadibotEmojis(number, emojisToDelete) {
+  number = String(number || '').replace(/[^0-9]/g, '')
+  const all = loadAllJadibotSettings()
+  if (!all[number]) all[number] = {}
+  let current = Array.isArray(all[number].emojis) ? all[number].emojis : []
+  const results = { deleted: [], notFound: [] }
+  for (const emoji of emojisToDelete) {
+    const trimmed = emoji.trim()
+    if (!trimmed) continue
+    const idx = current.indexOf(trimmed)
+    if (idx > -1) {
+      current.splice(idx, 1)
+      results.deleted.push(trimmed)
+    } else {
+      results.notFound.push(trimmed)
+    }
+  }
+  if (results.deleted.length > 0) {
+    all[number].emojis = current
+    all[number].updatedAt = Date.now()
+    saveAllJadibotSettings(all)
+  }
+  return results
+}
+
+export function listJadibotEmojis(number) {
+  number = String(number || '').replace(/[^0-9]/g, '')
+  const settings = getJadibotUserSettings(number)
+  const emojis = Array.isArray(settings.emojis) ? settings.emojis : []
+  return { emojis, count: emojis.length }
+}

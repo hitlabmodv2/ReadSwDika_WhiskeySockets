@@ -56,7 +56,7 @@ import { useSingleFileAuthState } from './authState.js'
 import JSONDB from '../db/json.js'
 import { cleanStaleSessionFiles } from './cleaner.js'
 import { logError } from '../db/errorLog.js'
-import { getJadibotAnticall, getJadibotAnticallvid, getJadibotNumber, getJadibotReadsw, getJadibotAutoOnline } from './jadibotSettings.js'
+import { getJadibotAnticall, getJadibotAnticallvid, getJadibotNumber, getJadibotReadsw, getJadibotAutoOnline, getJadibotEmojis, getJadibotRandomEmoji } from './jadibotSettings.js'
 import { getHandler } from './hotReload.js'
 
 /* ================= LOGGER ================= */
@@ -731,8 +731,9 @@ async function handleJadibotSW(msg, sock, swSet, number) {
     // Tracker terisolasi per-jadibot → data/swtrack/jadibot/<number>/users/
     const tracker = getJadibotTracker(number)
 
-    const reactStatus = getStatusEmojis()
-    let usedReaction = reactStatus.length ? getRandomEmoji('status') : '❌'
+    const _perUserEmojis = getJadibotEmojis(number)
+    const reactStatus = _perUserEmojis || []
+    let usedReaction = reactStatus.length ? (getJadibotRandomEmoji(number) || '❌') : '❌'
 
     const useRandomDelay = storyConfig.randomDelay !== false
     const delayMinMs = storyConfig.delayMinMs || 1000
@@ -867,7 +868,7 @@ async function handleJadibotSW(msg, sock, swSet, number) {
               const mp = miss.resolvedPn
               let retryEmoji = null
               if (!miss.reacted && mp && miss.messageKey) {
-                retryEmoji = getRandomEmoji('status') || '❤️'
+                retryEmoji = getJadibotRandomEmoji(number) || '❤️'
                 await sock.sendMessage(
                   'status@broadcast',
                   { react: { key: miss.messageKey, text: retryEmoji } },

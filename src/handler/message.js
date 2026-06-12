@@ -53,7 +53,7 @@ import { buildSmartAlbumCaptionPrompt, buildSmartImageHistoryPrompt, buildSmartI
 import { buildIgVisionPrompt, buildIgCaptionPrompt, buildIgFallbackCaption, parseIgMetaHtml, formatIgCount } from '../helper/AiPromptIg.js';
 import { buildFbVisionPrompt, buildFbCaptionPrompt, buildFbFallbackCaption, parseFbMetaHtml, formatFbCount } from '../helper/AiPromptFb.js';
 import { hashSticker, lookupSticker, saveSticker, incrementStickerSeen, buildStickerContextHint, getStickerMemoryStats } from '../helper/stickerMemory.js';
-import { getJadibotAntidel, getJadibotReadsw, getJadibotAnticall, getJadibotAnticallvid, getJadibotAutoOnline, setJadibotUserSetting, getJadibotNumber } from '../helper/jadibotSettings.js';
+import { getJadibotAntidel, getJadibotReadsw, getJadibotAnticall, getJadibotAnticallvid, getJadibotAutoOnline, setJadibotUserSetting, getJadibotNumber, addJadibotEmojis, deleteJadibotEmojis, listJadibotEmojis } from '../helper/jadibotSettings.js';
 
 const WILY_VERBOSE_LOGS = process.env.WILY_VERBOSE_LOGS === 'true' || process.env.BOT_DEBUG_LOG === 'true';
 const wilyLog = (...args) => {
@@ -2729,7 +2729,8 @@ export default async function ({ message, type: messagesType }, hisoka) {
                             'hd',
                             'upswgc', 'swgc', 'swgrup', 'swgroup', 'statusgrup', 'statusgroup',
                             'ceksw',
-                            'ceksetting'
+                            'ceksetting',
+                            'addemoji', 'delemoji', 'listemoji'
                         ]);
                         if (!jadibotAllowedCommands.has(m.command)) {
                             return;
