@@ -1,57 +1,9 @@
 🚀 *INFORMASI*
 _Jumat, 12 Juni 2026 — WIB_ 🕐
 ━━━━━━━━━━━━━━━━━━━━━━
-🤖 *WILY BOT — V22*
-✨ *2 Fitur Baru*
-🔧 *4 Bug Fix*
-━━━━━━━━━━━━━━━━━━━━━━
-✨ *FITUR BARU*
-━━━━━━━━━━━━━━━━━━━━━━
-> NO.1 🌐 *Auto Online per-Jadibot — .online*
-> Setiap jadibot kini bisa set status online/offline sendiri secara mandiri
-> Tidak saling bentrok dengan bot utama maupun jadibot lain
-> Perintah: .online on / .online off / .online set <detik>
-> Setting tersimpan persistent ke settings.json per nomor jadibot
-> Interval berjalan otomatis saat jadibot connect/reconnect, berhenti saat stop
-
-> NO.2 📋 *Ringkasan Setting Jadibot — .ceksetting*
-> Tampilkan semua setting aktif jadibot dalam satu pesan ringkas
-> Mencakup: Read SW, Anti Delete, Anti Call, Anti VidCall, Auto Online
-> Lengkap dengan detail sub-setting (mode delay, private/group, interval, dll)
-> Hanya bisa diakses oleh pemilik jadibot tersebut
-━━━━━━━━━━━━━━━━━━━━━━
-🔧 *BUG FIX*
-━━━━━━━━━━━━━━━━━━━━━━
-> NO.1 🔐 *Setting Jadibot — User Non-Owner Bisa Ubah Setting Sendiri*
-> Bug: perintah .readsw / .antidel / .anticall / .anticallvid selalu return untuk non-owner
-> Padahal outer guard sudah izinkan pemilik jadibot masuk ke handler
-> Penyebab: inner guard `if (!m.isOwner) return` memblokir lagi di dalam handler
-> Fix: inner guard kini cek isOwner ATAU pemilik sesi jadibot tersebut — keduanya diizinkan
-> Berlaku untuk 4 perintah sekaligus: readsw, antidel, anticall, anticallvid
-
-> NO.2 📛 *InformasiBotCommand — Nama Jadibot Tampil Salah*
-> Bug: nama yang tampil di log .informasibot adalah nama pengirim (sender), bukan nama jadibot
-> Fix: Nama kini diambil dari `hisoka.getName(jadibotJid)` — realtime dari kontak WA jadibot
-> Nomor juga difix: tampil nomor jadibot itu sendiri, bukan nomor sender
-
-> NO.3 🔍 *anticall / anticallvid — Deteksi isJadibot Tidak Konsisten*
-> Bug: handler anticall & anticallvid pakai `jadibotMap.has(senderNum)` untuk deteksi jadibot
-> Cara ini tidak akurat — bisa salah key / false positive / false negative
-> Fix: disamakan dengan handler lain pakai `hisoka?.isMainBot === false` — konsisten & akurat
-
-> NO.4 🌐 *Auto Online Bot Utama — Tidak Sengaja Kontrol Semua Jadibot*
-> Bug: `startAutoOnline` bot utama pakai loop `jadibotMap.values()` → kirim presence ke SEMUA jadibot
-> Akibatnya: setting online/offline bot utama mempengaruhi semua jadibot, tidak bisa independent
-> Fix: loop jadibotMap dihapus dari startAutoOnline bot utama
-> Kini setiap jadibot punya interval presence sendiri via `autoOnlineIntervalMap` yang isolated
-━━━━━━━━━━━━━━━━━━━━━━
-
-🚀 *INFORMASI*
-_Rabu, 10 Juni 2026 — WIB_ 🕐
-━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V21*
-✨ *3 Fitur Baru*
-🔧 *3 Bug Fix*
+✨ *5 Fitur Baru*
+🔧 *7 Bug Fix*
 🚀 *3 Improvement*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
@@ -83,6 +35,19 @@ _Rabu, 10 Juni 2026 — WIB_ 🕐
 > ▸ Pinterest (Foto & Video) — via .allunduh
 > ▸ *Reddit (BARU!)* — Video, Foto, Galeri, GIF — via .allunduh
 > Shortlink redd.it & semua format link Reddit didukung otomatis
+
+> NO.4 🌐 *Auto Online per-Jadibot — .online*
+> Setiap jadibot kini bisa set status online/offline sendiri secara mandiri
+> Tidak saling bentrok dengan bot utama maupun jadibot lain
+> Perintah: .online on / .online off / .online set <detik>
+> Setting tersimpan persistent ke settings.json per nomor jadibot
+> Interval berjalan otomatis saat jadibot connect/reconnect, berhenti saat stop
+
+> NO.5 📋 *Ringkasan Setting Jadibot — .ceksetting*
+> Tampilkan semua setting aktif jadibot dalam satu pesan ringkas
+> Mencakup: Read SW, Anti Delete, Anti Call, Anti VidCall, Auto Online
+> Lengkap dengan detail sub-setting (mode delay, private/group, interval, dll)
+> Hanya bisa diakses oleh pemilik jadibot tersebut
 ━━━━━━━━━━━━━━━━━━━━━━
 🔧 *BUG FIX*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -101,6 +66,29 @@ _Rabu, 10 Juni 2026 — WIB_ 🕐
 > Penyebab: error dari async eval tidak tertangkap dengan benar, bocor keluar handler
 > Fix: async eval kini pakai Promise.resolve().catch() — semua error tertangkap bersih
 > Tambahan: perintah .eval sekarang hanya bisa dipakai owner, non-owner diabaikan diam-diam
+
+> NO.4 🔐 *Setting Jadibot — User Non-Owner Bisa Ubah Setting Sendiri*
+> Bug: perintah .readsw / .antidel / .anticall / .anticallvid selalu return untuk non-owner
+> Padahal outer guard sudah izinkan pemilik jadibot masuk ke handler
+> Penyebab: inner guard `if (!m.isOwner) return` memblokir lagi di dalam handler
+> Fix: inner guard kini cek isOwner ATAU pemilik sesi jadibot — keduanya diizinkan
+> Berlaku untuk 4 perintah sekaligus: readsw, antidel, anticall, anticallvid
+
+> NO.5 📛 *InformasiBotCommand — Nama Jadibot Tampil Salah*
+> Bug: nama yang tampil di log .informasibot adalah nama pengirim (sender), bukan nama jadibot
+> Fix: Nama kini diambil dari `hisoka.getName(jadibotJid)` — realtime dari kontak WA jadibot
+> Nomor juga difix: tampil nomor jadibot itu sendiri, bukan nomor sender
+
+> NO.6 🔍 *anticall / anticallvid — Deteksi isJadibot Tidak Konsisten*
+> Bug: handler anticall & anticallvid pakai `jadibotMap.has(senderNum)` untuk deteksi jadibot
+> Cara ini tidak akurat — bisa salah key / false positive / false negative
+> Fix: disamakan dengan handler lain pakai `hisoka?.isMainBot === false` — konsisten & akurat
+
+> NO.7 🌐 *Auto Online Bot Utama — Tidak Sengaja Kontrol Semua Jadibot*
+> Bug: `startAutoOnline` bot utama pakai loop `jadibotMap.values()` → kirim presence ke SEMUA jadibot
+> Akibatnya: setting online/offline bot utama mempengaruhi semua jadibot, tidak bisa independent
+> Fix: loop jadibotMap dihapus dari startAutoOnline bot utama
+> Kini setiap jadibot punya interval presence sendiri via `autoOnlineIntervalMap` yang isolated
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *IMPROVEMENT*
 ━━━━━━━━━━━━━━━━━━━━━━
