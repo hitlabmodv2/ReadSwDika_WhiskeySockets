@@ -9343,9 +9343,19 @@ ${masaAktifLine}
 ├➤ *.antidel on/off* — Anti delete pesan
 ├➤ *.antidel private on/off* — Private chat
 ├➤ *.antidel group on/off* — Grup
-├➤ *.antidel sendto self/chat/both*
+╰➤ *.antidel sendto self/chat/both*
+
+╭─「 💬 *AUTO PRESENCE* 」
 ├➤ *.online on/off* — Auto terlihat online
-╰➤ *.online set [detik]* — Atur interval online
+├➤ *.online set [detik]* — Atur interval online
+├➤ *.typing on/off* — Auto tampil sedang mengetik
+├➤ *.typing set [detik]* — Atur durasi typing
+├➤ *.typing private on/off* — Typing di private chat
+├➤ *.typing group on/off* — Typing di grup
+├➤ *.recording on/off* — Auto tampil sedang merekam
+├➤ *.recording set [detik]* — Atur durasi recording
+├➤ *.recording private on/off* — Recording di private
+╰➤ *.recording group on/off* — Recording di grup
 
 ╭─「 📊 *CEK & INFO* 」
 ├➤ *.ceksetting* — Cek semua setting aktif
@@ -12558,8 +12568,11 @@ if (isJadibot) text += jadibotNote;
                                         const anticall  = getJadibotAnticall(jadibotNum);
                                         const acv       = getJadibotAnticallvid(jadibotNum);
                                         const ao        = getJadibotAutoOnline(jadibotNum);
+                                        const at        = getJadibotAutoTyping(jadibotNum);
+                                        const ar        = getJadibotAutoRecording(jadibotNum);
 
-                                        const yn = (v) => v ? '✅ ON' : '❌ OFF';
+                                        const yn  = (v) => v ? '✅ ON' : '❌ OFF';
+                                        const yns = (v) => v !== false ? '✅' : '❌';
 
                                         let txt = `╭═══『 *SETTING JADIBOT* 』═══╮\n`;
                                         txt += `│\n`;
@@ -12572,11 +12585,21 @@ if (isJadibot) text += jadibotNote;
                                         txt += `│   └ Group    : ${yn(antidel.groupChat)}\n`;
                                         txt += `│   └ Kirim ke : ${antidel.sendTo || 'self'}\n`;
                                         txt += `│\n`;
-                                        txt += `│ 📵 *Anti Call*: ${yn(anticall.enabled)}\n`;
-                                        txt += `│ 📵 *Anti VidCall*: ${yn(acv.enabled)}\n`;
+                                        txt += `│ 📵 *Anti Call*    : ${yn(anticall.enabled)}\n`;
+                                        txt += `│ 📵 *Anti VidCall* : ${yn(acv.enabled)}\n`;
                                         txt += `│\n`;
-                                        txt += `│ 🌐 *Auto Online*: ${yn(ao.enabled)}\n`;
+                                        txt += `│ 🌐 *Auto Online*  : ${yn(ao.enabled)}\n`;
                                         txt += `│   └ Interval : ${ao.intervalSeconds || 30} detik\n`;
+                                        txt += `│\n`;
+                                        txt += `│ ⌨️ *Auto Typing*  : ${yn(at.enabled)}\n`;
+                                        txt += `│   └ Private  : ${yns(at.privateChat)}\n`;
+                                        txt += `│   └ Group    : ${yns(at.groupChat)}\n`;
+                                        txt += `│   └ Delay    : ${at.delaySeconds || 5} detik\n`;
+                                        txt += `│\n`;
+                                        txt += `│ 🎙️ *Auto Recording*: ${yn(ar.enabled)}\n`;
+                                        txt += `│   └ Private  : ${yns(ar.privateChat)}\n`;
+                                        txt += `│   └ Group    : ${yns(ar.groupChat)}\n`;
+                                        txt += `│   └ Delay    : ${ar.delaySeconds || 5} detik\n`;
                                         txt += `│\n`;
                                         const emojiData = listJadibotEmojis(jadibotNum);
                                         const _eMode = emojiData.mode === 'custom' ? '🎨 Custom' : '🌐 Default (bot utama)';
@@ -12587,6 +12610,7 @@ if (isJadibot) text += jadibotNote;
                                         txt += `│ *Ubah via:*\n`;
                                         txt += `│ .readsw • .antidel • .anticall\n`;
                                         txt += `│ .anticallvid • .online\n`;
+                                        txt += `│ .typing • .recording\n`;
                                         txt += `│ .emojidefault • .emojicustom\n`;
                                         txt += `│ .emojiadd • .emojidel\n`;
                                         txt += `│ .emojiclear • .emojilist\n`;

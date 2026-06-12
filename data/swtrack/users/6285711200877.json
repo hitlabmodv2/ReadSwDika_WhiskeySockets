@@ -307,9 +307,9 @@
     "name": "Albiverstappen",
     "type": "videoMessage",
     "arrivedAt": "2026-06-12T15:58:15.702Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "⌨️",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6285711200877",
@@ -322,6 +322,8 @@
       "participant": "168736715731040@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-12T15:58:15.702Z"
+    "updatedAt": "2026-06-12T15:59:27.323Z",
+    "retriedOnStartup": true,
+    "retriedAt": "2026-06-12T15:59:27.323Z"
   }
 }
