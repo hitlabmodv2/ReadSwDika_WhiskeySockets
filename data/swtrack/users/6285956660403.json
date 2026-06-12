@@ -425,9 +425,9 @@
     "name": "Cosmouz",
     "type": "videoMessage",
     "arrivedAt": "2026-06-12T15:13:32.036Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "👩‍🏫",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6285956660403",
@@ -440,6 +440,25 @@
       "participant": "176549462564879@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-12T15:13:32.036Z"
+    "updatedAt": "2026-06-12T15:13:42.633Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285956660403@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A52D1BA1B128D9A9B65A26450241A883",
+        "participant": "176549462564879@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285956660403@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A52D1BA1B128D9A9B65A26450241A883",
+        "participant": "6285956660403@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-12T15:13:42.633Z"
   }
 }
