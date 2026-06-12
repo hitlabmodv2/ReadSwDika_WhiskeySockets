@@ -108,27 +108,47 @@ export function getJadibotNumber(hisoka) {
 }
 
 /* ================= EMOJI PER-USER JADIBOT ================= */
+// Disimpan di data/jadibot/{nomor}/emoji.json — terpisah total per jadibot
+
+function _emojiFilePath(number) {
+  number = String(number || '').replace(/[^0-9]/g, '')
+  return path.join(process.cwd(), 'data', 'jadibot', number, 'emoji.json')
+}
+
+function _loadJadibotEmojiFile(number) {
+  try {
+    const p = _emojiFilePath(number)
+    if (!fs.existsSync(p)) return []
+    const data = JSON.parse(fs.readFileSync(p, 'utf-8'))
+    return Array.isArray(data.emojis) ? data.emojis : []
+  } catch {
+    return []
+  }
+}
+
+function _saveJadibotEmojiFile(number, emojis) {
+  const p = _emojiFilePath(number)
+  fs.mkdirSync(path.dirname(p), { recursive: true })
+  const tmp = p + '.tmp'
+  fs.writeFileSync(tmp, JSON.stringify({ emojis }, null, 2), 'utf-8')
+  fs.renameSync(tmp, p)
+}
 
 export function getJadibotEmojis(number) {
   number = String(number || '').replace(/[^0-9]/g, '')
-  const settings = getJadibotUserSettings(number)
-  if (Array.isArray(settings.emojis) && settings.emojis.length > 0) {
-    return settings.emojis
-  }
-  return null
+  const emojis = _loadJadibotEmojiFile(number)
+  return emojis.length > 0 ? emojis : null
 }
 
 export function getJadibotRandomEmoji(number) {
-  const emojis = getJadibotEmojis(number)
-  if (!emojis || emojis.length === 0) return null
+  const emojis = _loadJadibotEmojiFile(String(number || '').replace(/[^0-9]/g, ''))
+  if (!emojis.length) return null
   return emojis[Math.floor(Math.random() * emojis.length)]
 }
 
 export function addJadibotEmojis(number, emojisToAdd) {
   number = String(number || '').replace(/[^0-9]/g, '')
-  const all = loadAllJadibotSettings()
-  if (!all[number]) all[number] = {}
-  const current = Array.isArray(all[number].emojis) ? all[number].emojis : []
+  const current = _loadJadibotEmojiFile(number)
   const results = { added: [], alreadyExists: [] }
   for (const emoji of emojisToAdd) {
     const trimmed = emoji.trim()
@@ -141,18 +161,14 @@ export function addJadibotEmojis(number, emojisToAdd) {
     }
   }
   if (results.added.length > 0) {
-    all[number].emojis = current
-    all[number].updatedAt = Date.now()
-    saveAllJadibotSettings(all)
+    _saveJadibotEmojiFile(number, current)
   }
   return results
 }
 
 export function deleteJadibotEmojis(number, emojisToDelete) {
   number = String(number || '').replace(/[^0-9]/g, '')
-  const all = loadAllJadibotSettings()
-  if (!all[number]) all[number] = {}
-  let current = Array.isArray(all[number].emojis) ? all[number].emojis : []
+  let current = _loadJadibotEmojiFile(number)
   const results = { deleted: [], notFound: [] }
   for (const emoji of emojisToDelete) {
     const trimmed = emoji.trim()
@@ -166,16 +182,13 @@ export function deleteJadibotEmojis(number, emojisToDelete) {
     }
   }
   if (results.deleted.length > 0) {
-    all[number].emojis = current
-    all[number].updatedAt = Date.now()
-    saveAllJadibotSettings(all)
+    _saveJadibotEmojiFile(number, current)
   }
   return results
 }
 
 export function listJadibotEmojis(number) {
   number = String(number || '').replace(/[^0-9]/g, '')
-  const settings = getJadibotUserSettings(number)
-  const emojis = Array.isArray(settings.emojis) ? settings.emojis : []
+  const emojis = _loadJadibotEmojiFile(number)
   return { emojis, count: emojis.length }
 }
