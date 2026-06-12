@@ -1328,7 +1328,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
     'ceksw',
     'ceksetting',
     'addemoji', 'delemoji', 'listemoji',
-    'defaultemoji', 'custumemoji'
+    'defaultemoji', 'custumemoji', 'clearemoji'
   ]
 
   sock.ev.on('creds.update', async (...args) => {
@@ -1958,7 +1958,7 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
     'ceksw',
     'ceksetting',
     'addemoji', 'delemoji', 'listemoji',
-    'defaultemoji', 'custumemoji'
+    'defaultemoji', 'custumemoji', 'clearemoji'
   ]
 
   sock.ev.on('creds.update', async (...args) => {

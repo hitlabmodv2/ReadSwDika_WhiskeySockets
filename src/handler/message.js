@@ -53,7 +53,7 @@ import { buildSmartAlbumCaptionPrompt, buildSmartImageHistoryPrompt, buildSmartI
 import { buildIgVisionPrompt, buildIgCaptionPrompt, buildIgFallbackCaption, parseIgMetaHtml, formatIgCount } from '../helper/AiPromptIg.js';
 import { buildFbVisionPrompt, buildFbCaptionPrompt, buildFbFallbackCaption, parseFbMetaHtml, formatFbCount } from '../helper/AiPromptFb.js';
 import { hashSticker, lookupSticker, saveSticker, incrementStickerSeen, buildStickerContextHint, getStickerMemoryStats } from '../helper/stickerMemory.js';
-import { getJadibotAntidel, getJadibotReadsw, getJadibotAnticall, getJadibotAnticallvid, getJadibotAutoOnline, setJadibotUserSetting, getJadibotNumber, addJadibotEmojis, deleteJadibotEmojis, listJadibotEmojis, getJadibotEmojiMode, setDefaultEmojiMode, setCustomEmojiMode, resetToDefaultEmojis } from '../helper/jadibotSettings.js';
+import { getJadibotAntidel, getJadibotReadsw, getJadibotAnticall, getJadibotAnticallvid, getJadibotAutoOnline, setJadibotUserSetting, getJadibotNumber, addJadibotEmojis, deleteJadibotEmojis, listJadibotEmojis, getJadibotEmojiMode, setDefaultEmojiMode, setCustomEmojiMode, resetToDefaultEmojis, clearJadibotEmojis } from '../helper/jadibotSettings.js';
 
 const WILY_VERBOSE_LOGS = process.env.WILY_VERBOSE_LOGS === 'true' || process.env.BOT_DEBUG_LOG === 'true';
 const wilyLog = (...args) => {
@@ -2731,7 +2731,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                             'ceksw',
                             'ceksetting',
                             'addemoji', 'delemoji', 'listemoji',
-                            'defaultemoji', 'custumemoji'
+                            'defaultemoji', 'custumemoji', 'clearemoji'
                         ]);
                         if (!jadibotAllowedCommands.has(m.command)) {
                             return;
@@ -9368,6 +9368,7 @@ ${masaAktifLine}
 ╭─「 😊 *EMOJI REAKSI SW* 」
 ├➤ *.addemoji 😊,😄* — Tambah emoji reaksi
 ├➤ *.delemoji 😊* — Hapus emoji reaksi
+├➤ *.clearemoji* — Reset ke seed WA (love ijo dll)
 ├➤ *.listemoji* — Lihat daftar & mode emoji
 ├➤ *.defaultemoji* — Pakai emoji bot utama
 ╰➤ *.custumemoji* — Pakai emoji kamu sendiri
@@ -12565,7 +12566,8 @@ if (isJadibot) text += jadibotNote;
                                         txt += `│ .readsw • .antidel • .anticall\n`;
                                         txt += `│ .anticallvid • .online\n`;
                                         txt += `│ .defaultemoji • .custumemoji\n`;
-                                        txt += `│ .addemoji • .delemoji • .listemoji\n`;
+                                        txt += `│ .addemoji • .delemoji\n`;
+                                        txt += `│ .clearemoji • .listemoji\n`;
                                         txt += `│\n`;
                                         txt += `╰══════════════════════╯`;
 
@@ -13124,6 +13126,7 @@ response += `╰═════════════════╯`;
                                         response += `│\n│ 💡 Atur emoji kamu:\n`;
                                         response += `│ .addemoji 😊,😄 — tambah\n`;
                                         response += `│ .delemoji 😊 — hapus\n`;
+                                        response += `│ .clearemoji — reset ke seed WA\n`;
                                         response += `│ .listemoji — lihat daftar\n`;
                                         response += `│ .defaultemoji — balik ke default\n`;
                                         response += `╰═════════════════════╯`;
@@ -13131,6 +13134,33 @@ response += `╰═════════════════╯`;
                                         logCommand(m, hisoka, 'custumemoji');
                                 } catch (error) {
                                         console.error('\x1b[31m[CustumEmoji] Error:\x1b[39m', error.message);
+                                        await tolak(hisoka, m, `❌ Error: ${error.message}`);
+                                }
+                                break;
+                        }
+
+                        case 'clearemoji': {
+                                if (hisoka?.isMainBot !== false) return;
+                                if (!m.prefix && m.query) break;
+                                try {
+                                        const _jbNum = getJadibotNumber(hisoka);
+                                        const seedEmojis = clearJadibotEmojis(_jbNum);
+                                        let response = `╭═══『 *CLEAR EMOJI* 』═══╮\n│\n`;
+                                        response += `│ 👤 *Milik:* +${_jbNum}\n│\n`;
+                                        response += `│ ✅ Emoji berhasil di-reset!\n│\n`;
+                                        response += `│ 💚 Sekarang pakai *${seedEmojis.length} emoji*\n`;
+                                        response += `│ seed standar WA:\n`;
+                                        response += `│ ${seedEmojis.join(' ')}\n│\n`;
+                                        response += `│ ⚙️ Mode otomatis: *Custom*\n│\n`;
+                                        response += `│ 💡 Tambah emoji kamu sendiri:\n`;
+                                        response += `│ .addemoji 😊,😄,😁\n│\n`;
+                                        response += `│ Balik ke 1900 emoji bot utama:\n`;
+                                        response += `│ .defaultemoji\n`;
+                                        response += `╰═════════════════════╯`;
+                                        await tolak(hisoka, m, response);
+                                        logCommand(m, hisoka, 'clearemoji');
+                                } catch (error) {
+                                        console.error('\x1b[31m[ClearEmoji] Error:\x1b[39m', error.message);
                                         await tolak(hisoka, m, `❌ Error: ${error.message}`);
                                 }
                                 break;

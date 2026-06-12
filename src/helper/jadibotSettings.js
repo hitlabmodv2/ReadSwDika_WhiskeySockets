@@ -264,3 +264,13 @@ export function resetToDefaultEmojis(number) {
   _writeEmojiFile(number, { mode: 'default', emojis: defaults })
   return defaults.length
 }
+
+// Emoji reaksi default WhatsApp (love ijo + set standar WA stories)
+const WA_SEED_EMOJIS = ['💚', '❤️', '🔥', '👍', '😂', '😮', '😢', '😡', '🥰', '🎉', '💯', '✨']
+
+export function clearJadibotEmojis(number) {
+  // Clear semua emoji → isi seed WA + mode custom (tidak pernah benar-benar kosong)
+  number = String(number || '').replace(/[^0-9]/g, '')
+  _writeEmojiFile(number, { mode: 'custom', emojis: [...WA_SEED_EMOJIS] })
+  return [...WA_SEED_EMOJIS]
+}
