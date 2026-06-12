@@ -1327,7 +1327,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
     'upswgc', 'swgc', 'swgrup', 'swgroup', 'statusgrup', 'statusgroup',
     'ceksw',
     'ceksetting',
-    'addemoji', 'delemoji', 'listemoji',
+    'emojiadd', 'emojidel', 'emojilist',
     'emojidefault', 'emojicustom', 'emojiclear'
   ]
 
@@ -1957,7 +1957,7 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
     'upswgc', 'swgc', 'swgrup', 'swgroup', 'statusgrup', 'statusgroup',
     'ceksw',
     'ceksetting',
-    'addemoji', 'delemoji', 'listemoji',
+    'emojiadd', 'emojidel', 'emojilist',
     'emojidefault', 'emojicustom', 'emojiclear'
   ]
 
