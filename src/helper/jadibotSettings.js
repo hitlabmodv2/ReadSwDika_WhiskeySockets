@@ -108,11 +108,17 @@ export function getJadibotNumber(hisoka) {
 }
 
 /* ================= EMOJI PER-USER JADIBOT ================= */
-// Disimpan di data_jadibot/{nomor}/emoji.json — terpisah total per jadibot
+// emoji.json        → setting user { mode, emojis } (custom emojis disimpan di sini)
+// defaultemoji.json → copy realtime dari bot utama, otomatis dibuat pertama kali & di-sync tiap akses default
 
 function _emojiFilePath(number) {
   number = String(number || '').replace(/[^0-9]/g, '')
   return path.join(process.cwd(), 'data_jadibot', number, 'emoji.json')
+}
+
+function _defaultEmojiFilePath(number) {
+  number = String(number || '').replace(/[^0-9]/g, '')
+  return path.join(process.cwd(), 'data_jadibot', number, 'defaultemoji.json')
 }
 
 function _getMainBotEmojis() {
@@ -126,21 +132,53 @@ function _getMainBotEmojis() {
   }
 }
 
+// Sync defaultemoji.json dari bot utama — realtime copy, selalu fresh
+function _syncDefaultEmojiFile(number) {
+  number = String(number || '').replace(/[^0-9]/g, '')
+  const emojis = _getMainBotEmojis()
+  if (!emojis.length) {
+    // Kalau main bot kosong, baca dari file lama jika ada
+    try {
+      const p = _defaultEmojiFilePath(number)
+      if (fs.existsSync(p)) {
+        const d = JSON.parse(fs.readFileSync(p, 'utf-8'))
+        return Array.isArray(d.emojis) ? d.emojis : []
+      }
+    } catch {}
+    return []
+  }
+  try {
+    const p = _defaultEmojiFilePath(number)
+    fs.mkdirSync(path.dirname(p), { recursive: true })
+    const obj = { source: 'main-bot', syncedAt: Date.now(), emojis }
+    const tmp = p + '.tmp'
+    fs.writeFileSync(tmp, JSON.stringify(obj, null, 2), 'utf-8')
+    fs.renameSync(tmp, p)
+  } catch {}
+  return emojis
+}
+
+function _readDefaultEmojiFile(number) {
+  number = String(number || '').replace(/[^0-9]/g, '')
+  // Selalu sync dari bot utama dulu (realtime)
+  return _syncDefaultEmojiFile(number)
+}
+
 function _readEmojiFile(number) {
-  // Return full object { mode, emojis } — auto-init dari bot utama jika belum ada
+  // Return full object { mode, emojis }
+  // Pertama kali user → auto-init mode=default + buat defaultemoji.json
   try {
     const p = _emojiFilePath(number)
     if (!fs.existsSync(p)) {
-      const defaults = _getMainBotEmojis()
+      // Pertama kali: buat defaultemoji.json sebagai copy bot utama
+      const defaults = _syncDefaultEmojiFile(number)
       const obj = { mode: 'default', emojis: defaults }
-      if (defaults.length > 0) {
-        try {
-          fs.mkdirSync(path.dirname(p), { recursive: true })
-          const tmp = p + '.tmp'
-          fs.writeFileSync(tmp, JSON.stringify(obj, null, 2), 'utf-8')
-          fs.renameSync(tmp, p)
-        } catch {}
-      }
+      try {
+        fs.mkdirSync(path.dirname(p), { recursive: true })
+        const tmp = p + '.tmp'
+        fs.writeFileSync(tmp, JSON.stringify(obj, null, 2), 'utf-8')
+        fs.renameSync(tmp, p)
+      } catch {}
       return obj
     }
     const data = JSON.parse(fs.readFileSync(p, 'utf-8'))
@@ -170,8 +208,9 @@ export function getJadibotEmojis(number) {
   number = String(number || '').replace(/[^0-9]/g, '')
   const { mode, emojis } = _readEmojiFile(number)
   if (mode === 'default') {
-    const main = _getMainBotEmojis()
-    return main.length > 0 ? main : (emojis.length > 0 ? emojis : null)
+    // Realtime sync dari bot utama via defaultemoji.json
+    const defaultEmojis = _readDefaultEmojiFile(number)
+    return defaultEmojis.length > 0 ? defaultEmojis : (emojis.length > 0 ? emojis : null)
   }
   return emojis.length > 0 ? emojis : null
 }
@@ -181,7 +220,8 @@ export function getJadibotRandomEmoji(number) {
   const { mode, emojis } = _readEmojiFile(number)
   let pool
   if (mode === 'default') {
-    pool = _getMainBotEmojis()
+    // Realtime sync dari bot utama via defaultemoji.json
+    pool = _readDefaultEmojiFile(number)
     if (!pool.length) pool = emojis
   } else {
     pool = emojis
@@ -238,19 +278,26 @@ export function deleteJadibotEmojis(number, emojisToDelete) {
 export function listJadibotEmojis(number) {
   number = String(number || '').replace(/[^0-9]/g, '')
   const { mode, emojis } = _readEmojiFile(number)
+  if (mode === 'default') {
+    // Tampilkan emoji dari defaultemoji.json (copy bot utama)
+    const defaultEmojis = _readDefaultEmojiFile(number)
+    return { emojis: defaultEmojis, count: defaultEmojis.length, mode }
+  }
   return { emojis, count: emojis.length, mode }
 }
 
 export function setDefaultEmojiMode(number) {
-  // Mode default: pakai emoji dari bot utama saat reaksi SW
+  // Mode default: pakai emoji dari bot utama, sync defaultemoji.json sekaligus
   number = String(number || '').replace(/[^0-9]/g, '')
   const obj = _readEmojiFile(number)
   obj.mode = 'default'
   _writeEmojiFile(number, obj)
+  // Sync defaultemoji.json realtime dari bot utama
+  _syncDefaultEmojiFile(number)
 }
 
 export function setCustomEmojiMode(number) {
-  // Mode custom: pakai emoji dari file milik jadibot sendiri
+  // Mode custom: pakai emoji dari emoji.json milik jadibot sendiri
   number = String(number || '').replace(/[^0-9]/g, '')
   const obj = _readEmojiFile(number)
   obj.mode = 'custom'
@@ -258,9 +305,9 @@ export function setCustomEmojiMode(number) {
 }
 
 export function resetToDefaultEmojis(number) {
-  // Reset file emoji ke default bot utama + set mode=default
+  // Reset ke default bot utama + set mode=default + sync defaultemoji.json
   number = String(number || '').replace(/[^0-9]/g, '')
-  const defaults = _getMainBotEmojis()
+  const defaults = _syncDefaultEmojiFile(number)
   _writeEmojiFile(number, { mode: 'default', emojis: defaults })
   return defaults.length
 }

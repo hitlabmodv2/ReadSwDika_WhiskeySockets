@@ -133,9 +133,9 @@
     "name": "harisulijar",
     "type": "imageMessage",
     "arrivedAt": "2026-06-12T15:04:45.884Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "🇪🇷",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6281215324028",
@@ -148,6 +148,25 @@
       "participant": "176931194552515@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-12T15:04:45.885Z"
+    "updatedAt": "2026-06-12T15:05:04.924Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281215324028@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC1AE177434785978286978DA0AC0E07",
+        "participant": "176931194552515@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281215324028@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC1AE177434785978286978DA0AC0E07",
+        "participant": "6281215324028@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-12T15:05:04.924Z"
   }
 }
