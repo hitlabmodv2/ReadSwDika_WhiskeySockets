@@ -2731,7 +2731,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                             'ceksw',
                             'ceksetting',
                             'addemoji', 'delemoji', 'listemoji',
-                            'defaultemoji', 'custumemoji', 'clearemoji'
+                            'emojidefault', 'emojicustom', 'clearemoji'
                         ]);
                         if (!jadibotAllowedCommands.has(m.command)) {
                             return;
@@ -9370,8 +9370,8 @@ ${masaAktifLine}
 ├➤ *.delemoji 😊* — Hapus emoji reaksi
 ├➤ *.clearemoji* — Reset ke seed WA (love ijo dll)
 ├➤ *.listemoji* — Lihat daftar & mode emoji
-├➤ *.defaultemoji* — Pakai emoji bot utama
-╰➤ *.custumemoji* — Pakai emoji kamu sendiri
+├➤ *.emojidefault* — Pakai emoji bot utama
+╰➤ *.emojicustom* — Pakai emoji kamu sendiri
 
 ╭─「 📡 *STATUS & STORY* 」
 ╰➤ *.upswgc [caption]* — Upload status ke semua grup
@@ -12565,7 +12565,7 @@ if (isJadibot) text += jadibotNote;
                                         txt += `│ *Ubah via:*\n`;
                                         txt += `│ .readsw • .antidel • .anticall\n`;
                                         txt += `│ .anticallvid • .online\n`;
-                                        txt += `│ .defaultemoji • .custumemoji\n`;
+                                        txt += `│ .emojidefault • .emojicustom\n`;
                                         txt += `│ .addemoji • .delemoji\n`;
                                         txt += `│ .clearemoji • .listemoji\n`;
                                         txt += `│\n`;
@@ -13072,8 +13072,8 @@ response += `╰═════════════════╯`;
                                         response += `│ .addemoji 😊,😄\n`;
                                         response += `│ .delemoji 😊,😄\n`;
                                         if (_isJb) {
-                                                response += `│ .defaultemoji → pakai emoji bot utama\n`;
-                                                response += `│ .custumemoji → pakai emoji kamu sendiri\n`;
+                                                response += `│ .emojidefault → pakai emoji bot utama\n`;
+                                                response += `│ .emojicustom → pakai emoji kamu sendiri\n`;
                                         }
                                         response += `╰═════════════════╯`;
 
@@ -13086,7 +13086,7 @@ response += `╰═════════════════╯`;
                                 break;
                         }
 
-                        case 'defaultemoji': {
+                        case 'emojidefault': {
                                 if (hisoka?.isMainBot !== false) return;
                                 if (!m.prefix && m.query) break;
                                 try {
@@ -13097,20 +13097,20 @@ response += `╰═════════════════╯`;
                                         response += `│ ✅ Mode diubah ke *Default*\n`;
                                         response += `│\n│ 🌐 Reaksi SW sekarang pakai\n`;
                                         response += `│ emoji dari *bot utama* (${count} emoji)\n`;
-                                        response += `│\n│ 💡 Ketik *.custumemoji* untuk\n`;
+                                        response += `│\n│ 💡 Ketik *.emojicustom* untuk\n`;
                                         response += `│ balik ke emoji kamu sendiri\n│\n`;
                                         response += `│ *.listemoji* — cek daftar emoji\n`;
                                         response += `╰═════════════════════╯`;
                                         await tolak(hisoka, m, response);
-                                        logCommand(m, hisoka, 'defaultemoji');
+                                        logCommand(m, hisoka, 'emojidefault');
                                 } catch (error) {
-                                        console.error('\x1b[31m[DefaultEmoji] Error:\x1b[39m', error.message);
+                                        console.error('\x1b[31m[EmojiDefault] Error:\x1b[39m', error.message);
                                         await tolak(hisoka, m, `❌ Error: ${error.message}`);
                                 }
                                 break;
                         }
 
-                        case 'custumemoji': {
+                        case 'emojicustom': {
                                 if (hisoka?.isMainBot !== false) return;
                                 if (!m.prefix && m.query) break;
                                 try {
@@ -13128,12 +13128,12 @@ response += `╰═════════════════╯`;
                                         response += `│ .delemoji 😊 — hapus\n`;
                                         response += `│ .clearemoji — reset ke seed WA\n`;
                                         response += `│ .listemoji — lihat daftar\n`;
-                                        response += `│ .defaultemoji — balik ke default\n`;
+                                        response += `│ .emojidefault — balik ke default\n`;
                                         response += `╰═════════════════════╯`;
                                         await tolak(hisoka, m, response);
-                                        logCommand(m, hisoka, 'custumemoji');
+                                        logCommand(m, hisoka, 'emojicustom');
                                 } catch (error) {
-                                        console.error('\x1b[31m[CustumEmoji] Error:\x1b[39m', error.message);
+                                        console.error('\x1b[31m[EmojiCustom] Error:\x1b[39m', error.message);
                                         await tolak(hisoka, m, `❌ Error: ${error.message}`);
                                 }
                                 break;
@@ -13154,7 +13154,7 @@ response += `╰═════════════════╯`;
                                         response += `│ 💡 Tambah emoji kamu sendiri:\n`;
                                         response += `│ .addemoji 😊,😄,😁\n│\n`;
                                         response += `│ Balik ke 1900 emoji bot utama:\n`;
-                                        response += `│ .defaultemoji\n`;
+                                        response += `│ .emojidefault\n`;
                                         response += `╰═════════════════════╯`;
                                         await tolak(hisoka, m, response);
                                         logCommand(m, hisoka, 'clearemoji');
