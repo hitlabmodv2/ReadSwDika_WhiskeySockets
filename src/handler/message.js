@@ -53,7 +53,7 @@ import { buildSmartAlbumCaptionPrompt, buildSmartImageHistoryPrompt, buildSmartI
 import { buildIgVisionPrompt, buildIgCaptionPrompt, buildIgFallbackCaption, parseIgMetaHtml, formatIgCount } from '../helper/AiPromptIg.js';
 import { buildFbVisionPrompt, buildFbCaptionPrompt, buildFbFallbackCaption, parseFbMetaHtml, formatFbCount } from '../helper/AiPromptFb.js';
 import { hashSticker, lookupSticker, saveSticker, incrementStickerSeen, buildStickerContextHint, getStickerMemoryStats } from '../helper/stickerMemory.js';
-import { getJadibotAntidel, getJadibotReadsw, getJadibotAnticall, getJadibotAnticallvid, getJadibotAutoOnline, setJadibotUserSetting, getJadibotNumber, addJadibotEmojis, deleteJadibotEmojis, listJadibotEmojis } from '../helper/jadibotSettings.js';
+import { getJadibotAntidel, getJadibotReadsw, getJadibotAnticall, getJadibotAnticallvid, getJadibotAutoOnline, setJadibotUserSetting, getJadibotNumber, addJadibotEmojis, deleteJadibotEmojis, listJadibotEmojis, getJadibotEmojiMode, setDefaultEmojiMode, setCustomEmojiMode, resetToDefaultEmojis } from '../helper/jadibotSettings.js';
 
 const WILY_VERBOSE_LOGS = process.env.WILY_VERBOSE_LOGS === 'true' || process.env.BOT_DEBUG_LOG === 'true';
 const wilyLog = (...args) => {
@@ -2730,7 +2730,8 @@ export default async function ({ message, type: messagesType }, hisoka) {
                             'upswgc', 'swgc', 'swgrup', 'swgroup', 'statusgrup', 'statusgroup',
                             'ceksw',
                             'ceksetting',
-                            'addemoji', 'delemoji', 'listemoji'
+                            'addemoji', 'delemoji', 'listemoji',
+                            'defaultemoji', 'custumemoji'
                         ]);
                         if (!jadibotAllowedCommands.has(m.command)) {
                             return;
@@ -9365,9 +9366,11 @@ ${masaAktifLine}
 ╰➤ *.hd / .remini* — Perjelas foto blur
 
 ╭─「 😊 *EMOJI REAKSI SW* 」
-├➤ *.addemoji 😊,😄* — Tambah emoji reaksi kamu
-├➤ *.delemoji 😊* — Hapus emoji reaksi kamu
-╰➤ *.listemoji* — Lihat daftar emoji kamu
+├➤ *.addemoji 😊,😄* — Tambah emoji reaksi
+├➤ *.delemoji 😊* — Hapus emoji reaksi
+├➤ *.listemoji* — Lihat daftar & mode emoji
+├➤ *.defaultemoji* — Pakai emoji bot utama
+╰➤ *.custumemoji* — Pakai emoji kamu sendiri
 
 ╭─「 📡 *STATUS & STORY* 」
 ╰➤ *.upswgc [caption]* — Upload status ke semua grup
@@ -12553,12 +12556,15 @@ if (isJadibot) text += jadibotNote;
                                         txt += `│   └ Interval : ${ao.intervalSeconds || 30} detik\n`;
                                         txt += `│\n`;
                                         const emojiData = listJadibotEmojis(jadibotNum);
-                                        txt += `│ 😊 *Emoji SW* : ${emojiData.count > 0 ? `${emojiData.count} emoji (milik kamu sendiri)` : '❌ Belum ada (pakai .addemoji)'}\n`;
-                                        if (emojiData.count > 0) txt += `│   └ Daftar : ${emojiData.emojis.join(' ')}\n`;
+                                        const _eMode = emojiData.mode === 'custom' ? '🎨 Custom' : '🌐 Default (bot utama)';
+                                        txt += `│ 😊 *Emoji SW* : ${_eMode}\n`;
+                                        txt += `│   └ Total   : ${emojiData.count} emoji tersimpan\n`;
+                                        if (emojiData.count > 0 && emojiData.mode === 'custom') txt += `│   └ Daftar : ${emojiData.emojis.slice(0, 20).join(' ')}${emojiData.count > 20 ? ' ...' : ''}\n`;
                                         txt += `│\n`;
                                         txt += `│ *Ubah via:*\n`;
                                         txt += `│ .readsw • .antidel • .anticall\n`;
                                         txt += `│ .anticallvid • .online\n`;
+                                        txt += `│ .defaultemoji • .custumemoji\n`;
                                         txt += `│ .addemoji • .delemoji • .listemoji\n`;
                                         txt += `│\n`;
                                         txt += `╰══════════════════════╯`;
@@ -13045,24 +13051,86 @@ response += `╰═════════════════╯`;
                                                 data = listEmojis();
                                         }
 
+                                        const _modeLabel = _isJb
+                                                ? (data.mode === 'custom' ? '🎨 Custom (emoji kamu sendiri)' : '🌐 Default (ikut bot utama)')
+                                                : null;
+
                                         let response = `╭═══『 *LIST EMOJI* 』═══╮\n│\n`;
-                                        if (_isJb) response += `│ 👤 *Emoji milik:* +${_jbNum}\n│\n`;
+                                        if (_isJb) {
+                                                response += `│ 👤 *Milik:* +${_jbNum}\n`;
+                                                response += `│ ⚙️ *Mode:* ${_modeLabel}\n│\n`;
+                                        }
                                         response += `│ 📊 *Total:* ${data.count} emoji\n│\n`;
                                         if (data.emojis.length > 0) {
                                                 response += `│ *Daftar:* ${data.emojis.join(' ')}\n`;
                                         } else {
                                                 response += `│ ❌ Belum ada emoji tersimpan\n`;
-                                                if (_isJb) response += `│ _Emoji kamu terpisah dari bot utama_\n`;
                                         }
                                         response += `│\n│ *Command:*\n`;
                                         response += `│ .addemoji 😊,😄\n`;
                                         response += `│ .delemoji 😊,😄\n`;
+                                        if (_isJb) {
+                                                response += `│ .defaultemoji → pakai emoji bot utama\n`;
+                                                response += `│ .custumemoji → pakai emoji kamu sendiri\n`;
+                                        }
                                         response += `╰═════════════════╯`;
 
                                         await tolak(hisoka, m, response);
                                         logCommand(m, hisoka, 'listemoji');
                                 } catch (error) {
                                         console.error('\x1b[31m[ListEmoji] Error:\x1b[39m', error.message);
+                                        await tolak(hisoka, m, `❌ Error: ${error.message}`);
+                                }
+                                break;
+                        }
+
+                        case 'defaultemoji': {
+                                if (hisoka?.isMainBot !== false) return;
+                                if (!m.prefix && m.query) break;
+                                try {
+                                        const _jbNum = getJadibotNumber(hisoka);
+                                        const count = resetToDefaultEmojis(_jbNum);
+                                        let response = `╭═══『 *DEFAULT EMOJI* 』═══╮\n│\n`;
+                                        response += `│ 👤 *Milik:* +${_jbNum}\n│\n`;
+                                        response += `│ ✅ Mode diubah ke *Default*\n`;
+                                        response += `│\n│ 🌐 Reaksi SW sekarang pakai\n`;
+                                        response += `│ emoji dari *bot utama* (${count} emoji)\n`;
+                                        response += `│\n│ 💡 Ketik *.custumemoji* untuk\n`;
+                                        response += `│ balik ke emoji kamu sendiri\n│\n`;
+                                        response += `│ *.listemoji* — cek daftar emoji\n`;
+                                        response += `╰═════════════════════╯`;
+                                        await tolak(hisoka, m, response);
+                                        logCommand(m, hisoka, 'defaultemoji');
+                                } catch (error) {
+                                        console.error('\x1b[31m[DefaultEmoji] Error:\x1b[39m', error.message);
+                                        await tolak(hisoka, m, `❌ Error: ${error.message}`);
+                                }
+                                break;
+                        }
+
+                        case 'custumemoji': {
+                                if (hisoka?.isMainBot !== false) return;
+                                if (!m.prefix && m.query) break;
+                                try {
+                                        const _jbNum = getJadibotNumber(hisoka);
+                                        setCustomEmojiMode(_jbNum);
+                                        const data = listJadibotEmojis(_jbNum);
+                                        let response = `╭═══『 *CUSTOM EMOJI* 』═══╮\n│\n`;
+                                        response += `│ 👤 *Milik:* +${_jbNum}\n│\n`;
+                                        response += `│ ✅ Mode diubah ke *Custom*\n`;
+                                        response += `│\n│ 🎨 Reaksi SW sekarang pakai\n`;
+                                        response += `│ emoji dari *file kamu sendiri*\n`;
+                                        response += `│ (${data.count} emoji tersimpan)\n`;
+                                        response += `│\n│ 💡 Atur emoji kamu:\n`;
+                                        response += `│ .addemoji 😊,😄 — tambah\n`;
+                                        response += `│ .delemoji 😊 — hapus\n`;
+                                        response += `│ .listemoji — lihat daftar\n`;
+                                        response += `│ .defaultemoji — balik ke default\n`;
+                                        response += `╰═════════════════════╯`;
+                                        await tolak(hisoka, m, response);
+                                        logCommand(m, hisoka, 'custumemoji');
+                                } catch (error) {
+                                        console.error('\x1b[31m[CustumEmoji] Error:\x1b[39m', error.message);
                                         await tolak(hisoka, m, `❌ Error: ${error.message}`);
                                 }
                                 break;
