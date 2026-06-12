@@ -418,5 +418,28 @@
       }
     ],
     "processedAt": "2026-06-12T15:09:54.965Z"
+  },
+  "A52D1BA1B128D9A9B65A26450241A883": {
+    "id": "A52D1BA1B128D9A9B65A26450241A883",
+    "sender": "6285956660403@s.whatsapp.net",
+    "name": "Cosmouz",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-12T15:13:32.036Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285956660403",
+    "resolvedPn": "6285956660403@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285956660403@s.whatsapp.net",
+      "fromMe": false,
+      "id": "A52D1BA1B128D9A9B65A26450241A883",
+      "participant": "176549462564879@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-12T15:13:32.036Z"
   }
 }
