@@ -376,5 +376,47 @@
       }
     ],
     "processedAt": "2026-06-12T10:40:29.767Z"
+  },
+  "ACB8F2A0E1408011BE63E2D6CBF37559": {
+    "id": "ACB8F2A0E1408011BE63E2D6CBF37559",
+    "sender": "6282252134009@s.whatsapp.net",
+    "name": "NAKIRAN || CON VIVIRS",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-12T11:54:49.131Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🫀",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6282252134009",
+    "resolvedPn": "6282252134009@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6282252134009@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACB8F2A0E1408011BE63E2D6CBF37559",
+      "participant": "76790290767977@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-12T11:55:05.788Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282252134009@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACB8F2A0E1408011BE63E2D6CBF37559",
+        "participant": "76790290767977@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282252134009@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACB8F2A0E1408011BE63E2D6CBF37559",
+        "participant": "6282252134009@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-12T11:55:05.788Z"
   }
 }
