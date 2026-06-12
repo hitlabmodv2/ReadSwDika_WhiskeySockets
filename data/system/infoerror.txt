@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 10/06/2026, 04.08.30  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 12/06/2026, 10.44.00  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,26 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  unhandledRejection
+│  #001  —  console.error
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  Cannot find module '/home/runner/workspace/src/scrape/infowibu.cjs'
-Require stack:
-- /home/runner/workspace/index.js
+│  [31m[HotReload] ✗ Gagal reload 'src/handler/message.js', pakai versi lama.[39m
 │
 │  DETAIL
-│  Sumber      : unhandledRejection
+│  Sumber      : console.error
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 10/06/2026, 04.08.30
-│  Terakhir    : 10/06/2026, 04.08.30
+│  Pertama     : 12/06/2026, 10.44.00
+│  Terakhir    : 12/06/2026, 10.44.00
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: Cannot find module '/home/runner/workspace/src/scrape/infowibu.cjs'
-│     Require stack:
-│     - /home/runner/workspace/index.js
+│  ▶  Error: [31m[HotReload] ✗ Gagal reload 'src/handler/message.js', pakai versi lama.[39m
+│     at console.error (file:///home/runner/workspace/index.js:393:27)
+│     at Timeout._onTimeout (file:///home/runner/workspace/src/helper/hotReload.js:102:29)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 10/06/2026, 04.08.30
+  Terakhir diperbarui: 12/06/2026, 10.44.00
 ════════════════════════════════════════════════════════════════════════

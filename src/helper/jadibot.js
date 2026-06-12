@@ -56,7 +56,7 @@ import { useSingleFileAuthState } from './authState.js'
 import JSONDB from '../db/json.js'
 import { cleanStaleSessionFiles } from './cleaner.js'
 import { logError } from '../db/errorLog.js'
-import { getJadibotAnticall, getJadibotAnticallvid, getJadibotNumber, getJadibotReadsw } from './jadibotSettings.js'
+import { getJadibotAnticall, getJadibotAnticallvid, getJadibotNumber, getJadibotReadsw, getJadibotAutoOnline } from './jadibotSettings.js'
 import { getHandler } from './hotReload.js'
 
 /* ================= LOGGER ================= */
@@ -128,6 +128,34 @@ const jadibotSwSets = new Map()
 const jadibotTrackers = new Map()
 // Per-jadibot periodic SessionCleaner interval — bersihkan session/sender-key lama saat session jalan lama
 const jadibotCleanerTimers = new Map()
+// Per-jadibot autoonline interval — isolated per jadibot, tidak mempengaruhi bot utama/jadibot lain
+const autoOnlineIntervalMap = new Map()
+
+/* ─── PER-JADIBOT AUTOONLINE ─── */
+export function startJadibotAutoOnline(sock, jadibotNum) {
+  // Bersihkan interval lama dulu (reconnect / setting berubah)
+  if (autoOnlineIntervalMap.has(jadibotNum)) {
+    clearInterval(autoOnlineIntervalMap.get(jadibotNum))
+    autoOnlineIntervalMap.delete(jadibotNum)
+  }
+  const aoSettings = getJadibotAutoOnline(jadibotNum)
+  const presence = aoSettings.enabled ? 'available' : 'unavailable'
+  const intervalMs = Math.max(10000, (aoSettings.intervalSeconds || 30) * 1000)
+  // Kirim presence langsung saat dipanggil
+  try { if (sock?.user) sock.sendPresenceUpdate(presence) } catch {}
+  // Jadwalkan secara periodik
+  const iv = setInterval(() => {
+    try { if (sock?.user) sock.sendPresenceUpdate(presence) } catch {}
+  }, intervalMs)
+  autoOnlineIntervalMap.set(jadibotNum, iv)
+}
+
+export function stopJadibotAutoOnline(jadibotNum) {
+  if (autoOnlineIntervalMap.has(jadibotNum)) {
+    clearInterval(autoOnlineIntervalMap.get(jadibotNum))
+    autoOnlineIntervalMap.delete(jadibotNum)
+  }
+}
 
 /* ================= UTILS ================= */
 function loadConfig() {
@@ -1290,11 +1318,13 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
     'anticall', 'ac',
     'anticallvid', 'acv',
     'autocallaudio', 'aca',
+    'online',
     'tt', 'ig', 'fb', 'ytmp3', 'ytmp4', 'play',
     'sticker', 's',
     'toimg', 'hd',
     'upswgc', 'swgc', 'swgrup', 'swgroup', 'statusgrup', 'statusgroup',
-    'ceksw'
+    'ceksw',
+    'ceksetting'
   ]
 
   sock.ev.on('creds.update', async (...args) => {
@@ -1500,6 +1530,9 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
       persistConnectedAt(number, _connectTs)
       startingSocketMap.delete(number)
       pairingRequested.delete(number)
+
+      // Start per-jadibot autoonline (isolated dari bot utama & jadibot lain)
+      try { startJadibotAutoOnline(sock, number) } catch {}
 
       // Pastikan registered = true tersimpan agar reconnect tidak trigger pairing ulang
       if (!state.creds.registered) {
@@ -1907,11 +1940,13 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
     'anticall', 'ac',
     'anticallvid', 'acv',
     'autocallaudio', 'aca',
+    'online',
     'tt', 'ig', 'fb', 'ytmp3', 'ytmp4', 'play',
     'sticker', 's',
     'toimg', 'hd',
     'upswgc', 'swgc', 'swgrup', 'swgroup', 'statusgrup', 'statusgroup',
-    'ceksw'
+    'ceksw',
+    'ceksetting'
   ]
 
   sock.ev.on('creds.update', async (...args) => {
@@ -1956,6 +1991,9 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
       jadibotMap.set(number, sock)
       jadibotConnectedAt.set(number, _connectTs)
       persistConnectedAt(number, _connectTs)
+
+      // Start per-jadibot autoonline (isolated dari bot utama & jadibot lain)
+      try { startJadibotAutoOnline(sock, number) } catch {}
 
       // Pastikan registered = true tersimpan agar reconnect tidak trigger QR ulang
       if (!state.creds.registered) {
@@ -2284,6 +2322,7 @@ async function stopJadibot(number, sendReply) {
     clearInterval(jadibotCleanerTimers.get(number))
     jadibotCleanerTimers.delete(number)
   }
+  stopJadibotAutoOnline(number)
   if (pairingTimeout.has(number)) {
     clearTimeout(pairingTimeout.get(number))
     pairingTimeout.delete(number)

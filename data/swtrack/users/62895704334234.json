@@ -64,7 +64,7 @@
       "participant": "142696211599405@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-12T10:31:16.926Z",
+    "updatedAt": "2026-06-12T10:37:00.738Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -83,7 +83,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-12T10:31:16.925Z"
+    "processedAt": "2026-06-12T10:31:16.925Z",
+    "deleted": true,
+    "deletedAt": "2026-06-12T10:37:00.738Z"
   },
   "AC3E31344848DF9FEC73D63686639EBB": {
     "id": "AC3E31344848DF9FEC73D63686639EBB",
@@ -106,7 +108,7 @@
       "participant": "142696211599405@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-12T10:31:14.044Z",
+    "updatedAt": "2026-06-12T10:37:00.734Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -125,6 +127,358 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-12T10:31:14.044Z"
+    "processedAt": "2026-06-12T10:31:14.044Z",
+    "deleted": true,
+    "deletedAt": "2026-06-12T10:37:00.734Z"
+  },
+  "AC182DBBE6AD292FAE38D0E82D381EC7": {
+    "id": "AC182DBBE6AD292FAE38D0E82D381EC7",
+    "sender": "62895704334234@s.whatsapp.net",
+    "name": "jazila_bidikkamu",
+    "type": "extendedTextMessage",
+    "arrivedAt": "2026-06-12T10:35:55.975Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🎹",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "62895704334234",
+    "resolvedPn": "62895704334234@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "62895704334234@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC182DBBE6AD292FAE38D0E82D381EC7",
+      "participant": "142696211599405@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-12T10:37:00.740Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62895704334234@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC182DBBE6AD292FAE38D0E82D381EC7",
+        "participant": "142696211599405@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62895704334234@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC182DBBE6AD292FAE38D0E82D381EC7",
+        "participant": "62895704334234@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-12T10:36:10.845Z",
+    "deleted": true,
+    "deletedAt": "2026-06-12T10:37:00.740Z"
+  },
+  "ACC84892804AC59D946464DAD712C1C8": {
+    "id": "ACC84892804AC59D946464DAD712C1C8",
+    "sender": "62895704334234@s.whatsapp.net",
+    "name": "jazila_bidikkamu",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-12T10:37:05.788Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "💅",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "62895704334234",
+    "resolvedPn": "62895704334234@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "62895704334234@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACC84892804AC59D946464DAD712C1C8",
+      "participant": "142696211599405@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-12T10:37:39.050Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62895704334234@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACC84892804AC59D946464DAD712C1C8",
+        "participant": "142696211599405@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62895704334234@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACC84892804AC59D946464DAD712C1C8",
+        "participant": "62895704334234@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-12T10:37:13.659Z",
+    "deleted": true,
+    "deletedAt": "2026-06-12T10:37:39.050Z"
+  },
+  "AC19D5060B7DF3E327B9C575EED238AD": {
+    "id": "AC19D5060B7DF3E327B9C575EED238AD",
+    "sender": "62895704334234@s.whatsapp.net",
+    "name": "jazila_bidikkamu",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-12T10:37:24.799Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🎙️",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "62895704334234",
+    "resolvedPn": "62895704334234@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "62895704334234@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC19D5060B7DF3E327B9C575EED238AD",
+      "participant": "142696211599405@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-12T10:37:39.045Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62895704334234@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC19D5060B7DF3E327B9C575EED238AD",
+        "participant": "142696211599405@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62895704334234@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC19D5060B7DF3E327B9C575EED238AD",
+        "participant": "62895704334234@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-12T10:37:37.052Z",
+    "deleted": true,
+    "deletedAt": "2026-06-12T10:37:39.045Z"
+  },
+  "AC956EB4ACF886ED737BDBB6523C510F": {
+    "id": "AC956EB4ACF886ED737BDBB6523C510F",
+    "sender": "62895704334234@s.whatsapp.net",
+    "name": "jazila_bidikkamu",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-12T10:37:39.051Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🔇",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "62895704334234",
+    "resolvedPn": "62895704334234@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "62895704334234@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC956EB4ACF886ED737BDBB6523C510F",
+      "participant": "142696211599405@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-12T10:38:56.877Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62895704334234@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC956EB4ACF886ED737BDBB6523C510F",
+        "participant": "142696211599405@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62895704334234@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC956EB4ACF886ED737BDBB6523C510F",
+        "participant": "62895704334234@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-12T10:37:52.607Z",
+    "deleted": true,
+    "deletedAt": "2026-06-12T10:38:56.877Z"
+  },
+  "ACECC9D9D9B8ADE575386F428FA7EDC1": {
+    "id": "ACECC9D9D9B8ADE575386F428FA7EDC1",
+    "sender": "62895704334234@s.whatsapp.net",
+    "name": "jazila_bidikkamu",
+    "type": "extendedTextMessage",
+    "arrivedAt": "2026-06-12T10:38:12.475Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🇦🇴",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "62895704334234",
+    "resolvedPn": "62895704334234@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "62895704334234@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACECC9D9D9B8ADE575386F428FA7EDC1",
+      "participant": "142696211599405@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-12T10:38:26.171Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62895704334234@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACECC9D9D9B8ADE575386F428FA7EDC1",
+        "participant": "142696211599405@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62895704334234@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACECC9D9D9B8ADE575386F428FA7EDC1",
+        "participant": "62895704334234@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-12T10:38:20.704Z",
+    "deleted": true,
+    "deletedAt": "2026-06-12T10:38:26.171Z"
+  },
+  "AC6B37A13E339C9A3C522266D4A28F16": {
+    "id": "AC6B37A13E339C9A3C522266D4A28F16",
+    "sender": "62895704334234@s.whatsapp.net",
+    "name": "jazila_bidikkamu",
+    "type": "extendedTextMessage",
+    "arrivedAt": "2026-06-12T10:38:49.033Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🏧",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "62895704334234",
+    "resolvedPn": "62895704334234@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "62895704334234@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC6B37A13E339C9A3C522266D4A28F16",
+      "participant": "142696211599405@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-12T10:39:07.171Z",
+    "deleted": true,
+    "deletedAt": "2026-06-12T10:38:55.838Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62895704334234@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC6B37A13E339C9A3C522266D4A28F16",
+        "participant": "142696211599405@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62895704334234@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC6B37A13E339C9A3C522266D4A28F16",
+        "participant": "62895704334234@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-12T10:39:07.170Z"
+  },
+  "ACD78FA314369B03E1FD9F23B3C5212E": {
+    "id": "ACD78FA314369B03E1FD9F23B3C5212E",
+    "sender": "62895704334234@s.whatsapp.net",
+    "name": "jazila_bidikkamu",
+    "type": "extendedTextMessage",
+    "arrivedAt": "2026-06-12T10:38:54.689Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "♾️",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "62895704334234",
+    "resolvedPn": "62895704334234@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "62895704334234@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACD78FA314369B03E1FD9F23B3C5212E",
+      "participant": "142696211599405@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-12T10:39:00.848Z",
+    "deleted": true,
+    "deletedAt": "2026-06-12T10:38:55.834Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62895704334234@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACD78FA314369B03E1FD9F23B3C5212E",
+        "participant": "142696211599405@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62895704334234@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACD78FA314369B03E1FD9F23B3C5212E",
+        "participant": "62895704334234@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-12T10:39:00.848Z"
+  },
+  "AC99EAEDAAF1BB69B569401EF9093FD0": {
+    "id": "AC99EAEDAAF1BB69B569401EF9093FD0",
+    "sender": "62895704334234@s.whatsapp.net",
+    "name": "jazila_bidikkamu",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-12T10:38:56.879Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🇭🇰",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "62895704334234",
+    "resolvedPn": "62895704334234@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "62895704334234@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC99EAEDAAF1BB69B569401EF9093FD0",
+      "participant": "142696211599405@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-12T10:39:14.427Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62895704334234@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC99EAEDAAF1BB69B569401EF9093FD0",
+        "participant": "142696211599405@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62895704334234@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC99EAEDAAF1BB69B569401EF9093FD0",
+        "participant": "62895704334234@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-12T10:39:14.427Z"
   }
 }

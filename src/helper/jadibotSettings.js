@@ -98,6 +98,11 @@ export function getJadibotAnticallvid(number) {
   return settings.anticallvid || { enabled: false, message: '', whitelist: [] }
 }
 
+export function getJadibotAutoOnline(number) {
+  const settings = getJadibotUserSettings(number)
+  return settings.autoOnline || { enabled: false, intervalSeconds: 30 }
+}
+
 export function getJadibotNumber(hisoka) {
   return String(hisoka?.user?.id || '').split('@')[0].split(':')[0].replace(/[^0-9]/g, '')
 }

@@ -1,13 +1,13 @@
 {
-  "3EB07BBBB06505AEA3C801": {
-    "id": "3EB07BBBB06505AEA3C801",
+  "A5F9EE76EA4DB27A1749F4846B8479AB": {
+    "id": "A5F9EE76EA4DB27A1749F4846B8479AB",
     "sender": "6283134844523@s.whatsapp.net",
     "name": "Anda Siapa?",
-    "type": "conversation",
-    "arrivedAt": "2026-06-11T05:25:40.586Z",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-12T10:37:01.288Z",
     "read": true,
     "reacted": true,
-    "emoji": "🍙",
+    "emoji": "🐶",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6283134844523",
@@ -16,17 +16,17 @@
       "remoteJid": "status@broadcast",
       "remoteJidAlt": "6283134844523@s.whatsapp.net",
       "fromMe": false,
-      "id": "3EB07BBBB06505AEA3C801",
+      "id": "A5F9EE76EA4DB27A1749F4846B8479AB",
       "participant": "239328697536578@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-11T05:25:51.016Z",
+    "updatedAt": "2026-06-12T10:37:15.189Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6283134844523@s.whatsapp.net",
         "fromMe": false,
-        "id": "3EB07BBBB06505AEA3C801",
+        "id": "A5F9EE76EA4DB27A1749F4846B8479AB",
         "participant": "239328697536578@lid",
         "addressingMode": "lid"
       },
@@ -34,22 +34,22 @@
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6283134844523@s.whatsapp.net",
         "fromMe": false,
-        "id": "3EB07BBBB06505AEA3C801",
+        "id": "A5F9EE76EA4DB27A1749F4846B8479AB",
         "participant": "6283134844523@s.whatsapp.net",
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-11T05:25:51.015Z"
+    "processedAt": "2026-06-12T10:37:15.189Z"
   },
-  "3EB0661E13EC50F779238C": {
-    "id": "3EB0661E13EC50F779238C",
+  "A5C6B1F0E8C4CBB0B535A85277A4F634": {
+    "id": "A5C6B1F0E8C4CBB0B535A85277A4F634",
     "sender": "6283134844523@s.whatsapp.net",
     "name": "Anda Siapa?",
-    "type": "conversation",
-    "arrivedAt": "2026-06-11T05:25:42.613Z",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-12T10:37:19.432Z",
     "read": true,
     "reacted": true,
-    "emoji": "🌭",
+    "emoji": "🗃️",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6283134844523",
@@ -58,17 +58,17 @@
       "remoteJid": "status@broadcast",
       "remoteJidAlt": "6283134844523@s.whatsapp.net",
       "fromMe": false,
-      "id": "3EB0661E13EC50F779238C",
+      "id": "A5C6B1F0E8C4CBB0B535A85277A4F634",
       "participant": "239328697536578@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-11T05:25:50.975Z",
+    "updatedAt": "2026-06-12T10:37:24.247Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6283134844523@s.whatsapp.net",
         "fromMe": false,
-        "id": "3EB0661E13EC50F779238C",
+        "id": "A5C6B1F0E8C4CBB0B535A85277A4F634",
         "participant": "239328697536578@lid",
         "addressingMode": "lid"
       },
@@ -76,95 +76,11 @@
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6283134844523@s.whatsapp.net",
         "fromMe": false,
-        "id": "3EB0661E13EC50F779238C",
+        "id": "A5C6B1F0E8C4CBB0B535A85277A4F634",
         "participant": "6283134844523@s.whatsapp.net",
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-11T05:25:50.975Z"
-  },
-  "3EB05E5A2EE63A49AD4626": {
-    "id": "3EB05E5A2EE63A49AD4626",
-    "sender": "6283134844523@s.whatsapp.net",
-    "name": "Anda Siapa?",
-    "type": "conversation",
-    "arrivedAt": "2026-06-11T05:25:46.666Z",
-    "read": true,
-    "reacted": true,
-    "emoji": "🐂",
-    "resolve": "PN langsung ✓",
-    "source": "status",
-    "number": "6283134844523",
-    "resolvedPn": "6283134844523@s.whatsapp.net",
-    "messageKey": {
-      "remoteJid": "status@broadcast",
-      "remoteJidAlt": "6283134844523@s.whatsapp.net",
-      "fromMe": false,
-      "id": "3EB05E5A2EE63A49AD4626",
-      "participant": "239328697536578@lid",
-      "addressingMode": "lid"
-    },
-    "updatedAt": "2026-06-11T05:26:05.436Z",
-    "receiptKeys": [
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6283134844523@s.whatsapp.net",
-        "fromMe": false,
-        "id": "3EB05E5A2EE63A49AD4626",
-        "participant": "239328697536578@lid",
-        "addressingMode": "lid"
-      },
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6283134844523@s.whatsapp.net",
-        "fromMe": false,
-        "id": "3EB05E5A2EE63A49AD4626",
-        "participant": "6283134844523@s.whatsapp.net",
-        "addressingMode": "lid"
-      }
-    ],
-    "processedAt": "2026-06-11T05:26:05.436Z"
-  },
-  "3EB0D2958BD960613C7665": {
-    "id": "3EB0D2958BD960613C7665",
-    "sender": "6283134844523@s.whatsapp.net",
-    "name": "Anda Siapa?",
-    "type": "conversation",
-    "arrivedAt": "2026-06-11T05:26:01.203Z",
-    "read": true,
-    "reacted": true,
-    "emoji": "🇦🇨",
-    "resolve": "PN langsung ✓",
-    "source": "status",
-    "number": "6283134844523",
-    "resolvedPn": "6283134844523@s.whatsapp.net",
-    "messageKey": {
-      "remoteJid": "status@broadcast",
-      "remoteJidAlt": "6283134844523@s.whatsapp.net",
-      "fromMe": false,
-      "id": "3EB0D2958BD960613C7665",
-      "participant": "239328697536578@lid",
-      "addressingMode": "lid"
-    },
-    "updatedAt": "2026-06-11T05:26:05.454Z",
-    "receiptKeys": [
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6283134844523@s.whatsapp.net",
-        "fromMe": false,
-        "id": "3EB0D2958BD960613C7665",
-        "participant": "239328697536578@lid",
-        "addressingMode": "lid"
-      },
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6283134844523@s.whatsapp.net",
-        "fromMe": false,
-        "id": "3EB0D2958BD960613C7665",
-        "participant": "6283134844523@s.whatsapp.net",
-        "addressingMode": "lid"
-      }
-    ],
-    "processedAt": "2026-06-11T05:26:05.454Z"
+    "processedAt": "2026-06-12T10:37:24.246Z"
   }
 }

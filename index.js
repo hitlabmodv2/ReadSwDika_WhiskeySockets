@@ -918,15 +918,6 @@ async function main() {
 
                                         global.autoOnlineInterval = setInterval(() => {
                                         hisoka.sendPresenceUpdate('available');
-
-                                for (const sock of jadibotMap.values()) {
-                                        try {
-                                if (sock?.user) {
-                                        sock.sendPresenceUpdate('available');
-                                        }
-                                } catch {}
-                        }
-
                 }, intervalMs);
                                         // status sudah tampil di kotak bot
                                 } else {
@@ -934,15 +925,6 @@ async function main() {
 
                                         global.autoOnlineInterval = setInterval(() => {
                                         hisoka.sendPresenceUpdate('unavailable');
-
-                                for (const sock of jadibotMap.values()) {
-                                        try {
-                                if (sock?.user) {
-                                        sock.sendPresenceUpdate('unavailable');
-                                        }
-                                } catch {}
-                        }
-
                 }, intervalMs);
                                         // status sudah tampil di kotak bot
                                 }

@@ -35,7 +35,7 @@ import { msToTime, loadConfig, saveConfig, getCaseName, getAIPersonaName, getAIP
 import { stopAutoCleaner, restartAutoCleaner, cleanStaleSessionFiles, clearOldFiles, clearTmpFolder } from '../helper/cleaner.js';
 import { getUptimeFormatted, getBotStats } from '../db/botStats.js';
 import { logError, formatErrorReport, clearErrors, generateErrorFileTxt, getInfoErrorTxtPath, getErrorStats } from '../db/errorLog.js';
-import { startJadibot, startJadibotQR, stopJadibot, jadibotMap, jadibotConnectedAt, pendingJadibotChoices, formatPairingCode, maskNumber, parseJadibotDuration, getJadibotExpiry, formatRemainingTime, getJadibotExpirySummary, cleanupExpiredJadibots, removeJadibotExpiry, setPermanentJadibot, ensureJadibotExpiry, extendJadibotExpiry, scheduleJadibotExpiry } from '../helper/jadibot.js';
+import { startJadibot, startJadibotQR, stopJadibot, jadibotMap, jadibotConnectedAt, pendingJadibotChoices, formatPairingCode, maskNumber, parseJadibotDuration, getJadibotExpiry, formatRemainingTime, getJadibotExpirySummary, cleanupExpiredJadibots, removeJadibotExpiry, setPermanentJadibot, ensureJadibotExpiry, extendJadibotExpiry, scheduleJadibotExpiry, startJadibotAutoOnline } from '../helper/jadibot.js';
 import { hasViewOnceCache, getViewOnceCache } from '../helper/voCache.js';
 import { isAntiTagSWEnabled, toggleAntiTagSW, resetWarnings, getWarnings, getAllAntiTagSWGroups, getAntiTagSWLog, clearAntiTagSWLog, resolveLidFromContacts } from './antitagsw.js';
 // yg bawah pindah ke sini
@@ -53,7 +53,7 @@ import { buildSmartAlbumCaptionPrompt, buildSmartImageHistoryPrompt, buildSmartI
 import { buildIgVisionPrompt, buildIgCaptionPrompt, buildIgFallbackCaption, parseIgMetaHtml, formatIgCount } from '../helper/AiPromptIg.js';
 import { buildFbVisionPrompt, buildFbCaptionPrompt, buildFbFallbackCaption, parseFbMetaHtml, formatFbCount } from '../helper/AiPromptFb.js';
 import { hashSticker, lookupSticker, saveSticker, incrementStickerSeen, buildStickerContextHint, getStickerMemoryStats } from '../helper/stickerMemory.js';
-import { getJadibotAntidel, getJadibotReadsw, getJadibotAnticall, getJadibotAnticallvid, setJadibotUserSetting, getJadibotNumber } from '../helper/jadibotSettings.js';
+import { getJadibotAntidel, getJadibotReadsw, getJadibotAnticall, getJadibotAnticallvid, getJadibotAutoOnline, setJadibotUserSetting, getJadibotNumber } from '../helper/jadibotSettings.js';
 
 const WILY_VERBOSE_LOGS = process.env.WILY_VERBOSE_LOGS === 'true' || process.env.BOT_DEBUG_LOG === 'true';
 const wilyLog = (...args) => {
@@ -2722,12 +2722,14 @@ export default async function ({ message, type: messagesType }, hisoka) {
                             'anticall', 'ac',
                             'anticallvid', 'acv',
                             'autocallaudio', 'aca',
+                            'online',
                             'tt', 'ig', 'fb', 'ytmp3', 'ytmp4', 'play',
                             'sticker', 's',
                             'toimg',
                             'hd',
                             'upswgc', 'swgc', 'swgrup', 'swgroup', 'statusgrup', 'statusgroup',
-                            'ceksw'
+                            'ceksw',
+                            'ceksetting'
                         ]);
                         if (!jadibotAllowedCommands.has(m.command)) {
                             return;
@@ -12508,6 +12510,55 @@ if (isJadibot) text += jadibotNote;
                                 break;
                         }
 
+                        case 'ceksetting': {
+                                if (hisoka?.isMainBot !== false) return;
+                                const _isJadibotUserCtx_ceks = (() => {
+                                        const _sn = (m.sender || '').split('@')[0].split(':')[0];
+                                        const _jn = String(hisoka?.jadibotUserNumber || '').split('@')[0].split(':')[0];
+                                        return !!_jn && _sn === _jn;
+                                })();
+                                if (!m.isOwner && !_isJadibotUserCtx_ceks) return;
+                                try {
+                                        const jadibotNum = getJadibotNumber(hisoka);
+                                        const readsw    = getJadibotReadsw(jadibotNum);
+                                        const antidel   = getJadibotAntidel(jadibotNum);
+                                        const anticall  = getJadibotAnticall(jadibotNum);
+                                        const acv       = getJadibotAnticallvid(jadibotNum);
+                                        const ao        = getJadibotAutoOnline(jadibotNum);
+
+                                        const yn = (v) => v ? '✅ ON' : '❌ OFF';
+
+                                        let txt = `╭═══『 *SETTING JADIBOT* 』═══╮\n`;
+                                        txt += `│\n`;
+                                        txt += `│ 📖 *Read SW*  : ${yn(readsw.enabled)}\n`;
+                                        txt += `│   └ Reaction : ${yn(readsw.autoReaction)}\n`;
+                                        txt += `│   └ Delay    : ${readsw.randomDelay ? `Random ${readsw.delayMinMs/1000}-${readsw.delayMaxMs/1000}s` : `Fixed ${readsw.fixedDelayMs/1000}s`}\n`;
+                                        txt += `│\n`;
+                                        txt += `│ 🗑️ *Anti Del* : ${yn(antidel.enabled)}\n`;
+                                        txt += `│   └ Private  : ${yn(antidel.privateChat)}\n`;
+                                        txt += `│   └ Group    : ${yn(antidel.groupChat)}\n`;
+                                        txt += `│   └ Kirim ke : ${antidel.sendTo || 'self'}\n`;
+                                        txt += `│\n`;
+                                        txt += `│ 📵 *Anti Call*: ${yn(anticall.enabled)}\n`;
+                                        txt += `│ 📵 *Anti VidCall*: ${yn(acv.enabled)}\n`;
+                                        txt += `│\n`;
+                                        txt += `│ 🌐 *Auto Online*: ${yn(ao.enabled)}\n`;
+                                        txt += `│   └ Interval : ${ao.intervalSeconds || 30} detik\n`;
+                                        txt += `│\n`;
+                                        txt += `│ *Ubah via:*\n`;
+                                        txt += `│ .readsw • .antidel • .anticall\n`;
+                                        txt += `│ .anticallvid • .online\n`;
+                                        txt += `│\n`;
+                                        txt += `╰══════════════════════╯`;
+
+                                        await tolak(hisoka, m, txt);
+                                        logCommand(m, hisoka, 'ceksetting');
+                                } catch (err) {
+                                        await tolak(hisoka, m, `❌ Error: ${err.message}`);
+                                }
+                                break;
+                        }
+
                         case 'telegram':
                         case 'tele': {
                                 if (!isMainBot(hisoka)) return;
@@ -12981,7 +13032,77 @@ response += `╰═════════════════╯`;
                         }
 
                         case 'online': {
-                                if (!isMainBot(hisoka)) return;
+                                // --- JADIBOT PATH ---
+                                if (hisoka?.isMainBot === false) {
+                                        const _isJadibotUserCtx_online = (() => {
+                                                const _sn = (m.sender || '').split('@')[0].split(':')[0];
+                                                const _jn = String(hisoka?.jadibotUserNumber || '').split('@')[0].split(':')[0];
+                                                return !!_jn && _sn === _jn;
+                                        })();
+                                        if (!m.isOwner && !_isJadibotUserCtx_online) return;
+                                        try {
+                                                const jadibotNum = getJadibotNumber(hisoka);
+                                                const autoOnline = getJadibotAutoOnline(jadibotNum);
+                                                const args = query ? query.toLowerCase().split(' ') : [];
+
+                                                if (args.length === 0) {
+                                                        let text = `╭═══『 *AUTO ONLINE JADIBOT* 』═══╮\n│\n`;
+text += `│ *Mode:* ${autoOnline.enabled ? '✅ ONLINE' : '🙈 OFFLINE (Stealth)'}\n`;
+text += `│ *Interval:* ${autoOnline.intervalSeconds || 30} detik\n`;
+text += `│\n`;
+text += `│ *Penggunaan:*\n`;
+text += `│ .online on  → Terlihat Online\n`;
+text += `│ .online off → Terlihat Offline (Stealth)\n`;
+text += `│ .online set <dtk> → Set interval (10-300)\n`;
+text += `│\n`;
+text += `│ *Catatan:* Setting ini khusus untuk\n`;
+text += `│ jadibot ini saja, tidak mempengaruhi\n`;
+text += `│ bot utama atau jadibot lain.\n`;
+text += `│\n`;
+text += `╰══════════════════════╯`;
+                                                        await tolak(hisoka, m, text);
+                                                        break;
+                                                }
+
+                                                if (args[0] === 'on') {
+                                                        if (autoOnline.enabled) {
+                                                                await tolak(hisoka, m, 'ℹ️ Auto Online jadibot sudah aktif sebelumnya');
+                                                        } else {
+                                                                setJadibotUserSetting(jadibotNum, 'autoOnline', { ...autoOnline, enabled: true });
+                                                                startJadibotAutoOnline(hisoka, jadibotNum);
+                                                                await tolak(hisoka, m, '✅ Auto Online jadibot diaktifkan - Anda terlihat online');
+                                                        }
+                                                } else if (args[0] === 'off') {
+                                                        if (!autoOnline.enabled) {
+                                                                await tolak(hisoka, m, 'ℹ️ Auto Online jadibot sudah nonaktif sebelumnya');
+                                                        } else {
+                                                                setJadibotUserSetting(jadibotNum, 'autoOnline', { ...autoOnline, enabled: false });
+                                                                startJadibotAutoOnline(hisoka, jadibotNum);
+                                                                await tolak(hisoka, m, '🙈 Auto Online jadibot dinonaktifkan - Mode stealth aktif');
+                                                        }
+                                                } else if (args[0] === 'set' && args[1]) {
+                                                        const seconds = parseInt(args[1]);
+                                                        if (isNaN(seconds) || seconds < 10 || seconds > 300) {
+                                                                await tolak(hisoka, m, '❌ Interval harus antara 10-300 detik');
+                                                                break;
+                                                        }
+                                                        const updatedAO = { ...autoOnline, intervalSeconds: seconds };
+                                                        setJadibotUserSetting(jadibotNum, 'autoOnline', updatedAO);
+                                                        if (autoOnline.enabled) startJadibotAutoOnline(hisoka, jadibotNum);
+                                                        await tolak(hisoka, m, `✅ Interval Auto Online jadibot diset ke ${seconds} detik`);
+                                                } else {
+                                                        await tolak(hisoka, m, '❌ Perintah tidak valid. Ketik .online untuk bantuan.');
+                                                }
+
+                                                logCommand(m, hisoka, 'online');
+                                        } catch (error) {
+                                                console.error('\x1b[31m[Online-Jadibot] Error:\x1b[39m', error.message);
+                                                await tolak(hisoka, m, `Error: ${error.message}`);
+                                        }
+                                        break;
+                                }
+
+                                // --- MAIN BOT PATH ---
                                 if (!m.isOwner) return;
                                 try {
                                         const config = loadConfig();
