@@ -14,31 +14,31 @@ _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurn
 > Tidak campur dengan bot utama maupun jadibot lain
 > Auto-init saat pertama connect: langsung copy 1900 emoji dari bot utama
 
-> NO.2 ➕ *Tambah Emoji Reaksi SW — .addemoji*
+> NO.2 ➕ *Tambah Emoji Reaksi SW — .emojiadd*
 > Tambah emoji ke daftar milik jadibot sendiri
-> Format: .addemoji 😊 atau .addemoji 😊,😄,🔥 (bisa banyak sekaligus)
+> Format: .emojiadd 😊 atau .emojiadd 😊,😄,🔥 (bisa banyak sekaligus)
 > Cek duplikat otomatis — emoji yang sudah ada tidak ditambah dobel
 
-> NO.3 ➖ *Hapus Emoji Reaksi SW — .delemoji*
+> NO.3 ➖ *Hapus Emoji Reaksi SW — .emojidel*
 > Hapus emoji dari daftar milik jadibot sendiri
-> Format: .delemoji 😊 atau .delemoji 😊,😄 (bisa banyak sekaligus)
+> Format: .emojidel 😊 atau .emojidel 😊,😄 (bisa banyak sekaligus)
 > Notif jika emoji tidak ditemukan di daftar
 
-> NO.4 📋 *Lihat Daftar Emoji — .listemoji*
+> NO.4 📋 *Lihat Daftar Emoji — .emojilist*
 > Tampilkan semua emoji tersimpan + mode aktif saat ini (Default / Custom)
 > Hanya tampil emoji milik jadibot yang kirim command, tidak campur lain
 
-> NO.5 🌐 *Mode Default Emoji — .defaultemoji*
+> NO.5 🌐 *Mode Default Emoji — .emojidefault*
 > Reaksi SW pakai emoji langsung dari bot utama (1900 emoji)
 > File emoji milik jadibot direset ke salinan bot utama + mode default aktif
 > Cocok kalau mau ikut update emoji bot utama otomatis
 
-> NO.6 🎨 *Mode Custom Emoji — .custumemoji*
+> NO.6 🎨 *Mode Custom Emoji — .emojicustom*
 > Reaksi SW pakai emoji dari file milik jadibot sendiri
-> Bisa kustom sesuka hati via .addemoji / .delemoji / .clearemoji
+> Bisa kustom sesuka hati via .emojiadd / .emojidel / .emojiclear
 > Mode custom tersimpan persistent — tidak hilang saat bot restart
 
-> NO.7 🧹 *Reset Emoji ke Seed WA — .clearemoji*
+> NO.7 🧹 *Reset Emoji ke Seed WA — .emojiclear*
 > Hapus semua emoji & isi ulang dengan 12 emoji seed standar WA:
 > 💚 ❤️ 🔥 👍 😂 😮 😢 😡 🥰 🎉 💯 ✨
 > Tidak pernah benar-benar kosong — love ijo 💚 selalu ada
@@ -66,7 +66,7 @@ _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurn
 🤖 *WILY BOT — V21*
 ✨ *7 Fitur Baru*
 🔧 *7 Bug Fix*
-🚀 *6 Improvement*
+🚀 *7 Improvement*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -202,4 +202,12 @@ _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurn
 > .ceksetting kini ikut tampilkan status ⌨️ Auto Typing dan 🎙️ Auto Recording
 > Lengkap dengan detail: private/group on/off + delay aktif per fitur
 > Footer hint diupdate: .typing • .recording masuk ke daftar perintah ubah setting
+
+> NO.7 🔒 *Isolasi Data Per-Jadibot — Auto Online, Typing & Recording Tidak Bentrok*
+> Setiap jadibot menyimpan setting Auto Online, Auto Typing, dan Auto Recording sendiri-sendiri
+> Data tersimpan ke data_jadibot/settings.json dikelompokkan per nomor jadibot
+> Jadibot A on typing tidak mempengaruhi jadibot B yang off typing — 100% isolated
+> Auto Online punya interval timer sendiri (autoOnlineIntervalMap) per sesi jadibot
+> Auto Typing & Recording hanya aktif saat ada pesan masuk ke sesi jadibot masing-masing
+> Tidak ada shared state — restart bot utama / jadibot lain tidak reset setting jadibot ini
 ━━━━━━━━━━━━━━━━━━━━━━
