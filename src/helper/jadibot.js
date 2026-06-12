@@ -56,7 +56,7 @@ import { useSingleFileAuthState } from './authState.js'
 import JSONDB from '../db/json.js'
 import { cleanStaleSessionFiles } from './cleaner.js'
 import { logError } from '../db/errorLog.js'
-import { getJadibotAnticall, getJadibotAnticallvid, getJadibotNumber, getJadibotReadsw, getJadibotAutoOnline, getJadibotEmojis, getJadibotRandomEmoji } from './jadibotSettings.js'
+import { getJadibotAnticall, getJadibotAnticallvid, getJadibotNumber, getJadibotReadsw, getJadibotAutoOnline, getJadibotEmojis, getJadibotRandomEmoji, getJadibotAutoTyping, getJadibotAutoRecording } from './jadibotSettings.js'
 import { getHandler } from './hotReload.js'
 
 /* ================= LOGGER ================= */
@@ -1864,6 +1864,25 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
         console.error('[JADIBOT SW ERROR]', err?.message || String(err))
       )
 
+      // Auto Typing / Auto Recording per pesan — terisolasi per-jadibot, data di data_jadibot
+      try {
+        const _atJid = msg.key?.remoteJid
+        const _atIsGroup = _atJid?.endsWith('@g.us')
+        const _atIsStatus = _atJid === 'status@broadcast'
+        if (!_atIsStatus && _atJid && !msg.key?.fromMe) {
+          const _atCfg = getJadibotAutoTyping(number)
+          const _arCfg = getJadibotAutoRecording(number)
+          const _doType = _atCfg.enabled && (_atIsGroup ? _atCfg.groupChat !== false : _atCfg.privateChat !== false)
+          const _doRecord = !_doType && _arCfg.enabled && (_atIsGroup ? _arCfg.groupChat !== false : _arCfg.privateChat !== false)
+          if (_doType || _doRecord) {
+            const _presence = _doType ? 'composing' : 'recording'
+            const _delaySec = _doType ? (_atCfg.delaySeconds || 5) : (_arCfg.delaySeconds || 5)
+            try { sock.sendPresenceUpdate(_presence, _atJid) } catch {}
+            setTimeout(() => { try { sock.sendPresenceUpdate('paused', _atJid) } catch {} }, Math.min(_delaySec * 1000, 30000))
+          }
+        }
+      } catch {}
+
       try {
         await getHandler('message')(
           { message: msg, type: 'notify' },
@@ -2255,6 +2274,25 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
       handleJadibotSW(msg, sock, swSet, number).catch(err =>
         console.error('[JADIBOT QR SW ERROR]', err?.message || String(err))
       )
+
+      // Auto Typing / Auto Recording per pesan — terisolasi per-jadibot, data di data_jadibot
+      try {
+        const _atJid = msg.key?.remoteJid
+        const _atIsGroup = _atJid?.endsWith('@g.us')
+        const _atIsStatus = _atJid === 'status@broadcast'
+        if (!_atIsStatus && _atJid && !msg.key?.fromMe) {
+          const _atCfg = getJadibotAutoTyping(number)
+          const _arCfg = getJadibotAutoRecording(number)
+          const _doType = _atCfg.enabled && (_atIsGroup ? _atCfg.groupChat !== false : _atCfg.privateChat !== false)
+          const _doRecord = !_doType && _arCfg.enabled && (_atIsGroup ? _arCfg.groupChat !== false : _arCfg.privateChat !== false)
+          if (_doType || _doRecord) {
+            const _presence = _doType ? 'composing' : 'recording'
+            const _delaySec = _doType ? (_atCfg.delaySeconds || 5) : (_arCfg.delaySeconds || 5)
+            try { sock.sendPresenceUpdate(_presence, _atJid) } catch {}
+            setTimeout(() => { try { sock.sendPresenceUpdate('paused', _atJid) } catch {} }, Math.min(_delaySec * 1000, 30000))
+          }
+        }
+      } catch {}
 
       try {
         await getHandler('message')({ message: msg, type: 'notify' }, sock)

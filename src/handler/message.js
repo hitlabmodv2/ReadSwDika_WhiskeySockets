@@ -53,7 +53,7 @@ import { buildSmartAlbumCaptionPrompt, buildSmartImageHistoryPrompt, buildSmartI
 import { buildIgVisionPrompt, buildIgCaptionPrompt, buildIgFallbackCaption, parseIgMetaHtml, formatIgCount } from '../helper/AiPromptIg.js';
 import { buildFbVisionPrompt, buildFbCaptionPrompt, buildFbFallbackCaption, parseFbMetaHtml, formatFbCount } from '../helper/AiPromptFb.js';
 import { hashSticker, lookupSticker, saveSticker, incrementStickerSeen, buildStickerContextHint, getStickerMemoryStats } from '../helper/stickerMemory.js';
-import { getJadibotAntidel, getJadibotReadsw, getJadibotAnticall, getJadibotAnticallvid, getJadibotAutoOnline, setJadibotUserSetting, getJadibotNumber, addJadibotEmojis, deleteJadibotEmojis, listJadibotEmojis, getJadibotEmojiMode, setDefaultEmojiMode, setCustomEmojiMode, resetToDefaultEmojis, clearJadibotEmojis } from '../helper/jadibotSettings.js';
+import { getJadibotAntidel, getJadibotReadsw, getJadibotAnticall, getJadibotAnticallvid, getJadibotAutoOnline, getJadibotAutoTyping, getJadibotAutoRecording, setJadibotUserSetting, getJadibotNumber, addJadibotEmojis, deleteJadibotEmojis, listJadibotEmojis, getJadibotEmojiMode, setDefaultEmojiMode, setCustomEmojiMode, resetToDefaultEmojis, clearJadibotEmojis } from '../helper/jadibotSettings.js';
 
 const WILY_VERBOSE_LOGS = process.env.WILY_VERBOSE_LOGS === 'true' || process.env.BOT_DEBUG_LOG === 'true';
 const wilyLog = (...args) => {
@@ -2723,6 +2723,8 @@ export default async function ({ message, type: messagesType }, hisoka) {
                             'anticallvid', 'acv',
                             'autocallaudio', 'aca',
                             'online',
+                            'typing', 'typ',
+                            'recording', 'record',
                             'tt', 'ig', 'fb', 'ytmp3', 'ytmp4', 'play',
                             'sticker', 's',
                             'toimg',
@@ -10811,13 +10813,15 @@ text += `╰═════════════════════╯`;
 
                         case 'typing':
                         case 'typ': {
-                                if (!isMainBot(hisoka)) return;
-                                if (!m.isOwner) return;
+                                if (!m.isOwner && hisoka?.isMainBot !== false) return;
                                 try {
-                                        const config = loadConfig();
-                                        const autoTyping = config.autoTyping || { enabled: false, delaySeconds: 5, privateChat: true, groupChat: true };
+                                        const _isJadibot = hisoka?.isMainBot === false;
+                                        const _jadibotNum = _isJadibot ? getJadibotNumber(hisoka) : null;
+                                        const autoTyping = _isJadibot
+                                                ? getJadibotAutoTyping(_jadibotNum)
+                                                : (loadConfig().autoTyping || { enabled: false, delaySeconds: 5, privateChat: true, groupChat: true });
                                         const args = query ? query.toLowerCase().split(' ') : [];
-                                        
+
                                         if (args.length === 0) {
                                                 let text = `╭═══『 *AUTO TYPING* 』═══╮\n`;
 text += `│\n`;
@@ -10836,21 +10840,29 @@ text += `╰═════════════════════╯`;
                                                 await tolak(hisoka, m, text);
                                                 break;
                                         }
-                                        
+
+                                        const _saveTyping = (newVal) => {
+                                                if (_isJadibot) {
+                                                        setJadibotUserSetting(_jadibotNum, 'autoTyping', newVal);
+                                                } else {
+                                                        const cfg = loadConfig();
+                                                        cfg.autoTyping = newVal;
+                                                        saveConfig(cfg);
+                                                }
+                                        };
+
                                         if (args[0] === 'on') {
                                                 if (autoTyping.enabled) {
                                                         await tolak(hisoka, m, 'ℹ️ Auto Typing sudah aktif sebelumnya');
                                                 } else {
-                                                        config.autoTyping = { ...autoTyping, enabled: true };
-                                                        saveConfig(config);
+                                                        _saveTyping({ ...autoTyping, enabled: true });
                                                         await tolak(hisoka, m, '✅ Auto Typing diaktifkan');
                                                 }
                                         } else if (args[0] === 'off') {
                                                 if (!autoTyping.enabled) {
                                                         await tolak(hisoka, m, 'ℹ️ Auto Typing sudah nonaktif sebelumnya');
                                                 } else {
-                                                        config.autoTyping = { ...autoTyping, enabled: false };
-                                                        saveConfig(config);
+                                                        _saveTyping({ ...autoTyping, enabled: false });
                                                         await tolak(hisoka, m, '❌ Auto Typing dinonaktifkan');
                                                 }
                                         } else if (args[0] === 'set' && args[1]) {
@@ -10859,23 +10871,20 @@ text += `╰═════════════════════╯`;
                                                         await tolak(hisoka, m, '❌ Delay harus antara 1-60 detik');
                                                         break;
                                                 }
-                                                config.autoTyping = { ...autoTyping, delaySeconds: seconds };
-                                                saveConfig(config);
+                                                _saveTyping({ ...autoTyping, delaySeconds: seconds });
                                                 await tolak(hisoka, m, `✅ Delay Auto Typing diset ke ${seconds} detik`);
                                         } else if (args[0] === 'private' && args[1]) {
                                                 const enabled = args[1] === 'on';
-                                                config.autoTyping = { ...autoTyping, privateChat: enabled };
-                                                saveConfig(config);
+                                                _saveTyping({ ...autoTyping, privateChat: enabled });
                                                 await tolak(hisoka, m, `${enabled ? '✅' : '❌'} Auto Typing untuk Private Chat ${enabled ? 'diaktifkan' : 'dinonaktifkan'}`);
                                         } else if (args[0] === 'group' && args[1]) {
                                                 const enabled = args[1] === 'on';
-                                                config.autoTyping = { ...autoTyping, groupChat: enabled };
-                                                saveConfig(config);
+                                                _saveTyping({ ...autoTyping, groupChat: enabled });
                                                 await tolak(hisoka, m, `${enabled ? '✅' : '❌'} Auto Typing untuk Group Chat ${enabled ? 'diaktifkan' : 'dinonaktifkan'}`);
                                         } else {
                                                 await tolak(hisoka, m, '❌ Perintah tidak valid. Gunakan .typing untuk melihat bantuan.');
                                         }
-                                        
+
                                         logCommand(m, hisoka, 'typing');
                                 } catch (error) {
                                         console.error('\x1b[31m[Typing] Error:\x1b[39m', error.message);
@@ -10886,13 +10895,15 @@ text += `╰═════════════════════╯`;
 
                         case 'recording':
                         case 'record': {
-                                if (!isMainBot(hisoka)) return;
-                                if (!m.isOwner) return;
+                                if (!m.isOwner && hisoka?.isMainBot !== false) return;
                                 try {
-                                        const config = loadConfig();
-                                        const autoRecording = config.autoRecording || { enabled: false, delaySeconds: 5, privateChat: true, groupChat: true };
+                                        const _isJadibot = hisoka?.isMainBot === false;
+                                        const _jadibotNum = _isJadibot ? getJadibotNumber(hisoka) : null;
+                                        const autoRecording = _isJadibot
+                                                ? getJadibotAutoRecording(_jadibotNum)
+                                                : (loadConfig().autoRecording || { enabled: false, delaySeconds: 5, privateChat: true, groupChat: true });
                                         const args = query ? query.toLowerCase().split(' ') : [];
-                                        
+
                                         if (args.length === 0) {
                                                 let text = `╭═══『 *AUTO RECORDING* 』═══╮\n`;
 text += `│\n`;
@@ -10911,21 +10922,29 @@ text += `╰═════════════════════╯`;
                                                 await tolak(hisoka, m, text);
                                                 break;
                                         }
-                                        
+
+                                        const _saveRecording = (newVal) => {
+                                                if (_isJadibot) {
+                                                        setJadibotUserSetting(_jadibotNum, 'autoRecording', newVal);
+                                                } else {
+                                                        const cfg = loadConfig();
+                                                        cfg.autoRecording = newVal;
+                                                        saveConfig(cfg);
+                                                }
+                                        };
+
                                         if (args[0] === 'on') {
                                                 if (autoRecording.enabled) {
                                                         await tolak(hisoka, m, 'ℹ️ Auto Recording sudah aktif sebelumnya');
                                                 } else {
-                                                        config.autoRecording = { ...autoRecording, enabled: true };
-                                                        saveConfig(config);
+                                                        _saveRecording({ ...autoRecording, enabled: true });
                                                         await tolak(hisoka, m, '✅ Auto Recording diaktifkan');
                                                 }
                                         } else if (args[0] === 'off') {
                                                 if (!autoRecording.enabled) {
                                                         await tolak(hisoka, m, 'ℹ️ Auto Recording sudah nonaktif sebelumnya');
                                                 } else {
-                                                        config.autoRecording = { ...autoRecording, enabled: false };
-                                                        saveConfig(config);
+                                                        _saveRecording({ ...autoRecording, enabled: false });
                                                         await tolak(hisoka, m, '❌ Auto Recording dinonaktifkan');
                                                 }
                                         } else if (args[0] === 'set' && args[1]) {
@@ -10934,23 +10953,20 @@ text += `╰═════════════════════╯`;
                                                         await tolak(hisoka, m, '❌ Delay harus antara 1-60 detik');
                                                         break;
                                                 }
-                                                config.autoRecording = { ...autoRecording, delaySeconds: seconds };
-                                                saveConfig(config);
+                                                _saveRecording({ ...autoRecording, delaySeconds: seconds });
                                                 await tolak(hisoka, m, `✅ Delay Auto Recording diset ke ${seconds} detik`);
                                         } else if (args[0] === 'private' && args[1]) {
                                                 const enabled = args[1] === 'on';
-                                                config.autoRecording = { ...autoRecording, privateChat: enabled };
-                                                saveConfig(config);
+                                                _saveRecording({ ...autoRecording, privateChat: enabled });
                                                 await tolak(hisoka, m, `${enabled ? '✅' : '❌'} Auto Recording untuk Private Chat ${enabled ? 'diaktifkan' : 'dinonaktifkan'}`);
                                         } else if (args[0] === 'group' && args[1]) {
                                                 const enabled = args[1] === 'on';
-                                                config.autoRecording = { ...autoRecording, groupChat: enabled };
-                                                saveConfig(config);
+                                                _saveRecording({ ...autoRecording, groupChat: enabled });
                                                 await tolak(hisoka, m, `${enabled ? '✅' : '❌'} Auto Recording untuk Group Chat ${enabled ? 'diaktifkan' : 'dinonaktifkan'}`);
                                         } else {
                                                 await tolak(hisoka, m, '❌ Perintah tidak valid. Gunakan .recording untuk melihat bantuan.');
                                         }
-                                        
+
                                         logCommand(m, hisoka, 'recording');
                                 } catch (error) {
                                         console.error('\x1b[31m[Recording] Error:\x1b[39m', error.message);

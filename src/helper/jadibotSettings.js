@@ -103,6 +103,16 @@ export function getJadibotAutoOnline(number) {
   return settings.autoOnline || { enabled: false, intervalSeconds: 30 }
 }
 
+export function getJadibotAutoTyping(number) {
+  const settings = getJadibotUserSettings(number)
+  return settings.autoTyping || { enabled: false, delaySeconds: 5, privateChat: true, groupChat: true }
+}
+
+export function getJadibotAutoRecording(number) {
+  const settings = getJadibotUserSettings(number)
+  return settings.autoRecording || { enabled: false, delaySeconds: 5, privateChat: true, groupChat: true }
+}
+
 export function getJadibotNumber(hisoka) {
   return String(hisoka?.user?.id || '').split('@')[0].split(':')[0].replace(/[^0-9]/g, '')
 }

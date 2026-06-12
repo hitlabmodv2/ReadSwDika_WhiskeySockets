@@ -300,5 +300,28 @@
       }
     ],
     "processedAt": "2026-06-12T14:50:56.772Z"
+  },
+  "A59B3CB335C4C7AD7167CE42FCE1F39D": {
+    "id": "A59B3CB335C4C7AD7167CE42FCE1F39D",
+    "sender": "6285711200877@s.whatsapp.net",
+    "name": "Albiverstappen",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-12T15:58:15.702Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285711200877",
+    "resolvedPn": "6285711200877@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285711200877@s.whatsapp.net",
+      "fromMe": false,
+      "id": "A59B3CB335C4C7AD7167CE42FCE1F39D",
+      "participant": "168736715731040@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-12T15:58:15.702Z"
   }
 }
