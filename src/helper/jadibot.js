@@ -1132,7 +1132,7 @@ function msgConnected(number) {
     `• *.readsw* — Kelola AutoRead SW\n` +
     `• *.stopbot ${number}* — Matikan jadibot\n` +
     `• *.listbot* — Daftar jadibot aktif\n\n` +
-    `_Powered by Wily Bot_ 🤖`
+    `_Powered by Wily Bot V21_ 🤖`
   )
 }
 
@@ -1175,7 +1175,7 @@ function msgDirectWelcome(number) {
     `• *.stopbot ${number}* — Matikan jadibot\n\n` +
     `⚠️ _Jangan logout dari Perangkat Tertaut_\n` +
     `_agar jadibot tetap aktif._\n\n` +
-    `_Powered by Wily Bot_ 🤖`
+    `_Powered by Wily Bot V21_ 🤖`
   )
 }
 

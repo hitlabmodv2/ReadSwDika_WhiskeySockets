@@ -9343,6 +9343,10 @@ ${masaAktifLine}
 ├➤ *.antidel group on/off* — Grup
 ╰➤ *.antidel sendto self/chat/both*
 
+╭─「 📊 *CEK & INFO* 」
+├➤ *.ceksetting* — Cek semua setting aktif
+╰➤ *.ceksw* — Lihat statistik reaksi SW
+
 ╭─「 🛡️ *ANTI CALL* 」
 ├➤ *.anticall on/off* — Tolak panggilan suara
 ├➤ *.anticall msg [teks]* — Atur pesan tolak
@@ -9389,7 +9393,7 @@ ${masaAktifLine}
 ━━━━━━━━━━━━━━━━━━━━━━
 _⚙️ Setting tersimpan per-jadibot realtime_
 _😊 Emoji reaksi SW terpisah milik kamu sendiri_
-_📦 Powered by Wily Bot V19_ 🤖`;
+_📦 Powered by Wily Bot V21_ 🤖`;
                                                 let jbMenuSent = false;
                                                 try {
                                                         const btnJb = new Button()
@@ -9426,7 +9430,7 @@ _📦 Powered by Wily Bot V19_ 🤖`;
 
                                         const teks =
 `╭═════════════════════╮
-║   🤖 *WILY BOT V19*   
+║   🤖 *WILY BOT V21*   
 ├═════════════════════┤
 │ 👤 » ${m.pushName || 'User'} ${m.isOwner ? '👑' : ''}
 │ ⏱️ » ${uptimeStr}
