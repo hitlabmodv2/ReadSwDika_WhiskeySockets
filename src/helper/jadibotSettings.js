@@ -115,10 +115,33 @@ function _emojiFilePath(number) {
   return path.join(process.cwd(), 'data', 'jadibot', number, 'emoji.json')
 }
 
+function _getMainBotEmojis() {
+  try {
+    const mainEmojiPath = path.join(process.cwd(), 'src', 'helper', 'emoji.json')
+    if (!fs.existsSync(mainEmojiPath)) return []
+    const data = JSON.parse(fs.readFileSync(mainEmojiPath, 'utf-8'))
+    return Array.isArray(data.emojis) ? data.emojis : []
+  } catch {
+    return []
+  }
+}
+
 function _loadJadibotEmojiFile(number) {
   try {
     const p = _emojiFilePath(number)
-    if (!fs.existsSync(p)) return []
+    if (!fs.existsSync(p)) {
+      // Belum ada emoji.json — copy otomatis dari emoji bot utama
+      const defaults = _getMainBotEmojis()
+      if (defaults.length > 0) {
+        try {
+          fs.mkdirSync(path.dirname(p), { recursive: true })
+          const tmp = p + '.tmp'
+          fs.writeFileSync(tmp, JSON.stringify({ emojis: defaults }, null, 2), 'utf-8')
+          fs.renameSync(tmp, p)
+        } catch {}
+      }
+      return defaults
+    }
     const data = JSON.parse(fs.readFileSync(p, 'utf-8'))
     return Array.isArray(data.emojis) ? data.emojis : []
   } catch {

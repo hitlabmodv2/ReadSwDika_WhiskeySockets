@@ -1537,6 +1537,9 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
       // Start per-jadibot autoonline (isolated dari bot utama & jadibot lain)
       try { startJadibotAutoOnline(sock, number) } catch {}
 
+      // Auto-init emoji.json per jadibot — copy dari bot utama jika belum ada
+      try { getJadibotEmojis(number) } catch {}
+
       // Pastikan registered = true tersimpan agar reconnect tidak trigger pairing ulang
       if (!state.creds.registered) {
         state.creds.registered = true
@@ -2001,6 +2004,9 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
 
       // Start per-jadibot autoonline (isolated dari bot utama & jadibot lain)
       try { startJadibotAutoOnline(sock, number) } catch {}
+
+      // Auto-init emoji.json per jadibot — copy dari bot utama jika belum ada
+      try { getJadibotEmojis(number) } catch {}
 
       // Pastikan registered = true tersimpan agar reconnect tidak trigger QR ulang
       if (!state.creds.registered) {
