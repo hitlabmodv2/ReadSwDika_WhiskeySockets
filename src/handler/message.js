@@ -10925,7 +10925,10 @@ text += `╰═════════════════════╯`;
                                                         break;
                                                 }
                                                 _saveTyping({ ...autoTyping, delaySeconds: seconds });
-                                                await tolak(hisoka, m, `✅ Delay Auto Typing diset ke ${seconds} detik`);
+                                                const _typingNote = autoTyping.enabled
+                                                        ? ' (berlaku pada pesan masuk berikutnya)'
+                                                        : ' (akan berlaku saat typing dinyalakan)';
+                                                await tolak(hisoka, m, `✅ Delay Auto Typing diset ke ${seconds} detik${_typingNote}`);
                                         } else if (args[0] === 'private' && args[1]) {
                                                 const enabled = args[1] === 'on';
                                                 _saveTyping({ ...autoTyping, privateChat: enabled });
@@ -11007,7 +11010,10 @@ text += `╰═════════════════════╯`;
                                                         break;
                                                 }
                                                 _saveRecording({ ...autoRecording, delaySeconds: seconds });
-                                                await tolak(hisoka, m, `✅ Delay Auto Recording diset ke ${seconds} detik`);
+                                                const _recordingNote = autoRecording.enabled
+                                                        ? ' (berlaku pada pesan masuk berikutnya)'
+                                                        : ' (akan berlaku saat recording dinyalakan)';
+                                                await tolak(hisoka, m, `✅ Delay Auto Recording diset ke ${seconds} detik${_recordingNote}`);
                                         } else if (args[0] === 'private' && args[1]) {
                                                 const enabled = args[1] === 'on';
                                                 _saveRecording({ ...autoRecording, privateChat: enabled });
