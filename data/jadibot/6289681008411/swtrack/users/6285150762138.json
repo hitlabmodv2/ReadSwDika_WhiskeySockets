@@ -47,9 +47,9 @@
     "name": "AE MyRep",
     "type": "imageMessage",
     "arrivedAt": "2026-06-12T11:20:11.070Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "💎",
     "resolve": "Signal Lib ✓",
     "source": "status",
     "number": "6285150762138",
@@ -62,6 +62,25 @@
       "participant": "12442939724000@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-12T11:20:11.070Z"
+    "updatedAt": "2026-06-12T11:20:22.456Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285150762138@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A502A5164D826EE8FA638C9B608673D7",
+        "participant": "12442939724000@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285150762138@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A502A5164D826EE8FA638C9B608673D7",
+        "participant": "6285150762138@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-12T11:20:22.456Z"
   }
 }
