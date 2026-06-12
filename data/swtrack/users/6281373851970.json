@@ -1,0 +1,44 @@
+{
+  "AC55DAA0F69A16E1384190E945C456A4": {
+    "id": "AC55DAA0F69A16E1384190E945C456A4",
+    "sender": "6281373851970@s.whatsapp.net",
+    "name": "callyea",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-12T10:37:12.721Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🦪",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6281373851970",
+    "resolvedPn": "6281373851970@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6281373851970@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC55DAA0F69A16E1384190E945C456A4",
+      "participant": "240651866259622@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-12T10:37:32.650Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281373851970@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC55DAA0F69A16E1384190E945C456A4",
+        "participant": "240651866259622@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281373851970@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC55DAA0F69A16E1384190E945C456A4",
+        "participant": "6281373851970@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-12T10:37:32.650Z"
+  }
+}
