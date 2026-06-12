@@ -5,7 +5,7 @@ _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurn
 🤖 *WILY BOT — V22*
 ✨ *7 Fitur Baru*
 🔧 *0 Bug Fix*
-🚀 *3 Improvement*
+🚀 *4 Improvement*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -61,6 +61,13 @@ _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurn
 > NO.3 🛡️ *Atomic Write untuk Semua Operasi Emoji*
 > Semua tulis file emoji pakai pola .tmp → rename
 > File tidak akan corrupt meskipun bot crash di tengah proses tulis
+
+> NO.4 📁 *Pindah Lokasi Data Jadibot — data/jadibot → data_jadibot*
+> Sebelumnya: semua data jadibot tersimpan di folder data/jadibot/{nomor}/
+> Sesudahnya: dipindah ke data_jadibot/ di root project (sejajar index.js)
+> Alasan: menghindari konflik dengan folder data/ bot utama & lebih mudah dikelola
+> Mencakup: settings.json, realtime.json, session, dan file emoji per jadibot
+> Semua referensi path di kode diupdate otomatis — tidak perlu migrasi manual
 ━━━━━━━━━━━━━━━━━━━━━━
 
 🤖 *WILY BOT — V21*
