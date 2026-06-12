@@ -3,7 +3,7 @@ _Jumat, 12 Juni 2026 — WIB_ 🕐
 _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurna_ 🙏
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V21*
-✨ *14 Fitur Baru*
+✨ *15 Fitur Baru*
 🔧 *7 Bug Fix*
 🚀 *11 Improvement*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -101,6 +101,13 @@ _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurn
 > 💚 ❤️ 🔥 👍 😂 😮 😢 😡 🥰 🎉 💯 ✨
 > Tidak pernah benar-benar kosong — love ijo 💚 selalu ada
 > Mode otomatis beralih ke Custom setelah clear
+
+> NO.15 📋 *Info Update / Changelog — .infoupdate / .changelog*
+> Tampilkan isi changelog.txt langsung dari WhatsApp tanpa buka file
+> Realtime — selalu ambil dari file terbaru saat command dijalankan
+> 3 alias: .infoupdate / .changelog / .update
+> Hanya tersedia di bot utama (bukan jadibot)
+> Masuk kategori 🔍 INFO & CEK di menu
 ━━━━━━━━━━━━━━━━━━━━━━
 🔧 *BUG FIX*
 ━━━━━━━━━━━━━━━━━━━━━━

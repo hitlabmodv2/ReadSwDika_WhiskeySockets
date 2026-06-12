@@ -9537,6 +9537,7 @@ _📦 Powered by Wily Bot V21_ 🤖`;
 ├═════════════════════┤
 │ .ping / .p
 │ .info
+│ .infoupdate / .changelog
 │ .owner / .own
 │ .cekhp / .spechp
 │ .bandingkan
@@ -10323,6 +10324,27 @@ text += `\n_Gunakan command masing-masing fitur untuk mengubah pengaturan, ${use
                                 } catch (error) {
                                         console.error('\x1b[31m[Info] Error:\x1b[39m', error.message);
                                         await tolak(hisoka, m, `Mohon maaf, terjadi kesalahan: ${error.message}`);
+                                }
+                                break;
+                        }
+
+                        case 'infoupdate':
+                        case 'changelog':
+                        case 'update': {
+                                if (!isMainBot(hisoka)) return;
+                                try {
+                                        const changelogPath = path.join(process.cwd(), 'changelog.txt');
+                                        if (!fs.existsSync(changelogPath)) {
+                                                await tolak(hisoka, m, '❌ File changelog.txt tidak ditemukan.');
+                                                break;
+                                        }
+                                        const isiChangelog = fs.readFileSync(changelogPath, 'utf8').trim();
+                                        await hisoka.sendMessage(m.from, { react: { text: '📋', key: m.key } }).catch(() => {});
+                                        await hisoka.sendMessage(m.from, { text: isiChangelog }, { quoted: m });
+                                        logCommand(m, hisoka, 'infoupdate');
+                                } catch (error) {
+                                        console.error('\x1b[31m[InfoUpdate] Error:\x1b[39m', error.message);
+                                        await tolak(hisoka, m, `Gagal membaca changelog: ${error.message}`);
                                 }
                                 break;
                         }
