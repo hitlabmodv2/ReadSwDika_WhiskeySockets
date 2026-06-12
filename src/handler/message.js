@@ -13047,13 +13047,15 @@ response += `╰═════════════════╯`;
 
                                                 if (args.length === 0) {
                                                         let text = `╭═══『 *AUTO ONLINE JADIBOT* 』═══╮\n│\n`;
-text += `│ *Mode:* ${autoOnline.enabled ? '✅ ONLINE' : '🙈 OFFLINE (Stealth)'}\n`;
-text += `│ *Interval:* ${autoOnline.intervalSeconds || 30} detik\n`;
+text += `│ *Status:* ${autoOnline.enabled ? '✅ ONLINE (terlihat online)' : '🙈 OFFLINE (tersembunyi)'}\n`;
+text += `│ *Kirim ulang setiap:* ${autoOnline.intervalSeconds || 30} detik\n`;
 text += `│\n`;
 text += `│ *Penggunaan:*\n`;
-text += `│ .online on  → Terlihat Online\n`;
-text += `│ .online off → Terlihat Offline (Stealth)\n`;
-text += `│ .online set <dtk> → Set interval (10-300)\n`;
+text += `│ .online on  → Jadibot terlihat online\n`;
+text += `│ .online off → Jadibot tersembunyi/offline\n`;
+text += `│ .online set <dtk> → Atur seberapa sering\n`;
+text += `│   status dikirim ulang ke WA (10-300 dtk)\n`;
+text += `│   Makin kecil = makin stabil, makin boros\n`;
 text += `│\n`;
 text += `│ *Catatan:* Setting ini khusus untuk\n`;
 text += `│ jadibot ini saja, tidak mempengaruhi\n`;
