@@ -9341,7 +9341,9 @@ ${masaAktifLine}
 ├➤ *.antidel on/off* — Anti delete pesan
 ├➤ *.antidel private on/off* — Private chat
 ├➤ *.antidel group on/off* — Grup
-╰➤ *.antidel sendto self/chat/both*
+├➤ *.antidel sendto self/chat/both*
+├➤ *.online on/off* — Auto terlihat online
+╰➤ *.online set [detik]* — Atur interval online
 
 ╭─「 📊 *CEK & INFO* 」
 ├➤ *.ceksetting* — Cek semua setting aktif
