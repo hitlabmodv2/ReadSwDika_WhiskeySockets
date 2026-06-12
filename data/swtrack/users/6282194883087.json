@@ -1,13 +1,13 @@
 {
-  "A5DD6DA7DA361400000ECE470CFEF4A4": {
-    "id": "A5DD6DA7DA361400000ECE470CFEF4A4",
+  "A5843F014B5FB87AE3997D64DCAA274F": {
+    "id": "A5843F014B5FB87AE3997D64DCAA274F",
     "sender": "6282194883087@s.whatsapp.net",
     "name": "Arthur [アーサー]",
-    "type": "videoMessage",
-    "arrivedAt": "2026-06-11T05:47:47.624Z",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-12T13:54:09.529Z",
     "read": true,
     "reacted": true,
-    "emoji": "🕗",
+    "emoji": "👩‍🦯",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6282194883087",
@@ -16,17 +16,17 @@
       "remoteJid": "status@broadcast",
       "remoteJidAlt": "6282194883087@s.whatsapp.net",
       "fromMe": false,
-      "id": "A5DD6DA7DA361400000ECE470CFEF4A4",
+      "id": "A5843F014B5FB87AE3997D64DCAA274F",
       "participant": "208916084441117@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-11T05:47:59.374Z",
+    "updatedAt": "2026-06-12T13:54:27.533Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6282194883087@s.whatsapp.net",
         "fromMe": false,
-        "id": "A5DD6DA7DA361400000ECE470CFEF4A4",
+        "id": "A5843F014B5FB87AE3997D64DCAA274F",
         "participant": "208916084441117@lid",
         "addressingMode": "lid"
       },
@@ -34,11 +34,11 @@
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6282194883087@s.whatsapp.net",
         "fromMe": false,
-        "id": "A5DD6DA7DA361400000ECE470CFEF4A4",
+        "id": "A5843F014B5FB87AE3997D64DCAA274F",
         "participant": "6282194883087@s.whatsapp.net",
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-11T05:47:59.374Z"
+    "processedAt": "2026-06-12T13:54:27.533Z"
   }
 }

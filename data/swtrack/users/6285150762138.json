@@ -20,7 +20,7 @@
       "participant": "12442939724000@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-12T10:33:39.598Z",
+    "updatedAt": "2026-06-12T13:53:56.767Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -39,7 +39,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-12T10:33:39.597Z"
+    "processedAt": "2026-06-12T10:33:39.597Z",
+    "deleted": true,
+    "deletedAt": "2026-06-12T13:53:56.767Z"
   },
   "A56D809D64C250C76F693FC010FFF089": {
     "id": "A56D809D64C250C76F693FC010FFF089",
@@ -104,7 +106,7 @@
       "participant": "12442939724000@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-12T10:37:13.640Z",
+    "updatedAt": "2026-06-12T13:53:56.792Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -123,7 +125,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-12T10:37:13.640Z"
+    "processedAt": "2026-06-12T10:37:13.640Z",
+    "deleted": true,
+    "deletedAt": "2026-06-12T13:53:56.792Z"
   },
   "A5C76E10AB20F21929FE07C785235DCD": {
     "id": "A5C76E10AB20F21929FE07C785235DCD",
@@ -338,5 +342,47 @@
       }
     ],
     "processedAt": "2026-06-12T11:20:17.771Z"
+  },
+  "A54CF8FC4A88D7783DF2DDC25D79693F": {
+    "id": "A54CF8FC4A88D7783DF2DDC25D79693F",
+    "sender": "6285150762138@s.whatsapp.net",
+    "name": "AE MyRep",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-12T13:53:56.793Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🪟",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285150762138",
+    "resolvedPn": "6285150762138@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285150762138@s.whatsapp.net",
+      "fromMe": false,
+      "id": "A54CF8FC4A88D7783DF2DDC25D79693F",
+      "participant": "12442939724000@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-12T13:54:16.394Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285150762138@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A54CF8FC4A88D7783DF2DDC25D79693F",
+        "participant": "12442939724000@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285150762138@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A54CF8FC4A88D7783DF2DDC25D79693F",
+        "participant": "6285150762138@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-12T13:54:16.394Z"
   }
 }

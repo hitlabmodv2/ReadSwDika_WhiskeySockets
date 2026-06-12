@@ -126,5 +126,47 @@
       }
     ],
     "processedAt": "2026-06-12T11:55:00.389Z"
+  },
+  "ACF73F336CDC190F35ECB67EE6ABA33C": {
+    "id": "ACF73F336CDC190F35ECB67EE6ABA33C",
+    "sender": "6283153401691@s.whatsapp.net",
+    "name": "yuan knp jir",
+    "type": "extendedTextMessage",
+    "arrivedAt": "2026-06-12T14:01:48.906Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🕗",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6283153401691",
+    "resolvedPn": "6283153401691@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6283153401691@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACF73F336CDC190F35ECB67EE6ABA33C",
+      "participant": "31959019446519@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-12T14:01:58.877Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283153401691@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACF73F336CDC190F35ECB67EE6ABA33C",
+        "participant": "31959019446519@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283153401691@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACF73F336CDC190F35ECB67EE6ABA33C",
+        "participant": "6283153401691@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-12T14:01:58.877Z"
   }
 }

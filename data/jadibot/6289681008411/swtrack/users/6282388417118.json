@@ -40,5 +40,47 @@
       }
     ],
     "processedAt": "2026-06-12T10:41:44.303Z"
+  },
+  "ACEE584B64EE763ED4042A52B5A06C8C": {
+    "id": "ACEE584B64EE763ED4042A52B5A06C8C",
+    "sender": "6282388417118@s.whatsapp.net",
+    "name": "Kaguya",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-12T13:54:28.067Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🇲🇪",
+    "resolve": "Signal Lib ✓",
+    "source": "status",
+    "number": "6282388417118",
+    "resolvedPn": "6282388417118@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6282388417118@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACEE584B64EE763ED4042A52B5A06C8C",
+      "participant": "20749339349072@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-12T13:54:47.417Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282388417118@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACEE584B64EE763ED4042A52B5A06C8C",
+        "participant": "20749339349072@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282388417118@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACEE584B64EE763ED4042A52B5A06C8C",
+        "participant": "6282388417118@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-12T13:54:47.417Z"
   }
 }

@@ -196,7 +196,7 @@
       "participant": "84636709445686@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-12T10:43:46.908Z",
+    "updatedAt": "2026-06-12T13:53:56.784Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -215,7 +215,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-12T10:43:46.908Z"
+    "processedAt": "2026-06-12T10:43:46.908Z",
+    "deleted": true,
+    "deletedAt": "2026-06-12T13:53:56.784Z"
   },
   "ACB5637374CC1081E7C29EDF7FAE4C1B": {
     "id": "ACB5637374CC1081E7C29EDF7FAE4C1B",
@@ -302,5 +304,47 @@
       }
     ],
     "processedAt": "2026-06-12T11:00:48.897Z"
+  },
+  "AC0D1232709605119A88D87BD6A7A003": {
+    "id": "AC0D1232709605119A88D87BD6A7A003",
+    "sender": "6282189076619@s.whatsapp.net",
+    "name": "F",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-12T13:53:56.756Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🤮",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6282189076619",
+    "resolvedPn": "6282189076619@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6282189076619@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC0D1232709605119A88D87BD6A7A003",
+      "participant": "84636709445686@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-12T13:54:04.662Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282189076619@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC0D1232709605119A88D87BD6A7A003",
+        "participant": "84636709445686@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282189076619@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC0D1232709605119A88D87BD6A7A003",
+        "participant": "6282189076619@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-12T13:54:04.662Z"
   }
 }
