@@ -13313,8 +13313,14 @@ text += `╰══════════════════════�
                                                         }
                                                         const updatedAO = { ...autoOnline, intervalSeconds: seconds };
                                                         setJadibotUserSetting(jadibotNum, 'autoOnline', updatedAO);
-                                                        if (autoOnline.enabled) startJadibotAutoOnline(hisoka, jadibotNum);
-                                                        await tolak(hisoka, m, `✅ Interval Auto Online jadibot diset ke ${seconds} detik`);
+                                                        let _timerStatus = '';
+                                                        if (updatedAO.enabled) {
+                                                                startJadibotAutoOnline(hisoka, jadibotNum);
+                                                                _timerStatus = ' (timer restarted)';
+                                                        } else {
+                                                                _timerStatus = ' (akan aktif saat online dinyalakan)';
+                                                        }
+                                                        await tolak(hisoka, m, `✅ Interval Auto Online diset ke ${seconds} detik${_timerStatus}`);
                                                 } else {
                                                         await tolak(hisoka, m, '❌ Perintah tidak valid. Ketik .online untuk bantuan.');
                                                 }
