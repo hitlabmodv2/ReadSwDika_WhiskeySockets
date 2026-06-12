@@ -23,7 +23,7 @@
 import fs from 'fs'
 import path from 'path'
 
-const JADIBOT_SETTINGS_PATH = path.join(process.cwd(), 'data', 'jadibot', 'settings.json')
+const JADIBOT_SETTINGS_PATH = path.join(process.cwd(), 'data_jadibot', 'settings.json')
 
 function ensureDir() {
   fs.mkdirSync(path.dirname(JADIBOT_SETTINGS_PATH), { recursive: true })
@@ -108,11 +108,11 @@ export function getJadibotNumber(hisoka) {
 }
 
 /* ================= EMOJI PER-USER JADIBOT ================= */
-// Disimpan di data/jadibot/{nomor}/emoji.json — terpisah total per jadibot
+// Disimpan di data_jadibot/{nomor}/emoji.json — terpisah total per jadibot
 
 function _emojiFilePath(number) {
   number = String(number || '').replace(/[^0-9]/g, '')
-  return path.join(process.cwd(), 'data', 'jadibot', number, 'emoji.json')
+  return path.join(process.cwd(), 'data_jadibot', number, 'emoji.json')
 }
 
 function _getMainBotEmojis() {

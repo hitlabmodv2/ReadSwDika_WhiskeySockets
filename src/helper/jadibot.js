@@ -100,8 +100,8 @@ async function preDownloadMediaForAntidel(msg, sock) {
 const PAIRING_TIMEOUT_MS = 3 * 60 * 1000 // 3 menit
 const DEFAULT_JADIBOT_DURATION_MS = 24 * 60 * 60 * 1000
 const MAX_TIMER_MS = 2147483647
-const JADIBOT_DATA_PATH = path.join(process.cwd(), 'data', 'jadibot', 'realtime.json')
-fs.mkdirSync(path.join(process.cwd(), 'data', 'jadibot'), { recursive: true })
+const JADIBOT_DATA_PATH = path.join(process.cwd(), 'data_jadibot', 'realtime.json')
+fs.mkdirSync(path.join(process.cwd(), 'data_jadibot'), { recursive: true })
 const JADIBOT_EXPIRY_WARNING_THRESHOLDS = [
   { ms: 10 * 60 * 1000, label: '10 menit' },
   { ms: 5 * 60 * 1000, label: '5 menit' },
@@ -672,7 +672,7 @@ function getJadibotSwSet(number) {
 
 function getJadibotTracker(number) {
   if (!jadibotTrackers.has(number)) {
-    const userDir = path.join(process.cwd(), 'data', 'jadibot', number, 'swtrack', 'users')
+    const userDir = path.join(process.cwd(), 'data_jadibot', number, 'swtrack', 'users')
     jadibotTrackers.set(number, createSwTracker(userDir))
   }
   return jadibotTrackers.get(number)
@@ -889,7 +889,7 @@ async function handleJadibotSW(msg, sock, swSet, number) {
                 time: missJkt.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false }).replace(':', '.'),
                 name: miss.name || trackNumber,
                 number: maskNumber(miss.number || trackNumber),
-                storyCount: getStoryCountToday(miss.number || trackNumber, path.join(process.cwd(), 'data', 'jadibot', number, 'swtrack', 'users')),
+                storyCount: getStoryCountToday(miss.number || trackNumber, path.join(process.cwd(), 'data_jadibot', number, 'swtrack', 'users')),
                 success: 'Retry ♻️',
                 reaction: retryEmoji || (miss.reacted ? miss.emoji || '✓' : 'Off ❌'),
                 resolve: (miss.resolve || 'PN ✓') + ' ♻️',
@@ -943,8 +943,8 @@ async function handleJadibotSW(msg, sock, swSet, number) {
     const storyNumber = jidDecode(from)?.user || ''
     const storyName = msg.pushName || storyNumber
 
-    // Tulis ke path jadibot sendiri: data/jadibot/<number>/ceksw/swstats.json
-    const jadibotStatsPath = path.join(process.cwd(), 'data', 'jadibot', number, 'ceksw', 'swstats.json')
+    // Tulis ke path jadibot sendiri: data_jadibot/<number>/ceksw/swstats.json
+    const jadibotStatsPath = path.join(process.cwd(), 'data_jadibot', number, 'ceksw', 'swstats.json')
     updateSwStatsAt(jadibotStatsPath, storyNumber, storyName, reactionSuccess, reactionSuccess ? usedReaction : null)
 
     if (trackNumber) {
@@ -984,7 +984,7 @@ async function handleJadibotSW(msg, sock, swSet, number) {
         time: jakartaDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false }).replace(':', '.'),
         name: storyName,
         number: maskNumber(storyNumber),
-        storyCount: getStoryCountToday(storyNumber, path.join(process.cwd(), 'data', 'jadibot', number, 'swtrack', 'users')),
+        storyCount: getStoryCountToday(storyNumber, path.join(process.cwd(), 'data_jadibot', number, 'swtrack', 'users')),
         success: reactionSuccess ? 'Iya ✓' : (readOk ? 'Baca ✓' : 'Gagal ❌'),
         reaction: shouldReact ? usedReaction : 'Off ❌',
         resolve: resolveMethod,
@@ -1837,7 +1837,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
         const _deletedId = _protoMsg.key?.id
         if (_isStatusRevoke && _deletedId) {
           try {
-            const _jadibotUserDir = path.join(process.cwd(), 'data', 'jadibot', number, 'swtrack', 'users')
+            const _jadibotUserDir = path.join(process.cwd(), 'data_jadibot', number, 'swtrack', 'users')
             if (fs.existsSync(_jadibotUserDir)) {
               const _files = fs.readdirSync(_jadibotUserDir).filter(f => f.endsWith('.json'))
               for (const _file of _files) {

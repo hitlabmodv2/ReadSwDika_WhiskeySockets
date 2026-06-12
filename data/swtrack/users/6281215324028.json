@@ -84,5 +84,70 @@
       }
     ],
     "processedAt": "2026-06-12T13:54:16.999Z"
+  },
+  "ACA7E34E02C121C47B975D03557BC2BA": {
+    "id": "ACA7E34E02C121C47B975D03557BC2BA",
+    "sender": "6281215324028@s.whatsapp.net",
+    "name": "harisulijar",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-12T15:04:43.969Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🇬🇦",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6281215324028",
+    "resolvedPn": "6281215324028@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6281215324028@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACA7E34E02C121C47B975D03557BC2BA",
+      "participant": "176931194552515@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-12T15:04:55.122Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281215324028@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACA7E34E02C121C47B975D03557BC2BA",
+        "participant": "176931194552515@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281215324028@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACA7E34E02C121C47B975D03557BC2BA",
+        "participant": "6281215324028@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-12T15:04:55.121Z"
+  },
+  "AC1AE177434785978286978DA0AC0E07": {
+    "id": "AC1AE177434785978286978DA0AC0E07",
+    "sender": "6281215324028@s.whatsapp.net",
+    "name": "harisulijar",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-12T15:04:45.884Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6281215324028",
+    "resolvedPn": "6281215324028@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6281215324028@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC1AE177434785978286978DA0AC0E07",
+      "participant": "176931194552515@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-12T15:04:45.885Z"
   }
 }

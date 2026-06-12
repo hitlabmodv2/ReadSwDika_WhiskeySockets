@@ -12262,10 +12262,10 @@ if (isJadibot) text += jadibotNote;
                                         const jadibotNum = isJadibot ? getJadibotNumber(hisoka) : null;
                                         // Path stats & swtrack terpisah per jadibot — tidak campur sama main bot
                                         const swStatsPath = isJadibot
-                                                ? path.join(process.cwd(), 'data', 'jadibot', jadibotNum, 'ceksw', 'swstats.json')
+                                                ? path.join(process.cwd(), 'data_jadibot', jadibotNum, 'ceksw', 'swstats.json')
                                                 : path.join(process.cwd(), 'data', 'ceksw', 'swstats.json');
                                         const swTrackDir = isJadibot
-                                                ? path.join(process.cwd(), 'data', 'jadibot', jadibotNum, 'swtrack', 'users')
+                                                ? path.join(process.cwd(), 'data_jadibot', jadibotNum, 'swtrack', 'users')
                                                 : path.join(process.cwd(), 'data', 'swtrack', 'users');
 
                                         const qLower = query ? query.trim().toLowerCase() : '';
