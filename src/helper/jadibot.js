@@ -522,6 +522,7 @@ async function expireJadibot(number, sendReply = null) {
 
   // Langkah 4: bersihkan semua Map/Set
   jadibotMap.delete(number)
+  stopJadibotAutoOnline(number)
   pairingRequested.delete(number)
   reconnectingJadibot.delete(number)
   activeOrStartingJadibot.delete(number)
@@ -1645,6 +1646,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
       if (stoppingJadibot.has(number)) {
         stoppingJadibot.delete(number)
         jadibotMap.delete(number)
+        stopJadibotAutoOnline(number)
         activeOrStartingJadibot.delete(number)
         const _C = '\x1b[36m', _R = '\x1b[0m', _B = '\x1b[1m';
         console.log(`${_C}╠══════════════════════════════════╣${_R}`);
@@ -1657,6 +1659,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
       if (reason === DisconnectReason.loggedOut) {
         // Hapus dari map DULU baru ambil sisa list (agar nomor ini tidak muncul di list)
         jadibotMap.delete(number)
+        stopJadibotAutoOnline(number)
         activeOrStartingJadibot.delete(number)
 
         const _C = '\x1b[36m', _R2 = '\x1b[0m', _B2 = '\x1b[1m';
@@ -1714,6 +1717,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
       /* ===== SESSION SUDAH TIDAK ADA ===== */
       if (!isSessionValid(sessionDir)) {
         jadibotMap.delete(number)
+        stopJadibotAutoOnline(number)
         activeOrStartingJadibot.delete(number)
         const _C = '\x1b[36m', _R = '\x1b[0m', _B = '\x1b[1m';
         console.log(`${_C}╠══════════════════════════════════╣${_R}`);
@@ -2064,6 +2068,7 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
       if (stoppingJadibot.has(number)) {
         stoppingJadibot.delete(number)
         jadibotMap.delete(number)
+        stopJadibotAutoOnline(number)
         activeOrStartingJadibot.delete(number)
         const _C = '\x1b[36m', _R = '\x1b[0m', _B = '\x1b[1m';
         console.log(`${_C}╠══════════════════════════════════╣${_R}`);
@@ -2074,6 +2079,7 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
 
       if (reason === DisconnectReason.loggedOut) {
         jadibotMap.delete(number)
+        stopJadibotAutoOnline(number)
         activeOrStartingJadibot.delete(number)
         const _C = '\x1b[36m', _R2 = '\x1b[0m', _B2 = '\x1b[1m';
         console.log(`${_C}╠══════════════════════════════════╣${_R2}`);
@@ -2156,6 +2162,7 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
       }
 
       jadibotMap.delete(number)
+      stopJadibotAutoOnline(number)
       activeOrStartingJadibot.delete(number)
       const _C = '\x1b[36m', _R = '\x1b[0m', _B = '\x1b[1m';
       console.log(`${_C}╠══════════════════════════════════╣${_R}`);
