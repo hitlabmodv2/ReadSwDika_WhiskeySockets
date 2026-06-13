@@ -40,5 +40,47 @@
       }
     ],
     "processedAt": "2026-06-12T10:34:19.371Z"
+  },
+  "AC05239A7A8786A2588F434E989A66AB": {
+    "id": "AC05239A7A8786A2588F434E989A66AB",
+    "sender": "62882007407746@s.whatsapp.net",
+    "name": "𝘼𝙛𝙖𝙨𝙨",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-13T05:01:02.031Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🪚",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "62882007407746",
+    "resolvedPn": "62882007407746@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "62882007407746@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC05239A7A8786A2588F434E989A66AB",
+      "participant": "69849254518919@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-13T05:01:17.964Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62882007407746@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC05239A7A8786A2588F434E989A66AB",
+        "participant": "69849254518919@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62882007407746@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC05239A7A8786A2588F434E989A66AB",
+        "participant": "62882007407746@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-13T05:01:17.964Z"
   }
 }

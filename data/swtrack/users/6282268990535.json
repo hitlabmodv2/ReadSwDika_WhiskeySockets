@@ -40,5 +40,47 @@
       }
     ],
     "processedAt": "2026-06-12T10:33:22.706Z"
+  },
+  "A5EF8135148119DA2FF68BC168B75403": {
+    "id": "A5EF8135148119DA2FF68BC168B75403",
+    "sender": "6282268990535@s.whatsapp.net",
+    "name": "Otaku Hakase",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-12T16:43:09.160Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "♦️",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6282268990535",
+    "resolvedPn": "6282268990535@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6282268990535@s.whatsapp.net",
+      "fromMe": false,
+      "id": "A5EF8135148119DA2FF68BC168B75403",
+      "participant": "38642156306452@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-12T16:43:20.064Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282268990535@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A5EF8135148119DA2FF68BC168B75403",
+        "participant": "38642156306452@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282268990535@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A5EF8135148119DA2FF68BC168B75403",
+        "participant": "6282268990535@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-12T16:43:20.064Z"
   }
 }
