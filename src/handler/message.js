@@ -5765,6 +5765,81 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 break;
                         }
 
+                        case 'pushkontakgc': {
+                                if (!m.isOwner) return tolak(hisoka, m, '❌ Hanya owner yang bisa pakai perintah ini.');
+
+                                if (!query || !query.includes('|')) return tolak(hisoka, m,
+                                        '❌ *Format salah!*\n\n' +
+                                        '📌 *Cara pakai:*\n' +
+                                        '`.pushkontakgc <JID_GRUP> | <pesan>`\n\n' +
+                                        '📝 *Contoh:*\n' +
+                                        '`.pushkontakgc 120363192554714254@g.us | Halo kak, ada info nih!`'
+                                );
+
+                                const sepIdx = query.indexOf('|');
+                                const targetGid = query.slice(0, sepIdx).trim();
+                                const pesanKirim = query.slice(sepIdx + 1).trim();
+
+                                if (!targetGid || !targetGid.endsWith('@g.us')) return tolak(hisoka, m,
+                                        '❌ JID grup tidak valid.\n' +
+                                        '_Contoh JID: `120363192554714254@g.us`_'
+                                );
+
+                                if (!pesanKirim) return tolak(hisoka, m, '❌ Pesan tidak boleh kosong.');
+
+                                let metaGc;
+                                try {
+                                        metaGc = await hisoka.groupMetadata(targetGid);
+                                } catch (err) {
+                                        return tolak(hisoka, m, '❌ Gagal ambil data grup. Pastikan bot ada di dalam grup tersebut.');
+                                }
+
+                                const namaGrup = metaGc?.subject || targetGid;
+                                const memberList = (metaGc?.participants || [])
+                                        .map(p => p.id || p.jid)
+                                        .filter(jid => jid && !jid.endsWith('@lid'));
+
+                                if (!memberList.length) return tolak(hisoka, m, '❌ Tidak ada member yang ditemukan di grup tersebut.');
+
+                                await m.reply(
+                                        `✅ *Push Kontak GC dimulai!*\n\n` +
+                                        `👥 *Grup :* ${namaGrup}\n` +
+                                        `📋 *Total member :* ${memberList.length} orang\n` +
+                                        `⏱ *Delay :* 3–10 detik (random)\n\n` +
+                                        `_Proses berjalan di background, harap tunggu..._`
+                                );
+
+                                const botJid = hisoka.user?.id?.replace(/:.*@/, '@') || '';
+
+                                let berhasil = 0;
+                                let gagal = 0;
+
+                                for (const jid of memberList) {
+                                        const numOnly = jid.split('@')[0];
+                                        if (numOnly === botJid.split('@')[0]) continue;
+
+                                        try {
+                                                await hisoka.sendMessage(jid, { text: pesanKirim });
+                                                berhasil++;
+                                        } catch (_) {
+                                                gagal++;
+                                        }
+
+                                        const delayMs = (Math.floor(Math.random() * 8) + 3) * 1000;
+                                        await new Promise(res => setTimeout(res, delayMs));
+                                }
+
+                                await m.reply(
+                                        `✅ *Push Kontak GC selesai!*\n\n` +
+                                        `👥 *Grup :* ${namaGrup}\n` +
+                                        `✔️ *Berhasil :* ${berhasil} orang\n` +
+                                        `❌ *Gagal :* ${gagal} orang`
+                                );
+
+                                logCommand(m, hisoka, 'pushkontakgc');
+                                break;
+                        }
+
                         case 'memori':
                         case 'memory':
                         case 'mymemory':
