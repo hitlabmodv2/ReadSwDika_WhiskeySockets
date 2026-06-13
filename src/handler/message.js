@@ -5781,7 +5781,10 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                         '⏱ *Delay:* pilih 3–10 detik\n\n' +
                                         '↩️ *Garis baru:*\n' +
                                         '• `\\n` → 1 baris kosong\n' +
-                                        '• `\\n\\n` → 2 baris kosong'
+                                        '• `\\n\\n` → 2 baris kosong\n\n' +
+                                        '🔍 *Belum tahu JID grupnya?*\n' +
+                                        '• Ketik `.cekjidgc` — di dalam grup untuk lihat JID grup tersebut\n' +
+                                        '• Ketik `.cekjidgcall` — untuk lihat semua JID grup yang diikuti bot'
                                 );
 
                                 const pkgParts = query.split('|');
@@ -5804,7 +5807,11 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 const pkgAdaMedia = !!(pkgMediaBuffer && pkgMediaBuffer.length > 0);
 
                                 if (!pkgTargetGid || !pkgTargetGid.endsWith('@g.us')) return tolak(hisoka, m,
-                                        '❌ JID grup tidak valid.\n_Contoh: `120363192554714254@g.us`_'
+                                        '❌ *JID grup tidak valid!*\n\n' +
+                                        '_Contoh format yang benar:_\n`120363192554714254@g.us`\n\n' +
+                                        '🔍 *Cara cari JID:*\n' +
+                                        '• `.cekjidgc` — ketik di dalam grup yang dituju\n' +
+                                        '• `.cekjidgcall` — tampilkan semua JID grup bot sekaligus'
                                 );
                                 if (!pkgAdaMedia && !pkgPesan) return tolak(hisoka, m, '❌ Pesan tidak boleh kosong.');
                                 if (pkgParts.length < 3 || pkgDelay === null) return tolak(hisoka, m,
