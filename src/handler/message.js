@@ -5808,8 +5808,17 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                                 const namaGrup = metaGc?.subject || targetGid;
                                 const memberList = (metaGc?.participants || [])
-                                        .map(p => p.id || p.jid)
-                                        .filter(jid => jid && !jid.endsWith('@lid'));
+                                        .map(p => {
+                                                const rawJid = p.id || p.jid || '';
+                                                if (!rawJid) return null;
+                                                if (rawJid.endsWith('@lid')) {
+                                                        const resolved = global.__lookupLidPn ? global.__lookupLidPn(rawJid) : null;
+                                                        if (resolved) return resolved.endsWith('@s.whatsapp.net') ? resolved : resolved.split('@')[0] + '@s.whatsapp.net';
+                                                        return rawJid;
+                                                }
+                                                return rawJid.endsWith('@s.whatsapp.net') ? rawJid : rawJid.split('@')[0] + '@s.whatsapp.net';
+                                        })
+                                        .filter(Boolean);
 
                                 if (!memberList.length) return tolak(hisoka, m, '❌ Tidak ada member yang ditemukan di grup tersebut.');
 
