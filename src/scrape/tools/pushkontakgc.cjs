@@ -28,6 +28,7 @@ async function getMemberList(hisoka, targetGid) {
  * - Delay tetap (dipilih user, 3–10 detik)
  */
 async function pushKontakGC(hisoka, { targetGid, pesanKirim, delayDetik, onStart, onDone }) {
+        pesanKirim = pesanKirim.replace(/\\n/g, '\n');
         const { meta, members } = await getMemberList(hisoka, targetGid);
         const namaGrup = meta?.subject || targetGid;
         const botJid = (hisoka.user?.id || '').split(':')[0] + '@s.whatsapp.net';
