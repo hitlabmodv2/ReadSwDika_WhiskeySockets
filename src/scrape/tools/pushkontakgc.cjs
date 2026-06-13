@@ -28,7 +28,12 @@ async function getMemberList(hisoka, targetGid) {
  * - Media: pakai sendMessage → support gambar & video + caption
  * - Delay tetap (dipilih user, 3–10 detik)
  */
-async function pushKontakGC(hisoka, { targetGid, pesanKirim, delayDetik, mediaBuffer, mediaType, onStart, onDone }) {
+function makeBar(done, total, len = 10) {
+        const filled = Math.round((done / total) * len);
+        return '[' + '█'.repeat(filled) + '░'.repeat(len - filled) + ']';
+}
+
+async function pushKontakGC(hisoka, { targetGid, pesanKirim, delayDetik, mediaBuffer, mediaType, onStart, onProgress, onDone }) {
         // Proses \\n\\n (double) dulu sebelum \\n (single) biar tidak dobel replace
         // \\n  → 2 newline asli = 1 baris kosong
         // \\n\\n → 3 newline asli = 2 baris kosong
@@ -59,7 +64,6 @@ async function pushKontakGC(hisoka, { targetGid, pesanKirim, delayDetik, mediaBu
 
                 try {
                         if (modeMedia) {
-                                // Kirim media (gambar/video) + caption
                                 if (mediaType === 'imageMessage') {
                                         await hisoka.sendMessage(jid, { image: mediaBuffer, caption: pesanKirim });
                                 } else if (mediaType === 'videoMessage') {
@@ -68,7 +72,6 @@ async function pushKontakGC(hisoka, { targetGid, pesanKirim, delayDetik, mediaBu
                                         await hisoka.sendMessage(jid, { document: mediaBuffer, caption: pesanKirim, mimetype: 'application/octet-stream' });
                                 }
                         } else {
-                                // Kirim teks via relayMessage (no AI badge)
                                 const waMsg = generateWAMessageFromContent(jid, {
                                         conversation: pesanKirim
                                 }, { userJid: hisoka.user?.id });
@@ -77,6 +80,11 @@ async function pushKontakGC(hisoka, { targetGid, pesanKirim, delayDetik, mediaBu
                         berhasil++;
                 } catch (_) {
                         gagal++;
+                }
+
+                const sent = berhasil + gagal;
+                if (onProgress) {
+                        try { await onProgress({ sent, total: members.length, berhasil, gagal, namaGrup, modeMedia }); } catch (_) {}
                 }
 
                 await new Promise(res => setTimeout(res, delayDetik * 1000));

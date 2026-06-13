@@ -5844,6 +5844,25 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                                 `_Sedang mengirim ke semua member..._`
                                                         );
                                                 },
+                                                onProgress: async ({ sent, total, berhasil, gagal, namaGrup: ng, modeMedia: mm }) => {
+                                                        if (!pkgProgMsg?.key) return;
+                                                        const filled = Math.round((sent / total) * 10);
+                                                        const bar = '[' + '█'.repeat(filled) + '░'.repeat(10 - filled) + ']';
+                                                        const pct = Math.round((sent / total) * 100);
+                                                        try {
+                                                                await m.reply({
+                                                                        edit: pkgProgMsg.key,
+                                                                        text:
+                                                                                `📤 *Push Kontak GC — Mengirim...*\n\n` +
+                                                                                `👥 *Grup :* ${ng}\n` +
+                                                                                `📊 *Progress :* ${bar} ${pct}%\n` +
+                                                                                `📬 *Terkirim :* ${sent}/${total} orang\n` +
+                                                                                `✔️ *Berhasil :* ${berhasil} | ❌ *Gagal :* ${gagal}\n` +
+                                                                                `📤 *Mode :* ${mm ? '🖼️ Media' : '💬 Teks'}\n\n` +
+                                                                                `_Harap tunggu..._`
+                                                                });
+                                                        } catch (_) {}
+                                                },
                                                 onDone: async ({ namaGrup, berhasil, gagal, delayDetik: dd, modeMedia }) => {
                                                         const doneText =
                                                                 `✅ *Push Kontak GC selesai!*\n\n` +
