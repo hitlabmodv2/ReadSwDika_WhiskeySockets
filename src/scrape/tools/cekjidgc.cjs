@@ -36,22 +36,7 @@ async function getGCInfo(hisoka, groupJid) {
         teks += `│ 📛 *Nama   :* ${namaGrup}\n`;
         teks += `│ 🆔 *JID    :* \`${jidGrup}\`\n`;
         teks += `│ 👥 *Member :* ${totalMember} orang\n`;
-        teks += `│ 👑 *Admin  :* ${totalAdmin} orang\n`;
-        if (deskripsi) {
-                const descShort = deskripsi.length > 80 ? deskripsi.slice(0, 80) + '...' : deskripsi;
-                teks += `│ 📝 *Desc   :* ${descShort}\n`;
-        }
         teks += `│\n`;
-
-        if (admins.length > 0) {
-                teks += `│ 👑 *Daftar Admin:*\n`;
-                admins.forEach((a, i) => {
-                        const crown = a.isSuper ? '👑' : '⭐';
-                        teks += `│ ${i + 1}. ${crown} +${a.nomor}\n`;
-                });
-                teks += `│\n`;
-        }
-
         teks += `╰════════════════════╯`;
 
         return { teks, namaGrup, jidGrup, totalMember, totalAdmin, admins };
