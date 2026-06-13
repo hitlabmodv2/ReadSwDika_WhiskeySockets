@@ -5771,14 +5771,19 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 if (!query || !query.includes('|')) return tolak(hisoka, m,
                                         '❌ *Format salah!*\n\n' +
                                         '📌 *Cara pakai:*\n' +
-                                        '`.pushkontakgc <JID_GRUP> | <pesan>`\n\n' +
+                                        '`.pushkontakgc <JID_GRUP> | <pesan> | <delay detik>`\n\n' +
                                         '📝 *Contoh:*\n' +
-                                        '`.pushkontakgc 120363192554714254@g.us | Halo kak, ada info nih!`'
+                                        '`.pushkontakgc 120363192554714254@g.us | Halo kak, ada info nih! | 5`\n\n' +
+                                        '⏱ *Delay:* pilih antara 3–10 detik'
                                 );
 
-                                const sepIdx = query.indexOf('|');
-                                const targetGid = query.slice(0, sepIdx).trim();
-                                const pesanKirim = query.slice(sepIdx + 1).trim();
+                                const parts = query.split('|');
+                                const targetGid = parts[0].trim();
+                                const pesanKirim = (parts[1] || '').trim();
+                                const delayInput = parseInt((parts[2] || '').trim());
+                                const delayDetik = (!isNaN(delayInput) && delayInput >= 3 && delayInput <= 10)
+                                        ? delayInput
+                                        : null;
 
                                 if (!targetGid || !targetGid.endsWith('@g.us')) return tolak(hisoka, m,
                                         '❌ JID grup tidak valid.\n' +
@@ -5786,6 +5791,13 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 );
 
                                 if (!pesanKirim) return tolak(hisoka, m, '❌ Pesan tidak boleh kosong.');
+
+                                if (parts.length < 3 || delayDetik === null) return tolak(hisoka, m,
+                                        '❌ *Delay tidak valid!*\n\n' +
+                                        '⏱ Masukkan delay antara *3–10 detik*\n\n' +
+                                        '📝 *Contoh:*\n' +
+                                        '`.pushkontakgc 120363192554714254@g.us | Halo kak! | 5`'
+                                );
 
                                 let metaGc;
                                 try {
@@ -5805,7 +5817,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                         `✅ *Push Kontak GC dimulai!*\n\n` +
                                         `👥 *Grup :* ${namaGrup}\n` +
                                         `📋 *Total member :* ${memberList.length} orang\n` +
-                                        `⏱ *Delay :* 3–10 detik (random)\n\n` +
+                                        `⏱ *Delay :* ${delayDetik} detik per pesan\n\n` +
                                         `_Proses berjalan di background, harap tunggu..._`
                                 );
 
@@ -5825,13 +5837,13 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                 gagal++;
                                         }
 
-                                        const delayMs = (Math.floor(Math.random() * 8) + 3) * 1000;
-                                        await new Promise(res => setTimeout(res, delayMs));
+                                        await new Promise(res => setTimeout(res, delayDetik * 1000));
                                 }
 
                                 await m.reply(
                                         `✅ *Push Kontak GC selesai!*\n\n` +
                                         `👥 *Grup :* ${namaGrup}\n` +
+                                        `⏱ *Delay dipakai :* ${delayDetik} detik\n` +
                                         `✔️ *Berhasil :* ${berhasil} orang\n` +
                                         `❌ *Gagal :* ${gagal} orang`
                                 );
