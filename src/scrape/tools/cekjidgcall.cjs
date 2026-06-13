@@ -12,7 +12,11 @@ async function getAllGCInfo(hisoka) {
 
         const groups = Object.values(allGroupsObj)
                 .filter(g => g && g.id && g.id.endsWith('@g.us'))
-                .sort((a, b) => (a.subject || '').localeCompare(b.subject || ''));
+                .sort((a, b) => {
+                        const countB = Array.isArray(b.participants) ? b.participants.length : 0;
+                        const countA = Array.isArray(a.participants) ? a.participants.length : 0;
+                        return countB - countA;
+                });
 
         const total = groups.length;
         if (total === 0) throw new Error('BOT_NOT_IN_ANY_GROUP');

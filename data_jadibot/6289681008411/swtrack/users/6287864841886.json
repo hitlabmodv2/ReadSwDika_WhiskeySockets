@@ -131,9 +131,9 @@
     "name": "Yakuza Dyy",
     "type": "imageMessage",
     "arrivedAt": "2026-06-13T10:11:31.398Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "🍦",
     "resolve": "Signal Lib ✓",
     "source": "status",
     "number": "6287864841886",
@@ -146,6 +146,48 @@
       "participant": "69132145979405@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-13T10:11:31.398Z"
+    "updatedAt": "2026-06-13T10:11:48.849Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287864841886@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACFA89D47A11ADB4C9ECFB6FEF4D0376",
+        "participant": "69132145979405@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287864841886@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACFA89D47A11ADB4C9ECFB6FEF4D0376",
+        "participant": "6287864841886@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-13T10:11:48.849Z"
+  },
+  "AC82A872D4917B6A3E199E18F924FD1C": {
+    "id": "AC82A872D4917B6A3E199E18F924FD1C",
+    "sender": "6287864841886@s.whatsapp.net",
+    "name": "Yakuza Dyy",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-13T10:12:23.124Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "Signal Lib ✓",
+    "source": "status",
+    "number": "6287864841886",
+    "resolvedPn": "6287864841886@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6287864841886@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC82A872D4917B6A3E199E18F924FD1C",
+      "participant": "69132145979405@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-13T10:12:23.124Z"
   }
 }
