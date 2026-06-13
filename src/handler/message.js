@@ -5905,12 +5905,13 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 const { groups, total } = cjgaResult;
 
                                 // Susun isi body + kumpulkan semua JID untuk 1 tombol copy
+                                const SEP = '─────────────────────────────';
                                 let bodyText = `╭══ 🏠 *SEMUA JID GRUP BOT* ══╮\n│ 📊 Total: *${total} grup* | Urutan: member terbanyak\n╰══════════════════════════╯\n\n`;
                                 const allJids = [];
 
                                 for (let i = 0; i < groups.length; i++) {
                                         const { nama, jid, count } = groups[i];
-                                        bodyText += `*${i + 1}. ${nama}*\n🆔 \`${jid}\`\n👥 ${count} member\n\n`;
+                                        bodyText += `*${i + 1}. ${nama}*\n🆔 \`${jid}\`\n👥 ${count} member\n${SEP}\n`;
                                         allJids.push(jid);
                                 }
 
