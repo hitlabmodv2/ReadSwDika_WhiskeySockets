@@ -5781,7 +5781,11 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                         '⏱ *Delay:* pilih 3–10 detik\n\n' +
                                         '↩️ *Garis baru:*\n' +
                                         '• `\\n` → 1 baris kosong\n' +
-                                        '• `\\n\\n` → 2 baris kosong\n\n' +
+                                        '_Contoh: `Halo kak!\\nApa kabar?`_\n' +
+                                        '_Hasil:_\nHalo kak!\n\nApa kabar?\n\n' +
+                                        '• `\\n\\n` → 2 baris kosong\n' +
+                                        '_Contoh: `Halo kak!\\n\\nApa kabar?`_\n' +
+                                        '_Hasil:_\nHalo kak!\n\n\nApa kabar?\n\n' +
                                         '🔍 *Belum tahu JID grupnya?*\n' +
                                         '• Ketik `.cekjidgc` — di dalam grup untuk lihat JID grup tersebut\n' +
                                         '• Ketik `.cekjidgcall` — untuk lihat semua JID grup yang diikuti bot'
