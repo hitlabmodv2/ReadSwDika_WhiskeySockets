@@ -1,8 +1,8 @@
 'use strict';
 
 /**
- * Fetch semua grup yang diikuti bot + format jadi chunks teks
- * Return: { chunks: string[], total: number }
+ * Fetch semua grup yang diikuti bot, return sorted by member count (terbanyak di atas)
+ * Return: { groups: [{nama, jid, count}], total }
  */
 async function getAllGCInfo(hisoka) {
         const allGroupsObj = await hisoka.groupFetchAllParticipating();
@@ -16,39 +16,17 @@ async function getAllGCInfo(hisoka) {
                         const countB = Array.isArray(b.participants) ? b.participants.length : 0;
                         const countA = Array.isArray(a.participants) ? a.participants.length : 0;
                         return countB - countA;
-                });
+                })
+                .map(g => ({
+                        nama:  g.subject || '(tanpa nama)',
+                        jid:   g.id,
+                        count: Array.isArray(g.participants) ? g.participants.length : 0
+                }));
 
         const total = groups.length;
         if (total === 0) throw new Error('BOT_NOT_IN_ANY_GROUP');
 
-        // Header
-        const header = `╭══ 🏠 *SEMUA JID GRUP BOT* ══╮\n│ 📊 Total: *${total} grup*\n╰══════════════════════════╯\n`;
-
-        // Build lines per grup
-        const lines = groups.map((g, i) => {
-                const nama  = g.subject || '(tanpa nama)';
-                const jid   = g.id;
-                const count = Array.isArray(g.participants) ? g.participants.length : '?';
-                return `*${i + 1}. ${nama}*\n🆔 \`${jid}\`\n👥 ${count} member`;
-        });
-
-        // Split jadi chunks max ~3500 char supaya gak dipotong WA
-        const MAX = 3500;
-        const chunks = [];
-        let current = header;
-
-        for (let i = 0; i < lines.length; i++) {
-                const line = lines[i] + '\n\n';
-                if ((current + line).length > MAX && current !== header) {
-                        chunks.push(current.trimEnd());
-                        current = line;
-                } else {
-                        current += line;
-                }
-        }
-        if (current.trim()) chunks.push(current.trimEnd());
-
-        return { chunks, total };
+        return { groups, total };
 }
 
 module.exports = { getAllGCInfo };

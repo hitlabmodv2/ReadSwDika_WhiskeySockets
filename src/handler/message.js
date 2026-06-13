@@ -5781,13 +5781,9 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                         '⏱ *Delay:* pilih 3–10 detik\n\n' +
                                         '↩️ *Garis baru dalam pesan:*\n' +
                                         '• `\\n` = 1 baris kosong\n' +
-                                        '• `\\n\\n` = 2 baris kosong\n\n' +
-                                        '📝 *Contoh \\n:*\n' +
-                                        '`.pushkontakgc 120363192554714254@g.us | Halo kak!\\nLagi apa nih? | 5`\n' +
-                                        '_Pesan yang diterima member:_\nHalo kak!\n\nLagi apa nih?\n\n' +
-                                        '📝 *Contoh \\n\\n:*\n' +
-                                        '`.pushkontakgc 120363192554714254@g.us | Halo kak!\\n\\nLagi apa nih? | 5`\n' +
-                                        '_Pesan yang diterima member:_\nHalo kak!\n\n\nLagi apa nih?\n\n' +
+                                        '_Contoh:_ `.pushkontakgc 120363192554714254@g.us | Halo kak!\\nLagi apa nih? | 5`\n\n' +
+                                        '• `\\n\\n` = 2 baris kosong\n' +
+                                        '_Contoh:_ `.pushkontakgc 120363192554714254@g.us | Halo kak!\\n\\nLagi apa nih? | 5`\n\n' +
                                         '🔍 *Belum tahu JID grupnya?*\n' +
                                         '• Ketik `.cekjidgc` — di dalam grup untuk lihat JID grup tersebut\n' +
                                         '• Ketik `.cekjidgcall` — untuk lihat semua JID grup yang diikuti bot'
@@ -5906,12 +5902,28 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                         return tolak(hisoka, m, '❌ Gagal fetch daftar grup: ' + (err.message || 'Unknown error'));
                                 }
 
-                                const { chunks, total } = cjgaResult;
+                                const { groups, total } = cjgaResult;
 
-                                for (let i = 0; i < chunks.length; i++) {
-                                        const footer = chunks.length > 1 ? `\n\n_Halaman ${i + 1}/${chunks.length}_` : '';
-                                        await hisoka.sendMessage(m.from, { text: chunks[i] + footer }, { quoted: m });
-                                        if (i < chunks.length - 1) await new Promise(r => setTimeout(r, 800));
+                                // Kirim header total dulu
+                                await hisoka.sendMessage(m.from, {
+                                        text: `╭══ 🏠 *SEMUA JID GRUP BOT* ══╮\n│ 📊 Total: *${total} grup*\n│ 📶 Urutan: member terbanyak\n╰══════════════════════════╯`
+                                }, { quoted: m });
+
+                                // Satu pesan per grup dengan limited_time_offer (JID tampil di box copy native WA)
+                                for (let i = 0; i < groups.length; i++) {
+                                        const { nama, jid, count } = groups[i];
+                                        await new Button()
+                                                .setTitle(`${i + 1}. ${nama}`)
+                                                .setBody(`👥 *${count} member*`)
+                                                .setFooter('Tap tombol untuk copy JID')
+                                                .setButton('limited_time_offer', {
+                                                        text: '🆔 JID Grup',
+                                                        copy_code: jid,
+                                                        expiration_time: 0
+                                                })
+                                                .addCopy('📋 Copy JID', jid, `copy_jidgcall_${i}`)
+                                                .run(m.from, hisoka);
+                                        if (i < groups.length - 1) await new Promise(r => setTimeout(r, 400));
                                 }
 
                                 await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
