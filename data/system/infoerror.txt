@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 12/06/2026, 16.09.30  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 13/06/2026, 09.39.41  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,26 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  console.error
+│  #001  —  command:pushkontakgc
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [31m[HotReload] ✗ Gagal reload 'src/handler/message.js', pakai versi lama.[39m
+│  Cannot find module './src/scrape/tools/pushkontakgc.cjs'
+Require stack:
+- /home/runner/workspace/src/handler/message.js
 │
 │  DETAIL
-│  Sumber      : console.error
+│  Sumber      : command:pushkontakgc
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 12/06/2026, 16.09.30
-│  Terakhir    : 12/06/2026, 16.09.30
+│  Pertama     : 13/06/2026, 09.39.41
+│  Terakhir    : 13/06/2026, 09.39.41
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [31m[HotReload] ✗ Gagal reload 'src/handler/message.js', pakai versi lama.[39m
-│     at console.error (file:///home/runner/workspace/index.js:393:27)
-│     at Timeout._onTimeout (file:///home/runner/workspace/src/helper/hotReload.js:102:29)
+│  ▶  Error: Cannot find module './src/scrape/tools/pushkontakgc.cjs'
+│     Require stack:
+│     - /home/runner/workspace/src/handler/message.js
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 12/06/2026, 16.09.30
+  Terakhir diperbarui: 13/06/2026, 09.39.41
 ════════════════════════════════════════════════════════════════════════

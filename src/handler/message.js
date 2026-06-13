@@ -5791,7 +5791,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                         '❌ *Delay tidak valid!*\n\n⏱ Masukkan delay antara *3–10 detik*\n\n📝 *Contoh:*\n`.pushkontakgc 120363192554714254@g.us | Halo kak! | 5`'
                                 );
 
-                                const { pushKontakGC } = _require('./src/scrape/tools/pushkontakgc.cjs');
+                                const { pushKontakGC } = _require(path.resolve('./src/scrape/tools/pushkontakgc.cjs'));
 
                                 try {
                                         await pushKontakGC(hisoka, {
