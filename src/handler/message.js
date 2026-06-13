@@ -5904,22 +5904,24 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                                 const { groups, total } = cjgaResult;
 
-                                // Kirim header total dulu
-                                await hisoka.sendMessage(m.from, {
-                                        text: `╭══ 🏠 *SEMUA JID GRUP BOT* ══╮\n│ 📊 Total: *${total} grup*\n│ 📶 Urutan: member terbanyak\n╰══════════════════════════╯`
-                                }, { quoted: m });
+                                // Susun isi body + kumpulkan semua JID untuk 1 tombol copy
+                                let bodyText = `╭══ 🏠 *SEMUA JID GRUP BOT* ══╮\n│ 📊 Total: *${total} grup* | Urutan: member terbanyak\n╰══════════════════════════╯\n\n`;
+                                const allJids = [];
 
-                                // Satu pesan per grup dengan limited_time_offer (JID tampil di box copy native WA)
                                 for (let i = 0; i < groups.length; i++) {
                                         const { nama, jid, count } = groups[i];
-                                        await new Button()
-                                                .setTitle(`${i + 1}. ${nama}`)
-                                                .setBody(`🆔 \`${jid}\`\n👥 *${count} member*`)
-                                                .setFooter('Tap tombol untuk copy JID')
-                                                .addCopy('📋 Copy JID', jid, `copy_jidgcall_${i}`)
-                                                .run(m.from, hisoka, m);
-                                        if (i < groups.length - 1) await new Promise(r => setTimeout(r, 400));
+                                        bodyText += `*${i + 1}. ${nama}*\n🆔 \`${jid}\`\n👥 ${count} member\n\n`;
+                                        allJids.push(jid);
                                 }
+
+                                const copyCode = allJids.join('\n');
+
+                                await new Button()
+                                        .setTitle('🏠 Semua JID Grup Bot')
+                                        .setBody(bodyText.trimEnd())
+                                        .setFooter(`Total ${total} grup • Tap tombol untuk copy semua JID`)
+                                        .addCopy('📋 Copy Semua JID', copyCode, 'copy_all_jidgc')
+                                        .run(m.from, hisoka, m);
 
                                 await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
                                 logCommand(m, hisoka, 'cekjidgcall');
