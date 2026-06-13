@@ -5827,6 +5827,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 const { pushKontakGC } = _require(path.resolve('./src/scrape/tools/pushkontakgc.cjs'));
 
                                 try {
+                                        let pkgProgMsg = null;
                                         await pushKontakGC(hisoka, {
                                                 targetGid: pkgTargetGid,
                                                 pesanKirim: pkgPesan,
@@ -5834,24 +5835,28 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                 mediaBuffer: pkgMediaBuffer,
                                                 mediaType: pkgMediaType,
                                                 onStart: async ({ namaGrup, total, modeMedia, mediaType: mt }) => {
-                                                        await m.reply(
-                                                                `✅ *Push Kontak GC dimulai!*\n\n` +
+                                                        pkgProgMsg = await m.reply(
+                                                                `⏳ *Push Kontak GC dimulai...*\n\n` +
                                                                 `👥 *Grup :* ${namaGrup}\n` +
-                                                                `📋 *Total member :* ${total} orang\n` +
+                                                                `📋 *Total :* ${total} orang\n` +
                                                                 `📤 *Mode :* ${modeMedia ? (mt === 'imageMessage' ? '🖼️ Gambar' : '🎥 Video') : '💬 Teks'}\n` +
-                                                                `⏱ *Delay :* ${pkgDelay} detik per pesan\n\n` +
-                                                                `_Proses berjalan di background, harap tunggu..._`
+                                                                `⏱ *Delay :* ${pkgDelay} detik/pesan\n\n` +
+                                                                `_Sedang mengirim ke semua member..._`
                                                         );
                                                 },
                                                 onDone: async ({ namaGrup, berhasil, gagal, delayDetik: dd, modeMedia }) => {
-                                                        await m.reply(
+                                                        const doneText =
                                                                 `✅ *Push Kontak GC selesai!*\n\n` +
                                                                 `👥 *Grup :* ${namaGrup}\n` +
                                                                 `📤 *Mode :* ${modeMedia ? '🖼️ Media' : '💬 Teks'}\n` +
-                                                                `⏱ *Delay dipakai :* ${dd} detik\n` +
+                                                                `⏱ *Delay :* ${dd} detik/pesan\n` +
                                                                 `✔️ *Berhasil :* ${berhasil} orang\n` +
-                                                                `❌ *Gagal :* ${gagal} orang`
-                                                        );
+                                                                `❌ *Gagal :* ${gagal} orang`;
+                                                        if (pkgProgMsg?.key) {
+                                                                await m.reply({ edit: pkgProgMsg.key, text: doneText });
+                                                        } else {
+                                                                await m.reply(doneText);
+                                                        }
                                                 }
                                         });
                                 } catch (err) {
