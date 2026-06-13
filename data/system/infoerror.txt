@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 13/06/2026, 09.39.41  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 13/06/2026, 10.30.53  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,26 +23,23 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  command:pushkontakgc
+│  #001  —  command:cekjidgcall
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  Cannot find module './src/scrape/tools/pushkontakgc.cjs'
-Require stack:
-- /home/runner/workspace/src/handler/message.js
+│  Cannot read properties of undefined (reading 'length')
 │
 │  DETAIL
-│  Sumber      : command:pushkontakgc
+│  Sumber      : command:cekjidgcall
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 13/06/2026, 09.39.41
-│  Terakhir    : 13/06/2026, 09.39.41
+│  Pertama     : 13/06/2026, 10.30.53
+│  Terakhir    : 13/06/2026, 10.30.53
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: Cannot find module './src/scrape/tools/pushkontakgc.cjs'
-│     Require stack:
-│     - /home/runner/workspace/src/handler/message.js
+│  ▶  TypeError: Cannot read properties of undefined (reading 'length')
+│     at default (file:///home/runner/workspace/src/handler/message.js?t=1781346609380:5913:60)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 13/06/2026, 09.39.41
+  Terakhir diperbarui: 13/06/2026, 10.30.53
 ════════════════════════════════════════════════════════════════════════

@@ -5914,15 +5914,10 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                         const { nama, jid, count } = groups[i];
                                         await new Button()
                                                 .setTitle(`${i + 1}. ${nama}`)
-                                                .setBody(`👥 *${count} member*`)
+                                                .setBody(`🆔 \`${jid}\`\n👥 *${count} member*`)
                                                 .setFooter('Tap tombol untuk copy JID')
-                                                .setButton('limited_time_offer', {
-                                                        text: '🆔 JID Grup',
-                                                        copy_code: jid,
-                                                        expiration_time: 0
-                                                })
                                                 .addCopy('📋 Copy JID', jid, `copy_jidgcall_${i}`)
-                                                .run(m.from, hisoka);
+                                                .run(m.from, hisoka, m);
                                         if (i < groups.length - 1) await new Promise(r => setTimeout(r, 400));
                                 }
 
