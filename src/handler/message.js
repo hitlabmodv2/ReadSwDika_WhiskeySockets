@@ -5770,16 +5770,18 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                                 if (!query || !query.includes('|')) return tolak(hisoka, m,
                                         '❌ *Format salah!*\n\n' +
-                                        '📌 *Cara pakai:*\n' +
-                                        '`.pushkontakgc <JID_GRUP> | <pesan> | <delay detik>`\n\n' +
-                                        '📝 *Contoh:*\n' +
-                                        '`.pushkontakgc 120363192554714254@g.us | Halo kak, ada info nih! | 5`\n\n' +
-                                        '⏱ *Delay:* pilih antara 3–10 detik\n\n' +
-                                        '↩️ *Garis baru di pesan:*\n' +
+                                        '📌 *Cara pakai (teks):*\n' +
+                                        '`.pushkontakgc <JID> | <pesan> | <delay>`\n\n' +
+                                        '🖼️ *Cara pakai (gambar/video):*\n' +
+                                        '_Kirim/reply gambar dengan caption:_\n' +
+                                        '`.pushkontakgc <JID> | <caption> | <delay>`\n' +
+                                        '_Caption boleh kosong jika tidak perlu_\n\n' +
+                                        '📝 *Contoh teks:*\n' +
+                                        '`.pushkontakgc 120363192554714254@g.us | Halo kak! | 5`\n\n' +
+                                        '⏱ *Delay:* pilih 3–10 detik\n\n' +
+                                        '↩️ *Garis baru:*\n' +
                                         '• `\\n` → 1 baris kosong\n' +
-                                        '• `\\n\\n` → 2 baris kosong\n\n' +
-                                        '📝 *Contoh dengan garis baru:*\n' +
-                                        '`.pushkontakgc 120363192554714254@g.us | Halo kak!\\nAda promo nih! | 5`'
+                                        '• `\\n\\n` → 2 baris kosong'
                                 );
 
                                 const pkgParts = query.split('|');
@@ -5788,10 +5790,23 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 const pkgDelayInput = parseInt((pkgParts[2] || '').trim());
                                 const pkgDelay = (!isNaN(pkgDelayInput) && pkgDelayInput >= 3 && pkgDelayInput <= 10) ? pkgDelayInput : null;
 
+                                // Deteksi media — dari pesan langsung atau reply
+                                const pkgMediaTypes = ['imageMessage', 'videoMessage'];
+                                let pkgMediaBuffer = null;
+                                let pkgMediaType = null;
+
+                                if (m.isMedia && pkgMediaTypes.includes(m.type)) {
+                                        try { pkgMediaBuffer = await m.downloadMedia(); pkgMediaType = m.type; } catch (_) {}
+                                } else if (m.isQuoted && m.quoted?.isMedia && pkgMediaTypes.includes(m.quoted?.type)) {
+                                        try { pkgMediaBuffer = await getQuotedMediaBuffer(hisoka, m); pkgMediaType = m.quoted.type; } catch (_) {}
+                                }
+
+                                const pkgAdaMedia = !!(pkgMediaBuffer && pkgMediaBuffer.length > 0);
+
                                 if (!pkgTargetGid || !pkgTargetGid.endsWith('@g.us')) return tolak(hisoka, m,
-                                        '❌ JID grup tidak valid.\n_Contoh JID: `120363192554714254@g.us`_'
+                                        '❌ JID grup tidak valid.\n_Contoh: `120363192554714254@g.us`_'
                                 );
-                                if (!pkgPesan) return tolak(hisoka, m, '❌ Pesan tidak boleh kosong.');
+                                if (!pkgAdaMedia && !pkgPesan) return tolak(hisoka, m, '❌ Pesan tidak boleh kosong.');
                                 if (pkgParts.length < 3 || pkgDelay === null) return tolak(hisoka, m,
                                         '❌ *Delay tidak valid!*\n\n⏱ Masukkan delay antara *3–10 detik*\n\n📝 *Contoh:*\n`.pushkontakgc 120363192554714254@g.us | Halo kak! | 5`'
                                 );
@@ -5803,20 +5818,24 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                 targetGid: pkgTargetGid,
                                                 pesanKirim: pkgPesan,
                                                 delayDetik: pkgDelay,
-                                                onStart: async ({ namaGrup, total }) => {
+                                                mediaBuffer: pkgMediaBuffer,
+                                                mediaType: pkgMediaType,
+                                                onStart: async ({ namaGrup, total, modeMedia, mediaType: mt }) => {
                                                         await m.reply(
                                                                 `✅ *Push Kontak GC dimulai!*\n\n` +
                                                                 `👥 *Grup :* ${namaGrup}\n` +
                                                                 `📋 *Total member :* ${total} orang\n` +
+                                                                `📤 *Mode :* ${modeMedia ? (mt === 'imageMessage' ? '🖼️ Gambar' : '🎥 Video') : '💬 Teks'}\n` +
                                                                 `⏱ *Delay :* ${pkgDelay} detik per pesan\n\n` +
                                                                 `_Proses berjalan di background, harap tunggu..._`
                                                         );
                                                 },
-                                                onDone: async ({ namaGrup, berhasil, gagal, delayDetik }) => {
+                                                onDone: async ({ namaGrup, berhasil, gagal, delayDetik: dd, modeMedia }) => {
                                                         await m.reply(
                                                                 `✅ *Push Kontak GC selesai!*\n\n` +
                                                                 `👥 *Grup :* ${namaGrup}\n` +
-                                                                `⏱ *Delay dipakai :* ${delayDetik} detik\n` +
+                                                                `📤 *Mode :* ${modeMedia ? '🖼️ Media' : '💬 Teks'}\n` +
+                                                                `⏱ *Delay dipakai :* ${dd} detik\n` +
                                                                 `✔️ *Berhasil :* ${berhasil} orang\n` +
                                                                 `❌ *Gagal :* ${gagal} orang`
                                                         );
