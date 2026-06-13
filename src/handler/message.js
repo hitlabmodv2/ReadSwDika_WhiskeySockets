@@ -5907,15 +5907,15 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 // Susun isi body + kumpulkan semua JID untuk 1 tombol copy
                                 const SEP = '─────────────────────────────';
                                 let bodyText = `╭══ 🏠 *SEMUA JID GRUP BOT* ══╮\n│ 📊 Total: *${total} grup* | Urutan: member terbanyak\n╰══════════════════════════╯\n\n`;
-                                const allJids = [];
+                                const copyLines = [];
 
                                 for (let i = 0; i < groups.length; i++) {
                                         const { nama, jid, count } = groups[i];
                                         bodyText += `*${i + 1}. ${nama}*\n🆔 \`${jid}\`\n👥 ${count} member\n${SEP}\n`;
-                                        allJids.push(jid);
+                                        copyLines.push(`${i + 1}. ${nama}\n🆔 ${jid}\n👥 ${count} member\n${SEP}`);
                                 }
 
-                                const copyCode = allJids.join('\n');
+                                const copyCode = copyLines.join('\n');
 
                                 await new Button()
                                         .setTitle('🏠 Semua JID Grup Bot')
