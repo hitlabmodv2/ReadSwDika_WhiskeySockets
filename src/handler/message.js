@@ -5777,88 +5777,50 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                         '⏱ *Delay:* pilih antara 3–10 detik'
                                 );
 
-                                const parts = query.split('|');
-                                const targetGid = parts[0].trim();
-                                const pesanKirim = (parts[1] || '').trim();
-                                const delayInput = parseInt((parts[2] || '').trim());
-                                const delayDetik = (!isNaN(delayInput) && delayInput >= 3 && delayInput <= 10)
-                                        ? delayInput
-                                        : null;
+                                const pkgParts = query.split('|');
+                                const pkgTargetGid = pkgParts[0].trim();
+                                const pkgPesan = (pkgParts[1] || '').trim();
+                                const pkgDelayInput = parseInt((pkgParts[2] || '').trim());
+                                const pkgDelay = (!isNaN(pkgDelayInput) && pkgDelayInput >= 3 && pkgDelayInput <= 10) ? pkgDelayInput : null;
 
-                                if (!targetGid || !targetGid.endsWith('@g.us')) return tolak(hisoka, m,
-                                        '❌ JID grup tidak valid.\n' +
-                                        '_Contoh JID: `120363192554714254@g.us`_'
+                                if (!pkgTargetGid || !pkgTargetGid.endsWith('@g.us')) return tolak(hisoka, m,
+                                        '❌ JID grup tidak valid.\n_Contoh JID: `120363192554714254@g.us`_'
+                                );
+                                if (!pkgPesan) return tolak(hisoka, m, '❌ Pesan tidak boleh kosong.');
+                                if (pkgParts.length < 3 || pkgDelay === null) return tolak(hisoka, m,
+                                        '❌ *Delay tidak valid!*\n\n⏱ Masukkan delay antara *3–10 detik*\n\n📝 *Contoh:*\n`.pushkontakgc 120363192554714254@g.us | Halo kak! | 5`'
                                 );
 
-                                if (!pesanKirim) return tolak(hisoka, m, '❌ Pesan tidak boleh kosong.');
+                                const { pushKontakGC } = _require('./src/scrape/tools/pushkontakgc.cjs');
 
-                                if (parts.length < 3 || delayDetik === null) return tolak(hisoka, m,
-                                        '❌ *Delay tidak valid!*\n\n' +
-                                        '⏱ Masukkan delay antara *3–10 detik*\n\n' +
-                                        '📝 *Contoh:*\n' +
-                                        '`.pushkontakgc 120363192554714254@g.us | Halo kak! | 5`'
-                                );
-
-                                let metaGc;
                                 try {
-                                        metaGc = await hisoka.groupMetadata(targetGid);
+                                        await pushKontakGC(hisoka, {
+                                                targetGid: pkgTargetGid,
+                                                pesanKirim: pkgPesan,
+                                                delayDetik: pkgDelay,
+                                                onStart: async ({ namaGrup, total }) => {
+                                                        await m.reply(
+                                                                `✅ *Push Kontak GC dimulai!*\n\n` +
+                                                                `👥 *Grup :* ${namaGrup}\n` +
+                                                                `📋 *Total member :* ${total} orang\n` +
+                                                                `⏱ *Delay :* ${pkgDelay} detik per pesan\n\n` +
+                                                                `_Proses berjalan di background, harap tunggu..._`
+                                                        );
+                                                },
+                                                onDone: async ({ namaGrup, berhasil, gagal, delayDetik }) => {
+                                                        await m.reply(
+                                                                `✅ *Push Kontak GC selesai!*\n\n` +
+                                                                `👥 *Grup :* ${namaGrup}\n` +
+                                                                `⏱ *Delay dipakai :* ${delayDetik} detik\n` +
+                                                                `✔️ *Berhasil :* ${berhasil} orang\n` +
+                                                                `❌ *Gagal :* ${gagal} orang`
+                                                        );
+                                                }
+                                        });
                                 } catch (err) {
+                                        if (err.message === 'EMPTY_MEMBER') return tolak(hisoka, m, '❌ Tidak ada member yang ditemukan di grup tersebut.');
                                         return tolak(hisoka, m, '❌ Gagal ambil data grup. Pastikan bot ada di dalam grup tersebut.');
                                 }
-
-                                const namaGrup = metaGc?.subject || targetGid;
-                                const memberList = (metaGc?.participants || [])
-                                        .map(p => {
-                                                const rawJid = p.id || p.jid || '';
-                                                if (!rawJid) return null;
-                                                if (rawJid.endsWith('@lid')) {
-                                                        const resolved = global.__lookupLidPn ? global.__lookupLidPn(rawJid) : null;
-                                                        if (resolved) return resolved.endsWith('@s.whatsapp.net') ? resolved : resolved.split('@')[0] + '@s.whatsapp.net';
-                                                        return rawJid;
-                                                }
-                                                return rawJid.endsWith('@s.whatsapp.net') ? rawJid : rawJid.split('@')[0] + '@s.whatsapp.net';
-                                        })
-                                        .filter(Boolean);
-
-                                if (!memberList.length) return tolak(hisoka, m, '❌ Tidak ada member yang ditemukan di grup tersebut.');
-
-                                await m.reply(
-                                        `✅ *Push Kontak GC dimulai!*\n\n` +
-                                        `👥 *Grup :* ${namaGrup}\n` +
-                                        `📋 *Total member :* ${memberList.length} orang\n` +
-                                        `⏱ *Delay :* ${delayDetik} detik per pesan\n\n` +
-                                        `_Proses berjalan di background, harap tunggu..._`
-                                );
-
-                                const botJid = hisoka.user?.id?.replace(/:.*@/, '@') || '';
-
-                                let berhasil = 0;
-                                let gagal = 0;
-
-                                for (const jid of memberList) {
-                                        const numOnly = jid.split('@')[0];
-                                        if (numOnly === botJid.split('@')[0]) continue;
-
-                                        try {
-                                                const waMsg = generateWAMessageFromContent(jid, {
-                                                        conversation: pesanKirim
-                                                }, { userJid: hisoka.user?.id });
-                                                await hisoka.relayMessage(jid, waMsg.message, { messageId: waMsg.key.id });
-                                                berhasil++;
-                                        } catch (_) {
-                                                gagal++;
-                                        }
-
-                                        await new Promise(res => setTimeout(res, delayDetik * 1000));
-                                }
-
-                                await m.reply(
-                                        `✅ *Push Kontak GC selesai!*\n\n` +
-                                        `👥 *Grup :* ${namaGrup}\n` +
-                                        `⏱ *Delay dipakai :* ${delayDetik} detik\n` +
-                                        `✔️ *Berhasil :* ${berhasil} orang\n` +
-                                        `❌ *Gagal :* ${gagal} orang`
-                                );
 
                                 logCommand(m, hisoka, 'pushkontakgc');
                                 break;

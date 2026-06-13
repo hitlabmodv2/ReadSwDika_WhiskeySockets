@@ -1,0 +1,44 @@
+{
+  "AC9821FA6F0413AC4567707922F4B9E3": {
+    "id": "AC9821FA6F0413AC4567707922F4B9E3",
+    "sender": "6287813185842@s.whatsapp.net",
+    "name": "kaa |𝐛𝐚𝐫𝐜𝐢𝐚",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-13T09:33:43.298Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🇸🇽",
+    "resolve": "Signal Lib ✓",
+    "source": "status",
+    "number": "6287813185842",
+    "resolvedPn": "6287813185842@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6287813185842@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC9821FA6F0413AC4567707922F4B9E3",
+      "participant": "179125973213223@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-13T09:33:46.165Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287813185842@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC9821FA6F0413AC4567707922F4B9E3",
+        "participant": "179125973213223@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287813185842@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC9821FA6F0413AC4567707922F4B9E3",
+        "participant": "6287813185842@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-13T09:33:46.165Z"
+  }
+}

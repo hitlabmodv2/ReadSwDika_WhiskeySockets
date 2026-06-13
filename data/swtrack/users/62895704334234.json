@@ -546,7 +546,7 @@
       "participant": "142696211599405@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-13T03:41:30.790Z",
+    "updatedAt": "2026-06-13T09:37:29.926Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -565,7 +565,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-13T03:41:30.790Z"
+    "processedAt": "2026-06-13T03:41:30.790Z",
+    "deleted": true,
+    "deletedAt": "2026-06-13T09:37:29.926Z"
   },
   "ACA240C4F61E1AD6A75AA9CFD453BDC1": {
     "id": "ACA240C4F61E1AD6A75AA9CFD453BDC1",
@@ -1194,7 +1196,7 @@
       "participant": "142696211599405@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-13T09:08:31.320Z",
+    "updatedAt": "2026-06-13T09:37:28.501Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -1213,7 +1215,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-13T09:08:31.320Z"
+    "processedAt": "2026-06-13T09:08:31.320Z",
+    "deleted": true,
+    "deletedAt": "2026-06-13T09:37:28.501Z"
   },
   "ACDAB05DC7F54D1AAA6E8A57B97092F7": {
     "id": "ACDAB05DC7F54D1AAA6E8A57B97092F7",
@@ -1258,5 +1262,32 @@
     "processedAt": "2026-06-13T09:25:30.933Z",
     "deleted": true,
     "deletedAt": "2026-06-13T09:25:53.388Z"
+  },
+  "AC616F4534C4A57A52102D65313F93F5": {
+    "id": "AC616F4534C4A57A52102D65313F93F5",
+    "sender": "62895704334234@s.whatsapp.net",
+    "name": "jazila_bidikkamu",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-13T09:31:27.289Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🦛",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "62895704334234",
+    "resolvedPn": "62895704334234@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "62895704334234@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC616F4534C4A57A52102D65313F93F5",
+      "participant": "142696211599405@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-13T09:37:29.420Z",
+    "retriedOnStartup": true,
+    "retriedAt": "2026-06-13T09:32:23.337Z",
+    "deleted": true,
+    "deletedAt": "2026-06-13T09:37:29.420Z"
   }
 }
