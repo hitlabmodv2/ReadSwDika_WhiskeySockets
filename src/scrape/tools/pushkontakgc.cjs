@@ -28,7 +28,13 @@ async function getMemberList(hisoka, targetGid) {
  * - Delay tetap (dipilih user, 3–10 detik)
  */
 async function pushKontakGC(hisoka, { targetGid, pesanKirim, delayDetik, onStart, onDone }) {
-        pesanKirim = pesanKirim.replace(/\\n/g, '\n\n');
+        // Proses dulu \\n\\n (double) sebelum \\n (single) biar tidak dobel replace
+        // \\n  → 2 newline asli = 1 baris kosong
+        // \\n\\n → 3 newline asli = 2 baris kosong
+        pesanKirim = pesanKirim
+                .replace(/\\n\\n/g, '\n\n\n')
+                .replace(/\\n/g, '\n\n');
+        console.log('[PushKontakGC] Preview pesan:\n' + pesanKirim.replace(/\n/g, '↵'));
         const { meta, members } = await getMemberList(hisoka, targetGid);
         const namaGrup = meta?.subject || targetGid;
         const botJid = (hisoka.user?.id || '').split(':')[0] + '@s.whatsapp.net';
