@@ -5876,6 +5876,36 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 break;
                         }
 
+                        case 'cekjidgcall':
+                        case 'jidgcall':
+                        case 'listjidgc':
+                        case 'alljidgc': {
+                                if (!m.isOwner) return tolak(hisoka, m, '❌ Perintah ini hanya untuk owner bot.');
+
+                                await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
+
+                                let cjgaResult;
+                                try {
+                                        const { getAllGCInfo } = _require(path.resolve('./src/scrape/tools/cekjidgcall.cjs'));
+                                        cjgaResult = await getAllGCInfo(hisoka);
+                                } catch (err) {
+                                        if (err.message === 'BOT_NOT_IN_ANY_GROUP') return tolak(hisoka, m, '❌ Bot tidak tergabung di grup manapun saat ini.');
+                                        return tolak(hisoka, m, '❌ Gagal fetch daftar grup: ' + (err.message || 'Unknown error'));
+                                }
+
+                                const { chunks, total } = cjgaResult;
+
+                                for (let i = 0; i < chunks.length; i++) {
+                                        const footer = chunks.length > 1 ? `\n\n_Halaman ${i + 1}/${chunks.length}_` : '';
+                                        await hisoka.sendMessage(m.from, { text: chunks[i] + footer }, { quoted: m });
+                                        if (i < chunks.length - 1) await new Promise(r => setTimeout(r, 800));
+                                }
+
+                                await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+                                logCommand(m, hisoka, 'cekjidgcall');
+                                break;
+                        }
+
                         case 'memori':
                         case 'memory':
                         case 'mymemory':
