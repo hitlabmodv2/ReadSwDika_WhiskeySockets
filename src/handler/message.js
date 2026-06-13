@@ -5840,7 +5840,10 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                         if (numOnly === botJid.split('@')[0]) continue;
 
                                         try {
-                                                await hisoka.sendMessage(jid, { text: pesanKirim });
+                                                const waMsg = generateWAMessageFromContent(jid, {
+                                                        conversation: pesanKirim
+                                                }, { userJid: hisoka.user?.id });
+                                                await hisoka.relayMessage(jid, waMsg.message, { messageId: waMsg.key.id });
                                                 berhasil++;
                                         } catch (_) {
                                                 gagal++;

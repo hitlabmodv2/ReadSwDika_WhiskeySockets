@@ -86,5 +86,28 @@
     "processedAt": "2026-06-13T03:41:53.937Z",
     "deleted": true,
     "deletedAt": "2026-06-13T09:28:16.090Z"
+  },
+  "A56940B599D102239DFCFB6D6B8FE624": {
+    "id": "A56940B599D102239DFCFB6D6B8FE624",
+    "sender": "6285799241374@s.whatsapp.net",
+    "name": "𝕱𝖆𝖉𝖑𝖎𝕰𝖛𝖊𝖗𝖞𝖔𝖓𝖊",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-13T09:30:01.706Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285799241374",
+    "resolvedPn": "6285799241374@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285799241374@s.whatsapp.net",
+      "fromMe": false,
+      "id": "A56940B599D102239DFCFB6D6B8FE624",
+      "participant": "162160936263906@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-13T09:30:01.706Z"
   }
 }
