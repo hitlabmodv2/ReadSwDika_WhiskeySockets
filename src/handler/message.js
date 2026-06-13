@@ -5774,7 +5774,12 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                         '`.pushkontakgc <JID_GRUP> | <pesan> | <delay detik>`\n\n' +
                                         '📝 *Contoh:*\n' +
                                         '`.pushkontakgc 120363192554714254@g.us | Halo kak, ada info nih! | 5`\n\n' +
-                                        '⏱ *Delay:* pilih antara 3–10 detik'
+                                        '⏱ *Delay:* pilih antara 3–10 detik\n\n' +
+                                        '↩️ *Garis baru di pesan:*\n' +
+                                        '• `\\n` → 1 baris kosong\n' +
+                                        '• `\\n\\n` → 2 baris kosong\n\n' +
+                                        '📝 *Contoh dengan garis baru:*\n' +
+                                        '`.pushkontakgc 120363192554714254@g.us | Halo kak!\\nAda promo nih! | 5`'
                                 );
 
                                 const pkgParts = query.split('|');

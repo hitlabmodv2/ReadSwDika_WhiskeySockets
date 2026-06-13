@@ -460,5 +460,28 @@
       }
     ],
     "processedAt": "2026-06-13T09:23:18.300Z"
+  },
+  "AC3988FA1CD82246CAC84E064B2D44B5": {
+    "id": "AC3988FA1CD82246CAC84E064B2D44B5",
+    "sender": "6285216433695@s.whatsapp.net",
+    "name": "知らないし、気にしない。",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-13T09:43:49.032Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "Signal Lib ✓",
+    "source": "status",
+    "number": "6285216433695",
+    "resolvedPn": "6285216433695@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285216433695@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC3988FA1CD82246CAC84E064B2D44B5",
+      "participant": "225670600900759@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-13T09:43:49.032Z"
   }
 }
