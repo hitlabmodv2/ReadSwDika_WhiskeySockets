@@ -399,9 +399,9 @@
     "name": "F",
     "type": "videoMessage",
     "arrivedAt": "2026-06-13T05:11:35.189Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "🍑",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6282189076619",
@@ -414,6 +414,8 @@
       "participant": "84636709445686@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-13T05:11:35.190Z"
+    "updatedAt": "2026-06-13T07:52:53.721Z",
+    "retriedOnStartup": true,
+    "retriedAt": "2026-06-13T07:52:53.721Z"
   }
 }

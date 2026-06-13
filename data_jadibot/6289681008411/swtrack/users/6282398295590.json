@@ -1,13 +1,13 @@
 {
-  "AC35CD6B3EC6A6E92E36D962E7B31DB5": {
-    "id": "AC35CD6B3EC6A6E92E36D962E7B31DB5",
+  "ACA2D3C3AEF75DF98C741C7B676F6625": {
+    "id": "ACA2D3C3AEF75DF98C741C7B676F6625",
     "sender": "6282398295590@s.whatsapp.net",
     "name": "Isami Minato",
     "type": "videoMessage",
-    "arrivedAt": "2026-06-10T03:46:08.232Z",
+    "arrivedAt": "2026-06-13T08:51:52.551Z",
     "read": true,
     "reacted": true,
-    "emoji": "🏇",
+    "emoji": "⏱️",
     "resolve": "Signal Lib ✓",
     "source": "status",
     "number": "6282398295590",
@@ -16,17 +16,17 @@
       "remoteJid": "status@broadcast",
       "remoteJidAlt": "6282398295590@s.whatsapp.net",
       "fromMe": false,
-      "id": "AC35CD6B3EC6A6E92E36D962E7B31DB5",
+      "id": "ACA2D3C3AEF75DF98C741C7B676F6625",
       "participant": "138250819784817@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-10T03:46:11.320Z",
+    "updatedAt": "2026-06-13T08:52:07.867Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6282398295590@s.whatsapp.net",
         "fromMe": false,
-        "id": "AC35CD6B3EC6A6E92E36D962E7B31DB5",
+        "id": "ACA2D3C3AEF75DF98C741C7B676F6625",
         "participant": "138250819784817@lid",
         "addressingMode": "lid"
       },
@@ -34,11 +34,11 @@
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6282398295590@s.whatsapp.net",
         "fromMe": false,
-        "id": "AC35CD6B3EC6A6E92E36D962E7B31DB5",
+        "id": "ACA2D3C3AEF75DF98C741C7B676F6625",
         "participant": "6282398295590@s.whatsapp.net",
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-10T03:46:11.320Z"
+    "processedAt": "2026-06-13T08:52:07.867Z"
   }
 }
