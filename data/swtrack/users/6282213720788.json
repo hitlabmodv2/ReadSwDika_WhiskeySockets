@@ -729,9 +729,9 @@
     "name": "-unravel-",
     "type": "videoMessage",
     "arrivedAt": "2026-06-13T10:38:15.702Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "👵",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6282213720788",
@@ -744,6 +744,25 @@
       "participant": "56010702086266@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-13T10:38:15.702Z"
+    "updatedAt": "2026-06-13T10:38:31.964Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282213720788@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC5BA34AD19EAB0473D12628B5DFF2F8",
+        "participant": "56010702086266@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282213720788@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC5BA34AD19EAB0473D12628B5DFF2F8",
+        "participant": "6282213720788@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-13T10:38:31.964Z"
   }
 }
