@@ -5784,6 +5784,10 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                         '_Contoh:_ `.pushkontakgc 120363192554714254@g.us | Halo kak!\\nLagi apa nih? | 5`\n\n' +
                                         '• `\\n\\n` = 2 baris kosong\n' +
                                         '_Contoh:_ `.pushkontakgc 120363192554714254@g.us | Halo kak!\\n\\nLagi apa nih? | 5`\n\n' +
+                                        '💡 *Bisa dipakai dari mana saja:*\n' +
+                                        '• Di dalam grup target langsung\n' +
+                                        '• Di grup lain (asal JID target benar)\n' +
+                                        '• Di chat private bot\n\n' +
                                         '🔍 *Belum tahu JID grupnya?*\n' +
                                         '• Ketik `.cekjidgc` — di dalam grup untuk lihat JID grup tersebut\n' +
                                         '• Ketik `.cekjidgcall` — untuk lihat semua JID grup yang diikuti bot'
