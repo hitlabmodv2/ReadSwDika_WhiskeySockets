@@ -562,47 +562,5 @@
       }
     ],
     "processedAt": "2026-06-13T03:42:37.540Z"
-  },
-  "A533B70FB071321350185F2BE1170E07": {
-    "id": "A533B70FB071321350185F2BE1170E07",
-    "sender": "6281295543915@s.whatsapp.net",
-    "name": "Arthur.remi_kan",
-    "type": "imageMessage",
-    "arrivedAt": "2026-06-13T06:01:51.542Z",
-    "read": true,
-    "reacted": true,
-    "emoji": "👀",
-    "resolve": "PN langsung ✓",
-    "source": "status",
-    "number": "6281295543915",
-    "resolvedPn": "6281295543915@s.whatsapp.net",
-    "messageKey": {
-      "remoteJid": "status@broadcast",
-      "remoteJidAlt": "6281295543915@s.whatsapp.net",
-      "fromMe": false,
-      "id": "A533B70FB071321350185F2BE1170E07",
-      "participant": "26547712958494@lid",
-      "addressingMode": "lid"
-    },
-    "updatedAt": "2026-06-13T06:01:57.453Z",
-    "receiptKeys": [
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6281295543915@s.whatsapp.net",
-        "fromMe": false,
-        "id": "A533B70FB071321350185F2BE1170E07",
-        "participant": "26547712958494@lid",
-        "addressingMode": "lid"
-      },
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6281295543915@s.whatsapp.net",
-        "fromMe": false,
-        "id": "A533B70FB071321350185F2BE1170E07",
-        "participant": "6281295543915@s.whatsapp.net",
-        "addressingMode": "lid"
-      }
-    ],
-    "processedAt": "2026-06-13T06:01:57.453Z"
   }
 }

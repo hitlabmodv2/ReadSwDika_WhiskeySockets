@@ -1419,16 +1419,14 @@ _do_check_update &
 # ===== Auto-classify commit (Conventional Commits) =====
 classify_commit() {
   local files status_lines
-  status_lines=$(git diff --cached --name-status 2>/dev/null)
+  status_lines=$(git diff --cached --name-status)
   files=$(echo "$status_lines" | awk '{print $2}')
-  [ -z "$files" ] && { echo "chore: update files"; return; }
 
   local added modified deleted
   added=$(echo "$status_lines"   | awk '$1=="A"' | wc -l | tr -d ' ')
   modified=$(echo "$status_lines" | awk '$1=="M"' | wc -l | tr -d ' ')
   deleted=$(echo "$status_lines"  | awk '$1=="D"' | wc -l | tr -d ' ')
 
-  # --- Scope: folder dominan ---
   local scope="" scope_count=0
   declare -A scope_map=(
     [src/scrape/]="scrape"
@@ -1442,104 +1440,55 @@ classify_commit() {
     [.agents/]="agents"
     [jadibot/]="jadibot"
   )
+
   for prefix in "${!scope_map[@]}"; do
-    local cnt; cnt=$(echo "$files" | grep -c "^${prefix}" 2>/dev/null || echo 0)
-    if [ "$cnt" -gt "$scope_count" ]; then scope_count=$cnt; scope="${scope_map[$prefix]}"; fi
+    local cnt
+    cnt=$(echo "$files" | grep -c "^${prefix}" || true)
+    if [ "$cnt" -gt "$scope_count" ]; then
+      scope_count=$cnt
+      scope="${scope_map[$prefix]}"
+    fi
   done
-  echo "$files" | grep -qE '^(package\.json|package-lock\.json)$' && [ -z "$scope" ] && scope="deps"
-  echo "$files" | grep -qE '^(push\.sh|index\.js|config\.json|\.gitignore|\.npmrc|Dockerfile)$' && [ -z "$scope" ] && scope="config"
-  echo "$files" | grep -q 'changelog' && [ -z "$scope" ] && scope="changelog"
 
-  # --- Analisa diff content (max 600 baris) ---
-  local diff_content
-  diff_content=$(git diff --cached 2>/dev/null | head -600)
-
-  # Ekstrak nama command/case yang ditambah dari message.js
-  local cmd_names=""
-  if echo "$files" | grep -q "message\.js"; then
-    cmd_names=$(printf '%s\n' "$diff_content" | grep -oE "^\+\s+case '([^']+)'" | \
-      sed "s/.*case '//;s/'.*//" | head -4 | tr '\n' ' ' | sed 's/ *$//')
+  if echo "$files" | grep -qE '^(package\.json|package-lock\.json)$'; then
+    [ -z "$scope" ] && scope="deps"
+  fi
+  if echo "$files" | grep -qE '^(\.gitignore|push\.sh|index\.js|config\.json|Dockerfile|fly\.toml|\.npmrc)$'; then
+    [ -z "$scope" ] && scope="config"
   fi
 
-  # Deteksi sinyal dari isi diff
-  local has_fix=0 has_feat=0 has_improve=0
-  printf '%s\n' "$diff_content" | grep -qiE '^\+.*(fix|bug|error|perbaiki|gagal|salah|bentrok)' && has_fix=1
-  printf '%s\n' "$diff_content" | grep -qiE '^\+.*(improve|improvement|samakan|sync|match|konsisten)' && has_improve=1
-  printf '%s\n' "$diff_content" | grep -qiE '^\+.*(feat|fitur|tambah|add|new|baru|case )' && has_feat=1
-  printf '%s\n' "$diff_content" | grep -qiE '^\+.*(changelog|update|upgrade|versi|V[0-9])' && \
-    [ "$scope" = "changelog" ] && has_improve=1
-
-  # --- Deteksi type ---
   local type=""
   if echo "$files" | grep -qE '^(package\.json|package-lock\.json)$' && [ "$scope_count" -le 1 ]; then
     type="deps"
-  elif [ "$scope" = "data" ] || [ "$scope" = "session" ] || \
-       [ "$scope" = "assets" ] || [ "$scope" = "agents" ]; then
-    type="chore"
-  elif [ "$scope" = "changelog" ]; then
-    type="docs"
-  elif [ "$has_fix" = "1" ] && [ "$has_feat" = "0" ]; then
-    type="fix"
-  elif [ "$has_feat" = "1" ] || ([ "$added" -ge "$modified" ] && [ "$added" -gt 0 ] && \
-       echo "$files" | grep -qE '^src/'); then
+  elif [ "$added" -ge "$modified" ] && [ "$added" -gt 0 ] && \
+       echo "$files" | grep -qE '^src/(scrape|handler|helper|lib)/'; then
     type="feat"
-  elif [ "$has_improve" = "1" ]; then
-    type="improve"
-  elif [ "$modified" -gt 0 ] && [ "$added" -eq 0 ] && echo "$files" | grep -qE '^src/'; then
+  elif [ "$scope" = "data" ] || [ "$scope" = "session" ]; then
+    type="chore"
+  elif [ "$scope" = "config" ]; then
+    type="chore"
+  elif [ "$scope" = "assets" ] || [ "$scope" = "agents" ]; then
+    type="chore"
+  elif [ "$modified" -gt 0 ] && echo "$files" | grep -qE '^src/'; then
     type="fix"
   else
     type="chore"
   fi
 
-  # --- Buat summary deskriptif ---
-  local summary=""
+  local sample summary total
+  total=$(echo "$files" | wc -l | tr -d ' ')
+  sample=$(echo "$files" | head -3 | xargs -n1 basename 2>/dev/null | tr '\n' ', ' | sed 's/, $//')
 
-  # Prioritas 1: nama command dari message.js
-  if [ -n "$cmd_names" ]; then
-    summary=$(printf '%s\n' "$cmd_names" | tr ' ' '\n' | head -4 | \
-      sed 's/^/./' | tr '\n' ' ' | sed 's/ *$//')
-  fi
-
-  # Prioritas 2: mapping file → deskripsi bermakna
-  if [ -z "$summary" ]; then
-    local descs="" f_count=0
-    while IFS= read -r _f; do
-      [ -z "$_f" ] && continue
-      local _bn; _bn=$(basename "$_f")
-      local _desc
-      case "$_bn" in
-        message.js)          _desc="command handler" ;;
-        jadibot.js)          _desc="jadibot core" ;;
-        jadibotSettings.js)  _desc="jadibot settings" ;;
-        utils.js)            _desc="utils" ;;
-        changelog.txt)       _desc="changelog" ;;
-        push.sh)             _desc="push script" ;;
-        index.js)            _desc="bot entry" ;;
-        config.json)         _desc="config" ;;
-        package.json)        _desc="dependencies" ;;
-        emoji.json)          _desc="emoji config" ;;
-        settings.json)       _desc="bot settings" ;;
-        *.js)                _desc="${_bn%.js}" ;;
-        *.json)              _desc="${_bn%.json}" ;;
-        *.txt)               _desc="${_bn%.txt}" ;;
-        *.sh)                _desc="${_bn%.sh} script" ;;
-        *)                   _desc="$_bn" ;;
-      esac
-      f_count=$(( f_count + 1 ))
-      [ "$f_count" -le 3 ] && {
-        [ -z "$descs" ] && descs="$_desc" || descs="$descs, $_desc"
-      }
-    done < <(echo "$files")
-    local total; total=$(echo "$files" | grep -c . 2>/dev/null || echo 0)
-    [ "$total" -gt 3 ] && descs="$descs +$((total-3)) lainnya"
-    summary="$descs"
-  fi
-
-  # Output
-  if [ -n "$scope" ]; then
-    printf '%s(%s): %s\n' "$type" "$scope" "$summary"
+  if [ "$total" -le 3 ]; then
+    summary="$sample"
   else
-    printf '%s: %s\n' "$type" "$summary"
+    summary="$sample +$((total - 3)) file lain"
+  fi
+
+  if [ -n "$scope" ]; then
+    echo "${type}(${scope}): ${summary}"
+  else
+    echo "${type}: ${summary}"
   fi
 }
 
@@ -5685,32 +5634,6 @@ commit_pending_changes() {
   if [ "$pre_total" -gt 0 ] && [ "$has_staged" = "no" ]; then
     echo -e "  ${C_YELLOW}⚠️  ${pre_total} file berubah di disk tapi tidak ke-stage${C_RESET}"
     echo -e "  ${C_DIM}   → biasanya ke-block .gitignore. Liat warning '🚫' di atas.${C_RESET}"
-  fi
-
-  # ===== STEP 3.5: Squash Replit auto-checkpoint commits =====
-  # Commit "Saved progress at the end of the loop" dari Replit digabung ke dalam
-  # commit ini supaya GitHub history tetap bersih dan bermakna.
-  local _sq_count=0
-  local _sq_branch; _sq_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
-  local _sq_origin; _sq_origin=$(git rev-parse "refs/remotes/origin/${_sq_branch}" 2>/dev/null || echo "")
-  local _sq_cur="HEAD"
-  local _sq_sha _sq_msg
-  for _sq_i in $(seq 1 50); do
-    _sq_sha=$(git rev-parse "${_sq_cur}" 2>/dev/null)
-    [ -z "$_sq_sha" ] && break
-    [ -n "$_sq_origin" ] && [ "$_sq_sha" = "$_sq_origin" ] && break
-    _sq_msg=$(git log --format='%s' -1 "$_sq_sha" 2>/dev/null)
-    if echo "$_sq_msg" | grep -qF "Saved progress at the end of the loop"; then
-      _sq_count=$(( _sq_count + 1 ))
-      _sq_cur="${_sq_sha}^"
-    else
-      break
-    fi
-  done
-  if [ "$_sq_count" -gt 0 ]; then
-    git reset --soft "HEAD~${_sq_count}" 2>/dev/null
-    has_staged="yes"
-    echo -e "  ${C_CYAN}⚡${C_RESET} ${_sq_count} checkpoint Replit digabung ke commit ini ${C_DIM}(history GitHub tetap bersih)${C_RESET}"
   fi
 
   # ===== STEP 4: Commit kalau ada yang di-stage =====

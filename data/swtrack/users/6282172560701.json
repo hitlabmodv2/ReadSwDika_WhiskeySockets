@@ -208,47 +208,5 @@
       }
     ],
     "processedAt": "2026-06-13T03:42:10.795Z"
-  },
-  "ACF346145ADA65029E1A43C753BAD030": {
-    "id": "ACF346145ADA65029E1A43C753BAD030",
-    "sender": "6282172560701@s.whatsapp.net",
-    "name": "Nemuri•",
-    "type": "videoMessage",
-    "arrivedAt": "2026-06-13T06:07:30.574Z",
-    "read": true,
-    "reacted": true,
-    "emoji": "🧑‍🩰",
-    "resolve": "PN langsung ✓",
-    "source": "status",
-    "number": "6282172560701",
-    "resolvedPn": "6282172560701@s.whatsapp.net",
-    "messageKey": {
-      "remoteJid": "status@broadcast",
-      "remoteJidAlt": "6282172560701@s.whatsapp.net",
-      "fromMe": false,
-      "id": "ACF346145ADA65029E1A43C753BAD030",
-      "participant": "57488271536342@lid",
-      "addressingMode": "lid"
-    },
-    "updatedAt": "2026-06-13T06:07:33.040Z",
-    "receiptKeys": [
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6282172560701@s.whatsapp.net",
-        "fromMe": false,
-        "id": "ACF346145ADA65029E1A43C753BAD030",
-        "participant": "57488271536342@lid",
-        "addressingMode": "lid"
-      },
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6282172560701@s.whatsapp.net",
-        "fromMe": false,
-        "id": "ACF346145ADA65029E1A43C753BAD030",
-        "participant": "6282172560701@s.whatsapp.net",
-        "addressingMode": "lid"
-      }
-    ],
-    "processedAt": "2026-06-13T06:07:33.039Z"
   }
 }
