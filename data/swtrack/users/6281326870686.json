@@ -40,5 +40,47 @@
       }
     ],
     "processedAt": "2026-06-14T05:34:55.041Z"
+  },
+  "AC9C8795707A22D85BABA6D249C985E3": {
+    "id": "AC9C8795707A22D85BABA6D249C985E3",
+    "sender": "6281326870686@s.whatsapp.net",
+    "name": "reki fans nganjuk pipel",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-14T10:28:13.963Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "👾",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6281326870686",
+    "resolvedPn": "6281326870686@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6281326870686@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC9C8795707A22D85BABA6D249C985E3",
+      "participant": "191323814494236@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-14T10:28:22.307Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281326870686@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC9C8795707A22D85BABA6D249C985E3",
+        "participant": "191323814494236@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281326870686@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC9C8795707A22D85BABA6D249C985E3",
+        "participant": "6281326870686@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-14T10:28:22.307Z"
   }
 }

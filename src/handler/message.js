@@ -16918,31 +16918,6 @@ hasil += `╰══════════════════════�
                                         } catch (_) {}
                                 }
 
-                                const swgcRows = [
-                                        {
-                                                title: '📢 Semua Grup',
-                                                description: `◆ ${allGids.length} grup  ◆ 👥 ${swgcTotalMember} member  ◆ 🛡️ ${swgcTotalAdmin} admin`,
-                                                id: `${swgcPrefix}sendstatus all ${swgcEncoded}`
-                                        }
-                                ];
-
-                                for (const gid of allGids) {
-                                        try {
-                                                const meta = hisoka.groups.read(gid);
-                                                if (!meta) continue;
-                                                const pts = meta.participants || [];
-                                                const mTotal = pts.length;
-                                                const aTotal = pts.filter(p => p.admin).length;
-                                                const aPct = mTotal > 0 ? Math.round((aTotal / mTotal) * 10) : 0;
-                                                const aBar = '█'.repeat(aPct) + '░'.repeat(10 - aPct);
-                                                swgcRows.push({
-                                                        title: (meta.subject || gid).substring(0, 24),
-                                                        description: `👥 ${mTotal} member  ◆  🛡️ ${aTotal} admin\n[${aBar}]`,
-                                                        id: `${swgcPrefix}sendstatus ${gid} ${swgcEncoded}`
-                                                });
-                                        } catch (_) {}
-                                }
-
                                 // Tentukan label tipe konten
                                 const swgcTypeLabel = swgcMeta.type === 'image' ? '🖼️ Gambar'
                                         : swgcMeta.type === 'video' ? '🎥 Video'
@@ -16967,38 +16942,30 @@ hasil += `╰══════════════════════�
                                         `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n\n` +
                                         `_Pilih grup tujuan di bawah_ 👇`;
 
-                                const swgcMsg = generateWAMessageFromContent(
-                                        m.from,
-                                        {
-                                                viewOnceMessage: {
-                                                        message: {
-                                                                messageContextInfo: { deviceListMetadata: {}, deviceListMetadataVersion: 2 },
-                                                                interactiveMessage: {
-                                                                        body: { text: swgcBodyText },
-                                                                        nativeFlowMessage: {
-                                                                                buttons: [
-                                                                                        {
-                                                                                                name: 'single_select',
-                                                                                                buttonParamsJson: JSON.stringify({
-                                                                                                        title: '🏘️ PILIH GRUP TUJUAN',
-                                                                                                        sections: [
-                                                                                                                { title: '🏘️ Daftar Grup Bot', rows: swgcRows }
-                                                                                                        ]
-                                                                                                })
-                                                                                        }
-                                                                                ]
-                                                                        }
-                                                                }
-                                                        }
-                                                }
-                                        },
-                                        { quoted: m },
-                                        {}
-                                );
+                                const swgcBtn = new Button()
+                                        .setBody(swgcBodyText)
+                                        .setFooter('⚡ Wily Bot • Group Status System')
+                                        .addReply('📢 Kirim ke Semua Grup', `${swgcPrefix}sendstatus all ${swgcEncoded}`)
+                                        .addSelection('🏘️ Pilih Satu Grup')
+                                        .makeSections('🏘️ Daftar Grup Bot');
 
-                                await hisoka.relayMessage(swgcMsg.key.remoteJid, swgcMsg.message, {
-                                        messageId: swgcMsg.key.id
-                                });
+                                for (const gid of allGids) {
+                                        try {
+                                                const meta = hisoka.groups.read(gid);
+                                                if (!meta) continue;
+                                                const pts = meta.participants || [];
+                                                const mTotal = pts.length;
+                                                const aTotal = pts.filter(p => p.admin).length;
+                                                swgcBtn.makeRow(
+                                                        '',
+                                                        (meta.subject || gid).substring(0, 24),
+                                                        `👥 ${mTotal} member  ◆  🛡️ ${aTotal} admin`,
+                                                        `${swgcPrefix}sendstatus ${gid} ${swgcEncoded}`
+                                                );
+                                        } catch (_) {}
+                                }
+
+                                await swgcBtn.run(m.from, hisoka, m);
 
                                 logCommand(m, hisoka, m.command);
                                 break;

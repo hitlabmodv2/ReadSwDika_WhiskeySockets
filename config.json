@@ -52,15 +52,15 @@
     "whitelist": []
   },
   "antiTagSW": {
-    "enabled": true,
+    "enabled": false,
     "maxWarnings": 10
   },
   "autoCleaner": {
-    "enabled": true,
+    "enabled": false,
     "intervalHours": 24
   },
   "sessionCleaner": {
-    "enabled": true
+    "enabled": false
   },
   "telegram": {
     "enabled": false,
@@ -102,7 +102,7 @@
     "autoDetectPercentage": 100
   },
   "welcomeGoodbye": {
-    "enabled": true,
+    "enabled": false,
     "groups": {
       "120363419402989015@g.us": {
         "welcome": false,
@@ -118,7 +118,7 @@
     }
   },
   "infowibu": {
-    "enabled": true,
+    "enabled": false,
     "groups": {
       "120363192554714254@g.us": {
         "enabled": false,

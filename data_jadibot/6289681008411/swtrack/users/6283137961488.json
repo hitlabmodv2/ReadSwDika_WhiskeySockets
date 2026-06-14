@@ -1,0 +1,44 @@
+{
+  "3A9C9B7C808D06FED156": {
+    "id": "3A9C9B7C808D06FED156",
+    "sender": "6283137961488@s.whatsapp.net",
+    "name": "M.FTH.IZ",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-14T10:08:30.679Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🤵‍♂️",
+    "resolve": "Signal Lib ✓",
+    "source": "status",
+    "number": "6283137961488",
+    "resolvedPn": "6283137961488@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6283137961488@s.whatsapp.net",
+      "fromMe": false,
+      "id": "3A9C9B7C808D06FED156",
+      "participant": "137465125953708@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-14T10:08:50.073Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283137961488@s.whatsapp.net",
+        "fromMe": false,
+        "id": "3A9C9B7C808D06FED156",
+        "participant": "137465125953708@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283137961488@s.whatsapp.net",
+        "fromMe": false,
+        "id": "3A9C9B7C808D06FED156",
+        "participant": "6283137961488@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-14T10:08:50.073Z"
+  }
+}
