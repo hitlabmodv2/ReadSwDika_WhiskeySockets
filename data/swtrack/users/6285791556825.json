@@ -173,9 +173,9 @@
     "name": "nmka.nam",
     "type": "imageMessage",
     "arrivedAt": "2026-06-14T09:19:55.000Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "💶",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6285791556825",
@@ -188,6 +188,25 @@
       "participant": "87552958685217@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-14T09:19:55.000Z"
+    "updatedAt": "2026-06-14T09:20:13.246Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285791556825@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC3A92A1E5EFD5468A0D2B113690A060",
+        "participant": "87552958685217@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285791556825@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC3A92A1E5EFD5468A0D2B113690A060",
+        "participant": "6285791556825@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-14T09:20:13.246Z"
   }
 }
