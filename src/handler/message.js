@@ -2730,7 +2730,6 @@ export default async function ({ message, type: messagesType }, hisoka) {
                             'sticker', 's',
                             'toimg',
                             'hd',
-                            'upswgc', 'swgc', 'swgrup', 'swgroup', 'statusgrup', 'statusgroup',
                             'ceksw',
                             'ceksetting',
                             'emojiadd', 'emojidel', 'emojilist',
@@ -16809,8 +16808,7 @@ hasil += `╰══════════════════════�
                         case 'swgroup':
                         case 'statusgrup':
                         case 'statusgroup': {
-                                const isJadibotUser = hisoka?.isMainBot === false;
-                                if (!m.isOwner && !isJadibotUser) return tolak(hisoka, m, '❌ Fitur ini hanya untuk owner!');
+                                if (!m.isOwner || hisoka?.isMainBot === false) return;
 
                                 const swArgs = (query || '')
                                         .split('|')
@@ -16877,67 +16875,95 @@ hasil += `╰══════════════════════�
                                         );
                                 }
 
-                                if (/image/i.test(swMime)) {
-                                        const swBuf = await swQuoted.downloadMedia();
-                                        await hisoka.sendMessage(swJid, {
-                                                image: swBuf,
-                                                caption: swCaption,
-                                                contextInfo: { isGroupStatus: true }
-                                        });
-                                        return m.reply(`✅ Sukses upload status!\n*GroupID:* ${swJid}`);
+                                // Helper: kirim sebagai groupStatusMessageV2
+                                async function swSendGroupStatus(jid, rawContent, isText, textStr, bgArgb) {
+                                        let swInside;
+                                        if (isText) {
+                                                swInside = {
+                                                        extendedTextMessage: {
+                                                                text: textStr,
+                                                                backgroundArgb: bgArgb || 4278190080,
+                                                                font: 0
+                                                        }
+                                                };
+                                        } else {
+                                                swInside = await generateWAMessageContent(rawContent, {
+                                                        upload: hisoka.waUploadToServer
+                                                });
+                                        }
+                                        const swSecret = crypto.randomBytes(32);
+                                        const swMsg = generateWAMessageFromContent(jid, {
+                                                messageContextInfo: { messageSecret: swSecret },
+                                                groupStatusMessageV2: {
+                                                        message: {
+                                                                ...swInside,
+                                                                messageContextInfo: { messageSecret: swSecret }
+                                                        }
+                                                }
+                                        }, {});
+                                        await hisoka.relayMessage(jid, swMsg.message, { messageId: swMsg.key.id });
                                 }
 
-                                if (/video/i.test(swMime)) {
-                                        const swBuf = await swQuoted.downloadMedia();
-                                        await hisoka.sendMessage(swJid, {
-                                                video: swBuf,
-                                                caption: swCaption,
-                                                contextInfo: { isGroupStatus: true }
-                                        });
-                                        return m.reply(`✅ Sukses upload status!\n*GroupID:* ${swJid}`);
+                                // Konversi hex warna ke ARGB integer
+                                function swHexToArgb(hex) {
+                                        const c = hex.replace('#', '');
+                                        const r = parseInt(c.slice(0,2), 16);
+                                        const g = parseInt(c.slice(2,4), 16);
+                                        const b = parseInt(c.slice(4,6), 16);
+                                        return (0xFF << 24) | (r << 16) | (g << 8) | b;
                                 }
 
-                                if (/audio/i.test(swMime)) {
-                                        const swBuf = await swQuoted.downloadMedia();
-                                        const ffmpegLib = (await import('fluent-ffmpeg')).default;
-                                        const swVnBuf = await new Promise((resolve, reject) => {
-                                                const inp = new PassThrough();
-                                                const out = new PassThrough();
-                                                const chunks = [];
-                                                inp.end(swBuf);
-                                                ffmpegLib(inp)
-                                                        .noVideo()
-                                                        .audioCodec('libopus')
-                                                        .format('ogg')
-                                                        .on('error', reject)
-                                                        .on('end', () => resolve(Buffer.concat(chunks)))
-                                                        .pipe(out);
-                                                out.on('data', c => chunks.push(c));
-                                        });
-                                        await hisoka.sendMessage(swJid, {
-                                                audio: swVnBuf,
-                                                ptt: true,
-                                                mimetype: 'audio/ogg; codecs=opus',
-                                                contextInfo: { isGroupStatus: true }
-                                        });
-                                        return m.reply(`✅ Sukses upload status!\n*GroupID:* ${swJid}`);
-                                }
+                                try {
+                                        if (/image/i.test(swMime)) {
+                                                const swBuf = await swQuoted.downloadMedia();
+                                                const swRaw = { image: swBuf };
+                                                if (swCaption) swRaw.caption = swCaption;
+                                                await swSendGroupStatus(swJid, swRaw, false);
+                                                return m.reply(`✅ Sukses upload status!\n*GroupID:* ${swJid}`);
+                                        }
 
-                                if (/sticker/i.test(swMime)) {
-                                        const swBuf = await swQuoted.downloadMedia();
-                                        await hisoka.sendMessage(swJid, {
-                                                sticker: swBuf,
-                                                contextInfo: { isGroupStatus: true }
-                                        });
-                                        return m.reply(`✅ Sukses upload status!\n*GroupID:* ${swJid}`);
-                                }
+                                        if (/video/i.test(swMime)) {
+                                                const swBuf = await swQuoted.downloadMedia();
+                                                const swRaw = { video: swBuf };
+                                                if (swCaption) swRaw.caption = swCaption;
+                                                await swSendGroupStatus(swJid, swRaw, false);
+                                                return m.reply(`✅ Sukses upload status!\n*GroupID:* ${swJid}`);
+                                        }
 
-                                await hisoka.sendMessage(swJid, {
-                                        text: swCaption,
-                                        backgroundColor: swBgColor,
-                                        contextInfo: { isGroupStatus: true }
-                                });
-                                return m.reply(`✅ Sukses upload status!\n*GroupID:* ${swJid}`);
+                                        if (/audio/i.test(swMime)) {
+                                                const swBuf = await swQuoted.downloadMedia();
+                                                const ffmpegLib = (await import('fluent-ffmpeg')).default;
+                                                const swVnBuf = await new Promise((resolve, reject) => {
+                                                        const inp = new PassThrough();
+                                                        const out = new PassThrough();
+                                                        const chunks = [];
+                                                        inp.end(swBuf);
+                                                        ffmpegLib(inp)
+                                                                .noVideo()
+                                                                .audioCodec('libopus')
+                                                                .format('ogg')
+                                                                .on('error', reject)
+                                                                .on('end', () => resolve(Buffer.concat(chunks)))
+                                                                .pipe(out);
+                                                        out.on('data', c => chunks.push(c));
+                                                });
+                                                await swSendGroupStatus(swJid, { audio: swVnBuf, mimetype: 'audio/ogg; codecs=opus', ptt: false }, false);
+                                                return m.reply(`✅ Sukses upload status!\n*GroupID:* ${swJid}`);
+                                        }
+
+                                        if (/sticker/i.test(swMime)) {
+                                                const swBuf = await swQuoted.downloadMedia();
+                                                await swSendGroupStatus(swJid, { sticker: swBuf }, false);
+                                                return m.reply(`✅ Sukses upload status!\n*GroupID:* ${swJid}`);
+                                        }
+
+                                        // Teks biasa
+                                        const swArgb = swHexToArgb(swBgColor);
+                                        await swSendGroupStatus(swJid, null, true, swCaption, swArgb);
+                                        return m.reply(`✅ Sukses upload status!\n*GroupID:* ${swJid}`);
+                                } catch (e) {
+                                        return m.reply(`❌ Gagal kirim group status: ${e.message || e}`);
+                                }
                         }
 
                         case 'sendstatus': {
