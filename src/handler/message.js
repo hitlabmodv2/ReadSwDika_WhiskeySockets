@@ -9613,18 +9613,20 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                 const _jbTglFmt = new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }).format(_jbNow);
                                                 const _jbJamFmt = new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).format(_jbNow);
                                                 const menuTeks =
-`╔══════════════════════════╗
-║   🤖  *MENU JADIBOT*   🤖   ║
-╚══════════════════════════╝
-
-👤 *Nama*   : ${m.pushName || 'User'}
-📱 *Nomor*  : +${jadibotNum}
-⏱️ *Uptime* : ${juh}j ${jum}m ${jus}d
-${masaAktifLine}
-📅 *Tanggal* : ${_jbTglFmt}
-🕐 *Waktu*   : ${_jbJamFmt} WIB
-📦 *Fitur*  : ${_jbFiturCount} fitur aktif
-🌐 *Status* : Online 🟢
+`╭═══════════════════════╮
+║   🤖 *WILY BOT V22*   
+├═══════════════════════╣
+║   🤖  *MENU JADIBOT*   
+├═══════════════════════╣
+│ 👤 » ${m.pushName || 'User'}
+│ 📱 » +${jadibotNum}
+│ ⏱️ » ${juh}j ${jum}m ${jus}d
+│ ${masaAktifLine}
+│ 📅 » ${_jbTglFmt}
+│ 🕐 » ${_jbJamFmt} WIB
+│ 📦 » ${_jbFiturCount} fitur aktif
+│ 🌐 » Online 🟢
+╰═══════════════════════╯
 
 ━━━━━━━━━━━━━━━━━━━━━━
 
