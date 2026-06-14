@@ -9590,33 +9590,30 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'menu': {
                                 if (!m.prefix && m.query) break;
                                 try {
-                                        const _allGroups = await getCaseGroups(path.join(process.cwd(), 'src', 'handler', 'message.js'));
                                         // ── JADIBOT: tampilkan menu khusus tanpa thumbnail ──
                                         if (hisoka?.isMainBot === false) {
-                                                const _jbAllowed = new Set([
-                                                        'p', 'ping', 'menu',
-                                                        'rvo', 'viewonce', 'vo',
-                                                        'antidel', 'ad',
-                                                        'readsw',
-                                                        'anticall', 'ac',
-                                                        'anticallvid', 'acv',
-                                                        'autocallaudio', 'aca',
-                                                        'online',
-                                                        'typing', 'typ',
-                                                        'recording', 'record',
-                                                        'tt', 'ig', 'fb', 'ytmp3', 'ytmp4', 'play',
-                                                        'sticker', 's',
-                                                        'toimg', 'hd',
-                                                        'upswgc', 'swgc', 'swgrup', 'swgroup', 'statusgrup', 'statusgroup',
-                                                        'ceksw', 'ceksetting',
-                                                        'emojiadd', 'emojidel', 'emojilist',
-                                                        'emojidefault', 'emojicustom', 'emojiclear'
-                                                ]);
-                                                const _jbFiturCount = _allGroups.filter(g => g.some(c => _jbAllowed.has(c))).length;
                                                 const _jbCfg       = loadConfig();
                                                 const _jbBotReply  = _jbCfg?.botReply || {};
                                                 const _jbFooter    = loadConfig()?.botReply?.footer || '';
                                                 const jadibotNum = getJadibotNumber(hisoka);
+
+                                                // Hitung fitur yang benar-benar ON secara realtime
+                                                const _jbReadsw = getJadibotReadsw(jadibotNum);
+                                                const _jbAntidel = getJadibotAntidel(jadibotNum);
+                                                const _jbAnticall = getJadibotAnticall(jadibotNum);
+                                                const _jbAcv = getJadibotAnticallvid(jadibotNum);
+                                                const _jbAo = getJadibotAutoOnline(jadibotNum);
+                                                const _jbAt = getJadibotAutoTyping(jadibotNum);
+                                                const _jbAr = getJadibotAutoRecording(jadibotNum);
+                                                const _jbFiturCount = [
+                                                        _jbReadsw?.enabled,
+                                                        _jbAntidel?.enabled,
+                                                        _jbAnticall?.enabled,
+                                                        _jbAcv?.enabled,
+                                                        _jbAo?.enabled,
+                                                        _jbAt?.enabled,
+                                                        _jbAr?.enabled,
+                                                ].filter(Boolean).length;
                                                 const jadibotConnectTs = jadibotConnectedAt.get(jadibotNum) || getJadibotExpiry(jadibotNum)?.connectedAt || Date.now();
                                                 const jadibotUptimeMs = Date.now() - jadibotConnectTs;
                                                 const jadibotUptimeSec = Math.floor(jadibotUptimeMs / 1000);
@@ -9752,7 +9749,14 @@ _📦 Powered by Wily Bot V22_ 🤖`;
                                         const um = Math.floor((uptime % 3600) / 60);
                                         const us = Math.floor(uptime % 60);
                                         const uptimeStr = `${uh} Jam ${um} Menit ${us} Detik`;
-                                        const totalCmd = _allGroups.length || 0;
+                                        // Hitung fitur yang benar-benar ON secara realtime (bukan total command)
+                                        const _mnCfg = loadConfig();
+                                        const totalCmd = CEKAUTO_FITUR_LIST.filter(f => {
+                                                if (f.checkFn) return f.checkFn(_mnCfg);
+                                                if (f.type === 'global') return _mnCfg[f.key]?.enabled === true;
+                                                const groups = _mnCfg[f.key]?.groups || {};
+                                                return Object.values(groups).some(g => g?.enabled === true);
+                                        }).length;
                                         const _mnNow = new Date();
                                         const _mnTgl = new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }).format(_mnNow);
                                         const _mnJam = new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).format(_mnNow);
