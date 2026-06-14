@@ -1,0 +1,44 @@
+{
+  "AC6323BCCAC709E2D7E3DC9D88936476": {
+    "id": "AC6323BCCAC709E2D7E3DC9D88936476",
+    "sender": "6283150720715@s.whatsapp.net",
+    "name": "ハイダル",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-14T09:10:09.303Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🎪",
+    "resolve": "Signal Lib ✓",
+    "source": "status",
+    "number": "6283150720715",
+    "resolvedPn": "6283150720715@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6283150720715@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC6323BCCAC709E2D7E3DC9D88936476",
+      "participant": "95910965076128@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-14T09:10:19.595Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283150720715@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC6323BCCAC709E2D7E3DC9D88936476",
+        "participant": "95910965076128@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283150720715@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC6323BCCAC709E2D7E3DC9D88936476",
+        "participant": "6283150720715@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-14T09:10:19.595Z"
+  }
+}
