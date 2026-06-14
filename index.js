@@ -456,8 +456,9 @@ async function main() {
         // Ini yang menyebabkan delay parah setelah offline lama
         cleanStaleSessionFiles(sessionDir)
 
-        const { state, saveCreds, contacts, groups, settings } = await useSingleFileAuthState(sessionFile);
+        const { state, saveCreds, contacts, groups, settings, clearCacheInPlace } = await useSingleFileAuthState(sessionFile);
         global.__mainBotGroups = groups;
+        global.__clearSesiInPlace = clearCacheInPlace;
         const { version, isLatest } = await fetchLatestBaileysVersion();
 
         console.info(`\x1b[32m→ Baileys  :\x1b[39m v${version.join('.')}${isLatest ? '' : ' (update tersedia)'}`);

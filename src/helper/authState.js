@@ -473,5 +473,80 @@ export async function useSingleFileAuthState(filePath) {
                 contacts,
                 groups,
                 settings,
+
+                // ── clearCacheInPlace: bersihkan cache di memory + flush ke disk ──
+                // Ini yang benar — tidak pakai file I/O langsung karena bot punya state di memory.
+                // onStep({ steps, totalSaved, beforeSize }) dipanggil setiap langkah selesai.
+                clearCacheInPlace: async (onStep) => {
+                        const serializeNow = () => {
+                                const keysObj = {}
+                                for (const [type, store] of keyStore) {
+                                        if (store.size === 0) continue
+                                        const obj = {}
+                                        for (const [id, val] of store) obj[id] = val
+                                        keysObj[type] = obj
+                                }
+                                return JSON.stringify({ creds, keys: keysObj, contacts: _contacts, groups: _groups, settings: _settings }, BufferJSON.replacer)
+                        }
+
+                        const beforeRaw  = serializeNow()
+                        const beforeSize = Buffer.byteLength(beforeRaw)
+
+                        const steps = []
+                        let totalSaved = 0
+
+                        const doStep = async (name, label, savedBytes) => {
+                                steps.push({ name, label, savedBytes: Math.max(0, savedBytes) })
+                                totalSaved += Math.max(0, savedBytes)
+                                if (onStep) { try { await onStep({ steps, totalSaved, beforeSize }) } catch (_) {} }
+                        }
+
+                        const bytesOf = (obj) => { try { return Buffer.byteLength(JSON.stringify(obj, BufferJSON.replacer)) } catch { return 0 } }
+                        const mapToObj = (store) => { const o = {}; for (const [k, v] of store) o[k] = v; return o }
+
+                        // 1. contacts
+                        const cntC = Object.keys(_contacts).length
+                        const bytC = bytesOf(_contacts)
+                        for (const k in _contacts) delete _contacts[k]
+                        await doStep('contacts', `${cntC} kontak`, bytC)
+
+                        // 2. groups
+                        const cntG = Object.keys(_groups).length
+                        const bytG = bytesOf(_groups)
+                        for (const k in _groups) delete _groups[k]
+                        await doStep('groups', `${cntG} grup`, bytG)
+
+                        // 3-6. key types yang aman dihapus
+                        for (const type of ['lid-mapping', 'sender-key', 'app-state-sync-version', 'tctoken']) {
+                                const store = keyStore.get(type)
+                                if (!store || store.size === 0) continue
+                                const cnt  = store.size
+                                const byt  = bytesOf(mapToObj(store))
+                                store.clear()
+                                await doStep(type, `${cnt} entri`, byt)
+                        }
+
+                        // 7. pre-key — trim, sisakan 100 id terbesar
+                        const preStore = keyStore.get('pre-key')
+                        if (preStore && preStore.size > 0) {
+                                const ids     = [...preStore.keys()].map(Number).sort((a, b) => a - b)
+                                const KEEP    = 100
+                                const keepSet = new Set(ids.slice(Math.max(0, ids.length - KEEP)).map(String))
+                                const removed = ids.length - keepSet.size
+                                const bytBefore = bytesOf(mapToObj(preStore))
+                                for (const id of [...preStore.keys()]) { if (!keepSet.has(id)) preStore.delete(id) }
+                                const saved = bytBefore - bytesOf(mapToObj(preStore))
+                                await doStep('pre-key (trim)', `hapus ${removed} lama, sisakan ${keepSet.size}`, saved)
+                        }
+
+                        // Flush ke disk sekarang
+                        await flushNow()
+
+                        const afterRaw  = serializeNow()
+                        const afterSize = Buffer.byteLength(afterRaw)
+                        const fmtMB     = (b) => (b / 1024 / 1024).toFixed(2) + ' MB'
+
+                        return { steps, beforeSize, afterSize, savedBytes: beforeSize - afterSize, fmtBefore: fmtMB(beforeSize), fmtAfter: fmtMB(afterSize), fmtSaved: fmtMB(beforeSize - afterSize) }
+                },
         }
 }

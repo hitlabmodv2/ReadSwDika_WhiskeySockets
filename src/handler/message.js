@@ -35,7 +35,7 @@ import { msToTime, loadConfig, saveConfig, getCaseName, getCaseGroups, getAIPers
 import { stopAutoCleaner, restartAutoCleaner, cleanStaleSessionFiles, clearOldFiles, clearTmpFolder } from '../helper/cleaner.js';
 import { getUptimeFormatted, getBotStats } from '../db/botStats.js';
 import { logError, formatErrorReport, clearErrors, generateErrorFileTxt, getInfoErrorTxtPath, getErrorStats } from '../db/errorLog.js';
-import { startJadibot, startJadibotQR, stopJadibot, jadibotMap, jadibotConnectedAt, pendingJadibotChoices, formatPairingCode, maskNumber, parseJadibotDuration, getJadibotExpiry, formatRemainingTime, getJadibotExpirySummary, cleanupExpiredJadibots, removeJadibotExpiry, setPermanentJadibot, ensureJadibotExpiry, extendJadibotExpiry, scheduleJadibotExpiry, startJadibotAutoOnline } from '../helper/jadibot.js';
+import { startJadibot, startJadibotQR, stopJadibot, jadibotMap, jadibotClearSesiMap, jadibotConnectedAt, pendingJadibotChoices, formatPairingCode, maskNumber, parseJadibotDuration, getJadibotExpiry, formatRemainingTime, getJadibotExpirySummary, cleanupExpiredJadibots, removeJadibotExpiry, setPermanentJadibot, ensureJadibotExpiry, extendJadibotExpiry, scheduleJadibotExpiry, startJadibotAutoOnline } from '../helper/jadibot.js';
 import { hasViewOnceCache, getViewOnceCache } from '../helper/voCache.js';
 import { isAntiTagSWEnabled, toggleAntiTagSW, resetWarnings, getWarnings, getAllAntiTagSWGroups, getAntiTagSWLog, clearAntiTagSWLog, resolveLidFromContacts } from './antitagsw.js';
 // yg bawah pindah ke sini
@@ -5892,15 +5892,22 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'cs': {
                                 if (!m.isOwner) return tolak(hisoka, m, '❌ Perintah ini hanya untuk owner!');
 
-                                const { clearSesi, fmtMB: fmtMBCS } = _require(path.resolve('./src/scrape/tools/clearsesi.cjs'));
+                                // Pilih fungsi clearCache yang tepat: main bot pakai global, jadibot pakai Map
+                                const isJadibotCtx = hisoka?.isMainBot === false;
+                                const jadibotNumCtx = isJadibotCtx ? getJadibotNumber(hisoka) : null;
+                                const clearFn = isJadibotCtx
+                                        ? jadibotClearSesiMap.get(jadibotNumCtx)
+                                        : global.__clearSesiInPlace;
 
-                                // Pesan awal
-                                const csProgMsg = await m.reply(
-                                        `🧹 *Clear Sesi — Memulai...*\n\n` +
-                                        `📂 *File :* sessions/hisoka.json\n` +
-                                        `🔍 *Memeriksa dan membersihkan cache...*\n\n` +
-                                        `_Harap tunggu..._`
-                                );
+                                if (!clearFn) {
+                                        return tolak(hisoka, m, '❌ Fungsi clearSesi tidak tersedia. Coba restart bot terlebih dahulu.');
+                                }
+
+                                const sessionLabel = isJadibotCtx
+                                        ? `jadibot/${jadibotNumCtx}.json`
+                                        : `sessions/hisoka.json`;
+
+                                const fmtMBCS = (b) => (b / 1024 / 1024).toFixed(2) + ' MB';
 
                                 const ICONS = {
                                         'contacts':               '👥',
@@ -5912,8 +5919,16 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                         'pre-key (trim)':         '🗝️',
                                 };
 
+                                // Pesan awal
+                                const csProgMsg = await m.reply(
+                                        `🧹 *Clear Sesi — Memulai...*\n\n` +
+                                        `📂 *File :* ${sessionLabel}\n` +
+                                        `🔍 *Memeriksa dan membersihkan cache...*\n\n` +
+                                        `_Harap tunggu..._`
+                                );
+
                                 try {
-                                        const result = await clearSesi(async ({ steps, totalSaved, beforeSize }) => {
+                                        const result = await clearFn(async ({ steps, totalSaved, beforeSize }) => {
                                                 if (!csProgMsg?.key) return;
 
                                                 const lines = steps.map(s => {
@@ -5939,7 +5954,6 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                 } catch (_) {}
                                         });
 
-                                        // Edit final summary
                                         const linesDone = result.steps.map(s => {
                                                 const icon = ICONS[s.name] || '📦';
                                                 const kb   = (s.savedBytes / 1024).toFixed(1);
@@ -5948,7 +5962,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                                         const doneText =
                                                 `✅ *Clear Sesi selesai!*\n\n` +
-                                                `📂 *File :* sessions/hisoka.json\n` +
+                                                `📂 *File :* ${sessionLabel}\n` +
                                                 `📉 *Sebelum :* ${result.fmtBefore}\n` +
                                                 `📈 *Sesudah :* ${result.fmtAfter}\n` +
                                                 `💾 *Total hemat :* ${result.fmtSaved}\n\n` +
@@ -5962,7 +5976,6 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                 await m.reply(doneText);
                                         }
                                 } catch (err) {
-                                        if (err.message === 'SESSION_NOT_FOUND') return tolak(hisoka, m, '❌ File sessions/hisoka.json tidak ditemukan!');
                                         return tolak(hisoka, m, `❌ Gagal clear sesi: ${err.message}`);
                                 }
 
