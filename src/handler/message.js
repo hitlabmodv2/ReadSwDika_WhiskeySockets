@@ -35,7 +35,7 @@ import { msToTime, loadConfig, saveConfig, getCaseName, getCaseGroups, getAIPers
 import { stopAutoCleaner, restartAutoCleaner, cleanStaleSessionFiles, clearOldFiles, clearTmpFolder } from '../helper/cleaner.js';
 import { getUptimeFormatted, getBotStats } from '../db/botStats.js';
 import { logError, formatErrorReport, clearErrors, generateErrorFileTxt, getInfoErrorTxtPath, getErrorStats } from '../db/errorLog.js';
-import { startJadibot, startJadibotQR, stopJadibot, jadibotMap, jadibotClearSesiMap, jadibotConnectedAt, pendingJadibotChoices, formatPairingCode, maskNumber, parseJadibotDuration, getJadibotExpiry, formatRemainingTime, getJadibotExpirySummary, cleanupExpiredJadibots, removeJadibotExpiry, setPermanentJadibot, ensureJadibotExpiry, extendJadibotExpiry, scheduleJadibotExpiry, startJadibotAutoOnline } from '../helper/jadibot.js';
+import { startJadibot, startJadibotQR, stopJadibot, jadibotMap, jadibotClearSesiMap, jadibotSesiReportMap, jadibotConnectedAt, pendingJadibotChoices, formatPairingCode, maskNumber, parseJadibotDuration, getJadibotExpiry, formatRemainingTime, getJadibotExpirySummary, cleanupExpiredJadibots, removeJadibotExpiry, setPermanentJadibot, ensureJadibotExpiry, extendJadibotExpiry, scheduleJadibotExpiry, startJadibotAutoOnline } from '../helper/jadibot.js';
 import { hasViewOnceCache, getViewOnceCache } from '../helper/voCache.js';
 import { isAntiTagSWEnabled, toggleAntiTagSW, resetWarnings, getWarnings, getAllAntiTagSWGroups, getAntiTagSWLog, clearAntiTagSWLog, resolveLidFromContacts } from './antitagsw.js';
 // yg bawah pindah ke sini
@@ -2734,7 +2734,9 @@ export default async function ({ message, type: messagesType }, hisoka) {
                             'ceksw',
                             'ceksetting',
                             'emojiadd', 'emojidel', 'emojilist',
-                            'emojidefault', 'emojicustom', 'emojiclear'
+                            'emojidefault', 'emojicustom', 'emojiclear',
+                            'ceksesi',
+                            'clearsesi', 'cs'
                         ]);
                         if (!jadibotAllowedCommands.has(m.command)) {
                             return;
@@ -5890,10 +5892,12 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                         case 'clearsesi':
                         case 'cs': {
-                                if (!m.isOwner) return tolak(hisoka, m, '❌ Perintah ini hanya untuk owner!');
+                                // Izinkan: owner ATAU userjadibot (pemilik sesi jadibot ini)
+                                const _csIsJadibot = hisoka?.isMainBot === false;
+                                if (!m.isOwner && !_csIsJadibot) return tolak(hisoka, m, '❌ Perintah ini hanya untuk owner!');
 
                                 // Pilih fungsi clearCache yang tepat: main bot pakai global, jadibot pakai Map
-                                const isJadibotCtx = hisoka?.isMainBot === false;
+                                const isJadibotCtx = _csIsJadibot;
                                 const jadibotNumCtx = isJadibotCtx ? getJadibotNumber(hisoka) : null;
                                 const clearFn = isJadibotCtx
                                         ? jadibotClearSesiMap.get(jadibotNumCtx)
@@ -15863,10 +15867,26 @@ hasil += `╰══════════════════════�
                                 break;
 
                         case 'ceksesi': {
-                                if (!m.isOwner) return tolak(hisoka, m, '❌ Perintah ini hanya untuk owner!');
+                                // Izinkan: owner ATAU userjadibot (pemilik sesi jadibot ini)
+                                const _csekIsJadibot = hisoka?.isMainBot === false;
+                                if (!m.isOwner && !_csekIsJadibot) return tolak(hisoka, m, '❌ Perintah ini hanya untuk owner!');
+
+                                // Pilih fungsi getSizeReport yang tepat: main bot pakai global, jadibot pakai Map
+                                const _csekJadibotNum  = _csekIsJadibot ? getJadibotNumber(hisoka) : null;
+                                const reportFn = _csekIsJadibot
+                                        ? jadibotSesiReportMap.get(_csekJadibotNum)
+                                        : global.__getSesiReport;
+
+                                if (!reportFn) {
+                                        return tolak(hisoka, m, '❌ Fungsi cekSesi tidak tersedia. Coba restart bot terlebih dahulu.');
+                                }
+
+                                const sessionLabel = _csekIsJadibot
+                                        ? `jadibot/${_csekJadibotNum}.json`
+                                        : `sessions/hisoka.json`;
+
                                 try {
-                                        const { cekSesi } = _require(path.resolve('./src/scrape/tools/ceksesi.cjs'));
-                                        const result = cekSesi();
+                                        const result = reportFn();
 
                                         const EMOJI_MAP = {
                                                 'creds':                  '🛡️',
@@ -15923,18 +15943,18 @@ hasil += `╰══════════════════════�
 
                                         const teks =
                                                 `╭─「 🗂️ *CEK SESI* 」\n` +
-                                                `│  📂 sessions/hisoka.json · ${result.fmtFileSize}\n` +
+                                                `│  📂 ${sessionLabel} · ${result.fmtFileSize}\n` +
+                                                `│  _💡 Data realtime dari memory (akurat)_\n` +
                                                 `│\n` +
                                                 `├─ ` + lines.join('\n├─ ') + `\n` +
                                                 `│\n` +
-                                                `├─ 💾 *Ukuran file :* ${result.fmtFileSize}\n` +
+                                                `├─ 💾 *Ukuran sesi :* ${result.fmtFileSize}\n` +
                                                 `├─ 🧹 *Potensi hemat :* ~${result.fmtMB(potensial + trimSaved)} (ketik .clearsesi)\n` +
                                                 `╰─ 🕐 ${new Date().toLocaleString('id-ID')}`;
 
                                         await m.reply(teks);
                                         logCommand(m, hisoka, 'ceksesi');
                                 } catch (e) {
-                                        if (e.message === 'SESSION_NOT_FOUND') return tolak(hisoka, m, '❌ File sessions/hisoka.json tidak ditemukan!');
                                         return tolak(hisoka, m, `❌ Gagal baca sesi: ${e.message}`);
                                 }
                                 break;

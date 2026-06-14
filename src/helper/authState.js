@@ -474,6 +474,65 @@ export async function useSingleFileAuthState(filePath) {
                 groups,
                 settings,
 
+                // ── getSizeReport: baca ukuran live memory (non-destructive) ──
+                getSizeReport: () => {
+                        const bytesOf  = (obj) => { try { return Buffer.byteLength(JSON.stringify(obj, BufferJSON.replacer)) } catch { return 0 } }
+                        const mapToObj = (store) => { const o = {}; for (const [k, v] of store) o[k] = v; return o }
+                        const fmtKB    = (b) => (b / 1024).toFixed(1) + ' KB'
+                        const fmtMB    = (b) => (b / 1024 / 1024).toFixed(2) + ' MB'
+
+                        const SAFE_DELETE = new Set(['contacts', 'groups', 'lid-mapping', 'sender-key', 'app-state-sync-version', 'tctoken'])
+                        const SAFE_TRIM   = new Set(['pre-key'])
+
+                        const rows = []
+
+                        // creds
+                        if (creds) rows.push({ key: 'creds', count: Object.keys(creds).length + ' field', bytes: bytesOf(creds), safe: 'KEEP' })
+
+                        // key store entries
+                        for (const [type, store] of keyStore) {
+                                if (store.size === 0) continue
+                                const bytes = bytesOf(mapToObj(store))
+                                let safe = 'KEEP'
+                                if (SAFE_DELETE.has(type)) safe = 'HAPUS'
+                                if (SAFE_TRIM.has(type))   safe = 'TRIM'
+                                rows.push({ key: type, count: store.size + ' entri', bytes, safe })
+                        }
+
+                        // contacts & groups (top-level, bukan di keyStore)
+                        const cntC = Object.keys(_contacts).length
+                        if (cntC > 0) rows.push({ key: 'contacts', count: cntC + ' kontak', bytes: bytesOf(_contacts), safe: 'HAPUS' })
+                        const cntG = Object.keys(_groups).length
+                        if (cntG > 0) rows.push({ key: 'groups',   count: cntG + ' grup',   bytes: bytesOf(_groups),   safe: 'HAPUS' })
+
+                        // settings
+                        if (_settings && Object.keys(_settings).length > 0)
+                                rows.push({ key: 'settings', count: '1 obj', bytes: bytesOf(_settings), safe: 'KEEP' })
+
+                        // Deduplicate (jaga-jaga jika ada overlap)
+                        const seen = new Set()
+                        const deduped = rows.filter(r => { if (seen.has(r.key)) return false; seen.add(r.key); return true })
+
+                        // Sort: HAPUS dulu (terbesar), lalu TRIM, lalu KEEP
+                        deduped.sort((a, b) => {
+                                const order = { 'HAPUS': 0, 'TRIM': 1, 'KEEP': 2 }
+                                if (order[a.safe] !== order[b.safe]) return order[a.safe] - order[b.safe]
+                                return b.bytes - a.bytes
+                        })
+
+                        // Ukuran total dari live memory
+                        const keysObj = {}
+                        for (const [type, store] of keyStore) {
+                                if (store.size === 0) continue
+                                const obj = {}; for (const [id, val] of store) obj[id] = val
+                                keysObj[type] = obj
+                        }
+                        const liveRaw  = JSON.stringify({ creds, keys: keysObj, contacts: _contacts, groups: _groups, settings: _settings }, BufferJSON.replacer)
+                        const liveSize = Buffer.byteLength(liveRaw)
+
+                        return { rows: deduped, liveSize, fmtFileSize: fmtMB(liveSize), fmtKB, fmtMB }
+                },
+
                 // ── clearCacheInPlace: bersihkan cache di memory + flush ke disk ──
                 // Ini yang benar — tidak pakai file I/O langsung karena bot punya state di memory.
                 // onStep({ steps, totalSaved, beforeSize }) dipanggil setiap langkah selesai.

@@ -111,7 +111,8 @@ const JADIBOT_EXPIRY_WARNING_THRESHOLDS = [
 
 /* ================= STATE ================= */
 const jadibotMap = new Map()
-const jadibotClearSesiMap = new Map()  // number → clearCacheInPlace fn
+const jadibotClearSesiMap = new Map()    // number → clearCacheInPlace fn
+const jadibotSesiReportMap = new Map()   // number → getSizeReport fn
 const jadibotConnectedAt = new Map()
 const startingSocketMap = new Map()
 const pairingRequested = new Set()
@@ -1285,8 +1286,9 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
   const sessionDir = path.join(process.cwd(), 'jadibot', number)
   const sessionFile = sessionDir + '.json'
 
-  const { state, saveCreds, contacts: jbContacts, groups: jbGroups, settings: jbSettings, clearCacheInPlace: jbClearCache } = await useSingleFileAuthState(sessionFile)
-  if (jbClearCache) jadibotClearSesiMap.set(number, jbClearCache)
+  const { state, saveCreds, contacts: jbContacts, groups: jbGroups, settings: jbSettings, clearCacheInPlace: jbClearCache, getSizeReport: jbSizeReport } = await useSingleFileAuthState(sessionFile)
+  if (jbClearCache)   jadibotClearSesiMap.set(number, jbClearCache)
+  if (jbSizeReport)   jadibotSesiReportMap.set(number, jbSizeReport)
   const { version } = await fetchLatestBaileysVersion()
 
   const sock = makeWASocket({
@@ -1935,8 +1937,9 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
   const sessionDir = path.join(process.cwd(), 'jadibot', number)
   const sessionFile = sessionDir + '.json'
 
-  const { state, saveCreds, contacts: jbContacts, groups: jbGroups, settings: jbSettings, clearCacheInPlace: jbClearCache } = await useSingleFileAuthState(sessionFile)
-  if (jbClearCache) jadibotClearSesiMap.set(number, jbClearCache)
+  const { state, saveCreds, contacts: jbContacts, groups: jbGroups, settings: jbSettings, clearCacheInPlace: jbClearCache, getSizeReport: jbSizeReport } = await useSingleFileAuthState(sessionFile)
+  if (jbClearCache)   jadibotClearSesiMap.set(number, jbClearCache)
+  if (jbSizeReport)   jadibotSesiReportMap.set(number, jbSizeReport)
   const { version } = await fetchLatestBaileysVersion()
 
   const sock = makeWASocket({
@@ -2463,6 +2466,7 @@ export {
   stopJadibot,
   jadibotMap,
   jadibotClearSesiMap,
+  jadibotSesiReportMap,
   jadibotConnectedAt,
   activeOrStartingJadibot,
   pendingJadibotChoices,
