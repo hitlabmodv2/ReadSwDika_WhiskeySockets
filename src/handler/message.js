@@ -9675,7 +9675,9 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
 ╭─「 📊 *CEK & INFO* 」
 ├➤ *.ceksetting* — Cek semua setting aktif
-╰➤ *.ceksw* — Lihat statistik reaksi SW
+├➤ *.ceksw* — Lihat statistik reaksi SW
+├➤ *.ceksesi* — Cek ukuran & detail sesi aktif
+╰➤ *.clearsesi / .cs* — Bersihkan cache sesi (hemat memori)
 
 ╭─「 🛡️ *ANTI CALL* 」
 ├➤ *.anticall on/off* — Tolak panggilan suara
@@ -10075,7 +10077,7 @@ listowner | addowner | delowner
 all | swgrup/statusgroup | infowibu | animasu | tvone | alqanimenotif | malnews | ceksw | cekauto | cekauto gc
 wily | simi | wilyai on/off | wilyai pm/gc/all | wilyai reset
 setreactapi | emojiadd | emojidel | emojilist
-upbot | restart/rebot | backup | ceksesi | eval | bash
+upbot | restart/rebot | backup | ceksesi | clearsesi/cs | eval | bash
 ram | ceksize/disksize | autosholat | credsjson
 dbstats | sessiondb | listcontact
 cekerror | cekerror reset | contact
