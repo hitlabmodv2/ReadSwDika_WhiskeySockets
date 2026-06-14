@@ -43,6 +43,7 @@ import {
         maskNumber,
         logStoryView,
         getMediaTypeEmoji,
+        getGcMediaTypeEmoji,
         getStoryCountToday,
 } from '../helper/swtrack.js';
 
@@ -611,7 +612,7 @@ ${m.text ? `<b>Caption :</b>\n\n${m.text}` : ''}`.trim();
                                 const delaySeconds = (delayMs / 1000).toFixed(1);
                                 const innerMsg = m.message.groupStatusMessageV2?.message;
                                 const innerType = innerMsg ? Object.keys(innerMsg).find(k => k !== 'messageContextInfo') : null;
-                                const mediaType = getMediaTypeEmoji(innerType);
+                                const mediaType = getGcMediaTypeEmoji(innerType);
                                 const greeting = getGreeting();
 
                                 const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];

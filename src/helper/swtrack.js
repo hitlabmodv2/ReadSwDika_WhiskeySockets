@@ -423,6 +423,23 @@ export function getMediaTypeEmoji(type) {
                 locationMessage: ['Location', '📍'],
                 contactMessage: ['Contact', '👤'],
                 contactsArrayMessage: ['Contacts', '👥'],
+                groupStatusMessageV2: ['Status GC', '👥'],
+                groupStatus: ['Status GC', '👥'],
         };
         return mediaTypes[type] || ['Media', '📨'];
+}
+
+/**
+ * Sama seperti getMediaTypeEmoji, tapi prefix nama dengan "GC " untuk
+ * membedakan story dari Group Status (upswgc / groupStatusMessageV2)
+ * vs story biasa dari status@broadcast.
+ *
+ * Contoh: getGcMediaTypeEmoji('videoMessage') → ['GC Video', '🎥']
+ *
+ * @param {string|null} innerType - tipe pesan di dalam groupStatusMessageV2
+ * @returns {[string, string]}
+ */
+export function getGcMediaTypeEmoji(innerType) {
+        const [name, emoji] = getMediaTypeEmoji(innerType);
+        return [`GC ${name}`, emoji];
 }
