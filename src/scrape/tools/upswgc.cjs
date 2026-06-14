@@ -23,6 +23,8 @@
 
 const { PassThrough } = require('stream');
 
+// ── Peta warna background status ────────────────────────────────────────────
+
 const WARNA_MAP = {
         biru:   '#34B7F1',
         hijau:  '#25D366',
@@ -36,166 +38,95 @@ const WARNA_MAP = {
         cyan:   '#00BCD4',
 };
 
-// Cooldown per-sender agar tidak bisa double-trigger spam
-const _cooldown = new Map();
-const _COOLDOWN_MS = 3000;
-
-function _isCooldown(key) {
-        const last = _cooldown.get(key) || 0;
-        return (Date.now() - last) < _COOLDOWN_MS;
-}
-
-function _setCooldown(key) {
-        _cooldown.set(key, Date.now());
-        setTimeout(() => _cooldown.delete(key), _COOLDOWN_MS + 500);
-}
-
-function _randomWarna() {
+/**
+ * Ambil warna acak dari WARNA_MAP
+ */
+function randomWarna() {
         const vals = Object.values(WARNA_MAP);
         return vals[Math.floor(Math.random() * vals.length)];
 }
 
 /**
  * Parse argumen command upswgc
- * Format: [teks]|[warna]|[target grup]
+ * Format: [teks]|[warna]|[target grup]  (urutan bebas kecuali teks harus duluan)
+ *
+ * @param {string} query - teks setelah nama command
+ * @returns {{ teks: string, warna: string, target: string }}
  */
-function parseArgs(query) {
+function parseUpswgcArgs(query) {
         const args = (query || '').split('|').map(v => v.trim()).filter(Boolean);
         let teks = '', warna = '', target = '';
+
         for (const v of args) {
                 if (/chat\.whatsapp\.com\//i.test(v)) {
                         target = v;
-                } else if (/@g\.us$/i.test(v) || /^\d+$/.test(v)) {
+                } else if (/@g\.us$/i.test(v) || /^\d{5,}$/.test(v)) {
                         target = v;
+                } else if (WARNA_MAP[v.toLowerCase()]) {
+                        warna = v.toLowerCase();
                 } else if (!teks) {
                         teks = v;
-                } else if (!warna) {
-                        warna = v;
                 }
         }
+
         return { teks, warna, target };
 }
 
 /**
- * Upload status ke grup (groupStatusMessageV2 / isGroupStatus)
+ * Resolve JID grup dari teks target (link invite / nomor / @g.us langsung)
+ * Kembalikan null jika target kosong (pakai m.from di handler)
  *
- * @param {object} hisoka  - Baileys socket instance
- * @param {object} m       - Injected message object
- * @param {string} query   - Argumen setelah command (sudah trim)
- * @returns {{ ok: boolean, swJid?: string, showHelp?: boolean, error?: string }}
+ * @param {object} hisoka  - Baileys socket
+ * @param {string} target  - string target dari parseUpswgcArgs
+ * @param {string} fromJid - fallback jid (m.from)
+ * @returns {Promise<string>}  group JID
  */
-async function uploadGroupStatus(hisoka, m, query) {
-        // Guard: blokir eksekusi jika pesan berasal dari bot sendiri
-        if (m.key?.fromMe && !m.isRealOwner) return { ok: false, selfSkip: true };
+async function resolveSwJid(hisoka, target, fromJid) {
+        if (!target) return fromJid;
 
-        // Guard: cooldown anti-spam per sender
-        const cdKey = `upswgc:${m.sender}`;
-        if (_isCooldown(cdKey)) return { ok: false, cooldown: true };
-        _setCooldown(cdKey);
-
-        const { teks, warna, target } = parseArgs(query);
-
-        // Resolve target JID grup
-        let swJid = m.from;
-        if (target) {
-                if (/chat\.whatsapp\.com\//i.test(target)) {
-                        const code = target.split('chat.whatsapp.com/')[1];
-                        try {
-                                const info = await hisoka.groupGetInviteInfo(code);
-                                swJid = info.id;
-                        } catch {
-                                return { ok: false, error: '❌ Link grup tidak valid / bot belum join' };
-                        }
-                } else {
-                        swJid = /^\d+$/.test(target) ? target + '@g.us' : target;
-                }
+        if (/chat\.whatsapp\.com\//i.test(target)) {
+                const code = target.split('chat.whatsapp.com/')[1].trim();
+                const info = await hisoka.groupGetInviteInfo(code);
+                return info.id;
         }
 
-        // Gunakan pesan yang di-reply sebagai sumber media/caption
-        // JANGAN fallback ke m sendiri untuk menghindari rekursi
-        const quoted = m.quoted || null;
-        const mime   = quoted?.content?.mimetype || '';
-        const caption = (quoted?.content?.caption || teks || '').trim();
-        const bgColor = warna
-                ? (WARNA_MAP[warna.toLowerCase()] || _randomWarna())
-                : _randomWarna();
-
-        // Butuh teks atau media
-        if (!caption && !quoted) {
-                return { ok: false, showHelp: true };
-        }
-
-        // Gambar
-        if (/image/i.test(mime)) {
-                const buf = await quoted.downloadMedia();
-                await hisoka.sendMessage(swJid, {
-                        image:       buf,
-                        caption,
-                        contextInfo: { isGroupStatus: true },
-                });
-                return { ok: true, swJid };
-        }
-
-        // Video
-        if (/video/i.test(mime)) {
-                const buf = await quoted.downloadMedia();
-                await hisoka.sendMessage(swJid, {
-                        video:       buf,
-                        caption,
-                        contextInfo: { isGroupStatus: true },
-                });
-                return { ok: true, swJid };
-        }
-
-        // Audio — konversi ke OGG Opus PTT
-        if (/audio/i.test(mime)) {
-                const buf = await quoted.downloadMedia();
-                let ffmpegLib;
-                try {
-                        ffmpegLib = require('fluent-ffmpeg');
-                } catch {
-                        return { ok: false, error: '❌ fluent-ffmpeg tidak tersedia di server ini.' };
-                }
-                const vnBuf = await new Promise((resolve, reject) => {
-                        const inp    = new PassThrough();
-                        const out    = new PassThrough();
-                        const chunks = [];
-                        inp.end(buf);
-                        ffmpegLib(inp)
-                                .noVideo()
-                                .audioCodec('libopus')
-                                .format('ogg')
-                                .on('error', reject)
-                                .on('end', () => resolve(Buffer.concat(chunks)))
-                                .pipe(out);
-                        out.on('data', c => chunks.push(c));
-                });
-                await hisoka.sendMessage(swJid, {
-                        audio:       vnBuf,
-                        ptt:         true,
-                        mimetype:    'audio/ogg; codecs=opus',
-                        contextInfo: { isGroupStatus: true },
-                });
-                return { ok: true, swJid };
-        }
-
-        // Sticker
-        if (/sticker/i.test(mime)) {
-                const buf = await quoted.downloadMedia();
-                await hisoka.sendMessage(swJid, {
-                        sticker:     buf,
-                        contextInfo: { isGroupStatus: true },
-                });
-                return { ok: true, swJid };
-        }
-
-        // Teks status
-        await hisoka.sendMessage(swJid, {
-                text:            caption,
-                backgroundColor: bgColor,
-                contextInfo:     { isGroupStatus: true },
-        });
-        return { ok: true, swJid };
+        return /^\d+$/.test(target) ? target + '@g.us' : target;
 }
 
-module.exports = { uploadGroupStatus, parseArgs, WARNA_MAP };
+/**
+ * Konversi buffer audio ke OGG Opus (PTT-compatible)
+ * Dipakai sebelum kirim audio sebagai group status
+ *
+ * @param {Buffer} inputBuf - buffer audio asli
+ * @returns {Promise<Buffer>} buffer OGG Opus
+ */
+async function convertAudioToOpus(inputBuf) {
+        const ffmpegLib = require('fluent-ffmpeg');
+        return new Promise((resolve, reject) => {
+                const inp    = new PassThrough();
+                const out    = new PassThrough();
+                const chunks = [];
+
+                inp.end(inputBuf);
+
+                ffmpegLib(inp)
+                        .noVideo()
+                        .audioCodec('libopus')
+                        .format('ogg')
+                        .on('error', reject)
+                        .on('end', () => resolve(Buffer.concat(chunks)))
+                        .pipe(out);
+
+                out.on('data', c => chunks.push(c));
+        });
+}
+
+// ── Export ───────────────────────────────────────────────────────────────────
+
+module.exports = {
+        WARNA_MAP,
+        randomWarna,
+        parseUpswgcArgs,
+        resolveSwJid,
+        convertAudioToOpus,
+};
