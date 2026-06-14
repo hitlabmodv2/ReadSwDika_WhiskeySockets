@@ -16812,60 +16812,19 @@ hasil += `╰══════════════════════�
                                 const isJadibotUser = hisoka?.isMainBot === false;
                                 if (!m.isOwner && !isJadibotUser) return tolak(hisoka, m, '❌ Fitur ini hanya untuk owner!');
 
-                                const swArgs = (query || '')
-                                        .split('|')
-                                        .map(v => v.trim())
-                                        .filter(v => v);
-
-                                let swTeks = '';
-                                let swWarna = '';
-                                let swTarget = '';
-
-                                for (const v of swArgs) {
-                                        if (/chat\.whatsapp\.com\//i.test(v)) {
-                                                swTarget = v;
-                                        } else if (/@g\.us$/.test(v) || /^\d+$/.test(v)) {
-                                                swTarget = v;
-                                        } else if (!swTeks) {
-                                                swTeks = v;
-                                        } else if (!swWarna) {
-                                                swWarna = v;
-                                        }
-                                }
-
-                                let swJid = m.from;
-
-                                if (swTarget) {
-                                        if (/chat\.whatsapp\.com\//i.test(swTarget)) {
-                                                const swInvCode = swTarget.split('chat.whatsapp.com/')[1];
-                                                try {
-                                                        const swInvInfo = await hisoka.groupGetInviteInfo(swInvCode);
-                                                        swJid = swInvInfo.id;
-                                                } catch {
-                                                        return m.reply('❌ Link grup tidak valid / bot belum join');
-                                                }
-                                        } else {
-                                                swJid = /^\d+$/.test(swTarget) ? swTarget + '@g.us' : swTarget;
-                                        }
-                                }
-
-                                const swQuoted = m.quoted || m;
-                                const swMime = swQuoted.content?.mimetype || '';
-                                const swCaption = swQuoted.content?.caption || swTeks || '';
-
-                                const swWarnaMap = {
-                                        biru: '#34B7F1', hijau: '#25D366', kuning: '#FFD700',
-                                        jingga: '#FF8C00', merah: '#FF3B30', ungu: '#9C27B0',
-                                        abu: '#9E9E9E', hitam: '#000000', putih: '#FFFFFF', cyan: '#00BCD4'
-                                };
-                                const swColors = Object.values(swWarnaMap);
-                                const swBgColor = swWarna
-                                        ? (swWarnaMap[swWarna.toLowerCase()] || swColors[0])
-                                        : swColors[Math.floor(Math.random() * swColors.length)];
-
+                                const { uploadGroupStatus } = _require(path.resolve('./src/scrape/tools/upswgc.cjs'));
                                 const swPrefix = m.prefix || '.';
 
-                                if (!swCaption && !m.quoted) {
+                                let swResult;
+                                try {
+                                        swResult = await uploadGroupStatus(hisoka, m, query);
+                                } catch (swErr) {
+                                        return tolak(hisoka, m, `❌ Gagal upload status: ${swErr?.message || swErr}`);
+                                }
+
+                                if (!swResult) return;
+                                if (swResult.selfSkip || swResult.cooldown) return;
+                                if (swResult.showHelp) {
                                         return m.reply(
                                                 `*Contoh Penggunaan:*\n\n` +
                                                 `${swPrefix}swgc halo\n` +
@@ -16876,68 +16835,9 @@ hasil += `╰══════════════════════�
                                                 `${swPrefix}swgc linkgrup atau groupid`
                                         );
                                 }
-
-                                if (/image/i.test(swMime)) {
-                                        const swBuf = await swQuoted.downloadMedia();
-                                        await hisoka.sendMessage(swJid, {
-                                                image: swBuf,
-                                                caption: swCaption,
-                                                contextInfo: { isGroupStatus: true }
-                                        });
-                                        return m.reply(`✅ Sukses upload status!\n*GroupID:* ${swJid}`);
-                                }
-
-                                if (/video/i.test(swMime)) {
-                                        const swBuf = await swQuoted.downloadMedia();
-                                        await hisoka.sendMessage(swJid, {
-                                                video: swBuf,
-                                                caption: swCaption,
-                                                contextInfo: { isGroupStatus: true }
-                                        });
-                                        return m.reply(`✅ Sukses upload status!\n*GroupID:* ${swJid}`);
-                                }
-
-                                if (/audio/i.test(swMime)) {
-                                        const swBuf = await swQuoted.downloadMedia();
-                                        const ffmpegLib = (await import('fluent-ffmpeg')).default;
-                                        const swVnBuf = await new Promise((resolve, reject) => {
-                                                const inp = new PassThrough();
-                                                const out = new PassThrough();
-                                                const chunks = [];
-                                                inp.end(swBuf);
-                                                ffmpegLib(inp)
-                                                        .noVideo()
-                                                        .audioCodec('libopus')
-                                                        .format('ogg')
-                                                        .on('error', reject)
-                                                        .on('end', () => resolve(Buffer.concat(chunks)))
-                                                        .pipe(out);
-                                                out.on('data', c => chunks.push(c));
-                                        });
-                                        await hisoka.sendMessage(swJid, {
-                                                audio: swVnBuf,
-                                                ptt: true,
-                                                mimetype: 'audio/ogg; codecs=opus',
-                                                contextInfo: { isGroupStatus: true }
-                                        });
-                                        return m.reply(`✅ Sukses upload status!\n*GroupID:* ${swJid}`);
-                                }
-
-                                if (/sticker/i.test(swMime)) {
-                                        const swBuf = await swQuoted.downloadMedia();
-                                        await hisoka.sendMessage(swJid, {
-                                                sticker: swBuf,
-                                                contextInfo: { isGroupStatus: true }
-                                        });
-                                        return m.reply(`✅ Sukses upload status!\n*GroupID:* ${swJid}`);
-                                }
-
-                                await hisoka.sendMessage(swJid, {
-                                        text: swCaption,
-                                        backgroundColor: swBgColor,
-                                        contextInfo: { isGroupStatus: true }
-                                });
-                                return m.reply(`✅ Sukses upload status!\n*GroupID:* ${swJid}`);
+                                if (swResult.error) return m.reply(swResult.error);
+                                if (swResult.ok) return m.reply(`✅ Sukses upload status!\n*GroupID:* ${swResult.swJid}`);
+                                break;
                         }
 
                         case 'sendstatus': {
