@@ -16838,8 +16838,10 @@ hasil += `╰══════════════════════�
                                 const swSrc     = m.isMedia ? m : (m.quoted || null);
                                 const swType    = swSrc?.type || '';
                                 const swMime    = swSrc?.content?.mimetype || '';
-                                // Prioritas caption: teks arg user dulu, baru caption dari sumber media
-                                const swCaption = (swTeks || swSrc?.text || swSrc?.content?.caption || '').trim();
+                                // Kalau media langsung (bukan quoted), jangan pakai m.text karena isinya command itu sendiri
+                                const swCaption = swSrc === m
+                                        ? swTeks.trim()
+                                        : (swTeks || swSrc?.text || swSrc?.content?.caption || '').trim();
                                 const swBgColor = swWarna ? (WARNA_MAP[swWarna] || randomWarna()) : randomWarna();
 
                                 if (!swCaption && !swSrc) {
