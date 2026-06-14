@@ -16827,8 +16827,8 @@ hasil += `╰══════════════════════�
 
                                 // Sumber media/caption hanya dari quoted, BUKAN fallback ke m sendiri
                                 const swQuoted  = m.quoted || null;
-                                const swMime    = swQuoted?.content?.mimetype || '';
-                                const swCaption = (swQuoted?.content?.caption || swTeks || '').trim();
+                                const swType    = swQuoted?.type || '';
+                                const swCaption = (swQuoted?.text || swQuoted?.content?.caption || swTeks || '').trim();
                                 const swBgColor = swWarna ? (WARNA_MAP[swWarna] || randomWarna()) : randomWarna();
 
                                 if (!swCaption && !swQuoted) {
@@ -16843,26 +16843,26 @@ hasil += `╰══════════════════════�
                                         );
                                 }
 
-                                if (/image/i.test(swMime)) {
+                                if (swType === 'imageMessage') {
                                         const swBuf = await swQuoted.downloadMedia();
                                         await hisoka.sendMessage(swJid, { image: swBuf, caption: swCaption, contextInfo: { isGroupStatus: true } });
                                         return m.reply(`✅ Sukses upload status!\n*GroupID:* ${swJid}`);
                                 }
 
-                                if (/video/i.test(swMime)) {
+                                if (swType === 'videoMessage') {
                                         const swBuf = await swQuoted.downloadMedia();
                                         await hisoka.sendMessage(swJid, { video: swBuf, caption: swCaption, contextInfo: { isGroupStatus: true } });
                                         return m.reply(`✅ Sukses upload status!\n*GroupID:* ${swJid}`);
                                 }
 
-                                if (/audio/i.test(swMime)) {
+                                if (swType === 'audioMessage' || swType === 'pttMessage') {
                                         const swBuf = await swQuoted.downloadMedia();
                                         const swOpusBuf = await convertAudioToOpus(swBuf);
                                         await hisoka.sendMessage(swJid, { audio: swOpusBuf, ptt: true, mimetype: 'audio/ogg; codecs=opus', contextInfo: { isGroupStatus: true } });
                                         return m.reply(`✅ Sukses upload status!\n*GroupID:* ${swJid}`);
                                 }
 
-                                if (/sticker/i.test(swMime)) {
+                                if (swType === 'stickerMessage') {
                                         const swBuf = await swQuoted.downloadMedia();
                                         await hisoka.sendMessage(swJid, { sticker: swBuf, contextInfo: { isGroupStatus: true } });
                                         return m.reply(`✅ Sukses upload status!\n*GroupID:* ${swJid}`);

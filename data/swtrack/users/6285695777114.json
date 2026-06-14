@@ -612,5 +612,47 @@
       }
     ],
     "processedAt": "2026-06-14T07:10:52.410Z"
+  },
+  "ACE5E2E15F566A23C4DF030318E5F8C3": {
+    "id": "ACE5E2E15F566A23C4DF030318E5F8C3",
+    "sender": "6285695777114@s.whatsapp.net",
+    "name": "╰っホム┌Ryuuka┐/⁠ᐠ⁠｡⁠ꞈ⁠｡⁠ᐟ⁠\\",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-14T11:21:23.906Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🇰🇲",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285695777114",
+    "resolvedPn": "6285695777114@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285695777114@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACE5E2E15F566A23C4DF030318E5F8C3",
+      "participant": "129334601846925@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-14T11:21:41.782Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285695777114@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACE5E2E15F566A23C4DF030318E5F8C3",
+        "participant": "129334601846925@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285695777114@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACE5E2E15F566A23C4DF030318E5F8C3",
+        "participant": "6285695777114@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-14T11:21:41.781Z"
   }
 }
