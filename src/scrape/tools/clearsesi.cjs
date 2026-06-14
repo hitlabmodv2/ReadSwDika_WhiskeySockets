@@ -1,0 +1,136 @@
+'use strict';
+
+/**
+ * clearSesi — bersihkan sessions/hisoka.json tanpa pairing ulang
+ *
+ * KEEP (wajib, agar bot tetap konek tanpa pairing ulang):
+ *   creds, keys.app-state-sync-key, keys.identity-key,
+ *   keys.session, keys.device-list, settings
+ *
+ * HAPUS / TRIM (cache — di-refetch otomatis oleh Baileys):
+ *   contacts, groups,
+ *   keys.lid-mapping, keys.sender-key,
+ *   keys.app-state-sync-version, keys.tctoken,
+ *   keys.pre-key → trim, sisakan 100 id terbesar (belum dipakai)
+ */
+
+const fs   = require('fs');
+const path = require('path');
+
+const SESSION_FILE = path.resolve('./sessions/hisoka.json');
+
+function byteSize(obj) {
+        return Buffer.byteLength(JSON.stringify(obj));
+}
+
+function fmtMB(bytes) {
+        return (bytes / 1024 / 1024).toFixed(2) + ' MB';
+}
+
+/**
+ * clearSesi(onStep)
+ *   onStep({ steps, totalSaved, beforeSize }) — dipanggil tiap langkah selesai
+ * Returns { steps, beforeSize, afterSize, fmtBefore, fmtAfter, fmtSaved }
+ */
+async function clearSesi(onStep) {
+        if (!fs.existsSync(SESSION_FILE)) throw new Error('SESSION_NOT_FOUND');
+
+        const raw        = fs.readFileSync(SESSION_FILE, 'utf8');
+        const data       = JSON.parse(raw);
+        const beforeSize = Buffer.byteLength(raw);
+
+        const steps = [];
+        let totalSaved = 0;
+
+        async function doStep(name, label, savedBytes) {
+                steps.push({ name, label, savedBytes });
+                totalSaved += savedBytes;
+                if (onStep) {
+                        try { await onStep({ steps, totalSaved, beforeSize }); } catch (_) {}
+                }
+        }
+
+        // 1. contacts
+        {
+                const cnt   = Object.keys(data.contacts || {}).length;
+                const bytes = byteSize(data.contacts || {});
+                data.contacts = {};
+                await doStep('contacts', `${cnt} kontak`, bytes);
+        }
+
+        // 2. groups
+        {
+                const cnt   = Object.keys(data.groups || {}).length;
+                const bytes = byteSize(data.groups || {});
+                data.groups = {};
+                await doStep('groups', `${cnt} grup`, bytes);
+        }
+
+        // 3. lid-mapping
+        if (data.keys?.['lid-mapping']) {
+                const cnt   = Object.keys(data.keys['lid-mapping']).length;
+                const bytes = byteSize(data.keys['lid-mapping']);
+                data.keys['lid-mapping'] = {};
+                await doStep('lid-mapping', `${cnt} entri`, bytes);
+        }
+
+        // 4. sender-key
+        if (data.keys?.['sender-key']) {
+                const cnt   = Object.keys(data.keys['sender-key']).length;
+                const bytes = byteSize(data.keys['sender-key']);
+                data.keys['sender-key'] = {};
+                await doStep('sender-key', `${cnt} entri`, bytes);
+        }
+
+        // 5. app-state-sync-version
+        if (data.keys?.['app-state-sync-version']) {
+                const cnt   = Object.keys(data.keys['app-state-sync-version']).length;
+                const bytes = byteSize(data.keys['app-state-sync-version']);
+                data.keys['app-state-sync-version'] = {};
+                await doStep('app-state-sync-version', `${cnt} entri`, bytes);
+        }
+
+        // 6. tctoken
+        if (data.keys?.['tctoken']) {
+                const cnt   = Object.keys(data.keys['tctoken']).length;
+                const bytes = byteSize(data.keys['tctoken']);
+                data.keys['tctoken'] = {};
+                await doStep('tctoken', `${cnt} entri`, bytes);
+        }
+
+        // 7. pre-key — trim, sisakan 100 id terbesar
+        if (data.keys?.['pre-key']) {
+                const obj   = data.keys['pre-key'];
+                const ids   = Object.keys(obj).map(Number).sort((a, b) => a - b);
+                const KEEP  = 100;
+                const keep  = ids.slice(Math.max(0, ids.length - KEEP));
+                const removed = ids.length - keep.length;
+                const bytesBefore = byteSize(obj);
+                const newObj = {};
+                for (const id of keep) newObj[String(id)] = obj[String(id)];
+                data.keys['pre-key'] = newObj;
+                const saved2 = bytesBefore - byteSize(newObj);
+                await doStep(
+                        'pre-key (trim)',
+                        `hapus ${removed} lama, sisakan ${keep.length}`,
+                        saved2
+                );
+        }
+
+        // Tulis ulang file
+        const newRaw    = JSON.stringify(data);
+        fs.writeFileSync(SESSION_FILE, newRaw, 'utf8');
+        const afterSize = Buffer.byteLength(newRaw);
+
+        return {
+                steps,
+                beforeSize,
+                afterSize,
+                savedBytes:  beforeSize - afterSize,
+                fmtBefore:   fmtMB(beforeSize),
+                fmtAfter:    fmtMB(afterSize),
+                fmtSaved:    fmtMB(beforeSize - afterSize)
+        };
+}
+
+module.exports = { clearSesi, fmtMB };

@@ -5887,6 +5887,88 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 break;
                         }
 
+                        case 'clearsesi':
+                        case 'cs': {
+                                if (!m.isOwner) return tolak(hisoka, m, '❌ Perintah ini hanya untuk owner!');
+
+                                const { clearSesi, fmtMB: fmtMBCS } = _require(path.resolve('./src/scrape/tools/clearsesi.cjs'));
+
+                                // Pesan awal
+                                const csProgMsg = await m.reply(
+                                        `🧹 *Clear Sesi — Memulai...*\n\n` +
+                                        `📂 *File :* sessions/hisoka.json\n` +
+                                        `🔍 *Memeriksa dan membersihkan cache...*\n\n` +
+                                        `_Harap tunggu..._`
+                                );
+
+                                const ICONS = {
+                                        'contacts':               '👥',
+                                        'groups':                 '👨‍👩‍👦',
+                                        'lid-mapping':            '🗺️',
+                                        'sender-key':             '🔑',
+                                        'app-state-sync-version': '🔄',
+                                        'tctoken':                '🎫',
+                                        'pre-key (trim)':         '🗝️',
+                                };
+
+                                try {
+                                        const result = await clearSesi(async ({ steps, totalSaved, beforeSize }) => {
+                                                if (!csProgMsg?.key) return;
+
+                                                const lines = steps.map(s => {
+                                                        const icon = ICONS[s.name] || '📦';
+                                                        const kb   = (s.savedBytes / 1024).toFixed(1);
+                                                        return `  ${icon} *${s.name}* — ${s.label} (hemat ${kb} KB)`;
+                                                }).join('\n');
+
+                                                const pctSaved = Math.min(100, Math.round((totalSaved / beforeSize) * 100));
+                                                const bar = '[' + '█'.repeat(Math.round(pctSaved / 10)) + '░'.repeat(10 - Math.round(pctSaved / 10)) + ']';
+
+                                                try {
+                                                        await m.reply({
+                                                                edit: csProgMsg.key,
+                                                                text:
+                                                                        `🧹 *Clear Sesi — Sedang berjalan...*\n\n` +
+                                                                        `📊 *Progress :* ${bar} ${pctSaved}%\n` +
+                                                                        `💾 *Hemat :* ${fmtMBCS(totalSaved)}\n\n` +
+                                                                        `*Langkah selesai:*\n` +
+                                                                        `${lines}\n\n` +
+                                                                        `_Harap tunggu..._`
+                                                        });
+                                                } catch (_) {}
+                                        });
+
+                                        // Edit final summary
+                                        const linesDone = result.steps.map(s => {
+                                                const icon = ICONS[s.name] || '📦';
+                                                const kb   = (s.savedBytes / 1024).toFixed(1);
+                                                return `  ${icon} *${s.name}* — ${s.label} (${kb} KB)`;
+                                        }).join('\n');
+
+                                        const doneText =
+                                                `✅ *Clear Sesi selesai!*\n\n` +
+                                                `📂 *File :* sessions/hisoka.json\n` +
+                                                `📉 *Sebelum :* ${result.fmtBefore}\n` +
+                                                `📈 *Sesudah :* ${result.fmtAfter}\n` +
+                                                `💾 *Total hemat :* ${result.fmtSaved}\n\n` +
+                                                `*Detail yang dibersihkan:*\n` +
+                                                `${linesDone}\n\n` +
+                                                `_Bot tetap aktif, tidak perlu pairing ulang_ ✔️`;
+
+                                        if (csProgMsg?.key) {
+                                                await m.reply({ edit: csProgMsg.key, text: doneText });
+                                        } else {
+                                                await m.reply(doneText);
+                                        }
+                                } catch (err) {
+                                        if (err.message === 'SESSION_NOT_FOUND') return tolak(hisoka, m, '❌ File sessions/hisoka.json tidak ditemukan!');
+                                        return tolak(hisoka, m, `❌ Gagal clear sesi: ${err.message}`);
+                                }
+
+                                logCommand(m, hisoka, 'clearsesi');
+                                break;
+                        }
+
                         case 'cekjidgc':
                         case 'jidgc':
                         case 'infogc': {
