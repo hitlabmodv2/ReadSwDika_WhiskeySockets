@@ -16812,6 +16812,15 @@ hasil += `╰══════════════════════�
                                 const isJadibotUser = hisoka?.isMainBot === false;
                                 if (!m.isOwner && !isJadibotUser) return tolak(hisoka, m, '❌ Fitur ini hanya untuk owner!');
 
+                                // Deduplication: cegah eksekusi ganda dari WA sync (append event)
+                                if (!hisoka._upswgcDone) hisoka._upswgcDone = new Map();
+                                const _swMsgId = m.key?.id || '';
+                                if (_swMsgId && hisoka._upswgcDone.has(_swMsgId)) break;
+                                if (_swMsgId) {
+                                        hisoka._upswgcDone.set(_swMsgId, Date.now());
+                                        setTimeout(() => hisoka._upswgcDone?.delete(_swMsgId), 10000);
+                                }
+
                                 const { parseUpswgcArgs, resolveSwJid, convertAudioToOpus, WARNA_MAP, randomWarna } = _require(path.resolve('./src/scrape/tools/upswgc.cjs'));
 
                                 const swPrefix = m.prefix || '.';
