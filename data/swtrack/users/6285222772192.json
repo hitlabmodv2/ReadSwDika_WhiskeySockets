@@ -208,5 +208,47 @@
       }
     ],
     "processedAt": "2026-06-14T06:06:05.306Z"
+  },
+  "ACDF8430EBB7A503ABD5D46A0B597848": {
+    "id": "ACDF8430EBB7A503ABD5D46A0B597848",
+    "sender": "6285222772192@s.whatsapp.net",
+    "name": "Finn么",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-14T06:54:21.898Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🥣",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285222772192",
+    "resolvedPn": "6285222772192@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285222772192@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACDF8430EBB7A503ABD5D46A0B597848",
+      "participant": "12661630705832@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-14T06:54:34.602Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285222772192@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACDF8430EBB7A503ABD5D46A0B597848",
+        "participant": "12661630705832@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285222772192@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACDF8430EBB7A503ABD5D46A0B597848",
+        "participant": "6285222772192@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-14T06:54:34.602Z"
   }
 }
