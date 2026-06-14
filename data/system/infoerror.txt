@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 13/06/2026, 10.30.53  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 14/06/2026, 06.38.10  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,23 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  command:cekjidgcall
+│  #001  —  console.error
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  Cannot read properties of undefined (reading 'length')
+│  [31m[HotReload] ✗ Gagal reload 'src/handler/message.js', pakai versi lama.[39m
 │
 │  DETAIL
-│  Sumber      : command:cekjidgcall
+│  Sumber      : console.error
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 13/06/2026, 10.30.53
-│  Terakhir    : 13/06/2026, 10.30.53
+│  Pertama     : 14/06/2026, 06.38.10
+│  Terakhir    : 14/06/2026, 06.38.10
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  TypeError: Cannot read properties of undefined (reading 'length')
-│     at default (file:///home/runner/workspace/src/handler/message.js?t=1781346609380:5913:60)
+│  ▶  Error: [31m[HotReload] ✗ Gagal reload 'src/handler/message.js', pakai versi lama.[39m
+│     at console.error (file:///home/runner/workspace/index.js:393:27)
+│     at Timeout._onTimeout (file:///home/runner/workspace/src/helper/hotReload.js:102:29)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 13/06/2026, 10.30.53
+  Terakhir diperbarui: 14/06/2026, 06.38.10
 ════════════════════════════════════════════════════════════════════════

@@ -15848,78 +15848,79 @@ hasil += `╰══════════════════════�
                                 break;
 
                         case 'ceksesi': {
-                                if (!m.prefix && m.query) break;
-                                if (!m.isOwner) return;
+                                if (!m.isOwner) return tolak(hisoka, m, '❌ Perintah ini hanya untuk owner!');
                                 try {
-                                        const sesiDir = path.join(process.cwd(), 'sessions', process.env.BOT_SESSION_NAME || 'hisoka');
-                                        const files = fs.readdirSync(sesiDir);
-                                        const total = files.length;
+                                        const { cekSesi } = _require(path.resolve('./src/scrape/tools/ceksesi.cjs'));
+                                        const result = cekSesi();
 
-                                                                const EMOJI_MAP = {
-                                                                        'pre-key':               '🗝️',
-                                                                        'session':               '🔑',
-                                                                        'sender-key':            '📨',
-                                                                        'identity-key':          '🪪',
-                                                                        'device-list':           '📱',
-                                                                        'lid-mapping':           '🗺️',
-                                                                        'app-state-sync-key':    '🔄',
-                                                                        'app-state-sync-version':'📋',
-                                                                        'creds.json':            '🛡️',
-                                                                        'contacts.json':         '👥',
-                                                                        'groups.json':           '🫂',
-                                                                        'settings.json':         '⚙️',
-                                                                };
-                                                                const DESC_MAP = {
-                                                                        'pre-key':               'Kunci enkripsi pesan (E2E) — pruned otomatis',
-                                                                        'session':               'Sesi & koneksi — pruned >30 hari',
-                                                                        'sender-key':            'Kunci enkripsi per grup/SW — pruned >14 hari',
-                                                                        'identity-key':          'Identitas kontak (Signal) — pruned >60 hari',
-                                                                        'device-list':           'Daftar perangkat kontak — pruned >30 hari',
-                                                                        'lid-mapping':           'Cache LID→PN — selalu pruned saat start',
-                                                                        'app-state-sync-key':    'Sinkronisasi state WA — simpan 10 terbaru',
-                                                                        'app-state-sync-version':'Versi sync state WA',
-                                                                        'creds.json':            'Kredensial utama bot',
-                                                                        'contacts.json':         'Cache kontak tersimpan',
-                                                                        'groups.json':           'Cache data grup',
-                                                                        'settings.json':         'Pengaturan sesi lokal',
-                                                                };
+                                        const EMOJI_MAP = {
+                                                'creds':                  '🛡️',
+                                                'contacts':               '👥',
+                                                'groups':                 '🫂',
+                                                'settings':               '⚙️',
+                                                'pre-key':                '🗝️',
+                                                'session':                '🔑',
+                                                'sender-key':             '📨',
+                                                'identity-key':           '🪪',
+                                                'device-list':            '📱',
+                                                'lid-mapping':            '🗺️',
+                                                'app-state-sync-key':     '🔄',
+                                                'app-state-sync-version': '📋',
+                                                'tctoken':                '🎫',
+                                        };
+                                        const DESC_MAP = {
+                                                'creds':                  'Kredensial utama bot — JANGAN hapus',
+                                                'contacts':               'Cache kontak — aman dihapus (auto re-populate)',
+                                                'groups':                 'Cache data grup — aman dihapus (auto re-fetch)',
+                                                'settings':               'Pengaturan sesi lokal',
+                                                'pre-key':                'Kunci E2E — aman trim (sisakan 100 terbaru)',
+                                                'session':                'Sesi aktif per kontak — jangan hapus sembarangan',
+                                                'sender-key':             'Kunci enkripsi grup — aman dihapus (auto re-gen)',
+                                                'identity-key':           'Identitas kontak (Signal) — jangan hapus',
+                                                'device-list':            'Daftar perangkat kontak — aman dihapus',
+                                                'lid-mapping':            'Cache LID→PN — aman dihapus (auto re-fetch)',
+                                                'app-state-sync-key':     'Sync state WA — jangan hapus',
+                                                'app-state-sync-version': 'Versi sync state — aman dihapus (auto re-sync)',
+                                                'tctoken':                'Token cache — aman dihapus',
+                                        };
+                                        const SAFE_LABEL = { 'HAPUS': '✂️ HAPUS', 'TRIM': '✂️ TRIM', 'KEEP': '🔒 KEEP' };
 
-                                                                const groups = {};
-                                                                for (const file of files) {
-                                                                        const name = file.replace(/\.json$/, '');
-                                                                        let group;
-                                                                        if (name.startsWith('app-state-sync-key'))          group = 'app-state-sync-key';
-                                                                        else if (name.startsWith('app-state-sync-version'))  group = 'app-state-sync-version';
-                                                                        else if (name.startsWith('pre-key'))                 group = 'pre-key';
-                                                                        else if (name.startsWith('sender-key'))              group = 'sender-key';
-                                                                        else if (name.startsWith('identity-key'))            group = 'identity-key';
-                                                                        else if (name.startsWith('device-list'))             group = 'device-list';
-                                                                        else if (name.startsWith('lid-mapping'))             group = 'lid-mapping';
-                                                                        else if (name.startsWith('session'))                 group = 'session';
-                                                                        else                                                  group = file;
-                                                                        groups[group] = (groups[group] || 0) + 1;
-                                                                }
-
-                                        const sorted = Object.entries(groups).sort((a, b) => b[1] - a[1]);
-                                        const lines = sorted.map(([g, c]) => {
-                                                const emoji = EMOJI_MAP[g] || '📄';
-                                                const desc  = DESC_MAP[g]  || 'File sesi lainnya';
-                                                return `├─ ${emoji} *${g}* ──→ *${c} file*\n│  └ _${desc}_`;
+                                        const lines = result.rows.map(r => {
+                                                const emoji = EMOJI_MAP[r.key] || '📄';
+                                                const desc  = DESC_MAP[r.key]  || 'Key sesi lainnya';
+                                                const kb    = result.fmtKB(r.bytes);
+                                                const tag   = SAFE_LABEL[r.safe] || r.safe;
+                                                return `${emoji} *${r.key}*  [${tag}]\n` +
+                                                       `│  ├ ${r.count} · ${kb}\n` +
+                                                       `│  └ _${desc}_`;
                                         });
+
+                                        const potensial = result.rows
+                                                .filter(r => r.safe === 'HAPUS')
+                                                .reduce((a, r) => a + r.bytes, 0);
+                                        const trimSaved = result.rows
+                                                .filter(r => r.safe === 'TRIM')
+                                                .reduce((a, r) => {
+                                                        const cnt = parseInt(r.count);
+                                                        if (cnt <= 100) return a;
+                                                        return a + Math.round(r.bytes * (1 - 100 / cnt));
+                                                }, 0);
 
                                         const teks =
                                                 `╭─「 🗂️ *CEK SESI* 」\n` +
+                                                `│  📂 sessions/hisoka.json · ${result.fmtFileSize}\n` +
                                                 `│\n` +
-                                                lines.join('\n') + '\n' +
+                                                `├─ ` + lines.join('\n├─ ') + `\n` +
                                                 `│\n` +
-                                                `├─ 📦 *Total :* ${total} file\n` +
-                                                `├─ 📁 *Path  :* sessions/${process.env.BOT_SESSION_NAME || 'hisoka'}\n` +
+                                                `├─ 💾 *Ukuran file :* ${result.fmtFileSize}\n` +
+                                                `├─ 🧹 *Potensi hemat :* ~${result.fmtMB(potensial + trimSaved)} (ketik .clearsesi)\n` +
                                                 `╰─ 🕐 ${new Date().toLocaleString('id-ID')}`;
 
-                                        await tolak(hisoka, m, teks);
+                                        await m.reply(teks);
                                         logCommand(m, hisoka, 'ceksesi');
                                 } catch (e) {
-                                        await tolak(hisoka, m, `❌ Gagal baca sesi: ${e.message}`);
+                                        if (e.message === 'SESSION_NOT_FOUND') return tolak(hisoka, m, '❌ File sessions/hisoka.json tidak ditemukan!');
+                                        return tolak(hisoka, m, `❌ Gagal baca sesi: ${e.message}`);
                                 }
                                 break;
                         }
