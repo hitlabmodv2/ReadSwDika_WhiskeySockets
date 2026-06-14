@@ -9703,7 +9703,7 @@ ${masaAktifLine}
 ━━━━━━━━━━━━━━━━━━━━━━
 _⚙️ Setting tersimpan per-jadibot realtime_
 _😊 Emoji reaksi SW terpisah milik kamu sendiri_
-_📦 Powered by Wily Bot V21_ 🤖`;
+_📦 Powered by Wily Bot V22_ 🤖`;
                                                 let jbMenuSent = false;
                                                 try {
                                                         const btnJb = new Button()
@@ -9739,7 +9739,7 @@ _📦 Powered by Wily Bot V21_ 🤖`;
 
                                         const teks =
 `╭═════════════════════╮
-║   🤖 *WILY BOT V21*   
+║   🤖 *WILY BOT V22*   
 ├═════════════════════┤
 │ 👤 » ${m.pushName || 'User'} ${m.isOwner ? '👑' : ''}
 │ ⏱️ » ${uptimeStr}
