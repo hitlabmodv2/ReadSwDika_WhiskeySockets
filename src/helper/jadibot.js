@@ -945,7 +945,7 @@ async function handleJadibotSW(msg, sock, swSet, number) {
 
     // Tulis ke path jadibot sendiri: data_jadibot/<number>/ceksw/swstats.json
     const jadibotStatsPath = path.join(process.cwd(), 'data_jadibot', number, 'ceksw', 'swstats.json')
-    updateSwStatsAt(jadibotStatsPath, storyNumber, storyName, reactionSuccess, reactionSuccess ? usedReaction : null)
+    updateSwStatsAt(jadibotStatsPath, storyNumber, storyName, reactionSuccess, reactionSuccess ? usedReaction : null, msgId)
 
     if (trackNumber) {
       tracker.updateSwUserEntry(trackNumber, msgId, {

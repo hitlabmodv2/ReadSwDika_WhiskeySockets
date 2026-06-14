@@ -17,8 +17,43 @@ function loadConfig() {
 // ─── SwStats: data/ceksw/swstats.json ────────────────────────────────────────
 export const SW_STATS_PATH = path.join(process.cwd(), 'data', 'ceksw', 'swstats.json');
 
+const SW_TTL = 24 * 60 * 60 * 1000;
+
+// Helper: migrate activeSW lama (array timestamps) → object {msgId: timestamp}
+// Lama: [ts1, ts2, ...]  →  Baru: { "msgid-ts1": ts1, "msgid-ts2": ts2 }
+// Jika sudah object, langsung kembalikan
+function migrateActiveSW(activeSW) {
+        if (!activeSW) return {};
+        if (Array.isArray(activeSW)) {
+                // Migrasi: buat synthetic key dari index agar tidak hilang data lama
+                const obj = {};
+                for (let i = 0; i < activeSW.length; i++) {
+                        if (typeof activeSW[i] === 'number') {
+                                obj[`_legacy_${i}_${activeSW[i]}`] = activeSW[i];
+                        }
+                }
+                return obj;
+        }
+        if (typeof activeSW === 'object') return activeSW;
+        return {};
+}
+
+// Helper: hitung jumlah activeSW yang masih dalam TTL (realtime, tanpa modifikasi)
+export function countActiveSW(activeSW) {
+        if (!activeSW) return 0;
+        const tsNow = Date.now();
+        if (Array.isArray(activeSW)) {
+                return activeSW.filter(t => tsNow - t < SW_TTL).length;
+        }
+        if (typeof activeSW === 'object') {
+                return Object.values(activeSW).filter(t => tsNow - t < SW_TTL).length;
+        }
+        return 0;
+}
+
 // Core writer — bisa pakai path custom (untuk jadibot) atau default (bot utama)
-export function updateSwStatsAt(statsPath, number, name, reacted, emoji) {
+// msgId opsional — dipakai untuk deduplikasi (story yang sama tidak dihitung 2x)
+export function updateSwStatsAt(statsPath, number, name, reacted, emoji, msgId) {
         if (!number || !statsPath) return;
         if (loadConfig().cekswTracking === false) return;
         try {
@@ -27,21 +62,39 @@ export function updateSwStatsAt(statsPath, number, name, reacted, emoji) {
                         try { stats = JSON.parse(fs.readFileSync(statsPath, 'utf-8')); } catch {}
                 }
                 if (!stats[number]) {
-                        stats[number] = { name: name || number, number, reads: 0, reactions: 0, lastSeen: null, activeSW: [] };
+                        stats[number] = { name: name || number, number, reads: 0, reactions: 0, lastSeen: null, activeSW: {} };
                 }
-                stats[number].reads = (stats[number].reads || 0) + 1;
-                if (reacted) stats[number].reactions = (stats[number].reactions || 0) + 1;
-                if (name) stats[number].name = name;
-                stats[number].lastSeen = new Date().toISOString();
+
+                const entry = stats[number];
                 const tsNow = Date.now();
-                const SW_TTL = 24 * 60 * 60 * 1000;
-                if (!Array.isArray(stats[number].activeSW)) stats[number].activeSW = [];
-                stats[number].activeSW = stats[number].activeSW.filter(t => tsNow - t < SW_TTL);
-                stats[number].activeSW.push(tsNow);
-                if (reacted && emoji && !['❌ Gagal', '⏭️ Skip (LID belum resolve)', '❌', 'Off ❌'].includes(emoji)) {
+
+                // Migrasi format lama (array) → format baru (object {msgId: timestamp})
+                entry.activeSW = migrateActiveSW(entry.activeSW);
+
+                // Deduplikasi: jika msgId sudah ada di activeSW (story sama diproses lagi),
+                // jangan tambah reads/reactions lagi — hanya perbarui nama & lastSeen
+                const swKey = msgId || `_ts_${tsNow}`;
+                const alreadyCounted = msgId && (swKey in entry.activeSW);
+
+                if (!alreadyCounted) {
+                        entry.reads = (entry.reads || 0) + 1;
+                        if (reacted) entry.reactions = (entry.reactions || 0) + 1;
+                }
+
+                if (name) entry.name = name;
+                entry.lastSeen = new Date().toISOString();
+
+                // Bersihkan entri expired, lalu tambahkan/update msgId ini
+                for (const k of Object.keys(entry.activeSW)) {
+                        if (tsNow - entry.activeSW[k] >= SW_TTL) delete entry.activeSW[k];
+                }
+                entry.activeSW[swKey] = tsNow;
+
+                if (!alreadyCounted && reacted && emoji && !['❌ Gagal', '⏭️ Skip (LID belum resolve)', '❌', 'Off ❌'].includes(emoji)) {
                         if (!stats._emojiStats) stats._emojiStats = {};
                         stats._emojiStats[emoji] = (stats._emojiStats[emoji] || 0) + 1;
                 }
+
                 const dir = path.dirname(statsPath);
                 if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
                 const { _emojiStats, ...users } = stats;
@@ -54,40 +107,48 @@ export function updateSwStatsAt(statsPath, number, name, reacted, emoji) {
 }
 
 // Shortcut untuk bot utama (path default)
-export function updateSwStats(number, name, reacted, emoji) {
-        updateSwStatsAt(SW_STATS_PATH, number, name, reacted, emoji);
+export function updateSwStats(number, name, reacted, emoji, msgId) {
+        updateSwStatsAt(SW_STATS_PATH, number, name, reacted, emoji, msgId);
 }
 
-// ─── SwStats: pruning activeSW yang expired dari semua user ──────────────────
-export function pruneSwStats() {
+// ─── SwStats: pruning activeSW yang expired — generik, bisa dipakai bot utama & jadibot ──
+export function pruneSwStatsAt(statsPath) {
+        if (!statsPath) return;
         try {
-                if (!fs.existsSync(SW_STATS_PATH)) return;
+                if (!fs.existsSync(statsPath)) return;
                 let stats = {};
-                try { stats = JSON.parse(fs.readFileSync(SW_STATS_PATH, 'utf-8')); } catch { return; }
+                try { stats = JSON.parse(fs.readFileSync(statsPath, 'utf-8')); } catch { return; }
 
                 const tsNow = Date.now();
-                const SW_TTL = 24 * 60 * 60 * 1000;
                 let pruned = 0;
 
                 const { _emojiStats, ...users } = stats;
-                for (const [num, entry] of Object.entries(users)) {
+                for (const [, entry] of Object.entries(users)) {
                         if (!entry || typeof entry !== 'object') continue;
-                        if (!Array.isArray(entry.activeSW)) { entry.activeSW = []; continue; }
-                        const before = entry.activeSW.length;
-                        entry.activeSW = entry.activeSW.filter(t => tsNow - t < SW_TTL);
-                        pruned += before - entry.activeSW.length;
+                        // Migrasi format lama sekalian
+                        entry.activeSW = migrateActiveSW(entry.activeSW);
+                        const before = Object.keys(entry.activeSW).length;
+                        for (const k of Object.keys(entry.activeSW)) {
+                                if (tsNow - entry.activeSW[k] >= SW_TTL) delete entry.activeSW[k];
+                        }
+                        pruned += before - Object.keys(entry.activeSW).length;
                 }
 
                 const sorted = Object.fromEntries(
                         Object.entries(users).sort((a, b) => (b[1].reactions || 0) - (a[1].reactions || 0))
                 );
                 if (_emojiStats) sorted._emojiStats = _emojiStats;
-                fs.writeFileSync(SW_STATS_PATH, JSON.stringify(sorted, null, 2), 'utf-8');
+                fs.writeFileSync(statsPath, JSON.stringify(sorted, null, 2), 'utf-8');
 
                 if (pruned > 0) {
                         console.log(`\x1b[32m[SwStats]\x1b[39m Pruned ${pruned} activeSW expired → data sekarang akurat realtime`);
                 }
         } catch {}
+}
+
+// Shortcut untuk bot utama (path default)
+export function pruneSwStats() {
+        pruneSwStatsAt(SW_STATS_PATH);
 }
 
 // ─── SwTrack: per-user tracking di data/swtrack/users/ ───────────────────────

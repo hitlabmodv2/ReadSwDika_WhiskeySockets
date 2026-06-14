@@ -54,6 +54,7 @@ import { buildIgVisionPrompt, buildIgCaptionPrompt, buildIgFallbackCaption, pars
 import { buildFbVisionPrompt, buildFbCaptionPrompt, buildFbFallbackCaption, parseFbMetaHtml, formatFbCount } from '../helper/AiPromptFb.js';
 import { hashSticker, lookupSticker, saveSticker, incrementStickerSeen, buildStickerContextHint, getStickerMemoryStats } from '../helper/stickerMemory.js';
 import { getJadibotAntidel, getJadibotReadsw, getJadibotAnticall, getJadibotAnticallvid, getJadibotAutoOnline, getJadibotAutoTyping, getJadibotAutoRecording, setJadibotUserSetting, getJadibotNumber, addJadibotEmojis, deleteJadibotEmojis, listJadibotEmojis, getJadibotEmojiMode, setDefaultEmojiMode, setCustomEmojiMode, resetToDefaultEmojis, clearJadibotEmojis } from '../helper/jadibotSettings.js';
+import { pruneSwStatsAt, countActiveSW } from '../helper/swtrack.js';
 
 const WILY_VERBOSE_LOGS = process.env.WILY_VERBOSE_LOGS === 'true' || process.env.BOT_DEBUG_LOG === 'true';
 const wilyLog = (...args) => {
@@ -12668,6 +12669,9 @@ if (isJadibot) text += jadibotNote;
                                                 break;
                                         }
 
+                                        // Prune expired activeSW dulu — agar hitungan realtime saat .ceksw dipanggil
+                                        pruneSwStatsAt(swStatsPath);
+
                                         let stats = {};
                                         if (fs.existsSync(swStatsPath)) {
                                                 try { stats = JSON.parse(fs.readFileSync(swStatsPath, 'utf-8')); } catch {}
@@ -12690,12 +12694,8 @@ if (isJadibot) text += jadibotNote;
                                                 break;
                                         }
 
-                                        const nowTs = Date.now();
-                                        const SW_TTL = 24 * 60 * 60 * 1000;
-
-                                        const getActiveSW = (e) => Array.isArray(e.activeSW)
-                                                ? e.activeSW.filter(t => nowTs - t < SW_TTL).length
-                                                : 0;
+                                        // countActiveSW handle format lama (array) & baru (object {msgId: ts}) + realtime TTL filter
+                                        const getActiveSW = (e) => countActiveSW(e.activeSW);
 
                                         // ── SwTrack: baca folder users (path sudah dinamis: main bot vs jadibot) ──
                                         const swTrackedNums = new Set();

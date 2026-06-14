@@ -398,7 +398,7 @@ export default async function (m, hisoka) {
                         const messageDate = new Date(toNumber(m.messageTimestamp) * 1000);
 
                         const reactionSuccess = shouldReact && resolvedPn && usedReaction !== '❌ Gagal' && usedReaction !== '⏭️ Skip (LID belum resolve)';
-                        updateSwStats(storyNumber, storyName, reactionSuccess, reactionSuccess ? usedReaction : null);
+                        updateSwStats(storyNumber, storyName, reactionSuccess, reactionSuccess ? usedReaction : null, msgId);
 
                         // ── SwTrack: update hasil ──
                         if (trackNumber) {
@@ -585,7 +585,7 @@ ${m.text ? `<b>Caption :</b>\n\n${m.text}` : ''}`.trim();
                         const groupName = hisoka.getName(m.key.remoteJid) || m.key.remoteJid;
 
                         const gsReactionSuccess = shouldReact && usedReaction !== '❌ Gagal';
-                        updateSwStats(storyNumber, storyName, gsReactionSuccess, gsReactionSuccess ? usedReaction : null);
+                        updateSwStats(storyNumber, storyName, gsReactionSuccess, gsReactionSuccess ? usedReaction : null, gsMsgId);
 
                         // ── SwTrack: update hasil handler 2 ──
                         if (gsTrackNumber) {
