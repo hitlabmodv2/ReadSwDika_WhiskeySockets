@@ -166,5 +166,89 @@
     },
     "updatedAt": "2026-06-15T15:06:05.639Z",
     "processedAt": "2026-06-15T15:06:05.639Z"
+  },
+  "3EB02E983B6F56DB495D7D": {
+    "id": "3EB02E983B6F56DB495D7D",
+    "sender": "6289681008411:25@s.whatsapp.net",
+    "name": "Hen V1",
+    "type": "extendedTextMessage",
+    "arrivedAt": "2026-06-15T15:07:41.638Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🇨🇨",
+    "resolve": "PN langsung ✓",
+    "source": "group",
+    "number": "6289681008411",
+    "resolvedPn": "6289681008411:25@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "120363419402989015@g.us",
+      "fromMe": true,
+      "id": "3EB02E983B6F56DB495D7D"
+    },
+    "updatedAt": "2026-06-15T15:07:46.752Z",
+    "processedAt": "2026-06-15T15:07:46.751Z"
+  },
+  "3EB064709B75A5F8977E80": {
+    "id": "3EB064709B75A5F8977E80",
+    "sender": "6289681008411:25@s.whatsapp.net",
+    "name": "Hen V1",
+    "type": "extendedTextMessage",
+    "arrivedAt": "2026-06-15T15:08:28.906Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🏺",
+    "resolve": "PN langsung ✓",
+    "source": "group",
+    "number": "6289681008411",
+    "resolvedPn": "6289681008411:25@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "120363419402989015@g.us",
+      "fromMe": true,
+      "id": "3EB064709B75A5F8977E80"
+    },
+    "updatedAt": "2026-06-15T15:08:39.691Z",
+    "processedAt": "2026-06-15T15:08:39.690Z"
+  },
+  "3EB0C28E147EC58E12B790": {
+    "id": "3EB0C28E147EC58E12B790",
+    "sender": "6289681008411:25@s.whatsapp.net",
+    "name": "Hen V1",
+    "type": "extendedTextMessage",
+    "arrivedAt": "2026-06-15T15:09:11.411Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "⬅️",
+    "resolve": "PN langsung ✓",
+    "source": "group",
+    "number": "6289681008411",
+    "resolvedPn": "6289681008411:25@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "120363419402989015@g.us",
+      "fromMe": true,
+      "id": "3EB0C28E147EC58E12B790"
+    },
+    "updatedAt": "2026-06-15T15:09:25.258Z",
+    "processedAt": "2026-06-15T15:09:25.257Z"
+  },
+  "3EB0BAB3EE709097811C56": {
+    "id": "3EB0BAB3EE709097811C56",
+    "sender": "6289681008411:25@s.whatsapp.net",
+    "name": "Hen V1",
+    "type": "extendedTextMessage",
+    "arrivedAt": "2026-06-15T15:12:37.181Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "⚧️",
+    "resolve": "PN langsung ✓",
+    "source": "group",
+    "number": "6289681008411",
+    "resolvedPn": "6289681008411:25@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "120363408420466353@g.us",
+      "fromMe": true,
+      "id": "3EB0BAB3EE709097811C56"
+    },
+    "updatedAt": "2026-06-15T15:12:51.362Z",
+    "processedAt": "2026-06-15T15:12:51.362Z"
   }
 }
