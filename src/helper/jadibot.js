@@ -953,14 +953,37 @@ async function handleJadibotSW(msg, sock, swSet, number) {
         usedReaction = '❌ Gagal'
       })
     } else if (isGroupStatus && shouldReact) {
-      // Group status selalu react ke group JID dengan key original (fromMe atau bukan)
-      await sock.sendMessage(
-        remoteJid,
-        { react: { key: msg.key, text: usedReaction } }
-      ).catch(err => {
-        if (!isConnClosed(err)) console.error('\x1b[31m[Jadibot GS Reaction]\x1b[39m', err?.message || String(err))
-        usedReaction = '❌ Gagal'
-      })
+      // Dua jalur reaksi:
+      // fromMe=true  → react ke group JID (story sendiri = group message, WA izinkan react ke pesan sendiri)
+      // fromMe=false → react ke status@broadcast + statusJidList (linked status dari orang lain)
+      if (msg.key?.fromMe) {
+        // Story gc milik jadibot sendiri — react ke group JID
+        const gsSelfKey = { ...msg.key }
+        await sock.sendMessage(
+          remoteJid,
+          { react: { key: gsSelfKey, text: usedReaction } }
+        ).catch(err => {
+          if (!isConnClosed(err)) console.error('\x1b[31m[Jadibot GS Self-Reaction]\x1b[39m', err?.message || String(err))
+          usedReaction = '❌ Gagal'
+        })
+      } else {
+        // Story gc orang lain — react via status@broadcast + statusJidList
+        const gsStatusKey = {
+          remoteJid: 'status@broadcast',
+          fromMe: false,
+          id: msg.key?.id,
+          participant: senderJidNorm || undefined,
+        }
+        const gsStatusJidList = [jidNormalizedUser(sock.user.id), ...(senderJidNorm ? [senderJidNorm] : [])]
+        await sock.sendMessage(
+          'status@broadcast',
+          { react: { key: gsStatusKey, text: usedReaction } },
+          { statusJidList: gsStatusJidList }
+        ).catch(err => {
+          if (!isConnClosed(err)) console.error('\x1b[31m[Jadibot GS Reaction]\x1b[39m', err?.message || String(err))
+          usedReaction = '❌ Gagal'
+        })
+      }
     } else if (shouldReact && !resolvedPn && isStatusBroadcast) {
       usedReaction = '⏭️ Skip (LID belum resolve)'
     }
