@@ -934,11 +934,28 @@ async function handleJadibotSW(msg, sock, swSet, number) {
       readOk = true
     } else {
       // Group status (GC) — read + react PARALLEL seperti event.js bot utama
+      //
+      // ROOT CAUSE READ GAGAL:
+      // Baileys sendReceipts() → aggregateMessageKeysNotFromMe() → skip key fromMe=true
+      // Untuk GC story fromMe=true (story jadibot sendiri via upswgc), read receipt
+      // tidak pernah dikirim karena difilter diam-diam tanpa error.
+      // Juga: participant bisa punya device suffix (:25) yang perlu dinormalisasi.
+      //
+      // FIX: buat gcReadKey dengan fromMe=false + participant ternormalisasi
+      // sehingga Baileys tidak memfilternya dan receipt benar-benar terkirim ke WA.
+      const _gcParticipant = msg.key?.participant
+        ? jidNormalizedUser(msg.key.participant)
+        : (msg.key?.fromMe ? jidNormalizedUser(sock.user?.id || `${number}@s.whatsapp.net`) : undefined)
+      const gcReadKey = {
+        ...msg.key,
+        fromMe: false,
+        ...((_gcParticipant !== undefined) && { participant: _gcParticipant }),
+      }
       const gsReadPromise = Promise.all([
-        sock.readMessages([msg.key]).catch(err => {
+        sock.readMessages([gcReadKey]).catch(err => {
           if (!isConnClosed(err)) console.error('\x1b[31m[Jadibot GS Read]\x1b[39m', err?.message || String(err))
         }),
-        sock.sendReceipts([msg.key], 'read').catch(() => {}),
+        sock.sendReceipts([gcReadKey], 'read').catch(() => {}),
       ])
 
       let gsReactPromise

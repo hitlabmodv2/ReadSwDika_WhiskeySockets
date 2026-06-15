@@ -250,5 +250,68 @@
     },
     "updatedAt": "2026-06-15T15:12:51.362Z",
     "processedAt": "2026-06-15T15:12:51.362Z"
+  },
+  "3EB02DD826EB2A977DEE0E": {
+    "id": "3EB02DD826EB2A977DEE0E",
+    "sender": "6289681008411:25@s.whatsapp.net",
+    "name": "Hen V1",
+    "type": "extendedTextMessage",
+    "arrivedAt": "2026-06-15T15:14:07.020Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🍋‍🟩",
+    "resolve": "PN langsung ✓",
+    "source": "group",
+    "number": "6289681008411",
+    "resolvedPn": "6289681008411:25@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "120363408420466353@g.us",
+      "fromMe": true,
+      "id": "3EB02DD826EB2A977DEE0E"
+    },
+    "updatedAt": "2026-06-15T15:14:22.489Z",
+    "processedAt": "2026-06-15T15:14:22.489Z"
+  },
+  "3EB0C7071C272D621F4AB9": {
+    "id": "3EB0C7071C272D621F4AB9",
+    "sender": "6289681008411:25@s.whatsapp.net",
+    "name": "Hen V1",
+    "type": "extendedTextMessage",
+    "arrivedAt": "2026-06-15T15:16:08.733Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🧠",
+    "resolve": "PN langsung ✓",
+    "source": "group",
+    "number": "6289681008411",
+    "resolvedPn": "6289681008411:25@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "120363408420466353@g.us",
+      "fromMe": true,
+      "id": "3EB0C7071C272D621F4AB9"
+    },
+    "updatedAt": "2026-06-15T15:16:28.661Z",
+    "processedAt": "2026-06-15T15:16:28.661Z"
+  },
+  "3EB0B835262C696AAAE959": {
+    "id": "3EB0B835262C696AAAE959",
+    "sender": "6289681008411:25@s.whatsapp.net",
+    "name": "Hen V1",
+    "type": "extendedTextMessage",
+    "arrivedAt": "2026-06-15T15:22:30.602Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🧁",
+    "resolve": "PN langsung ✓",
+    "source": "group",
+    "number": "6289681008411",
+    "resolvedPn": "6289681008411:25@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "120363408420466353@g.us",
+      "fromMe": true,
+      "id": "3EB0B835262C696AAAE959"
+    },
+    "updatedAt": "2026-06-15T15:22:50.329Z",
+    "processedAt": "2026-06-15T15:22:50.328Z"
   }
 }
