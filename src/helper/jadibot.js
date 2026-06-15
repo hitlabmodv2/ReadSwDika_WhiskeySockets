@@ -920,7 +920,13 @@ async function handleJadibotSW(msg, sock, swSet, number) {
       )
       readOk = true
     } else {
-      // Group status — tidak perlu receipt key
+      // Group status — read + view receipt agar counter "dilihat" naik
+      await Promise.all([
+        sock.readMessages([msg.key]).catch(err => {
+          if (!isConnClosed(err)) console.error('\x1b[31m[Jadibot GS Read]\x1b[39m', err?.message || String(err))
+        }),
+        sock.sendReceipts([msg.key], 'read').catch(() => {}),
+      ])
       readOk = true
     }
 
