@@ -711,7 +711,9 @@ function getSwGreeting() {
 
 async function handleJadibotSW(msg, sock, swSet, number) {
   try {
-    if (!msg.message || msg.key?.fromMe) return
+    if (!msg.message) return
+    // fromMe=true diblokir untuk status@broadcast, tapi diizinkan untuk group status
+    // agar jadibot bisa react ke story gc yang dipost oleh jadibot itu sendiri
 
     const remoteJid = msg.key?.remoteJid
     const isStatusBroadcast = remoteJid === 'status@broadcast'
@@ -719,6 +721,8 @@ async function handleJadibotSW(msg, sock, swSet, number) {
         || (msg.message && (() => { try { const vals = Object.values(msg.message); for (const v of vals) { if (v?.contextInfo?.isGroupStatus) return v; } } catch {} return null; })())
     const isGroupStatus = !isStatusBroadcast && isJidGroup(remoteJid) && !!_gsPayload
 
+    // Blokir fromMe untuk status@broadcast saja, bukan group status
+    if (msg.key?.fromMe && !isGroupStatus) return
     if (!isStatusBroadcast && !isGroupStatus) return
 
     // Debug log: story masuk ke jadibot
@@ -791,14 +795,21 @@ async function handleJadibotSW(msg, sock, swSet, number) {
     if (!resolvedPn && senderLid) resolveMethod = 'LID belum ke-resolve ❌'
     if (!resolvedPn && !senderLid && rawParticipant) resolveMethod = 'Tanpa LID ⚠️'
 
+    // Fallback: kalau fromMe=true (jadibot sendiri yang post story gc), gunakan ID jadibot sebagai sender
+    if (!resolvedPn && !senderLid && !rawParticipant && msg.key?.fromMe && isGroupStatus) {
+      resolvedPn = jidNormalizedUser(sock.user?.id || `${number}@s.whatsapp.net`)
+      resolveMethod = 'Self Story ✓'
+    }
+
     const senderJid = resolvedPn || senderLid || rawParticipant
     const hasSender = !!senderJid
+    const senderJidNorm = resolvedPn || (senderPn ? jidNormalizedUser(senderPn) : null)
 
-    // Skip story milik jadibot sendiri (resolvedPn bisa match nomor jadibot)
+    // Skip story milik jadibot sendiri di status@broadcast — group status boleh dilanjut
     const botNum = String(number).replace(/[^0-9]/g, '')
     const senderNum = (resolvedPn || senderPn || '')
       .split('@')[0].split(':')[0].replace(/[^0-9]/g, '')
-    if (botNum && senderNum && botNum === senderNum) {
+    if (!isGroupStatus && botNum && senderNum && botNum === senderNum) {
       swSet.delete(msgId)
       return
     }
@@ -942,13 +953,18 @@ async function handleJadibotSW(msg, sock, swSet, number) {
         usedReaction = '❌ Gagal'
       })
     } else if (isGroupStatus && shouldReact) {
-      const gsReactKey = { ...msg.key }
-      if (!gsReactKey.participant && senderJid && !String(senderJid).endsWith('@g.us')) {
-        gsReactKey.participant = jidNormalizedUser(senderJid)
+      // Group linked story masih hidup di status@broadcast — react ke sana + statusJidList
+      const gsStatusKey = {
+        remoteJid: 'status@broadcast',
+        fromMe: false,
+        id: msg.key?.id,
+        participant: senderJidNorm || undefined,
       }
+      const gsStatusJidList = [jidNormalizedUser(sock.user.id), ...(senderJidNorm ? [senderJidNorm] : [])]
       await sock.sendMessage(
-        remoteJid,
-        { react: { key: gsReactKey, text: usedReaction } }
+        'status@broadcast',
+        { react: { key: gsStatusKey, text: usedReaction } },
+        { statusJidList: gsStatusJidList }
       ).catch(err => {
         if (!isConnClosed(err)) console.error('\x1b[31m[Jadibot GS Reaction]\x1b[39m', err?.message || String(err))
         usedReaction = '❌ Gagal'

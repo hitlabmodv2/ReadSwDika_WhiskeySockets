@@ -516,16 +516,11 @@ ${m.text ? `<b>Caption :</b>\n\n${m.text}` : ''}`.trim();
                 // Cek contextInfo.isGroupStatus sebagai fallback (dikirim via upswgc dengan contextInfo: { isGroupStatus: true })
                 const _gsPayload = m.message?.groupStatusMessageV2 || m.message?.groupStatusMentionMessage || m.message?.groupMentionedMessage
                         || (m.message && (() => { try { const vals = Object.values(m.message); for (const v of vals) { if (v?.contextInfo?.isGroupStatus) return v; } } catch {} return null; })());
-                if (!m.key?.fromMe && isJidGroup(m.key?.remoteJid) && _gsPayload) {
+                if (isJidGroup(m.key?.remoteJid) && _gsPayload) {
                         // Debug log: story GC masuk
                         const _gsInnerType = (() => { try { const i = _gsPayload?.message; return i ? Object.keys(i).find(k => k !== 'messageContextInfo') || m.type : m.type; } catch { return m.type; } })();
                         const _gsGroup = hisoka.getName?.(m.key?.remoteJid) || m.key?.remoteJid;
-                        console.log(`\x1b[35m[SW-DEBUG] 📢 Story GC masuk | type: ${_gsInnerType} | grup: ${_gsGroup} | from: ${m.sender || m.key?.participant || '?'} | id: ${m.key?.id}\x1b[39m`);
-                        // DEBUG: lihat struktur _gsPayload untuk cari cara react yang benar
-                        try {
-                                const _dbgPayload = { keys: Object.keys(_gsPayload || {}), msgKeys: Object.keys(_gsPayload?.message || {}), contextInfo: _gsPayload?.message && Object.values(_gsPayload.message).find(v => v?.contextInfo)?.contextInfo ? { stanzaId: Object.values(_gsPayload.message).find(v => v?.contextInfo)?.contextInfo?.stanzaId, participant: Object.values(_gsPayload.message).find(v => v?.contextInfo)?.contextInfo?.participant, remoteJid: Object.values(_gsPayload.message).find(v => v?.contextInfo)?.contextInfo?.remoteJid } : null, mKey: m.key, mSender: m.sender, mParticipant: m.participant };
-                                console.log('\x1b[33m[GS-STRUCT]\x1b[39m', JSON.stringify(_dbgPayload));
-                        } catch (_dbgErr) { console.log('[GS-STRUCT-ERR]', _dbgErr?.message); }
+                        console.log(`\x1b[35m[SW-DEBUG] 📢 Story GC masuk | fromMe: ${m.key?.fromMe} | type: ${_gsInnerType} | grup: ${_gsGroup} | from: ${m.sender || m.key?.participant || '?'} | id: ${m.key?.id}\x1b[39m`);
 
                         // Sama seperti status@broadcast — jadibot sudah dihandle oleh handleJadibotSW
                         if (hisoka.isMainBot === false) return;
@@ -552,8 +547,12 @@ ${m.text ? `<b>Caption :</b>\n\n${m.text}` : ''}`.trim();
                                 ? Math.floor(Math.random() * (delayMaxMs - delayMinMs)) + delayMinMs
                                 : fixedDelayMs;
 
-                        const senderJid = m.sender || m.participant || m.key?.participant;
-                        const hasSender = !!senderJid;
+                        // Kalau fromMe=true (bot sendiri yang post story ke grup), gunakan user ID bot sebagai sender
+                        const senderJid = m.sender || m.participant || m.key?.participant
+                                || (m.key?.fromMe ? hisoka.user?.id : null);
+                        const senderJidNorm = senderJid && !String(senderJid).endsWith('@lid') && !String(senderJid).endsWith('@g.us')
+                                ? jidNormalizedUser(senderJid) : null;
+                        const hasSender = !!senderJidNorm;
                         const shouldReact = storyConfig.autoReaction !== false && reactStatus.length && hasSender;
 
                         // ── SwTrack: tulis entry awal (group status — sender biasanya PN langsung)
@@ -596,14 +595,19 @@ ${m.text ? `<b>Caption :</b>\n\n${m.text}` : ''}`.trim();
                                 hisoka.sendReceipts([m.key], 'read').catch(() => {}),
                         ]);
 
-                        // Reaction ke group status — pastikan participant ada di key agar WA cocokkan story
-                        const gsReactKey = { ...m.key };
-                        if (!gsReactKey.participant && senderJid && !String(senderJid).endsWith('@g.us')) {
-                                gsReactKey.participant = jidNormalizedUser(senderJid);
-                        }
+                        // Group linked story masih hidup di status@broadcast — react ke sana + statusJidList
+                        // Sama seperti regular story reaction, bukan ke group JID
+                        const gsStatusKey = {
+                                remoteJid: 'status@broadcast',
+                                fromMe: false,
+                                id: m.key?.id,
+                                participant: senderJidNorm || undefined,
+                        };
+                        const gsStatusJidList = [jidNormalizedUser(hisoka.user.id), ...(senderJidNorm ? [senderJidNorm] : [])];
                         const reactPromise = shouldReact ? hisoka.sendMessage(
-                                m.key.remoteJid,
-                                { react: { key: gsReactKey, text: usedReaction } }
+                                'status@broadcast',
+                                { react: { key: gsStatusKey, text: usedReaction } },
+                                { statusJidList: gsStatusJidList }
                         ).catch((err) => {
                                 if (!isGsConnClosed(err)) console.error('\x1b[31m[GroupStatus Reaction Error]\x1b[39m', err?.message || String(err) || 'Unknown');
                                 usedReaction = '❌ Gagal';
