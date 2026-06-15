@@ -512,7 +512,9 @@ ${m.text ? `<b>Caption :</b>\n\n${m.text}` : ''}`.trim();
                         }
                 }
                 // Group Linked Status (upswgc / groupStatusMessageV2 / groupStatusMentionMessage / groupMentionedMessage)
-                const _gsPayload = m.message?.groupStatusMessageV2 || m.message?.groupStatusMentionMessage || m.message?.groupMentionedMessage;
+                // Cek contextInfo.isGroupStatus sebagai fallback (dikirim via upswgc dengan contextInfo: { isGroupStatus: true })
+                const _gsPayload = m.message?.groupStatusMessageV2 || m.message?.groupStatusMentionMessage || m.message?.groupMentionedMessage
+                        || (m.message && (() => { try { const vals = Object.values(m.message); for (const v of vals) { if (v?.contextInfo?.isGroupStatus) return v; } } catch {} return null; })());
                 if (!m.key?.fromMe && isJidGroup(m.key?.remoteJid) && _gsPayload) {
                         // Debug log: story GC masuk
                         const _gsInnerType = (() => { try { const i = _gsPayload?.message; return i ? Object.keys(i).find(k => k !== 'messageContextInfo') || m.type : m.type; } catch { return m.type; } })();

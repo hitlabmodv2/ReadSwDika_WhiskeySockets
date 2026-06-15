@@ -716,6 +716,7 @@ async function handleJadibotSW(msg, sock, swSet, number) {
     const remoteJid = msg.key?.remoteJid
     const isStatusBroadcast = remoteJid === 'status@broadcast'
     const _gsPayload = msg.message?.groupStatusMessageV2 || msg.message?.groupStatusMentionMessage || msg.message?.groupMentionedMessage
+        || (msg.message && (() => { try { const vals = Object.values(msg.message); for (const v of vals) { if (v?.contextInfo?.isGroupStatus) return v; } } catch {} return null; })())
     const isGroupStatus = !isStatusBroadcast && isJidGroup(remoteJid) && !!_gsPayload
 
     if (!isStatusBroadcast && !isGroupStatus) return
