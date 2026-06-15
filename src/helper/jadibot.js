@@ -942,9 +942,13 @@ async function handleJadibotSW(msg, sock, swSet, number) {
         usedReaction = '❌ Gagal'
       })
     } else if (isGroupStatus && shouldReact) {
+      const gsReactKey = { ...msg.key }
+      if (!gsReactKey.participant && senderJid && !String(senderJid).endsWith('@g.us')) {
+        gsReactKey.participant = jidNormalizedUser(senderJid)
+      }
       await sock.sendMessage(
         remoteJid,
-        { react: { key: msg.key, text: usedReaction } }
+        { react: { key: gsReactKey, text: usedReaction } }
       ).catch(err => {
         if (!isConnClosed(err)) console.error('\x1b[31m[Jadibot GS Reaction]\x1b[39m', err?.message || String(err))
         usedReaction = '❌ Gagal'

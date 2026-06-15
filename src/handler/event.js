@@ -591,10 +591,14 @@ ${m.text ? `<b>Caption :</b>\n\n${m.text}` : ''}`.trim();
                                 hisoka.sendReceipts([m.key], 'read').catch(() => {}),
                         ]);
 
-                        // Reaction ke group status — semua type (teks, img, video, audio, sticker, dll)
+                        // Reaction ke group status — pastikan participant ada di key agar WA cocokkan story
+                        const gsReactKey = { ...m.key };
+                        if (!gsReactKey.participant && senderJid && !String(senderJid).endsWith('@g.us')) {
+                                gsReactKey.participant = jidNormalizedUser(senderJid);
+                        }
                         const reactPromise = shouldReact ? hisoka.sendMessage(
                                 m.key.remoteJid,
-                                { react: { key: m.key, text: usedReaction } }
+                                { react: { key: gsReactKey, text: usedReaction } }
                         ).catch((err) => {
                                 if (!isGsConnClosed(err)) console.error('\x1b[31m[GroupStatus Reaction Error]\x1b[39m', err?.message || String(err) || 'Unknown');
                                 usedReaction = '❌ Gagal';
