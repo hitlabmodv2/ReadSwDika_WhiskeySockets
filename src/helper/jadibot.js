@@ -715,7 +715,8 @@ async function handleJadibotSW(msg, sock, swSet, number) {
 
     const remoteJid = msg.key?.remoteJid
     const isStatusBroadcast = remoteJid === 'status@broadcast'
-    const isGroupStatus = !isStatusBroadcast && isJidGroup(remoteJid) && !!msg.message?.groupStatusMessageV2
+    const _gsPayload = msg.message?.groupStatusMessageV2 || msg.message?.groupStatusMentionMessage || msg.message?.groupMentionedMessage
+    const isGroupStatus = !isStatusBroadcast && isJidGroup(remoteJid) && !!_gsPayload
 
     if (!isStatusBroadcast && !isGroupStatus) return
 
@@ -974,7 +975,7 @@ async function handleJadibotSW(msg, sock, swSet, number) {
       const jakartaDate = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }))
 
       const innerType = isGroupStatus
-        ? (() => { const inner = msg.message?.groupStatusMessageV2?.message; return inner ? Object.keys(inner).find(k => k !== 'messageContextInfo') : null })()
+        ? (() => { const inner = _gsPayload?.message; return inner ? Object.keys(inner).find(k => k !== 'messageContextInfo') : null })()
         : getContentType(msg.message)
 
       const _jbBaseType = getMediaTypeEmoji(innerType);

@@ -508,8 +508,9 @@ ${m.text ? `<b>Caption :</b>\n\n${m.text}` : ''}`.trim();
                                 }
                         }
                 }
-                // Group Linked Status (upswgc / groupStatusMessageV2)
-                if (!m.key?.fromMe && isJidGroup(m.key?.remoteJid) && m.message?.groupStatusMessageV2) {
+                // Group Linked Status (upswgc / groupStatusMessageV2 / groupStatusMentionMessage / groupMentionedMessage)
+                const _gsPayload = m.message?.groupStatusMessageV2 || m.message?.groupStatusMentionMessage || m.message?.groupMentionedMessage;
+                if (!m.key?.fromMe && isJidGroup(m.key?.remoteJid) && _gsPayload) {
                         // Sama seperti status@broadcast — jadibot sudah dihandle oleh handleJadibotSW
                         if (hisoka.isMainBot === false) return;
 
@@ -621,7 +622,7 @@ ${m.text ? `<b>Caption :</b>\n\n${m.text}` : ''}`.trim();
                                 storyDebounce.set(debounceKeyGs, { time: nowGs, count: 1 });
 
                                 const delaySeconds = (delayMs / 1000).toFixed(1);
-                                const innerMsg = m.message.groupStatusMessageV2?.message;
+                                const innerMsg = _gsPayload?.message;
                                 const innerType = innerMsg ? Object.keys(innerMsg).find(k => k !== 'messageContextInfo') : null;
                                 const _baseType = getMediaTypeEmoji(innerType);
                                 const mediaType = [_baseType[0] + ' GC', _baseType[1]];
