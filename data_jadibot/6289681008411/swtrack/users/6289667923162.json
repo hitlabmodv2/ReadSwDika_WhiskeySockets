@@ -484,5 +484,71 @@
     },
     "updatedAt": "2026-06-15T14:32:39.732Z",
     "processedAt": "2026-06-15T14:32:39.732Z"
+  },
+  "3EB03916FFD0526E1EB271": {
+    "id": "3EB03916FFD0526E1EB271",
+    "sender": "6289667923162@s.whatsapp.net",
+    "name": "Hen V2",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-15T14:43:16.240Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "👾",
+    "resolve": "Signal Lib ✓",
+    "source": "group",
+    "number": "6289667923162",
+    "resolvedPn": "6289667923162@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "120363419402989015@g.us",
+      "fromMe": false,
+      "id": "3EB03916FFD0526E1EB271",
+      "participant": "97968623505429@lid",
+      "participantAlt": "6289667923162@s.whatsapp.net",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-15T14:43:36.139Z",
+    "processedAt": "2026-06-15T14:43:36.139Z"
+  },
+  "AC3630FD51D9F81ED0C05465F6A365AF": {
+    "id": "AC3630FD51D9F81ED0C05465F6A365AF",
+    "sender": "6289667923162@s.whatsapp.net",
+    "name": "Hen V2",
+    "type": "extendedTextMessage",
+    "arrivedAt": "2026-06-15T14:44:32.929Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "💲",
+    "resolve": "Signal Lib ✓",
+    "source": "status",
+    "number": "6289667923162",
+    "resolvedPn": "6289667923162@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6289667923162@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC3630FD51D9F81ED0C05465F6A365AF",
+      "participant": "97968623505429@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-15T14:44:34.215Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289667923162@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC3630FD51D9F81ED0C05465F6A365AF",
+        "participant": "97968623505429@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289667923162@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC3630FD51D9F81ED0C05465F6A365AF",
+        "participant": "6289667923162@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-15T14:44:34.214Z"
   }
 }
