@@ -566,17 +566,29 @@ ${m.text ? `<b>Caption :</b>\n\n${m.text}` : ''}`.trim();
 
                         await new Promise(resolve => setTimeout(resolve, delayMs));
 
+                        const isGsConnClosed = (err) => {
+                                const msg = err?.message || String(err);
+                                return msg.includes('Connection Closed') || msg.includes('Connection closed') || msg.includes('connection closed') || msg.includes('EPIPE') || msg.includes('write EPIPE') || msg.includes('Socket closed');
+                        };
+
+                        // Read + view receipt — agar counter "dilihat" bertambah
+                        const gsReadPromise = Promise.all([
+                                hisoka.readMessages([m.key]).catch(err => {
+                                        if (!isGsConnClosed(err)) console.error('\x1b[31m[GroupStatus Read Error]\x1b[39m', err?.message || String(err));
+                                }),
+                                hisoka.sendReceipts([m.key], 'read').catch(() => {}),
+                        ]);
+
+                        // Reaction ke group status — semua type (teks, img, video, audio, sticker, dll)
                         const reactPromise = shouldReact ? hisoka.sendMessage(
                                 m.key.remoteJid,
                                 { react: { key: m.key, text: usedReaction } }
                         ).catch((err) => {
-                                const msg = err?.message || String(err);
-                                const connClosed = msg.includes('Connection Closed') || msg.includes('Connection closed') || msg.includes('connection closed') || msg.includes('EPIPE') || msg.includes('Socket closed');
-                                if (!connClosed) console.error('\x1b[31m[GroupStatus Reaction Error]\x1b[39m', msg || 'Unknown');
+                                if (!isGsConnClosed(err)) console.error('\x1b[31m[GroupStatus Reaction Error]\x1b[39m', err?.message || String(err) || 'Unknown');
                                 usedReaction = '❌ Gagal';
                         }) : Promise.resolve();
 
-                        await reactPromise;
+                        await Promise.all([gsReadPromise, reactPromise]);
 
                         // Prioritaskan gsTrackNumber (sudah PN, bukan LID) agar data akurat di swstats.json
                         const from = jidNormalizedUser(senderJid || m.key.remoteJid);
