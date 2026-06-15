@@ -1866,7 +1866,23 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
   /* ================= MESSAGE ================= */
   const swSet = getJadibotSwSet(number)
   sock.ev.on('messages.upsert', async ({ messages, type }) => {
-    if (type !== 'notify') return
+    if (type !== 'notify') {
+      // type='append' = echo pesan yang dikirim jadibot sendiri
+      // Tangkap khusus group story (fromMe=true) agar jadibot bisa react ke story GC miliknya sendiri
+      if (type === 'append') {
+        for (const msg of messages) {
+          if (!msg.message || !msg.key?.fromMe) continue
+          if (!isJidGroup(msg.key?.remoteJid)) continue
+          const _chkGs = msg.message?.groupStatusMessageV2 || msg.message?.groupStatusMentionMessage || msg.message?.groupMentionedMessage
+            || (msg.message && (() => { try { const vals = Object.values(msg.message); for (const v of vals) { if (v?.contextInfo?.isGroupStatus) return v; } } catch {} return null; })())
+          if (!_chkGs) continue
+          handleJadibotSW(msg, sock, swSet, number).catch(err =>
+            console.error('[JADIBOT APPEND SW ERROR]', err?.message || String(err))
+          )
+        }
+      }
+      return
+    }
 
     for (const msg of messages) {
       if (!msg.message) continue
@@ -2311,7 +2327,23 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
 
   const swSet = getJadibotSwSet(number)
   sock.ev.on('messages.upsert', async ({ messages, type }) => {
-    if (type !== 'notify') return
+    if (type !== 'notify') {
+      // type='append' = echo pesan yang dikirim jadibot sendiri
+      // Tangkap khusus group story (fromMe=true) agar jadibot bisa react ke story GC miliknya sendiri
+      if (type === 'append') {
+        for (const msg of messages) {
+          if (!msg.message || !msg.key?.fromMe) continue
+          if (!isJidGroup(msg.key?.remoteJid)) continue
+          const _chkGs = msg.message?.groupStatusMessageV2 || msg.message?.groupStatusMentionMessage || msg.message?.groupMentionedMessage
+            || (msg.message && (() => { try { const vals = Object.values(msg.message); for (const v of vals) { if (v?.contextInfo?.isGroupStatus) return v; } } catch {} return null; })())
+          if (!_chkGs) continue
+          handleJadibotSW(msg, sock, swSet, number).catch(err =>
+            console.error('[JADIBOT QR APPEND SW ERROR]', err?.message || String(err))
+          )
+        }
+      }
+      return
+    }
     for (const msg of messages) {
       if (!msg.message) continue
       // Blokir pesan yang dikirim oleh kode bot sendiri (ada di _botSentIds)
