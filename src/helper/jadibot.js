@@ -933,39 +933,36 @@ async function handleJadibotSW(msg, sock, swSet, number) {
       )
       readOk = true
     } else {
-      // Group status (GC) — read + react PARALLEL seperti event.js bot utama
-      //
-      // ROOT CAUSE READ GAGAL:
-      // Baileys sendReceipts() → aggregateMessageKeysNotFromMe() → skip key fromMe=true
-      // Untuk GC story fromMe=true (story jadibot sendiri via upswgc), read receipt
-      // tidak pernah dikirim karena difilter diam-diam tanpa error.
-      // Juga: participant bisa punya device suffix (:25) yang perlu dinormalisasi.
-      //
-      // FIX: buat gcReadKey dengan fromMe=false + participant ternormalisasi
-      // sehingga Baileys tidak memfilternya dan receipt benar-benar terkirim ke WA.
-      const _gcParticipant = msg.key?.participant
-        ? jidNormalizedUser(msg.key.participant)
-        : (msg.key?.fromMe ? jidNormalizedUser(sock.user?.id || `${number}@s.whatsapp.net`) : undefined)
-      const gcReadKey = {
-        ...msg.key,
-        fromMe: false,
-        ...((_gcParticipant !== undefined) && { participant: _gcParticipant }),
-      }
-      const gsReadPromise = Promise.all([
-        sock.readMessages([gcReadKey]).catch(err => {
+      // Group status — read + view receipt agar counter "dilihat" naik
+      await Promise.all([
+        sock.readMessages([msg.key]).catch(err => {
           if (!isConnClosed(err)) console.error('\x1b[31m[Jadibot GS Read]\x1b[39m', err?.message || String(err))
         }),
-        sock.sendReceipts([gcReadKey], 'read').catch(() => {}),
+        sock.sendReceipts([msg.key], 'read').catch(() => {}),
       ])
+      readOk = true
+    }
 
-      let gsReactPromise
-      if (!shouldReact) {
-        gsReactPromise = Promise.resolve()
-      } else if (msg.key?.fromMe) {
+    // ── Reaction ──
+    if (isStatusBroadcast && shouldReact && resolvedPn) {
+      await sock.sendMessage(
+        'status@broadcast',
+        { react: { key: msg.key, text: usedReaction } },
+        { statusJidList: [jidNormalizedUser(sock.user.id), jidNormalizedUser(resolvedPn)] }
+      ).catch(err => {
+        if (!isConnClosed(err)) console.error('\x1b[31m[Jadibot Reaction]\x1b[39m', err?.message || String(err))
+        usedReaction = '❌ Gagal'
+      })
+    } else if (isGroupStatus && shouldReact) {
+      // Dua jalur reaksi:
+      // fromMe=true  → react ke group JID (story sendiri = group message, WA izinkan react ke pesan sendiri)
+      // fromMe=false → react ke status@broadcast + statusJidList (linked status dari orang lain)
+      if (msg.key?.fromMe) {
         // Story gc milik jadibot sendiri — react ke group JID
-        gsReactPromise = sock.sendMessage(
+        const gsSelfKey = { ...msg.key }
+        await sock.sendMessage(
           remoteJid,
-          { react: { key: msg.key, text: usedReaction } }
+          { react: { key: gsSelfKey, text: usedReaction } }
         ).catch(err => {
           if (!isConnClosed(err)) console.error('\x1b[31m[Jadibot GS Self-Reaction]\x1b[39m', err?.message || String(err))
           usedReaction = '❌ Gagal'
@@ -979,7 +976,7 @@ async function handleJadibotSW(msg, sock, swSet, number) {
           participant: senderJidNorm || undefined,
         }
         const gsStatusJidList = [jidNormalizedUser(sock.user.id), ...(senderJidNorm ? [senderJidNorm] : [])]
-        gsReactPromise = sock.sendMessage(
+        await sock.sendMessage(
           'status@broadcast',
           { react: { key: gsStatusKey, text: usedReaction } },
           { statusJidList: gsStatusJidList }
@@ -988,42 +985,17 @@ async function handleJadibotSW(msg, sock, swSet, number) {
           usedReaction = '❌ Gagal'
         })
       }
-
-      await Promise.all([gsReadPromise, gsReactPromise])
-      readOk = true
+    } else if (shouldReact && !resolvedPn && isStatusBroadcast) {
+      usedReaction = '⏭️ Skip (LID belum resolve)'
     }
 
-    // ── Reaction (status@broadcast only — GC sudah dihandle parallel di atas) ──
-    if (isStatusBroadcast) {
-      if (shouldReact && resolvedPn) {
-        await sock.sendMessage(
-          'status@broadcast',
-          { react: { key: msg.key, text: usedReaction } },
-          { statusJidList: [jidNormalizedUser(sock.user.id), jidNormalizedUser(resolvedPn)] }
-        ).catch(err => {
-          if (!isConnClosed(err)) console.error('\x1b[31m[Jadibot Reaction]\x1b[39m', err?.message || String(err))
-          usedReaction = '❌ Gagal'
-        })
-      } else if (shouldReact && !resolvedPn) {
-        usedReaction = '⏭️ Skip (LID belum resolve)'
-      }
-    }
-
-    // GC: reactionSuccess tidak butuh resolvedPn (seperti event.js)
-    // status@broadcast: perlu resolvedPn agar statusJidList valid
-    const reactionSuccess = isGroupStatus
-      ? (shouldReact && usedReaction !== '❌ Gagal')
-      : (shouldReact && !!resolvedPn && usedReaction !== '❌ Gagal' && usedReaction !== '⏭️ Skip (LID belum resolve)')
+    const reactionSuccess = shouldReact && usedReaction !== '❌ Gagal' && usedReaction !== '⏭️ Skip (LID belum resolve)'
 
     // ── SwStats + SwTrack update ──
     const from = jidNormalizedUser(senderJid || remoteJid)
     const storyNumber = jidDecode(from)?.user || ''
-    // Nama: pushName → getName dari kontak → nama jadibot (kalau fromMe) → fallback nomor
-    // Sama persis dengan event.js: m.pushName || hisoka.getName(from, true) || storyNumber
-    const storyName = msg.pushName
-      || sock.getName?.(from, true)
-      || (msg.key?.fromMe ? (sock.user?.name || '') : '')
-      || storyNumber
+    // Untuk fromMe=true (story jadibot sendiri di GC), pakai nama jadibot dari sock.user.name
+    const storyName = msg.pushName || (msg.key?.fromMe ? (sock.user?.name || '') : '') || storyNumber
 
     // Tulis ke path jadibot sendiri: data_jadibot/<number>/ceksw/swstats.json
     const jadibotStatsPath = path.join(process.cwd(), 'data_jadibot', number, 'ceksw', 'swstats.json')
