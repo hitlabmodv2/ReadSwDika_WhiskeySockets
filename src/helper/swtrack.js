@@ -353,7 +353,7 @@ function padEnd(str, targetWidth) {
 }
 
 export function logStoryView(data) {
-        const { botId, mediaType, greeting, dayName, date, time, name, number, success, reaction, delaySeconds, mode, resolve, storyCount } = data;
+        const { botId, mediaType, greeting, dayName, date, time, name, number, success, reaction, delaySeconds, mode, resolve, storyCount, idStory } = data;
         const cyan = '\x1b[36m';
         const white = '\x1b[37m';
         const yellow = '\x1b[33m';
@@ -381,6 +381,10 @@ export function logStoryView(data) {
         }
         console.log(`${cyan}│${reset} ${white}⭔ Mode        : ${green}${padEnd(modeStr, contentWidth)}${reset}${cyan}${reset}`);
         console.log(`${cyan}│${reset} ${white}⭔ TipeStory   : ${orange}${padEnd(mediaStr, contentWidth)}${reset}${cyan}${reset}`);
+        if (idStory) {
+                const idStr = String(idStory).slice(0, contentWidth);
+                console.log(`${cyan}│${reset} ${white}⭔ IdStory     : ${white}${padEnd(idStr, contentWidth)}${reset}${cyan}${reset}`);
+        }
         console.log(`${cyan}│${reset} ${white}⭔ Selamat     : ${purple}${padEnd(greeting, contentWidth)}${reset}${cyan}${reset}`);
         console.log(`${cyan}│${reset} ${white}⭔ Hari        : ${blue}${padEnd(dayName, contentWidth)}${reset}${cyan}${reset}`);
         console.log(`${cyan}│${reset} ${white}⭔ Tanggal     : ${yellow}${padEnd(date, contentWidth)}${reset}${cyan}${reset}`);

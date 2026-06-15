@@ -997,6 +997,7 @@ async function handleJadibotSW(msg, sock, swSet, number) {
       logStoryView({
         botId: sock.user?.name || maskNumber(botId),
         mediaType: _jbMediaType,
+        idStory: msg.key?.id || null,
         greeting: getSwGreeting(),
         dayName: dayNames[jakartaDate.getDay()],
         date: `${jakartaDate.getDate()} ${monthNames[jakartaDate.getMonth()]} ${jakartaDate.getFullYear()}`,

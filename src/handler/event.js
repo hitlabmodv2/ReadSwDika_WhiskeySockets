@@ -447,6 +447,7 @@ export default async function (m, hisoka) {
                                 logStoryView({
                      /* ini tambahan */ botId: hisoka.isMainBot ? null : (hisoka.user.name || maskNumber(botId)),
                                         mediaType: getMediaTypeEmoji(m.type),
+                                        idStory: m.key?.id || null,
                                         greeting: getGreeting(),
                                         dayName: dayName,
                                         date: dateStr,
@@ -650,6 +651,7 @@ ${m.text ? `<b>Caption :</b>\n\n${m.text}` : ''}`.trim();
                                 logStoryView({
                                         botId: hisoka.isMainBot ? null : (hisoka.user.name || maskNumber(botIdGs)),
                                         mediaType,
+                                        idStory: m.key?.id || null,
                                         greeting,
                                         dayName,
                                         date: dateStr,
