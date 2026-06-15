@@ -1,0 +1,44 @@
+{
+  "AC5D9C24A94874F2525E95E3CF3FDCDF": {
+    "id": "AC5D9C24A94874F2525E95E3CF3FDCDF",
+    "sender": "6281230540131@s.whatsapp.net",
+    "name": "Cina Jawa👲🗿",
+    "type": "extendedTextMessage",
+    "arrivedAt": "2026-06-15T14:09:43.907Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "📛",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6281230540131",
+    "resolvedPn": "6281230540131@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6281230540131@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC5D9C24A94874F2525E95E3CF3FDCDF",
+      "participant": "156839438221505@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-15T14:10:13.254Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281230540131@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC5D9C24A94874F2525E95E3CF3FDCDF",
+        "participant": "156839438221505@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281230540131@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC5D9C24A94874F2525E95E3CF3FDCDF",
+        "participant": "6281230540131@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-15T14:10:13.254Z"
+  }
+}
