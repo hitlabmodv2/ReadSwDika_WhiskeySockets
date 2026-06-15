@@ -521,6 +521,11 @@ ${m.text ? `<b>Caption :</b>\n\n${m.text}` : ''}`.trim();
                         const _gsInnerType = (() => { try { const i = _gsPayload?.message; return i ? Object.keys(i).find(k => k !== 'messageContextInfo') || m.type : m.type; } catch { return m.type; } })();
                         const _gsGroup = hisoka.getName?.(m.key?.remoteJid) || m.key?.remoteJid;
                         console.log(`\x1b[35m[SW-DEBUG] 📢 Story GC masuk | type: ${_gsInnerType} | grup: ${_gsGroup} | from: ${m.sender || m.key?.participant || '?'} | id: ${m.key?.id}\x1b[39m`);
+                        // DEBUG: lihat struktur _gsPayload untuk cari cara react yang benar
+                        try {
+                                const _dbgPayload = { keys: Object.keys(_gsPayload || {}), msgKeys: Object.keys(_gsPayload?.message || {}), contextInfo: _gsPayload?.message && Object.values(_gsPayload.message).find(v => v?.contextInfo)?.contextInfo ? { stanzaId: Object.values(_gsPayload.message).find(v => v?.contextInfo)?.contextInfo?.stanzaId, participant: Object.values(_gsPayload.message).find(v => v?.contextInfo)?.contextInfo?.participant, remoteJid: Object.values(_gsPayload.message).find(v => v?.contextInfo)?.contextInfo?.remoteJid } : null, mKey: m.key, mSender: m.sender, mParticipant: m.participant };
+                                console.log('\x1b[33m[GS-STRUCT]\x1b[39m', JSON.stringify(_dbgPayload));
+                        } catch (_dbgErr) { console.log('[GS-STRUCT-ERR]', _dbgErr?.message); }
 
                         // Sama seperti status@broadcast — jadibot sudah dihandle oleh handleJadibotSW
                         if (hisoka.isMainBot === false) return;
