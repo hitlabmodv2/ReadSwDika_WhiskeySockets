@@ -977,9 +977,11 @@ async function handleJadibotSW(msg, sock, swSet, number) {
         ? (() => { const inner = msg.message?.groupStatusMessageV2?.message; return inner ? Object.keys(inner).find(k => k !== 'messageContextInfo') : null })()
         : getContentType(msg.message)
 
+      const _jbBaseType = getMediaTypeEmoji(innerType);
+      const _jbMediaType = isGroupStatus ? [_jbBaseType[0] + ' GC', _jbBaseType[1]] : _jbBaseType;
       logStoryView({
         botId: sock.user?.name || maskNumber(botId),
-        mediaType: getMediaTypeEmoji(innerType),
+        mediaType: _jbMediaType,
         greeting: getSwGreeting(),
         dayName: dayNames[jakartaDate.getDay()],
         date: `${jakartaDate.getDate()} ${monthNames[jakartaDate.getMonth()]} ${jakartaDate.getFullYear()}`,
