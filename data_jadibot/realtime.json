@@ -9,7 +9,9 @@
       "durationText": "30 hari",
       "status": "active",
       "connectedAt": 1781510793241,
-      "isPaused": false
+      "isPaused": true,
+      "pausedAt": 1781511010002,
+      "pausedRemainingMs": 2585644213
     }
   }
 }

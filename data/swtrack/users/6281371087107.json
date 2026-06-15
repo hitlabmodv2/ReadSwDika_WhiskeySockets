@@ -1,0 +1,44 @@
+{
+  "ACEF7A5C26E03364EBB53999C34CF541": {
+    "id": "ACEF7A5C26E03364EBB53999C34CF541",
+    "sender": "6281371087107@s.whatsapp.net",
+    "name": "Halmes Sandri",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-15T05:21:11.557Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🏰",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6281371087107",
+    "resolvedPn": "6281371087107@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6281371087107@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACEF7A5C26E03364EBB53999C34CF541",
+      "participant": "195262182080707@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-15T05:21:31.330Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281371087107@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACEF7A5C26E03364EBB53999C34CF541",
+        "participant": "195262182080707@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281371087107@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACEF7A5C26E03364EBB53999C34CF541",
+        "participant": "6281371087107@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-15T05:21:31.330Z"
+  }
+}
