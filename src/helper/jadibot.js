@@ -1022,10 +1022,6 @@ async function handleJadibotSW(msg, sock, swSet, number) {
       if (d) { d.count++; storyDebounce.set(debounceKey, d) }
     }
 
-    // Tandai ke global swProcessingSet agar event.js tidak double-log SW yang sama
-    if (!global.__swProcessingSet) global.__swProcessingSet = new Set()
-    global.__swProcessingSet.add(msgId)
-
   } catch (err) {
     console.error('\x1b[31m[Jadibot SW Error]\x1b[39m', err?.message || String(err))
   }

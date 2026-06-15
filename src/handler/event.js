@@ -659,7 +659,7 @@ ${m.text ? `<b>Caption :</b>\n\n${m.text}` : ''}`.trim();
                                         name: storyName,
                                         number: maskNumber(storyNumber),
                                         storyCount: getStoryCountToday(storyNumber),
-                                        success: 'Grup SW ✓',
+                                        success: gsReactionSuccess ? 'Grup SW ✓' : (shouldReact ? 'Baca ✓' : 'Baca ✓'),
                                         reaction: shouldReact ? usedReaction : 'Off ❌',
                                         delaySeconds,
                                         mode: `${mode} [📢 ${groupName}]`,
