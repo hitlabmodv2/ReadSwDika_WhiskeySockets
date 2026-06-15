@@ -552,7 +552,8 @@ ${m.text ? `<b>Caption :</b>\n\n${m.text}` : ''}`.trim();
                                 || (m.key?.fromMe ? hisoka.user?.id : null);
                         const senderJidNorm = senderJid && !String(senderJid).endsWith('@lid') && !String(senderJid).endsWith('@g.us')
                                 ? jidNormalizedUser(senderJid) : null;
-                        const hasSender = !!senderJidNorm;
+                        // hasSender tidak wajib PN — LID pun tetap bisa react (key.id sudah cukup untuk identifikasi story)
+                        const hasSender = !!senderJid;
                         const shouldReact = storyConfig.autoReaction !== false && reactStatus.length && hasSender;
 
                         // ── SwTrack: tulis entry awal (group status — sender biasanya PN langsung)

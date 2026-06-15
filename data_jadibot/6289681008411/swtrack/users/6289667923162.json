@@ -443,9 +443,9 @@
     "name": "Hen V2",
     "type": "extendedTextMessage",
     "arrivedAt": "2026-06-15T14:31:51.331Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "🔰",
     "resolve": "Signal Lib ✓",
     "source": "group",
     "number": "6289667923162",
@@ -458,6 +458,31 @@
       "participantAlt": "6289667923162@s.whatsapp.net",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-15T14:31:51.332Z"
+    "updatedAt": "2026-06-15T14:31:58.625Z",
+    "processedAt": "2026-06-15T14:31:58.625Z"
+  },
+  "3EB0BCCAF940730F87678B": {
+    "id": "3EB0BCCAF940730F87678B",
+    "sender": "6289667923162@s.whatsapp.net",
+    "name": "Hen V2",
+    "type": "extendedTextMessage",
+    "arrivedAt": "2026-06-15T14:32:37.463Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🧘",
+    "resolve": "Signal Lib ✓",
+    "source": "group",
+    "number": "6289667923162",
+    "resolvedPn": "6289667923162@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "120363192554714254@g.us",
+      "fromMe": false,
+      "id": "3EB0BCCAF940730F87678B",
+      "participant": "97968623505429@lid",
+      "participantAlt": "6289667923162@s.whatsapp.net",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-15T14:32:39.732Z",
+    "processedAt": "2026-06-15T14:32:39.732Z"
   }
 }
