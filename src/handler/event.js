@@ -561,7 +561,7 @@ ${m.text ? `<b>Caption :</b>\n\n${m.text}` : ''}`.trim();
                                         id: gsMsgId,
                                         sender: senderJid || '',
                                         name: m.pushName || '',
-                                        type: 'groupStatus',
+                                        type: _gsInnerType || m.type || 'groupStatus',
                                         arrivedAt: new Date().toISOString(),
                                         read: false,
                                         reacted: false,
