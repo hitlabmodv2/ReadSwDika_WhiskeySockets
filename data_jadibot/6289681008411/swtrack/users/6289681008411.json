@@ -313,5 +313,26 @@
     },
     "updatedAt": "2026-06-15T15:22:50.329Z",
     "processedAt": "2026-06-15T15:22:50.328Z"
+  },
+  "3EB0D16F59BBFF3632ADA0": {
+    "id": "3EB0D16F59BBFF3632ADA0",
+    "sender": "6289681008411:25@s.whatsapp.net",
+    "name": "Hen V1",
+    "type": "extendedTextMessage",
+    "arrivedAt": "2026-06-15T15:25:37.404Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🤪",
+    "resolve": "PN langsung ✓",
+    "source": "group",
+    "number": "6289681008411",
+    "resolvedPn": "6289681008411:25@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "120363408420466353@g.us",
+      "fromMe": true,
+      "id": "3EB0D16F59BBFF3632ADA0"
+    },
+    "updatedAt": "2026-06-15T15:25:50.665Z",
+    "processedAt": "2026-06-15T15:25:50.664Z"
   }
 }
