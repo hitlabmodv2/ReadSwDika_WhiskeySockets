@@ -82,5 +82,133 @@
       }
     ],
     "processedAt": "2026-06-14T10:28:22.307Z"
+  },
+  "ACC9C6BC843139B8FB4C061E5625BB28": {
+    "id": "ACC9C6BC843139B8FB4C061E5625BB28",
+    "sender": "6281326870686@s.whatsapp.net",
+    "name": "reki fans nganjuk pipel",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-15T05:21:11.533Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "👩‍🔧",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6281326870686",
+    "resolvedPn": "6281326870686@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6281326870686@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACC9C6BC843139B8FB4C061E5625BB28",
+      "participant": "191323814494236@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-15T05:21:19.990Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281326870686@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACC9C6BC843139B8FB4C061E5625BB28",
+        "participant": "191323814494236@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281326870686@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACC9C6BC843139B8FB4C061E5625BB28",
+        "participant": "6281326870686@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-15T05:21:19.990Z"
+  },
+  "ACD6BE6D912ACDEDB692D4ACECE3B165": {
+    "id": "ACD6BE6D912ACDEDB692D4ACECE3B165",
+    "sender": "6281326870686@s.whatsapp.net",
+    "name": "reki fans nganjuk pipel",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-15T05:21:11.614Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "👀",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6281326870686",
+    "resolvedPn": "6281326870686@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6281326870686@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACD6BE6D912ACDEDB692D4ACECE3B165",
+      "participant": "191323814494236@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-15T05:21:33.017Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281326870686@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACD6BE6D912ACDEDB692D4ACECE3B165",
+        "participant": "191323814494236@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281326870686@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACD6BE6D912ACDEDB692D4ACECE3B165",
+        "participant": "6281326870686@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-15T05:21:33.017Z"
+  },
+  "ACBFA44057E3A14F0F12E17B839315DB": {
+    "id": "ACBFA44057E3A14F0F12E17B839315DB",
+    "sender": "6281326870686@s.whatsapp.net",
+    "name": "reki fans nganjuk pipel",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-15T05:21:11.655Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "👩‍💼",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6281326870686",
+    "resolvedPn": "6281326870686@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6281326870686@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACBFA44057E3A14F0F12E17B839315DB",
+      "participant": "191323814494236@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-15T06:31:12.219Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281326870686@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACBFA44057E3A14F0F12E17B839315DB",
+        "participant": "191323814494236@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281326870686@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACBFA44057E3A14F0F12E17B839315DB",
+        "participant": "6281326870686@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-15T05:21:23.998Z",
+    "deleted": true,
+    "deletedAt": "2026-06-15T06:31:12.219Z"
   }
 }

@@ -2,12 +2,13 @@
   "bots": {
     "6289681008411": {
       "number": "6289681008411",
-      "permanent": true,
+      "createdAt": 1781504375094,
+      "updatedAt": 1781508147965,
+      "expiresAt": 1784096375094,
+      "durationMs": 2592000000,
+      "durationText": "30 hari",
       "status": "active",
-      "createdAt": 1780991085762,
-      "updatedAt": 1781449002269,
-      "durationText": "Permanent",
-      "connectedAt": 1781449002265
+      "connectedAt": 1781508147961
     }
   }
 }

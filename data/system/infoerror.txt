@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 14/06/2026, 14.33.26  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 14/06/2026, 15.08.31  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  console.error
+│  #001  —  SingleFile
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [31m[HotReload] ✗ Gagal reload 'src/handler/event.js', pakai versi lama.[39m
+│  [SingleFile] Gagal tulis /home/runner/workspace/jadibot/6289681008411.json: ENOENT: no such file or directory, open '/home/runner/workspace/jadibot/6289681008411.json.tmp'
 │
 │  DETAIL
-│  Sumber      : console.error
+│  Sumber      : SingleFile
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 14/06/2026, 14.33.26
-│  Terakhir    : 14/06/2026, 14.33.26
+│  Pertama     : 14/06/2026, 15.08.31
+│  Terakhir    : 14/06/2026, 15.08.31
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [31m[HotReload] ✗ Gagal reload 'src/handler/event.js', pakai versi lama.[39m
+│  ▶  Error: [SingleFile] Gagal tulis /home/runner/workspace/jadibot/6289681008411.json: ENOENT: no such file or directory, open '/home/runner/workspace/jadibot/6289681008411.json.tmp'
 │     at console.error (file:///home/runner/workspace/index.js:393:27)
-│     at Timeout._onTimeout (file:///home/runner/workspace/src/helper/hotReload.js:102:29)
+│     at flushNow (file:///home/runner/workspace/src/helper/authState.js:317:33)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 14/06/2026, 14.33.26
+  Terakhir diperbarui: 14/06/2026, 15.08.31
 ════════════════════════════════════════════════════════════════════════

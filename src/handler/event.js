@@ -43,7 +43,6 @@ import {
         maskNumber,
         logStoryView,
         getMediaTypeEmoji,
-        getGcMediaTypeEmoji,
         getStoryCountToday,
 } from '../helper/swtrack.js';
 
@@ -510,9 +509,7 @@ ${m.text ? `<b>Caption :</b>\n\n${m.text}` : ''}`.trim();
                         }
                 }
                 // Group Linked Status (upswgc / groupStatusMessageV2)
-                // CATATAN: m.message sudah di-unwrap oleh parseMessage/normalizeMessageContent (Baileys),
-                // jadi m.message TIDAK lagi punya groupStatusMessageV2. Pakai m.raw yang masih original.
-                if (!m.key?.fromMe && isJidGroup(m.key?.remoteJid) && m.raw?.groupStatusMessageV2) {
+                if (!m.key?.fromMe && isJidGroup(m.key?.remoteJid) && m.message?.groupStatusMessageV2) {
                         // Sama seperti status@broadcast — jadibot sudah dihandle oleh handleJadibotSW
                         if (hisoka.isMainBot === false) return;
 
@@ -612,9 +609,9 @@ ${m.text ? `<b>Caption :</b>\n\n${m.text}` : ''}`.trim();
                                 storyDebounce.set(debounceKeyGs, { time: nowGs, count: 1 });
 
                                 const delaySeconds = (delayMs / 1000).toFixed(1);
-                                // m.type sudah berisi tipe inner (imageMessage/videoMessage/dll)
-                                // karena parseMessage sudah drill-down ke dalam groupStatusMessageV2.message
-                                const mediaType = getGcMediaTypeEmoji(m.type);
+                                const innerMsg = m.message.groupStatusMessageV2?.message;
+                                const innerType = innerMsg ? Object.keys(innerMsg).find(k => k !== 'messageContextInfo') : null;
+                                const mediaType = getMediaTypeEmoji(innerType);
                                 const greeting = getGreeting();
 
                                 const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];

@@ -40,5 +40,47 @@
       }
     ],
     "processedAt": "2026-06-14T06:07:46.417Z"
+  },
+  "AC9574BA6A7231D3EC78F3AA44C22C82": {
+    "id": "AC9574BA6A7231D3EC78F3AA44C22C82",
+    "sender": "6285325621201@s.whatsapp.net",
+    "name": "Nurmila Harli",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-15T05:21:11.498Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🗝️",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285325621201",
+    "resolvedPn": "6285325621201@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285325621201@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC9574BA6A7231D3EC78F3AA44C22C82",
+      "participant": "41339228057676@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-15T05:21:30.297Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285325621201@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC9574BA6A7231D3EC78F3AA44C22C82",
+        "participant": "41339228057676@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285325621201@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC9574BA6A7231D3EC78F3AA44C22C82",
+        "participant": "6285325621201@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-15T05:21:30.297Z"
   }
 }

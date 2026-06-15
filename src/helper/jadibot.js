@@ -48,7 +48,6 @@ import {
   maskNumber,
   logStoryView,
   getMediaTypeEmoji,
-  getGcMediaTypeEmoji,
   getStoryCountToday,
   createSwTracker,
 } from './swtrack.js'
@@ -980,7 +979,7 @@ async function handleJadibotSW(msg, sock, swSet, number) {
 
       logStoryView({
         botId: sock.user?.name || maskNumber(botId),
-        mediaType: isGroupStatus ? getGcMediaTypeEmoji(innerType) : getMediaTypeEmoji(innerType),
+        mediaType: getMediaTypeEmoji(innerType),
         greeting: getSwGreeting(),
         dayName: dayNames[jakartaDate.getDay()],
         date: `${jakartaDate.getDate()} ${monthNames[jakartaDate.getMonth()]} ${jakartaDate.getFullYear()}`,

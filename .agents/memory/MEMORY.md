@@ -1,1 +1,0 @@
-- [Baileys groupStatusMessageV2 unwrap](baileys-groupstatus-unwrap.md) — m.message tidak punya groupStatusMessageV2 setelah inject; pakai m.raw
