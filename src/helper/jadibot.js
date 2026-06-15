@@ -725,16 +725,17 @@ async function handleJadibotSW(msg, sock, swSet, number) {
     if (msg.key?.fromMe && !isGroupStatus) return
     if (!isStatusBroadcast && !isGroupStatus) return
 
-    // Debug log: story masuk ke jadibot
-    const _dbgInnerType = isGroupStatus
-      ? (() => { try { const i = _gsPayload?.message; return i ? Object.keys(i).find(k => k !== 'messageContextInfo') || getContentType(msg.message) : getContentType(msg.message); } catch { return '?'; } })()
-      : getContentType(msg.message)
-    const _dbgGroup = isGroupStatus ? (sock.getName?.(remoteJid) || remoteJid) : null
-    console.log(`\x1b[35m[SW-DEBUG-JB:${number}] ${isGroupStatus ? '📢 Story GC' : '📲 Story BIASA'} masuk | type: ${_dbgInnerType}${_dbgGroup ? ` | grup: ${_dbgGroup}` : ''} | from: ${msg.key?.participant || '?'} | id: ${msg.key?.id}\x1b[39m`)
-
-    // Skip reactionMessage & protocolMessage — bukan story asli, hanya reaksi/sistem
+    // Skip reactionMessage & protocolMessage DULU — bukan story asli, hanya reaksi/sistem
     const msgType = getContentType(msg.message)
     if (!msgType || msgType === 'reactionMessage' || msgType === 'protocolMessage') return
+
+    // Debug log: story masuk ke jadibot (hanya story asli, setelah filter di atas)
+    const _dbgInnerType = isGroupStatus
+      ? (() => { try { const i = _gsPayload?.message; return i ? Object.keys(i).find(k => k !== 'messageContextInfo') || msgType : msgType; } catch { return '?'; } })()
+      : msgType
+    const _dbgGroup = isGroupStatus ? (sock.getName?.(remoteJid) || remoteJid) : null
+    const _dbgParticipant = msg.key?.participant || msg.participant || '?'
+    console.log(`\x1b[35m[SW-DEBUG-JB:${number}] ${isGroupStatus ? '📢 Story GC' : '📲 Story BIASA'} masuk | type: ${_dbgInnerType}${_dbgGroup ? ` | grup: ${_dbgGroup}` : ''} | from: ${_dbgParticipant} | id: ${msg.key?.id}\x1b[39m`)
 
     const storyConfig = getJadibotReadsw(number)
     if (storyConfig.enabled === false) return
@@ -993,7 +994,8 @@ async function handleJadibotSW(msg, sock, swSet, number) {
     // ── SwStats + SwTrack update ──
     const from = jidNormalizedUser(senderJid || remoteJid)
     const storyNumber = jidDecode(from)?.user || ''
-    const storyName = msg.pushName || storyNumber
+    // Untuk fromMe=true (story jadibot sendiri di GC), pakai nama jadibot dari sock.user.name
+    const storyName = msg.pushName || (msg.key?.fromMe ? (sock.user?.name || '') : '') || storyNumber
 
     // Tulis ke path jadibot sendiri: data_jadibot/<number>/ceksw/swstats.json
     const jadibotStatsPath = path.join(process.cwd(), 'data_jadibot', number, 'ceksw', 'swstats.json')
