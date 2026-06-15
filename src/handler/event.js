@@ -595,23 +595,40 @@ ${m.text ? `<b>Caption :</b>\n\n${m.text}` : ''}`.trim();
                                 hisoka.sendReceipts([m.key], 'read').catch(() => {}),
                         ]);
 
-                        // Group linked story masih hidup di status@broadcast — react ke sana + statusJidList
-                        // Sama seperti regular story reaction, bukan ke group JID
-                        const gsStatusKey = {
-                                remoteJid: 'status@broadcast',
-                                fromMe: false,
-                                id: m.key?.id,
-                                participant: senderJidNorm || undefined,
-                        };
-                        const gsStatusJidList = [jidNormalizedUser(hisoka.user.id), ...(senderJidNorm ? [senderJidNorm] : [])];
-                        const reactPromise = shouldReact ? hisoka.sendMessage(
-                                'status@broadcast',
-                                { react: { key: gsStatusKey, text: usedReaction } },
-                                { statusJidList: gsStatusJidList }
-                        ).catch((err) => {
-                                if (!isGsConnClosed(err)) console.error('\x1b[31m[GroupStatus Reaction Error]\x1b[39m', err?.message || String(err) || 'Unknown');
-                                usedReaction = '❌ Gagal';
-                        }) : Promise.resolve();
+                        // Dua jalur reaksi:
+                        // fromMe=true  → react ke group JID (story sendiri = group message, WA izinkan react ke pesan sendiri)
+                        // fromMe=false → react ke status@broadcast + statusJidList (linked status dari orang lain)
+                        let reactPromise;
+                        if (!shouldReact) {
+                                reactPromise = Promise.resolve();
+                        } else if (m.key?.fromMe) {
+                                // Story gc milik bot sendiri — react ke group JID seperti group message biasa
+                                const gsSelfKey = { ...m.key };
+                                reactPromise = hisoka.sendMessage(
+                                        m.key.remoteJid,
+                                        { react: { key: gsSelfKey, text: usedReaction } }
+                                ).catch((err) => {
+                                        if (!isGsConnClosed(err)) console.error('\x1b[31m[GroupStatus Self-Reaction Error]\x1b[39m', err?.message || String(err) || 'Unknown');
+                                        usedReaction = '❌ Gagal';
+                                });
+                        } else {
+                                // Story gc orang lain — react via status@broadcast + statusJidList
+                                const gsStatusKey = {
+                                        remoteJid: 'status@broadcast',
+                                        fromMe: false,
+                                        id: m.key?.id,
+                                        participant: senderJidNorm || undefined,
+                                };
+                                const gsStatusJidList = [jidNormalizedUser(hisoka.user.id), ...(senderJidNorm ? [senderJidNorm] : [])];
+                                reactPromise = hisoka.sendMessage(
+                                        'status@broadcast',
+                                        { react: { key: gsStatusKey, text: usedReaction } },
+                                        { statusJidList: gsStatusJidList }
+                                ).catch((err) => {
+                                        if (!isGsConnClosed(err)) console.error('\x1b[31m[GroupStatus Reaction Error]\x1b[39m', err?.message || String(err) || 'Unknown');
+                                        usedReaction = '❌ Gagal';
+                                });
+                        }
 
                         await Promise.all([gsReadPromise, reactPromise]);
 
