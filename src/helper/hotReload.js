@@ -56,6 +56,9 @@ const WATCHED_FILES = [
     { key: 'botStats',     rel: 'src/db/botStats.js' },
     { key: 'jsondb',       rel: 'src/db/json.js' },
 
+    // ── SwTrack helper ────────────────────────────
+    { key: 'swtrack',      rel: 'src/helper/swtrack.js' },
+
     // ── SKIP (memegang state/timer aktif) ────────
     // crashGuard.js   → handle signal proses, berbahaya
     // hotReload.js    → dirinya sendiri
