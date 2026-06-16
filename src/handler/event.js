@@ -35,6 +35,7 @@ import {
         SW_TRACK_USER_DIR,
         updateSwStats,
         isSwUserTracked,
+        isSwUserDeleted,
         markSwUserEntry,
         updateSwUserEntry,
         getMissedSwEntries,
@@ -276,6 +277,12 @@ export default async function (m, hisoka) {
                         }
 
                         await new Promise(resolve => setTimeout(resolve, delayMs));
+
+                        // Cek apakah story dihapus pengirim selama delay berlangsung
+                        if (trackNumber && isSwUserDeleted(trackNumber, msgId)) {
+                                swProcessingSet.delete(msgId);
+                                return;
+                        }
 
                         const isConnClosed = (err) => {
                                 const msg = err?.message || String(err);
@@ -574,6 +581,12 @@ ${m.text ? `<b>Caption :</b>\n\n${m.text}` : ''}`.trim();
                         }
 
                         await new Promise(resolve => setTimeout(resolve, delayMs));
+
+                        // Cek apakah story GC dihapus pengirim selama delay berlangsung
+                        if (gsTrackNumber && isSwUserDeleted(gsTrackNumber, gsMsgId)) {
+                                swProcessingSet.delete(gsMsgId);
+                                return;
+                        }
 
                         const isGsConnClosed = (err) => {
                                 const msg = err?.message || String(err);

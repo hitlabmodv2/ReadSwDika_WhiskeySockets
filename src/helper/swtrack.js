@@ -189,6 +189,11 @@ export function isSwUserTracked(number, msgId) {
         return !!loadSwUser(number)[msgId];
 }
 
+export function isSwUserDeleted(number, msgId) {
+        if (!number || !msgId) return false;
+        try { return !!loadSwUser(number)[msgId]?.deleted; } catch { return false; }
+}
+
 export function markSwUserEntry(number, msgId, entry) {
         if (!number || !msgId) return;
         try {
@@ -287,6 +292,10 @@ export function createSwTracker(userDir) {
                 isSwUserTracked(number, msgId) {
                         if (!number || !msgId) return false;
                         return !!_load(number)[msgId];
+                },
+                isSwUserDeleted(number, msgId) {
+                        if (!number || !msgId) return false;
+                        try { return !!_load(number)[msgId]?.deleted; } catch { return false; }
                 },
                 markSwUserEntry(number, msgId, entry) {
                         if (!number || !msgId) return;

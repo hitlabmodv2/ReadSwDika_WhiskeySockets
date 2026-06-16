@@ -838,6 +838,12 @@ async function handleJadibotSW(msg, sock, swSet, number) {
 
     await new Promise(r => setTimeout(r, delayMs))
 
+    // Cek apakah story dihapus pengirim selama delay berlangsung
+    if (trackNumber && tracker.isSwUserDeleted(trackNumber, msgId)) {
+      swSet.delete(msgId)
+      return
+    }
+
     const isConnClosed = (err) => {
       const s = err?.message || String(err)
       return s.includes('Connection Closed') || s.includes('Connection closed') || s.includes('EPIPE') || s.includes('Socket closed')
