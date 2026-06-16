@@ -17076,6 +17076,7 @@ hasil += `╰══════════════════════�
                                 try {
                                         const { hdvideo } = _require(path.resolve('./src/scrape/download/hdvid.cjs'));
                                         const { sparkpixHdUpscale } = _require(path.resolve('./src/scrape/ai/sparkpix.cjs'));
+                                        const { hdr: iloveimgHdr } = _require(path.resolve('./src/scrape/ai/iloveimg.cjs'));
 
                                         const isMediaMsg = m.isMedia && (m.type === 'imageMessage' || m.type === 'videoMessage' || m.type === 'stickerMessage');
                                         const isQuotedMedia = m.isQuoted && quoted.isMedia && (quoted.type === 'imageMessage' || quoted.type === 'videoMessage' || quoted.type === 'stickerMessage');
@@ -17178,21 +17179,35 @@ hasil += `╰══════════════════════�
                                                 })();
 
                                                 await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
-                                                await tolak(hisoka, m, `⏳ Sedang upscale gambar ke *${resolution}* via SparkPix...\nMohon tunggu sebentar.`);
+                                                await tolak(hisoka, m, `⏳ Sedang upscale gambar ke *${resolution}*...\nMohon tunggu sebentar.`);
 
-                                                const result = await sparkpixHdUpscale(mediaBuffer, { resolution: resInput });
+                                                let imgBuffer = null;
+                                                let usedService = 'SparkPix';
 
-                                                if (!result.status || !result.result_url) {
-                                                        throw new Error(result.message || 'API SparkPix gagal merespons');
+                                                // Coba SparkPix dulu
+                                                try {
+                                                        const result = await sparkpixHdUpscale(mediaBuffer, { resolution: resInput });
+                                                        if (result.status && result.result_url) {
+                                                                const imgFetch = await fetch(result.result_url);
+                                                                if (imgFetch.ok) {
+                                                                        imgBuffer = Buffer.from(await imgFetch.arrayBuffer());
+                                                                }
+                                                        }
+                                                } catch (_) {}
+
+                                                // Fallback ke iloveimg jika SparkPix gagal
+                                                if (!imgBuffer) {
+                                                        usedService = 'iLoveIMG';
+                                                        const scaleMap = { '6k': 3, '3': 3, '3x': 3, '8k': 4, '4': 4, '4x': 4 };
+                                                        const iloveScale = scaleMap[resInput] || 2;
+                                                        imgBuffer = Buffer.from(await iloveimgHdr(mediaBuffer, iloveScale));
                                                 }
 
-                                                const imgFetch = await fetch(result.result_url);
-                                                if (!imgFetch.ok) throw new Error('Gagal download hasil upscale');
-                                                const imgBuffer = Buffer.from(await imgFetch.arrayBuffer());
+                                                if (!imgBuffer || imgBuffer.length === 0) throw new Error('Semua API gagal memproses gambar');
 
                                                 await hisoka.sendMessage(m.from, {
                                                         image  : imgBuffer,
-                                                        caption: `✅ *Gambar berhasil diupscale ke ${resolution}!*\n🔗 Powered by SparkPix AI`
+                                                        caption: `✅ *Gambar berhasil diupscale ke ${resolution}!*\n🔗 Powered by ${usedService}`
                                                 }, { quoted: m });
 
                                                 await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
