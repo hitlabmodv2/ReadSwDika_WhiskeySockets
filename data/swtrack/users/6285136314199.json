@@ -126,5 +126,47 @@
       }
     ],
     "processedAt": "2026-06-16T06:50:51.856Z"
+  },
+  "AC2C6D2118B53F60B61194AF2CAFB9D5": {
+    "id": "AC2C6D2118B53F60B61194AF2CAFB9D5",
+    "sender": "6285136314199@s.whatsapp.net",
+    "name": "jir ada Nurull",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-16T07:03:45.916Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "⛴️",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285136314199",
+    "resolvedPn": "6285136314199@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285136314199@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC2C6D2118B53F60B61194AF2CAFB9D5",
+      "participant": "90916371062907@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-16T07:03:56.978Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285136314199@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC2C6D2118B53F60B61194AF2CAFB9D5",
+        "participant": "90916371062907@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285136314199@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC2C6D2118B53F60B61194AF2CAFB9D5",
+        "participant": "6285136314199@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-16T07:03:56.978Z"
   }
 }

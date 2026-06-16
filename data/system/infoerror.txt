@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 16/06/2026, 06.53.52  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 16/06/2026, 07.08.50  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -26,21 +26,22 @@
 │  #001  —  console.error
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [31m[HotReload] ✗ Gagal reload 'src/handler/event.js', pakai versi lama.[39m
+│  [31mError in event handler:[39m
+ _gsInnerType is not defined
 │
 │  DETAIL
 │  Sumber      : console.error
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 16/06/2026, 06.53.52
-│  Terakhir    : 16/06/2026, 06.53.52
+│  Pertama     : 16/06/2026, 07.08.50
+│  Terakhir    : 16/06/2026, 07.08.50
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [31m[HotReload] ✗ Gagal reload 'src/handler/event.js', pakai versi lama.[39m
+│  ▶  Error: [31mError in event handler:[39m
+│     _gsInnerType is not defined
 │     at console.error (file:///home/runner/workspace/index.js:393:27)
-│     at Timeout._onTimeout (file:///home/runner/workspace/src/helper/hotReload.js:102:29)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 16/06/2026, 06.53.52
+  Terakhir diperbarui: 16/06/2026, 07.08.50
 ════════════════════════════════════════════════════════════════════════

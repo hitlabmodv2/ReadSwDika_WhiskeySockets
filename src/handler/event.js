@@ -555,6 +555,8 @@ ${m.text ? `<b>Caption :</b>\n\n${m.text}` : ''}`.trim();
                         const hasSender = !!senderJid;
                         const shouldReact = storyConfig.autoReaction !== false && reactStatus.length && hasSender;
 
+                        const _gsInnerType = (() => { try { const i = _gsPayload?.message; return i ? Object.keys(i).find(k => k !== 'messageContextInfo') || m.type : m.type; } catch { return m.type; } })();
+
                         // ── SwTrack: tulis entry awal (group status — sender biasanya PN langsung)
                         const gsTrackNumber = senderJid && !String(senderJid).endsWith('@lid')
                                 ? extractSwNumber(senderJid)

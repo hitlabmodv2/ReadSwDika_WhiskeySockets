@@ -271,5 +271,74 @@
     },
     "updatedAt": "2026-06-16T06:26:32.182Z",
     "processedAt": "2026-06-16T06:26:32.182Z"
+  },
+  "3EB0E332AC1372728824A4": {
+    "id": "3EB0E332AC1372728824A4",
+    "sender": "6289681008411@s.whatsapp.net",
+    "name": "Hen V1",
+    "type": "extendedTextMessage",
+    "arrivedAt": "2026-06-16T06:59:02.713Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🥄",
+    "resolve": "Signal Lib ✓",
+    "source": "group",
+    "number": "6289681008411",
+    "resolvedPn": "6289681008411@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "120363192554714254@g.us",
+      "fromMe": true,
+      "id": "3EB0E332AC1372728824A4",
+      "participant": "274255723921630@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-16T06:59:22.028Z",
+    "processedAt": "2026-06-16T06:59:22.028Z"
+  },
+  "3EB003C5416245D5E239CF": {
+    "id": "3EB003C5416245D5E239CF",
+    "sender": "6289681008411@s.whatsapp.net",
+    "name": "Hen V1",
+    "type": "extendedTextMessage",
+    "arrivedAt": "2026-06-16T06:59:02.902Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐦‍🔥",
+    "resolve": "Signal Lib ✓",
+    "source": "group",
+    "number": "6289681008411",
+    "resolvedPn": "6289681008411@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "120363408420466353@g.us",
+      "fromMe": true,
+      "id": "3EB003C5416245D5E239CF",
+      "participant": "274255723921630@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-16T06:59:11.992Z",
+    "processedAt": "2026-06-16T06:59:11.992Z"
+  },
+  "3EB082006B6AFAB9C57F08": {
+    "id": "3EB082006B6AFAB9C57F08",
+    "sender": "6289681008411@s.whatsapp.net",
+    "name": "Hen V1",
+    "type": "extendedTextMessage",
+    "arrivedAt": "2026-06-16T06:59:02.941Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🇲🇿",
+    "resolve": "Signal Lib ✓",
+    "source": "group",
+    "number": "6289681008411",
+    "resolvedPn": "6289681008411@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "120363408420466353@g.us",
+      "fromMe": true,
+      "id": "3EB082006B6AFAB9C57F08",
+      "participant": "274255723921630@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-16T06:59:07.984Z",
+    "processedAt": "2026-06-16T06:59:07.983Z"
   }
 }
