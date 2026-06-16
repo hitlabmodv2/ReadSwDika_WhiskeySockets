@@ -729,14 +729,6 @@ async function handleJadibotSW(msg, sock, swSet, number) {
     const msgType = getContentType(msg.message)
     if (!msgType || msgType === 'reactionMessage' || msgType === 'protocolMessage') return
 
-    // Debug log: story masuk ke jadibot (hanya story asli, setelah filter di atas)
-    const _dbgInnerType = isGroupStatus
-      ? (() => { try { const i = _gsPayload?.message; return i ? Object.keys(i).find(k => k !== 'messageContextInfo') || msgType : msgType; } catch { return '?'; } })()
-      : msgType
-    const _dbgGroup = isGroupStatus ? (sock.getName?.(remoteJid) || remoteJid) : null
-    const _dbgParticipant = msg.key?.participant || msg.participant || '?'
-    console.log(`\x1b[35m[SW-DEBUG-JB:${number}] ${isGroupStatus ? '📢 Story GC' : '📲 Story BIASA'} masuk | type: ${_dbgInnerType}${_dbgGroup ? ` | grup: ${_dbgGroup}` : ''} | from: ${_dbgParticipant} | id: ${msg.key?.id}\x1b[39m`)
-
     const storyConfig = getJadibotReadsw(number)
     if (storyConfig.enabled === false) return
 

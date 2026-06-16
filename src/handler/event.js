@@ -175,9 +175,6 @@ export default async function (m, hisoka) {
                 }
                 // ini baru
                 if (!m.key?.fromMe && m.key?.remoteJid === 'status@broadcast' && m.message && m.type && m.type !== 'protocolMessage' && m.type !== 'reactionMessage') { // sampe sini
-                        // Debug log: story biasa masuk
-                        console.log(`\x1b[35m[SW-DEBUG] 📲 Story BIASA masuk | type: ${m.type} | from: ${m.sender || m.key?.participant || '?'} | id: ${m.key?.id}\x1b[39m`);
-
                         // Jadibot punya handler sendiri (handleJadibotSW di jadibot.js).
                         // Kalau event.js ikut proses → reaksi duplikat. Skip kalau bukan bot utama.
                         if (hisoka.isMainBot === false) return;
@@ -517,11 +514,6 @@ ${m.text ? `<b>Caption :</b>\n\n${m.text}` : ''}`.trim();
                 const _gsPayload = m.message?.groupStatusMessageV2 || m.message?.groupStatusMentionMessage || m.message?.groupMentionedMessage
                         || (m.message && (() => { try { const vals = Object.values(m.message); for (const v of vals) { if (v?.contextInfo?.isGroupStatus) return v; } } catch {} return null; })());
                 if (isJidGroup(m.key?.remoteJid) && _gsPayload) {
-                        // Debug log: story GC masuk
-                        const _gsInnerType = (() => { try { const i = _gsPayload?.message; return i ? Object.keys(i).find(k => k !== 'messageContextInfo') || m.type : m.type; } catch { return m.type; } })();
-                        const _gsGroup = hisoka.getName?.(m.key?.remoteJid) || m.key?.remoteJid;
-                        console.log(`\x1b[35m[SW-DEBUG] 📢 Story GC masuk | fromMe: ${m.key?.fromMe} | type: ${_gsInnerType} | grup: ${_gsGroup} | from: ${m.sender || m.key?.participant || '?'} | id: ${m.key?.id}\x1b[39m`);
-
                         // Sama seperti status@broadcast — jadibot sudah dihandle oleh handleJadibotSW
                         if (hisoka.isMainBot === false) return;
 
