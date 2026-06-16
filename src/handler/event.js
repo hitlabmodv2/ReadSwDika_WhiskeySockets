@@ -35,7 +35,7 @@ import {
         SW_TRACK_USER_DIR,
         updateSwStats,
         isSwUserTracked,
-        isSwUserDeleted,
+        loadSwUser,
         markSwUserEntry,
         updateSwUserEntry,
         getMissedSwEntries,
@@ -279,7 +279,7 @@ export default async function (m, hisoka) {
                         await new Promise(resolve => setTimeout(resolve, delayMs));
 
                         // Cek apakah story dihapus pengirim selama delay berlangsung
-                        if (trackNumber && isSwUserDeleted(trackNumber, msgId)) {
+                        if (trackNumber && !!loadSwUser(trackNumber)[msgId]?.deleted) {
                                 swProcessingSet.delete(msgId);
                                 return;
                         }
@@ -585,7 +585,7 @@ ${m.text ? `<b>Caption :</b>\n\n${m.text}` : ''}`.trim();
                         await new Promise(resolve => setTimeout(resolve, delayMs));
 
                         // Cek apakah story GC dihapus pengirim selama delay berlangsung
-                        if (gsTrackNumber && isSwUserDeleted(gsTrackNumber, gsMsgId)) {
+                        if (gsTrackNumber && !!loadSwUser(gsTrackNumber)[gsMsgId]?.deleted) {
                                 swProcessingSet.delete(gsMsgId);
                                 return;
                         }
