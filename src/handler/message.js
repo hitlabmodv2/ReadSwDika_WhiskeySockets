@@ -17196,9 +17196,10 @@ hasil += `╰══════════════════════�
                                                 } catch (_) {}
 
                                                 // Fallback ke iloveimg jika SparkPix gagal
+                                                // iloveimg support: 2x (scale 2), 4x (scale 4), 8x (scale 8)
                                                 if (!imgBuffer) {
                                                         usedService = 'iLoveIMG';
-                                                        const scaleMap = { '6k': 3, '3': 3, '3x': 3, '8k': 4, '4': 4, '4x': 4 };
+                                                        const scaleMap = { '6k': 4, '3': 4, '3x': 4, '8k': 8, '4': 8, '4x': 8 };
                                                         const iloveScale = scaleMap[resInput] || 2;
                                                         imgBuffer = Buffer.from(await iloveimgHdr(mediaBuffer, iloveScale));
                                                 }

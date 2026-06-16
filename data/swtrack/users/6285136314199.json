@@ -218,5 +218,30 @@
     "processedAt": "2026-06-16T10:45:53.480Z",
     "deleted": true,
     "deletedAt": "2026-06-16T10:46:02.264Z"
+  },
+  "ACFAD278B334D3E428C6CFDA0416AAC5": {
+    "id": "ACFAD278B334D3E428C6CFDA0416AAC5",
+    "sender": "6285136314199@s.whatsapp.net",
+    "name": "OMG.. Nurl?",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-16T13:16:19.867Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285136314199",
+    "resolvedPn": "6285136314199@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285136314199@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACFAD278B334D3E428C6CFDA0416AAC5",
+      "participant": "90916371062907@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-16T13:16:22.241Z",
+    "deleted": true,
+    "deletedAt": "2026-06-16T13:16:22.241Z"
   }
 }

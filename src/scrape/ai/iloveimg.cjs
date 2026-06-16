@@ -64,7 +64,8 @@ async function hdr(buffer, scale = 4) {
     const servers = [
         'api1g', 'api2g', 'api3g', 'api8g', 'api9g', 'api10g', 'api11g', 'api12g',
         'api13g', 'api14g', 'api15g', 'api16g', 'api17g', 'api18g', 'api19g',
-        'api20g', 'api21g', 'api22g', 'api24g', 'api25g'
+        'api20g', 'api21g', 'api22g', 'api24g', 'api25g', 'api26g', 'api27g',
+        'api28g', 'api29g'
     ];
     const server = servers[Math.floor(Math.random() * servers.length)];
 
