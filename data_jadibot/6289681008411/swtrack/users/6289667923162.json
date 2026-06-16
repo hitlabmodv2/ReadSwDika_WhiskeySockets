@@ -188,7 +188,7 @@
       "participant": "97968623505429@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-15T14:12:44.377Z",
+    "updatedAt": "2026-06-16T06:31:37.655Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -207,7 +207,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-15T14:12:44.377Z"
+    "processedAt": "2026-06-15T14:12:44.377Z",
+    "deleted": true,
+    "deletedAt": "2026-06-16T06:31:37.655Z"
   },
   "3EB090D9A1C3FDF19CE638": {
     "id": "3EB090D9A1C3FDF19CE638",
@@ -694,5 +696,47 @@
     },
     "updatedAt": "2026-06-16T06:26:46.444Z",
     "processedAt": "2026-06-16T06:26:46.443Z"
+  },
+  "AC01A5970E4646C491D9E3F476D70F3E": {
+    "id": "AC01A5970E4646C491D9E3F476D70F3E",
+    "sender": "6289667923162@s.whatsapp.net",
+    "name": "Hen V2",
+    "type": "extendedTextMessage",
+    "arrivedAt": "2026-06-16T06:30:26.203Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🥰",
+    "resolve": "Signal Lib ✓",
+    "source": "status",
+    "number": "6289667923162",
+    "resolvedPn": "6289667923162@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6289667923162@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC01A5970E4646C491D9E3F476D70F3E",
+      "participant": "97968623505429@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-16T06:30:40.085Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289667923162@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC01A5970E4646C491D9E3F476D70F3E",
+        "participant": "97968623505429@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289667923162@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC01A5970E4646C491D9E3F476D70F3E",
+        "participant": "6289667923162@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-16T06:30:40.085Z"
   }
 }
