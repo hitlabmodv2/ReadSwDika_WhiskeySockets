@@ -9732,82 +9732,80 @@ export default async function ({ message, type: messagesType }, hisoka) {
 ━━━━━━━━━━━━━━━━━━━━━━
 
 ╭─「 📌 *UMUM* 」
-├➤ *.p / .ping* — Cek status bot
-╰➤ *.menu* — Tampilkan menu ini
+├➤ *.p / .ping*
+╰➤ *.menu*
 
 ╭─「 ⚙️ *SETTING* 」
-├➤ *.readsw on/off* — Auto read story
-├➤ *.readsw true* — Read + Reaction
-├➤ *.readsw false* — Read Only
-├➤ *.antidel on/off* — Anti delete pesan
-├➤ *.antidel private on/off* — Private chat
-├➤ *.antidel group on/off* — Grup
+├➤ *.readsw on/off*
+├➤ *.readsw true*
+├➤ *.readsw false*
+├➤ *.antidel on/off*
+├➤ *.antidel private on/off*
+├➤ *.antidel group on/off*
 ╰➤ *.antidel sendto self/chat/both*
 
 ╭─「 💬 *AUTO PRESENCE* 」
-├➤ *.online on/off* — Auto terlihat online
-├➤ *.online set [detik]* — Atur interval online
-├➤ *.typing on/off* — Auto tampil sedang mengetik
-├➤ *.typing set [detik]* — Atur durasi typing
-├➤ *.typing private on/off* — Typing di private chat
-├➤ *.typing group on/off* — Typing di grup
-├➤ *.recording on/off* — Auto tampil sedang merekam
-├➤ *.recording set [detik]* — Atur durasi recording
-├➤ *.recording private on/off* — Recording di private
-╰➤ *.recording group on/off* — Recording di grup
+├➤ *.online on/off*
+├➤ *.online set [detik]*
+├➤ *.typing on/off*
+├➤ *.typing set [detik]*
+├➤ *.typing private on/off*
+├➤ *.typing group on/off*
+├➤ *.recording on/off*
+├➤ *.recording set [detik]*
+├➤ *.recording private on/off*
+╰➤ *.recording group on/off*
 
 ╭─「 📊 *CEK & INFO* 」
-├➤ *.ceksetting* — Cek semua setting aktif
-├➤ *.ceksw* — Lihat statistik reaksi SW
-├➤ *.ceksesi* — Cek ukuran & detail sesi aktif
-╰➤ *.clearsesi / .cs* — Bersihkan cache sesi (hemat memori)
+├➤ *.ceksetting*
+├➤ *.ceksw*
+├➤ *.ceksesi*
+╰➤ *.clearsesi / .cs*
 
 ╭─「 🛡️ *ANTI CALL* 」
-├➤ *.anticall on/off* — Tolak panggilan suara
-├➤ *.anticall msg [teks]* — Atur pesan tolak
-├➤ *.anticall add [nomor]* — Whitelist nomor
-├➤ *.anticall del [nomor]* — Hapus whitelist
-╰➤ *.anticall list* — Lihat whitelist
+├➤ *.anticall on/off*
+├➤ *.anticall msg [teks]*
+├➤ *.anticall add [nomor]*
+├➤ *.anticall del [nomor]*
+╰➤ *.anticall list*
 
 ╭─「 📵 *ANTI CALL VIDEO* 」
-├➤ *.anticallvid on/off* — Tolak panggilan video
-├➤ *.anticallvid msg [teks]* — Atur pesan tolak
-├➤ *.anticallvid add [nomor]* — Whitelist nomor
-├➤ *.anticallvid del [nomor]* — Hapus whitelist
-╰➤ *.anticallvid list* — Lihat whitelist
+├➤ *.anticallvid on/off*
+├➤ *.anticallvid msg [teks]*
+├➤ *.anticallvid add [nomor]*
+├➤ *.anticallvid del [nomor]*
+╰➤ *.anticallvid list*
 
 ╭─「 👁️ *VIEW ONCE* 」
-╰➤ *.rvo / .viewonce / .vo* — Buka view once
+╰➤ *.rvo / .viewonce / .vo*
 
 ╭─「 🎨 *STICKER & GAMBAR* 」
-├➤ *.sticker / .s* — Buat sticker
-├➤ *.toimg* — Sticker → Gambar
-╰➤ *.hd / .remini* — Perjelas foto blur
+├➤ *.sticker / .s*
+├➤ *.toimg*
+╰➤ *.hd / .remini*
 
 ╭─「 😊 *EMOJI REAKSI SW* 」
-├➤ *.emojiadd 😊,😄* — Tambah emoji reaksi
-├➤ *.emojidel 😊* — Hapus emoji reaksi
-├➤ *.emojiclear* — Reset ke seed WA (love ijo dll)
-├➤ *.emojilist* — Lihat daftar & mode emoji
-├➤ *.emojidefault* — Pakai emoji bot utama
-╰➤ *.emojicustom* — Pakai emoji kamu sendiri
+├➤ *.emojiadd 😊,😄*
+├➤ *.emojidel 😊*
+├➤ *.emojiclear*
+├➤ *.emojilist*
+├➤ *.emojidefault*
+╰➤ *.emojicustom*
 
 ╭─「 📡 *STATUS & STORY* 」
-╰➤ *.upswgc [caption]* — Upload status ke semua grup
+╰➤ *.upswgc [caption]*
 
 ╭─「 📥 *DOWNLOAD* 」
-├➤ *.allunduh [link]* — Download dari semua platform
-├➤ *.tt [link]* — Download TikTok
-├➤ *.ig [link]* — Download Instagram
-├➤ *.fb [link]* — Download Facebook
-├➤ *.twdl [link]* — Download Twitter/X
-├➤ *.ytmp3 [link]* — YouTube → Audio
-├➤ *.ytmp4 [link]* — YouTube → Video
-╰➤ *.play [judul]* — Cari & download lagu
+├➤ *.allunduh [link]*
+├➤ *.tt [link]*
+├➤ *.ig [link]*
+├➤ *.fb [link]*
+├➤ *.twdl [link]*
+├➤ *.ytmp3 [link]*
+├➤ *.ytmp4 [link]*
+╰➤ *.play [judul]*
 
 ━━━━━━━━━━━━━━━━━━━━━━
-_⚙️ Setting tersimpan per-jadibot realtime_
-_😊 Emoji reaksi SW terpisah milik kamu sendiri_
 _📦 Powered by Wily Bot V22_ 🤖`;
                                                 const _jbTotalMenuCmd = (_jbMenuBody.match(/[├╰]➤/g) || []).length;
                                                 const menuTeks =
@@ -10482,24 +10480,14 @@ cekerror | cekerror reset | contact
 
                                 const jadibotTeks =
 `╭─「 🤖 *JADIBOT* 」
-│  _Jadikan nomor lain sebagai bot_
 │
 ├➤ *.jadibot [nomor] [durasi]*
-│   _Aktifkan jadibot di nomor tertentu_
-│   _Contoh: .jadibot 628xxx 1j_
-│   _Format durasi: 30m / 1j / 2h / 1d_
 │
 ├➤ *.stopbot [nomor]*
-│   _Hentikan jadibot di nomor tertentu_
-│   _Contoh: .stopbot 628xxx_
 │
 ├➤ *.listbot*
-│   _Lihat daftar jadibot yang sedang aktif_
 │
 ╰➤ *.setpairing v1/v2*
-   _Atur mode pengiriman kode pairing_
-   _v1 → kode tampil di GC / owner_
-   _v2 → kode dikirim ke nomor tujuan_
 
 `;
 
