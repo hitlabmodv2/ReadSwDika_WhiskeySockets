@@ -295,6 +295,7 @@ export async function useSingleFileAuthState(filePath) {
         const absPath   = filePath.startsWith('/') ? filePath : join(process.cwd(), filePath)
         const writeMutex = _getWriteMutex(absPath)
         let writeTimer = null
+        let _sealed = false
 
         let creds = null
         const keyStore = new Map()
@@ -337,6 +338,7 @@ export async function useSingleFileAuthState(filePath) {
         }
 
         function scheduleFlush() {
+                if (_sealed) return
                 if (writeTimer) clearTimeout(writeTimer)
                 writeTimer = setTimeout(() => { writeTimer = null; flushNow().catch(() => {}) }, 300)
         }
@@ -486,6 +488,7 @@ export async function useSingleFileAuthState(filePath) {
                         scheduleFlush()
                 },
                 stopFlush: () => {
+                        _sealed = true
                         if (writeTimer) { clearTimeout(writeTimer); writeTimer = null }
                 },
                 flushImmediate: () => flushNow(),

@@ -257,15 +257,44 @@ export async function startBrowserSwitch(hisoka, browserVal, from, editFn, newBr
                 // Step 1: Baileys emit creds.update (registered, me, account, dll) SETELAH
                 // connection.update {open} — bukan sebelum. Jika kita flush langsung di sini,
                 // state.creds masih belum lengkap (registered: false, me: undefined).
-                // Fix: set registered=true manual + tunggu 800ms agar semua creds.update
-                // sempat fire dan scheduleFlush (debounce 300ms) menyimpannya ke memori.
-                // Baru SETELAH itu kita stop timer + flush sekali final ke disk.
+                //
+                // Fix Bug A – Delay adaptif:
+                //   Poll hingga creds.me + creds.account terisi (maks 5000ms), lalu
+                //   tambahkan 300ms grace period. Ini lebih andal dari delay tetap 800ms
+                //   yang bisa terlalu pendek pada perangkat baru.
+                //
+                // Fix Bug B – Race condition post-rename:
+                //   _stopFlush() sekarang menyetel flag _sealed = true di authState,
+                //   sehingga setiap scheduleFlush() berikutnya (dari creds.update yang
+                //   masih di queue) jadi no-op. _flushImmediate() adalah flush FINAL
+                //   ke tempFile. Setelah ini tidak ada flush baru yang bisa berjalan
+                //   dan menimpa hisoka.json setelah rename.
                 try {
                     if (state?.creds && !state.creds.registered) {
                         state.creds.registered = true;
                     }
                 } catch {}
-                await delay(800); // tunggu creds.update Baileys fire & update state
+
+                // Tunggu creds.me dan creds.account terisi dari Baileys (maks 5000ms).
+                // Untuk perangkat baru, Baileys emit creds.update dengan me + account
+                // SETELAH connection.update {open} — durasi bisa >800ms di kondisi tertentu.
+                // Polling lebih andal daripada delay tetap.
+                {
+                    const POLL_INTERVAL = 100;
+                    const MAX_WAIT_MS   = 5000;
+                    let waited = 0;
+                    while ((!state.creds?.me || !state.creds?.account) && waited < MAX_WAIT_MS) {
+                        await delay(POLL_INTERVAL);
+                        waited += POLL_INTERVAL;
+                    }
+                    // Tambahkan 300ms grace period agar debounce flush terakhir sempat fire
+                    // dan creds.update lain yang menyusul masuk ke state sebelum kita seal.
+                    await delay(300);
+                }
+
+                // Seal flush: setelah ini scheduleFlush() jadi no-op,
+                // sehingga creds.update yang masih di queue tidak bisa schedule flush baru
+                // dan overwrite file setelah rename.
                 try { if (_stopFlush) _stopFlush(); } catch {}
                 try { if (_flushImmediate) await _flushImmediate(); } catch {}
                 try { sock.ev.removeAllListeners(); } catch {}
