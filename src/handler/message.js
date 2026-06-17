@@ -9612,7 +9612,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                 const _jbAo = getJadibotAutoOnline(jadibotNum);
                                                 const _jbAt = getJadibotAutoTyping(jadibotNum);
                                                 const _jbAr = getJadibotAutoRecording(jadibotNum);
-                                                const _jbFiturCount = [
+                                                const _jbAutoList = [
                                                         _jbReadsw?.enabled,
                                                         _jbAntidel?.enabled,
                                                         _jbAnticall?.enabled,
@@ -9620,7 +9620,10 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                         _jbAo?.enabled,
                                                         _jbAt?.enabled,
                                                         _jbAr?.enabled,
-                                                ].filter(Boolean).length;
+                                                ];
+                                                const _jbTotalAutoFitur = _jbAutoList.length;
+                                                const _jbFiturCount = _jbAutoList.filter(Boolean).length;
+                                                const _jbAutoTidakAktif = _jbTotalAutoFitur - _jbFiturCount;
                                                 const jadibotConnectTs = jadibotConnectedAt.get(jadibotNum) || getJadibotExpiry(jadibotNum)?.connectedAt || Date.now();
                                                 const jadibotUptimeMs = Date.now() - jadibotConnectTs;
                                                 const jadibotUptimeSec = Math.floor(jadibotUptimeMs / 1000);
@@ -9634,22 +9637,8 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                 const _jbNow = new Date();
                                                 const _jbTglFmt = new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }).format(_jbNow);
                                                 const _jbJamFmt = new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).format(_jbNow);
-                                                const menuTeks =
-`╭═══════════════════════╮
-║   🤖 *WILY BOT V22*   
-├═══════════════════════╣
-║   🤖  *MENU JADIBOT*   
-├═══════════════════════╣
-│ 👤 » ${m.pushName || 'User'}
-│ 📱 » +${jadibotNum}
-│ ⏱️ » ${juh}j ${jum}m ${jus}d
-│ ${masaAktifLine}
-│ 📅 » ${_jbTglFmt}
-│ 🕐 » ${_jbJamFmt} WIB
-│ 📦 » ${_jbFiturCount} fitur aktif
-│ 🌐 » Online 🟢
-╰═══════════════════════╯
-
+                                                const _jbMenuBody =
+`
 ━━━━━━━━━━━━━━━━━━━━━━
 
 ╭─「 📌 *UMUM* 」
@@ -9730,6 +9719,25 @@ export default async function ({ message, type: messagesType }, hisoka) {
 _⚙️ Setting tersimpan per-jadibot realtime_
 _😊 Emoji reaksi SW terpisah milik kamu sendiri_
 _📦 Powered by Wily Bot V22_ 🤖`;
+                                                const _jbTotalMenuCmd = (_jbMenuBody.match(/[├╰]➤/g) || []).length;
+                                                const menuTeks =
+`╭═══════════════════════╮
+║   🤖 *WILY BOT V22*   
+├═══════════════════════╣
+║   🤖  *MENU JADIBOT*   
+├═══════════════════════╣
+│ 👤 » ${m.pushName || 'User'}
+│ 📱 » +${jadibotNum}
+│ ⏱️ » ${juh}j ${jum}m ${jus}d
+│ ${masaAktifLine}
+│ 📅 » ${_jbTglFmt}
+│ 🕐 » ${_jbJamFmt} WIB
+│ 📜 » ${_jbTotalMenuCmd} Total Semua Command
+│ 🗂️ » ${_jbTotalAutoFitur} Total Fitur Auto
+│ ✅ » ${_jbFiturCount} Fitur Auto Aktif
+│ ❌ » ${_jbAutoTidakAktif} Fitur Auto Tidak Aktif
+│ 🌐 » Online 🟢
+╰═══════════════════════╯${_jbMenuBody}`;
                                                 let jbMenuSent = false;
                                                 try {
                                                         const btnJb = new Button()
