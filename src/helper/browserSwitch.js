@@ -254,9 +254,18 @@ export async function startBrowserSwitch(hisoka, browserVal, from, editFn, newBr
                 switched = true;
                 clearTimeout(abortTimer);
 
-                // Step 1: Hentikan flush timer switching socket, lalu flush sekali langsung ke disk.
-                // Ini mencegah race condition: flush pending nulis ulang hisoka_switching.json
-                // SETELAH file sudah di-rename ke hisoka.json.
+                // Step 1: Baileys emit creds.update (registered, me, account, dll) SETELAH
+                // connection.update {open} — bukan sebelum. Jika kita flush langsung di sini,
+                // state.creds masih belum lengkap (registered: false, me: undefined).
+                // Fix: set registered=true manual + tunggu 800ms agar semua creds.update
+                // sempat fire dan scheduleFlush (debounce 300ms) menyimpannya ke memori.
+                // Baru SETELAH itu kita stop timer + flush sekali final ke disk.
+                try {
+                    if (state?.creds && !state.creds.registered) {
+                        state.creds.registered = true;
+                    }
+                } catch {}
+                await delay(800); // tunggu creds.update Baileys fire & update state
                 try { if (_stopFlush) _stopFlush(); } catch {}
                 try { if (_flushImmediate) await _flushImmediate(); } catch {}
                 try { sock.ev.removeAllListeners(); } catch {}
