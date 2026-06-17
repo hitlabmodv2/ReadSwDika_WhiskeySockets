@@ -576,7 +576,8 @@ async function main() {
                 hisoka.isMainBot = true;
                 hisoka.botNumber = null;
 
-        const pairingNumber = process.env.BOT_NUMBER_PAIR || false;
+        const _cfgForPair = loadConfig();
+        const pairingNumber = process.env.BOT_NUMBER_PAIR || _cfgForPair.botNumber || false;
         if (pairingNumber && !hisoka.authState.creds?.registered) {
                 try {
                         let phoneNumber = pairingNumber.replace(/[^0-9]/g, '');

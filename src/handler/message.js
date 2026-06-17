@@ -3842,12 +3842,15 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                         try { await fs.promises.rm(_cabDir, { recursive: true, force: true }); } catch {}
                                         try { await fs.promises.unlink(_cabFile); } catch {}
                                         await _cabWait(1000);
+                                        const _cabBotNum = loadConfig().botNumber || '6289667923162';
                                         await _cabEdit(
                                                 `✅ *Browser berhasil diganti!*\n\n` +
                                                 `🖥️ *Browser Baru:* ${_cabPilihan.label}\n` +
                                                 `📦 *Detail:* ${_cabPilihan.value.join(' | ')}\n\n` +
-                                                `🔄 *Bot restart dalam 3 detik...*\n` +
-                                                `📲 *Pairing code akan muncul — masukkan di WA kamu!*`
+                                                `🔄 *Bot restart dalam 3 detik...*\n\n` +
+                                                `📲 *Pairing code otomatis dikirim ke:*\n` +
+                                                `📱 *+${_cabBotNum}*\n` +
+                                                `↳ Buka WA → Perangkat Tertaut → Tautkan Perangkat → masukkan kode`
                                         );
                                         logCommand(m, hisoka, 'aturbrowser');
                                         const { restartBot: _cabRestart } = _require(path.resolve('./src/scrape/system/shutdown.cjs'));
@@ -14335,12 +14338,15 @@ text += `│\n╰═════════════════╯`;
                                                 try { await fs.promises.unlink(_abFile); } catch {}
                                                 await _wait(1000);
 
+                                                const _abBotNum = loadConfig().botNumber || '6289667923162';
                                                 await _edit(
                                                         `✅ *Browser berhasil diganti!*\n\n` +
                                                         `🖥️ *Browser Baru:* ${pilihan.label}\n` +
                                                         `📦 *Detail:* ${pilihan.value.join(' | ')}\n\n` +
-                                                        `🔄 *Bot restart dalam 3 detik...*\n` +
-                                                        `📲 *Pairing code akan muncul — masukkan di WA kamu!*`
+                                                        `🔄 *Bot restart dalam 3 detik...*\n\n` +
+                                                        `📲 *Pairing code otomatis dikirim ke:*\n` +
+                                                        `📱 *+${_abBotNum}*\n` +
+                                                        `↳ Buka WA → Perangkat Tertaut → Tautkan Perangkat → masukkan kode`
                                                 );
 
                                                 logCommand(m, hisoka, 'aturbrowser');
