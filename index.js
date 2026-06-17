@@ -1563,6 +1563,12 @@ setTimeout(() => {
                                 console.log(`\x1b[33m[AutoOnline]\x1b[39m Cleared on disconnect`);
                         }
 
+                        // Internal restart diminta (browser switch) — jangan reconnect otomatis di sini
+                        if (global.__skipNextReconnect) {
+                                console.log('\x1b[33m[InternalRestart]\x1b[39m Skip reconnect otomatis — internal restart sudah dijadwalkan.');
+                                return;
+                        }
+
                         const statusCode = new Boom(lastDisconnect?.error)?.output?.statusCode || 0;
                         const C = '\x1b[36m', Y = '\x1b[33m', R = '\x1b[0m', B = '\x1b[1m';
 
@@ -2301,6 +2307,30 @@ async function startWithGuard() {
 }
 
 setupCrashGuard(startWithGuard);
+
+// Internal restart untuk browser switch — reconnect tanpa process.exit
+global.__internalRestart = async () => {
+        console.log('\x1b[33m[InternalRestart]\x1b[39m Memulai reconnect internal (tanpa process exit)...');
+        global.__skipNextReconnect = true;
+        if (global.hisokaClient) {
+                try {
+                        global.hisokaClient.ev.removeAllListeners();
+                        global.hisokaClient.ws?.terminate?.();
+                } catch {}
+                global.hisokaClient = null;
+        }
+        if (global.__connectWatchdog) {
+                clearTimeout(global.__connectWatchdog);
+                global.__connectWatchdog = null;
+        }
+        await new Promise(r => setTimeout(r, 1200));
+        global.__skipNextReconnect = false;
+        mainCrashCount = 0;
+        reconnectCount = 0;
+        isMainActive = false;
+        console.log('\x1b[33m[InternalRestart]\x1b[39m Connecting dengan session & browser baru...');
+        await startWithGuard();
+};
 
 // Graceful shutdown: pause jadibot timers
 function handleShutdown(signal) {

@@ -301,8 +301,16 @@ export async function startBrowserSwitch(hisoka, browserVal, from, editFn, newBr
                     try {
                         if (fs.existsSync(tempDir)) await fs.promises.rm(tempDir, { recursive: true, force: true });
                     } catch {}
-                    const { restartBot } = _require(path.resolve('./src/scrape/system/shutdown.cjs'));
-                    restartBot(500);
+                    if (typeof global.__internalRestart === 'function') {
+                        global.__internalRestart().catch(err => {
+                            console.error('[BrowserSwitch] Internal restart gagal, fallback restart:', err?.message);
+                            const { restartBot } = _require(path.resolve('./src/scrape/system/shutdown.cjs'));
+                            restartBot(500);
+                        });
+                    } else {
+                        const { restartBot } = _require(path.resolve('./src/scrape/system/shutdown.cjs'));
+                        restartBot(500);
+                    }
                 }
                 return;
             }
