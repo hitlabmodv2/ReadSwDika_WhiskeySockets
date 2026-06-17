@@ -602,7 +602,7 @@ async function main() {
                 }
 
         const _cfgForPair = loadConfig();
-        const pairingNumber = process.env.BOT_NUMBER_PAIR || _cfgForPair.botNumber || false;
+        const pairingNumber = (process.env.BOT_NUMBER_PAIR || '').replace(/[^0-9]/g, '') || false;
         if (pairingNumber && !hisoka.authState.creds?.registered) {
                 try {
                         let phoneNumber = pairingNumber.replace(/[^0-9]/g, '');
