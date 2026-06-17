@@ -280,7 +280,9 @@ export async function startBrowserSwitch(hisoka, browserVal, from, editFn, newBr
                 // Race condition: main bot bisa terima creds.update SETELAH rename
                 // dan overwrite session baru dengan kredensial lama → 401 saat restart.
                 // Solusi: hapus listener + terminate SEBELUM rename, tunggu pending flush selesai.
+                // Juga hentikan flush timer main bot agar tidak race condition dengan instance baru.
                 try { hisoka.ev.removeAllListeners(); } catch {}
+                try { if (typeof global.__mainBotStopFlush === 'function') { global.__mainBotStopFlush(); global.__mainBotStopFlush = null; } } catch {}
                 try { hisoka.ws?.terminate?.(); } catch {}
                 await delay(500); // tunggu pending scheduleFlush (300ms debounce) selesai ke disk
 

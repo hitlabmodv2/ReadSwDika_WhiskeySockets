@@ -472,10 +472,11 @@ async function main() {
                 }
         } catch (_) {}
 
-        const { state, saveCreds, contacts, groups, settings, clearCacheInPlace, getSizeReport } = await useSingleFileAuthState(sessionFile);
+        const { state, saveCreds, contacts, groups, settings, clearCacheInPlace, getSizeReport, stopFlush: _stopMainFlush } = await useSingleFileAuthState(sessionFile);
         global.__mainBotGroups = groups;
         global.__clearSesiInPlace = clearCacheInPlace;
         global.__getSesiReport = getSizeReport;
+        global.__mainBotStopFlush = _stopMainFlush;
         const { version, isLatest } = await fetchLatestBaileysVersion();
 
         console.info(`\x1b[32m→ Baileys  :\x1b[39m v${version.join('.')}${isLatest ? '' : ' (update tersedia)'}`);
@@ -2312,6 +2313,8 @@ setupCrashGuard(startWithGuard);
 global.__internalRestart = async () => {
         console.log('\x1b[33m[InternalRestart]\x1b[39m Memulai reconnect internal (tanpa process exit)...');
         global.__skipNextReconnect = true;
+        // Hentikan flush timer instance lama agar tidak race condition dengan instance baru
+        try { if (typeof global.__mainBotStopFlush === 'function') { global.__mainBotStopFlush(); global.__mainBotStopFlush = null; } } catch {}
         if (global.hisokaClient) {
                 try {
                         global.hisokaClient.ev.removeAllListeners();
