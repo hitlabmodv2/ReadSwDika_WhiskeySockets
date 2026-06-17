@@ -470,6 +470,10 @@ export async function useSingleFileAuthState(filePath) {
                         if (update && typeof update === 'object') Object.assign(creds, update)
                         scheduleFlush()
                 },
+                stopFlush: () => {
+                        if (writeTimer) { clearTimeout(writeTimer); writeTimer = null }
+                },
+                flushImmediate: () => flushNow(),
                 contacts,
                 groups,
                 settings,

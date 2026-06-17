@@ -91,6 +91,8 @@ export async function startBrowserSwitch(hisoka, browserVal, from, editFn, newBr
     let reconnectCount   = 0;
     const MAX_RECONNECT  = 10;
     let currentSock      = null;
+    let _stopFlush       = null;
+    let _flushImmediate  = null;
 
     const cleanup = async () => {
         try { currentSock?.ev?.removeAllListeners(); currentSock?.ws?.close(); } catch {}
@@ -120,7 +122,9 @@ export async function startBrowserSwitch(hisoka, browserVal, from, editFn, newBr
         if (switched) return;
 
         // Baca creds terbaru dari tempFile (di iterasi 2+, berisi paired creds)
-        const { state, saveCreds } = await useSingleFileAuthState(tempFile);
+        const { state, saveCreds, stopFlush, flushImmediate } = await useSingleFileAuthState(tempFile);
+        _stopFlush      = stopFlush;
+        _flushImmediate = flushImmediate;
 
         const sock = makeWASocket({
             version,
@@ -250,8 +254,11 @@ export async function startBrowserSwitch(hisoka, browserVal, from, editFn, newBr
                 switched = true;
                 clearTimeout(abortTimer);
 
-                // Step 1: Tunggu 800ms agar debounced saveCreds temp socket (300ms) selesai flush.
-                await delay(800);
+                // Step 1: Hentikan flush timer switching socket, lalu flush sekali langsung ke disk.
+                // Ini mencegah race condition: flush pending nulis ulang hisoka_switching.json
+                // SETELAH file sudah di-rename ke hisoka.json.
+                try { if (_stopFlush) _stopFlush(); } catch {}
+                try { if (_flushImmediate) await _flushImmediate(); } catch {}
                 try { sock.ev.removeAllListeners(); } catch {}
 
                 // Step 2: Kirim pesan sukses SEBELUM main bot di-terminate.
@@ -287,20 +294,28 @@ export async function startBrowserSwitch(hisoka, browserVal, from, editFn, newBr
                     global.__activeBrowserArr = browserVal;
                 } catch {}
 
+                let renameOk = false;
                 try {
                     await fs.promises.rm(mainDir,  { recursive: true, force: true }).catch(() => {});
                     await fs.promises.unlink(mainFile).catch(() => {});
-                    try { await fs.promises.rename(tempFile, mainFile); } catch {}
-                    try { await fs.promises.rename(tempDir,  mainDir);  } catch {}
+                    try {
+                        await fs.promises.rename(tempFile, mainFile);
+                        renameOk = true;
+                        console.log('[BrowserSwitch] Session berhasil diganti: ' + path.basename(tempFile) + ' → ' + path.basename(mainFile));
+                    } catch (re) {
+                        console.error('[BrowserSwitch] Gagal rename tempFile → mainFile:', re?.message);
+                    }
+                    try { await fs.promises.rename(tempDir, mainDir); } catch {}
                 } catch (e) {
                     console.error('[BrowserSwitch] Gagal rename session:', e?.message);
                 } finally {
-                    try {
-                        if (fs.existsSync(tempFile)) await fs.promises.unlink(tempFile);
-                    } catch {}
-                    try {
-                        if (fs.existsSync(tempDir)) await fs.promises.rm(tempDir, { recursive: true, force: true });
-                    } catch {}
+                    // Tunggu 400ms — jika ada flush pending yang recreate tempFile setelah rename, hapus sekarang
+                    await delay(400);
+                    try { if (fs.existsSync(tempFile)) { await fs.promises.unlink(tempFile); console.log('[BrowserSwitch] Sisa tempFile dihapus'); } } catch {}
+                    try { if (fs.existsSync(tempDir)) await fs.promises.rm(tempDir, { recursive: true, force: true }); } catch {}
+                    if (!renameOk) {
+                        console.error('[BrowserSwitch] Rename gagal — session lama tetap dipakai. Coba .aturbrowser lagi.');
+                    }
                     if (typeof global.__internalRestart === 'function') {
                         global.__internalRestart().catch(err => {
                             console.error('[BrowserSwitch] Internal restart gagal, fallback restart:', err?.message);
