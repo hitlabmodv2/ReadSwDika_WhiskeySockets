@@ -9751,12 +9751,14 @@ _📦 Powered by Wily Bot V22_ 🤖`;
                                         const uptimeStr = `${uh} Jam ${um} Menit ${us} Detik`;
                                         // Hitung fitur yang benar-benar ON secara realtime (bukan total command)
                                         const _mnCfg = loadConfig();
+                                        const totalSemuaFitur = CEKAUTO_FITUR_LIST.length;
                                         const totalCmd = CEKAUTO_FITUR_LIST.filter(f => {
                                                 if (f.checkFn) return f.checkFn(_mnCfg);
                                                 if (f.type === 'global') return _mnCfg[f.key]?.enabled === true;
                                                 const groups = _mnCfg[f.key]?.groups || {};
                                                 return Object.values(groups).some(g => g?.enabled === true);
                                         }).length;
+                                        const totalTidakAktif = totalSemuaFitur - totalCmd;
                                         const _mnNow = new Date();
                                         const _mnTgl = new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }).format(_mnNow);
                                         const _mnJam = new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).format(_mnNow);
@@ -9771,7 +9773,9 @@ _📦 Powered by Wily Bot V22_ 🤖`;
 │ ⏱️ » ${uptimeStr}
 │ 📅 » ${_mnTgl}
 │ 🕐 » ${_mnJam} WIB
-│ 📦 » ${totalCmd} fitur aktif
+│ 📦 » ${totalSemuaFitur} Total Semua Fitur
+│ 📦 » ${totalCmd} Fitur Auto Aktif
+│ 📦 » ${totalTidakAktif} Fitur Auto Tidak Aktif
 │ 🌐 » Online 🟢
 ├═════════════════════┤
 ║   🤖 *AUTO FITUR*   
