@@ -3816,6 +3816,55 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         }
                 }
 
+                // ── Handle reply ke pesan konfirmasi .aturbrowser ──
+                if (isMainBot(hisoka) && m.isOwner && m.isQuoted && !m.prefix && pendingAturBrowser.has(m.sender)) {
+                        const _cabPending  = pendingAturBrowser.get(m.sender);
+                        const _cabQuotedId = getQuotedStanzaId(m);
+                        const _cabRaw      = (m.text || '').trim().toLowerCase();
+                        const _cabIsReply  = _cabPending?.botMsg?.key?.id && _cabQuotedId === _cabPending.botMsg.key.id && Date.now() < _cabPending.expiresAt;
+                        if (_cabIsReply) {
+                                if (/^(ya|yes)$/i.test(_cabRaw)) {
+                                        clearTimeout(_cabPending.timer);
+                                        pendingAturBrowser.delete(m.sender);
+                                        const _cabConfig  = loadConfig();
+                                        const _cabPilihan = BROWSER_LIST.find(b => b.key === _cabPending.vKey);
+                                        if (!_cabPilihan) { await m.reply(`❌ Pilihan tidak valid.`); return; }
+                                        const _cabProgMsg = await m.reply(`⏳ *Memproses...*`);
+                                        const _cabEdit = async (txt) => { try { await hisoka.sendMessage(m.from, { edit: _cabProgMsg.key, text: txt }); } catch {} };
+                                        const _cabWait = (ms) => new Promise(r => setTimeout(r, ms));
+                                        _cabConfig.browserDevice = { selected: _cabPilihan.key };
+                                        saveConfig(_cabConfig);
+                                        await _cabEdit(`⏳ *Menyimpan config browser...*\n🖥️ ${_cabPilihan.label}`);
+                                        await _cabWait(1200);
+                                        const _cabDir  = global.sessionDir || path.join(process.cwd(), 'sessions', process.env.BOT_SESSION_NAME || 'hisoka');
+                                        const _cabFile = path.join(process.cwd(), 'sessions', (process.env.BOT_SESSION_NAME || 'hisoka') + '.json');
+                                        await _cabEdit(`🗑️ *Menghapus session lama...*\n🖥️ ${_cabPilihan.label}`);
+                                        try { await fs.promises.rm(_cabDir, { recursive: true, force: true }); } catch {}
+                                        try { await fs.promises.unlink(_cabFile); } catch {}
+                                        await _cabWait(1000);
+                                        await _cabEdit(
+                                                `✅ *Browser berhasil diganti!*\n\n` +
+                                                `🖥️ *Browser Baru:* ${_cabPilihan.label}\n` +
+                                                `📦 *Detail:* ${_cabPilihan.value.join(' | ')}\n\n` +
+                                                `🔄 *Bot restart dalam 3 detik...*\n` +
+                                                `📲 *Pairing code akan muncul — masukkan di WA kamu!*`
+                                        );
+                                        logCommand(m, hisoka, 'aturbrowser');
+                                        const { restartBot: _cabRestart } = _require(path.resolve('./src/scrape/system/shutdown.cjs'));
+                                        _cabRestart(3000);
+                                        return;
+                                } else if (/^(tidak|batal|no|cancel)$/i.test(_cabRaw)) {
+                                        clearTimeout(_cabPending.timer);
+                                        pendingAturBrowser.delete(m.sender);
+                                        if (_cabPending?.botMsg?.key) {
+                                                await hisoka.sendMessage(m.from, { edit: _cabPending.botMsg.key, text: `❌ *Ganti browser dibatalkan.*` }).catch(() => {});
+                                        }
+                                        await m.reply(`❌ *Ganti browser dibatalkan.*`);
+                                        return;
+                                }
+                        }
+                }
+
                 // Handle pending play choice (user balas 1 atau 2)
                 if (pendingPlayChoices.has(m.sender)) {
                         const choice = (m.text || '').trim();
