@@ -1534,24 +1534,26 @@ setTimeout(() => {
                                 global.__connectWatchdog = null;
                         }
                         // Pastikan registered = true tersimpan permanen setelah terhubung
-                        if (!state.creds.registered) {
+                        // Tangkap dulu state sebelum diubah agar bisa dipakai di bawah
+                        const _wasFirstPairing = !state.creds.registered;
+                        if (_wasFirstPairing) {
                                 state.creds.registered = true;
                                 saveCreds();
                         }
-                        // Jika ini adalah PAIRING BARU (creds belum registered sebelumnya),
-                        // simpan pairedBrowserKey = browser yang benar-benar dipakai saat pairing.
-                        // Ini yang akan tampil di WA Perangkat Tertaut.
-                        if (!state.creds.registered) {
-                                try {
-                                        const _pairCfg = loadConfig();
-                                        const _pairKey = (_pairCfg.browserDevice?.selected || 'v1').toLowerCase();
+                        // Setiap kali bot berhasil terhubung (pairing baru MAUPUN reconnect),
+                        // sync pairedBrowserKey = browserDevice.selected.
+                        // Ini memastikan menu & .aturbrowser selalu tampil browser yang BENAR-BENAR terhubung.
+                        try {
+                                const _pairCfg = loadConfig();
+                                const _pairKey = (_pairCfg.browserDevice?.selected || 'v1').toLowerCase();
+                                if (_pairCfg.pairedBrowserKey !== _pairKey) {
                                         _pairCfg.pairedBrowserKey = _pairKey;
                                         saveConfig(_pairCfg);
-                                        const _pairInfo = BROWSER_LIST.find(b => b.key === _pairKey) || BROWSER_LIST[0];
-                                        global.__activeBrowserKey = _pairKey;
-                                        global.__activeBrowserArr = _pairInfo.value;
-                                } catch {}
-                        }
+                                }
+                                const _pairInfo = BROWSER_LIST.find(b => b.key === _pairKey) || BROWSER_LIST[0];
+                                global.__activeBrowserKey = _pairKey;
+                                global.__activeBrowserArr = _pairInfo.value;
+                        } catch {}
                 }
 
                 if (connection === 'close') {
