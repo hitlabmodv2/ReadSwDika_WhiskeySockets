@@ -9775,6 +9775,9 @@ _📦 Powered by Wily Bot V22_ 🤖`;
                                                 return Object.values(groups).some(g => g?.enabled === true);
                                         }).length;
                                         const totalTidakAktif = totalSemuaFitur - totalCmd;
+                                        const _mnBrowserKey = (_mnCfg.browserDevice?.selected || 'v1').toLowerCase();
+                                        const _mnBrowserInfo = BROWSER_LIST.find(b => b.key === _mnBrowserKey) || BROWSER_LIST[0];
+                                        const _mnBrowserLabel = `${_mnBrowserInfo.label} (${_mnBrowserInfo.value[2]})`;
                                         const _mnNow = new Date();
                                         const _mnTgl = new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }).format(_mnNow);
                                         const _mnJam = new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).format(_mnNow);
@@ -9789,6 +9792,7 @@ _📦 Powered by Wily Bot V22_ 🤖`;
 │ ⏱️ » ${uptimeStr}
 │ 📅 » ${_mnTgl}
 │ 🕐 » ${_mnJam} WIB
+│ 🖥️ » ${_mnBrowserLabel}
 │ 📜 » ${TOTAL_CMD_COUNT} Total Semua Command
 │ 🗂️ » ${totalSemuaFitur} Total Fitur Auto
 │ ✅ » ${totalCmd} Fitur Auto Aktif
