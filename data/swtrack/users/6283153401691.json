@@ -175,9 +175,9 @@
     "name": "yyuan",
     "type": "videoMessage",
     "arrivedAt": "2026-06-17T04:01:11.233Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "🇶🇦",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6283153401691",
@@ -190,6 +190,25 @@
       "participant": "31959019446519@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-17T04:01:11.233Z"
+    "updatedAt": "2026-06-17T04:01:26.324Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283153401691@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACF2261A5D632EFC306C284994331885",
+        "participant": "31959019446519@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283153401691@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACF2261A5D632EFC306C284994331885",
+        "participant": "6283153401691@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-17T04:01:26.324Z"
   }
 }

@@ -173,9 +173,9 @@
     "name": "Cosmouz/Fadli",
     "type": "videoMessage",
     "arrivedAt": "2026-06-17T04:01:03.069Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "👨‍👩‍👦‍👦",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6285956660403",
@@ -188,7 +188,26 @@
       "participant": "176549462564879@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-17T04:01:03.069Z"
+    "updatedAt": "2026-06-17T04:01:22.214Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285956660403@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A5F92A14901983033D85A36E310ED79F",
+        "participant": "176549462564879@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285956660403@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A5F92A14901983033D85A36E310ED79F",
+        "participant": "6285956660403@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-17T04:01:22.214Z"
   },
   "A5C7BE67DCAAE992804D0EBC8F26239B": {
     "id": "A5C7BE67DCAAE992804D0EBC8F26239B",
@@ -196,9 +215,9 @@
     "name": "Cosmouz/Fadli",
     "type": "imageMessage",
     "arrivedAt": "2026-06-17T04:01:12.327Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "🫴",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6285956660403",
@@ -211,6 +230,25 @@
       "participant": "176549462564879@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-17T04:01:12.327Z"
+    "updatedAt": "2026-06-17T04:01:18.786Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285956660403@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A5C7BE67DCAAE992804D0EBC8F26239B",
+        "participant": "176549462564879@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285956660403@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A5C7BE67DCAAE992804D0EBC8F26239B",
+        "participant": "6285956660403@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-17T04:01:18.786Z"
   }
 }

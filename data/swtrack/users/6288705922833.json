@@ -126,5 +126,47 @@
       }
     ],
     "processedAt": "2026-06-17T04:00:50.869Z"
+  },
+  "A51D3787BF20C1B0D24EEF665230846D": {
+    "id": "A51D3787BF20C1B0D24EEF665230846D",
+    "sender": "6288705922833@s.whatsapp.net",
+    "name": "amalia",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-17T04:01:24.296Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "😉",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6288705922833",
+    "resolvedPn": "6288705922833@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6288705922833@s.whatsapp.net",
+      "fromMe": false,
+      "id": "A51D3787BF20C1B0D24EEF665230846D",
+      "participant": "200897581863137@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-17T04:01:31.703Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6288705922833@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A51D3787BF20C1B0D24EEF665230846D",
+        "participant": "200897581863137@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6288705922833@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A51D3787BF20C1B0D24EEF665230846D",
+        "participant": "6288705922833@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-17T04:01:31.703Z"
   }
 }
