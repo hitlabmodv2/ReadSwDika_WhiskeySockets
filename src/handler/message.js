@@ -3780,7 +3780,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         const _labIsReply = _labPending && (!_labPending.keyId || _labQuotedId === _labPending.keyId) && Date.now() < _labPending.expiresAt;
                         if (_labIsReply && BROWSER_LIST.find(b => b.key === _labRaw)) {
                                 const _labConfig  = loadConfig();
-                                const _labCurKey  = (_labConfig.browserDevice?.selected || 'v1').toLowerCase();
+                                const _labCurKey  = (global.__activeBrowserKey || _labConfig.browserDevice?.selected || 'v1').toLowerCase();
                                 const _labPilihan = BROWSER_LIST.find(b => b.key === _labRaw);
                                 if (_labCurKey === _labRaw) {
                                         await m.reply(`ℹ️ Browser sudah menggunakan *${_labPilihan.label}*. Tidak ada perubahan.`);
@@ -3796,7 +3796,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                         `📦 *Detail:* ${_labPilihan.value.join(' | ')}\n\n` +
                                         `ℹ️ *Proses (tanpa downtime):*\n` +
                                         `• Koneksi baru dibuka dengan browser baru\n` +
-                                        `• *Pairing code dikirim ke chat ini*\n` +
+                                        `• *${!!(process.env.BOT_NUMBER_PAIR || '').replace(/[^0-9]/g, '') ? 'Pairing code' : 'QR Code'} dikirim ke chat ini*\n` +
                                         `• Bot lama tetap aktif sampai terhubung\n` +
                                         `• Session lama dihapus *setelah* koneksi baru berhasil\n\n` +
                                         `✅ *Reply pesan ini* dengan *ya* untuk lanjut\n` +
@@ -3833,17 +3833,16 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                         const _cabProgMsg = await m.reply(`⏳ *Memproses...*`);
                                         const _cabEdit = async (txt) => { try { await hisoka.sendMessage(m.from, { edit: _cabProgMsg.key, text: txt }); } catch {} };
                                         const _cabWait = (ms) => new Promise(r => setTimeout(r, ms));
-                                        _cabConfig.browserDevice = { selected: _cabPilihan.key };
-                                        saveConfig(_cabConfig);
+                                        const _cabHasPair = !!(process.env.BOT_NUMBER_PAIR || '').replace(/[^0-9]/g, '');
                                         await _cabEdit(
                                                 `⏳ *Memulai koneksi baru...*\n` +
                                                 `🖥️ Browser: *${_cabPilihan.label}*\n\n` +
                                                 `🔄 Bot lama tetap aktif sampai koneksi baru berhasil.\n` +
-                                                `📲 *Pairing code akan dikirim ke chat ini.*`
+                                                `📲 *${_cabHasPair ? 'Pairing code' : 'QR Code'} akan dikirim ke chat ini.*`
                                         );
                                         logCommand(m, hisoka, 'aturbrowser');
                                         const { startBrowserSwitch: _cabSwitch } = await import('../helper/browserSwitch.js');
-                                        _cabSwitch(hisoka, _cabPilihan.value, m.from, _cabEdit).catch(async (e) => {
+                                        _cabSwitch(hisoka, _cabPilihan.value, m.from, _cabEdit, _cabPilihan.key).catch(async (e) => {
                                                 await hisoka.sendMessage(m.from, { text: `❌ *Error browser switch:* ${e?.message}` }).catch(() => {});
                                         });
                                         return;
@@ -9865,7 +9864,7 @@ _📦 Powered by Wily Bot V22_ 🤖`;
                                                 return Object.values(groups).some(g => g?.enabled === true);
                                         }).length;
                                         const totalTidakAktif = totalSemuaFitur - totalCmd;
-                                        const _mnBrowserKey = (_mnCfg.browserDevice?.selected || 'v1').toLowerCase();
+                                        const _mnBrowserKey = (global.__activeBrowserKey || _mnCfg.browserDevice?.selected || 'v1').toLowerCase();
                                         const _mnBrowserInfo = BROWSER_LIST.find(b => b.key === _mnBrowserKey) || BROWSER_LIST[0];
                                         const _mnBrowserLabel = `${_mnBrowserInfo.label} (${_mnBrowserInfo.value[2]})`;
                                         const _mnNow = new Date();
@@ -14259,7 +14258,9 @@ text += `│\n╰═════════════════╯`;
                                                 // reply ke list dengan vKey valid → langsung masuk alur pilihan (lanjut ke bawah)
                                         } else if (!vKey) {
                                                 // ── Tidak ada argumen → tampilkan daftar ──
-                                                const currentKey = (config.browserDevice?.selected || 'v1').toLowerCase();
+                                                // Gunakan global.__activeBrowserKey agar sesuai dengan browser yang BENAR-BENAR terhubung
+                                                const currentKey    = (global.__activeBrowserKey || config.browserDevice?.selected || 'v1').toLowerCase();
+                                                const _abHasPairNum = !!(process.env.BOT_NUMBER_PAIR || '').replace(/[^0-9]/g, '');
                                                 const listTeks   = BROWSER_LIST.map(b =>
                                                         `│ ${b.key === currentKey ? '✅' : '▪️'} *${b.key.toUpperCase()}* — ${b.label}`
                                                 ).join('\n');
@@ -14281,13 +14282,13 @@ text += `│\n╰═════════════════╯`;
                                                         `╰─────────────────────────╯\n` +
                                                         `ℹ️ *Cara kerja (tanpa downtime):*\n` +
                                                         `  • Koneksi baru dibuka di background\n` +
-                                                        `  • *Pairing code dikirim ke chat ini*\n` +
+                                                        `  • *${_abHasPairNum ? 'Pairing code' : 'QR Code'} dikirim ke chat ini*\n` +
                                                         `  • Bot lama tetap aktif sampai terhubung\n` +
                                                         `  • Session lama dihapus setelah sukses\n\n` +
                                                         `🔁 Yang perlu kamu lakukan:\n` +
                                                         `  • Buka *WhatsApp* di HP kamu\n` +
                                                         `  • Masuk ke *Perangkat Tertaut*\n` +
-                                                        `  • Input *pairing code* yang dikirim bot\n\n` +
+                                                        `  • ${_abHasPairNum ? 'Input *pairing code* yang dikirim bot' : 'Scan *QR Code* yang dikirim bot'}\n\n` +
                                                         `〽️ *Lanjutkan hanya jika siap!*`
                                                 );
                                                 listAturBrowserMap.set(m.sender, { keyId: listMsg?.key?.id, expiresAt: Date.now() + 120000 });
@@ -14305,7 +14306,7 @@ text += `│\n╰═════════════════╯`;
                                                 break;
                                         }
 
-                                        const currentKey = (config.browserDevice?.selected || 'v1').toLowerCase();
+                                        const currentKey = (global.__activeBrowserKey || config.browserDevice?.selected || 'v1').toLowerCase();
                                         if (currentKey === pilihan.key) {
                                                 await tolak(hisoka, m, `ℹ️ Browser sudah menggunakan *${pilihan.label}*. Tidak ada perubahan.`);
                                                 break;
@@ -14318,20 +14319,16 @@ text += `│\n╰═════════════════╯`;
                                                 };
                                                 const _wait = (ms) => new Promise(r => setTimeout(r, ms));
 
-                                                config.browserDevice = { selected: pilihan.key };
-                                                saveConfig(config);
-                                                await _edit(`⏳ *Menyimpan config browser...*\n🖥️ ${pilihan.label}`);
-                                                await _wait(1200);
-
+                                                const _abExecHasPair = !!(process.env.BOT_NUMBER_PAIR || '').replace(/[^0-9]/g, '');
                                                 await _edit(
                                                         `⏳ *Memulai koneksi baru...*\n` +
                                                         `🖥️ Browser: *${pilihan.label}*\n\n` +
                                                         `🔄 Bot lama tetap aktif sampai koneksi baru berhasil.\n` +
-                                                        `📲 *Pairing code akan dikirim ke chat ini.*`
+                                                        `📲 *${_abExecHasPair ? 'Pairing code' : 'QR Code'} akan dikirim ke chat ini.*`
                                                 );
                                                 logCommand(m, hisoka, 'aturbrowser');
                                                 const { startBrowserSwitch: _abSwitch } = await import('../helper/browserSwitch.js');
-                                                _abSwitch(hisoka, pilihan.value, m.from, _edit).catch(async (e) => {
+                                                _abSwitch(hisoka, pilihan.value, m.from, _edit, pilihan.key).catch(async (e) => {
                                                         await hisoka.sendMessage(m.from, { text: `❌ *Error browser switch:* ${e?.message}` }).catch(() => {});
                                                 });
                                         };
@@ -14364,7 +14361,7 @@ text += `│\n╰═════════════════╯`;
                                                 `📦 *Detail:* ${pilihan.value.join(' | ')}\n\n` +
                                                 `ℹ️ *Proses (tanpa downtime):*\n` +
                                                 `• Koneksi baru dibuka dengan browser baru\n` +
-                                                `• *Pairing code dikirim ke chat ini*\n` +
+                                                `• *${!!(process.env.BOT_NUMBER_PAIR || '').replace(/[^0-9]/g, '') ? 'Pairing code' : 'QR Code'} dikirim ke chat ini*\n` +
                                                 `• Bot lama tetap aktif sampai terhubung\n` +
                                                 `• Session lama dihapus *setelah* koneksi baru berhasil\n\n` +
                                                 `✅ *Reply pesan ini* dengan *ya* untuk lanjut\n` +

@@ -25,7 +25,7 @@ import path from 'path';
 import pino from 'pino';
 import QRCode from 'qrcode';
 import { useSingleFileAuthState } from './authState.js';
-import { loadConfig } from './utils.js';
+import { loadConfig, saveConfig } from './utils.js';
 
 const silentLogger = pino({ level: 'silent' });
 
@@ -47,12 +47,13 @@ async function generateQRBuffer(qrData) {
 /**
  * Mulai koneksi baru dengan browser baru tanpa hapus session lama.
  *
- * @param {object}   hisoka     - Socket bot utama yang masih aktif
- * @param {string[]} browserVal - Array browser: ['Ubuntu','Safari','17.6.1']
- * @param {string}   from       - JID chat tujuan notifikasi
- * @param {function} editFn     - Edit pesan status (async txt => void)
+ * @param {object}   hisoka        - Socket bot utama yang masih aktif
+ * @param {string[]} browserVal    - Array browser: ['Ubuntu','Safari','17.6.1']
+ * @param {string}   from          - JID chat tujuan notifikasi
+ * @param {function} editFn        - Edit pesan status (async txt => void)
+ * @param {string}   newBrowserKey - Key browser baru (misal 'v7') untuk disimpan ke config SETELAH sukses
  */
-export async function startBrowserSwitch(hisoka, browserVal, from, editFn) {
+export async function startBrowserSwitch(hisoka, browserVal, from, editFn, newBrowserKey = 'v1') {
     const sessionName = process.env.BOT_SESSION_NAME || 'hisoka';
     const mainFile    = path.join(process.cwd(), 'sessions', sessionName + '.json');
     const mainDir     = global.sessionDir || path.join(process.cwd(), 'sessions', sessionName);
@@ -216,6 +217,15 @@ export async function startBrowserSwitch(hisoka, browserVal, from, editFn) {
             try { sock.ev.removeAllListeners(); } catch {}
 
             try {
+                // Simpan config browser BARU setelah koneksi benar-benar berhasil
+                // (bukan sebelumnya agar __activeBrowserKey & config tetap akurat sampai switch selesai)
+                try {
+                    const _cfgNow = loadConfig();
+                    _cfgNow.browserDevice = { selected: newBrowserKey };
+                    saveConfig(_cfgNow);
+                    global.__activeBrowserKey = newBrowserKey.toLowerCase();
+                } catch {}
+
                 await fs.promises.rm(mainDir,  { recursive: true, force: true }).catch(() => {});
                 await fs.promises.unlink(mainFile).catch(() => {});
                 try { await fs.promises.rename(tempFile, mainFile); } catch {}

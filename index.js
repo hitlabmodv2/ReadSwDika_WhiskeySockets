@@ -575,6 +575,8 @@ async function main() {
         );
                 hisoka.isMainBot = true;
                 hisoka.botNumber = null;
+                // Browser yang BENAR-BENAR dipakai saat runtime (bukan dari config yg bisa berubah di tengah jalan)
+                global.__activeBrowserKey = (loadConfig().browserDevice?.selected || 'v1').toLowerCase();
 
         const _cfgForPair = loadConfig();
         const pairingNumber = process.env.BOT_NUMBER_PAIR || _cfgForPair.botNumber || false;
