@@ -457,6 +457,21 @@ async function main() {
         // Ini yang menyebabkan delay parah setelah offline lama
         cleanStaleSessionFiles(sessionDir)
 
+        // Bersihkan sisa file _switching dari proses .aturbrowser yang tidak selesai
+        // (crash, restart mendadak, timeout, dll.)
+        try {
+                const switchingFile = path.join(process.cwd(), 'sessions', (process.env.BOT_SESSION_NAME || 'default') + '_switching.json');
+                const switchingDir  = path.join(process.cwd(), 'sessions', (process.env.BOT_SESSION_NAME || 'default') + '_switching');
+                if (fs.existsSync(switchingFile)) {
+                        fs.unlinkSync(switchingFile);
+                        console.log(`\x1b[33m[Startup] Sisa file switching dihapus: ${path.basename(switchingFile)}\x1b[39m`);
+                }
+                if (fs.existsSync(switchingDir)) {
+                        fs.rmSync(switchingDir, { recursive: true, force: true });
+                        console.log(`\x1b[33m[Startup] Sisa folder switching dihapus: ${path.basename(switchingDir)}\x1b[39m`);
+                }
+        } catch (_) {}
+
         const { state, saveCreds, contacts, groups, settings, clearCacheInPlace, getSizeReport } = await useSingleFileAuthState(sessionFile);
         global.__mainBotGroups = groups;
         global.__clearSesiInPlace = clearCacheInPlace;

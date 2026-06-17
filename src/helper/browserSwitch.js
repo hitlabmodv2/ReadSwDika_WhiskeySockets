@@ -107,6 +107,57 @@ export async function startBrowserSwitch(hisoka, browserVal, from, editFn, newBr
         try { await fs.promises.unlink(tempFile); } catch {}
     };
 
+    // ── Request pairing code LANGSUNG setelah socket dibuat (jika BOT_NUMBER_PAIR diisi) ──
+    // Harus dipanggil segera — bukan di dalam event handler — agar Baileys
+    // bisa masuk ke mode pairing code sebelum QR sempat di-generate.
+    if (usePairingCode && !state.creds?.registered) {
+        delay(3000).then(async () => {
+            if (pairingRequested || switched) return;
+            pairingRequested = true;
+            try {
+                const _cfg = loadConfig();
+                const _customCode = _cfg.pairingCode
+                    ? String(_cfg.pairingCode).toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8).padEnd(8, '0')
+                    : undefined;
+                const code = await sock.requestPairingCode(botNum, _customCode);
+                const fmt  = fmtPairingCode(code);
+
+                await hisoka.sendMessage(from, {
+                    text:
+                        `╔══════════════════════════╗\n` +
+                        `║  🔑  *PAIRING CODE BARU*  🔑  ║\n` +
+                        `╚══════════════════════════╝\n\n` +
+                        `🖥️ *Browser:* ${browserVal.join(' | ')}\n\n` +
+                        `┌──────────────────────┐\n` +
+                        `│      *${fmt}*      │\n` +
+                        `└──────────────────────┘\n\n` +
+                        `📋 *Cara masukkan kode:*\n` +
+                        `1️⃣ Buka WhatsApp di HP\n` +
+                        `2️⃣ Ketuk ⋮ → *Perangkat Tertaut*\n` +
+                        `3️⃣ Ketuk *Tautkan Perangkat*\n` +
+                        `4️⃣ Pilih *Tautkan dengan nomor telepon*\n` +
+                        `5️⃣ Masukkan kode:\n\n` +
+                        `\`\`\`${fmt}\`\`\`\n\n` +
+                        `⏳ *Kode berlaku 3 menit*\n` +
+                        `🔄 Bot lama tetap aktif sampai kode dimasukkan.`
+                }).catch(() => {});
+                await editFn(
+                    `📲 *Pairing code sudah dikirim ke chat ini!*\n\n` +
+                    `🖥️ Browser: *${browserVal.join(' | ')}*\n\n` +
+                    `⏳ Masukkan kode dalam *3 menit*.\n` +
+                    `Bot lama tetap berjalan normal.`
+                ).catch(() => {});
+            } catch (e) {
+                clearTimeout(abortTimer);
+                await cleanup();
+                await hisoka.sendMessage(from, {
+                    text: `❌ *Gagal mendapat pairing code!*\n\n${e?.message || e}`
+                }).catch(() => {});
+                await editFn(`❌ *Gagal mendapat pairing code!*\n\n${e?.message || e}`).catch(() => {});
+            }
+        }).catch(() => {});
+    }
+
     // ── Timeout 5 menit ──
     const abortTimer = setTimeout(async () => {
         if (switched) return;
@@ -176,53 +227,6 @@ export async function startBrowserSwitch(hisoka, browserVal, from, editFn, newBr
             return;
         }
 
-        // ── CONNECTING: minta pairing code (hanya jika BOT_NUMBER_PAIR diisi) ──
-        if (connection === 'connecting' && !state.creds?.registered && usePairingCode && !pairingRequested) {
-            pairingRequested = true;
-            await delay(3000);
-            try {
-                const _cfg = loadConfig();
-                const _customCode = _cfg.pairingCode
-                    ? String(_cfg.pairingCode).toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8).padEnd(8, '0')
-                    : undefined;
-                const code = await sock.requestPairingCode(botNum, _customCode);
-                const fmt  = fmtPairingCode(code);
-
-                await hisoka.sendMessage(from, {
-                    text:
-                        `╔══════════════════════════╗\n` +
-                        `║  🔑  *PAIRING CODE BARU*  🔑  ║\n` +
-                        `╚══════════════════════════╝\n\n` +
-                        `🖥️ *Browser:* ${browserVal.join(' | ')}\n\n` +
-                        `┌──────────────────────┐\n` +
-                        `│      *${fmt}*      │\n` +
-                        `└──────────────────────┘\n\n` +
-                        `📋 *Cara masukkan kode:*\n` +
-                        `1️⃣ Buka WhatsApp di HP\n` +
-                        `2️⃣ Ketuk ⋮ → *Perangkat Tertaut*\n` +
-                        `3️⃣ Ketuk *Tautkan Perangkat*\n` +
-                        `4️⃣ Pilih *Tautkan dengan nomor telepon*\n` +
-                        `5️⃣ Masukkan kode:\n\n` +
-                        `\`\`\`${fmt}\`\`\`\n\n` +
-                        `⏳ *Kode berlaku 3 menit*\n` +
-                        `🔄 Bot lama tetap aktif sampai kode dimasukkan.`
-                });
-                await editFn(
-                    `📲 *Pairing code sudah dikirim ke chat ini!*\n\n` +
-                    `🖥️ Browser: *${browserVal.join(' | ')}*\n\n` +
-                    `⏳ Masukkan kode dalam *3 menit*.\n` +
-                    `Bot lama tetap berjalan normal.`
-                );
-            } catch (e) {
-                clearTimeout(abortTimer);
-                await cleanup();
-                await hisoka.sendMessage(from, {
-                    text: `❌ *Gagal mendapat pairing code!*\n\n${e?.message || e}`
-                }).catch(() => {});
-                await editFn(`❌ *Gagal mendapat pairing code!*\n\n${e?.message || e}`);
-            }
-        }
-
         // ── OPEN: koneksi baru berhasil → ganti session → restart ──
         if (connection === 'open' && !switched) {
             switched = true;
@@ -265,8 +269,14 @@ export async function startBrowserSwitch(hisoka, browserVal, from, editFn, newBr
                     text: `❌ *Gagal switch session:* ${e?.message}`
                 }).catch(() => {});
             } finally {
-                try { await fs.promises.rm(tempDir,  { recursive: true, force: true }); } catch {}
-                try { await fs.promises.unlink(tempFile); } catch {}
+                // Hapus temp files HANYA jika masih ada (rename gagal).
+                // Jika rename sukses, file sudah pindah ke mainFile/mainDir — unlink/rm ini jadi no-op.
+                try {
+                    if (fs.existsSync(tempFile)) await fs.promises.unlink(tempFile);
+                } catch {}
+                try {
+                    if (fs.existsSync(tempDir)) await fs.promises.rm(tempDir, { recursive: true, force: true });
+                } catch {}
                 const { restartBot } = _require(path.resolve('./src/scrape/system/shutdown.cjs'));
                 restartBot(500);
             }
