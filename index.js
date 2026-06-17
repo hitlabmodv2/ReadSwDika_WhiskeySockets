@@ -19,6 +19,7 @@
  * ───────────────────────────────
  */
 import 'dotenv/config';
+import BROWSER_DEVICE from './name_perangkat_tertautan.js';
 import fs from 'fs';
 import path from 'path';
 import { createRequire } from 'module';
@@ -543,7 +544,7 @@ async function main() {
                                 creds: state.creds,
                                 keys: state.keys,
                         },
-                        browser: ['Ubuntu', 'Chrome', '136.0.7103.93'],
+                        browser: BROWSER_DEVICE,
                         generateHighQualityLinkPreview: true,
                         syncFullHistory: true,
                         connectTimeoutMs: 60000,
