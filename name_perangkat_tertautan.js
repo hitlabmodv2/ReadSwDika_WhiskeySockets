@@ -12,18 +12,18 @@
  */
 
 export const BROWSER_LIST = [
-        { key: 'v1',  label: 'Ubuntu + Chrome',         value: ['Ubuntu',   'Chrome',  '124.0.6367.82']   },
-        { key: 'v2',  label: 'Windows + Chrome',        value: ['Windows',  'Chrome',  '125.0.6422.141']  },
-        { key: 'v3',  label: 'MacOS + Chrome',          value: ['Mac OS',   'Chrome',  '126.0.6478.114']  },
-        { key: 'v4',  label: 'Ubuntu + Firefox',        value: ['Ubuntu',   'Firefox', '125.0.1']         },
-        { key: 'v5',  label: 'Windows + Firefox',       value: ['Windows',  'Firefox', '126.0']           },
-        { key: 'v6',  label: 'MacOS + Firefox',         value: ['Mac OS',   'Firefox', '127.0']           },
-        { key: 'v7',  label: 'Ubuntu + Safari',         value: ['Ubuntu',   'Safari',  '17.5.1']          },
-        { key: 'v8',  label: 'MacOS + Safari',          value: ['Mac OS',   'Safari',  '17.5.1']          },
-        { key: 'v9',  label: 'Windows + Edge',          value: ['Windows',  'Edge',    '124.0.2478.67']   },
-        { key: 'v10', label: 'Ubuntu + Edge',           value: ['Ubuntu',   'Edge',    '125.0.2535.51']   },
-        { key: 'v11', label: 'Android + Chrome Mobile', value: ['Android',  'Chrome',  '125.0.6422.165']  },
-        { key: 'v12', label: 'iPhone + Safari Mobile',  value: ['iPhone',   'Safari',  '17.5.1']          },
+        { key: 'v1',  label: 'Ubuntu + Chrome',         value: ['Ubuntu',   'Chrome',  '124.0.6367.82']      },
+        { key: 'v2',  label: 'Windows + Chrome',        value: ['Windows',  'Chrome',  '125.0.6422.141']     },
+        { key: 'v3',  label: 'MacOS + Chrome',          value: ['Mac OS',   'Chrome',  '126.0.6478.114']     },
+        { key: 'v4',  label: 'Ubuntu + Firefox',        value: ['Ubuntu',   'Firefox', '125.0.1.20240501']   },
+        { key: 'v5',  label: 'Windows + Firefox',       value: ['Windows',  'Firefox', '126.0.0.20240603']   },
+        { key: 'v6',  label: 'MacOS + Firefox',         value: ['Mac OS',   'Firefox', '127.0.0.20240617']   },
+        { key: 'v7',  label: 'Ubuntu + Safari',         value: ['Ubuntu',   'Safari',  '617.2.4.4.9.1']      },
+        { key: 'v8',  label: 'MacOS + Safari',          value: ['Mac OS',   'Safari',  '619.2.8.12.8.1']     },
+        { key: 'v9',  label: 'Windows + Edge',          value: ['Windows',  'Edge',    '124.0.2478.67']      },
+        { key: 'v10', label: 'Ubuntu + Edge',           value: ['Ubuntu',   'Edge',    '125.0.2535.51']      },
+        { key: 'v11', label: 'Android + Chrome Mobile', value: ['Android',  'Chrome',  '125.0.6422.165']     },
+        { key: 'v12', label: 'iPhone + Safari Mobile',  value: ['iPhone',   'Safari',  '619.2.8.12.8.1']     },
 ];
 
 export function getBrowserDevice(cfg) {
