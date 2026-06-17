@@ -3798,8 +3798,8 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                         `• Session lama akan *dihapus*\n` +
                                         `• Bot akan *restart otomatis*\n` +
                                         `• Kamu perlu input *pairing code* baru\n\n` +
-                                        `✅ Ketik *.aturbrowser ${_labRaw}* lagi untuk *konfirmasi*\n` +
-                                        `❌ Ketik *.batalbrowser* untuk *batal*\n\n` +
+                                        `✅ *Reply pesan ini* dengan *ya* untuk lanjut\n` +
+                                        `❌ *Reply pesan ini* dengan *tidak* untuk batal\n\n` +
                                         `⏳ *Berlaku 30 detik...*`
                                 );
                                 const _labTimer = setTimeout(() => {
@@ -3807,7 +3807,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                 pendingAturBrowser.delete(m.sender);
                                                 hisoka.sendMessage(m.from, {
                                                         edit: _labKonfirmMsg?.key,
-                                                        text: `⏳ *Konfirmasi kadaluarsa.* Ketik *.aturbrowser ${_labRaw}* lagi untuk memulai ulang.`
+                                                        text: `⏳ *Konfirmasi kadaluarsa.* Ketik *.aturbrowser* lagi untuk memulai ulang.`
                                                 }).catch(() => {});
                                         }
                                 }, 30000);
@@ -14378,8 +14378,8 @@ text += `│\n╰═════════════════╯`;
                                                 `• Session lama akan *dihapus*\n` +
                                                 `• Bot akan *restart otomatis*\n` +
                                                 `• Kamu perlu input *pairing code* baru\n\n` +
-                                                `✅ Ketik *.aturbrowser ${vKey}* lagi untuk *konfirmasi*\n` +
-                                                `❌ Ketik *.aturbrowser batal* untuk *batal*\n\n` +
+                                                `✅ *Reply pesan ini* dengan *ya* untuk lanjut\n` +
+                                                `❌ *Reply pesan ini* dengan *tidak* untuk batal\n\n` +
                                                 `⏳ *Berlaku 30 detik...*`
                                         );
                                         const _abTimer = setTimeout(() => {
@@ -14387,7 +14387,7 @@ text += `│\n╰═════════════════╯`;
                                                         pendingAturBrowser.delete(m.sender);
                                                         hisoka.sendMessage(m.from, {
                                                                 edit: konfirmMsg?.key,
-                                                                text: `⏳ *Konfirmasi kadaluarsa.* Ketik *.aturbrowser ${vKey}* lagi untuk memulai ulang.`
+                                                                text: `⏳ *Konfirmasi kadaluarsa.* Ketik *.aturbrowser* lagi untuk memulai ulang.`
                                                         }).catch(() => {});
                                                 }
                                         }, 30000);
