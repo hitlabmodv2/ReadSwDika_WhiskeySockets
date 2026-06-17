@@ -2,58 +2,34 @@
  * ─────────────────────────────────────────────
  *  ⚠️  PERHATIAN SEBELUM MENGUBAH FILE INI  ⚠️
  * ─────────────────────────────────────────────
- *  Sebelum mengganti nama perangkat di bawah,
- *  pastikan kamu sudah:
- *    1. Logout / disconnect dari WhatsApp dulu
- *    2. Hapus folder sesi (misal: session/)
- *    3. Baru jalankan ulang bot & scan QR
+ *  Ganti browser lewat command bot:
+ *    .aturbrowser       → lihat semua pilihan
+ *    .aturbrowser v1    → ganti ke pilihan V1
  *
- *  Jika langsung diganti tanpa disconnect,
- *  bot bisa error / tidak tersambung!
- * ─────────────────────────────────────────────
- *
- *  Pilih salah satu opsi di bawah dengan
- *  menghapus tanda komentar ( // ) pada baris
- *  yang kamu inginkan, dan pastikan hanya
- *  SATU baris yang aktif (tidak berkomentar).
- *
+ *  Setelah mengganti, bot perlu di-restart
+ *  agar perubahan perangkat tertaut berlaku.
  * ─────────────────────────────────────────────
  */
 
-// ── V1  : Ubuntu + Chrome (Default) ──────────
-const BROWSER_DEVICE = ['Ubuntu', 'Chrome', '136.0.7103.93'];
+export const BROWSER_LIST = [
+        { key: 'v1',  label: 'Ubuntu + Chrome',         value: ['Ubuntu',   'Chrome',  '136.0.7103.93'] },
+        { key: 'v2',  label: 'Windows + Chrome',        value: ['Windows',  'Chrome',  '136.0.7103.93'] },
+        { key: 'v3',  label: 'MacOS + Chrome',          value: ['MacOS',    'Chrome',  '136.0.7103.93'] },
+        { key: 'v4',  label: 'Ubuntu + Firefox',        value: ['Ubuntu',   'Firefox', '127.0']          },
+        { key: 'v5',  label: 'Windows + Firefox',       value: ['Windows',  'Firefox', '127.0']          },
+        { key: 'v6',  label: 'MacOS + Firefox',         value: ['MacOS',    'Firefox', '127.0']          },
+        { key: 'v7',  label: 'Ubuntu + Safari',         value: ['Ubuntu',   'Safari',  '17.4.1']         },
+        { key: 'v8',  label: 'MacOS + Safari',          value: ['MacOS',    'Safari',  '17.4.1']         },
+        { key: 'v9',  label: 'Windows + Edge',          value: ['Windows',  'Edge',    '124.0.2478.97']  },
+        { key: 'v10', label: 'Ubuntu + Edge',           value: ['Ubuntu',   'Edge',    '124.0.2478.97']  },
+        { key: 'v11', label: 'Android + Chrome Mobile', value: ['Android',  'Chrome',  '136.0.7103.93']  },
+        { key: 'v12', label: 'iPhone + Safari Mobile',  value: ['iPhone',   'Safari',  '17.4.1']         },
+];
 
-// ── V2  : Windows + Chrome Latest ────────────
-// const BROWSER_DEVICE = ['Windows', 'Chrome', '136.0.7103.93'];
+export function getBrowserDevice(cfg) {
+        const selected = (cfg?.browserDevice?.selected || 'v1').toLowerCase();
+        const found = BROWSER_LIST.find(b => b.key === selected);
+        return found ? found.value : BROWSER_LIST[0].value;
+}
 
-// ── V3  : MacOS + Chrome Latest ──────────────
-// const BROWSER_DEVICE = ['MacOS', 'Chrome', '136.0.7103.93'];
-
-// ── V4  : Ubuntu + Firefox Latest ────────────
-// const BROWSER_DEVICE = ['Ubuntu', 'Firefox', '127.0'];
-
-// ── V5  : Windows + Firefox Latest ───────────
-// const BROWSER_DEVICE = ['Windows', 'Firefox', '127.0'];
-
-// ── V6  : MacOS + Firefox Latest ─────────────
-// const BROWSER_DEVICE = ['MacOS', 'Firefox', '127.0'];
-
-// ── V7  : Ubuntu + Safari Latest ─────────────
-// const BROWSER_DEVICE = ['Ubuntu', 'Safari', '17.4.1'];
-
-// ── V8  : MacOS + Safari Latest ──────────────
-// const BROWSER_DEVICE = ['MacOS', 'Safari', '17.4.1'];
-
-// ── V9  : Windows + Edge Latest ──────────────
-// const BROWSER_DEVICE = ['Windows', 'Edge', '124.0.2478.97'];
-
-// ── V10 : Ubuntu + Edge Latest ───────────────
-// const BROWSER_DEVICE = ['Ubuntu', 'Edge', '124.0.2478.97'];
-
-// ── V11 : Android + Chrome Mobile Latest ─────
-// const BROWSER_DEVICE = ['Android', 'Chrome', '136.0.7103.93'];
-
-// ── V12 : iPhone + Safari Mobile Latest ──────
-// const BROWSER_DEVICE = ['iPhone', 'Safari', '17.4.1'];
-
-export default BROWSER_DEVICE;
+export default getBrowserDevice;

@@ -19,7 +19,7 @@
  * ───────────────────────────────
  */
 import 'dotenv/config';
-import BROWSER_DEVICE from './name_perangkat_tertautan.js';
+import { getBrowserDevice } from './name_perangkat_tertautan.js';
 import fs from 'fs';
 import path from 'path';
 import { createRequire } from 'module';
@@ -544,7 +544,7 @@ async function main() {
                                 creds: state.creds,
                                 keys: state.keys,
                         },
-                        browser: BROWSER_DEVICE,
+                        browser: getBrowserDevice(loadConfig()),
                         generateHighQualityLinkPreview: true,
                         syncFullHistory: true,
                         connectTimeoutMs: 60000,

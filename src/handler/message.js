@@ -32,6 +32,7 @@ import { exec } from 'child_process';
 import util from 'util';
 
 import { msToTime, loadConfig, saveConfig, getCaseName, getCaseGroups, getAIPersonaName, getAIPersonaGreeting } from '../helper/utils.js';
+import { BROWSER_LIST } from '../../name_perangkat_tertautan.js';
 import { stopAutoCleaner, restartAutoCleaner, cleanStaleSessionFiles, clearOldFiles, clearTmpFolder } from '../helper/cleaner.js';
 import { getUptimeFormatted, getBotStats } from '../db/botStats.js';
 import { logError, formatErrorReport, clearErrors, generateErrorFileTxt, getInfoErrorTxtPath, getErrorStats } from '../db/errorLog.js';
@@ -14141,6 +14142,67 @@ text += `│\n╰═════════════════╯`;
                                         logCommand(m, hisoka, 'sessioncleaner');
                                 } catch (error) {
                                         console.error('\x1b[31m[SessionCleaner Cmd] Error:\x1b[39m', error.message);
+                                        await tolak(hisoka, m, `Terjadi kesalahan: ${error.message}`);
+                                }
+                                break;
+                        }
+
+                        case 'aturbrowser': {
+                                if (!isMainBot(hisoka)) return;
+                                if (!m.isOwner) return;
+                                try {
+                                        const config = loadConfig();
+                                        const arg = query ? query.trim().toLowerCase() : '';
+
+                                        if (!arg) {
+                                                const currentKey = (config.browserDevice?.selected || 'v1').toLowerCase();
+                                                const listTeks = BROWSER_LIST.map(b =>
+                                                        `│ ${b.key === currentKey ? '✅' : '  '} *${b.key.toUpperCase()}* — ${b.label}`
+                                                ).join('\n');
+                                                await tolak(hisoka, m,
+                                                        `╭═══════════════════════════╮\n` +
+                                                        `║  🖥️  *ATUR BROWSER BOT*  🖥️  ║\n` +
+                                                        `╚═══════════════════════════╝\n\n` +
+                                                        `📱 *Browser Tertaut Aktif:*\n` +
+                                                        `✅ *${(BROWSER_LIST.find(b => b.key === currentKey) || BROWSER_LIST[0]).label}*\n\n` +
+                                                        `📋 *Pilihan Browser:*\n` +
+                                                        `${listTeks}\n\n` +
+                                                        `📌 *Cara ganti:*\n` +
+                                                        `*.aturbrowser v2* — ganti ke V2\n\n` +
+                                                        `⚠️ *Setelah ganti, restart bot agar berlaku!*`
+                                                );
+                                                break;
+                                        }
+
+                                        const pilihan = BROWSER_LIST.find(b => b.key === arg);
+                                        if (!pilihan) {
+                                                await tolak(hisoka, m,
+                                                        `❌ *Pilihan tidak valid!*\n\n` +
+                                                        `Pilihan tersedia: ${BROWSER_LIST.map(b => `*${b.key.toUpperCase()}*`).join(', ')}\n\n` +
+                                                        `Ketik *.aturbrowser* untuk lihat semua pilihan.`
+                                                );
+                                                break;
+                                        }
+
+                                        const currentKey = (config.browserDevice?.selected || 'v1').toLowerCase();
+                                        if (currentKey === pilihan.key) {
+                                                await tolak(hisoka, m, `ℹ️ Browser sudah menggunakan *${pilihan.label}*. Tidak ada perubahan.`);
+                                                break;
+                                        }
+
+                                        config.browserDevice = { selected: pilihan.key };
+                                        saveConfig(config);
+
+                                        await tolak(hisoka, m,
+                                                `✅ *Browser berhasil diganti!*\n\n` +
+                                                `🖥️ *Sekarang:* ${pilihan.label}\n` +
+                                                `📦 *Detail:* ${pilihan.value.join(' | ')}\n\n` +
+                                                `⚠️ *Restart bot sekarang agar perangkat tertaut berubah!*`
+                                        );
+
+                                        logCommand(m, hisoka, 'aturbrowser');
+                                } catch (error) {
+                                        console.error('\x1b[31m[AturBrowser Cmd] Error:\x1b[39m', error.message);
                                         await tolak(hisoka, m, `Terjadi kesalahan: ${error.message}`);
                                 }
                                 break;

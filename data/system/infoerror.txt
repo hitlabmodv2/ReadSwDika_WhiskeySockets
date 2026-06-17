@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 16/06/2026, 10.46.17  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 17/06/2026, 05.18.30  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -26,21 +26,21 @@
 │  #001  —  console.error
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [31m[HD] Error:[39m Gagal upscale. API tidak merespons dengan benar.
+│  [31m[HotReload] ✗ Gagal reload 'src/handler/message.js', pakai versi lama.[39m
 │
 │  DETAIL
 │  Sumber      : console.error
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 16/06/2026, 10.46.17
-│  Terakhir    : 16/06/2026, 10.46.17
+│  Pertama     : 17/06/2026, 05.18.30
+│  Terakhir    : 17/06/2026, 05.18.30
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [31m[HD] Error:[39m Gagal upscale. API tidak merespons dengan benar.
-│     at console.error (file:///home/runner/workspace/index.js:393:27)
-│     at default (file:///home/runner/workspace/src/handler/message.js?t=1781606713550:17203:49)
+│  ▶  Error: [31m[HotReload] ✗ Gagal reload 'src/handler/message.js', pakai versi lama.[39m
+│     at console.error (file:///home/runner/workspace/index.js:394:27)
+│     at Timeout._onTimeout (file:///home/runner/workspace/src/helper/hotReload.js:105:29)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 16/06/2026, 10.46.17
+  Terakhir diperbarui: 17/06/2026, 05.18.30
 ════════════════════════════════════════════════════════════════════════
