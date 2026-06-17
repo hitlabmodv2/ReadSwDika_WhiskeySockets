@@ -322,6 +322,12 @@ export async function startBrowserSwitch(hisoka, browserVal, from, editFn, newBr
                         `✅ Baru  : *${_newLabel}*\n\n` +
                         `🗑️ Session lama (*${_oldKey.toUpperCase()}*) otomatis dihapus.\n` +
                         `📲 Perangkat tertaut di WA kamu sekarang: *${_newInfo?.label || _newLabel}*\n\n` +
+                        `⚠️ *Catatan:*\n` +
+                        `Jika perangkat lama (*${_oldLabel}*) masih muncul\n` +
+                        `di daftar Perangkat Tertaut WA kamu,\n` +
+                        `silakan hapus manual:\n` +
+                        `📱 WA → ⋮ → *Perangkat Tertaut*\n` +
+                        `→ Tekan lama perangkat lama → *Keluar*\n\n` +
                         `🔄 *Bot restart dalam 3 detik...*`
                 }).catch(() => {});
 
