@@ -534,8 +534,10 @@
       "participant": "56010702086266@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-17T11:59:33.349Z",
+    "updatedAt": "2026-06-17T15:23:51.004Z",
     "retriedOnStartup": true,
-    "retriedAt": "2026-06-17T11:59:33.349Z"
+    "retriedAt": "2026-06-17T11:59:33.349Z",
+    "deleted": true,
+    "deletedAt": "2026-06-17T15:23:51.004Z"
   }
 }
