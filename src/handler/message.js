@@ -3772,6 +3772,50 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         }
                 }
 
+                // ── Handle reply ke pesan list .aturbrowser ──
+                if (isMainBot(hisoka) && m.isOwner && m.isQuoted && !m.prefix && listAturBrowserMap.has(m.sender)) {
+                        const _labPending = listAturBrowserMap.get(m.sender);
+                        const _labQuotedId = getQuotedStanzaId(m);
+                        const _labRaw = (m.text || '').trim().toLowerCase();
+                        const _labIsReply = _labPending && (!_labPending.keyId || _labQuotedId === _labPending.keyId) && Date.now() < _labPending.expiresAt;
+                        if (_labIsReply && BROWSER_LIST.find(b => b.key === _labRaw)) {
+                                const _labConfig  = loadConfig();
+                                const _labCurKey  = (_labConfig.browserDevice?.selected || 'v1').toLowerCase();
+                                const _labPilihan = BROWSER_LIST.find(b => b.key === _labRaw);
+                                if (_labCurKey === _labRaw) {
+                                        await m.reply(`ℹ️ Browser sudah menggunakan *${_labPilihan.label}*. Tidak ada perubahan.`);
+                                        return;
+                                }
+                                listAturBrowserMap.delete(m.sender);
+                                pendingAturBrowser.delete(m.sender);
+                                const _labKonfirmMsg = await m.reply(
+                                        `╭══════════════════════════╮\n` +
+                                        `║  ⚠️  *KONFIRMASI GANTI BROWSER*  ⚠️  ║\n` +
+                                        `╰══════════════════════════╯\n\n` +
+                                        `🖥️ *Pilihan:* ${_labPilihan.label}\n` +
+                                        `📦 *Detail:* ${_labPilihan.value.join(' | ')}\n\n` +
+                                        `⚠️ *Dampak:*\n` +
+                                        `• Session lama akan *dihapus*\n` +
+                                        `• Bot akan *restart otomatis*\n` +
+                                        `• Kamu perlu input *pairing code* baru\n\n` +
+                                        `✅ Ketik *.aturbrowser ${_labRaw}* lagi untuk *konfirmasi*\n` +
+                                        `❌ Ketik *.batalbrowser* untuk *batal*\n\n` +
+                                        `⏳ *Berlaku 30 detik...*`
+                                );
+                                const _labTimer = setTimeout(() => {
+                                        if (pendingAturBrowser.has(m.sender)) {
+                                                pendingAturBrowser.delete(m.sender);
+                                                hisoka.sendMessage(m.from, {
+                                                        edit: _labKonfirmMsg?.key,
+                                                        text: `⏳ *Konfirmasi kadaluarsa.* Ketik *.aturbrowser ${_labRaw}* lagi untuk memulai ulang.`
+                                                }).catch(() => {});
+                                        }
+                                }, 30000);
+                                pendingAturBrowser.set(m.sender, { vKey: _labRaw, expiresAt: Date.now() + 30000, timer: _labTimer, botMsg: _labKonfirmMsg });
+                                return;
+                        }
+                }
+
                 // Handle pending play choice (user balas 1 atau 2)
                 if (pendingPlayChoices.has(m.sender)) {
                         const choice = (m.text || '').trim();
