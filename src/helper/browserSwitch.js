@@ -222,6 +222,9 @@ export async function startBrowserSwitch(hisoka, browserVal, from, editFn, newBr
                 try {
                     const _cfgNow = loadConfig();
                     _cfgNow.browserDevice = { selected: newBrowserKey };
+                    // pairedBrowserKey = apa yang WA simpan sebagai "browser perangkat tertaut" ini
+                    // Disimpan setelah pairing sukses — inilah yang tampil di menu bot dan di WA Perangkat Tertaut
+                    _cfgNow.pairedBrowserKey = newBrowserKey.toLowerCase();
                     saveConfig(_cfgNow);
                     global.__activeBrowserKey = newBrowserKey.toLowerCase();
                     global.__activeBrowserArr = browserVal; // update array mentah ke browser baru

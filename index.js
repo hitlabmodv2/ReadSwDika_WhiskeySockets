@@ -19,7 +19,7 @@
  * ───────────────────────────────
  */
 import 'dotenv/config';
-import { getBrowserDevice } from './name_perangkat_tertautan.js';
+import { getBrowserDevice, BROWSER_LIST } from './name_perangkat_tertautan.js';
 import fs from 'fs';
 import path from 'path';
 import { createRequire } from 'module';
@@ -47,7 +47,7 @@ import JSONDB from './src/db/json.js';
 import { kvGet, kvSet, kvMigrateFromJSON, kvMigrateKey } from './src/db/datadb.js';
 import { initBotStats } from './src/db/botStats.js';
 import { injectClient } from './src/helper/inject.js';
-import { getCaseName, loadConfig } from './src/helper/utils.js';
+import { getCaseName, loadConfig, saveConfig } from './src/helper/utils.js';
 import { getStatusEmojis, getRandomEmoji } from './src/helper/emoji.js';
 import { MemoryMonitor } from './src/helper/memoryMonitor.js';
 import { getPhoneRegion, formatPhoneWithRegion } from './src/helper/phoneRegion.js';
@@ -575,11 +575,16 @@ async function main() {
         );
                 hisoka.isMainBot = true;
                 hisoka.botNumber = null;
-                // Browser yang BENAR-BENAR dipakai saat runtime — simpan array mentah dari getBrowserDevice
-                // agar menu selalu akurat tanpa lookup config yang bisa berubah di tengah switch
-                const _runtimeBrowser = getBrowserDevice(loadConfig());
-                global.__activeBrowserKey = (loadConfig().browserDevice?.selected || 'v1').toLowerCase();
-                global.__activeBrowserArr = _runtimeBrowser; // ['Ubuntu','Firefox','128.0.3']
+                // pairedBrowserKey = browser yang terdaftar di WA Perangkat Tertaut (set saat pairing, bukan reconnect)
+                // browserDevice.selected = browser yang ingin dipakai Baileys untuk reconnect (bisa beda)
+                // Menu harus tampilkan pairedBrowserKey agar sesuai dengan yang WA tampilkan
+                {
+                        const _cfg0 = loadConfig();
+                        const _pairedKey = (_cfg0.pairedBrowserKey || _cfg0.browserDevice?.selected || 'v1').toLowerCase();
+                        const _pairedInfo = BROWSER_LIST.find(b => b.key === _pairedKey) || BROWSER_LIST[0];
+                        global.__activeBrowserKey = _pairedKey;
+                        global.__activeBrowserArr = _pairedInfo.value; // ['Ubuntu','Chrome','136.x.x']
+                }
 
         const _cfgForPair = loadConfig();
         const pairingNumber = process.env.BOT_NUMBER_PAIR || _cfgForPair.botNumber || false;
@@ -1517,6 +1522,20 @@ setTimeout(() => {
                         if (!state.creds.registered) {
                                 state.creds.registered = true;
                                 saveCreds();
+                        }
+                        // Jika ini adalah PAIRING BARU (creds belum registered sebelumnya),
+                        // simpan pairedBrowserKey = browser yang benar-benar dipakai saat pairing.
+                        // Ini yang akan tampil di WA Perangkat Tertaut.
+                        if (!state.creds.registered) {
+                                try {
+                                        const _pairCfg = loadConfig();
+                                        const _pairKey = (_pairCfg.browserDevice?.selected || 'v1').toLowerCase();
+                                        _pairCfg.pairedBrowserKey = _pairKey;
+                                        saveConfig(_pairCfg);
+                                        const _pairInfo = BROWSER_LIST.find(b => b.key === _pairKey) || BROWSER_LIST[0];
+                                        global.__activeBrowserKey = _pairKey;
+                                        global.__activeBrowserArr = _pairInfo.value;
+                                } catch {}
                         }
                 }
 
