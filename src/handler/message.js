@@ -1369,6 +1369,13 @@ function isViewOnceMessage(quotedMsg) {
         return false;
 }
 
+const TOTAL_CMD_COUNT = (() => {
+        try {
+                const _src = fs.readFileSync(new URL(import.meta.url).pathname, 'utf8');
+                return (_src.match(/^\s*case\s+'[^']+'\s*:/gm) || []).length;
+        } catch { return 0; }
+})();
+
 const CEKAUTO_FITUR_LIST = [
         { key: 'antiCall',       nama: 'Anti Call',        cmd: '.anticall on/off',        type: 'global', toggleKey: 'antiCall',       toggleable: true  },
         { key: 'antiCallVideo',  nama: 'Anti Call Video',  cmd: '.anticallvid on/off',     type: 'global', toggleKey: 'antiCallVideo',  toggleable: true  },
@@ -9773,6 +9780,7 @@ _📦 Powered by Wily Bot V22_ 🤖`;
 │ ⏱️ » ${uptimeStr}
 │ 📅 » ${_mnTgl}
 │ 🕐 » ${_mnJam} WIB
+│ 📜 » ${TOTAL_CMD_COUNT} Total Semua Command
 │ 🗂️ » ${totalSemuaFitur} Total Fitur Auto
 │ ✅ » ${totalCmd} Fitur Auto Aktif
 │ ❌ » ${totalTidakAktif} Fitur Auto Tidak Aktif

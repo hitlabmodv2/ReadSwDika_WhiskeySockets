@@ -4,11 +4,11 @@
     "sender": "6285845967819@s.whatsapp.net",
     "name": "Ikbal",
     "type": "videoMessage",
-    "arrivedAt": "2026-06-17T04:27:40.648Z",
+    "arrivedAt": "2026-06-17T04:27:40.694Z",
     "read": true,
     "reacted": true,
-    "emoji": "🇮🇨",
-    "resolve": "PN langsung ✓",
+    "emoji": "⏏️",
+    "resolve": "Signal Lib ✓",
     "source": "status",
     "number": "6285845967819",
     "resolvedPn": "6285845967819@s.whatsapp.net",
@@ -20,7 +20,7 @@
       "participant": "81303965798410@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-17T04:27:50.725Z",
+    "updatedAt": "2026-06-17T04:27:45.541Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -39,6 +39,6 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-17T04:27:50.724Z"
+    "processedAt": "2026-06-17T04:27:45.541Z"
   }
 }
