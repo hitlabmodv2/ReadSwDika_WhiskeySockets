@@ -1371,6 +1371,7 @@ function isViewOnceMessage(quotedMsg) {
 }
 
 const pendingAturBrowser = new Map();
+const listAturBrowserMap = new Map();
 
 const TOTAL_CMD_COUNT = (() => {
         try {
@@ -14163,13 +14164,19 @@ text += `│\n╰═════════════════╯`;
                                         const vKey    = args[0] || '';
                                         const konfirm = args[1] || '';
 
-                                        // ── Tidak ada argumen → tampilkan daftar ──
-                                        if (!vKey) {
+                                        // ── Deteksi reply ke pesan list ──
+                                        const _listPending = listAturBrowserMap.get(m.sender);
+                                        if (!vKey && m.quoted?.key?.id && _listPending && m.quoted.key.id === _listPending.keyId && Date.now() < _listPending.expiresAt) {
+                                                // body kosong tapi reply ke list → abaikan, tampilkan list lagi
+                                        } else if (m.quoted?.key?.id && _listPending && m.quoted.key.id === _listPending.keyId && Date.now() < _listPending.expiresAt && BROWSER_LIST.find(b => b.key === vKey)) {
+                                                // reply ke list dengan vKey valid → langsung masuk alur pilihan (lanjut ke bawah)
+                                        } else if (!vKey) {
+                                                // ── Tidak ada argumen → tampilkan daftar ──
                                                 const currentKey = (config.browserDevice?.selected || 'v1').toLowerCase();
                                                 const listTeks   = BROWSER_LIST.map(b =>
                                                         `│ ${b.key === currentKey ? '✅' : '▪️'} *${b.key.toUpperCase()}* — ${b.label}`
                                                 ).join('\n');
-                                                await tolak(hisoka, m,
+                                                const listMsg = await tolak(hisoka, m,
                                                         `╭═══════════════════════════╮\n` +
                                                         `║  🖥️  *ATUR BROWSER BOT*  🖥️  ║\n` +
                                                         `╚═══════════════════════════╝\n\n` +
@@ -14178,9 +14185,11 @@ text += `│\n╰═════════════════╯`;
                                                         `📋 *Pilihan Browser:*\n` +
                                                         `${listTeks}\n\n` +
                                                         `📌 *Cara ganti:*\n` +
-                                                        `*.aturbrowser v2* — pilih V2 (minta konfirmasi)\n` +
+                                                        `↩️ *Reply pesan ini* dengan *v2* untuk pilih\n` +
+                                                        `*.aturbrowser v2* — ketik manual\n` +
                                                         `*.aturbrowser v2 ya* — langsung ganti tanpa konfirmasi`
                                                 );
+                                                listAturBrowserMap.set(m.sender, { keyId: listMsg?.key?.id, expiresAt: Date.now() + 120000 });
                                                 break;
                                         }
 
