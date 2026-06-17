@@ -38,6 +38,7 @@ import pino from 'pino';
 import QRCode from 'qrcode';
 import { useSingleFileAuthState } from './authState.js';
 import { loadConfig, saveConfig } from './utils.js';
+import { BROWSER_LIST } from '../../name_perangkat_tertautan.js';
 
 const silentLogger = pino({ level: 'silent' });
 
@@ -76,6 +77,15 @@ export async function startBrowserSwitch(hisoka, browserVal, from, editFn, newBr
     const _bsCfg = loadConfig();
     const botNum = (process.env.BOT_NUMBER_PAIR || _bsCfg.botNumber || '').replace(/[^0-9]/g, '');
     const usePairingCode = botNum.length > 0;
+
+    // Tangkap browser LAMA sebelum switch — untuk ditampilkan di pesan sukses
+    const _oldKey   = (global.__activeBrowserKey || _bsCfg.pairedBrowserKey || _bsCfg.browserDevice?.selected || 'v1').toLowerCase();
+    const _oldInfo  = BROWSER_LIST.find(b => b.key === _oldKey);
+    const _oldLabel = _oldInfo ? `${_oldInfo.label} (${_oldKey.toUpperCase()})` : (Array.isArray(global.__activeBrowserArr) ? global.__activeBrowserArr.join(' | ') : 'Browser lama');
+    // Browser baru — label untuk pesan sukses
+    const _newKey   = newBrowserKey.toLowerCase();
+    const _newInfo  = BROWSER_LIST.find(b => b.key === _newKey);
+    const _newLabel = _newInfo ? `${_newInfo.label} (${_newKey.toUpperCase()})` : browserVal.join(' | ');
 
     // Bersihkan temp session sebelumnya jika ada
     try { await fs.promises.rm(tempDir, { recursive: true, force: true }); } catch {}
@@ -303,12 +313,15 @@ export async function startBrowserSwitch(hisoka, browserVal, from, editFn, newBr
                 // (setelah terminate, hisoka.sendMessage tidak bisa dipakai)
                 await hisoka.sendMessage(from, {
                     text:
-                        `╔══════════════════════╗\n` +
-                        `║  ✅  *TERHUBUNG!*  ✅  ║\n` +
-                        `╚══════════════════════╝\n\n` +
-                        `🟢 *Koneksi baru berhasil!*\n` +
-                        `🖥️ Browser: *${browserVal.join(' | ')}*\n\n` +
-                        `🗑️ Session lama sudah dihapus.\n` +
+                        `╔══════════════════════════════╗\n` +
+                        `║  ✅  *BROWSER BERHASIL DIGANTI!*  ✅  ║\n` +
+                        `╚══════════════════════════════╝\n\n` +
+                        `🟢 *Koneksi baru berhasil terhubung!*\n\n` +
+                        `🔄 *Pergantian Browser:*\n` +
+                        `❌ Lama : *${_oldLabel}*\n` +
+                        `✅ Baru  : *${_newLabel}*\n\n` +
+                        `🗑️ Session lama (*${_oldKey.toUpperCase()}*) otomatis dihapus.\n` +
+                        `📲 Perangkat tertaut di WA kamu sekarang: *${_newInfo?.label || _newLabel}*\n\n` +
                         `🔄 *Bot restart dalam 3 detik...*`
                 }).catch(() => {});
 
