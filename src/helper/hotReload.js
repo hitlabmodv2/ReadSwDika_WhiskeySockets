@@ -59,11 +59,39 @@ const WATCHED_FILES = [
     // ── SwTrack helper ────────────────────────────
     { key: 'swtrack',      rel: 'src/helper/swtrack.js' },
 
+    // ── AI Prompt helpers ─────────────────────────
+    { key: 'aiPromptFb',   rel: 'src/helper/AiPromptFb.js' },
+    { key: 'aiPromptIg',   rel: 'src/helper/AiPromptIg.js' },
+    { key: 'aiStickerStory', rel: 'src/helper/aiStickerStory.js' },
+    { key: 'gemini',       rel: 'src/helper/gemini.js' },
+
+    // ── Media / Sticker helpers ───────────────────
+    { key: 'imageSearch',  rel: 'src/helper/imageSearch.js' },
+    { key: 'stickerMap',   rel: 'src/helper/stickerMap.js' },
+    { key: 'stickerMemory', rel: 'src/helper/stickerMemory.js' },
+
+    // ── User / Memory helpers ─────────────────────
+    { key: 'userMemory',   rel: 'src/helper/userMemory.js' },
+
+    // ── Jadibot settings ──────────────────────────
+    { key: 'jadibotSettings', rel: 'src/helper/jadibotSettings.js' },
+
+    // ── Utility helpers ───────────────────────────
+    { key: 'zipParser',    rel: 'src/helper/zipParser.js' },
+
+    // ── Database helpers (tambahan) ───────────────
+    { key: 'datadb',       rel: 'src/db/datadb.js' },
+    { key: 'errorLog',     rel: 'src/db/errorLog.js' },
+    { key: 'userDb',       rel: 'src/db/userDb.js' },
+
     // ── SKIP (memegang state/timer aktif) ────────
-    // crashGuard.js   → handle signal proses, berbahaya
-    // hotReload.js    → dirinya sendiri
+    // crashGuard.js    → handle signal proses, berbahaya
+    // hotReload.js     → dirinya sendiri
     // memoryMonitor.js → timer RAM aktif
-    // jadibot.js      → sesi aktif user lain
+    // jadibot.js       → sesi aktif user lain
+    // authState.js     → pegang creds/session WA di memory
+    // browserSwitch.js → manage koneksi socket aktif
+    // aiHistory.js     → punya _writeLock promise, bahaya direload saat menulis
 ];
 
 async function loadModule(rel) {
