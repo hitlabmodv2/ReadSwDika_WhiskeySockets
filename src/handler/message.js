@@ -9864,9 +9864,14 @@ _📦 Powered by Wily Bot V22_ 🤖`;
                                                 return Object.values(groups).some(g => g?.enabled === true);
                                         }).length;
                                         const totalTidakAktif = totalSemuaFitur - totalCmd;
-                                        const _mnBrowserKey = (global.__activeBrowserKey || _mnCfg.browserDevice?.selected || 'v1').toLowerCase();
+                                        // Gunakan array mentah dari runtime agar label sesuai BENAR-BENAR
+                                        // dengan browser yang dipakai saat socket dibuat (= apa yg WA lihat di Perangkat Tertaut)
+                                        const _mnBrowserArr  = global.__activeBrowserArr;
+                                        const _mnBrowserKey  = (global.__activeBrowserKey || _mnCfg.browserDevice?.selected || 'v1').toLowerCase();
                                         const _mnBrowserInfo = BROWSER_LIST.find(b => b.key === _mnBrowserKey) || BROWSER_LIST[0];
-                                        const _mnBrowserLabel = `${_mnBrowserInfo.label} (${_mnBrowserInfo.value[2]})`;
+                                        const _mnBrowserLabel = _mnBrowserArr && _mnBrowserArr.length >= 3
+                                                ? `${_mnBrowserArr[0]} + ${_mnBrowserArr[1]} (${_mnBrowserArr[2]})`
+                                                : `${_mnBrowserInfo.label} (${_mnBrowserInfo.value[2]})`;
                                         const _mnNow = new Date();
                                         const _mnTgl = new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }).format(_mnNow);
                                         const _mnJam = new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).format(_mnNow);
@@ -14269,7 +14274,7 @@ text += `│\n╰═════════════════╯`;
                                                         `║  🖥️  *ATUR BROWSER BOT*  🖥️  ║\n` +
                                                         `╚═══════════════════════════╝\n\n` +
                                                         `📱 *Browser Aktif Saat Ini:*\n` +
-                                                        `✅ *${(BROWSER_LIST.find(b => b.key === currentKey) || BROWSER_LIST[0]).label}*\n\n` +
+                                                        `✅ *${global.__activeBrowserArr && global.__activeBrowserArr.length >= 2 ? `${global.__activeBrowserArr[0]} + ${global.__activeBrowserArr[1]} (${global.__activeBrowserArr[2] || ''})`.trim() : (BROWSER_LIST.find(b => b.key === currentKey) || BROWSER_LIST[0]).label}*\n\n` +
                                                         `📋 *Pilihan Browser:*\n` +
                                                         `${listTeks}\n\n` +
                                                         `📌 *Cara ganti:*\n` +

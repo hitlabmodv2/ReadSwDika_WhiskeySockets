@@ -224,6 +224,7 @@ export async function startBrowserSwitch(hisoka, browserVal, from, editFn, newBr
                     _cfgNow.browserDevice = { selected: newBrowserKey };
                     saveConfig(_cfgNow);
                     global.__activeBrowserKey = newBrowserKey.toLowerCase();
+                    global.__activeBrowserArr = browserVal; // update array mentah ke browser baru
                 } catch {}
 
                 await fs.promises.rm(mainDir,  { recursive: true, force: true }).catch(() => {});

@@ -575,8 +575,11 @@ async function main() {
         );
                 hisoka.isMainBot = true;
                 hisoka.botNumber = null;
-                // Browser yang BENAR-BENAR dipakai saat runtime (bukan dari config yg bisa berubah di tengah jalan)
+                // Browser yang BENAR-BENAR dipakai saat runtime — simpan array mentah dari getBrowserDevice
+                // agar menu selalu akurat tanpa lookup config yang bisa berubah di tengah switch
+                const _runtimeBrowser = getBrowserDevice(loadConfig());
                 global.__activeBrowserKey = (loadConfig().browserDevice?.selected || 'v1').toLowerCase();
+                global.__activeBrowserArr = _runtimeBrowser; // ['Ubuntu','Firefox','128.0.3']
 
         const _cfgForPair = loadConfig();
         const pairingNumber = process.env.BOT_NUMBER_PAIR || _cfgForPair.botNumber || false;
