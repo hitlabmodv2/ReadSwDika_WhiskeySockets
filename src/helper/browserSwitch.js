@@ -2,8 +2,14 @@
  * ─────────────────────────────────────
  *  Browser Switch Helper
  *  Ganti browser tanpa hapus session lama dulu.
- *  Urutan: koneksi baru dulu → kirim pairing code via bot lama →
- *          setelah terhubung baru hapus session lama → restart.
+ *
+ *  Logika:
+ *  - BOT_NUMBER_PAIR diisi → pairing code dikirim ke chat WA
+ *  - BOT_NUMBER_PAIR kosong → QR code (gambar) dikirim ke chat WA
+ *
+ *  Urutan: buka koneksi baru (bot lama tetap aktif) →
+ *          kirim pairing code / QR via bot lama →
+ *          setelah terhubung, hapus session lama → restart.
  * ─────────────────────────────────────
  */
 import { createRequire } from 'module';
@@ -17,6 +23,7 @@ const {
 import fs from 'fs';
 import path from 'path';
 import pino from 'pino';
+import QRCode from 'qrcode';
 import { useSingleFileAuthState } from './authState.js';
 import { loadConfig } from './utils.js';
 
@@ -28,15 +35,22 @@ function fmtPairingCode(code) {
     return clean.match(/.{1,4}/g)?.join('-') || code;
 }
 
+async function generateQRBuffer(qrData) {
+    return QRCode.toBuffer(qrData, {
+        type: 'png',
+        width: 512,
+        margin: 2,
+        color: { dark: '#000000', light: '#ffffff' },
+    });
+}
+
 /**
  * Mulai koneksi baru dengan browser baru tanpa hapus session lama.
- * Pairing code dikirim via hisoka (bot lama yang masih aktif) ke chat `from`.
- * Setelah koneksi baru berhasil (open), session lama baru dihapus → restart.
  *
- * @param {object} hisoka       - Socket bot utama yang sedang aktif
- * @param {string[]} browserVal - Array browser: ['Ubuntu','Firefox','128.0.3']
- * @param {string} from         - JID chat tujuan kirim pairing code
- * @param {function} editFn     - Fungsi edit pesan status (async txt => void)
+ * @param {object}   hisoka     - Socket bot utama yang masih aktif
+ * @param {string[]} browserVal - Array browser: ['Ubuntu','Safari','17.6.1']
+ * @param {string}   from       - JID chat tujuan notifikasi
+ * @param {function} editFn     - Edit pesan status (async txt => void)
  */
 export async function startBrowserSwitch(hisoka, browserVal, from, editFn) {
     const sessionName = process.env.BOT_SESSION_NAME || 'hisoka';
@@ -45,7 +59,9 @@ export async function startBrowserSwitch(hisoka, browserVal, from, editFn) {
     const tempFile    = path.join(process.cwd(), 'sessions', sessionName + '_switching.json');
     const tempDir     = path.join(process.cwd(), 'sessions', sessionName + '_switching');
 
-    const botNum = (loadConfig().botNumber || process.env.BOT_NUMBER_PAIR || '').replace(/[^0-9]/g, '');
+    // HANYA ambil dari BOT_NUMBER_PAIR — bukan config.botNumber (itu nomor bot sendiri)
+    const botNum = (process.env.BOT_NUMBER_PAIR || '').replace(/[^0-9]/g, '');
+    const usePairingCode = botNum.length > 0;
 
     // Bersihkan temp session sebelumnya jika ada
     try { await fs.promises.rm(tempDir, { recursive: true, force: true }); } catch {}
@@ -60,51 +76,97 @@ export async function startBrowserSwitch(hisoka, browserVal, from, editFn) {
         logger: silentLogger,
         printQRInTerminal: false,
         browser: browserVal,
-        keepAliveIntervalMs: 30000,
-        connectTimeoutMs:    60000,
-        defaultQueryTimeoutMs: 60000,
+        keepAliveIntervalMs:    30000,
+        connectTimeoutMs:       60000,
+        defaultQueryTimeoutMs:  60000,
     });
 
     sock.ev.on('creds.update', saveCreds);
 
     let pairingRequested = false;
+    let qrSent           = false;
     let switched         = false;
 
-    // ── Timeout 5 menit: batalkan jika tidak ada respons ──
-    const abortTimer = setTimeout(async () => {
-        if (switched) return;
+    const cleanup = async () => {
         try { sock.ev.removeAllListeners(); sock.ws?.close(); } catch {}
         try { await fs.promises.rm(tempDir,  { recursive: true, force: true }); } catch {}
         try { await fs.promises.unlink(tempFile); } catch {}
+    };
+
+    // ── Timeout 5 menit ──
+    const abortTimer = setTimeout(async () => {
+        if (switched) return;
+        await cleanup();
         await hisoka.sendMessage(from, {
             text:
                 `⏰ *Timeout Ganti Browser!*\n\n` +
-                `Proses pairing tidak selesai dalam 5 menit.\n` +
+                `Proses koneksi tidak selesai dalam 5 menit.\n` +
                 `Bot tetap menggunakan browser lama.\n\n` +
                 `Coba lagi dengan *.aturbrowser*`
         }).catch(() => {});
     }, 5 * 60 * 1000);
 
-    sock.ev.on('connection.update', async ({ connection, lastDisconnect }) => {
+    sock.ev.on('connection.update', async ({ connection, lastDisconnect, qr }) => {
 
-        // ── CONNECTING: minta pairing code ──
-        if (connection === 'connecting' && !state.creds?.registered && !pairingRequested) {
+        // ── QR CODE: BOT_NUMBER_PAIR kosong ──
+        if (qr && !usePairingCode && !qrSent && !switched) {
+            qrSent = true;
+            try {
+                const qrBuf = await generateQRBuffer(qr);
+                const caption =
+                    `╔══════════════════════════╗\n` +
+                    `║  📷  *QR CODE BARU*  📷  ║\n` +
+                    `╚══════════════════════════╝\n\n` +
+                    `🖥️ *Browser:* ${browserVal.join(' | ')}\n\n` +
+                    `📋 *Cara scan QR:*\n` +
+                    `1️⃣ Buka WhatsApp di HP\n` +
+                    `2️⃣ Ketuk ⋮ → *Perangkat Tertaut*\n` +
+                    `3️⃣ Ketuk *Tautkan Perangkat*\n` +
+                    `4️⃣ Arahkan kamera ke QR di atas\n\n` +
+                    `⏳ *QR berlaku ~60 detik* — kalau expired, bot kirim QR baru otomatis.\n` +
+                    `🔄 Bot lama tetap aktif sampai QR di-scan.`;
+
+                await hisoka.sendMessage(from, {
+                    image: qrBuf,
+                    caption,
+                });
+                await editFn(
+                    `📷 *QR Code sudah dikirim ke chat ini!*\n\n` +
+                    `🖥️ Browser: *${browserVal.join(' | ')}*\n\n` +
+                    `⏳ Scan QR dalam *60 detik*.\n` +
+                    `Bot lama tetap berjalan normal.\n\n` +
+                    `_Kalau QR expired, bot kirim QR baru otomatis._`
+                );
+            } catch (e) {
+                await hisoka.sendMessage(from, {
+                    text: `❌ *Gagal kirim QR Code!*\n\n${e?.message || e}`
+                }).catch(() => {});
+            }
+            return;
+        }
+
+        // QR expired & belum terhubung → kirim QR baru
+        if (qr && !usePairingCode && qrSent && !switched) {
+            qrSent = false; // reset supaya QR baru bisa dikirim
+            try {
+                const qrBuf = await generateQRBuffer(qr);
+                await hisoka.sendMessage(from, {
+                    image: qrBuf,
+                    caption:
+                        `🔄 *QR Code diperbarui!*\n\n` +
+                        `🖥️ *Browser:* ${browserVal.join(' | ')}\n` +
+                        `⏳ Scan sebelum expired.`
+                });
+                qrSent = true;
+            } catch {}
+            return;
+        }
+
+        // ── CONNECTING: minta pairing code (hanya jika BOT_NUMBER_PAIR diisi) ──
+        if (connection === 'connecting' && !state.creds?.registered && usePairingCode && !pairingRequested) {
             pairingRequested = true;
             await delay(3000);
             try {
-                if (!botNum) {
-                    await editFn(
-                        `⚠️ *BOT_NUMBER_PAIR belum diset!*\n\n` +
-                        `Tidak bisa kirim pairing code ke WA.\n` +
-                        `Isi BOT_NUMBER_PAIR di file .env, lalu coba *.aturbrowser* lagi.`
-                    );
-                    clearTimeout(abortTimer);
-                    try { sock.ev.removeAllListeners(); sock.ws?.close(); } catch {}
-                    try { await fs.promises.rm(tempDir,  { recursive: true, force: true }); } catch {}
-                    try { await fs.promises.unlink(tempFile); } catch {}
-                    return;
-                }
-
                 const _cfg = loadConfig();
                 const _customCode = _cfg.pairingCode
                     ? String(_cfg.pairingCode).toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8).padEnd(8, '0')
@@ -112,7 +174,6 @@ export async function startBrowserSwitch(hisoka, browserVal, from, editFn) {
                 const code = await sock.requestPairingCode(botNum, _customCode);
                 const fmt  = fmtPairingCode(code);
 
-                // Kirim via hisoka (bot lama masih hidup) → langsung ke chat
                 await hisoka.sendMessage(from, {
                     text:
                         `╔══════════════════════════╗\n` +
@@ -132,7 +193,6 @@ export async function startBrowserSwitch(hisoka, browserVal, from, editFn) {
                         `⏳ *Kode berlaku 3 menit*\n` +
                         `🔄 Bot lama tetap aktif sampai kode dimasukkan.`
                 });
-
                 await editFn(
                     `📲 *Pairing code sudah dikirim ke chat ini!*\n\n` +
                     `🖥️ Browser: *${browserVal.join(' | ')}*\n\n` +
@@ -141,9 +201,7 @@ export async function startBrowserSwitch(hisoka, browserVal, from, editFn) {
                 );
             } catch (e) {
                 clearTimeout(abortTimer);
-                try { sock.ev.removeAllListeners(); sock.ws?.close(); } catch {}
-                try { await fs.promises.rm(tempDir,  { recursive: true, force: true }); } catch {}
-                try { await fs.promises.unlink(tempFile); } catch {}
+                await cleanup();
                 await hisoka.sendMessage(from, {
                     text: `❌ *Gagal mendapat pairing code!*\n\n${e?.message || e}`
                 }).catch(() => {});
@@ -155,15 +213,11 @@ export async function startBrowserSwitch(hisoka, browserVal, from, editFn) {
         if (connection === 'open' && !switched) {
             switched = true;
             clearTimeout(abortTimer);
-
             try { sock.ev.removeAllListeners(); } catch {}
 
             try {
-                // Hapus session lama SEKARANG (setelah koneksi baru berhasil)
-                await fs.promises.rm(mainDir,   { recursive: true, force: true }).catch(() => {});
+                await fs.promises.rm(mainDir,  { recursive: true, force: true }).catch(() => {});
                 await fs.promises.unlink(mainFile).catch(() => {});
-
-                // Pindahkan session sementara → session utama
                 try { await fs.promises.rename(tempFile, mainFile); } catch {}
                 try { await fs.promises.rename(tempDir,  mainDir);  } catch {}
 
@@ -184,10 +238,8 @@ export async function startBrowserSwitch(hisoka, browserVal, from, editFn) {
                     text: `❌ *Gagal switch session:* ${e?.message}`
                 }).catch(() => {});
             } finally {
-                // Cleanup temp jika rename gagal
                 try { await fs.promises.rm(tempDir,  { recursive: true, force: true }); } catch {}
                 try { await fs.promises.unlink(tempFile); } catch {}
-
                 const { restartBot } = _require(path.resolve('./src/scrape/system/shutdown.cjs'));
                 restartBot(500);
             }
@@ -196,14 +248,9 @@ export async function startBrowserSwitch(hisoka, browserVal, from, editFn) {
         // ── CLOSE: koneksi baru terputus ──
         const reason = lastDisconnect?.error?.output?.statusCode;
         if (connection === 'close' && !switched) {
-            // Jika pairing belum dimulai, jangan batalkan dulu (bisa reconnect)
-            if (!pairingRequested) return;
-
+            if (!pairingRequested && !qrSent) return; // belum mulai, biarkan reconnect
             clearTimeout(abortTimer);
-            try { sock.ev.removeAllListeners(); sock.ws?.close(); } catch {}
-            try { await fs.promises.rm(tempDir,  { recursive: true, force: true }); } catch {}
-            try { await fs.promises.unlink(tempFile); } catch {}
-
+            await cleanup();
             await hisoka.sendMessage(from, {
                 text:
                     `❌ *Koneksi baru terputus!*\n\n` +
