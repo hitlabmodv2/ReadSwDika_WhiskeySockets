@@ -21,6 +21,7 @@ const {
     default: makeWASocket,
     delay,
     fetchLatestBaileysVersion,
+    generateWAMessageFromContent,
 } = _require('@whiskeysockets/baileys');
 
 // Error code fatal yang langsung abort tanpa coba reconnect
@@ -41,6 +42,46 @@ import { loadConfig, saveConfig } from './utils.js';
 import { BROWSER_LIST } from '../../name_perangkat_tertautan.js';
 
 const silentLogger = pino({ level: 'silent' });
+
+/**
+ * Kirim interactive message dengan tombol "Copy" satu klik.
+ * Saat user tap tombol, teks `copyCode` otomatis tersalin ke clipboard WA.
+ */
+async function sendCopyButton(sock, jid, title, body, footer, copyCode, copyLabel) {
+    try {
+        const msg = generateWAMessageFromContent(jid, {
+            interactiveMessage: {
+                body:   { text: body },
+                footer: { text: footer },
+                header: { title, subtitle: '', hasMediaAttachment: false },
+                contextInfo: {},
+                nativeFlowMessage: {
+                    messageParamsJson: JSON.stringify({}),
+                    buttons: [{
+                        name: 'cta_copy',
+                        buttonParamsJson: JSON.stringify({
+                            display_text: copyLabel,
+                            copy_code:    copyCode,
+                            id:           'copy_pairing_code'
+                        })
+                    }]
+                }
+            }
+        }, {});
+        await sock.relayMessage(msg.key.remoteJid, msg.message, {
+            messageId: msg.key.id,
+            additionalNodes: [{
+                tag:  'biz',
+                attrs: {},
+                content: [{
+                    tag:  'interactive',
+                    attrs: { type: 'native_flow', v: '1' },
+                    content: [{ tag: 'native_flow', attrs: { v: '9', name: 'mixed' } }]
+                }]
+            }]
+        });
+    } catch (_) {}
+}
 
 function fmtPairingCode(code) {
     if (!code) return '';
@@ -169,7 +210,7 @@ export async function startBrowserSwitch(hisoka, browserVal, from, editFn, newBr
                             `╔══════════════════════════╗\n` +
                             `║  🔑  *PAIRING CODE BARU*  🔑  ║\n` +
                             `╚══════════════════════════╝\n\n` +
-                            `🖥️ *Browser:* ${browserVal.join(' | ')}\n\n` +
+                            `🖥️ *Browser:* ${_newLabel}\n\n` +
                             `┌──────────────────────┐\n` +
                             `│      *${fmt}*      │\n` +
                             `└──────────────────────┘\n\n` +
@@ -183,11 +224,23 @@ export async function startBrowserSwitch(hisoka, browserVal, from, editFn, newBr
                             `⏳ *Kode berlaku 3 menit*\n` +
                             `🔄 Bot lama tetap aktif sampai kode dimasukkan.`
                     }).catch(() => {});
+                    // Kirim tombol copy — user tinggal tap sekali, kode langsung tersalin
+                    await sendCopyButton(
+                        hisoka,
+                        from,
+                        '🔑 Pairing Code — Ganti Browser',
+                        `Tap tombol di bawah untuk menyalin kode:\n\n\`\`\`${fmt}\`\`\``,
+                        `🖥️ ${_newLabel} • ⏳ Berlaku 3 menit`,
+                        fmt,
+                        `📋 Copy Pairing Code  ${fmt}`
+                    );
                     await editFn(
                         `📲 *Pairing code sudah dikirim ke chat ini!*\n\n` +
-                        `🖥️ Browser: *${browserVal.join(' | ')}*\n\n` +
+                        `🖥️ Browser: *${_newLabel}*\n\n` +
                         `⏳ Masukkan kode dalam *3 menit*.\n` +
-                        `Bot lama tetap berjalan normal.`
+                        `Bot lama tetap berjalan normal.\n\n` +
+                        `💡 Tap tombol *📋 Copy* di pesan berikutnya\n` +
+                        `untuk menyalin kode secara otomatis.`
                     ).catch(() => {});
                 } catch (e) {
                     clearTimeout(abortTimer);
