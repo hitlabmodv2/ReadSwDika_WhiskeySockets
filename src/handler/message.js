@@ -9797,6 +9797,7 @@ _📦 Powered by Wily Bot V22_ 🤖`;
 ├═════════════════════┤
 ║   🤖 *AUTO FITUR*   
 ├═════════════════════┤
+│ .aturbrowser
 │ .typing
 │ .recording
 │ .online

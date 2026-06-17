@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 17/06/2026, 05.18.30  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 17/06/2026, 05.21.51  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -31,8 +31,8 @@
 │  DETAIL
 │  Sumber      : console.error
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 17/06/2026, 05.18.30
-│  Terakhir    : 17/06/2026, 05.18.30
+│  Pertama     : 17/06/2026, 05.21.51
+│  Terakhir    : 17/06/2026, 05.21.51
 │
 │  STACK TRACE (3 baris pertama)
 │  ▶  Error: [31m[HotReload] ✗ Gagal reload 'src/handler/message.js', pakai versi lama.[39m
@@ -42,5 +42,5 @@
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 17/06/2026, 05.18.30
+  Terakhir diperbarui: 17/06/2026, 05.21.51
 ════════════════════════════════════════════════════════════════════════
