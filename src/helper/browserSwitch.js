@@ -18,7 +18,18 @@ const {
     default: makeWASocket,
     delay,
     fetchLatestBaileysVersion,
+    DisconnectReason,
 } = _require('@whiskeysockets/baileys');
+
+// Error code fatal yang langsung abort tanpa coba reconnect
+const FATAL_CODES = new Set([
+    401, // loggedOut
+    403, // forbidden
+    405, // connectionReplaced / takeover
+    440, // connectionReplaced (versi lain)
+    442, // sessionExpired
+]);
+// 515 = restartRequired → Baileys reconnect otomatis, JANGAN abort
 
 import fs from 'fs';
 import path from 'path';
@@ -87,6 +98,8 @@ export async function startBrowserSwitch(hisoka, browserVal, from, editFn, newBr
     let pairingRequested = false;
     let qrSent           = false;
     let switched         = false;
+    let reconnectCount   = 0;
+    const MAX_RECONNECT  = 8; // maksimal reconnect sebelum abort
 
     const cleanup = async () => {
         try { sock.ev.removeAllListeners(); sock.ws?.close(); } catch {}
@@ -262,14 +275,39 @@ export async function startBrowserSwitch(hisoka, browserVal, from, editFn, newBr
         // ── CLOSE: koneksi baru terputus ──
         const reason = lastDisconnect?.error?.output?.statusCode;
         if (connection === 'close' && !switched) {
-            if (!pairingRequested && !qrSent) return; // belum mulai, biarkan reconnect
+            // Kalau belum mulai proses sama sekali → biarkan Baileys reconnect sendiri
+            if (!pairingRequested && !qrSent) return;
+
+            // Error fatal → langsung abort tanpa coba reconnect lagi
+            if (FATAL_CODES.has(reason)) {
+                clearTimeout(abortTimer);
+                await cleanup();
+                await hisoka.sendMessage(from, {
+                    text:
+                        `❌ *Koneksi baru gagal (error fatal)!*\n\n` +
+                        `Bot tetap menggunakan session lama.\n` +
+                        `Alasan: \`${reason}\`\n\n` +
+                        `Coba lagi dengan *.aturbrowser*`
+                }).catch(() => {});
+                return;
+            }
+
+            // 515 (restartRequired) & error non-fatal lain → Baileys reconnect otomatis
+            // Kita hanya abort jika sudah terlalu banyak reconnect (anti-loop)
+            reconnectCount++;
+            if (reconnectCount <= MAX_RECONNECT) {
+                // Biarkan Baileys reconnect — QR/pairing code baru akan dikirim otomatis
+                return;
+            }
+
+            // Sudah terlalu banyak reconnect → abort
             clearTimeout(abortTimer);
             await cleanup();
             await hisoka.sendMessage(from, {
                 text:
                     `❌ *Koneksi baru terputus!*\n\n` +
                     `Bot tetap menggunakan session lama.\n` +
-                    `Alasan: \`${reason || 'unknown'}\`\n\n` +
+                    `Alasan: \`${reason || 'unknown'}\` (setelah ${reconnectCount} percobaan)\n\n` +
                     `Coba lagi dengan *.aturbrowser*`
             }).catch(() => {});
         }
