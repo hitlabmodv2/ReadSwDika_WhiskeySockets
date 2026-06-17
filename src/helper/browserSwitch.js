@@ -205,31 +205,28 @@ export async function startBrowserSwitch(hisoka, browserVal, from, editFn, newBr
                     const code = await sock.requestPairingCode(botNum, undefined);
                     const fmt  = fmtPairingCode(code);
 
-                    await hisoka.sendMessage(from, {
-                        text:
-                            `╔══════════════════════════╗\n` +
-                            `║  🔑  *PAIRING CODE BARU*  🔑  ║\n` +
-                            `╚══════════════════════════╝\n\n` +
-                            `🖥️ *Browser:* ${_newLabel}\n\n` +
-                            `┌──────────────────────┐\n` +
-                            `│      *${fmt}*      │\n` +
-                            `└──────────────────────┘\n\n` +
-                            `📋 *Cara masukkan kode:*\n` +
-                            `1️⃣ Buka WhatsApp di HP\n` +
-                            `2️⃣ Ketuk ⋮ → *Perangkat Tertaut*\n` +
-                            `3️⃣ Ketuk *Tautkan Perangkat*\n` +
-                            `4️⃣ Pilih *Tautkan dengan nomor telepon*\n` +
-                            `5️⃣ Masukkan kode:\n\n` +
-                            `\`\`\`${fmt}\`\`\`\n\n` +
-                            `⏳ *Kode berlaku 3 menit*\n` +
-                            `🔄 Bot lama tetap aktif sampai kode dimasukkan.`
-                    }).catch(() => {});
-                    // Kirim tombol copy — user tinggal tap sekali, kode langsung tersalin
+                    // Kirim 1 pesan saja: instruksi lengkap + tombol copy sekaligus
                     await sendCopyButton(
                         hisoka,
                         from,
-                        '🔑 Pairing Code — Ganti Browser',
-                        `Tap tombol di bawah untuk menyalin kode:\n\n\`\`\`${fmt}\`\`\``,
+                        `🔑 PAIRING CODE BARU — ${_newLabel}`,
+                        `╔══════════════════════════╗\n` +
+                        `║  🔑  *PAIRING CODE BARU*  🔑  ║\n` +
+                        `╚══════════════════════════╝\n\n` +
+                        `🖥️ *Browser:* ${_newLabel}\n\n` +
+                        `┌──────────────────────┐\n` +
+                        `│      *${fmt}*      │\n` +
+                        `└──────────────────────┘\n\n` +
+                        `📋 *Cara masukkan kode:*\n` +
+                        `1️⃣ Buka WhatsApp di HP\n` +
+                        `2️⃣ Ketuk ⋮ → *Perangkat Tertaut*\n` +
+                        `3️⃣ Ketuk *Tautkan Perangkat*\n` +
+                        `4️⃣ Pilih *Tautkan dengan nomor telepon*\n` +
+                        `5️⃣ Masukkan kode:\n\n` +
+                        `\`\`\`${fmt}\`\`\`\n\n` +
+                        `⏳ *Kode berlaku 3 menit*\n` +
+                        `🔄 Bot lama tetap aktif sampai kode dimasukkan.\n\n` +
+                        `👇 *Tap tombol di bawah untuk salin kode otomatis:*`,
                         `🖥️ ${_newLabel} • ⏳ Berlaku 3 menit`,
                         fmt,
                         `📋 Copy Pairing Code  ${fmt}`
