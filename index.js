@@ -793,11 +793,19 @@ async function main() {
                         const modeLabel = autoOnline2.enabled !== false ? 'ONLINE 🟢' : 'OFFLINE 🔴';
 
                         const G = '\x1b[32m', Y = '\x1b[33m', C = '\x1b[36m', R = '\x1b[0m', B = '\x1b[1m';
+                        const _bKey2   = (global.__activeBrowserKey || 'v1').toLowerCase();
+                        const _bInfo2  = BROWSER_LIST.find(b => b.key === _bKey2);
+                        const _bLabel2 = _bInfo2
+                                ? `${_bInfo2.label} (${_bKey2.toUpperCase()})`
+                                : (Array.isArray(global.__activeBrowserArr)
+                                        ? `${global.__activeBrowserArr[0]} + ${global.__activeBrowserArr[1]}`
+                                        : 'Chrome');
                         console.log(`${C}╔══════════════════════════════════╗${R}`);
                         console.log(`${C}║${R}     ${B}${G}🤖  W I L Y  B O T  A K T I F${R}     ${C}║${R}`);
                         console.log(`${C}╠══════════════════════════════════╣${R}`);
                         console.log(`${C}║${R} ${G}✅${R} Nomor  : ${B}${userId}${R}`);
                         console.log(`${C}║${R} ${G}👤${R} Nama   : ${B}${userName}${R}`);
+                        console.log(`${C}║${R} ${Y}🖥️${R} Browser: ${B}${_bLabel2}${R}`);
                         console.log(`${C}║${R} ${Y}📋${R} Cmd    : ${B}${commands.length} commands${R}`);
                         console.log(`${C}║${R} ${Y}👥${R} Grup   : ${B}${groupCount} grup (admin: ${adminCount})${R}`);
                         console.log(`${C}║${R} ${G}🌐${R} Status : ${B}${modeLabel}${R}`);
