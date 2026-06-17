@@ -14187,7 +14187,20 @@ text += `│\n╰═════════════════╯`;
                                                         `📌 *Cara ganti:*\n` +
                                                         `↩️ *Reply pesan ini* dengan *v2* untuk pilih\n` +
                                                         `*.aturbrowser v2* — ketik manual\n` +
-                                                        `*.aturbrowser v2 ya* — langsung ganti tanpa konfirmasi`
+                                                        `*.aturbrowser v2 ya* — langsung ganti tanpa konfirmasi\n\n` +
+                                                        `┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n` +
+                                                        `╭─────────────────────────╮\n` +
+                                                        `│  ⚠️  *HARAP BACA DULU!*  ⚠️  │\n` +
+                                                        `╰─────────────────────────╯\n` +
+                                                        `📵 Mengganti browser akan:\n` +
+                                                        `  • *Menghapus sesi* WhatsApp aktif\n` +
+                                                        `  • *Memutus koneksi* bot sementara\n` +
+                                                        `  • Meminta *pairing code baru* saat restart\n\n` +
+                                                        `🔁 Pastikan kamu siap untuk:\n` +
+                                                        `  • Buka *WhatsApp* di HP kamu\n` +
+                                                        `  • Masuk ke *Perangkat Tertaut*\n` +
+                                                        `  • Input *pairing code* yang muncul\n\n` +
+                                                        `〽️ *Lanjutkan hanya jika siap!*`
                                                 );
                                                 listAturBrowserMap.set(m.sender, { keyId: listMsg?.key?.id, expiresAt: Date.now() + 120000 });
                                                 break;
