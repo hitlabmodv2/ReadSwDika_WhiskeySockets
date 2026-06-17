@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 17/06/2026, 08.24.26  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 17/06/2026, 09.10.23  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  SingleFile
+│  #001  —  unhandledRejection
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [SingleFile] Gagal tulis /home/runner/workspace/sessions/hisoka.json: ENOENT: no such file or directory, open '/home/runner/workspace/sessions/hisoka.json.tmp'
+│  Connection Closed
 │
 │  DETAIL
-│  Sumber      : SingleFile
+│  Sumber      : unhandledRejection
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 17/06/2026, 08.24.26
-│  Terakhir    : 17/06/2026, 08.24.26
+│  Pertama     : 17/06/2026, 09.10.23
+│  Terakhir    : 17/06/2026, 09.10.23
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [SingleFile] Gagal tulis /home/runner/workspace/sessions/hisoka.json: ENOENT: no such file or directory, open '/home/runner/workspace/sessions/hisoka.json.tmp'
-│     at console.error (file:///home/runner/workspace/index.js:394:27)
-│     at flushNow (file:///home/runner/workspace/src/helper/authState.js:317:33)
+│  ▶  Error: Connection Closed
+│     at sendRawMessage (file:///home/runner/workspace/node_modules/@whiskeysockets/baileys/lib/Socket/socket.js:57:19)
+│     at sendNode (file:///home/runner/workspace/node_modules/@whiskeysockets/baileys/lib/Socket/socket.js:76:16)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 17/06/2026, 08.24.26
+  Terakhir diperbarui: 17/06/2026, 09.10.23
 ════════════════════════════════════════════════════════════════════════
