@@ -9773,7 +9773,7 @@ _📦 Powered by Wily Bot V22_ 🤖`;
 │ ⏱️ » ${uptimeStr}
 │ 📅 » ${_mnTgl}
 │ 🕐 » ${_mnJam} WIB
-│ 📦 » ${totalSemuaFitur} Total Semua Fitur
+│ 📦 » ${totalSemuaFitur} Total Fitur Auto
 │ 📦 » ${totalCmd} Fitur Auto Aktif
 │ 📦 » ${totalTidakAktif} Fitur Auto Tidak Aktif
 │ 🌐 » Online 🟢
