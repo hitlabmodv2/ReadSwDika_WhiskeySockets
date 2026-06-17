@@ -1,0 +1,67 @@
+{
+  "AC5E0C482775FEA06931D1ECEB153FFD": {
+    "id": "AC5E0C482775FEA06931D1ECEB153FFD",
+    "sender": "628132642384@s.whatsapp.net",
+    "name": "𝓒ყα ||𝟐𝟐℅||𝐀𝐓𝐑||𝐂𝟗||𝐍𝐕𝟔𝟔𝟔",
+    "type": "protocolMessage",
+    "arrivedAt": "2026-06-16T13:16:02.542Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🌪️",
+    "source": "group",
+    "number": "628132642384",
+    "messageKey": {
+      "remoteJid": "120363424557936431@g.us",
+      "fromMe": false,
+      "id": "AC5E0C482775FEA06931D1ECEB153FFD",
+      "participant": "21080370589742@lid",
+      "participantAlt": "628132642384@s.whatsapp.net",
+      "addressingMode": "lid"
+    },
+    "resolvedPn": "628132642384@s.whatsapp.net",
+    "updatedAt": "2026-06-16T13:16:18.398Z",
+    "processedAt": "2026-06-16T13:16:18.398Z"
+  },
+  "AC7F0D89D80B8C1BFE4A189073FD404A": {
+    "id": "AC7F0D89D80B8C1BFE4A189073FD404A",
+    "sender": "628132642384@s.whatsapp.net",
+    "name": "𝓒ყα ||𝟐𝟐℅||𝐀𝐓𝐑||𝐂𝟗||𝐍𝐕𝟔𝟔𝟔",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-16T13:16:02.600Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "👩‍💼",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "628132642384",
+    "resolvedPn": "628132642384@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "628132642384@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC7F0D89D80B8C1BFE4A189073FD404A",
+      "participant": "21080370589742@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-16T13:16:11.592Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "628132642384@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC7F0D89D80B8C1BFE4A189073FD404A",
+        "participant": "21080370589742@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "628132642384@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC7F0D89D80B8C1BFE4A189073FD404A",
+        "participant": "628132642384@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-16T13:16:11.592Z"
+  }
+}
