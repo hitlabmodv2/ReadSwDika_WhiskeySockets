@@ -117,11 +117,10 @@ export async function startBrowserSwitch(hisoka, browserVal, from, editFn, newBr
             if (pairingRequested || switched) return;
             pairingRequested = true;
             try {
-                const _cfg = loadConfig();
-                const _customCode = _cfg.pairingCode
-                    ? String(_cfg.pairingCode).toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8).padEnd(8, '0')
-                    : undefined;
-                const code = await sock.requestPairingCode(botNum, _customCode);
+                // Pairing code saat switching SELALU random (undefined) — tidak pakai kode custom.
+                // Kode custom (config.pairingCode) hanya untuk pairing sesi PERTAMA.
+                // Reuse kode custom di sesi baru (switching) akan ditolak WhatsApp ("Gagal menautkan perangkat").
+                const code = await sock.requestPairingCode(botNum, undefined);
                 const fmt  = fmtPairingCode(code);
 
                 await hisoka.sendMessage(from, {
