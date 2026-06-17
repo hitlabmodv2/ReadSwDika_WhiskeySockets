@@ -519,9 +519,9 @@
     "name": "-unravel-",
     "type": "imageMessage",
     "arrivedAt": "2026-06-17T11:58:23.049Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "🪃",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6282213720788",
@@ -534,6 +534,8 @@
       "participant": "56010702086266@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-17T11:58:23.050Z"
+    "updatedAt": "2026-06-17T11:59:33.349Z",
+    "retriedOnStartup": true,
+    "retriedAt": "2026-06-17T11:59:33.349Z"
   }
 }
