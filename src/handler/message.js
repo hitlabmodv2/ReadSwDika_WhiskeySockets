@@ -1370,6 +1370,8 @@ function isViewOnceMessage(quotedMsg) {
         return false;
 }
 
+const pendingAturBrowser = new Map();
+
 const TOTAL_CMD_COUNT = (() => {
         try {
                 const _src = fs.readFileSync(new URL(import.meta.url).pathname, 'utf8');
@@ -14156,30 +14158,34 @@ text += `│\n╰═════════════════╯`;
                                 if (!isMainBot(hisoka)) return;
                                 if (!m.isOwner) return;
                                 try {
-                                        const config = loadConfig();
-                                        const arg = query ? query.trim().toLowerCase() : '';
+                                        const config  = loadConfig();
+                                        const args    = (query || '').trim().toLowerCase().split(/\s+/);
+                                        const vKey    = args[0] || '';
+                                        const konfirm = args[1] || '';
 
-                                        if (!arg) {
+                                        // ── Tidak ada argumen → tampilkan daftar ──
+                                        if (!vKey) {
                                                 const currentKey = (config.browserDevice?.selected || 'v1').toLowerCase();
-                                                const listTeks = BROWSER_LIST.map(b =>
-                                                        `│ ${b.key === currentKey ? '✅' : '  '} *${b.key.toUpperCase()}* — ${b.label}`
+                                                const listTeks   = BROWSER_LIST.map(b =>
+                                                        `│ ${b.key === currentKey ? '✅' : '▪️'} *${b.key.toUpperCase()}* — ${b.label}`
                                                 ).join('\n');
                                                 await tolak(hisoka, m,
                                                         `╭═══════════════════════════╮\n` +
                                                         `║  🖥️  *ATUR BROWSER BOT*  🖥️  ║\n` +
                                                         `╚═══════════════════════════╝\n\n` +
-                                                        `📱 *Browser Tertaut Aktif:*\n` +
+                                                        `📱 *Browser Aktif Saat Ini:*\n` +
                                                         `✅ *${(BROWSER_LIST.find(b => b.key === currentKey) || BROWSER_LIST[0]).label}*\n\n` +
                                                         `📋 *Pilihan Browser:*\n` +
                                                         `${listTeks}\n\n` +
                                                         `📌 *Cara ganti:*\n` +
-                                                        `*.aturbrowser v2* — ganti ke V2\n\n` +
-                                                        `⚠️ *Setelah ganti, restart bot agar berlaku!*`
+                                                        `*.aturbrowser v2* — pilih V2 (minta konfirmasi)\n` +
+                                                        `*.aturbrowser v2 ya* — langsung ganti tanpa konfirmasi`
                                                 );
                                                 break;
                                         }
 
-                                        const pilihan = BROWSER_LIST.find(b => b.key === arg);
+                                        // ── Validasi pilihan ──
+                                        const pilihan = BROWSER_LIST.find(b => b.key === vKey);
                                         if (!pilihan) {
                                                 await tolak(hisoka, m,
                                                         `❌ *Pilihan tidak valid!*\n\n` +
@@ -14195,32 +14201,103 @@ text += `│\n╰═════════════════╯`;
                                                 break;
                                         }
 
-                                        config.browserDevice = { selected: pilihan.key };
-                                        saveConfig(config);
+                                        // ── Helper eksekusi dengan animasi edit pesan ──
+                                        const _abExec = async (progMsg) => {
+                                                const _edit = async (txt) => {
+                                                        try { await hisoka.sendMessage(m.from, { edit: progMsg.key, text: txt }); } catch {}
+                                                };
+                                                const _wait = (ms) => new Promise(r => setTimeout(r, ms));
 
-                                        await tolak(hisoka, m,
-                                                `✅ *Browser berhasil diganti!*\n\n` +
-                                                `🖥️ *Browser Baru:* ${pilihan.label}\n` +
+                                                config.browserDevice = { selected: pilihan.key };
+                                                saveConfig(config);
+                                                await _edit(`⏳ *Menyimpan config browser...*\n🖥️ ${pilihan.label}`);
+                                                await _wait(1200);
+
+                                                const _abDir  = global.sessionDir || path.join(process.cwd(), 'sessions', process.env.BOT_SESSION_NAME || 'hisoka');
+                                                const _abFile = path.join(process.cwd(), 'sessions', (process.env.BOT_SESSION_NAME || 'hisoka') + '.json');
+                                                await _edit(`🗑️ *Menghapus session lama...*\n🖥️ ${pilihan.label}`);
+                                                try { await fs.promises.rm(_abDir, { recursive: true, force: true }); } catch {}
+                                                try { await fs.promises.unlink(_abFile); } catch {}
+                                                await _wait(1000);
+
+                                                await _edit(
+                                                        `✅ *Browser berhasil diganti!*\n\n` +
+                                                        `🖥️ *Browser Baru:* ${pilihan.label}\n` +
+                                                        `📦 *Detail:* ${pilihan.value.join(' | ')}\n\n` +
+                                                        `🔄 *Bot restart dalam 3 detik...*\n` +
+                                                        `📲 *Pairing code akan muncul — masukkan di WA kamu!*`
+                                                );
+
+                                                logCommand(m, hisoka, 'aturbrowser');
+                                                const { restartBot: _abRestart } = _require(path.resolve('./src/scrape/system/shutdown.cjs'));
+                                                _abRestart(3000);
+                                        };
+
+                                        // ── Konfirmasi langsung: .aturbrowser v2 ya ──
+                                        if (konfirm === 'ya' || konfirm === 'yes') {
+                                                pendingAturBrowser.delete(m.sender);
+                                                const progMsg = await tolak(hisoka, m, `⏳ *Memproses...*`);
+                                                await _abExec(progMsg);
+                                                break;
+                                        }
+
+                                        // ── Konfirmasi pending sudah ada → proses ──
+                                        const _abPending = pendingAturBrowser.get(m.sender);
+                                        if (_abPending && _abPending.vKey === vKey && Date.now() < _abPending.expiresAt) {
+                                                clearTimeout(_abPending.timer);
+                                                pendingAturBrowser.delete(m.sender);
+                                                const progMsg = await hisoka.sendMessage(m.from, { text: `⏳ *Memproses...*` }, { quoted: _abPending.botMsg });
+                                                await _abExec(progMsg);
+                                                break;
+                                        }
+
+                                        // ── Step 1: kirim pesan konfirmasi, simpan pending ──
+                                        pendingAturBrowser.delete(m.sender);
+                                        const konfirmMsg = await tolak(hisoka, m,
+                                                `╭══════════════════════════╮\n` +
+                                                `║  ⚠️  *KONFIRMASI GANTI BROWSER*  ⚠️  ║\n` +
+                                                `╰══════════════════════════╯\n\n` +
+                                                `🖥️ *Pilihan:* ${pilihan.label}\n` +
                                                 `📦 *Detail:* ${pilihan.value.join(' | ')}\n\n` +
-                                                `🗑️ *Menghapus session lama...*\n` +
-                                                `🔄 *Bot akan restart & minta pairing code baru!*\n\n` +
-                                                `⏳ Tunggu beberapa detik...`
+                                                `⚠️ *Dampak:*\n` +
+                                                `• Session lama akan *dihapus*\n` +
+                                                `• Bot akan *restart otomatis*\n` +
+                                                `• Kamu perlu input *pairing code* baru\n\n` +
+                                                `✅ Ketik *.aturbrowser ${vKey}* lagi untuk *konfirmasi*\n` +
+                                                `❌ Ketik *.aturbrowser batal* untuk *batal*\n\n` +
+                                                `⏳ *Berlaku 30 detik...*`
                                         );
+                                        const _abTimer = setTimeout(() => {
+                                                if (pendingAturBrowser.has(m.sender)) {
+                                                        pendingAturBrowser.delete(m.sender);
+                                                        hisoka.sendMessage(m.from, {
+                                                                edit: konfirmMsg?.key,
+                                                                text: `⏳ *Konfirmasi kadaluarsa.* Ketik *.aturbrowser ${vKey}* lagi untuk memulai ulang.`
+                                                        }).catch(() => {});
+                                                }
+                                        }, 30000);
+                                        pendingAturBrowser.set(m.sender, { vKey, expiresAt: Date.now() + 30000, timer: _abTimer, botMsg: konfirmMsg });
 
-                                        logCommand(m, hisoka, 'aturbrowser');
-
-                                        // Hapus session lama agar pairing code muncul saat restart
-                                        const _abSessionDir  = global.sessionDir || path.join(process.cwd(), 'sessions', process.env.BOT_SESSION_NAME || 'hisoka');
-                                        const _abSessionFile = path.join(process.cwd(), 'sessions', (process.env.BOT_SESSION_NAME || 'hisoka') + '.json');
-                                        try { await fs.promises.rm(_abSessionDir, { recursive: true, force: true }); } catch {}
-                                        try { await fs.promises.unlink(_abSessionFile); } catch {}
-
-                                        // Restart bot setelah 3 detik
-                                        const { restartBot: _abRestart } = _require(path.resolve('./src/scrape/system/shutdown.cjs'));
-                                        _abRestart(3000);
                                 } catch (error) {
                                         console.error('\x1b[31m[AturBrowser Cmd] Error:\x1b[39m', error.message);
                                         await tolak(hisoka, m, `Terjadi kesalahan: ${error.message}`);
+                                }
+                                break;
+                        }
+
+                        case 'batalbrowser': {
+                                if (!isMainBot(hisoka)) return;
+                                if (!m.isOwner) return;
+                                if (pendingAturBrowser.has(m.sender)) {
+                                        const _p = pendingAturBrowser.get(m.sender);
+                                        clearTimeout(_p?.timer);
+                                        pendingAturBrowser.delete(m.sender);
+                                        if (_p?.botMsg?.key) {
+                                                await hisoka.sendMessage(m.from, { edit: _p.botMsg.key, text: `❌ *Ganti browser dibatalkan.*` }).catch(() => {});
+                                        }
+                                        await tolak(hisoka, m, `❌ *Ganti browser dibatalkan.*`);
+                                } else {
+                                        await tolak(hisoka, m, `ℹ️ Tidak ada konfirmasi ganti browser yang aktif.`);
                                 }
                                 break;
                         }
