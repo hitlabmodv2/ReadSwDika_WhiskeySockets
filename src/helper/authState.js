@@ -266,6 +266,19 @@ class InMemorySection {
 }
 
 // ─────────────────────────────────────────────────────────────────
+//  Global write-mutex registry — satu mutex per absolute file path.
+//  Mencegah race condition antara dua instance useSingleFileAuthState
+//  untuk file yang sama (mis. saat __internalRestart): keduanya berbagi
+//  mutex yang sama sehingga tidak bisa tulis .tmp bersamaan.
+// ─────────────────────────────────────────────────────────────────
+const _globalWriteMutexes = new Map()
+function _getWriteMutex(absPath) {
+        let m = _globalWriteMutexes.get(absPath)
+        if (!m) { m = new Mutex(); _globalWriteMutexes.set(absPath, m) }
+        return m
+}
+
+// ─────────────────────────────────────────────────────────────────
 //  useSingleFileAuthState — SATU file JSON untuk segalanya:
 //  creds + keys + contacts + groups + settings
 //
@@ -278,7 +291,9 @@ class InMemorySection {
 export async function useSingleFileAuthState(filePath) {
         await mkdir(dirname(filePath), { recursive: true })
 
-        const writeMutex = new Mutex()
+        // Gunakan global mutex agar semua instance untuk path ini berbagi mutex
+        const absPath   = filePath.startsWith('/') ? filePath : join(process.cwd(), filePath)
+        const writeMutex = _getWriteMutex(absPath)
         let writeTimer = null
 
         let creds = null
