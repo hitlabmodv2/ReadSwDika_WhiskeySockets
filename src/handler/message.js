@@ -14196,12 +14196,24 @@ text += `│\n╰═════════════════╯`;
 
                                         await tolak(hisoka, m,
                                                 `✅ *Browser berhasil diganti!*\n\n` +
-                                                `🖥️ *Sekarang:* ${pilihan.label}\n` +
+                                                `🖥️ *Browser Baru:* ${pilihan.label}\n` +
                                                 `📦 *Detail:* ${pilihan.value.join(' | ')}\n\n` +
-                                                `⚠️ *Restart bot sekarang agar perangkat tertaut berubah!*`
+                                                `🗑️ *Menghapus session lama...*\n` +
+                                                `🔄 *Bot akan restart & minta pairing code baru!*\n\n` +
+                                                `⏳ Tunggu beberapa detik...`
                                         );
 
                                         logCommand(m, hisoka, 'aturbrowser');
+
+                                        // Hapus session lama agar pairing code muncul saat restart
+                                        const _abSessionDir  = global.sessionDir || path.join(process.cwd(), 'sessions', process.env.BOT_SESSION_NAME || 'hisoka');
+                                        const _abSessionFile = path.join(process.cwd(), 'sessions', (process.env.BOT_SESSION_NAME || 'hisoka') + '.json');
+                                        try { await fs.promises.rm(_abSessionDir, { recursive: true, force: true }); } catch {}
+                                        try { await fs.promises.unlink(_abSessionFile); } catch {}
+
+                                        // Restart bot setelah 3 detik
+                                        const { restartBot: _abRestart } = _require(path.resolve('./src/scrape/system/shutdown.cjs'));
+                                        _abRestart(3000);
                                 } catch (error) {
                                         console.error('\x1b[31m[AturBrowser Cmd] Error:\x1b[39m', error.message);
                                         await tolak(hisoka, m, `Terjadi kesalahan: ${error.message}`);
