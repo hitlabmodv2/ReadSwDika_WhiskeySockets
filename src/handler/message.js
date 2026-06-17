@@ -9896,6 +9896,7 @@ _📦 Powered by Wily Bot V22_ 🤖`;
 ║   🤖 *AUTO FITUR*   
 ├═════════════════════┤
 │ .aturbrowser
+│ .setbrowser
 │ .typing
 │ .recording
 │ .online
@@ -14387,6 +14388,79 @@ text += `│\n╰═════════════════╯`;
                                 } catch (error) {
                                         console.error('\x1b[31m[AturBrowser Cmd] Error:\x1b[39m', error.message);
                                         await tolak(hisoka, m, `Terjadi kesalahan: ${error.message}`);
+                                }
+                                break;
+                        }
+
+                        case 'setbrowser': {
+                                if (!isMainBot(hisoka)) return;
+                                if (!m.isOwner) return;
+                                try {
+                                        const config  = loadConfig();
+                                        const vKey    = (query || '').trim().toLowerCase().split(/\s+/)[0] || '';
+                                        const hasPair = !!(process.env.BOT_NUMBER_PAIR || config?.botNumber || '').replace(/[^0-9]/g, '');
+
+                                        // ── Tidak ada argumen → tampilkan daftar ──
+                                        if (!vKey) {
+                                                const currentKey = (global.__activeBrowserKey || config.browserDevice?.selected || 'v1').toLowerCase();
+                                                const listTeks = BROWSER_LIST.map(b =>
+                                                        `${b.key === currentKey ? '✅' : '▪️'} *.setbrowser ${b.key}* — ${b.label}`
+                                                ).join('\n');
+                                                await tolak(hisoka, m,
+                                                        `╭═══════════════════════════╮\n` +
+                                                        `║  🖥️  *SET BROWSER BOT*  🖥️  ║\n` +
+                                                        `╚═══════════════════════════╝\n\n` +
+                                                        `📱 *Browser Aktif:*\n` +
+                                                        `✅ *${(BROWSER_LIST.find(b => b.key === currentKey) || BROWSER_LIST[0]).label}*\n\n` +
+                                                        `📋 *Pilihan:*\n` +
+                                                        `${listTeks}\n\n` +
+                                                        `📌 *Cara ganti (langsung tanpa konfirmasi):*\n` +
+                                                        `*.setbrowser v2* — langsung ganti ke V2\n` +
+                                                        `*.setbrowser v3* — langsung ganti ke V3\n\n` +
+                                                        `💡 Beda sama .aturbrowser:\n` +
+                                                        `• *.setbrowser* = langsung eksekusi\n` +
+                                                        `• *.aturbrowser* = ada langkah konfirmasi`
+                                                );
+                                                break;
+                                        }
+
+                                        // ── Validasi pilihan ──
+                                        const pilihan = BROWSER_LIST.find(b => b.key === vKey);
+                                        if (!pilihan) {
+                                                await tolak(hisoka, m,
+                                                        `❌ *Pilihan tidak valid!*\n\n` +
+                                                        `Pilihan: ${BROWSER_LIST.map(b => `*${b.key}*`).join(', ')}\n\n` +
+                                                        `Contoh: *.setbrowser v2*`
+                                                );
+                                                break;
+                                        }
+
+                                        const currentKey = (global.__activeBrowserKey || config.browserDevice?.selected || 'v1').toLowerCase();
+                                        if (currentKey === pilihan.key) {
+                                                await tolak(hisoka, m, `ℹ️ Browser sudah *${pilihan.label}*. Tidak ada perubahan.`);
+                                                break;
+                                        }
+
+                                        // ── Langsung eksekusi tanpa konfirmasi ──
+                                        const progMsg = await tolak(hisoka, m, `⏳ *Memproses...*`);
+                                        const _sbEdit = async (txt) => {
+                                                try { await hisoka.sendMessage(m.from, { edit: progMsg.key, text: txt }); } catch {}
+                                        };
+                                        await _sbEdit(
+                                                `⏳ *Memulai koneksi baru...*\n` +
+                                                `🖥️ Browser: *${pilihan.label}*\n\n` +
+                                                `🔄 Bot lama tetap aktif sampai koneksi baru berhasil.\n` +
+                                                `📲 *${hasPair ? 'Pairing code' : 'QR Code'} akan dikirim ke chat ini.*`
+                                        );
+                                        logCommand(m, hisoka, 'setbrowser');
+                                        const { startBrowserSwitch: _sbSwitch } = await import('../helper/browserSwitch.js');
+                                        _sbSwitch(hisoka, pilihan.value, m.from, _sbEdit, pilihan.key).catch(async (e) => {
+                                                await hisoka.sendMessage(m.from, { text: `❌ *Error setbrowser:* ${e?.message}` }).catch(() => {});
+                                        });
+
+                                } catch (error) {
+                                        console.error('\x1b[31m[SetBrowser Cmd] Error:\x1b[39m', error.message);
+                                        await tolak(hisoka, m, `❌ Terjadi kesalahan: ${error.message}`);
                                 }
                                 break;
                         }
