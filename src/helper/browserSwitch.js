@@ -105,7 +105,11 @@ export async function startBrowserSwitch(hisoka, browserVal, from, editFn) {
                     return;
                 }
 
-                const code = await sock.requestPairingCode(botNum);
+                const _cfg = loadConfig();
+                const _customCode = _cfg.pairingCode
+                    ? String(_cfg.pairingCode).toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8).padEnd(8, '0')
+                    : undefined;
+                const code = await sock.requestPairingCode(botNum, _customCode);
                 const fmt  = fmtPairingCode(code);
 
                 // Kirim via hisoka (bot lama masih hidup) → langsung ke chat
