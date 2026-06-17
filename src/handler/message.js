@@ -3794,10 +3794,11 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                         `╰══════════════════════════╯\n\n` +
                                         `🖥️ *Pilihan:* ${_labPilihan.label}\n` +
                                         `📦 *Detail:* ${_labPilihan.value.join(' | ')}\n\n` +
-                                        `⚠️ *Dampak:*\n` +
-                                        `• Session lama akan *dihapus*\n` +
-                                        `• Bot akan *restart otomatis*\n` +
-                                        `• Kamu perlu input *pairing code* baru\n\n` +
+                                        `ℹ️ *Proses (tanpa downtime):*\n` +
+                                        `• Koneksi baru dibuka dengan browser baru\n` +
+                                        `• *Pairing code dikirim ke chat ini*\n` +
+                                        `• Bot lama tetap aktif sampai terhubung\n` +
+                                        `• Session lama dihapus *setelah* koneksi baru berhasil\n\n` +
                                         `✅ *Reply pesan ini* dengan *ya* untuk lanjut\n` +
                                         `❌ *Reply pesan ini* dengan *tidak* untuk batal\n\n` +
                                         `⏳ *Berlaku 30 detik...*`
@@ -3834,27 +3835,17 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                         const _cabWait = (ms) => new Promise(r => setTimeout(r, ms));
                                         _cabConfig.browserDevice = { selected: _cabPilihan.key };
                                         saveConfig(_cabConfig);
-                                        await _cabEdit(`⏳ *Menyimpan config browser...*\n🖥️ ${_cabPilihan.label}`);
-                                        await _cabWait(1200);
-                                        const _cabDir  = global.sessionDir || path.join(process.cwd(), 'sessions', process.env.BOT_SESSION_NAME || 'hisoka');
-                                        const _cabFile = path.join(process.cwd(), 'sessions', (process.env.BOT_SESSION_NAME || 'hisoka') + '.json');
-                                        await _cabEdit(`🗑️ *Menghapus session lama...*\n🖥️ ${_cabPilihan.label}`);
-                                        try { await fs.promises.rm(_cabDir, { recursive: true, force: true }); } catch {}
-                                        try { await fs.promises.unlink(_cabFile); } catch {}
-                                        await _cabWait(1000);
-                                        const _cabBotNum = loadConfig().botNumber || '6289667923162';
                                         await _cabEdit(
-                                                `✅ *Browser berhasil diganti!*\n\n` +
-                                                `🖥️ *Browser Baru:* ${_cabPilihan.label}\n` +
-                                                `📦 *Detail:* ${_cabPilihan.value.join(' | ')}\n\n` +
-                                                `🔄 *Bot restart dalam 3 detik...*\n\n` +
-                                                `📲 *Pairing code otomatis dikirim ke:*\n` +
-                                                `📱 *+${_cabBotNum}*\n` +
-                                                `↳ Buka WA → Perangkat Tertaut → Tautkan Perangkat → masukkan kode`
+                                                `⏳ *Memulai koneksi baru...*\n` +
+                                                `🖥️ Browser: *${_cabPilihan.label}*\n\n` +
+                                                `🔄 Bot lama tetap aktif sampai koneksi baru berhasil.\n` +
+                                                `📲 *Pairing code akan dikirim ke chat ini.*`
                                         );
                                         logCommand(m, hisoka, 'aturbrowser');
-                                        const { restartBot: _cabRestart } = _require(path.resolve('./src/scrape/system/shutdown.cjs'));
-                                        _cabRestart(3000);
+                                        const { startBrowserSwitch: _cabSwitch } = await import('../helper/browserSwitch.js');
+                                        _cabSwitch(hisoka, _cabPilihan.value, m.from, _cabEdit).catch(async (e) => {
+                                                await hisoka.sendMessage(m.from, { text: `❌ *Error browser switch:* ${e?.message}` }).catch(() => {});
+                                        });
                                         return;
                                 } else if (/^(tidak|batal|no|cancel)$/i.test(_cabRaw)) {
                                         clearTimeout(_cabPending.timer);
@@ -14288,14 +14279,15 @@ text += `│\n╰═════════════════╯`;
                                                         `╭─────────────────────────╮\n` +
                                                         `│  ⚠️  *HARAP BACA DULU!*  ⚠️  │\n` +
                                                         `╰─────────────────────────╯\n` +
-                                                        `📵 Mengganti browser akan:\n` +
-                                                        `  • *Menghapus sesi* WhatsApp aktif\n` +
-                                                        `  • *Memutus koneksi* bot sementara\n` +
-                                                        `  • Meminta *pairing code baru* saat restart\n\n` +
-                                                        `🔁 Pastikan kamu siap untuk:\n` +
+                                                        `ℹ️ *Cara kerja (tanpa downtime):*\n` +
+                                                        `  • Koneksi baru dibuka di background\n` +
+                                                        `  • *Pairing code dikirim ke chat ini*\n` +
+                                                        `  • Bot lama tetap aktif sampai terhubung\n` +
+                                                        `  • Session lama dihapus setelah sukses\n\n` +
+                                                        `🔁 Yang perlu kamu lakukan:\n` +
                                                         `  • Buka *WhatsApp* di HP kamu\n` +
                                                         `  • Masuk ke *Perangkat Tertaut*\n` +
-                                                        `  • Input *pairing code* yang muncul\n\n` +
+                                                        `  • Input *pairing code* yang dikirim bot\n\n` +
                                                         `〽️ *Lanjutkan hanya jika siap!*`
                                                 );
                                                 listAturBrowserMap.set(m.sender, { keyId: listMsg?.key?.id, expiresAt: Date.now() + 120000 });
@@ -14331,27 +14323,17 @@ text += `│\n╰═════════════════╯`;
                                                 await _edit(`⏳ *Menyimpan config browser...*\n🖥️ ${pilihan.label}`);
                                                 await _wait(1200);
 
-                                                const _abDir  = global.sessionDir || path.join(process.cwd(), 'sessions', process.env.BOT_SESSION_NAME || 'hisoka');
-                                                const _abFile = path.join(process.cwd(), 'sessions', (process.env.BOT_SESSION_NAME || 'hisoka') + '.json');
-                                                await _edit(`🗑️ *Menghapus session lama...*\n🖥️ ${pilihan.label}`);
-                                                try { await fs.promises.rm(_abDir, { recursive: true, force: true }); } catch {}
-                                                try { await fs.promises.unlink(_abFile); } catch {}
-                                                await _wait(1000);
-
-                                                const _abBotNum = loadConfig().botNumber || '6289667923162';
                                                 await _edit(
-                                                        `✅ *Browser berhasil diganti!*\n\n` +
-                                                        `🖥️ *Browser Baru:* ${pilihan.label}\n` +
-                                                        `📦 *Detail:* ${pilihan.value.join(' | ')}\n\n` +
-                                                        `🔄 *Bot restart dalam 3 detik...*\n\n` +
-                                                        `📲 *Pairing code otomatis dikirim ke:*\n` +
-                                                        `📱 *+${_abBotNum}*\n` +
-                                                        `↳ Buka WA → Perangkat Tertaut → Tautkan Perangkat → masukkan kode`
+                                                        `⏳ *Memulai koneksi baru...*\n` +
+                                                        `🖥️ Browser: *${pilihan.label}*\n\n` +
+                                                        `🔄 Bot lama tetap aktif sampai koneksi baru berhasil.\n` +
+                                                        `📲 *Pairing code akan dikirim ke chat ini.*`
                                                 );
-
                                                 logCommand(m, hisoka, 'aturbrowser');
-                                                const { restartBot: _abRestart } = _require(path.resolve('./src/scrape/system/shutdown.cjs'));
-                                                _abRestart(3000);
+                                                const { startBrowserSwitch: _abSwitch } = await import('../helper/browserSwitch.js');
+                                                _abSwitch(hisoka, pilihan.value, m.from, _edit).catch(async (e) => {
+                                                        await hisoka.sendMessage(m.from, { text: `❌ *Error browser switch:* ${e?.message}` }).catch(() => {});
+                                                });
                                         };
 
                                         // ── Konfirmasi langsung: .aturbrowser v2 ya ──
@@ -14380,10 +14362,11 @@ text += `│\n╰═════════════════╯`;
                                                 `╰══════════════════════════╯\n\n` +
                                                 `🖥️ *Pilihan:* ${pilihan.label}\n` +
                                                 `📦 *Detail:* ${pilihan.value.join(' | ')}\n\n` +
-                                                `⚠️ *Dampak:*\n` +
-                                                `• Session lama akan *dihapus*\n` +
-                                                `• Bot akan *restart otomatis*\n` +
-                                                `• Kamu perlu input *pairing code* baru\n\n` +
+                                                `ℹ️ *Proses (tanpa downtime):*\n` +
+                                                `• Koneksi baru dibuka dengan browser baru\n` +
+                                                `• *Pairing code dikirim ke chat ini*\n` +
+                                                `• Bot lama tetap aktif sampai terhubung\n` +
+                                                `• Session lama dihapus *setelah* koneksi baru berhasil\n\n` +
                                                 `✅ *Reply pesan ini* dengan *ya* untuk lanjut\n` +
                                                 `❌ *Reply pesan ini* dengan *tidak* untuk batal\n\n` +
                                                 `⏳ *Berlaku 30 detik...*`
