@@ -250,12 +250,34 @@ export async function startBrowserSwitch(hisoka, browserVal, from, editFn, newBr
                 switched = true;
                 clearTimeout(abortTimer);
 
-                // Tunggu 800ms agar debounced saveCreds (300ms timer) selesai
-                // flush ke tempFile SEBELUM kita removeAllListeners + rename.
-                // Tanpa ini, final creds.update tertulis ke path lama setelah rename → 401.
+                // Step 1: Tunggu 800ms agar debounced saveCreds temp socket (300ms) selesai flush.
                 await delay(800);
                 try { sock.ev.removeAllListeners(); } catch {}
 
+                // Step 2: Kirim pesan sukses SEBELUM main bot di-terminate.
+                // (setelah terminate, hisoka.sendMessage tidak bisa dipakai)
+                await hisoka.sendMessage(from, {
+                    text:
+                        `╔══════════════════════╗\n` +
+                        `║  ✅  *TERHUBUNG!*  ✅  ║\n` +
+                        `╚══════════════════════╝\n\n` +
+                        `🟢 *Koneksi baru berhasil!*\n` +
+                        `🖥️ Browser: *${browserVal.join(' | ')}*\n\n` +
+                        `🗑️ Session lama sudah dihapus.\n` +
+                        `🔄 *Bot restart dalam 3 detik...*`
+                }).catch(() => {});
+
+                await delay(1000); // beri waktu pesan terkirim sebelum socket dimatikan
+
+                // Step 3: Stop main bot dari nulis ke session file.
+                // Race condition: main bot bisa terima creds.update SETELAH rename
+                // dan overwrite session baru dengan kredensial lama → 401 saat restart.
+                // Solusi: hapus listener + terminate SEBELUM rename, tunggu pending flush selesai.
+                try { hisoka.ev.removeAllListeners(); } catch {}
+                try { hisoka.ws?.terminate?.(); } catch {}
+                await delay(500); // tunggu pending scheduleFlush (300ms debounce) selesai ke disk
+
+                // Step 4: Simpan config + rename session files.
                 try {
                     const _cfgNow = loadConfig();
                     _cfgNow.browserDevice  = { selected: newBrowserKey };
@@ -270,23 +292,8 @@ export async function startBrowserSwitch(hisoka, browserVal, from, editFn, newBr
                     await fs.promises.unlink(mainFile).catch(() => {});
                     try { await fs.promises.rename(tempFile, mainFile); } catch {}
                     try { await fs.promises.rename(tempDir,  mainDir);  } catch {}
-
-                    await hisoka.sendMessage(from, {
-                        text:
-                            `╔══════════════════════╗\n` +
-                            `║  ✅  *TERHUBUNG!*  ✅  ║\n` +
-                            `╚══════════════════════╝\n\n` +
-                            `🟢 *Koneksi baru berhasil!*\n` +
-                            `🖥️ Browser: *${browserVal.join(' | ')}*\n\n` +
-                            `🗑️ Session lama sudah dihapus.\n` +
-                            `🔄 *Bot restart dalam 3 detik...*`
-                    }).catch(() => {});
-
-                    await delay(3000);
                 } catch (e) {
-                    await hisoka.sendMessage(from, {
-                        text: `❌ *Gagal switch session:* ${e?.message}`
-                    }).catch(() => {});
+                    console.error('[BrowserSwitch] Gagal rename session:', e?.message);
                 } finally {
                     try {
                         if (fs.existsSync(tempFile)) await fs.promises.unlink(tempFile);
