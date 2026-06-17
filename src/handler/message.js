@@ -3796,7 +3796,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                         `📦 *Detail:* ${_labPilihan.value.join(' | ')}\n\n` +
                                         `ℹ️ *Proses (tanpa downtime):*\n` +
                                         `• Koneksi baru dibuka dengan browser baru\n` +
-                                        `• *${!!(process.env.BOT_NUMBER_PAIR || '').replace(/[^0-9]/g, '') ? 'Pairing code' : 'QR Code'} dikirim ke chat ini*\n` +
+                                        `• *${!!(process.env.BOT_NUMBER_PAIR || loadConfig()?.botNumber || '').replace(/[^0-9]/g, '') ? 'Pairing code' : 'QR Code'} dikirim ke chat ini*\n` +
                                         `• Bot lama tetap aktif sampai terhubung\n` +
                                         `• Session lama dihapus *setelah* koneksi baru berhasil\n\n` +
                                         `✅ *Reply pesan ini* dengan *ya* untuk lanjut\n` +
@@ -3833,7 +3833,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                         const _cabProgMsg = await m.reply(`⏳ *Memproses...*`);
                                         const _cabEdit = async (txt) => { try { await hisoka.sendMessage(m.from, { edit: _cabProgMsg.key, text: txt }); } catch {} };
                                         const _cabWait = (ms) => new Promise(r => setTimeout(r, ms));
-                                        const _cabHasPair = !!(process.env.BOT_NUMBER_PAIR || '').replace(/[^0-9]/g, '');
+                                        const _cabHasPair = !!(process.env.BOT_NUMBER_PAIR || _cabConfig?.botNumber || '').replace(/[^0-9]/g, '');
                                         await _cabEdit(
                                                 `⏳ *Memulai koneksi baru...*\n` +
                                                 `🖥️ Browser: *${_cabPilihan.label}*\n\n` +
@@ -14265,7 +14265,7 @@ text += `│\n╰═════════════════╯`;
                                                 // ── Tidak ada argumen → tampilkan daftar ──
                                                 // Gunakan global.__activeBrowserKey agar sesuai dengan browser yang BENAR-BENAR terhubung
                                                 const currentKey    = (global.__activeBrowserKey || config.browserDevice?.selected || 'v1').toLowerCase();
-                                                const _abHasPairNum = !!(process.env.BOT_NUMBER_PAIR || '').replace(/[^0-9]/g, '');
+                                                const _abHasPairNum = !!(process.env.BOT_NUMBER_PAIR || config?.botNumber || '').replace(/[^0-9]/g, '');
                                                 const listTeks   = BROWSER_LIST.map(b =>
                                                         `│ ${b.key === currentKey ? '✅' : '▪️'} *${b.key.toUpperCase()}* — ${b.label}`
                                                 ).join('\n');
@@ -14324,7 +14324,7 @@ text += `│\n╰═════════════════╯`;
                                                 };
                                                 const _wait = (ms) => new Promise(r => setTimeout(r, ms));
 
-                                                const _abExecHasPair = !!(process.env.BOT_NUMBER_PAIR || '').replace(/[^0-9]/g, '');
+                                                const _abExecHasPair = !!(process.env.BOT_NUMBER_PAIR || config?.botNumber || '').replace(/[^0-9]/g, '');
                                                 await _edit(
                                                         `⏳ *Memulai koneksi baru...*\n` +
                                                         `🖥️ Browser: *${pilihan.label}*\n\n` +
@@ -14366,7 +14366,7 @@ text += `│\n╰═════════════════╯`;
                                                 `📦 *Detail:* ${pilihan.value.join(' | ')}\n\n` +
                                                 `ℹ️ *Proses (tanpa downtime):*\n` +
                                                 `• Koneksi baru dibuka dengan browser baru\n` +
-                                                `• *${!!(process.env.BOT_NUMBER_PAIR || '').replace(/[^0-9]/g, '') ? 'Pairing code' : 'QR Code'} dikirim ke chat ini*\n` +
+                                                `• *${!!(process.env.BOT_NUMBER_PAIR || config?.botNumber || '').replace(/[^0-9]/g, '') ? 'Pairing code' : 'QR Code'} dikirim ke chat ini*\n` +
                                                 `• Bot lama tetap aktif sampai terhubung\n` +
                                                 `• Session lama dihapus *setelah* koneksi baru berhasil\n\n` +
                                                 `✅ *Reply pesan ini* dengan *ya* untuk lanjut\n` +

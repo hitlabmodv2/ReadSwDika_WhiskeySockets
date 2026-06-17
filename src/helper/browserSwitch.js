@@ -71,8 +71,10 @@ export async function startBrowserSwitch(hisoka, browserVal, from, editFn, newBr
     const tempFile    = path.join(process.cwd(), 'sessions', sessionName + '_switching.json');
     const tempDir     = path.join(process.cwd(), 'sessions', sessionName + '_switching');
 
-    // HANYA ambil dari BOT_NUMBER_PAIR — bukan config.botNumber (itu nomor bot sendiri)
-    const botNum = (process.env.BOT_NUMBER_PAIR || '').replace(/[^0-9]/g, '');
+    // Ambil nomor pairing: BOT_NUMBER_PAIR → fallback ke config.botNumber
+    // (sama seperti index.js agar konsisten: dotenv tidak override env kosong di Replit)
+    const _bsCfg = loadConfig();
+    const botNum = (process.env.BOT_NUMBER_PAIR || _bsCfg.botNumber || '').replace(/[^0-9]/g, '');
     const usePairingCode = botNum.length > 0;
 
     // Bersihkan temp session sebelumnya jika ada
