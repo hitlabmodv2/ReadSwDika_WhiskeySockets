@@ -14246,7 +14246,7 @@ text += `│\n╰═════════════════╯`;
                                         if (_abPending && _abPending.vKey === vKey && Date.now() < _abPending.expiresAt) {
                                                 clearTimeout(_abPending.timer);
                                                 pendingAturBrowser.delete(m.sender);
-                                                const progMsg = await hisoka.sendMessage(m.from, { text: `⏳ *Memproses...*` }, { quoted: _abPending.botMsg });
+                                                const progMsg = await m.reply(`⏳ *Memproses...*`);
                                                 await _abExec(progMsg);
                                                 break;
                                         }
