@@ -4,11 +4,11 @@
     "sender": "6285778517902@s.whatsapp.net",
     "name": "Stephanie Floriska",
     "type": "videoMessage",
-    "arrivedAt": "2026-06-16T13:22:43.948Z",
+    "arrivedAt": "2026-06-16T13:22:43.973Z",
     "read": true,
     "reacted": true,
-    "emoji": "🪩",
-    "resolve": "PN langsung ✓",
+    "emoji": "🏴󠁧󠁢󠁳󠁣󠁴󠁿",
+    "resolve": "Signal Lib ✓",
     "source": "status",
     "number": "6285778517902",
     "resolvedPn": "6285778517902@s.whatsapp.net",
@@ -20,7 +20,7 @@
       "participant": "178701056626923@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-16T13:22:57.559Z",
+    "updatedAt": "2026-06-16T13:22:51.495Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -39,6 +39,6 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-16T13:22:57.558Z"
+    "processedAt": "2026-06-16T13:22:51.495Z"
   }
 }

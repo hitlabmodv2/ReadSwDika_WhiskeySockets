@@ -1,13 +1,13 @@
 {
-  "AC460A453E0A1F8819FF03EB8FEFD848": {
-    "id": "AC460A453E0A1F8819FF03EB8FEFD848",
+  "ACBD12F3403D5B541FCE003F7C04B040": {
+    "id": "ACBD12F3403D5B541FCE003F7C04B040",
     "sender": "6282172560701@s.whatsapp.net",
     "name": "Nemuri•",
     "type": "videoMessage",
-    "arrivedAt": "2026-06-15T05:21:11.516Z",
-    "read": true,
-    "reacted": true,
-    "emoji": "🐘",
+    "arrivedAt": "2026-06-17T04:01:11.854Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6282172560701",
@@ -16,71 +16,10 @@
       "remoteJid": "status@broadcast",
       "remoteJidAlt": "6282172560701@s.whatsapp.net",
       "fromMe": false,
-      "id": "AC460A453E0A1F8819FF03EB8FEFD848",
+      "id": "ACBD12F3403D5B541FCE003F7C04B040",
       "participant": "57488271536342@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-15T05:21:22.050Z",
-    "receiptKeys": [
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6282172560701@s.whatsapp.net",
-        "fromMe": false,
-        "id": "AC460A453E0A1F8819FF03EB8FEFD848",
-        "participant": "57488271536342@lid",
-        "addressingMode": "lid"
-      },
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6282172560701@s.whatsapp.net",
-        "fromMe": false,
-        "id": "AC460A453E0A1F8819FF03EB8FEFD848",
-        "participant": "6282172560701@s.whatsapp.net",
-        "addressingMode": "lid"
-      }
-    ],
-    "processedAt": "2026-06-15T05:21:22.050Z"
-  },
-  "AC0849FC6B024C3F4FC5F20D74D9FC4F": {
-    "id": "AC0849FC6B024C3F4FC5F20D74D9FC4F",
-    "sender": "6282172560701@s.whatsapp.net",
-    "name": "Nemuri•",
-    "type": "imageMessage",
-    "arrivedAt": "2026-06-15T14:09:43.890Z",
-    "read": true,
-    "reacted": true,
-    "emoji": "🩶",
-    "resolve": "PN langsung ✓",
-    "source": "status",
-    "number": "6282172560701",
-    "resolvedPn": "6282172560701@s.whatsapp.net",
-    "messageKey": {
-      "remoteJid": "status@broadcast",
-      "remoteJidAlt": "6282172560701@s.whatsapp.net",
-      "fromMe": false,
-      "id": "AC0849FC6B024C3F4FC5F20D74D9FC4F",
-      "participant": "57488271536342@lid",
-      "addressingMode": "lid"
-    },
-    "updatedAt": "2026-06-15T14:10:11.415Z",
-    "receiptKeys": [
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6282172560701@s.whatsapp.net",
-        "fromMe": false,
-        "id": "AC0849FC6B024C3F4FC5F20D74D9FC4F",
-        "participant": "57488271536342@lid",
-        "addressingMode": "lid"
-      },
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6282172560701@s.whatsapp.net",
-        "fromMe": false,
-        "id": "AC0849FC6B024C3F4FC5F20D74D9FC4F",
-        "participant": "6282172560701@s.whatsapp.net",
-        "addressingMode": "lid"
-      }
-    ],
-    "processedAt": "2026-06-15T14:10:11.414Z"
+    "updatedAt": "2026-06-17T04:01:11.854Z"
   }
 }

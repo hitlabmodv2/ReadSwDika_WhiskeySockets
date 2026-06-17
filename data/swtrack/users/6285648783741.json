@@ -104,7 +104,7 @@
       "participant": "232598433488998@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-16T13:16:58.994Z",
+    "updatedAt": "2026-06-17T04:00:24.727Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -123,7 +123,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-16T13:16:58.994Z"
+    "processedAt": "2026-06-16T13:16:58.994Z",
+    "deleted": true,
+    "deletedAt": "2026-06-17T04:00:24.727Z"
   },
   "AC8B7376D9CD9D39C60F95BC4CD328A2": {
     "id": "AC8B7376D9CD9D39C60F95BC4CD328A2",
@@ -146,7 +148,7 @@
       "participant": "232598433488998@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-16T13:16:55.116Z",
+    "updatedAt": "2026-06-17T04:00:25.144Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -165,7 +167,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-16T13:16:55.116Z"
+    "processedAt": "2026-06-16T13:16:55.116Z",
+    "deleted": true,
+    "deletedAt": "2026-06-17T04:00:25.144Z"
   },
   "AC827BCFBBE17AF7A951416D63087E5B": {
     "id": "AC827BCFBBE17AF7A951416D63087E5B",
@@ -188,7 +192,7 @@
       "participant": "232598433488998@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-16T13:17:01.809Z",
+    "updatedAt": "2026-06-17T04:00:23.676Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -207,7 +211,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-16T13:17:01.809Z"
+    "processedAt": "2026-06-16T13:17:01.809Z",
+    "deleted": true,
+    "deletedAt": "2026-06-17T04:00:23.676Z"
   },
   "AC1470989F2F909C4E45298E2CD7A0F2": {
     "id": "AC1470989F2F909C4E45298E2CD7A0F2",
@@ -250,5 +256,173 @@
       }
     ],
     "processedAt": "2026-06-16T13:16:50.527Z"
+  },
+  "AC9FF73A7552CEEBE1A22171DC82069B": {
+    "id": "AC9FF73A7552CEEBE1A22171DC82069B",
+    "sender": "6285648783741@s.whatsapp.net",
+    "name": "afriza",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-17T04:00:07.319Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🇵🇷",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285648783741",
+    "resolvedPn": "6285648783741@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285648783741@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC9FF73A7552CEEBE1A22171DC82069B",
+      "participant": "232598433488998@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-17T04:00:17.577Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285648783741@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC9FF73A7552CEEBE1A22171DC82069B",
+        "participant": "232598433488998@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285648783741@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC9FF73A7552CEEBE1A22171DC82069B",
+        "participant": "6285648783741@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-17T04:00:17.576Z"
+  },
+  "ACD721DDD20BBDAD4D43A80DCCEC47D3": {
+    "id": "ACD721DDD20BBDAD4D43A80DCCEC47D3",
+    "sender": "6285648783741@s.whatsapp.net",
+    "name": "afriza",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-17T04:00:07.394Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🗯️",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285648783741",
+    "resolvedPn": "6285648783741@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285648783741@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACD721DDD20BBDAD4D43A80DCCEC47D3",
+      "participant": "232598433488998@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-17T04:00:13.449Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285648783741@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACD721DDD20BBDAD4D43A80DCCEC47D3",
+        "participant": "232598433488998@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285648783741@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACD721DDD20BBDAD4D43A80DCCEC47D3",
+        "participant": "6285648783741@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-17T04:00:13.449Z"
+  },
+  "ACAF214049F5560AC7E66F332B865213": {
+    "id": "ACAF214049F5560AC7E66F332B865213",
+    "sender": "6285648783741@s.whatsapp.net",
+    "name": "afriza",
+    "type": "extendedTextMessage",
+    "arrivedAt": "2026-06-17T04:00:38.373Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🔻",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285648783741",
+    "resolvedPn": "6285648783741@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285648783741@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACAF214049F5560AC7E66F332B865213",
+      "participant": "232598433488998@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-17T04:00:51.502Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285648783741@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACAF214049F5560AC7E66F332B865213",
+        "participant": "232598433488998@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285648783741@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACAF214049F5560AC7E66F332B865213",
+        "participant": "6285648783741@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-17T04:00:51.501Z"
+  },
+  "ACC35E113D48DA205F0943422422D9FB": {
+    "id": "ACC35E113D48DA205F0943422422D9FB",
+    "sender": "6285648783741@s.whatsapp.net",
+    "name": "afriza",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-17T04:00:38.829Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐦",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285648783741",
+    "resolvedPn": "6285648783741@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285648783741@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACC35E113D48DA205F0943422422D9FB",
+      "participant": "232598433488998@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-17T04:00:58.165Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285648783741@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACC35E113D48DA205F0943422422D9FB",
+        "participant": "232598433488998@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285648783741@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACC35E113D48DA205F0943422422D9FB",
+        "participant": "6285648783741@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-17T04:00:58.165Z"
   }
 }
