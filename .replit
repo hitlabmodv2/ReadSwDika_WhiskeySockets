@@ -24,7 +24,7 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "pm2 delete wily-bot 2>/dev/null; pm2 start ecosystem.config.cjs && pm2 monit"
+args = "npm run pm2"
 
 [workflows.workflow.metadata]
 outputType = "console"

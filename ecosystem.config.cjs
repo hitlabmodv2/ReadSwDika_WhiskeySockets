@@ -63,9 +63,8 @@ module.exports = {
       exp_backoff_restart_delay : 100, // backoff eksponensial antar restart
 
       // ── Logging (wajib untuk pm2 monit & pm2 logs akurat) ────
-      log_date_format : "YYYY-MM-DD HH:mm:ss Z",
       merge_logs      : true,        // gabung stdout+stderr → 1 file
-      time            : true,        // tambah timestamp di tiap baris log
+      time            : false,       // timestamp di log dimatikan — biar log polos
       out_file        : "./logs/pm2-out.log",
       error_file      : "./logs/pm2-error.log",
       log_file        : "./logs/pm2-combined.log",
