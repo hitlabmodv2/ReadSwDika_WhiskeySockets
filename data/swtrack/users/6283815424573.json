@@ -210,5 +210,28 @@
       }
     ],
     "processedAt": "2026-06-18T06:27:24.184Z"
+  },
+  "ACF46E1D890F0587601A770E2853E6BA": {
+    "id": "ACF46E1D890F0587601A770E2853E6BA",
+    "sender": "6283815424573@s.whatsapp.net",
+    "name": "(T)ipii kinetik",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-18T09:50:25.784Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6283815424573",
+    "resolvedPn": "6283815424573@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6283815424573@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACF46E1D890F0587601A770E2853E6BA",
+      "participant": "127393243132132@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-18T09:50:25.784Z"
   }
 }
