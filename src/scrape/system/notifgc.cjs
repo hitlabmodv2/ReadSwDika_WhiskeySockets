@@ -392,18 +392,22 @@ const STUB_INFO = {
         171: { label: 'Mode Tambah Anggota',           emoji: '👥' },
         144: { label: 'Permintaan Bergabung',          emoji: '📩' },
         186: { label: 'Kirim Riwayat Pesan ke Anggota Baru', emoji: '📜' },
+        217: { label: 'Izin Undang via Tautan',             emoji: '🔗' },
+        221: { label: 'Bagikan Riwayat Grup',               emoji: '📋' },
 };
 
 //
 // Stub types yang TIDAK ditangkap oleh groups.update sehingga HARUS lewat stub:
-//   22  = GROUP_CHANGE_ICON          → icon, groups.update tidak fire
-//   23  = GROUP_CHANGE_INVITE_LINK   → reset link undangan, tidak di groups.update
-//   186 = GROUP_CHANGE_RECENT_HISTORY_SHARING → kirim riwayat pesan, tidak di groups.update
+//   22  = GROUP_CHANGE_ICON                   → icon
+//   23  = GROUP_CHANGE_INVITE_LINK            → reset link undangan
+//   186 = GROUP_CHANGE_RECENT_HISTORY_SHARING → kirim riwayat pesan (kandidat A)
+//   217 = GROUP_MEMBER_LINK_MODE              → Undang via tautan permission
+//   221 = GROUP_MEMBER_SHARE_GROUP_HISTORY_MODE → riwayat grup (kandidat B)
 //
 // Stub yang sudah ditangkap groups.update (subject/desc/restrict/announce/
 //   memberAddMode/joinApprovalMode) TIDAK masuk sini untuk hindari double notif.
 //
-const STUB_HANDLE_VIA_STUB = new Set([22, 23, 186]);
+const STUB_HANDLE_VIA_STUB = new Set([22, 23, 186, 217, 221]);
 
 // Semua stub types yang kita pantau untuk debug
 const STUB_ALL_WATCH = new Set(Object.keys(STUB_INFO).map(Number));
@@ -476,17 +480,34 @@ async function handleNotifGCStub(hisoka, message) {
                 } else if (stubType === 23) {
                         teks += `│    → Tautan undangan grup telah direset\n`;
                         teks += `│    → Link lama sudah tidak berlaku\n`;
-                } else if (stubType === 186) {
-                        // stubParams[0] biasanya "on" / "off" atau nama mode
+                } else if (stubType === 186 || stubType === 221) {
+                        // stubParams[0] biasanya "on"/"off" atau angka mode
                         const mode = stubParams[0];
-                        if (mode === '1' || mode === 'on' || mode === 'true') {
-                                teks += `│    → Semua anggota diizinkan melihat\n`;
-                                teks += `│       riwayat pesan saat bergabung\n`;
-                        } else if (mode === '0' || mode === 'off' || mode === 'false') {
-                                teks += `│    → Riwayat pesan tidak dikirim ke\n`;
-                                teks += `│       anggota baru\n`;
+                        const aktif = mode === '1' || mode === 'on' || mode === 'true' || mode === 'all';
+                        const nonaktif = mode === '0' || mode === 'off' || mode === 'false' || mode === 'admins';
+                        if (aktif) {
+                                teks += `│    → ✅ Semua anggota diizinkan\n`;
+                                teks += `│       menerima riwayat pesan saat bergabung\n`;
+                        } else if (nonaktif) {
+                                teks += `│    → ❌ Riwayat pesan tidak dikirim\n`;
+                                teks += `│       ke anggota baru\n`;
                         } else {
                                 teks += `│    → Pengaturan riwayat pesan diubah\n`;
+                                if (mode) teks += `│    → Mode: ${mode}\n`;
+                        }
+                } else if (stubType === 217) {
+                        // stubParams[0] biasanya mode siapa yang boleh undang via link
+                        const mode = stubParams[0];
+                        const semuaAnggota = mode === '1' || mode === 'on' || mode === 'true' || mode === 'all';
+                        const adminOnly   = mode === '0' || mode === 'off' || mode === 'false' || mode === 'admins';
+                        if (semuaAnggota) {
+                                teks += `│    → ✅ Semua anggota bisa membagikan\n`;
+                                teks += `│       tautan undangan grup\n`;
+                        } else if (adminOnly) {
+                                teks += `│    → 🔒 Hanya admin yang bisa\n`;
+                                teks += `│       membagikan tautan undangan\n`;
+                        } else {
+                                teks += `│    → Izin tautan undangan diubah\n`;
                                 if (mode) teks += `│    → Mode: ${mode}\n`;
                         }
                 } else if (stubParams.length > 0) {

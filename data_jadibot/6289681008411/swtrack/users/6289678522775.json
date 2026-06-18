@@ -334,5 +334,28 @@
       }
     ],
     "processedAt": "2026-06-18T13:29:19.563Z"
+  },
+  "AC8DAC999042BF865ED041E8F9F68597": {
+    "id": "AC8DAC999042BF865ED041E8F9F68597",
+    "sender": "6289678522775@s.whatsapp.net",
+    "name": "Zacky Ariansyah",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-18T13:34:51.967Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "Signal Lib ✓",
+    "source": "status",
+    "number": "6289678522775",
+    "resolvedPn": "6289678522775@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6289678522775@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC8DAC999042BF865ED041E8F9F68597",
+      "participant": "193020829909081@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-18T13:34:51.968Z"
   }
 }
