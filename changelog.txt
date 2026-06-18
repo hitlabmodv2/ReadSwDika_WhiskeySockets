@@ -4,7 +4,7 @@ _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurn
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V22*
 ✨ *3 Fitur Baru*
-🔧 *1 Bug Fix*
+🔧 *2 Bug Fix*
 🚀 *1 Improvement*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
@@ -49,7 +49,15 @@ _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurn
 ━━━━━━━━━━━━━━━━━━━━━━
 🔧 *BUG FIX*
 ━━━━━━━━━━━━━━━━━━━━━━
-> NO.1 ⚙️ *PM2 di Panel Pterodactyl — Tidak Bisa Jalan (ecosystem.config.cjs)*
+> NO.1 ⚡ *Koneksi Bot Utama & Userjadibot — 2x Lebih Cepat dari Sebelumnya*
+> Bug: sesi menyimpan banyak file terpisah (useMultiFileAuthState) → baca/tulis lambat saat connect
+> Fix: migrasi ke useSingleFileAuthState — semua data (creds, keys, contacts, groups, settings)
+>   dipadatkan jadi 1 file JSON per sesi (bot utama & setiap userjadibot)
+> Tulis file pakai pola atomic (.tmp → rename) — tidak corrupt meski bot crash di tengah tulis
+> Berlaku untuk: bot utama, userjadibot, dan proses browser switch
+> Hasil: koneksi terasa 2x lebih cepat, tidak ada lagi spam file di folder sessions
+
+> NO.2 ⚙️ *PM2 di Panel Pterodactyl — Tidak Bisa Jalan (ecosystem.config.cjs)*
 > Bug: PM2 gagal start di panel Pterodactyl karena config tidak kompatibel
 > Fix: ecosystem.config.cjs diperbaiki — path absolut, fork mode, heap size eksplisit
 > Logging lengkap: pm2-out.log, pm2-error.log, pm2-combined.log
