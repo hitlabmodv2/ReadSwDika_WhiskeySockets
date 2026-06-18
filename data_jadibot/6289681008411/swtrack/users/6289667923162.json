@@ -208,5 +208,29 @@
     },
     "updatedAt": "2026-06-18T07:36:45.653Z",
     "processedAt": "2026-06-18T07:36:45.653Z"
+  },
+  "3EB00B7BD652A7D46AFC17": {
+    "id": "3EB00B7BD652A7D46AFC17",
+    "sender": "6289667923162@s.whatsapp.net",
+    "name": "Hen V2",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-18T07:38:44.830Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "📢",
+    "resolve": "Signal Lib ✓",
+    "source": "group",
+    "number": "6289667923162",
+    "resolvedPn": "6289667923162@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "120363383540766761@g.us",
+      "fromMe": false,
+      "id": "3EB00B7BD652A7D46AFC17",
+      "participant": "97968623505429@lid",
+      "participantAlt": "6289667923162@s.whatsapp.net",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-18T07:38:49.486Z",
+    "processedAt": "2026-06-18T07:38:49.485Z"
   }
 }
