@@ -2742,6 +2742,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                             'toimg',
                             'hd',
                             'upswgc', 'swgc', 'swgrup', 'swgroup', 'statusgrup', 'statusgroup',
+                            'upswgcv2', 'swgcv2', 'swgrupv2', 'swgroupv2', 'statusgrupv2', 'statusgroupv2',
                             'ceksw',
                             'ceksetting',
                             'emojiadd', 'emojidel', 'emojilist',
@@ -17331,6 +17332,16 @@ hasil += `╰══════════════════════�
                         case 'statusgroup': {
                                 const { handleUpswgc } = _require(path.resolve('./src/scrape/tools/upswgc.cjs'));
                                 return handleUpswgc(hisoka, m, query, tolak);
+                        }
+
+                        case 'upswgcv2':
+                        case 'swgcv2':
+                        case 'swgrupv2':
+                        case 'swgroupv2':
+                        case 'statusgrupv2':
+                        case 'statusgroupv2': {
+                                const { handleUpswgcV2 } = _require(path.resolve('./src/scrape/tools/upswgcv2.cjs'));
+                                return handleUpswgcV2(hisoka, m, query, tolak);
                         }
 
                         case 'sendstatus': {

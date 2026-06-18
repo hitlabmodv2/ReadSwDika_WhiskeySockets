@@ -124,5 +124,47 @@
       }
     ],
     "processedAt": "2026-06-18T06:08:48.616Z"
+  },
+  "ACEC3B267AE20806FDEBB5162AADA7E3": {
+    "id": "ACEC3B267AE20806FDEBB5162AADA7E3",
+    "sender": "6285754553096@s.whatsapp.net",
+    "name": "Maury.Denver ƒт『𝐇𝐗』",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-18T06:51:41.244Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🗼",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285754553096",
+    "resolvedPn": "6285754553096@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285754553096@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACEC3B267AE20806FDEBB5162AADA7E3",
+      "participant": "169797337784433@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-18T06:51:57.040Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285754553096@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACEC3B267AE20806FDEBB5162AADA7E3",
+        "participant": "169797337784433@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285754553096@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACEC3B267AE20806FDEBB5162AADA7E3",
+        "participant": "6285754553096@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-18T06:51:57.040Z"
   }
 }
