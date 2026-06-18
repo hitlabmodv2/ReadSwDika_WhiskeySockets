@@ -36,7 +36,7 @@ echo "▶ Wily Bot - Replit Mode"
 # Install node_modules jika belum ada
 if [ ! -d "node_modules" ]; then
   echo "▶ node_modules tidak ditemukan, install dulu..."
-  npm install
+  npm install --ignore-scripts
 fi
 
 # Install PM2 global jika belum ada
