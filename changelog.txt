@@ -3,7 +3,7 @@ _Jumat, 12 Juni 2026 — WIB_ 🕐
 _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurna_ 🙏
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V22*
-✨ *2 Fitur Baru*
+✨ *3 Fitur Baru*
 🔧 *0 Bug Fix*
 🚀 *1 Improvement*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -19,7 +19,22 @@ _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurn
 > Reply gambar/video + caption juga didukung
 > Deduplication otomatis — tidak akan kirim 2x meskipun ada WA sync
 
-> NO.2 🌐 *Ganti Browser/Perangkat Tertautan — .setbrowser / .aturbrowser*
+> NO.2 🎮 *Auto Notif Game MOD — .anigame / .gamean1 / .an1game*
+> Bot otomatis kirim notif ke grup saat ada game MOD baru di AN1.COM
+> Cek setiap 10 menit secara otomatis sejak bot start
+> Sumber: an1.com/games/
+> *Perintah owner (di grup):*
+> .anigame on — aktifkan notif di grup ini
+> .anigame off — nonaktifkan notif di grup ini
+> .anigame test — kirim test notif ke grup ini
+> .anigame test grup — kirim test ke semua grup aktif
+> .anigame status — lihat daftar semua grup aktif/nonaktif
+> *Perintah semua user:*
+> .anigame list — lihat daftar game terbaru + thumbnail
+> .anigame [nama game] — cari game, contoh: .anigame minecraft
+> Setting tersimpan per-grup di config.json — tidak hilang saat restart
+
+> NO.3 🌐 *Ganti Browser/Perangkat Tertautan — .setbrowser / .aturbrowser*
 > Ganti identitas browser bot (nama perangkat tertautan di WA) tanpa restart manual
 > 12 pilihan browser tersedia: V1–V12
 > ▸ V1: Ubuntu + Chrome • V2: Windows + Chrome • V3: MacOS + Chrome
