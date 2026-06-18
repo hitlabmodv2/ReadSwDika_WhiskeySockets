@@ -20,7 +20,7 @@
       "participant": "81003150311587@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-17T11:55:27.855Z",
+    "updatedAt": "2026-06-18T04:07:34.684Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -39,6 +39,50 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-17T11:55:27.855Z"
+    "processedAt": "2026-06-17T11:55:27.855Z",
+    "deleted": true,
+    "deletedAt": "2026-06-18T04:07:34.684Z"
+  },
+  "AC74439DBF75B36D523414ECA1BD5DC5": {
+    "id": "AC74439DBF75B36D523414ECA1BD5DC5",
+    "sender": "6281349600400@s.whatsapp.net",
+    "name": "Jaydes",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-18T04:06:47.829Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🇧🇿",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6281349600400",
+    "resolvedPn": "6281349600400@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6281349600400@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC74439DBF75B36D523414ECA1BD5DC5",
+      "participant": "81003150311587@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-18T04:06:54.797Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281349600400@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC74439DBF75B36D523414ECA1BD5DC5",
+        "participant": "81003150311587@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281349600400@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC74439DBF75B36D523414ECA1BD5DC5",
+        "participant": "6281349600400@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-18T04:06:54.796Z"
   }
 }

@@ -166,5 +166,47 @@
       }
     ],
     "processedAt": "2026-06-17T13:05:27.143Z"
+  },
+  "AC8C23E07CC8A2ACB9A498CB90B8C6FF": {
+    "id": "AC8C23E07CC8A2ACB9A498CB90B8C6FF",
+    "sender": "6282252134009@s.whatsapp.net",
+    "name": "NISKI || CONVIERA",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-18T04:06:06.000Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "☣️",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6282252134009",
+    "resolvedPn": "6282252134009@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6282252134009@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC8C23E07CC8A2ACB9A498CB90B8C6FF",
+      "participant": "76790290767977@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-18T04:06:13.083Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282252134009@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC8C23E07CC8A2ACB9A498CB90B8C6FF",
+        "participant": "76790290767977@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282252134009@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC8C23E07CC8A2ACB9A498CB90B8C6FF",
+        "participant": "6282252134009@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-18T04:06:13.083Z"
   }
 }

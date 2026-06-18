@@ -133,7 +133,7 @@
       "participant": "263483945930926@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-17T13:10:08.820Z",
+    "updatedAt": "2026-06-18T04:02:58.302Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -152,7 +152,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-17T13:10:08.820Z"
+    "processedAt": "2026-06-17T13:10:08.820Z",
+    "deleted": true,
+    "deletedAt": "2026-06-18T04:02:58.302Z"
   },
   "A5A03C6979A7370B096DCA4CA5E9F0A6": {
     "id": "A5A03C6979A7370B096DCA4CA5E9F0A6",
@@ -327,5 +329,30 @@
     "processedAt": "2026-06-17T14:54:05.967Z",
     "deleted": true,
     "deletedAt": "2026-06-17T15:42:20.577Z"
+  },
+  "A5754E3DEB1915BABDD5E57D68F00531": {
+    "id": "A5754E3DEB1915BABDD5E57D68F00531",
+    "sender": "6282393354095@s.whatsapp.net",
+    "name": "j",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-18T04:02:58.367Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6282393354095",
+    "resolvedPn": "6282393354095@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6282393354095@s.whatsapp.net",
+      "fromMe": false,
+      "id": "A5754E3DEB1915BABDD5E57D68F00531",
+      "participant": "263483945930926@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-18T04:03:10.299Z",
+    "deleted": true,
+    "deletedAt": "2026-06-18T04:03:10.299Z"
   }
 }

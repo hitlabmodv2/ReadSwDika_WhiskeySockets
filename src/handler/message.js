@@ -9132,6 +9132,123 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 break;
                         }
 
+                        case 'anigame':
+                        case 'gamean1':
+                        case 'an1game': {
+                                try {
+                                        const input = (query || '').trim();
+                                        const pfx   = m.prefix || '.';
+
+                                        if (!input) {
+                                                await hisoka.sendMessage(m.from, { react: { text: '🎮', key: m.key } });
+                                                const loadingMsg = await tolak(hisoka, m, `🎮 *Mengambil daftar game terbaru dari AN1.COM...*`);
+
+                                                const { getGamesList } = _require(path.resolve('./src/scrape/tools/an1game.cjs'));
+                                                const games = await getGamesList();
+
+                                                if (!games || !games.length) {
+                                                        await hisoka.sendMessage(m.from, { delete: loadingMsg.key }).catch(() => {});
+                                                        await tolak(hisoka, m, `❌ Gagal mengambil daftar game dari AN1.COM. Coba lagi nanti.`);
+                                                        break;
+                                                }
+
+                                                const list = games.slice(0, 12).map((g, i) => {
+                                                        const no  = String(i + 1).padStart(2, ' ');
+                                                        const rat = g.rating ? ` ⭐${g.rating}` : '';
+                                                        const dev = g.developer ? `\n│    👤 ${g.developer}` : '';
+                                                        const url = g.url ? `\n│    🔗 ${g.url}` : '';
+                                                        return `│ ${no}. *${g.title}*${rat}${dev}${url}`;
+                                                }).join('\n│\n');
+
+                                                const teks =
+                                                        `╭─「 🎮 *AN1.COM — GAME TERBARU* 」\n` +
+                                                        `│\n` +
+                                                        `${list}\n` +
+                                                        `│\n` +
+                                                        `│ 🌐 *Sumber:* https://an1.com/games/\n` +
+                                                        `│\n` +
+                                                        `│ *Cari game tertentu:*\n` +
+                                                        `│ ${pfx}anigame minecraft\n` +
+                                                        `│ ${pfx}anigame gta\n` +
+                                                        `╰────────────────────`;
+
+                                                await hisoka.sendMessage(m.from, { delete: loadingMsg.key }).catch(() => {});
+
+                                                const thumb = games[0]?.image || '';
+                                                if (thumb) {
+                                                        const imgBuf = await _require('axios').get(thumb, { responseType: 'arraybuffer', timeout: 10000, headers: { 'Referer': 'https://an1.com/', 'User-Agent': 'Mozilla/5.0' } })
+                                                                .then(r => Buffer.from(r.data)).catch(() => null);
+                                                        if (imgBuf) {
+                                                                await hisoka.sendMessage(m.from, { image: imgBuf, caption: teks }, { quoted: m });
+                                                                logCommand(m, hisoka, 'anigame');
+                                                                break;
+                                                        }
+                                                }
+                                                await tolak(hisoka, m, teks);
+                                                logCommand(m, hisoka, 'anigame');
+                                                break;
+                                        }
+
+                                        // ── Mode Pencarian ──
+                                        await hisoka.sendMessage(m.from, { react: { text: '🔎', key: m.key } });
+                                        const loadingMsg2 = await tolak(hisoka, m, `🔎 *Mencari game "${input}" di AN1.COM...*`);
+
+                                        const { searchGames } = _require(path.resolve('./src/scrape/tools/an1game.cjs'));
+                                        const { games: hasil, total, searchUrl } = await searchGames(input);
+
+                                        await hisoka.sendMessage(m.from, { delete: loadingMsg2.key }).catch(() => {});
+
+                                        if (!hasil || !hasil.length) {
+                                                await tolak(hisoka, m,
+                                                        `❌ *Game "${input}" tidak ditemukan di AN1.COM.*\n\n` +
+                                                        `Coba kata kunci lain atau cek langsung:\n` +
+                                                        `🔗 ${searchUrl}`
+                                                );
+                                                break;
+                                        }
+
+                                        const totalTeks = total ? ` (${total} hasil)` : '';
+                                        const listHasil = hasil.slice(0, 10).map((g, i) => {
+                                                const no  = String(i + 1).padStart(2, ' ');
+                                                const dev = g.developer ? ` — ${g.developer}` : '';
+                                                const url = g.url ? `\n│    🔗 ${g.url}` : '';
+                                                return `│ ${no}. *${g.title}*${dev}${url}`;
+                                        }).join('\n│\n');
+
+                                        const teksCari =
+                                                `╭─「 🔎 *AN1.COM — HASIL PENCARIAN* 」\n` +
+                                                `│ 🔍 Keyword: *${input}*${totalTeks}\n` +
+                                                `│\n` +
+                                                `${listHasil}\n` +
+                                                `│\n` +
+                                                `│ 🌐 *Semua hasil:*\n` +
+                                                `│ ${searchUrl}\n` +
+                                                `╰────────────────────`;
+
+                                        const thumb2 = hasil[0]?.image || '';
+                                        if (thumb2) {
+                                                const imgBuf2 = await _require('axios').get(thumb2, { responseType: 'arraybuffer', timeout: 10000, headers: { 'Referer': 'https://an1.com/', 'User-Agent': 'Mozilla/5.0' } })
+                                                        .then(r => Buffer.from(r.data)).catch(() => null);
+                                                if (imgBuf2) {
+                                                        await hisoka.sendMessage(m.from, { image: imgBuf2, caption: teksCari }, { quoted: m });
+                                                        logCommand(m, hisoka, 'anigame');
+                                                        break;
+                                                }
+                                        }
+                                        await tolak(hisoka, m, teksCari);
+                                        logCommand(m, hisoka, 'anigame');
+
+                                } catch (error) {
+                                        console.error('\x1b[31m[AniGame Cmd] Error:\x1b[39m', error.message);
+                                        await tolak(hisoka, m,
+                                                `❌ *Gagal mengambil data game.*\n\n` +
+                                                `_${error.message}_\n\n` +
+                                                `🌐 Cek manual: https://an1.com/games/`
+                                        );
+                                }
+                                break;
+                        }
+
                         case 'bluearchive':
                         case 'bachar':
                         case 'ba': {
