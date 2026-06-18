@@ -1828,6 +1828,12 @@ setTimeout(() => {
                                                 // Simpan data lama sebelum di-overwrite (untuk notifgc)
                                                 const oldGroupData = { ...existingGroup };
                                                 groups.write(groupId, { ...existingGroup, ...group });
+                                                // ── Catch-all log: dump semua field groups.update ──
+                                                const _skipGcFields = new Set(['id','participants','metadata']);
+                                                const _gcFields = Object.keys(group).filter(k => !_skipGcFields.has(k));
+                                                if (_gcFields.length > 0) {
+                                                        console.log(`\x1b[36m[NotifGC][GRP UPDATE]\x1b[39m grup=${groupId} fields=${_gcFields.join(',')} vals=${JSON.stringify(_gcFields.reduce((a,k)=>({...a,[k]:group[k]}),{}))}`);
+                                                }
                                                 // Notif perubahan info grup ke anggota jika fitur aktif
                                                 try {
                                                         await handleNotifGC(hisoka, group, oldGroupData);
@@ -2267,14 +2273,22 @@ setTimeout(() => {
                 }
         }); // sampe sini
 
-        // ── NotifGC: tangkap perubahan ikon grup via stub message ──
-        // groups.update TIDAK fire untuk icon change, harus lewat messages.upsert
+        // ── NotifGC: tangkap perubahan grup via stub message ──
+        // (icon, reset link, riwayat pesan, dll yang groups.update tidak kirim)
         hisoka.ev.on('messages.upsert', ({ messages, type }) => {
                 if (type !== 'notify' && type !== 'append') return;
                 for (const message of messages) {
                         if (!message?.messageStubType) continue;
                         const remoteJid = message?.key?.remoteJid;
                         if (!remoteJid || !remoteJid.endsWith('@g.us')) continue;
+                        // ── Catch-all log: selalu cetak stub grup yang tidak dikenal ──
+                        const st = message.messageStubType;
+                        const knownStubs = new Set([20,21,22,23,24,25,26,27,28,29,30,31,32,33,43,44,69,70,71,119,120,121,133,134,135,136,137,138,139,140,141,144,145,146,149,150,151,158,165,166,167,171,172,173,176,181,183,185,186,191,203,204,208,209,217,221]);
+                        if (!knownStubs.has(st)) {
+                                console.log(`\x1b[33m[NotifGC][UNKNOWN STUB]\x1b[39m type=${st} grup=${remoteJid} params=${JSON.stringify(message.messageStubParameters||[])} participant=${message.participant||''}`);
+                        } else {
+                                console.log(`\x1b[36m[NotifGC][STUB]\x1b[39m type=${st} grup=${remoteJid} params=${JSON.stringify(message.messageStubParameters||[])} participant=${message.participant||''}`);
+                        }
                         handleNotifGCStub(hisoka, message).catch(err =>
                                 console.error('\x1b[31m[NotifGC Stub]\x1b[39m', err?.message || err)
                         );
