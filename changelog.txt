@@ -5,7 +5,7 @@ _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurn
 🤖 *WILY BOT — V22*
 ✨ *2 Fitur Baru*
 🔧 *0 Bug Fix*
-🚀 *0 Improvement*
+🚀 *1 Improvement*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -38,3 +38,13 @@ _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurn
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *IMPROVEMENT*
 ━━━━━━━━━━━━━━━━━━━━━━
+> NO.1 📋 *Info Tambahan di Menu — Browser, Total Command & Status Fitur Auto*
+> Menu bot utama (.menu) kini menampilkan info tambahan secara realtime:
+> 🖥️ » Browser/perangkat tertautan aktif — contoh: Ubuntu + Firefox (125.0.1.20240501)
+> 📜 » Total semua command yang tersedia
+> 🗂️ » Total fitur auto yang terdaftar
+> ✅ » Jumlah fitur auto yang sedang aktif
+> ❌ » Jumlah fitur auto yang tidak aktif
+> Browser label diambil langsung dari runtime (sesuai yang WA lihat di Perangkat Tertaut)
+> Menu jadibot (.menu) juga menampilkan total command, total fitur auto, aktif & tidak aktif
+> Jadibot tidak tampilkan browser (browser milik bot utama, bukan jadibot)
