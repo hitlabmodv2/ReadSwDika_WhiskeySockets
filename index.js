@@ -45,7 +45,8 @@ import qrcode from 'qrcode-terminal';
 
 import JSONDB from './src/db/json.js';
 import { kvGet, kvSet, kvMigrateFromJSON, kvMigrateKey } from './src/db/datadb.js';
-import { initBotStats } from './src/db/botStats.js';
+import { initBotStats, getUptime as getBotUptime, getBotStats } from './src/db/botStats.js';
+import { startPm2Metrics } from './src/metrics/pm2Metrics.js';
 import { injectClient } from './src/helper/inject.js';
 import { getCaseName, loadConfig, saveConfig } from './src/helper/utils.js';
 import { getStatusEmojis, getRandomEmoji } from './src/helper/emoji.js';
@@ -244,6 +245,18 @@ if (!process.env.BOT_SESSION_NAME) process.env.BOT_SESSION_NAME = 'default';
 if (!process.env.BOT_NUMBER_OWNER) process.env.BOT_NUMBER_OWNER = '1';
 
 const botStats = initBotStats();
+
+// ── PM2 Custom Metrics — update tiap 5 detik ──────────────────────────────────
+startPm2Metrics({
+    getUptime  : ()  => getBotUptime(),
+    getRestarts: ()  => (getBotStats().totalRestarts ?? 0),
+    getGroups  : ()  => (Array.isArray(global.__mainBotGroups) ? global.__mainBotGroups.length : 0),
+    getJadibot : ()  => (jadibotMap?.size ?? 0),
+    getWsState : ()  => global.hisokaClient?.ws?.readyState ?? -1,
+    getSession : ()  => (process.env.BOT_SESSION_NAME || 'default'),
+    getCmdTotal: ()  => (global.__cmdTotal ?? '-'),
+    getOwner   : ()  => (process.env.BOT_NUMBER_OWNER || '-'),
+});
 
 const sessionDir = (global.sessionDir = path.join(process.cwd(), 'sessions', process.env.BOT_SESSION_NAME));
 const sessionFile = path.join(process.cwd(), 'sessions', process.env.BOT_SESSION_NAME + '.json');
@@ -806,6 +819,7 @@ async function main() {
                         console.log(`${C}║${R} ${G}✅${R} Nomor  : ${B}${userId}${R}`);
                         console.log(`${C}║${R} ${G}👤${R} Nama   : ${B}${userName}${R}`);
                         console.log(`${C}║${R} ${Y}🖥️${R} Browser: ${B}${_bLabel2}${R}`);
+                        global.__cmdTotal = commands.length;
                         console.log(`${C}║${R} ${Y}📋${R} Cmd    : ${B}${commands.length} commands${R}`);
                         console.log(`${C}║${R} ${Y}👥${R} Grup   : ${B}${groupCount} grup (admin: ${adminCount})${R}`);
                         console.log(`${C}║${R} ${G}🌐${R} Status : ${B}${modeLabel}${R}`);
