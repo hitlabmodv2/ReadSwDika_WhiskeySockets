@@ -62,7 +62,7 @@
       "participant": "195748050256060@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-18T04:13:40.069Z",
+    "updatedAt": "2026-06-18T10:40:58.714Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -81,7 +81,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-18T04:13:40.069Z"
+    "processedAt": "2026-06-18T04:13:40.069Z",
+    "deleted": true,
+    "deletedAt": "2026-06-18T10:40:58.714Z"
   },
   "ACA26681F17436182DFEEB45C6060E48": {
     "id": "ACA26681F17436182DFEEB45C6060E48",

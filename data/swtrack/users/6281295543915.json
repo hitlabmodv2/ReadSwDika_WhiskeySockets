@@ -20,7 +20,7 @@
       "participant": "26547712958494@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-17T11:43:25.556Z",
+    "updatedAt": "2026-06-18T10:40:45.853Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -39,7 +39,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-17T11:43:25.556Z"
+    "processedAt": "2026-06-17T11:43:25.556Z",
+    "deleted": true,
+    "deletedAt": "2026-06-18T10:40:45.853Z"
   },
   "A5453EBE51EAB01F45FABCAB3B9368A8": {
     "id": "A5453EBE51EAB01F45FABCAB3B9368A8",
@@ -62,7 +64,7 @@
       "participant": "26547712958494@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-17T11:43:28.138Z",
+    "updatedAt": "2026-06-18T10:40:45.867Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -81,7 +83,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-17T11:43:28.138Z"
+    "processedAt": "2026-06-17T11:43:28.138Z",
+    "deleted": true,
+    "deletedAt": "2026-06-18T10:40:45.867Z"
   },
   "A5D898BAA8D6C5E3EFDDDD3E5FF71393": {
     "id": "A5D898BAA8D6C5E3EFDDDD3E5FF71393",
@@ -208,5 +212,91 @@
       }
     ],
     "processedAt": "2026-06-18T08:17:59.001Z"
+  },
+  "A5F6A83E02D5CE18A8B1F49695C7AB7C": {
+    "id": "A5F6A83E02D5CE18A8B1F49695C7AB7C",
+    "sender": "6281295543915@s.whatsapp.net",
+    "name": "Arthur.remi_kan",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-18T10:41:13.409Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐊",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6281295543915",
+    "resolvedPn": "6281295543915@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6281295543915@s.whatsapp.net",
+      "fromMe": false,
+      "id": "A5F6A83E02D5CE18A8B1F49695C7AB7C",
+      "participant": "26547712958494@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-18T10:42:58.695Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281295543915@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A5F6A83E02D5CE18A8B1F49695C7AB7C",
+        "participant": "26547712958494@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281295543915@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A5F6A83E02D5CE18A8B1F49695C7AB7C",
+        "participant": "6281295543915@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-18T10:41:23.848Z",
+    "deleted": true,
+    "deletedAt": "2026-06-18T10:42:58.695Z"
+  },
+  "A54DAAEA095849C10D95DBC88E9E71BF": {
+    "id": "A54DAAEA095849C10D95DBC88E9E71BF",
+    "sender": "6281295543915@s.whatsapp.net",
+    "name": "Arthur.remi_kan",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-18T10:43:51.847Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "😙",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6281295543915",
+    "resolvedPn": "6281295543915@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6281295543915@s.whatsapp.net",
+      "fromMe": false,
+      "id": "A54DAAEA095849C10D95DBC88E9E71BF",
+      "participant": "26547712958494@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-18T10:44:04.384Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281295543915@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A54DAAEA095849C10D95DBC88E9E71BF",
+        "participant": "26547712958494@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281295543915@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A54DAAEA095849C10D95DBC88E9E71BF",
+        "participant": "6281295543915@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-18T10:44:04.384Z"
   }
 }

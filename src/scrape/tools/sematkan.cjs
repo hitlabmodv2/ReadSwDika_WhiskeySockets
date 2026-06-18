@@ -17,6 +17,10 @@
  *
  *  Bot wajib admin di grup.
  *  Cek admin: botadmin.json (realtime) → fallback live groupMetadata.
+ *
+ *  FIX LID: Semua grup pakai addressingMode:lid, participant di key
+ *  adalah LID JID (@lid). Harus resolve ke phone number (@s.whatsapp.net)
+ *  via hisoka.resolveLidToPN() sebelum kirim pin ke WhatsApp server.
  * ───────────────────────────────
  */
 
@@ -48,9 +52,71 @@ function durasiLabel(type) {
     return '24 jam';
 }
 
+// ── Cek LID JID ───────────────────────────────────────────────────────────────
+function isLidJid(jid) {
+    return typeof jid === 'string' && jid.endsWith('@lid');
+}
+
+// ── Resolve key: LID participant → phone number ───────────────────────────────
+// Grup pakai addressingMode:lid → m.quoted.key.participant berupa @lid
+// WhatsApp server butuh @s.whatsapp.net untuk pin, bukan @lid
+async function resolveKeyForPin(hisoka, rawKey) {
+    // Buat salinan key (jangan mutasi original)
+    const key = { ...rawKey };
+
+    if (!key.participant) {
+        console.log(`${LOG} Key tidak punya participant — tidak perlu resolve`);
+        return key;
+    }
+
+    if (!isLidJid(key.participant)) {
+        console.log(`${LOG} Participant sudah phone number: ${key.participant}`);
+        return key;
+    }
+
+    // Participant adalah LID — resolve ke phone number
+    console.log(`${LOG} LID participant terdeteksi: ${key.participant} — resolve ke phone number…`);
+
+    try {
+        // resolveLidToPN menerima key object, mengembalikan phone number JID string
+        const resolved = await hisoka.resolveLidToPN(key);
+        console.log(`${LOG} Hasil resolve: ${key.participant} → ${resolved}`);
+
+        if (resolved && !isLidJid(resolved)) {
+            key.participant = resolved;
+            console.log(`${LOG} ✅ Participant berhasil di-resolve: ${resolved}`);
+        } else {
+            // Fallback manual: cari di groups store
+            console.log(`${LOG} resolveLidToPN masih LID (${resolved}), coba fallback groups store…`);
+            if (hisoka.groups && key.remoteJid) {
+                const group = hisoka.groups.read?.(key.remoteJid) || null;
+                const participants = group?.participants || [];
+                const match = participants.find(p =>
+                    p.id === key.participant ||
+                    p.lid === key.participant ||
+                    (p.id || '').split('@')[0] === (key.participant || '').split('@')[0]
+                );
+                if (match?.phoneNumber) {
+                    key.participant = match.phoneNumber;
+                    console.log(`${LOG} ✅ Participant resolve via groups store: ${key.participant}`);
+                } else if (match?.id && !isLidJid(match.id)) {
+                    key.participant = match.id;
+                    console.log(`${LOG} ✅ Participant resolve via groups store (id): ${key.participant}`);
+                } else {
+                    console.warn(`${LOG} ⚠️ Participant tidak bisa di-resolve, pin pakai LID: ${key.participant}`);
+                }
+            }
+        }
+    } catch (err) {
+        console.error(`${LOG} Gagal resolve LID participant:`, err.message);
+    }
+
+    return key;
+}
+
 // ── Cek apakah bot admin di grup ──────────────────────────────────────────────
 async function checkBotAdmin(hisoka, groupJid, kvGet) {
-    // 1. Cek dari cache botadmin.json (data/kv/botadmin/botadmin.json)
+    // 1. Cek dari cache botadmin.json
     const botAdminData = kvGet('botadmin/botadmin', {});
     if (groupJid in botAdminData) {
         const fromCache = botAdminData[groupJid] === true;
@@ -65,7 +131,7 @@ async function checkBotAdmin(hisoka, groupJid, kvGet) {
         const botRaw    = hisoka.user?.id || '';
         const botNum    = botRaw.split('@')[0].split(':')[0];
         const botP      = (groupMeta?.participants || []).find(p => {
-            const pNum = (p.id || p.jid || '').split('@')[0].split(':')[0];
+            const pNum = (p.id || p.jid || p.phoneNumber || '').split('@')[0].split(':')[0];
             return pNum === botNum;
         });
         const isAdmin = !!(botP?.admin);
@@ -89,7 +155,8 @@ async function checkBotAdmin(hisoka, groupJid, kvGet) {
 async function handleSematkan(hisoka, m, query, tolak, kvGet) {
     const pfx = m.prefix || '.';
 
-    console.log(`${LOG} Command diterima — dari: ${m.sender} | grup: ${m.from || '-'} | query: "${query || ''}"`);
+    console.log(`${LOG} ─────────────────────────────────`);
+    console.log(`${LOG} Command: ${pfx}sematkan | query: "${query || ''}" | dari: ${m.sender} | grup: ${m.from || '-'}`);
 
     // ── 1. Harus di grup ──────────────────────────────────────────────────────
     if (!m.isGroup) {
@@ -139,21 +206,27 @@ async function handleSematkan(hisoka, m, query, tolak, kvGet) {
     // ── 4. Parse durasi ───────────────────────────────────────────────────────
     const durasiType = parseDurasi(query);
     const durasiStr  = durasiLabel(durasiType);
-    const targetKey  = m.quoted.key;
+    const rawKey     = m.quoted.key;
     const senderNum  = (m.sender || '').split('@')[0].split(':')[0];
 
-    console.log(`${LOG} Menyematkan → key: ${JSON.stringify(targetKey)} | durasi: ${durasiStr} (type=${durasiType}) | oleh: ${senderNum}`);
+    console.log(`${LOG} Raw key: ${JSON.stringify(rawKey)}`);
+    console.log(`${LOG} Durasi: ${durasiStr} (type=${durasiType})`);
 
-    // ── 5. Kirim pin via Baileys ──────────────────────────────────────────────
+    // ── 5. Resolve LID participant → phone number ─────────────────────────────
+    // Penting: semua grup pakai addressingMode:lid, participant bisa @lid
+    // WhatsApp server butuh phone number JID untuk pin
+    const pinKey = await resolveKeyForPin(hisoka, rawKey);
+    console.log(`${LOG} Pin key final: ${JSON.stringify(pinKey)}`);
+
+    // ── 6. Kirim pin via Baileys ──────────────────────────────────────────────
     try {
         await hisoka.sendMessage(m.from, {
-            pin  : targetKey,
+            pin  : pinKey,
             type : durasiType,
         });
 
         console.log(`${LOG} ✅ Berhasil disematkan — durasi: ${durasiStr} | grup: ${m.from}`);
 
-        const namaGrup = hisoka.getName?.(m.from) || m.from;
         await tolak(hisoka, m,
             `╭─「 📌 *PESAN DISEMATKAN* 」\n` +
             `│\n` +
@@ -161,7 +234,6 @@ async function handleSematkan(hisoka, m, query, tolak, kvGet) {
             `│\n` +
             `│ ⏱️ Durasi : *${durasiStr}*\n` +
             `│ 👤 Oleh   : @${senderNum}\n` +
-            `│ 💬 Grup   : ${namaGrup}\n` +
             `╰──────────────────────`
         );
 
