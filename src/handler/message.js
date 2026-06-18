@@ -4332,8 +4332,8 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                         const namaMapAddAll = {
                                                 infowibu: 'Info Wibu', animasu: 'Animasu Notif',
                                                 alqanimenotif: 'Alqanime Notif', tvonenews: 'TV One News',
-                                                malnews: 'MAL News', welcome: 'Welcome',
-                                                goodbye: 'Goodbye',
+                                                malnews: 'MAL News', anigame: 'AN1.COM Game Notif',
+                                                welcome: 'Welcome', goodbye: 'Goodbye',
                                                 antiTagSWGrup: 'Anti Tag SW (Grup)',
                                         };
                                         await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
@@ -9135,115 +9135,247 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'anigame':
                         case 'gamean1':
                         case 'an1game': {
+                                const _agMod = _require(path.resolve('./src/scrape/tools/an1game.cjs'));
+                                const sub    = (query || '').trim().toLowerCase().replace(/\s+/g, ' ');
+                                const pfx    = m.prefix || '.';
+
+                                // ── Subcommand owner: on/off/test/status ──
+                                const isOwnerSub = ['on', 'off', 'test', 'test grup', 'status'].includes(sub);
+                                if (isOwnerSub) {
+                                        if (!m.isOwner) return tolak(hisoka, m, '❌ Hanya owner yang bisa gunakan perintah ini.');
+                                        if (!m.isGroup && sub !== 'test grup' && sub !== 'status') return tolak(hisoka, m, '❌ Perintah ini hanya untuk grup.');
+                                }
+
                                 try {
-                                        const input = (query || '').trim();
-                                        const pfx   = m.prefix || '.';
+                                        // ── Help / no input ──
+                                        if (!sub || sub === 'help') {
+                                                const cfgHlp  = loadConfig();
+                                                const aktifHlp = m.isGroup ? cfgHlp?.anigame?.groups?.[m.from]?.enabled === true : null;
+                                                await tolak(hisoka, m,
+                                                        `╭─「 🎮 *AN1.COM GAME NOTIF* 」\n` +
+                                                        `│\n` +
+                                                        (m.isGroup ? `│ Status grup ini : ${aktifHlp ? '✅ *Aktif*' : '❌ *Nonaktif*'}\n│\n` : '') +
+                                                        `│ *🔔 Auto Notif (owner, di grup):*\n` +
+                                                        `│ • ${pfx}anigame on — aktifkan notif game baru\n` +
+                                                        `│ • ${pfx}anigame off — nonaktifkan\n` +
+                                                        `│ • ${pfx}anigame test — kirim test ke grup ini\n` +
+                                                        `│ • ${pfx}anigame test grup — kirim test ke semua grup aktif\n` +
+                                                        `│ • ${pfx}anigame status — lihat daftar grup aktif\n` +
+                                                        `│\n` +
+                                                        `│ *🔍 Cari/Lihat Game (semua user):*\n` +
+                                                        `│ • ${pfx}anigame list — daftar game terbaru\n` +
+                                                        `│ • ${pfx}anigame minecraft — cari game\n` +
+                                                        `│ • ${pfx}anigame gta san andreas — cari game\n` +
+                                                        `│\n` +
+                                                        `│ 💡 Bot otomatis kirim notif tiap 10 menit\n` +
+                                                        `│    saat ada game MOD baru di AN1.COM.\n` +
+                                                        `│ 🌐 Sumber: an1.com/games/\n` +
+                                                        `╰──────────────────────`
+                                                );
+                                                break;
+                                        }
 
-                                        if (!input) {
-                                                await hisoka.sendMessage(m.from, { react: { text: '🎮', key: m.key } });
-                                                const loadingMsg = await tolak(hisoka, m, `🎮 *Mengambil daftar game terbaru dari AN1.COM...*`);
+                                        // ── ON ──
+                                        if (sub === 'on') {
+                                                if (!m.isOwner) return tolak(hisoka, m, '❌ Hanya owner yang bisa gunakan perintah ini.');
+                                                if (!m.isGroup) return tolak(hisoka, m, '❌ Perintah ini hanya untuk grup.');
+                                                const cfgOn   = loadConfig();
+                                                if (!cfgOn.anigame)        cfgOn.anigame        = { groups: {} };
+                                                if (!cfgOn.anigame.groups) cfgOn.anigame.groups = {};
+                                                const sebelumOn = cfgOn.anigame.groups[m.from]?.enabled === true;
+                                                cfgOn.anigame.groups[m.from] = { enabled: true, diubahPada: Date.now() };
+                                                fs.writeFileSync(path.join(process.cwd(), 'config.json'), JSON.stringify(cfgOn, null, 2));
+                                                await sendConfirmWithButtons(hisoka, m,
+                                                        `╭─「 🎮 *AN1.COM GAME NOTIF* 」\n` +
+                                                        `│\n` +
+                                                        `│ Status sebelumnya : ${sebelumOn ? '✅ *ON*' : '❌ *OFF*'}\n` +
+                                                        `│ Status sekarang   : ✅ *ON*\n` +
+                                                        `│\n` +
+                                                        (sebelumOn
+                                                                ? `│ ℹ️ Fitur ini sebelumnya sudah aktif,\n│    tidak ada perubahan.\n`
+                                                                : `│ ✅ Fitur berhasil diaktifkan!\n│    Bot akan kirim notif otomatis\n│    saat ada game MOD baru di AN1.COM.\n│    ⏱️ Cek setiap 10 menit.\n`) +
+                                                        `│\n` +
+                                                        `│ Ketik *${pfx}anigame off* untuk menonaktifkan.\n` +
+                                                        `╰──────────────────────`,
+                                                        [{ text: '➕ Aktifkan Semua Grup', id: '__addallgrp__anigame' }]
+                                                );
+                                                await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+                                                logCommand(m, hisoka, 'anigame-on');
+                                                break;
+                                        }
 
-                                                const { getGamesList } = _require(path.resolve('./src/scrape/tools/an1game.cjs'));
-                                                const games = await getGamesList();
+                                        // ── OFF ──
+                                        if (sub === 'off') {
+                                                if (!m.isOwner) return tolak(hisoka, m, '❌ Hanya owner yang bisa gunakan perintah ini.');
+                                                if (!m.isGroup) return tolak(hisoka, m, '❌ Perintah ini hanya untuk grup.');
+                                                const cfgOff   = loadConfig();
+                                                if (!cfgOff.anigame)        cfgOff.anigame        = { groups: {} };
+                                                if (!cfgOff.anigame.groups) cfgOff.anigame.groups = {};
+                                                const sebelumOff = cfgOff.anigame.groups[m.from]?.enabled === true;
+                                                cfgOff.anigame.groups[m.from] = { enabled: false, diubahPada: Date.now() };
+                                                fs.writeFileSync(path.join(process.cwd(), 'config.json'), JSON.stringify(cfgOff, null, 2));
+                                                await tolak(hisoka, m,
+                                                        `╭─「 🎮 *AN1.COM GAME NOTIF* 」\n` +
+                                                        `│\n` +
+                                                        `│ Status sebelumnya : ${sebelumOff ? '✅ *ON*' : '❌ *OFF*'}\n` +
+                                                        `│ Status sekarang   : ❌ *OFF*\n` +
+                                                        `│\n` +
+                                                        (sebelumOff
+                                                                ? `│ ❌ Fitur berhasil dinonaktifkan.\n│    Bot tidak akan kirim notif game\n│    di grup ini.\n`
+                                                                : `│ ℹ️ Fitur ini sebelumnya sudah nonaktif,\n│    tidak ada perubahan.\n`) +
+                                                        `│\n` +
+                                                        `│ Ketik *${pfx}anigame on* untuk mengaktifkan kembali.\n` +
+                                                        `╰──────────────────────`
+                                                );
+                                                await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+                                                logCommand(m, hisoka, 'anigame-off');
+                                                break;
+                                        }
 
-                                                if (!games || !games.length) {
-                                                        await hisoka.sendMessage(m.from, { delete: loadingMsg.key }).catch(() => {});
-                                                        await tolak(hisoka, m, `❌ Gagal mengambil daftar game dari AN1.COM. Coba lagi nanti.`);
+                                        // ── STATUS ──
+                                        if (sub === 'status') {
+                                                if (!m.isOwner) return tolak(hisoka, m, '❌ Hanya owner yang bisa gunakan perintah ini.');
+                                                const cfgStat  = loadConfig();
+                                                const groupsStat = cfgStat?.anigame?.groups || {};
+                                                const entries    = Object.entries(groupsStat);
+                                                if (!entries.length) {
+                                                        await tolak(hisoka, m, '📋 Belum ada grup yang terdaftar untuk AniGame Notif.');
                                                         break;
                                                 }
+                                                let txt = `╭─「 🎮 *STATUS AN1.COM GAME NOTIF* 」\n│\n`;
+                                                for (const [jid, val] of entries) {
+                                                        const aktifSt = val?.enabled === true;
+                                                        const tgl     = val?.diubahPada ? new Date(val.diubahPada).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }) : '-';
+                                                        txt += `│ ${aktifSt ? '✅' : '❌'} ${jid}\n│    _(diubah: ${tgl})_\n│\n`;
+                                                }
+                                                txt += `╰──────────────────────`;
+                                                await tolak(hisoka, m, txt);
+                                                logCommand(m, hisoka, 'anigame-status');
+                                                break;
+                                        }
 
-                                                const list = games.slice(0, 12).map((g, i) => {
+                                        // ── TEST GRUP ──
+                                        if (sub === 'test grup') {
+                                                if (!m.isOwner) return tolak(hisoka, m, '❌ Hanya owner yang bisa gunakan perintah ini.');
+                                                await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
+                                                const daftarGrupTG = _agMod.getEnabledGroups();
+                                                if (!daftarGrupTG.length) {
+                                                        await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
+                                                        await tolak(hisoka, m, `❌ Belum ada grup yang mengaktifkan AniGame Notif.\nKetik *${pfx}anigame on* di grup tujuan dulu.`);
+                                                        break;
+                                                }
+                                                const hasilTG = await _agMod.simulasi();
+                                                let berhasilTG = 0, gagalTG = 0;
+                                                for (const jid of daftarGrupTG) {
+                                                        try {
+                                                                if (hasilTG.urlGambar) {
+                                                                        await hisoka.sendMessage(jid, { image: { url: hasilTG.urlGambar }, caption: hasilTG.caption });
+                                                                } else {
+                                                                        await hisoka.sendMessage(jid, { text: hasilTG.caption });
+                                                                }
+                                                                berhasilTG++;
+                                                                await new Promise(r => setTimeout(r, 1500));
+                                                        } catch (e) {
+                                                                gagalTG++;
+                                                                console.error(`[AniGame] Gagal kirim test ke ${jid}:`, e?.message);
+                                                        }
+                                                }
+                                                await hisoka.sendMessage(m.from, {
+                                                        text: `✅ *Test AniGame selesai!*\n\n📤 Terkirim ke: *${berhasilTG}/${daftarGrupTG.length} grup*` +
+                                                              (gagalTG ? `\n❌ Gagal: ${gagalTG} grup` : ''),
+                                                }, { quoted: m });
+                                                await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+                                                logCommand(m, hisoka, 'anigame-test-grup');
+                                                break;
+                                        }
+
+                                        // ── TEST (ke grup ini) ──
+                                        if (sub === 'test') {
+                                                if (!m.isOwner) return tolak(hisoka, m, '❌ Hanya owner yang bisa gunakan perintah ini.');
+                                                await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
+                                                const hasilT = await _agMod.simulasi();
+                                                if (hasilT.urlGambar) {
+                                                        await hisoka.sendMessage(m.from, { image: { url: hasilT.urlGambar }, caption: hasilT.caption }, { quoted: m });
+                                                } else {
+                                                        await tolak(hisoka, m, hasilT.caption);
+                                                }
+                                                await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+                                                logCommand(m, hisoka, 'anigame-test');
+                                                break;
+                                        }
+
+                                        // ── LIST (daftar game terbaru) ──
+                                        if (sub === 'list') {
+                                                await hisoka.sendMessage(m.from, { react: { text: '🎮', key: m.key } });
+                                                const loadingL = await tolak(hisoka, m, `🎮 *Mengambil daftar game terbaru dari AN1.COM...*`);
+                                                const gamesL   = await _agMod.getGamesList();
+                                                await hisoka.sendMessage(m.from, { delete: loadingL.key }).catch(() => {});
+                                                if (!gamesL.length) {
+                                                        await tolak(hisoka, m, `❌ Gagal mengambil daftar game. Coba lagi nanti.`);
+                                                        break;
+                                                }
+                                                const listL = gamesL.slice(0, 12).map((g, i) => {
                                                         const no  = String(i + 1).padStart(2, ' ');
                                                         const rat = g.rating ? ` ⭐${g.rating}` : '';
                                                         const dev = g.developer ? `\n│    👤 ${g.developer}` : '';
                                                         const url = g.url ? `\n│    🔗 ${g.url}` : '';
                                                         return `│ ${no}. *${g.title}*${rat}${dev}${url}`;
                                                 }).join('\n│\n');
-
-                                                const teks =
-                                                        `╭─「 🎮 *AN1.COM — GAME TERBARU* 」\n` +
-                                                        `│\n` +
-                                                        `${list}\n` +
-                                                        `│\n` +
-                                                        `│ 🌐 *Sumber:* https://an1.com/games/\n` +
-                                                        `│\n` +
-                                                        `│ *Cari game tertentu:*\n` +
-                                                        `│ ${pfx}anigame minecraft\n` +
-                                                        `│ ${pfx}anigame gta\n` +
+                                                const teksL =
+                                                        `╭─「 🎮 *AN1.COM — GAME TERBARU* 」\n│\n` +
+                                                        `${listL}\n│\n` +
+                                                        `│ 🌐 *Sumber:* https://an1.com/games/\n│\n` +
+                                                        `│ 💡 Cari game: *${pfx}anigame minecraft*\n` +
                                                         `╰────────────────────`;
-
-                                                await hisoka.sendMessage(m.from, { delete: loadingMsg.key }).catch(() => {});
-
-                                                const thumb = games[0]?.image || '';
-                                                if (thumb) {
-                                                        const imgBuf = await _require('axios').get(thumb, { responseType: 'arraybuffer', timeout: 10000, headers: { 'Referer': 'https://an1.com/', 'User-Agent': 'Mozilla/5.0' } })
+                                                const thumbL = gamesL[0]?.image || '';
+                                                if (thumbL) {
+                                                        const imgL = await _require('axios').get(thumbL, { responseType: 'arraybuffer', timeout: 10000, headers: { 'Referer': 'https://an1.com/', 'User-Agent': 'Mozilla/5.0' } })
                                                                 .then(r => Buffer.from(r.data)).catch(() => null);
-                                                        if (imgBuf) {
-                                                                await hisoka.sendMessage(m.from, { image: imgBuf, caption: teks }, { quoted: m });
-                                                                logCommand(m, hisoka, 'anigame');
-                                                                break;
-                                                        }
+                                                        if (imgL) { await hisoka.sendMessage(m.from, { image: imgL, caption: teksL }, { quoted: m }); logCommand(m, hisoka, 'anigame'); break; }
                                                 }
-                                                await tolak(hisoka, m, teks);
+                                                await tolak(hisoka, m, teksL);
                                                 logCommand(m, hisoka, 'anigame');
                                                 break;
                                         }
 
-                                        // ── Mode Pencarian ──
+                                        // ── SEARCH (keyword) ──
                                         await hisoka.sendMessage(m.from, { react: { text: '🔎', key: m.key } });
-                                        const loadingMsg2 = await tolak(hisoka, m, `🔎 *Mencari game "${input}" di AN1.COM...*`);
-
-                                        const { searchGames } = _require(path.resolve('./src/scrape/tools/an1game.cjs'));
-                                        const { games: hasil, total, searchUrl } = await searchGames(input);
-
-                                        await hisoka.sendMessage(m.from, { delete: loadingMsg2.key }).catch(() => {});
-
-                                        if (!hasil || !hasil.length) {
+                                        const loadingS = await tolak(hisoka, m, `🔎 *Mencari game "${sub}" di AN1.COM...*`);
+                                        const { games: hasilS, total: totalS, searchUrl: searchUrlS } = await _agMod.searchGames(sub);
+                                        await hisoka.sendMessage(m.from, { delete: loadingS.key }).catch(() => {});
+                                        if (!hasilS || !hasilS.length) {
                                                 await tolak(hisoka, m,
-                                                        `❌ *Game "${input}" tidak ditemukan di AN1.COM.*\n\n` +
-                                                        `Coba kata kunci lain atau cek langsung:\n` +
-                                                        `🔗 ${searchUrl}`
+                                                        `❌ *Game "${sub}" tidak ditemukan di AN1.COM.*\n\n` +
+                                                        `Coba kata kunci lain atau cek langsung:\n🔗 ${searchUrlS}`
                                                 );
                                                 break;
                                         }
-
-                                        const totalTeks = total ? ` (${total} hasil)` : '';
-                                        const listHasil = hasil.slice(0, 10).map((g, i) => {
+                                        const totalTeksS  = totalS ? ` (${totalS} hasil)` : '';
+                                        const listHasilS  = hasilS.slice(0, 10).map((g, i) => {
                                                 const no  = String(i + 1).padStart(2, ' ');
                                                 const dev = g.developer ? ` — ${g.developer}` : '';
                                                 const url = g.url ? `\n│    🔗 ${g.url}` : '';
                                                 return `│ ${no}. *${g.title}*${dev}${url}`;
                                         }).join('\n│\n');
-
-                                        const teksCari =
+                                        const teksCariS =
                                                 `╭─「 🔎 *AN1.COM — HASIL PENCARIAN* 」\n` +
-                                                `│ 🔍 Keyword: *${input}*${totalTeks}\n` +
-                                                `│\n` +
-                                                `${listHasil}\n` +
-                                                `│\n` +
-                                                `│ 🌐 *Semua hasil:*\n` +
-                                                `│ ${searchUrl}\n` +
+                                                `│ 🔍 Keyword: *${sub}*${totalTeksS}\n│\n` +
+                                                `${listHasilS}\n│\n` +
+                                                `│ 🌐 *Semua hasil:*\n│ ${searchUrlS}\n` +
                                                 `╰────────────────────`;
-
-                                        const thumb2 = hasil[0]?.image || '';
-                                        if (thumb2) {
-                                                const imgBuf2 = await _require('axios').get(thumb2, { responseType: 'arraybuffer', timeout: 10000, headers: { 'Referer': 'https://an1.com/', 'User-Agent': 'Mozilla/5.0' } })
+                                        const thumbS = hasilS[0]?.image || '';
+                                        if (thumbS) {
+                                                const imgS = await _require('axios').get(thumbS, { responseType: 'arraybuffer', timeout: 10000, headers: { 'Referer': 'https://an1.com/', 'User-Agent': 'Mozilla/5.0' } })
                                                         .then(r => Buffer.from(r.data)).catch(() => null);
-                                                if (imgBuf2) {
-                                                        await hisoka.sendMessage(m.from, { image: imgBuf2, caption: teksCari }, { quoted: m });
-                                                        logCommand(m, hisoka, 'anigame');
-                                                        break;
-                                                }
+                                                if (imgS) { await hisoka.sendMessage(m.from, { image: imgS, caption: teksCariS }, { quoted: m }); logCommand(m, hisoka, 'anigame'); break; }
                                         }
-                                        await tolak(hisoka, m, teksCari);
+                                        await tolak(hisoka, m, teksCariS);
                                         logCommand(m, hisoka, 'anigame');
 
                                 } catch (error) {
                                         console.error('\x1b[31m[AniGame Cmd] Error:\x1b[39m', error.message);
                                         await tolak(hisoka, m,
-                                                `❌ *Gagal mengambil data game.*\n\n` +
-                                                `_${error.message}_\n\n` +
-                                                `🌐 Cek manual: https://an1.com/games/`
+                                                `❌ *Gagal mengambil data game.*\n\n_${error.message}_\n\n🌐 Cek manual: https://an1.com/games/`
                                         );
                                 }
                                 break;

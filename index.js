@@ -1115,6 +1115,62 @@ async function main() {
                         }
                         /* =================== END AUTO ANIMASU SCHEDULER =================== */
 
+                        /* =================== AUTO AN1GAME SCHEDULER =================== */
+                        if (global.anigameInterval) {
+                                clearInterval(global.anigameInterval);
+                                global.anigameInterval = null;
+                        }
+                        {
+                                const _ag             = _require(path.join(process.cwd(), 'src', 'scrape', 'tools', 'an1game.cjs'));
+                                const AG_INTERVAL_MS  = 10 * 60 * 1000; // 10 menit
+
+                                const runAnigame = async () => {
+                                        try {
+                                                const daftarGrup = _ag.getEnabledGroups();
+                                                if (!daftarGrup.length) return;
+
+                                                const gameBaru = await _ag.cariGameBaru();
+                                                if (!gameBaru.length) return;
+
+                                                for (const game of gameBaru) {
+                                                        const caption   = _ag.buatCaption(game);
+                                                        const urlGambar = game.image || null;
+
+                                                        // Kirim ke semua grup aktif (batch 5)
+                                                        const BATCH = 5;
+                                                        for (let i = 0; i < daftarGrup.length; i += BATCH) {
+                                                                const chunk = daftarGrup.slice(i, i + BATCH);
+                                                                await Promise.allSettled(chunk.map(async jid => {
+                                                                        try {
+                                                                                if (urlGambar) {
+                                                                                        await hisoka.sendMessage(jid, { image: { url: urlGambar }, caption });
+                                                                                } else {
+                                                                                        await hisoka.sendMessage(jid, { text: caption });
+                                                                                }
+                                                                        } catch (e) {
+                                                                                console.error(`[AniGame] Gagal kirim ke ${jid}:`, e?.message);
+                                                                        }
+                                                                }));
+                                                                if (i + BATCH < daftarGrup.length) await new Promise(r => setTimeout(r, 1000));
+                                                        }
+
+                                                        _ag.tandaiDanLog(game, daftarGrup);
+                                                        console.log(`[AniGame] ✅ "${game.title}" terkirim ke ${daftarGrup.length} grup`);
+                                                        await new Promise(r => setTimeout(r, 2000));
+                                                }
+                                        } catch (err) {
+                                                console.error('[AniGame] Error scheduler:', err?.message);
+                                        }
+                                };
+
+                                // Mulai 60 detik setelah start (setelah animasu)
+                                setTimeout(() => {
+                                        runAnigame();
+                                        global.anigameInterval = setInterval(runAnigame, AG_INTERVAL_MS);
+                                }, 60000);
+                        }
+                        /* =================== END AUTO AN1GAME SCHEDULER =================== */
+
                         /* =================== AUTO ALQANIME NOTIF SCHEDULER =================== */
                         if (global.alqanimeInterval) {
                                 clearInterval(global.alqanimeInterval);
