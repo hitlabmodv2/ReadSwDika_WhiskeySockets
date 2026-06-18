@@ -62,7 +62,7 @@
       "participant": "176549462564879@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-17T13:00:22.998Z",
+    "updatedAt": "2026-06-18T08:54:31.966Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -81,7 +81,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-17T13:00:22.998Z"
+    "processedAt": "2026-06-17T13:00:22.998Z",
+    "deleted": true,
+    "deletedAt": "2026-06-18T08:54:31.965Z"
   },
   "A532786C00099309228751A3D93CB9B5": {
     "id": "A532786C00099309228751A3D93CB9B5",
@@ -502,5 +504,47 @@
       }
     ],
     "processedAt": "2026-06-18T07:38:24.320Z"
+  },
+  "A5BFB2C0A7CE79FC83EF289D7D15741E": {
+    "id": "A5BFB2C0A7CE79FC83EF289D7D15741E",
+    "sender": "6285956660403@s.whatsapp.net",
+    "name": "Cosmouz/Fadli",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-18T08:53:31.873Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🧓",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285956660403",
+    "resolvedPn": "6285956660403@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285956660403@s.whatsapp.net",
+      "fromMe": false,
+      "id": "A5BFB2C0A7CE79FC83EF289D7D15741E",
+      "participant": "176549462564879@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-18T08:53:38.462Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285956660403@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A5BFB2C0A7CE79FC83EF289D7D15741E",
+        "participant": "176549462564879@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285956660403@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A5BFB2C0A7CE79FC83EF289D7D15741E",
+        "participant": "6285956660403@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-18T08:53:38.461Z"
   }
 }
