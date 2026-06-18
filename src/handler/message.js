@@ -1397,7 +1397,6 @@ const CEKAUTO_FITUR_LIST = [
         { key: 'sessionCleaner', nama: 'Session Cleaner',  cmd: '.sessioncleaner on/off',  type: 'global', toggleKey: 'sessionCleaner', toggleable: true  },
         { key: 'telegram',       nama: 'Telegram Bridge',  cmd: '.telegram on/off',        type: 'global', toggleKey: 'telegram',       toggleable: true  },
         { key: 'welcomeGoodbye', nama: 'Welcome/Goodbye',  cmd: '.welcome on/off',         type: 'global', toggleable: false, checkFn: (cfg) => { const g = cfg.welcomeGoodbye?.groups || {}; return Object.values(g).some(v => v?.welcome === true || v?.goodbye === true); } },
-        { key: 'notifgc',        nama: 'Notif Info GC',    cmd: '.notifgc on/off',         type: 'group',  toggleable: false, checkFn: (cfg) => { const g = cfg.notifgc?.groups || {}; return Object.values(g).some(v => v?.enabled === true); } },
         { key: 'wilyAI',         nama: 'Wily AI',          cmd: '.wilyai on/off',          type: 'global', toggleKey: 'wilyAI',         toggleable: true  },
         { key: 'cekswTracking',  nama: 'Cek SW Tracking',  cmd: '.ceksw on/off',           type: 'custom', toggleKey: 'cekswTracking',  toggleable: true,  checkFn: (cfg) => cfg.cekswTracking !== false },
         { key: 'alqanimenotif',  nama: 'Alqanime Notif',   cmd: '.alqanimenotif on/off',   type: 'group',  toggleable: false             },
@@ -1455,11 +1454,6 @@ const CEKAUTO_GROUP_FITUR_LIST = [
                 key: 'autoSholat', nama: 'Auto Sholat', cmd: '.autosholat add/remove', toggleable: true,
                 desc: 'Kirim notif waktu sholat + gambar masjid + suara adzan ke grup otomatis.',
                 checkFn: (cfg, jid) => Array.isArray(cfg.autoSholat?.groups) && cfg.autoSholat.groups.includes(jid)
-        },
-        {
-                key: 'notifgc', nama: 'Notif Info GC', cmd: '.notifgc on/off', toggleable: true,
-                desc: 'Kirim notifikasi ke grup bila ada perubahan info grup: nama, ikon, deskripsi, pengaturan, dll.',
-                checkFn: (cfg, jid) => cfg.notifgc?.groups?.[jid]?.enabled === true
         },
 ];
 
@@ -10194,7 +10188,6 @@ _📦 Powered by Wily Bot V22_ 🤖`;
 │ .welcome
 │ .goodbye
 │ .welgod
-│ .notifgc
 │ .listgroup
 │ .group
 ├═════════════════════┤
@@ -17333,102 +17326,6 @@ hasil += `╰══════════════════════�
                                                 `│ 📋 Cara penggunaan:\n` +
                                                 `│ • *.${featureKey} on*  → Aktifkan\n` +
                                                 `│ • *.${featureKey} off* → Nonaktifkan\n` +
-                                                `│\n` +
-                                                `╰────────────────────────────────────╯`
-                                        );
-                                }
-                                break;
-                        }
-
-                        case 'notifgc':
-                        case 'setnotifgc': {
-                                if (!m.isGroup) return tolak(hisoka, m, '❌ Perintah ini hanya bisa digunakan di dalam grup!');
-                                if (!m.isAdmin && !m.isOwner) return tolak(hisoka, m, '❌ Hanya admin grup atau owner bot yang bisa menggunakan perintah ini!');
-
-                                const argNgc = (query || '').trim().toLowerCase();
-                                const cfgNgc = loadConfig();
-                                if (!cfgNgc.notifgc) cfgNgc.notifgc = { groups: {} };
-                                if (!cfgNgc.notifgc.groups) cfgNgc.notifgc.groups = {};
-                                if (!cfgNgc.notifgc.groups[m.from]) cfgNgc.notifgc.groups[m.from] = {};
-
-                                const isOn = cfgNgc.notifgc.groups[m.from]?.enabled === true;
-
-                                if (argNgc === 'on') {
-                                        if (isOn) {
-                                                await tolak(hisoka, m, 'ℹ️ Notif Info Grup sudah aktif di grup ini sebelumnya.');
-                                                break;
-                                        }
-                                        cfgNgc.notifgc.groups[m.from].enabled = true;
-                                        const cfgPathNgc = path.join(process.cwd(), 'config.json');
-                                        fs.writeFileSync(cfgPathNgc, JSON.stringify(cfgNgc, null, 4));
-                                        await tolak(hisoka, m,
-                                                `╭───〔 *✅ NOTIF INFO GRUP* 〕───╮\n` +
-                                                `│\n` +
-                                                `│ 🟢 *Notif Info Grup AKTIF!*\n` +
-                                                `│\n` +
-                                                `│ 🔔 Bot akan mengirim notifikasi\n` +
-                                                `│    ke grup ini bila ada perubahan\n` +
-                                                `│    info grup seperti:\n` +
-                                                `│\n` +
-                                                `│ 📝 Nama grup berubah\n` +
-                                                `│ 🖼️ Foto/ikon grup berubah\n` +
-                                                `│ 📋 Deskripsi grup berubah\n` +
-                                                `│ 💬 Pengaturan kirim pesan berubah\n` +
-                                                `│ ⚙️ Pengaturan edit info berubah\n` +
-                                                `│ ⏳ Timer pesan sementara berubah\n` +
-                                                `│\n` +
-                                                `│ 👤 Termasuk info siapa yang mengubah\n` +
-                                                `│\n` +
-                                                `│ 💡 Nonaktifkan: *.notifgc off*\n` +
-                                                `│\n` +
-                                                `╰────────────────────────────────────╯`
-                                        );
-                                        logCommand(m, hisoka, 'notifgc on');
-                                } else if (argNgc === 'off') {
-                                        if (!isOn) {
-                                                await tolak(hisoka, m, 'ℹ️ Notif Info Grup memang sudah nonaktif di grup ini.');
-                                                break;
-                                        }
-                                        cfgNgc.notifgc.groups[m.from].enabled = false;
-                                        const cfgPathNgcOff = path.join(process.cwd(), 'config.json');
-                                        fs.writeFileSync(cfgPathNgcOff, JSON.stringify(cfgNgc, null, 4));
-                                        await tolak(hisoka, m,
-                                                `╭───〔 *❌ NOTIF INFO GRUP* 〕───╮\n` +
-                                                `│\n` +
-                                                `│ 🔴 *Notif Info Grup NONAKTIF!*\n` +
-                                                `│\n` +
-                                                `│ Bot tidak akan mengirim notifikasi\n` +
-                                                `│    perubahan info grup di sini.\n` +
-                                                `│\n` +
-                                                `│ 💡 Aktifkan kembali: *.notifgc on*\n` +
-                                                `│\n` +
-                                                `╰────────────────────────────────────╯`
-                                        );
-                                        logCommand(m, hisoka, 'notifgc off');
-                                } else {
-                                        // Tampilkan status
-                                        await tolak(hisoka, m,
-                                                `╭───〔 *ℹ️ NOTIF INFO GRUP* 〕───╮\n` +
-                                                `│\n` +
-                                                `│ 📌 *Status Grup Ini:*\n` +
-                                                `│    ${isOn ? '🟢 Aktif' : '🔴 Nonaktif'}\n` +
-                                                `│\n` +
-                                                `│ 🔔 Fitur ini mengirim notifikasi ke\n` +
-                                                `│    grup bila ada perubahan info GC:\n` +
-                                                `│\n` +
-                                                `│ 📝 Nama grup\n` +
-                                                `│ 🖼️ Foto / ikon grup\n` +
-                                                `│ 📋 Deskripsi grup\n` +
-                                                `│ 💬 Pengaturan kirim pesan\n` +
-                                                `│ ⚙️ Pengaturan edit info grup\n` +
-                                                `│ ⏳ Timer pesan sementara\n` +
-                                                `│\n` +
-                                                `│ 👤 Bot akan menyebut siapa yang\n` +
-                                                `│    melakukan perubahan tersebut\n` +
-                                                `│\n` +
-                                                `│ 📋 *Cara penggunaan:*\n` +
-                                                `│ • *.notifgc on*  → Aktifkan\n` +
-                                                `│ • *.notifgc off* → Nonaktifkan\n` +
                                                 `│\n` +
                                                 `╰────────────────────────────────────╯`
                                         );
