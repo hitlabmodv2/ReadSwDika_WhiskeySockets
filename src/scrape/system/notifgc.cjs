@@ -382,20 +382,28 @@ async function handleNotifGC(hisoka, groupUpdate, oldGroupData) {
 
 // ─── Map stub type number → label + emoji ────────────────────────────────────
 const STUB_INFO = {
-        22: { label: 'Foto / Ikon Grup',          emoji: '🖼️' },
-        21: { label: 'Nama Grup',                  emoji: '📝' },
-        24: { label: 'Deskripsi Grup',             emoji: '📋' },
-        25: { label: 'Izin Edit Info Grup',        emoji: '⚙️' },
-        26: { label: 'Izin Kirim Pesan',           emoji: '💬' },
-        23: { label: 'Link Undangan Grup',         emoji: '🔗' },
-        145: { label: 'Mode Persetujuan Bergabung', emoji: '🚪' },
-        171: { label: 'Mode Tambah Anggota',        emoji: '👥' },
-        144: { label: 'Permintaan Bergabung',       emoji: '📩' },
+        22:  { label: 'Foto / Ikon Grup',              emoji: '🖼️' },
+        21:  { label: 'Nama Grup',                     emoji: '📝' },
+        24:  { label: 'Deskripsi Grup',                emoji: '📋' },
+        25:  { label: 'Izin Edit Info Grup',           emoji: '⚙️' },
+        26:  { label: 'Izin Kirim Pesan Baru',         emoji: '💬' },
+        23:  { label: 'Tautan Undangan Grup',          emoji: '🔗' },
+        145: { label: 'Mode Persetujuan Bergabung',    emoji: '🚪' },
+        171: { label: 'Mode Tambah Anggota',           emoji: '👥' },
+        144: { label: 'Permintaan Bergabung',          emoji: '📩' },
+        186: { label: 'Kirim Riwayat Pesan ke Anggota Baru', emoji: '📜' },
 };
 
-// Stub types yang perlu di-skip bila sudah ditangani groups.update
-// (kita hanya handle icon via stub karena groups.update tidak fire untuk ikon)
-const STUB_ICON_ONLY = new Set([22]);
+//
+// Stub types yang TIDAK ditangkap oleh groups.update sehingga HARUS lewat stub:
+//   22  = GROUP_CHANGE_ICON          → icon, groups.update tidak fire
+//   23  = GROUP_CHANGE_INVITE_LINK   → reset link undangan, tidak di groups.update
+//   186 = GROUP_CHANGE_RECENT_HISTORY_SHARING → kirim riwayat pesan, tidak di groups.update
+//
+// Stub yang sudah ditangkap groups.update (subject/desc/restrict/announce/
+//   memberAddMode/joinApprovalMode) TIDAK masuk sini untuk hindari double notif.
+//
+const STUB_HANDLE_VIA_STUB = new Set([22, 23, 186]);
 
 // Semua stub types yang kita pantau untuk debug
 const STUB_ALL_WATCH = new Set(Object.keys(STUB_INFO).map(Number));
@@ -428,9 +436,9 @@ async function handleNotifGCStub(hisoka, message) {
                 // Hanya proses stub yang ada di map kita
                 if (!STUB_INFO[stubType]) return;
 
-                // Untuk subject/desc/restrict/announce → sudah ditangani groups.update, skip
-                // Kita hanya handle icon (22) di sini karena groups.update tidak fire untuk itu
-                if (!STUB_ICON_ONLY.has(stubType)) {
+                // Hanya proses stub yang TIDAK ditangani groups.update
+                // (22=icon, 23=invite link, 186=riwayat pesan)
+                if (!STUB_HANDLE_VIA_STUB.has(stubType)) {
                         dbg(`Stub type ${stubType} dilewati (sudah ditangani groups.update)`);
                         return;
                 }
@@ -465,6 +473,22 @@ async function handleNotifGCStub(hisoka, message) {
 
                 if (stubType === 22) {
                         teks += `│    → Foto / ikon grup baru telah dipasang\n`;
+                } else if (stubType === 23) {
+                        teks += `│    → Tautan undangan grup telah direset\n`;
+                        teks += `│    → Link lama sudah tidak berlaku\n`;
+                } else if (stubType === 186) {
+                        // stubParams[0] biasanya "on" / "off" atau nama mode
+                        const mode = stubParams[0];
+                        if (mode === '1' || mode === 'on' || mode === 'true') {
+                                teks += `│    → Semua anggota diizinkan melihat\n`;
+                                teks += `│       riwayat pesan saat bergabung\n`;
+                        } else if (mode === '0' || mode === 'off' || mode === 'false') {
+                                teks += `│    → Riwayat pesan tidak dikirim ke\n`;
+                                teks += `│       anggota baru\n`;
+                        } else {
+                                teks += `│    → Pengaturan riwayat pesan diubah\n`;
+                                if (mode) teks += `│    → Mode: ${mode}\n`;
+                        }
                 } else if (stubParams.length > 0) {
                         teks += `│    → ${stubParams.join(', ')}\n`;
                 }
