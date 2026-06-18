@@ -210,6 +210,7 @@ const WARNA_ALIAS = {
 // ── Peta audience ────────────────────────────────────────────────────────────
 // close_friends → kirim ke close friends list
 // all           → semua kontak (default, tanpa audience)
+// custom:Nama:emoji → custom list dengan nama & emoji sendiri
 const AUDIENCE_MAP = {
         all:           undefined,
         semua:         undefined,
@@ -218,6 +219,55 @@ const AUDIENCE_MAP = {
         dekat:         'close_friends',
         close_friends: 'close_friends',
 };
+
+/**
+ * Parse custom audience dari string format "custom:NamaList:emoji"
+ * Contoh: "custom:VIP Members:👑" → { type:'custom', name:'VIP Members', emoji:'👑' }
+ *
+ * @param {string} v
+ * @returns {{ type:'custom', name:string, emoji:string }|null}
+ */
+function parseCustomAudience(v) {
+        const lower = v.toLowerCase();
+        if (!lower.startsWith('custom:') && !lower.startsWith('cus:')) return null;
+        const sep   = lower.startsWith('custom:') ? 'custom:' : 'cus:';
+        const rest  = v.slice(sep.length).trim();
+        if (!rest) return null;
+
+        // Pisah nama dan emoji — cari emoji di akhir setelah ':'
+        // Format: "NamaList:🔥" atau "NamaList" (emoji opsional)
+        const colonIdx = rest.lastIndexOf(':');
+        let name = rest, emoji = '';
+        if (colonIdx > 0) {
+                const maybeEmoji = rest.slice(colonIdx + 1).trim();
+                // Cek apakah bagian setelah ':' terakhir adalah emoji atau bukan teks biasa
+                const isEmoji = /\p{Emoji}/u.test(maybeEmoji) && maybeEmoji.length <= 8;
+                if (isEmoji) {
+                        name  = rest.slice(0, colonIdx).trim();
+                        emoji = maybeEmoji;
+                }
+        }
+
+        return { type: 'custom', name, emoji };
+}
+
+/**
+ * Format label audience untuk tampilan di reply sukses
+ *
+ * @param {string|object|undefined} audience_
+ * @returns {string}
+ */
+function audienceLabel(audience_) {
+        if (!audience_) return 'Semua';
+        if (audience_ === 'close_friends') return 'Close Friends';
+        if (typeof audience_ === 'object') {
+                const parts = [];
+                if (audience_.emoji) parts.push(audience_.emoji);
+                if (audience_.name)  parts.push(audience_.name);
+                return parts.length ? `Custom — ${parts.join(' ')}` : 'Custom';
+        }
+        return String(audience_);
+}
 
 /**
  * Ambil warna acak dari WARNA_MAP
@@ -261,8 +311,12 @@ function parseArgs(query) {
                 } else if (/^\d{10,}$/.test(v)) {
                         target = v;
                 }
-                // Deteksi audience
-                else if (AUDIENCE_MAP[v.toLowerCase()] !== undefined || v.toLowerCase() in AUDIENCE_MAP) {
+                // Deteksi custom audience: "custom:NamaList:emoji" atau "cus:NamaList:emoji"
+                else if (/^(custom|cus):/i.test(v)) {
+                        audience = parseCustomAudience(v);
+                }
+                // Deteksi audience preset (cf, closefriends, dll)
+                else if (v.toLowerCase() in AUDIENCE_MAP) {
                         audience = v.toLowerCase();
                 }
                 // Deteksi warna — nama, alias pendek, atau hex
@@ -343,13 +397,19 @@ function resolveWarna(warna) {
 
 /**
  * Resolve audience untuk castleys-community
- * Kembalikan string 'close_friends' atau undefined
+ * Kembalikan:
+ *   - undefined             → kirim ke semua
+ *   - 'close_friends'       → close friends
+ *   - { type, name, emoji } → custom list
  *
- * @param {string|undefined} audienceKey
- * @returns {string|undefined}
+ * @param {string|object|undefined} audienceKey
+ * @returns {string|object|undefined}
  */
 function resolveAudience(audienceKey) {
         if (!audienceKey) return undefined;
+        // Sudah diparse sebagai object (dari parseCustomAudience)
+        if (typeof audienceKey === 'object') return audienceKey;
+        // Preset string (cf, closefriends, dll)
         return AUDIENCE_MAP[audienceKey.toLowerCase()] ?? undefined;
 }
 
@@ -408,40 +468,61 @@ async function handleUpswgcV2(hisoka, m, query, tolak) {
 
         // Tampilkan panduan kalau tidak ada konten sama sekali
         if (!caption && !src) {
-                const audienceList = Object.keys(AUDIENCE_MAP).filter(k => k !== 'all' && k !== 'semua').join(', ');
                 const aliasStr = Object.entries(WARNA_ALIAS).map(([k, v]) => `${k}=${v}`).join(', ');
                 return m.reply(
-                        `*📋 Panduan swgcv2*\n\n` +
+                        `╭─────────────────────────╮\n` +
+                        `│   📋 *PANDUAN swgcv2*   │\n` +
+                        `╰─────────────────────────╯\n\n` +
+
                         `*Format:*\n` +
                         `${prefix}swgcv2 [teks]|[warna]|[grup]|[audience]\n\n` +
-                        `*Contoh:*\n` +
+
+                        `*━━━ CONTOH TEKS ━━━*\n` +
                         `${prefix}swgcv2 Halo semua!\n` +
                         `${prefix}swgcv2 Halo|hijau\n` +
                         `${prefix}swgcv2 Halo|merahtua\n` +
                         `${prefix}swgcv2 Halo|#FF5722\n` +
-                        `${prefix}swgcv2 Halo|discord|linkgrup\n` +
-                        `${prefix}swgcv2 Halo|biru|linkgrup|cf\n\n` +
-                        `*Media (reply foto/video/audio):*\n` +
+                        `${prefix}swgcv2 Halo|discord\n\n` +
+
+                        `*━━━ CONTOH DENGAN GRUP ━━━*\n` +
+                        `${prefix}swgcv2 Halo|biru|https://chat.whatsapp.com/xxx\n` +
+                        `${prefix}swgcv2 Halo|merah|628xxx@g.us\n\n` +
+
+                        `*━━━ AUDIENCE ━━━*\n` +
+                        `*1. Semua (default):*\n` +
+                        `${prefix}swgcv2 Halo semua!\n\n` +
+                        `*2. Close Friends:*\n` +
+                        `${prefix}swgcv2 Halo|hijau|cf\n` +
+                        `${prefix}swgcv2 Halo|biru|linkgrup|closefriends\n\n` +
+                        `*3. Custom List (nama & emoji sendiri):*\n` +
+                        `${prefix}swgcv2 Halo VIP!|emas|custom:VIP Members:👑\n` +
+                        `${prefix}swgcv2 Info tim|biru|custom:Tim Kerja:💼\n` +
+                        `${prefix}swgcv2 Update bot|ungu|linkgrup|custom:Dev Squad:🤖\n` +
+                        `${prefix}swgcv2 Promo!|merah|cus:Pelanggan:🛒\n\n` +
+                        `> Format custom: custom:[NamaList]:[emoji]\n` +
+                        `> Emoji opsional, nama bebas\n\n` +
+
+                        `*━━━ MEDIA (reply foto/video/audio) ━━━*\n` +
                         `${prefix}swgcv2\n` +
-                        `${prefix}swgcv2 caption|linkgrup|cf\n\n` +
-                        `*🎨 Warna tersedia (${Object.keys(WARNA_MAP).length} warna):*\n` +
-                        `🔴 Merah: merah, merahtua, merahmuda, merahmarun, krimson, scarlet, coral, salmon, tomat, rose\n` +
-                        `🟠 Jingga: jingga, orange, jinggamuda, jinggaterang, amber, oranye\n` +
-                        `🟡 Kuning: kuning, kuningmuda, kuningtua, emas, gold, lemon, krem\n` +
-                        `🟢 Hijau: hijau, hijaumuda, hijautua, limau, lime, mint, olive, toska, teal, sage, zaitun, hijauneon\n` +
-                        `🔵 Biru: biru, birumuda, birutua, navy, navyblue, cobalt, dodger, royal, steel, birulangit, birulaut, biruneon, biru2\n` +
-                        `🩵 Cyan: cyan, cyantua, aqua, turquoise\n` +
-                        `🟣 Ungu: ungu, ungumuda, ungutua, violet, lavender, lilac, indigo, nila, magenta, fuchsia, plum\n` +
-                        `🩷 Pink: pink, pinkmuda, pinktua, hotpink, deeppink\n` +
-                        `🟤 Coklat: coklat, coklatmuda, coklattua, tan, khaki, mocha, kayu, siena\n` +
-                        `⬜ Abu/Putih: abu, abumuda, abutua, silver, perak, slate, charcoal, asap, putih, white, ivory, gading\n` +
-                        `⬛ Hitam: hitam, black\n` +
-                        `⚡ Neon: neon, neonhijau, neonbiru, neonmerah, neonkuning, neonpink, neonungu\n` +
-                        `📱 Sosmed: wa, whatsapp, telegram, youtube, instagram, twitter, tiktok, facebook, spotify, snapchat, discord\n` +
-                        `🌿 Alam: langit, laut, daun, pasir, tanah, salju, api, es\n` +
+                        `${prefix}swgcv2 Caption gambar!\n` +
+                        `${prefix}swgcv2 Caption|linkgrup|cf\n` +
+                        `${prefix}swgcv2 Caption|linkgrup|custom:VIP:👑\n\n` +
+
+                        `*━━━ WARNA (${Object.keys(WARNA_MAP).length} tersedia) ━━━*\n` +
+                        `🔴 merah, merahtua, merahmuda, krimson, coral, salmon, rose\n` +
+                        `🟠 jingga, orange, amber, oranye\n` +
+                        `🟡 kuning, emas, gold, lemon\n` +
+                        `🟢 hijau, hijaumuda, hijautua, limau, mint, toska, teal, neon\n` +
+                        `🔵 biru, birumuda, birutua, navy, cobalt, dodger, royal\n` +
+                        `🟣 ungu, ungumuda, violet, lavender, indigo, magenta, fuchsia\n` +
+                        `🩷 pink, hotpink, deeppink\n` +
+                        `🟤 coklat, mocha, kayu, siena, tan\n` +
+                        `⬛ hitam • ⬜ putih • 🩶 abu, silver\n` +
+                        `⚡ neonhijau, neonbiru, neonmerah, neonpink, neonungu\n` +
+                        `📱 wa, telegram, youtube, instagram, discord, spotify\n` +
+                        `🌿 langit, laut, daun, pasir, api, es\n` +
                         `*Alias cepat:* ${aliasStr}\n` +
-                        `*Hex custom:* #RRGGBB atau #RGB\n\n` +
-                        `*Audience:* ${audienceList}`
+                        `*Hex:* #RRGGBB atau #RGB`
                 );
         }
 
@@ -464,7 +545,11 @@ async function handleUpswgcV2(hisoka, m, query, tolak) {
                                 caption:  caption,
                                 audience: audience_,
                         });
-                        return m.reply(`✅ Status gambar berhasil dikirim!\n*Group:* ${jid}${audience_ ? `\n*Audience:* ${audience_}` : ''}`);
+                        return m.reply(
+                                `✅ *Status gambar dikirim!*\n` +
+                                `*Group:* ${jid}\n` +
+                                `*Audience:* ${audienceLabel(audience_)}`
+                        );
                 }
 
                 // Video
@@ -475,7 +560,11 @@ async function handleUpswgcV2(hisoka, m, query, tolak) {
                                 caption:  caption,
                                 audience: audience_,
                         });
-                        return m.reply(`✅ Status video berhasil dikirim!\n*Group:* ${jid}${audience_ ? `\n*Audience:* ${audience_}` : ''}`);
+                        return m.reply(
+                                `✅ *Status video dikirim!*\n` +
+                                `*Group:* ${jid}\n` +
+                                `*Audience:* ${audienceLabel(audience_)}`
+                        );
                 }
 
                 // Audio / PTT
@@ -487,7 +576,11 @@ async function handleUpswgcV2(hisoka, m, query, tolak) {
                                 ptt:      true,
                                 audience: audience_,
                         });
-                        return m.reply(`✅ Status audio berhasil dikirim!\n*Group:* ${jid}${audience_ ? `\n*Audience:* ${audience_}` : ''}`);
+                        return m.reply(
+                                `✅ *Status audio dikirim!*\n` +
+                                `*Group:* ${jid}\n` +
+                                `*Audience:* ${audienceLabel(audience_)}`
+                        );
                 }
 
                 // Stiker — kirim sebagai gambar di status
@@ -498,7 +591,11 @@ async function handleUpswgcV2(hisoka, m, query, tolak) {
                                 caption:  caption,
                                 audience: audience_,
                         });
-                        return m.reply(`✅ Status stiker berhasil dikirim!\n*Group:* ${jid}${audience_ ? `\n*Audience:* ${audience_}` : ''}`);
+                        return m.reply(
+                                `✅ *Status stiker dikirim!*\n` +
+                                `*Group:* ${jid}\n` +
+                                `*Audience:* ${audienceLabel(audience_)}`
+                        );
                 }
 
                 // Teks dengan background warna
@@ -508,10 +605,10 @@ async function handleUpswgcV2(hisoka, m, query, tolak) {
                         audience:   audience_,
                 });
                 return m.reply(
-                        `✅ Status teks berhasil dikirim!\n` +
+                        `✅ *Status teks dikirim!*\n` +
                         `*Group:* ${jid}\n` +
-                        `*Warna:* ${bgColor}` +
-                        (audience_ ? `\n*Audience:* ${audience_}` : '')
+                        `*Warna:* ${bgColor}\n` +
+                        `*Audience:* ${audienceLabel(audience_)}`
                 );
 
         } catch (err) {
@@ -529,6 +626,8 @@ module.exports = {
         randomWarna,
         isHex,
         parseArgs,
+        parseCustomAudience,
+        audienceLabel,
         resolveJid,
         resolveWarna,
         resolveAudience,
