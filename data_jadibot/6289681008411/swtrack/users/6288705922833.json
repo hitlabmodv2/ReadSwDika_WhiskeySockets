@@ -106,5 +106,71 @@
     },
     "updatedAt": "2026-06-18T11:05:29.797Z",
     "processedAt": "2026-06-18T11:05:29.797Z"
+  },
+  "A5E10A0FB88993FD63B0050F9B034906": {
+    "id": "A5E10A0FB88993FD63B0050F9B034906",
+    "sender": "6288705922833@s.whatsapp.net",
+    "name": "amalia",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-18T11:30:36.719Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🔀",
+    "resolve": "Signal Lib ✓",
+    "source": "status",
+    "number": "6288705922833",
+    "resolvedPn": "6288705922833@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6288705922833@s.whatsapp.net",
+      "fromMe": false,
+      "id": "A5E10A0FB88993FD63B0050F9B034906",
+      "participant": "200897581863137@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-18T11:30:46.655Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6288705922833@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A5E10A0FB88993FD63B0050F9B034906",
+        "participant": "200897581863137@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6288705922833@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A5E10A0FB88993FD63B0050F9B034906",
+        "participant": "6288705922833@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-18T11:30:46.654Z"
+  },
+  "A5604F258C42FAE4220F55A6CAAF9E76": {
+    "id": "A5604F258C42FAE4220F55A6CAAF9E76",
+    "sender": "6288705922833@s.whatsapp.net",
+    "name": "amalia",
+    "type": "groupStatusMentionMessage",
+    "arrivedAt": "2026-06-18T11:30:41.722Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🇱🇺",
+    "resolve": "Signal Lib ✓",
+    "source": "group",
+    "number": "6288705922833",
+    "resolvedPn": "6288705922833@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "120363363036005418@g.us",
+      "fromMe": false,
+      "id": "A5604F258C42FAE4220F55A6CAAF9E76",
+      "participant": "200897581863137@lid",
+      "participantAlt": "6288705922833@s.whatsapp.net",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-18T11:30:44.464Z",
+    "processedAt": "2026-06-18T11:30:44.464Z"
   }
 }

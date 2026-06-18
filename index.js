@@ -39,6 +39,7 @@ const {
         getContentType,
 } = _require('@whiskeysockets/baileys');
 const { createWelcomeCard } = _require('./src/scrape/system/welcomeCard.cjs');
+const { handleNotifGC } = _require('./src/scrape/system/notifgc.cjs');
 import pino from 'pino';
 import { Boom } from '@hapi/boom';
 import qrcode from 'qrcode-terminal';
@@ -1820,11 +1821,17 @@ setTimeout(() => {
         hisoka.ev.on('groups.update', async groupsData => {
                 try {
                         await Promise.all(
-                                groupsData.map(group => {
+                                groupsData.map(async group => {
                                         try {
                                                 const groupId = group.id;
                                                 const existingGroup = groups.read(groupId) || {};
-                                                return groups.write(groupId, { ...existingGroup, ...group });
+                                                // Simpan data lama sebelum di-overwrite (untuk notifgc)
+                                                const oldGroupData = { ...existingGroup };
+                                                groups.write(groupId, { ...existingGroup, ...group });
+                                                // Notif perubahan info grup ke anggota jika fitur aktif
+                                                try {
+                                                        await handleNotifGC(hisoka, group, oldGroupData);
+                                                } catch (_) {}
                                         } catch (_) {}
                                 })
                         );
