@@ -4,7 +4,7 @@ _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurn
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V22*
 ✨ *3 Fitur Baru*
-🔧 *0 Bug Fix*
+🔧 *1 Bug Fix*
 🚀 *1 Improvement*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
@@ -49,6 +49,15 @@ _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurn
 ━━━━━━━━━━━━━━━━━━━━━━
 🔧 *BUG FIX*
 ━━━━━━━━━━━━━━━━━━━━━━
+> NO.1 ⚙️ *PM2 di Panel Pterodactyl — Tidak Bisa Jalan (ecosystem.config.cjs)*
+> Bug: PM2 gagal start di panel Pterodactyl karena config tidak kompatibel
+> Fix: ecosystem.config.cjs diperbaiki — path absolut, fork mode, heap size eksplisit
+> Logging lengkap: pm2-out.log, pm2-error.log, pm2-combined.log
+> Auto restart jika crash (max 10x), restart jika RAM > 500MB
+> *Cara pakai di panel Pterodactyl:*
+> 1️⃣ Jalankan npm i dulu untuk install semua modul
+> 2️⃣ Di panel → Startup → ubah Startup Command jadi:
+>     pm2 delete wily-bot 2>/dev/null; pm2 start ecosystem.config.cjs && pm2 monit
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *IMPROVEMENT*
