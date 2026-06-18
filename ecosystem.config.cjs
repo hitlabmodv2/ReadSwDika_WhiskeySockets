@@ -28,16 +28,19 @@
 //   pm2 delete wily-bot                   → hapus dari pm2 list
 //   pm2 save && pm2 startup               → auto-start saat server reboot
 
+const path = require('path');
 const pkg  = require('./package.json');
-const node = process.version; // contoh: "v20.20.0"
+const node = process.version;
+
+const ROOT = __dirname; // path absolut folder project, bukan relatif
 
 module.exports = {
   apps: [
     {
       // ── Identitas ────────────────────────────────────────────
       name        : "wily-bot",
-      script      : "./index.js",
-      cwd         : "./",
+      script      : path.join(ROOT, 'index.js'), // ABSOLUT — pm2_env.version jadi akurat
+      cwd         : ROOT,                         // ABSOLUT — daemon baca pkg.json benar
       interpreter : "node",
       version     : pkg.version,   // tampil di pm2 monit → Metadata > Version
 
@@ -70,20 +73,25 @@ module.exports = {
       pmx             : true,        // aktifkan APM & metrics di monit
       source_map_support : false,    // matikan source-map (hemat RAM)
       instance_var    : "INSTANCE_ID", // ID instance unik di monit
-      vizion          : false,       // matikan git tracking (lebih ringan)
+      // vizion TIDAK di-set false — kalau false, PM2 skip finalizeProcedure
+      // dan pm2_env.version tidak pernah di-set → tampil N/A di monit
 
       // ── Environment ──────────────────────────────────────────
       env: {
-        NODE_ENV       : "production",
-        FORCE_COLOR    : "1",        // warna tetap tampil di log
-        NODE_VERSION   : node,       // tampil di pm2 monit → env panel
-        BOT_VERSION    : pkg.version,
+        NODE_ENV             : "production",
+        FORCE_COLOR          : "1",
+        npm_package_version  : pkg.version,  // PM2 baca ini untuk kolom Version
+        npm_package_name     : pkg.name,
+        NODE_VERSION         : node,
+        BOT_VERSION          : pkg.version,
       },
       env_development: {
-        NODE_ENV       : "development",
-        FORCE_COLOR    : "1",
-        NODE_VERSION   : node,
-        BOT_VERSION    : pkg.version,
+        NODE_ENV             : "development",
+        FORCE_COLOR          : "1",
+        npm_package_version  : pkg.version,
+        npm_package_name     : pkg.name,
+        NODE_VERSION         : node,
+        BOT_VERSION          : pkg.version,
       },
     },
   ],
