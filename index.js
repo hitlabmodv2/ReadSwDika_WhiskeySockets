@@ -1133,7 +1133,7 @@ async function main() {
                                                 if (!gameBaru.length) return;
 
                                                 for (const game of gameBaru) {
-                                                        const caption   = _ag.buatCaption(game);
+                                                        const caption   = _ag.buatCaption(game, game); // game sudah merged dengan detail
                                                         const urlGambar = game.image || null;
 
                                                         // Kirim ke semua grup aktif (batch 5)

@@ -517,6 +517,9 @@ const SEP  = '━━━━━━━━━━━━━━━━━━━';
 const SEP2 = '┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄';
 
 function buatCaption(game, detail = null) {
+    // d = sumber data utama: detail jika ada, fallback ke game (yang sudah merged)
+    const d = detail || game || {};
+
     // Waktu kirim
     const now      = new Date();
     const opsiHari = { timeZone: 'Asia/Jakarta', weekday: 'long' };
@@ -526,34 +529,33 @@ function buatCaption(game, detail = null) {
     const tgl      = now.toLocaleDateString('id-ID', opsiTgl);
     const jam      = now.toLocaleTimeString('id-ID', opsiJam);
 
-    const title     = detail?.fullTitle || game.title || '?';
-    const dev       = detail?.developer || game.developer || '';
-    const image     = detail?.image     || game.image     || '';
-    const urlGame   = detail?.url       || game.url       || '';
-    const rating    = game.rating       || '';
+    const title   = d.fullTitle   || d.title     || game?.title   || '?';
+    const dev     = d.developer   || game?.developer || '';
+    const urlGame = d.url         || game?.url   || '';
+    const rating  = game?.rating  || d.rating    || '';
 
     // Baris info teknis (hanya tampilkan yang ada datanya)
     const infoRows = [];
-    if (detail?.version)  infoRows.push(`├ 📦 *Versi*     : \`${detail.version}\``);
-    if (detail?.android)  infoRows.push(`├ 🤖 *Android*   : \`${detail.android}\``);
-    if (detail?.size)     infoRows.push(`├ 💾 *Ukuran*    : \`${detail.size}\``);
-    if (detail?.koneksi)  infoRows.push(`├ 📶 *Koneksi*   : \`${detail.koneksi}\``);
-    if (detail?.updated)  infoRows.push(`├ 📅 *Update*    : ${detail.updated}`);
-    if (detail?.installs) infoRows.push(`├ 📲 *Unduhan*   : ${detail.installs}`);
-    if (detail?.ratedFor) infoRows.push(`├ 🔞 *Rating*    : ${detail.ratedFor} tahun+`);
-    if (detail?.category) infoRows.push(`├ 📂 *Kategori*  : ${detail.category}`);
-    if (detail?.price)    infoRows.push(`├ 💰 *Harga*     : ${detail.price === '$0' ? 'Gratis' : detail.price}`);
-    if (rating)           infoRows.push(`├ ⭐ *Bintang*   : ${rating}/5`);
+    if (d.version)  infoRows.push(`├ 📦 *Versi*     : \`${d.version}\``);
+    if (d.android)  infoRows.push(`├ 🤖 *Android*   : \`${d.android}\``);
+    if (d.size)     infoRows.push(`├ 💾 *Ukuran*    : \`${d.size}\``);
+    if (d.koneksi)  infoRows.push(`├ 📶 *Koneksi*   : \`${d.koneksi}\``);
+    if (d.updated)  infoRows.push(`├ 📅 *Update*    : ${d.updated}`);
+    if (d.installs) infoRows.push(`├ 📲 *Unduhan*   : ${d.installs}`);
+    if (d.ratedFor) infoRows.push(`├ 🔞 *Rating*    : ${d.ratedFor} tahun+`);
+    if (d.category) infoRows.push(`├ 📂 *Kategori*  : ${d.category}`);
+    if (d.price)    infoRows.push(`├ 💰 *Harga*     : ${d.price === '$0' ? 'Gratis' : d.price}`);
+    if (rating)     infoRows.push(`├ ⭐ *Bintang*   : ${rating}/5`);
 
     // Ubah baris terakhir dari ├ ke ╰
     if (infoRows.length > 0) {
         infoRows[infoRows.length - 1] = infoRows[infoRows.length - 1].replace(/^├/, '╰');
     }
 
-    // Blok sinopsis (format > WhatsApp quote)
+    // Blok sinopsis Bahasa Indo (format > WhatsApp quote)
     let sinopsisBlok = '';
-    if (detail?.sinopsis) {
-        const kalimat = detail.sinopsis.replace(/\n+/g, ' ').trim();
+    if (d.sinopsis) {
+        const kalimat = d.sinopsis.replace(/\n+/g, ' ').trim();
         sinopsisBlok =
             `\n📖 *Sinopsis*\n` +
             `${SEP2}\n` +
@@ -565,14 +567,14 @@ function buatCaption(game, detail = null) {
         : '';
 
     // Link download: prioritaskan direct APK, fallback ke halaman game
-    const apkUrl       = detail?.downloadUrl || '';
+    const apkUrl       = d.downloadUrl || '';
     const downloadBlok = apkUrl
         ? `\n${SEP}\n📥 *Download APK (Langsung):*\n${apkUrl}\n\n🔗 *Halaman Game:*\n${urlGame}\n`
         : urlGame
             ? `\n${SEP}\n🔗 *Download / Info:*\n${urlGame}\n`
             : '';
 
-    // Header dinamis berdasarkan tipe game
+    // Header dinamis: game baru vs update versi
     const tipe        = game?.tipeUpdate || 'baru';
     const headerEmoji = tipe === 'update' ? '🔄' : '🎮';
     const headerTeks  = tipe === 'update'
