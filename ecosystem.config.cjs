@@ -28,6 +28,9 @@
 //   pm2 delete wily-bot                   → hapus dari pm2 list
 //   pm2 save && pm2 startup               → auto-start saat server reboot
 
+const pkg  = require('./package.json');
+const node = process.version; // contoh: "v20.20.0"
+
 module.exports = {
   apps: [
     {
@@ -36,6 +39,7 @@ module.exports = {
       script      : "./index.js",
       cwd         : "./",
       interpreter : "node",
+      version     : pkg.version,   // tampil di pm2 monit → Metadata > Version
 
       // ── Mode & Instance ──────────────────────────────────────
       instances   : 1,
@@ -72,10 +76,14 @@ module.exports = {
       env: {
         NODE_ENV       : "production",
         FORCE_COLOR    : "1",        // warna tetap tampil di log
+        NODE_VERSION   : node,       // tampil di pm2 monit → env panel
+        BOT_VERSION    : pkg.version,
       },
       env_development: {
         NODE_ENV       : "development",
         FORCE_COLOR    : "1",
+        NODE_VERSION   : node,
+        BOT_VERSION    : pkg.version,
       },
     },
   ],
