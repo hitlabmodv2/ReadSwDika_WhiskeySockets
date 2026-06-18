@@ -38,7 +38,7 @@ const HEADERS = {
     'Accept-Language': 'id-ID,id;q=0.9,en;q=0.8',
 };
 
-// ── STATE (game yang sudah terkirim) ──────────────────────────────────────────
+// ── STATE ─────────────────────────────────────────────────────────────────────
 
 function bacaState() {
     try {
@@ -51,7 +51,7 @@ function simpanState(data) {
     try { fs.writeFileSync(FILE_STATE, JSON.stringify(data, null, 2), 'utf-8'); } catch (_) {}
 }
 
-// ── LOG PENGIRIMAN ─────────────────────────────────────────────────────────────
+// ── LOG ───────────────────────────────────────────────────────────────────────
 
 function bacaLog() {
     try {
@@ -100,12 +100,224 @@ async function fetchMarkdown(url) {
     return res.data;
 }
 
-// ── PARSE GAME CARDS DARI HALAMAN GAMES LIST ──────────────────────────────────
-// Pola markdown jina:
-//   ![Image N: TITLE](IMAGE_URL)
-//   [TITLE](GAME_URL "TITLE")
-//   DEVELOPER
-//   *   RATING
+// ── TEXT HELPERS ──────────────────────────────────────────────────────────────
+
+function potongTeks(teks, maks = 280) {
+    if (!teks || teks.length <= maks) return teks || '';
+    const potong    = teks.slice(0, maks);
+    const lastSpace = potong.lastIndexOf(' ');
+    return (lastSpace > 50 ? potong.slice(0, lastSpace) : potong) + '...';
+}
+
+function formatInstalls(raw) {
+    if (!raw) return '';
+    // "500 000 000+" → "500.000.000+"
+    return raw.replace(/\s+/g, '.').replace(/\.$/, '');
+}
+
+function formatTanggalIndo(raw) {
+    if (!raw) return '';
+    const map = {
+        January: 'Januari', February: 'Februari', March: 'Maret',
+        April: 'April', May: 'Mei', June: 'Juni', July: 'Juli',
+        August: 'Agustus', September: 'September', October: 'Oktober',
+        November: 'November', December: 'Desember',
+    };
+    // Coba reorder "Month DD, YYYY" → "DD Month YYYY"
+    let tgl = raw.trim();
+    const mArr = tgl.match(/^([A-Za-z]+)\s+(\d{1,2}),?\s+(\d{4})$/);
+    if (mArr) tgl = `${mArr[2]} ${mArr[1]} ${mArr[3]}`;
+    for (const [en, id] of Object.entries(map)) {
+        tgl = tgl.replace(new RegExp(en, 'gi'), id);
+    }
+    return tgl;
+}
+
+// ── PARSE HALAMAN DETAIL GAME ─────────────────────────────────────────────────
+//
+// Struktur markdown jina untuk halaman detail an1.com:
+//
+// Title: Download TITLE VERSION APK for android
+// Published Time: ...
+//
+// *   [AN1.com](...)
+// *   [Games](...)
+// *   [CATEGORY](...)        ← breadcrumb kategori
+//
+// ![Image 1: NAME mod apk](IMAGE_URL)ONLINE_STATUS  ← bisa ada "Offline"/"Online" langsung setelah ]
+//
+// *   Android X.X +
+// *    Version: X.X.X
+// *   XXXMb
+//
+// DEVELOPER
+//
+// **FULL_GAME_TITLE** - SINOPSIS TEXT
+//
+// Additional Information:
+// *   **Updated**DATE
+// *   **Price**$X
+// *   **Installs** XXX
+// *   **Rated for****X+** years
+
+function parseDetailPage(md, fallbackUrl) {
+    const lines = md.split('\n');
+
+    // Judul dari baris Title:
+    let fullTitle = '';
+    const titleLine = lines.find(l => l.startsWith('Title:'));
+    if (titleLine) {
+        fullTitle = titleLine.replace(/^Title:\s*/, '').replace(/\s*APK for android$/i, '').replace(/^Download\s+/i, '').trim();
+    }
+
+    // Versi dari judul (misal "6.38.0" di akhir judul sebelum "APK")
+    let version = '';
+    const verFromTitle = fullTitle.match(/\s+([\d.]+)$/);
+    if (verFromTitle) {
+        version = verFromTitle[1];
+        fullTitle = fullTitle.replace(verFromTitle[0], '').trim();
+    }
+
+    // Kategori dari breadcrumb (baris ke-3 link setelah [AN1.com] dan [Games])
+    let category = '';
+    let bcCount = 0;
+    for (const ln of lines) {
+        if (/\[AN1\.com\]/i.test(ln)) { bcCount++; continue; }
+        if (/\[Games\]/i.test(ln) && bcCount >= 1) { bcCount++; continue; }
+        if (bcCount === 2 && ln.match(/^\*\s+\[/)) {
+            const m = ln.match(/\[([^\]]+)\]\(https:\/\/an1\.com\/games\//);
+            if (m) { category = m[1]; break; }
+        }
+    }
+
+    // Image + Online/Offline — pola: ![Image 1: NAME](URL)Offline atau ![...](URL)
+    let image      = '';
+    let koneksi    = '';
+    for (const ln of lines) {
+        const m = ln.match(/!\[Image 1:[^\]]+\]\((https:\/\/an1\.com\/uploads\/[^)]+)\)(Online|Offline)?/);
+        if (m) {
+            image   = m[1];
+            koneksi = m[2] || '';
+            break;
+        }
+    }
+
+    // Spesifikasi: Android, Version, Size (3 bullet list berurutan)
+    let android = '';
+    let size    = '';
+    for (let i = 0; i < lines.length; i++) {
+        const ln = lines[i].trim();
+        // Android requirement
+        if (!android && /^\*\s+Android\s+[\d.]+/.test(ln)) {
+            android = ln.replace(/^\*\s+/, '').trim();
+        }
+        // Version dari list (kalau belum dari title)
+        if (!version && /^\*\s+Version:\s+[\d.]+/.test(ln)) {
+            version = ln.replace(/^\*\s+Version:\s+/, '').trim();
+        }
+        // Size: angka + Mb/Gb
+        if (!size && /^\*\s+[\d.]+\s*(Mb|Gb|MB|GB)/i.test(ln)) {
+            size = ln.replace(/^\*\s+/, '').trim();
+        }
+    }
+
+    // Developer — baris teks biasa setelah blok spesifikasi
+    let developer = '';
+    let foundSpec = false;
+    for (let i = 0; i < lines.length; i++) {
+        const ln = lines[i].trim();
+        if (/^\*\s+(Android|Version|[\d.]+\s*(Mb|Gb))/i.test(ln)) { foundSpec = true; }
+        if (foundSpec && !developer && ln &&
+            !ln.startsWith('*') && !ln.startsWith('!') && !ln.startsWith('[') && !ln.startsWith('#') &&
+            !ln.startsWith('**') && ln.length > 1 && ln.length < 60) {
+            developer = ln;
+            break;
+        }
+    }
+
+    // Sinopsis — baris yang dimulai **JUDUL** - DESKRIPSI
+    let sinopsis = '';
+    for (const ln of lines) {
+        const m = ln.match(/^\*\*[^*]+\*\*\s*[-–]\s*(.+)/);
+        if (m && m[1].length > 30) {
+            sinopsis = m[1].trim();
+            break;
+        }
+    }
+    // Fallback: ambil baris deskripsi panjang pertama
+    if (!sinopsis) {
+        for (const ln of lines) {
+            const clean = ln.trim();
+            if (clean.length > 80 && !clean.startsWith('*') && !clean.startsWith('!') &&
+                !clean.startsWith('[') && !clean.startsWith('#') && !clean.startsWith('>')) {
+                sinopsis = clean;
+                break;
+            }
+        }
+    }
+
+    // Additional Information block
+    let updatedRaw = '';
+    let price      = '';
+    let installs   = '';
+    let ratedFor   = '';
+    for (const ln of lines) {
+        const l = ln.trim();
+        if (!updatedRaw) {
+            const m = l.match(/\*\*Updated\*\*(.+)/);
+            if (m) updatedRaw = m[1].trim();
+        }
+        if (!price) {
+            const m = l.match(/\*\*Price\*\*(.+)/);
+            if (m) price = m[1].trim();
+        }
+        if (!installs) {
+            const m = l.match(/\*\*Installs\*\*\s*(.+)/);
+            if (m) installs = m[1].trim();
+        }
+        if (!ratedFor) {
+            const m = l.match(/\*\*Rated for\*\*\*\*(.+?)\*\*/);
+            if (m) ratedFor = m[1].trim();
+        }
+    }
+
+    // MOD info dari judul: "(MOD, Unlimited Coins)" dll
+    let modInfo = '';
+    const modMatch = fullTitle.match(/\(MOD[^)]*\)/i);
+    if (modMatch) modInfo = modMatch[0];
+
+    return {
+        fullTitle,
+        version,
+        category,
+        image,
+        koneksi,
+        android,
+        size,
+        developer,
+        sinopsis: potongTeks(sinopsis, 280),
+        updated: formatTanggalIndo(updatedRaw),
+        price,
+        installs: formatInstalls(installs),
+        ratedFor,
+        modInfo,
+        url: fallbackUrl || '',
+    };
+}
+
+// ── FETCH DETAIL HALAMAN GAME ─────────────────────────────────────────────────
+
+async function fetchGameDetail(gameUrl) {
+    try {
+        const md = await fetchMarkdown(gameUrl);
+        return parseDetailPage(md, gameUrl);
+    } catch (e) {
+        console.warn('[AniGame] Gagal fetch detail:', gameUrl, e?.message);
+        return null;
+    }
+}
+
+// ── PARSE GAMES LIST (halaman /games/) ────────────────────────────────────────
 
 function parseGamesList(md) {
     const results = [];
@@ -130,34 +342,28 @@ function parseGamesList(md) {
         for (let j = i + 1; j < Math.min(i + 8, lines.length); j++) {
             const ln = lines[j].trim();
             if (!ln) continue;
-
             if (!gameUrl && ln.startsWith('[') && ln.includes('an1.com/') && ln.includes('.html')) {
                 const m = ln.match(/\[([^\]]+)\]\((https:\/\/an1\.com\/[0-9]+-[^)"]+\.html)/);
                 if (m) { title = m[1].trim(); gameUrl = m[2]; }
                 continue;
             }
-
             if (!dev && !ln.startsWith('*') && !ln.startsWith('!') && !ln.startsWith('[') && !ln.startsWith('#') && ln.length > 1 && ln.length < 80) {
-                dev = ln;
-                continue;
+                dev = ln; continue;
             }
-
             if (!rating && /^\*\s+[\d.]+$/.test(ln)) {
-                rating = ln.replace(/^\*\s+/, '').trim();
-                break;
+                rating = ln.replace(/^\*\s+/, '').trim(); break;
             }
         }
 
         if (!title || seen.has(gameUrl || title)) continue;
         seen.add(gameUrl || title);
-
         results.push({ title, image: imgUrl, url: gameUrl, developer: dev, rating });
     }
 
     return results;
 }
 
-// ── PARSE HASIL SEARCH ────────────────────────────────────────────────────────
+// ── PARSE SEARCH RESULTS ──────────────────────────────────────────────────────
 
 function parseSearchResults(md) {
     const results = [];
@@ -183,8 +389,7 @@ function parseSearchResults(md) {
             if (!ln) continue;
             if (!gameUrl && ln.startsWith('[') && ln.includes('an1.com/') && ln.includes('.html')) {
                 const m = ln.match(/\[([^\]]+)\]\((https:\/\/an1\.com\/[0-9]+-[^)"]+\.html)/);
-                if (m) { gameUrl = m[2]; }
-                continue;
+                if (m) { gameUrl = m[2]; } continue;
             }
             if (!dev && !ln.startsWith('*') && !ln.startsWith('!') && !ln.startsWith('[') && !ln.startsWith('#') && ln.length > 1 && ln.length < 80) {
                 dev = ln; continue;
@@ -222,37 +427,76 @@ async function searchGames(query) {
     return { games, total, searchUrl: `${BASE}/?do=search&subaction=search&story=${encoded}` };
 }
 
-// ── FORMAT CAPTION UNTUK NOTIF GRUP ──────────────────────────────────────────
+// ── FORMAT CAPTION NOTIF GRUP (mobile-friendly WhatsApp) ─────────────────────
 
-const SEP  = '━━━━━━━━━━━━━━━━━━';
-const SEP2 = '┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄';
+const SEP  = '━━━━━━━━━━━━━━━━━━━';
+const SEP2 = '┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄';
 
-function buatCaption(game) {
-    const sekarang = new Date();
+function buatCaption(game, detail = null) {
+    // Waktu kirim
+    const now      = new Date();
     const opsiHari = { timeZone: 'Asia/Jakarta', weekday: 'long' };
     const opsiTgl  = { timeZone: 'Asia/Jakarta', day: '2-digit', month: 'long', year: 'numeric' };
     const opsiJam  = { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit', hour12: false };
-    const hari     = sekarang.toLocaleDateString('id-ID', opsiHari);
-    const tgl      = sekarang.toLocaleDateString('id-ID', opsiTgl);
-    const jam      = sekarang.toLocaleTimeString('id-ID', opsiJam);
-    const headerWaktu = `${hari}, ${tgl} — ${jam} WIB`;
+    const hari     = now.toLocaleDateString('id-ID', opsiHari);
+    const tgl      = now.toLocaleDateString('id-ID', opsiTgl);
+    const jam      = now.toLocaleTimeString('id-ID', opsiJam);
 
-    const rating   = game.rating ? `⭐ *${game.rating}/5*` : '';
-    const dev      = game.developer ? `\n👤 *Developer* : _${game.developer}_` : '';
-    const url      = game.url ? `\n🔗 *Download*  : ${game.url}` : '';
+    const title     = detail?.fullTitle || game.title || '?';
+    const dev       = detail?.developer || game.developer || '';
+    const image     = detail?.image     || game.image     || '';
+    const urlGame   = detail?.url       || game.url       || '';
+    const rating    = game.rating       || '';
+
+    // Baris info teknis (hanya tampilkan yang ada datanya)
+    const infoRows = [];
+    if (detail?.version)  infoRows.push(`├ 📦 *Versi*     : \`${detail.version}\``);
+    if (detail?.android)  infoRows.push(`├ 🤖 *Android*   : \`${detail.android}\``);
+    if (detail?.size)     infoRows.push(`├ 💾 *Ukuran*    : \`${detail.size}\``);
+    if (detail?.koneksi)  infoRows.push(`├ 📶 *Koneksi*   : \`${detail.koneksi}\``);
+    if (detail?.updated)  infoRows.push(`├ 📅 *Update*    : ${detail.updated}`);
+    if (detail?.installs) infoRows.push(`├ 📲 *Unduhan*   : ${detail.installs}`);
+    if (detail?.ratedFor) infoRows.push(`├ 🔞 *Rating*    : ${detail.ratedFor} tahun+`);
+    if (detail?.category) infoRows.push(`├ 📂 *Kategori*  : ${detail.category}`);
+    if (detail?.price)    infoRows.push(`├ 💰 *Harga*     : ${detail.price === '$0' ? 'Gratis' : detail.price}`);
+    if (rating)           infoRows.push(`├ ⭐ *Bintang*   : ${rating}/5`);
+
+    // Ubah baris terakhir dari ├ ke ╰
+    if (infoRows.length > 0) {
+        infoRows[infoRows.length - 1] = infoRows[infoRows.length - 1].replace(/^├/, '╰');
+    }
+
+    // Blok sinopsis (format > WhatsApp quote)
+    let sinopsisBlok = '';
+    if (detail?.sinopsis) {
+        const kalimat = detail.sinopsis.replace(/\n+/g, ' ').trim();
+        sinopsisBlok =
+            `\n📖 *Sinopsis*\n` +
+            `${SEP2}\n` +
+            `> ${kalimat}\n`;
+    }
+
+    const infoBlok = infoRows.length
+        ? `\n${SEP}\n📋 *Info Game*\n${SEP2}\n${infoRows.join('\n')}\n`
+        : '';
+
+    const downloadBlok = urlGame
+        ? `\n${SEP}\n🔗 *Download / Info:*\n${urlGame}\n`
+        : '';
 
     return (
         `🎮 *GAME BARU DI AN1.COM!*\n` +
         `${SEP}\n` +
-        `📅 _${headerWaktu}_\n` +
+        `📅 _${hari}, ${tgl}_\n` +
+        `🕐 _${jam} WIB_\n` +
         `${SEP}\n\n` +
-        `🕹️ *${game.title}*\n` +
-        `${dev}\n` +
-        (rating ? `${rating}\n` : '') +
-        `${url}\n\n` +
+        `🕹️ *${title}*\n` +
+        (dev ? `👤 _${dev}_\n` : '') +
+        sinopsisBlok +
+        infoBlok +
+        downloadBlok +
         `${SEP}\n` +
-        `🌐 *Sumber* : https://an1.com/games/\n` +
-        `📥 Klik link download di atas untuk unduh APK MOD gratis!`
+        `🌐 _Sumber: AN1.COM — APK MOD Gratis_`
     );
 }
 
@@ -275,17 +519,17 @@ function tandaiSudahKirim(url) {
 
 function tandaiDanLog(game, grupList) {
     if (game.url) tandaiSudahKirim(game.url);
-
     try {
         const log = bacaLog();
         if (!Array.isArray(log.terkirim)) log.terkirim = [];
         const sudahAda = log.terkirim.some(e => e.url === game.url);
         if (!sudahAda) {
             log.terkirim.unshift({
-                title     : game.title,
-                url       : game.url || '',
+                title     : game.fullTitle || game.title || '',
+                url       : game.url       || '',
                 developer : game.developer || '',
-                rating    : game.rating || '',
+                version   : game.version   || '',
+                size      : game.size      || '',
                 waktuKirim: new Date().toISOString(),
                 grupCount : grupList.length,
                 grupList,
@@ -299,10 +543,6 @@ function tandaiDanLog(game, grupList) {
 }
 
 // ── CARI GAME BARU (REALTIME) ─────────────────────────────────────────────────
-// Logika:
-// - Ambil halaman games terbaru
-// - Jika belum pernah diinisialisasi (bot baru start), tandai semua sebagai seen tanpa kirim
-// - Jika sudah pernah, kirim game yang belum pernah terkirim
 
 async function cariGameBaru() {
     const state = bacaState();
@@ -314,7 +554,7 @@ async function cariGameBaru() {
         return [];
     }
 
-    // Inisialisasi pertama: tandai semua game saat ini sebagai seen, jangan kirim
+    // Inisialisasi pertama: tandai semua game saat ini, jangan kirim
     if (!state.initialized) {
         state.initialized = true;
         if (!state.urlTerkirim) state.urlTerkirim = [];
@@ -331,9 +571,23 @@ async function cariGameBaru() {
 
     simpanState(state);
 
-    // Temukan game yang belum pernah terkirim
-    const baru = games.filter(g => g.url && !sudahDikirim(g.url));
-    return baru;
+    // Game yang belum pernah terkirim
+    const baruList = games.filter(g => g.url && !sudahDikirim(g.url));
+    if (!baruList.length) return [];
+
+    // Fetch detail untuk tiap game baru (max 5 agar tidak lambat)
+    const hasilBaru = [];
+    for (const game of baruList.slice(0, 5)) {
+        const detail = await fetchGameDetail(game.url);
+        hasilBaru.push({
+            ...game,
+            ...(detail || {}),
+            url: game.url, // pastikan URL tidak tertimpa
+        });
+        await new Promise(r => setTimeout(r, 1000));
+    }
+
+    return hasilBaru;
 }
 
 // ── SIMULASI (TEST) ────────────────────────────────────────────────────────────
@@ -341,9 +595,17 @@ async function cariGameBaru() {
 async function simulasi() {
     const games = await getGamesList(1);
     if (!games.length) throw new Error('Tidak ada game ditemukan di AN1.COM');
-    const game    = games[0];
-    const caption = buatCaption(game);
-    return { caption, urlGambar: game.image || null, game };
+
+    const game   = games[0];
+    const detail = await fetchGameDetail(game.url);
+    const merged = { ...game, ...(detail || {}), url: game.url };
+    const caption = buatCaption(merged, detail);
+
+    return {
+        caption,
+        urlGambar: detail?.image || game.image || null,
+        game: merged,
+    };
 }
 
 // ── EXPORT ────────────────────────────────────────────────────────────────────
@@ -351,6 +613,7 @@ async function simulasi() {
 module.exports = {
     getGamesList,
     searchGames,
+    fetchGameDetail,
     getEnabledGroups,
     setGroupEnabled,
     cariGameBaru,
