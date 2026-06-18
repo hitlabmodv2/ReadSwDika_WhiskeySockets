@@ -40,7 +40,13 @@ _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurn
 > Shortcut tanpa konfirmasi: _.setbrowser v2 ya_
 > Konfirmasi kadaluarsa otomatis setelah 30 detik
 > Hanya owner, hanya bot utama
-> 💡 Bisa juga atur manual lewat config.json → _"browserDevice": { "selected": "v2" }_
+> 🔗 *Metode koneksi ulang saat ganti browser:*
+> ▸ QR Code — scan langsung dari WA
+> ▸ Pairing Code — kode dikirim ke chat ini otomatis
+> ⚙️ *Sebelum pakai, pastikan config.json sudah benar:*
+> Buka config.json → bagian paling atas → ubah _"botNumber"_ ke nomor WA yang kamu pakai sekarang
+> Contoh: _"botNumber": "628xxxxxxxxxxxx"_
+> 💡 Bisa juga atur browser manual lewat config.json → _"browserDevice": { "selected": "v2" }_
 > 🖥️ *Daftar 12 Browser Tersedia:*
 > ▸ V1  — Ubuntu + Chrome (124.0.6367.82)
 > ▸ V2  — Windows + Chrome (125.0.6422.141)

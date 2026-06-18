@@ -64,7 +64,7 @@
       "participant": "127393243132132@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-17T13:19:12.609Z",
+    "updatedAt": "2026-06-18T10:18:30.559Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -83,7 +83,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-17T13:19:12.609Z"
+    "processedAt": "2026-06-17T13:19:12.609Z",
+    "deleted": true,
+    "deletedAt": "2026-06-18T10:18:30.559Z"
   },
   "AC1EC44EE37D71F2B1DF047D7AD8A294": {
     "id": "AC1EC44EE37D71F2B1DF047D7AD8A294",
@@ -235,5 +237,47 @@
     "updatedAt": "2026-06-18T09:59:13.732Z",
     "retriedOnStartup": true,
     "retriedAt": "2026-06-18T09:59:13.732Z"
+  },
+  "AC0C8B2E777B4BFF7C067935091C9261": {
+    "id": "AC0C8B2E777B4BFF7C067935091C9261",
+    "sender": "6283815424573@s.whatsapp.net",
+    "name": "(T)ipii kinetik",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-18T10:18:30.550Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "👟",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6283815424573",
+    "resolvedPn": "6283815424573@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6283815424573@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC0C8B2E777B4BFF7C067935091C9261",
+      "participant": "127393243132132@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-18T10:18:47.397Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283815424573@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC0C8B2E777B4BFF7C067935091C9261",
+        "participant": "127393243132132@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283815424573@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC0C8B2E777B4BFF7C067935091C9261",
+        "participant": "6283815424573@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-18T10:18:47.396Z"
   }
 }
