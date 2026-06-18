@@ -554,7 +554,7 @@ async function handleUpswgcV2(hisoka, m, query, tolak) {
                 );
         }
 
-        // Load castleys-community
+        // Load castleys-community (diperlukan untuk: text status + proto patch audience)
         let groupStatusV2;
         try {
                 groupStatusV2 = await getGroupStatusV2();
@@ -562,17 +562,56 @@ async function handleUpswgcV2(hisoka, m, query, tolak) {
                 return m.reply(`❌ Gagal load castleys-community: ${e.message}\nPastikan package sudah terinstall.`);
         }
 
+        // ── Helper: build contextInfo untuk hisoka.sendMessage ───────────────
+        // Media dikirim via hisoka.sendMessage (proven work, sama dgn V1)
+        // agar tidak kena bug messageSecret dari relayMessage castleys-community
+        const buildCtx = (aud) => {
+                const base = { isGroupStatus: true };
+                if (!aud) return base;
+                // Close friends
+                if (aud === 'close_friends' ||
+                    (typeof aud === 'object' && (aud.type === 'close_friends' || aud.type === 1))) {
+                        return { ...base, statusAudienceMetadata: { audienceType: 1 } };
+                }
+                // Custom list
+                if (typeof aud === 'object' && (aud.type === 'custom' || aud.type === 2 || aud.name)) {
+                        return {
+                                ...base,
+                                statusAudienceMetadata: {
+                                        audienceType: 2,
+                                        ...(aud.name  ? { listName:  String(aud.name)  } : {}),
+                                        ...(aud.emoji ? { listEmoji: String(aud.emoji) } : {}),
+                                },
+                        };
+                }
+                return base;
+        };
+
         // ── Kirim berdasarkan tipe media ────────────────────────────────────
 
         try {
+                const isImg    = mType === 'imageMessage'  || /image/i.test(mMime);
+                const isVid    = mType === 'videoMessage'  || /video/i.test(mMime);
+                const isAud    = mType === 'audioMessage'  || mType === 'pttMessage' || /audio/i.test(mMime);
+                const isStk    = mType === 'stickerMessage';
+                const hasMedia = isImg || isVid || isAud || isStk;
+
+                console.log('[swgcv2][debug] src:', src ? `${src === m ? 'current' : 'quoted'}` : 'null',
+                        '| mType:', mType || '(none)',
+                        '| mMime:', mMime || '(none)',
+                        '| hasMedia:', hasMedia,
+                        '| caption:', caption || '(kosong)',
+                        '| audience_:', JSON.stringify(audience_) || 'undefined');
+
                 // Gambar
-                if (mType === 'imageMessage' || /image/i.test(mMime)) {
+                if (isImg) {
+                        console.log('[swgcv2][debug] → download image...');
                         const buf = await downloadSrc();
-                        await groupStatusV2(hisoka, jid, {
-                                image:    buf,
-                                caption:  caption,
-                                audience: audience_,
-                        });
+                        console.log('[swgcv2][debug] → buf size:', buf?.length, '| kirim via sendMessage...');
+                        const ctx = buildCtx(audience_);
+                        console.log('[swgcv2][debug] → contextInfo:', JSON.stringify(ctx));
+                        await hisoka.sendMessage(jid, { image: buf, caption, contextInfo: ctx });
+                        console.log('[swgcv2][debug] → image sent OK');
                         return m.reply(
                                 `✅ *Status gambar dikirim!*\n` +
                                 `*Group:* ${jid}\n` +
@@ -581,13 +620,13 @@ async function handleUpswgcV2(hisoka, m, query, tolak) {
                 }
 
                 // Video
-                if (mType === 'videoMessage' || /video/i.test(mMime)) {
+                if (isVid) {
+                        console.log('[swgcv2][debug] → download video...');
                         const buf = await downloadSrc();
-                        await groupStatusV2(hisoka, jid, {
-                                video:    buf,
-                                caption:  caption,
-                                audience: audience_,
-                        });
+                        console.log('[swgcv2][debug] → buf size:', buf?.length, '| kirim via sendMessage...');
+                        const ctx = buildCtx(audience_);
+                        await hisoka.sendMessage(jid, { video: buf, caption, contextInfo: ctx });
+                        console.log('[swgcv2][debug] → video sent OK');
                         return m.reply(
                                 `✅ *Status video dikirim!*\n` +
                                 `*Group:* ${jid}\n` +
@@ -596,14 +635,14 @@ async function handleUpswgcV2(hisoka, m, query, tolak) {
                 }
 
                 // Audio / PTT
-                if (mType === 'audioMessage' || mType === 'pttMessage' || /audio/i.test(mMime)) {
+                if (isAud) {
+                        console.log('[swgcv2][debug] → download audio...');
                         const rawBuf  = await downloadSrc();
                         const opusBuf = await convertAudioToOpus(rawBuf);
-                        await groupStatusV2(hisoka, jid, {
-                                audio:    opusBuf,
-                                ptt:      true,
-                                audience: audience_,
-                        });
+                        console.log('[swgcv2][debug] → opusBuf size:', opusBuf?.length, '| kirim via sendMessage...');
+                        const ctx = buildCtx(audience_);
+                        await hisoka.sendMessage(jid, { audio: opusBuf, ptt: true, mimetype: 'audio/ogg; codecs=opus', contextInfo: ctx });
+                        console.log('[swgcv2][debug] → audio sent OK');
                         return m.reply(
                                 `✅ *Status audio dikirim!*\n` +
                                 `*Group:* ${jid}\n` +
@@ -611,14 +650,14 @@ async function handleUpswgcV2(hisoka, m, query, tolak) {
                         );
                 }
 
-                // Stiker — kirim sebagai gambar di status
-                if (mType === 'stickerMessage') {
+                // Stiker — download lalu kirim sebagai gambar di status
+                if (isStk) {
+                        console.log('[swgcv2][debug] → download sticker...');
                         const buf = await downloadSrc();
-                        await groupStatusV2(hisoka, jid, {
-                                image:    buf,
-                                caption:  caption,
-                                audience: audience_,
-                        });
+                        console.log('[swgcv2][debug] → buf size:', buf?.length, '| kirim via sendMessage (as image)...');
+                        const ctx = buildCtx(audience_);
+                        await hisoka.sendMessage(jid, { image: buf, caption, contextInfo: ctx });
+                        console.log('[swgcv2][debug] → sticker (as image) sent OK');
                         return m.reply(
                                 `✅ *Status stiker dikirim!*\n` +
                                 `*Group:* ${jid}\n` +
@@ -626,7 +665,8 @@ async function handleUpswgcV2(hisoka, m, query, tolak) {
                         );
                 }
 
-                // Teks dengan background warna
+                // Teks dengan background warna (tetap pakai castleys-community)
+                console.log('[swgcv2][debug] → kirim teks via groupStatusV2 | warna:', bgColor);
                 await groupStatusV2(hisoka, jid, {
                         text:       caption,
                         background: bgColor,

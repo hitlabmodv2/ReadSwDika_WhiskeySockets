@@ -1,48 +1,4 @@
 {
-  "ACB9756968DD3CED61A3EF810230859D": {
-    "id": "ACB9756968DD3CED61A3EF810230859D",
-    "sender": "6285136314199@s.whatsapp.net",
-    "name": "nurull L ny 2",
-    "type": "extendedTextMessage",
-    "arrivedAt": "2026-06-17T04:54:42.635Z",
-    "read": true,
-    "reacted": true,
-    "emoji": "👳",
-    "resolve": "PN langsung ✓",
-    "source": "status",
-    "number": "6285136314199",
-    "resolvedPn": "6285136314199@s.whatsapp.net",
-    "messageKey": {
-      "remoteJid": "status@broadcast",
-      "remoteJidAlt": "6285136314199@s.whatsapp.net",
-      "fromMe": false,
-      "id": "ACB9756968DD3CED61A3EF810230859D",
-      "participant": "90916371062907@lid",
-      "addressingMode": "lid"
-    },
-    "updatedAt": "2026-06-17T09:05:10.887Z",
-    "receiptKeys": [
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6285136314199@s.whatsapp.net",
-        "fromMe": false,
-        "id": "ACB9756968DD3CED61A3EF810230859D",
-        "participant": "90916371062907@lid",
-        "addressingMode": "lid"
-      },
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6285136314199@s.whatsapp.net",
-        "fromMe": false,
-        "id": "ACB9756968DD3CED61A3EF810230859D",
-        "participant": "6285136314199@s.whatsapp.net",
-        "addressingMode": "lid"
-      }
-    ],
-    "processedAt": "2026-06-17T04:54:57.451Z",
-    "deleted": true,
-    "deletedAt": "2026-06-17T09:05:10.887Z"
-  },
   "AC66A7D96FC8B1D71AE4A8B5DA952AB3": {
     "id": "AC66A7D96FC8B1D71AE4A8B5DA952AB3",
     "sender": "6285136314199@s.whatsapp.net",
@@ -602,5 +558,28 @@
     "processedAt": "2026-06-18T06:33:42.741Z",
     "deleted": true,
     "deletedAt": "2026-06-18T07:08:43.186Z"
+  },
+  "AC0CD629921A633D53DBC9B7170C922F": {
+    "id": "AC0CD629921A633D53DBC9B7170C922F",
+    "sender": "6285136314199@s.whatsapp.net",
+    "name": "nurull L ny 2",
+    "type": "extendedTextMessage",
+    "arrivedAt": "2026-06-18T07:25:02.984Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285136314199",
+    "resolvedPn": "6285136314199@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285136314199@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC0CD629921A633D53DBC9B7170C922F",
+      "participant": "90916371062907@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-18T07:25:02.985Z"
   }
 }
