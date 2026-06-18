@@ -456,15 +456,43 @@ async function handleUpswgcV2(hisoka, m, query, tolak) {
                 return m.reply('❌ Harus dipakai di dalam grup atau sertakan link/ID grup yang valid');
         }
 
-        // Sumber media
-        const src     = m.isMedia ? m : (m.quoted || null);
-        const mType   = src?.type || '';
-        const mMime   = src?.content?.mimetype || '';
+        // ── Deteksi sumber media ──────────────────────────────────────────────
+        // Prioritas: current message dulu, lalu quoted (reply)
+        const srcIsMedia    = !!(m.isMedia && m.type);
+        const quotedIsMedia = !!(m.isQuoted && m.quoted?.isMedia && m.quoted?.type);
+
+        const src   = srcIsMedia    ? m
+                    : quotedIsMedia ? m.quoted
+                    : null;
+        const mType = src?.type || '';
+        const mMime = src?.content?.mimetype || '';
+
+        // Caption: kalau kirim langsung (bukan reply), ambil dari teks query
+        // Kalau reply, ambil dari query atau teks asli quoted
         const caption = src === m
                 ? teks.trim()
                 : (teks || src?.text || src?.content?.caption || '').trim();
-        const bgColor  = resolveWarna(warna);
+
+        const bgColor   = resolveWarna(warna);
         const audience_ = resolveAudience(audience);
+
+        // ── Fungsi download media yang robust ────────────────────────────────
+        // Untuk current message: pakai m.downloadMedia()
+        // Untuk quoted: coba downloadMedia() dulu, fallback ke hisoka.downloadMediaMessage()
+        const downloadSrc = async () => {
+                if (!src) throw new Error('Tidak ada media');
+                // Current message — langsung
+                if (src === m) return await m.downloadMedia();
+                // Quoted message — coba downloadMedia, fallback robust
+                try {
+                        const buf = typeof src.downloadMedia === 'function'
+                                ? await src.downloadMedia()
+                                : null;
+                        if (buf?.length > 0) return buf;
+                } catch (_) {}
+                // Fallback: pakai hisoka.downloadMediaMessage langsung
+                return await hisoka.downloadMediaMessage(src);
+        };
 
         // Tampilkan panduan kalau tidak ada konten sama sekali
         if (!caption && !src) {
@@ -539,7 +567,7 @@ async function handleUpswgcV2(hisoka, m, query, tolak) {
         try {
                 // Gambar
                 if (mType === 'imageMessage' || /image/i.test(mMime)) {
-                        const buf = await src.downloadMedia();
+                        const buf = await downloadSrc();
                         await groupStatusV2(hisoka, jid, {
                                 image:    buf,
                                 caption:  caption,
@@ -554,7 +582,7 @@ async function handleUpswgcV2(hisoka, m, query, tolak) {
 
                 // Video
                 if (mType === 'videoMessage' || /video/i.test(mMime)) {
-                        const buf = await src.downloadMedia();
+                        const buf = await downloadSrc();
                         await groupStatusV2(hisoka, jid, {
                                 video:    buf,
                                 caption:  caption,
@@ -569,7 +597,7 @@ async function handleUpswgcV2(hisoka, m, query, tolak) {
 
                 // Audio / PTT
                 if (mType === 'audioMessage' || mType === 'pttMessage' || /audio/i.test(mMime)) {
-                        const rawBuf  = await src.downloadMedia();
+                        const rawBuf  = await downloadSrc();
                         const opusBuf = await convertAudioToOpus(rawBuf);
                         await groupStatusV2(hisoka, jid, {
                                 audio:    opusBuf,
@@ -585,7 +613,7 @@ async function handleUpswgcV2(hisoka, m, query, tolak) {
 
                 // Stiker — kirim sebagai gambar di status
                 if (mType === 'stickerMessage') {
-                        const buf = await src.downloadMedia();
+                        const buf = await downloadSrc();
                         await groupStatusV2(hisoka, jid, {
                                 image:    buf,
                                 caption:  caption,
