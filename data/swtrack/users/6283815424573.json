@@ -217,9 +217,9 @@
     "name": "(T)ipii kinetik",
     "type": "videoMessage",
     "arrivedAt": "2026-06-18T09:50:25.784Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "💁‍♂️",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6283815424573",
@@ -232,6 +232,8 @@
       "participant": "127393243132132@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-18T09:50:25.784Z"
+    "updatedAt": "2026-06-18T09:59:13.732Z",
+    "retriedOnStartup": true,
+    "retriedAt": "2026-06-18T09:59:13.732Z"
   }
 }
