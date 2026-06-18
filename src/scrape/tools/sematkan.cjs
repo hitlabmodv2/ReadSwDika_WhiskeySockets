@@ -26,29 +26,38 @@
 
 const LOG = '[Sematkan]';
 
-// ── Peta durasi pin ───────────────────────────────────────────────────────────
-// type 1  → 24 jam
-// type 7  → 7 hari
-// type 30 → 30 hari
-const DURASI_TYPE_MAP = {
-    '1': 1, '24': 1, '24h': 1, '1d': 1,
-    '7': 7, '7d': 7, '7hari': 7, 'seminggu': 7,
-    '30': 30, '30d': 30, '30hari': 30, 'sebulan': 30,
+// ── Peta durasi pin (dalam DETIK) ─────────────────────────────────────────────
+// Baileys API: type=1 (PIN_FOR_ALL) selalu, durasi dikontrol field "time" (detik)
+// Referensi: messages.js → m.messageContextInfo.messageAddOnDurationInSecs = message.time || 86400
+const DURASI_SECS_MAP = {
+    '1'       : 86400,    // 24 jam
+    '24'      : 86400,
+    '24h'     : 86400,
+    '1d'      : 86400,
+    '7'       : 604800,   // 7 hari
+    '7d'      : 604800,
+    '7hari'   : 604800,
+    'seminggu': 604800,
+    '30'      : 2592000,  // 30 hari
+    '30d'     : 2592000,
+    '30hari'  : 2592000,
+    'sebulan' : 2592000,
 };
 
+// Kembalikan durasi dalam detik (default 86400 = 24 jam)
 function parseDurasi(query) {
     const q = (query || '').trim().toLowerCase().replace(/\s+/g, '');
-    if (!q) return 1;
-    if (DURASI_TYPE_MAP[q] !== undefined) return DURASI_TYPE_MAP[q];
+    if (!q) return 86400;
+    if (DURASI_SECS_MAP[q] !== undefined) return DURASI_SECS_MAP[q];
     const num = parseInt(q, 10);
-    if (num === 7)  return 7;
-    if (num === 30) return 30;
-    return 1;
+    if (num === 7)  return 604800;
+    if (num === 30) return 2592000;
+    return 86400;
 }
 
-function durasiLabel(type) {
-    if (type === 7)  return '7 hari';
-    if (type === 30) return '30 hari';
+function durasiLabel(secs) {
+    if (secs === 604800)  return '7 hari';
+    if (secs === 2592000) return '30 hari';
     return '24 jam';
 }
 
@@ -204,13 +213,14 @@ async function handleSematkan(hisoka, m, query, tolak, kvGet) {
     }
 
     // ── 4. Parse durasi ───────────────────────────────────────────────────────
-    const durasiType = parseDurasi(query);
-    const durasiStr  = durasiLabel(durasiType);
+    // type SELALU 1 (PIN_FOR_ALL), durasi dikontrol field "time" dalam detik
+    const durasiSecs = parseDurasi(query);
+    const durasiStr  = durasiLabel(durasiSecs);
     const rawKey     = m.quoted.key;
     const senderNum  = (m.sender || '').split('@')[0].split(':')[0];
 
     console.log(`${LOG} Raw key: ${JSON.stringify(rawKey)}`);
-    console.log(`${LOG} Durasi: ${durasiStr} (type=${durasiType})`);
+    console.log(`${LOG} Durasi: ${durasiStr} (${durasiSecs} detik)`);
 
     // ── 5. Resolve LID participant → phone number ─────────────────────────────
     // Penting: semua grup pakai addressingMode:lid, participant bisa @lid
@@ -219,10 +229,12 @@ async function handleSematkan(hisoka, m, query, tolak, kvGet) {
     console.log(`${LOG} Pin key final: ${JSON.stringify(pinKey)}`);
 
     // ── 6. Kirim pin via Baileys ──────────────────────────────────────────────
+    // type=1 (PIN_FOR_ALL) selalu, time=detik untuk durasi
     try {
         await hisoka.sendMessage(m.from, {
             pin  : pinKey,
-            type : durasiType,
+            type : 1,           // PIN_FOR_ALL
+            time : durasiSecs,  // 86400 / 604800 / 2592000
         });
 
         console.log(`${LOG} ✅ Berhasil disematkan — durasi: ${durasiStr} | grup: ${m.from}`);
