@@ -305,12 +305,55 @@ function parseDetailPage(md, fallbackUrl) {
     };
 }
 
+// ── FETCH DIRECT APK DOWNLOAD LINK ────────────────────────────────────────────
+// Ambil dari /file_ID-dw.html menggunakan axios (jina tidak render JS download btn)
+
+async function fetchDownloadUrl(gameUrl) {
+    try {
+        // Extract ID dari URL: https://an1.com/266-slug.html → 266
+        const idMatch = gameUrl.match(/an1\.com\/(\d+)-/);
+        if (!idMatch) return '';
+
+        const id          = idMatch[1];
+        const downloadPage = `${BASE}/file_${id}-dw.html`;
+
+        const res = await axios.get(downloadPage, {
+            headers: {
+                'User-Agent' : HEADERS['User-Agent'],
+                'Accept'     : 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'Accept-Language': HEADERS['Accept-Language'],
+                'Referer'    : gameUrl,
+            },
+            timeout: 20000,
+            decompress: true,
+        });
+
+        const html = typeof res.data === 'string' ? res.data : JSON.stringify(res.data);
+
+        // Cari semua files.an1.net/*.apk — abaikan an1store.apk
+        const matches = html.match(/https:\/\/files\.an1\.net\/[^\s"'<>]+\.apk/g) || [];
+        const apkUrl  = matches.find(u => !u.includes('an1store'));
+        return apkUrl || '';
+    } catch (e) {
+        console.warn('[AniGame] Gagal fetch download URL:', e?.message);
+        return '';
+    }
+}
+
 // ── FETCH DETAIL HALAMAN GAME ─────────────────────────────────────────────────
 
 async function fetchGameDetail(gameUrl) {
     try {
-        const md = await fetchMarkdown(gameUrl);
-        return parseDetailPage(md, gameUrl);
+        // Fetch detail page via jina (info: versi, ukuran, sinopsis, dll)
+        const mdProm     = fetchMarkdown(gameUrl);
+        // Fetch download link langsung via axios (paralel)
+        const dlUrlProm  = fetchDownloadUrl(gameUrl);
+
+        const [md, dlUrl] = await Promise.all([mdProm, dlUrlProm]);
+
+        const detail = parseDetailPage(md, gameUrl);
+        if (detail) detail.downloadUrl = dlUrl || '';
+        return detail;
     } catch (e) {
         console.warn('[AniGame] Gagal fetch detail:', gameUrl, e?.message);
         return null;
@@ -480,9 +523,13 @@ function buatCaption(game, detail = null) {
         ? `\n${SEP}\n📋 *Info Game*\n${SEP2}\n${infoRows.join('\n')}\n`
         : '';
 
-    const downloadBlok = urlGame
-        ? `\n${SEP}\n🔗 *Download / Info:*\n${urlGame}\n`
-        : '';
+    // Link download: prioritaskan direct APK, fallback ke halaman game
+    const apkUrl       = detail?.downloadUrl || '';
+    const downloadBlok = apkUrl
+        ? `\n${SEP}\n📥 *Download APK (Langsung):*\n${apkUrl}\n\n🔗 *Halaman Game:*\n${urlGame}\n`
+        : urlGame
+            ? `\n${SEP}\n🔗 *Download / Info:*\n${urlGame}\n`
+            : '';
 
     return (
         `🎮 *GAME BARU DI AN1.COM!*\n` +
