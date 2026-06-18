@@ -43,6 +43,7 @@ module.exports = {
       cwd         : ROOT,                         // ABSOLUT — daemon baca pkg.json benar
       interpreter : "node",
       version     : pkg.version,   // tampil di pm2 monit → Metadata > Version
+      args        : `--name ${pkg.name} --version ${pkg.version}`, // tampil di Script args monit
 
       // ── Mode & Instance ──────────────────────────────────────
       instances   : 1,
