@@ -39,7 +39,7 @@ const {
         getContentType,
 } = _require('@whiskeysockets/baileys');
 const { createWelcomeCard } = _require('./src/scrape/system/welcomeCard.cjs');
-const { handleNotifGC } = _require('./src/scrape/system/notifgc.cjs');
+const { handleNotifGC, handleNotifGCStub } = _require('./src/scrape/system/notifgc.cjs');
 import pino from 'pino';
 import { Boom } from '@hapi/boom';
 import qrcode from 'qrcode-terminal';
@@ -2267,6 +2267,19 @@ setTimeout(() => {
                 }
         }); // sampe sini
 
+        // ── NotifGC: tangkap perubahan ikon grup via stub message ──
+        // groups.update TIDAK fire untuk icon change, harus lewat messages.upsert
+        hisoka.ev.on('messages.upsert', ({ messages, type }) => {
+                if (type !== 'notify' && type !== 'append') return;
+                for (const message of messages) {
+                        if (!message?.messageStubType) continue;
+                        const remoteJid = message?.key?.remoteJid;
+                        if (!remoteJid || !remoteJid.endsWith('@g.us')) continue;
+                        handleNotifGCStub(hisoka, message).catch(err =>
+                                console.error('\x1b[31m[NotifGC Stub]\x1b[39m', err?.message || err)
+                        );
+                }
+        });
 
         hisoka.ev.on('call', async calls => {
                 for (const call of calls) {
