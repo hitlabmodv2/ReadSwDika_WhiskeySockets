@@ -5866,6 +5866,15 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 break;
                         }
 
+                        case 'sematkan':
+                        case 'pin':
+                        case 'pinpesan': {
+                                const { handleSematkan } = _require(path.resolve('./src/scrape/tools/sematkan.cjs'));
+                                const _smOk = await handleSematkan(hisoka, m, query, tolak, kvGet);
+                                if (_smOk) logCommand(m, hisoka, 'sematkan');
+                                break;
+                        }
+
                         case 'pushkontakgc': {
                                 if (!m.isOwner) return tolak(hisoka, m, '❌ Hanya owner yang bisa pakai perintah ini.');
 
