@@ -38,6 +38,67 @@ async function getGroupStatusV2() {
         return _groupStatusV2;
 }
 
+// ── Patch proto.ContextInfo.StatusAudienceMetadata ──────────────────────────
+// Baileys hanya encode audienceType — tidak encode listName & listEmoji.
+// Patch ini menambahkan dukungan penuh (field 2=listName, field 3=listEmoji)
+// supaya hisoka.sendMessage bisa mengirim custom audience dengan emoji yang benar.
+let _protoPatchApplied = false;
+function applyStatusAudiencePatch() {
+        if (_protoPatchApplied) return;
+        _protoPatchApplied = true;
+        try {
+                const baileys = require('@whiskeysockets/baileys');
+                const proto   = baileys.proto;
+                const sam     = proto?.ContextInfo?.StatusAudienceMetadata;
+                if (!sam) return;
+
+                // Tambah CUSTOM_LIST ke enum AudienceType (Baileys tidak punya ini)
+                const at = sam.AudienceType || {};
+                at[0] = 'UNKNOWN';      at['UNKNOWN']      = 0;
+                at[1] = 'CLOSE_FRIENDS'; at['CLOSE_FRIENDS'] = 1;
+                at[2] = 'CUSTOM_LIST';  at['CUSTOM_LIST']  = 2;
+                sam.AudienceType = at;
+
+                // Patch encode — tambah listName (field 2) dan listEmoji (field 3)
+                sam.encode = function encode(m, w) {
+                        const { Writer } = require('protobufjs/minimal');
+                        if (!w) w = Writer.create();
+                        if (m.audienceType != null && Object.hasOwnProperty.call(m, 'audienceType'))
+                                w.uint32(8).int32(m.audienceType);
+                        if (m.listName != null && Object.hasOwnProperty.call(m, 'listName'))
+                                w.uint32(18).string(m.listName);
+                        if (m.listEmoji != null && Object.hasOwnProperty.call(m, 'listEmoji'))
+                                w.uint32(26).string(m.listEmoji);
+                        return w;
+                };
+
+                // Patch fromObject — parse audienceType + listName + listEmoji
+                sam.fromObject = function fromObject(d) {
+                        if (d instanceof sam) return d;
+                        const m = sam.create ? sam.create() : Object.create(sam.prototype || {});
+                        // audienceType
+                        switch (d.audienceType) {
+                                case 'UNKNOWN':      case 0: m.audienceType = 0; break;
+                                case 'CLOSE_FRIENDS': case 1: m.audienceType = 1; break;
+                                case 'CUSTOM_LIST':  case 2: m.audienceType = 2; break;
+                                default:
+                                        if (typeof d.audienceType === 'number') m.audienceType = d.audienceType;
+                        }
+                        if (d.listName  != null) m.listName  = String(d.listName);
+                        if (d.listEmoji != null) m.listEmoji = String(d.listEmoji);
+                        return m;
+                };
+
+                if (!sam.create) {
+                        sam.create = function create(p) {
+                                const m = Object.create(sam.prototype || {});
+                                if (p) Object.assign(m, p);
+                                return m;
+                        };
+                }
+        } catch (_) {}
+}
+
 // ── Peta warna background status ────────────────────────────────────────────
 const WARNA_MAP = {
         // ── Merah & turunannya ──────────────────────────────
@@ -562,6 +623,9 @@ async function handleUpswgcV2(hisoka, m, query, tolak) {
                 return m.reply(`❌ Gagal load castleys-community: ${e.message}\nPastikan package sudah terinstall.`);
         }
 
+        // Patch proto agar listName & listEmoji ter-encode di hisoka.sendMessage
+        applyStatusAudiencePatch();
+
         // ── Helper: build contextInfo untuk hisoka.sendMessage ───────────────
         // Media dikirim via hisoka.sendMessage (proven work, sama dgn V1)
         // agar tidak kena bug messageSecret dari relayMessage castleys-community
@@ -603,6 +667,26 @@ async function handleUpswgcV2(hisoka, m, query, tolak) {
                         '| caption:', caption || '(kosong)',
                         '| audience_:', JSON.stringify(audience_) || 'undefined');
 
+                // ── Auto-delete pesan sumber setelah status terkirim ─────────────
+                // Hapus foto/video/audio yang jadi sumber agar tidak spam di grup
+                const autoDeleteSrc = async () => {
+                        try {
+                                if (src === m) {
+                                        // Kirim media langsung: hapus pesan command itu sendiri
+                                        await hisoka.sendMessage(m.from, { delete: m.key });
+                                } else if (src === m.quoted && m.quoted?.key?.id) {
+                                        // Reply ke foto: hapus pesan quoted (foto sumber)
+                                        const qKey = {
+                                                ...m.quoted.key,
+                                                remoteJid: m.from,
+                                        };
+                                        await hisoka.sendMessage(m.from, { delete: qKey });
+                                        // Hapus juga pesan command reply-nya
+                                        await hisoka.sendMessage(m.from, { delete: m.key });
+                                }
+                        } catch (_) {}
+                };
+
                 // Gambar
                 if (isImg) {
                         console.log('[swgcv2][debug] → download image...');
@@ -612,11 +696,13 @@ async function handleUpswgcV2(hisoka, m, query, tolak) {
                         console.log('[swgcv2][debug] → contextInfo:', JSON.stringify(ctx));
                         await hisoka.sendMessage(jid, { image: buf, caption, contextInfo: ctx });
                         console.log('[swgcv2][debug] → image sent OK');
-                        return m.reply(
+                        await m.reply(
                                 `✅ *Status gambar dikirim!*\n` +
                                 `*Group:* ${jid}\n` +
                                 `*Audience:* ${audienceLabel(audience_)}`
                         );
+                        await autoDeleteSrc();
+                        return;
                 }
 
                 // Video
@@ -627,11 +713,13 @@ async function handleUpswgcV2(hisoka, m, query, tolak) {
                         const ctx = buildCtx(audience_);
                         await hisoka.sendMessage(jid, { video: buf, caption, contextInfo: ctx });
                         console.log('[swgcv2][debug] → video sent OK');
-                        return m.reply(
+                        await m.reply(
                                 `✅ *Status video dikirim!*\n` +
                                 `*Group:* ${jid}\n` +
                                 `*Audience:* ${audienceLabel(audience_)}`
                         );
+                        await autoDeleteSrc();
+                        return;
                 }
 
                 // Audio / PTT
@@ -643,11 +731,13 @@ async function handleUpswgcV2(hisoka, m, query, tolak) {
                         const ctx = buildCtx(audience_);
                         await hisoka.sendMessage(jid, { audio: opusBuf, ptt: true, mimetype: 'audio/ogg; codecs=opus', contextInfo: ctx });
                         console.log('[swgcv2][debug] → audio sent OK');
-                        return m.reply(
+                        await m.reply(
                                 `✅ *Status audio dikirim!*\n` +
                                 `*Group:* ${jid}\n` +
                                 `*Audience:* ${audienceLabel(audience_)}`
                         );
+                        await autoDeleteSrc();
+                        return;
                 }
 
                 // Stiker — download lalu kirim sebagai gambar di status
@@ -658,11 +748,13 @@ async function handleUpswgcV2(hisoka, m, query, tolak) {
                         const ctx = buildCtx(audience_);
                         await hisoka.sendMessage(jid, { image: buf, caption, contextInfo: ctx });
                         console.log('[swgcv2][debug] → sticker (as image) sent OK');
-                        return m.reply(
+                        await m.reply(
                                 `✅ *Status stiker dikirim!*\n` +
                                 `*Group:* ${jid}\n` +
                                 `*Audience:* ${audienceLabel(audience_)}`
                         );
+                        await autoDeleteSrc();
+                        return;
                 }
 
                 // Teks dengan background warna (tetap pakai castleys-community)
