@@ -40,20 +40,171 @@ async function getGroupStatusV2() {
 
 // ── Peta warna background status ────────────────────────────────────────────
 const WARNA_MAP = {
-        biru:    '#34B7F1',
-        hijau:   '#25D366',
-        kuning:  '#FFD700',
-        jingga:  '#FF8C00',
-        merah:   '#FF3B30',
-        ungu:    '#9C27B0',
-        abu:     '#9E9E9E',
-        hitam:   '#000000',
-        putih:   '#FFFFFF',
-        cyan:    '#00BCD4',
-        pink:    '#E91E8C',
-        coklat:  '#795548',
-        navy:    '#1A237E',
-        toska:   '#009688',
+        // ── Merah & turunannya ──────────────────────────────
+        merah:          '#FF3B30',
+        merahtua:       '#C0392B',
+        merahmuda:      '#FF6B6B',
+        merahmarun:     '#800000',
+        krimson:        '#DC143C',
+        scarlet:        '#FF2400',
+        coral:          '#FF6F61',
+        salmon:         '#FA8072',
+        tomat:          '#FF4500',
+        rose:           '#FF007F',
+
+        // ── Jingga & turunannya ─────────────────────────────
+        jingga:         '#FF8C00',
+        orange:         '#FF8C00',
+        jinggamuda:     '#FFA500',
+        jinggaterang:   '#FF6200',
+        amber:          '#FFBF00',
+        oranye:         '#FF7043',
+
+        // ── Kuning & turunannya ─────────────────────────────
+        kuning:         '#FFD700',
+        kuningmuda:     '#FFEE58',
+        kuningtua:      '#F9A825',
+        emas:           '#FFD700',
+        gold:           '#FFD700',
+        lemon:          '#FFF44F',
+        krem:           '#FFFDD0',
+
+        // ── Hijau & turunannya ──────────────────────────────
+        hijau:          '#25D366',
+        hijauwatsapp:   '#25D366',
+        hijaumuda:      '#66BB6A',
+        hijautua:       '#1B5E20',
+        limau:          '#32CD32',
+        lime:           '#CDDC39',
+        hijauneon:      '#39FF14',
+        mint:           '#98FF98',
+        olive:          '#808000',
+        zaitun:         '#808000',
+        sage:           '#BCB88A',
+        toska:          '#009688',
+        teal:           '#009688',
+
+        // ── Biru & turunannya ───────────────────────────────
+        biru:           '#34B7F1',
+        birumuda:       '#64B5F6',
+        birutua:        '#1565C0',
+        navy:           '#1A237E',
+        navyblue:       '#000080',
+        besi:           '#4682B4',
+        cobalt:         '#0047AB',
+        biru2:          '#2196F3',
+        birulangit:     '#87CEEB',
+        birulaut:       '#006994',
+        biruneon:       '#00B4FF',
+        dodger:         '#1E90FF',
+        royal:          '#4169E1',
+        steel:          '#4682B4',
+
+        // ── Cyan & turunannya ───────────────────────────────
+        cyan:           '#00BCD4',
+        cyantua:        '#00838F',
+        aqua:           '#00FFFF',
+        turquoise:      '#40E0D0',
+        turqoise:       '#40E0D0',
+
+        // ── Ungu & turunannya ───────────────────────────────
+        ungu:           '#9C27B0',
+        ungumuda:       '#CE93D8',
+        ungutua:        '#4A148C',
+        violet:         '#EE82EE',
+        lavender:       '#E6E6FA',
+        lilac:          '#C8A2C8',
+        indigo:         '#3F51B5',
+        nila:           '#3F51B5',
+        magenta:        '#FF00FF',
+        fuchsia:        '#FF00FF',
+        plum:           '#DDA0DD',
+
+        // ── Pink & turunannya ───────────────────────────────
+        pink:           '#E91E8C',
+        pinkMuda:       '#F48FB1',
+        pinkTua:        '#880E4F',
+        hotpink:        '#FF69B4',
+        deeppink:       '#FF1493',
+        babyblue:       '#89CFF0',
+
+        // ── Coklat & turunannya ─────────────────────────────
+        coklat:         '#795548',
+        coklatmuda:     '#A1887F',
+        coklattua:      '#4E342E',
+        tan:            '#D2B48C',
+        khaki:          '#C3B091',
+        mocha:          '#6F4E37',
+        kayu:           '#8B4513',
+        siena:          '#A0522D',
+
+        // ── Abu & turunannya ────────────────────────────────
+        abu:            '#9E9E9E',
+        abumuda:        '#BDBDBD',
+        abutua:         '#616161',
+        silver:         '#C0C0C0',
+        perak:          '#C0C0C0',
+        slate:          '#708090',
+        charcoal:       '#36454F',
+        asap:           '#848884',
+
+        // ── Hitam & Putih ───────────────────────────────────
+        hitam:          '#000000',
+        black:          '#000000',
+        putih:          '#FFFFFF',
+        white:          '#FFFFFF',
+        ivory:          '#FFFFF0',
+        gading:         '#FFFFF0',
+
+        // ── Warna Neon / Terang ─────────────────────────────
+        neon:           '#39FF14',
+        neonhijau:      '#39FF14',
+        neonbiru:       '#00B4FF',
+        neonmerah:      '#FF3131',
+        neonkuning:     '#FFFF33',
+        neonpink:       '#FF10F0',
+        neonungu:       '#BC13FE',
+
+        // ── Warna Khusus ────────────────────────────────────
+        whatsapp:       '#25D366',
+        wa:             '#25D366',
+        telegram:       '#2CA5E0',
+        youtube:        '#FF0000',
+        instagram:      '#C13584',
+        twitter:        '#1DA1F2',
+        tiktok:         '#010101',
+        facebook:       '#1877F2',
+        spotify:        '#1DB954',
+        snapchat:       '#FFFC00',
+        discord:        '#5865F2',
+
+        // ── Warna Alam ──────────────────────────────────────
+        langit:         '#87CEEB',
+        laut:           '#006994',
+        daun:           '#228B22',
+        pasir:          '#C2B280',
+        tanah:          '#8B4513',
+        salju:          '#FFFAFA',
+        api:            '#FF4500',
+        es:             '#99C5C4',
+};
+
+// Alias pendek yang mengarah ke nama utama (biar fleksibel input user)
+const WARNA_ALIAS = {
+        r:    'merah',
+        g:    'hijau',
+        b:    'biru',
+        y:    'kuning',
+        p:    'pink',
+        o:    'jingga',
+        u:    'ungu',
+        h:    'hitam',
+        w:    'putih',
+        c:    'cyan',
+        t:    'toska',
+        n:    'navy',
+        m:    'merah',
+        k:    'kuning',
 };
 
 // ── Peta audience ────────────────────────────────────────────────────────────
@@ -114,8 +265,8 @@ function parseArgs(query) {
                 else if (AUDIENCE_MAP[v.toLowerCase()] !== undefined || v.toLowerCase() in AUDIENCE_MAP) {
                         audience = v.toLowerCase();
                 }
-                // Deteksi warna — nama atau hex
-                else if (WARNA_MAP[v.toLowerCase()]) {
+                // Deteksi warna — nama, alias pendek, atau hex
+                else if (WARNA_MAP[v.toLowerCase()] || WARNA_ALIAS[v.toLowerCase()]) {
                         warna = v.toLowerCase();
                 } else if (isHex(v)) {
                         warna = v.trim();
@@ -184,7 +335,10 @@ async function convertAudioToOpus(inputBuf) {
 function resolveWarna(warna) {
         if (!warna) return randomWarna();
         if (isHex(warna)) return warna;
-        return WARNA_MAP[warna.toLowerCase()] || randomWarna();
+        const key = warna.toLowerCase();
+        // Cek alias dulu, lalu nama langsung
+        const resolved = WARNA_ALIAS[key] ? WARNA_MAP[WARNA_ALIAS[key]] : WARNA_MAP[key];
+        return resolved || randomWarna();
 }
 
 /**
@@ -255,19 +409,38 @@ async function handleUpswgcV2(hisoka, m, query, tolak) {
         // Tampilkan panduan kalau tidak ada konten sama sekali
         if (!caption && !src) {
                 const audienceList = Object.keys(AUDIENCE_MAP).filter(k => k !== 'all' && k !== 'semua').join(', ');
+                const aliasStr = Object.entries(WARNA_ALIAS).map(([k, v]) => `${k}=${v}`).join(', ');
                 return m.reply(
-                        `*📋 Panduan upswgcv2*\n\n` +
-                        `*Teks:*\n` +
+                        `*📋 Panduan swgcv2*\n\n` +
+                        `*Format:*\n` +
+                        `${prefix}swgcv2 [teks]|[warna]|[grup]|[audience]\n\n` +
+                        `*Contoh:*\n` +
                         `${prefix}swgcv2 Halo semua!\n` +
                         `${prefix}swgcv2 Halo|hijau\n` +
-                        `${prefix}swgcv2 Halo|#FF5722|linkgrup\n` +
+                        `${prefix}swgcv2 Halo|merahtua\n` +
+                        `${prefix}swgcv2 Halo|#FF5722\n` +
+                        `${prefix}swgcv2 Halo|discord|linkgrup\n` +
                         `${prefix}swgcv2 Halo|biru|linkgrup|cf\n\n` +
-                        `*Media (reply/kirim foto, video, audio):*\n` +
+                        `*Media (reply foto/video/audio):*\n` +
                         `${prefix}swgcv2\n` +
-                        `${prefix}swgcv2 caption di sini\n` +
-                        `${prefix}swgcv2 caption|linkgrup\n\n` +
-                        `*Warna:* ${Object.keys(WARNA_MAP).join(', ')}\n` +
-                        `*Atau hex:* #RRGGBB\n\n` +
+                        `${prefix}swgcv2 caption|linkgrup|cf\n\n` +
+                        `*🎨 Warna tersedia (${Object.keys(WARNA_MAP).length} warna):*\n` +
+                        `🔴 Merah: merah, merahtua, merahmuda, merahmarun, krimson, scarlet, coral, salmon, tomat, rose\n` +
+                        `🟠 Jingga: jingga, orange, jinggamuda, jinggaterang, amber, oranye\n` +
+                        `🟡 Kuning: kuning, kuningmuda, kuningtua, emas, gold, lemon, krem\n` +
+                        `🟢 Hijau: hijau, hijaumuda, hijautua, limau, lime, mint, olive, toska, teal, sage, zaitun, hijauneon\n` +
+                        `🔵 Biru: biru, birumuda, birutua, navy, navyblue, cobalt, dodger, royal, steel, birulangit, birulaut, biruneon, biru2\n` +
+                        `🩵 Cyan: cyan, cyantua, aqua, turquoise\n` +
+                        `🟣 Ungu: ungu, ungumuda, ungutua, violet, lavender, lilac, indigo, nila, magenta, fuchsia, plum\n` +
+                        `🩷 Pink: pink, pinkmuda, pinktua, hotpink, deeppink\n` +
+                        `🟤 Coklat: coklat, coklatmuda, coklattua, tan, khaki, mocha, kayu, siena\n` +
+                        `⬜ Abu/Putih: abu, abumuda, abutua, silver, perak, slate, charcoal, asap, putih, white, ivory, gading\n` +
+                        `⬛ Hitam: hitam, black\n` +
+                        `⚡ Neon: neon, neonhijau, neonbiru, neonmerah, neonkuning, neonpink, neonungu\n` +
+                        `📱 Sosmed: wa, whatsapp, telegram, youtube, instagram, twitter, tiktok, facebook, spotify, snapchat, discord\n` +
+                        `🌿 Alam: langit, laut, daun, pasir, tanah, salju, api, es\n` +
+                        `*Alias cepat:* ${aliasStr}\n` +
+                        `*Hex custom:* #RRGGBB atau #RGB\n\n` +
                         `*Audience:* ${audienceList}`
                 );
         }
@@ -351,6 +524,7 @@ async function handleUpswgcV2(hisoka, m, query, tolak) {
 
 module.exports = {
         WARNA_MAP,
+        WARNA_ALIAS,
         AUDIENCE_MAP,
         randomWarna,
         isHex,
