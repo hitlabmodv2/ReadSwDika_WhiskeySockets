@@ -44,7 +44,22 @@ function bacaState() {
     try {
         if (fs.existsSync(FILE_STATE)) return JSON.parse(fs.readFileSync(FILE_STATE, 'utf-8'));
     } catch (_) {}
-    return { urlTerkirim: [], lastCheck: null, initialized: false };
+    return { urlTerkirim: [], lastCheck: null, initialized: false, idsTerlihat: [] };
+}
+
+// Ambil ID angka dari URL an1.com
+function extractId(url) {
+    const m = url.match(/an1\.com\/(\d+)-/);
+    return m ? parseInt(m[1], 10) : null;
+}
+
+// Tentukan tipe game: 'baru' = baru ditambahkan ke an1.com, 'update' = versi baru game lama
+function tentikanTipe(gameUrl, state) {
+    const id  = extractId(gameUrl);
+    if (!id) return 'update';
+    const ids = state?.idsTerlihat || [];
+    // Kalau ID-nya belum pernah ada di daftar saat init → kemungkinan game baru
+    return ids.includes(id) ? 'update' : 'baru';
 }
 
 function simpanState(data) {
@@ -557,8 +572,15 @@ function buatCaption(game, detail = null) {
             ? `\n${SEP}\n🔗 *Download / Info:*\n${urlGame}\n`
             : '';
 
+    // Header dinamis berdasarkan tipe game
+    const tipe        = game?.tipeUpdate || 'baru';
+    const headerEmoji = tipe === 'update' ? '🔄' : '🎮';
+    const headerTeks  = tipe === 'update'
+        ? `*UPDATE VERSI BARU DI AN1.COM!*`
+        : `*GAME BARU DI AN1.COM!*`;
+
     return (
-        `🎮 *GAME BARU DI AN1.COM!*\n` +
+        `${headerEmoji} ${headerTeks}\n` +
         `${SEP}\n` +
         `📅 _${hari}, ${tgl}_\n` +
         `🕐 _${jam} WIB_\n` +
@@ -630,16 +652,26 @@ async function cariGameBaru() {
     // Inisialisasi pertama: tandai semua game saat ini, jangan kirim
     if (!state.initialized) {
         state.initialized = true;
-        if (!state.urlTerkirim) state.urlTerkirim = [];
+        if (!state.urlTerkirim)  state.urlTerkirim  = [];
+        if (!state.idsTerlihat)  state.idsTerlihat  = [];
         for (const g of games) {
             if (g.url && !state.urlTerkirim.includes(g.url)) {
                 state.urlTerkirim.unshift(g.url);
             }
+            const id = extractId(g.url);
+            if (id && !state.idsTerlihat.includes(id)) state.idsTerlihat.push(id);
         }
         if (state.urlTerkirim.length > 500) state.urlTerkirim = state.urlTerkirim.slice(0, 500);
         simpanState(state);
         console.log(`[AniGame] ✅ Inisialisasi: ${games.length} game ditandai, siap pantau game baru`);
         return [];
+    }
+
+    // Migrasi: isi idsTerlihat dari urlTerkirim yang sudah ada (kalau belum ada)
+    if (!state.idsTerlihat || !state.idsTerlihat.length) {
+        state.idsTerlihat = (state.urlTerkirim || [])
+            .map(u => extractId(u))
+            .filter(Boolean);
     }
 
     simpanState(state);
@@ -651,11 +683,13 @@ async function cariGameBaru() {
     // Fetch detail untuk tiap game baru (max 5 agar tidak lambat)
     const hasilBaru = [];
     for (const game of baruList.slice(0, 5)) {
-        const detail = await fetchGameDetail(game.url);
+        const tipeUpdate = tentikanTipe(game.url, state);
+        const detail     = await fetchGameDetail(game.url);
         hasilBaru.push({
             ...game,
             ...(detail || {}),
-            url: game.url, // pastikan URL tidak tertimpa
+            url       : game.url, // pastikan URL tidak tertimpa
+            tipeUpdate,           // 'baru' atau 'update'
         });
         await new Promise(r => setTimeout(r, 1000));
     }
@@ -671,13 +705,23 @@ async function simulasi() {
 
     const game   = games[0];
     const detail = await fetchGameDetail(game.url);
-    const merged = { ...game, ...(detail || {}), url: game.url };
+
+    // Tentukan tipe realtime berdasarkan state
+    const state      = bacaState();
+    // Migrasi state lama yang belum punya idsTerlihat
+    if (!state.idsTerlihat || !state.idsTerlihat.length) {
+        state.idsTerlihat = (state.urlTerkirim || []).map(u => extractId(u)).filter(Boolean);
+    }
+    const tipeUpdate = tentikanTipe(game.url, state);
+
+    const merged  = { ...game, ...(detail || {}), url: game.url, tipeUpdate };
     const caption = buatCaption(merged, detail);
 
     return {
         caption,
-        urlGambar: detail?.image || game.image || null,
-        game: merged,
+        urlGambar : detail?.image || game.image || null,
+        game      : merged,
+        tipeUpdate,
     };
 }
 
