@@ -16,7 +16,8 @@
     "pm2:status": "pm2 status",
     "pm2:monit": "pm2 monit",
     "pm2:save": "pm2 save",
-    "pm2:startup": "pm2 startup"
+    "pm2:startup": "pm2 startup",
+    "postinstall": "node -e \"const fs=require(\"fs\"),p=\"node_modules/baileys\",t=\"node_modules/@whiskeysockets/baileys\";if(!fs.existsSync(p)){fs.symlinkSync(require(\"path\").resolve(t),p,\"dir\");console.log(\"[postinstall] baileys → @whiskeysockets/baileys symlink dibuat\");}else{console.log(\"[postinstall] baileys symlink sudah ada\");}\""
   },
   "keywords": [
     "whatsapp-bot",
