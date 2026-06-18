@@ -100,6 +100,23 @@ async function fetchMarkdown(url) {
     return res.data;
 }
 
+// ── TRANSLATE KE BAHASA INDONESIA (Google Translate gratis) ───────────────────
+
+async function translateToIndo(text) {
+    if (!text) return '';
+    try {
+        const url = 'https://translate.googleapis.com/translate_a/single'
+            + '?client=gtx&sl=en&tl=id&dt=t&q='
+            + encodeURIComponent(text);
+        const res    = await axios.get(url, { headers: HEADERS, timeout: 15000 });
+        const hasil  = (res.data[0] || []).map(x => x[0]).join('');
+        return hasil || text;
+    } catch (e) {
+        console.warn('[AniGame] Translate gagal, pakai teks asli:', e?.message);
+        return text; // fallback ke bahasa Inggris
+    }
+}
+
 // ── TEXT HELPERS ──────────────────────────────────────────────────────────────
 
 function potongTeks(teks, maks = 280) {
@@ -235,7 +252,7 @@ function parseDetailPage(md, fallbackUrl) {
         }
     }
 
-    // Sinopsis — baris yang dimulai **JUDUL** - DESKRIPSI
+    // Sinopsis — baris yang dimulai **JUDUL** - DESKRIPSI (ambil teks PENUH, tanpa potong)
     let sinopsis = '';
     for (const ln of lines) {
         const m = ln.match(/^\*\*[^*]+\*\*\s*[-–]\s*(.+)/);
@@ -255,6 +272,8 @@ function parseDetailPage(md, fallbackUrl) {
             }
         }
     }
+    // Bersihkan trailing elipsis jika ada (kadang jina tambah "...")
+    sinopsis = sinopsis.replace(/\s*\.\.\.\s*$/, '').trim();
 
     // Additional Information block
     let updatedRaw = '';
@@ -295,7 +314,7 @@ function parseDetailPage(md, fallbackUrl) {
         android,
         size,
         developer,
-        sinopsis: potongTeks(sinopsis, 280),
+        sinopsis,          // teks penuh, belum di-translate (dilakukan di fetchGameDetail)
         updated: formatTanggalIndo(updatedRaw),
         price,
         installs: formatInstalls(installs),
@@ -344,15 +363,22 @@ async function fetchDownloadUrl(gameUrl) {
 
 async function fetchGameDetail(gameUrl) {
     try {
-        // Fetch detail page via jina (info: versi, ukuran, sinopsis, dll)
-        const mdProm     = fetchMarkdown(gameUrl);
-        // Fetch download link langsung via axios (paralel)
-        const dlUrlProm  = fetchDownloadUrl(gameUrl);
-
-        const [md, dlUrl] = await Promise.all([mdProm, dlUrlProm]);
+        // Fetch detail page via jina + download URL secara paralel
+        const [md, dlUrl] = await Promise.all([
+            fetchMarkdown(gameUrl),
+            fetchDownloadUrl(gameUrl),
+        ]);
 
         const detail = parseDetailPage(md, gameUrl);
-        if (detail) detail.downloadUrl = dlUrl || '';
+        if (!detail) return null;
+
+        detail.downloadUrl = dlUrl || '';
+
+        // Translate sinopsis ke Bahasa Indonesia (teks penuh, tanpa potong)
+        if (detail.sinopsis) {
+            detail.sinopsis = await translateToIndo(detail.sinopsis);
+        }
+
         return detail;
     } catch (e) {
         console.warn('[AniGame] Gagal fetch detail:', gameUrl, e?.message);
