@@ -1,3 +1,27 @@
+/**
+ * ───────────────────────────────
+ *  Base Script : Bang Dika Ardnt
+ *  Recode By   : Bang Wilykun
+ *  WhatsApp    : 6289688206739
+ *  Telegram    : @Wilykun1994
+ * ───────────────────────────────
+ *  Script ini khusus donasi/VIP
+ *  Support dari kalian bikin saya
+ *  makin semangat update fitur,
+ *  fix bug, dan rawat script ini.
+ *
+ *  Dilarang menjual ulang script ini
+ *  Tanpa izin resmi dari developer.
+ *  Jika ketahuan = NO UPDATE / NO FIX
+ *
+ *  Hargai karya, gunakan dengan bijak.
+ *  Terima kasih sudah support.
+ * ───────────────────────────────
+ *
+ *  menu_utama.js — Builder teks menu utama bot
+ *  Tampilkan semua command, info uptime, fitur aktif/nonaktif
+ * ───────────────────────────────
+ */
 export function buildMenuUtama({ pushName, isOwner, uptimeStr, tgl, jam, browserLabel, totalCmdCount, totalSemuaFitur, fiturAktif, fiturTidakAktif }) {
         return `╭═════════════════════╮
 ║   🤖 *WILY BOT V22*   

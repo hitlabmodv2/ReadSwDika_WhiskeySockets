@@ -1,14 +1,13 @@
 /**
  * ───────────────────────────────
+ *  Base Script : Bang Dika Ardnt
  *  Recode By   : Bang Wilykun
  *  WhatsApp    : 6289688206739
  *  Telegram    : @Wilykun1994
  * ───────────────────────────────
- *  FITUR   : Auto Notifikasi Sholat
- *  Fungsi  : Kirim jadwal sholat + gambar masjid +
- *            suara adzan ke grup yang terdaftar,
- *            tepat saat waktu sholat tiba (±0 menit).
- *  Sumber  : api.aladhan.com (gratis, tanpa key)
+ *
+ *  autosholat.cjs — Notifikasi waktu sholat otomatis
+ *  Kirim jadwal sholat + gambar + adzan ke grup, tepat waktu
  * ───────────────────────────────
  */
 'use strict';
