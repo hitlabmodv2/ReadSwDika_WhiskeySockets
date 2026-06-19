@@ -187,5 +187,17 @@
   },
   "autoSholat": {
     "groups": []
+  },
+  "anigame": {
+    "groups": {
+      "120363383540766761@g.us": {
+        "enabled": true,
+        "diubahPada": 1781853785844
+      },
+      "120363192554714254@g.us": {
+        "enabled": false,
+        "diubahPada": 1781853787033
+      }
+    }
   }
 }
