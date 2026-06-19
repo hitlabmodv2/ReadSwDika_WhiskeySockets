@@ -3,7 +3,7 @@ _📅 Minggu, 21 Juni 2026 — WIB_ 🕐
 _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurna_ 🙏
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V22*
-✨ *3 Fitur Baru*
+✨ *4 Fitur Baru*
 🔧 *2 Bug Fix*
 🚀 *1 Improvement*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -60,6 +60,16 @@ _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurn
 > ▸ V10 — Ubuntu + Edge (125.0.2535.51)
 > ▸ V11 — Android + Chrome Mobile (125.0.6422.165)
 > ▸ V12 — iPhone + Safari Mobile (619.2.8.12.8.1)
+
+> NO.4 📌 *Sematkan Pesan di Grup — .sematkan*
+> Sematkan (pin) pesan apapun di grup WhatsApp langsung lewat bot
+> Cara pakai: reply pesan yang mau disematkan → ketik .sematkan
+> Durasi pilihan:
+> ▸ _.sematkan_ → sematkan 24 jam (default)
+> ▸ _.sematkan 7_ → sematkan 7 hari
+> ▸ _.sematkan 30_ → sematkan 30 hari
+> Bot wajib menjadi admin di grup
+> Hanya bisa digunakan di dalam grup
 ━━━━━━━━━━━━━━━━━━━━━━
 🔧 *BUG FIX*
 ━━━━━━━━━━━━━━━━━━━━━━
