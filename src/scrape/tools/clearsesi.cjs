@@ -158,3 +158,98 @@ async function clearSesi(onStep) {
 }
 
 module.exports = { clearSesi, fmtMB };
+
+// ── HANDLER: clearsesi ────────────────────────────────────────────────────────
+
+async function handleClearsesi({ hisoka, m, tolak, logCommand, getJadibotNumber, jadibotClearSesiMap }) {
+        const _csIsJadibot = hisoka?.isMainBot === false;
+        if (!m.isOwner && !_csIsJadibot) return tolak(hisoka, m, '❌ Perintah ini hanya untuk owner!');
+
+        const jadibotNumCtx = _csIsJadibot ? getJadibotNumber(hisoka) : null;
+        const clearFn = _csIsJadibot
+                ? jadibotClearSesiMap.get(jadibotNumCtx)
+                : global.__clearSesiInPlace;
+
+        if (!clearFn) {
+                return tolak(hisoka, m, '❌ Fungsi clearSesi tidak tersedia. Coba restart bot terlebih dahulu.');
+        }
+
+        const sessionLabel = _csIsJadibot
+                ? `jadibot/${jadibotNumCtx}.json`
+                : `sessions/hisoka.json`;
+
+        const fmtMBCS = (b) => (b / 1024 / 1024).toFixed(2) + ' MB';
+
+        const ICONS = {
+                'contacts':               '👥',
+                'groups':                 '👨‍👩‍👦',
+                'lid-mapping':            '🗺️',
+                'sender-key':             '🔑',
+                'app-state-sync-version': '🔄',
+                'tctoken':                '🎫',
+                'pre-key (trim)':         '🗝️',
+        };
+
+        const csProgMsg = await m.reply(
+                `🧹 *Clear Sesi — Memulai...*\n\n` +
+                `📂 *File :* ${sessionLabel}\n` +
+                `🔍 *Memeriksa dan membersihkan cache...*\n\n` +
+                `_Harap tunggu..._`
+        );
+
+        try {
+                const result = await clearFn(async ({ steps, totalSaved, beforeSize }) => {
+                        if (!csProgMsg?.key) return;
+
+                        const lines = steps.map(s => {
+                                const icon = ICONS[s.name] || '📦';
+                                const kb   = (s.savedBytes / 1024).toFixed(1);
+                                return `  ${icon} *${s.name}* — ${s.label} (hemat ${kb} KB)`;
+                        }).join('\n');
+
+                        const pctSaved = Math.min(100, Math.round((totalSaved / beforeSize) * 100));
+                        const bar = '[' + '█'.repeat(Math.round(pctSaved / 10)) + '░'.repeat(10 - Math.round(pctSaved / 10)) + ']';
+
+                        try {
+                                await m.reply({
+                                        edit: csProgMsg.key,
+                                        text:
+                                                `🧹 *Clear Sesi — Sedang berjalan...*\n\n` +
+                                                `📊 *Progress :* ${bar} ${pctSaved}%\n` +
+                                                `💾 *Hemat :* ${fmtMBCS(totalSaved)}\n\n` +
+                                                `*Langkah selesai:*\n` +
+                                                `${lines}\n\n` +
+                                                `_Harap tunggu..._`
+                                });
+                        } catch (_) {}
+                });
+
+                const linesDone = result.steps.map(s => {
+                        const icon = ICONS[s.name] || '📦';
+                        const kb   = (s.savedBytes / 1024).toFixed(1);
+                        return `  ${icon} *${s.name}* — ${s.label} (${kb} KB)`;
+                }).join('\n');
+
+                const doneText =
+                        `✅ *Clear Sesi selesai!*\n\n` +
+                        `📂 *File :* ${sessionLabel}\n` +
+                        `📉 *Sebelum :* ${result.fmtBefore}\n` +
+                        `📈 *Sesudah :* ${result.fmtAfter}\n` +
+                        `💾 *Total hemat :* ${result.fmtSaved}\n\n` +
+                        `*Detail yang dibersihkan:*\n` +
+                        `${linesDone}\n\n` +
+                        `_Bot tetap aktif, tidak perlu pairing ulang_ ✔️`;
+
+                if (csProgMsg?.key) {
+                        await m.reply({ edit: csProgMsg.key, text: doneText });
+                } else {
+                        await m.reply(doneText);
+                }
+        } catch (err) {
+                return tolak(hisoka, m, `❌ Gagal clear sesi: ${err.message}`);
+        }
+
+        logCommand(m, hisoka, 'clearsesi');
+}
+
+module.exports.handleClearsesi = handleClearsesi;

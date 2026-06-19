@@ -279,3 +279,98 @@ async function handleSessionstat({ hisoka, m, fs, path, logCommand }) {
 }
 
 module.exports.handleSessionstat = handleSessionstat;
+
+// ── HANDLER: ceksesi ──────────────────────────────────────────────────────────
+
+async function handleCeksesi({ hisoka, m, tolak, logCommand, getJadibotNumber, jadibotSesiReportMap }) {
+        const _csekIsJadibot = hisoka?.isMainBot === false;
+        if (!m.isOwner && !_csekIsJadibot) return tolak(hisoka, m, '❌ Perintah ini hanya untuk owner!');
+
+        const _csekJadibotNum = _csekIsJadibot ? getJadibotNumber(hisoka) : null;
+        const reportFn = _csekIsJadibot
+                ? jadibotSesiReportMap.get(_csekJadibotNum)
+                : global.__getSesiReport;
+
+        if (!reportFn) {
+                return tolak(hisoka, m, '❌ Fungsi cekSesi tidak tersedia. Coba restart bot terlebih dahulu.');
+        }
+
+        const sessionLabel = _csekIsJadibot
+                ? `jadibot/${_csekJadibotNum}.json`
+                : `sessions/hisoka.json`;
+
+        try {
+                const result = reportFn();
+
+                const EMOJI_MAP = {
+                        'creds':                  '🛡️',
+                        'contacts':               '👥',
+                        'groups':                 '🫂',
+                        'settings':               '⚙️',
+                        'pre-key':                '🗝️',
+                        'session':                '🔑',
+                        'sender-key':             '📨',
+                        'identity-key':           '🪪',
+                        'device-list':            '📱',
+                        'lid-mapping':            '🗺️',
+                        'app-state-sync-key':     '🔄',
+                        'app-state-sync-version': '📋',
+                        'tctoken':                '🎫',
+                };
+                const DESC_MAP = {
+                        'creds':                  'Kredensial utama bot — JANGAN hapus',
+                        'contacts':               'Cache kontak — aman dihapus (auto re-populate)',
+                        'groups':                 'Cache data grup — aman dihapus (auto re-fetch)',
+                        'settings':               'Pengaturan sesi lokal',
+                        'pre-key':                'Kunci E2E — aman trim (sisakan 100 terbaru)',
+                        'session':                'Sesi aktif per kontak — jangan hapus sembarangan',
+                        'sender-key':             'Kunci enkripsi grup — aman dihapus (auto re-gen)',
+                        'identity-key':           'Identitas kontak (Signal) — jangan hapus',
+                        'device-list':            'Daftar perangkat kontak — aman dihapus',
+                        'lid-mapping':            'Cache LID→PN — aman dihapus (auto re-fetch)',
+                        'app-state-sync-key':     'Sync state WA — jangan hapus',
+                        'app-state-sync-version': 'Versi sync state — aman dihapus (auto re-sync)',
+                        'tctoken':                'Token cache — aman dihapus',
+                };
+                const SAFE_LABEL = { 'HAPUS': '✂️ HAPUS', 'TRIM': '✂️ TRIM', 'KEEP': '🔒 KEEP' };
+
+                const lines = result.rows.map(r => {
+                        const emoji = EMOJI_MAP[r.key] || '📄';
+                        const desc  = DESC_MAP[r.key]  || 'Key sesi lainnya';
+                        const kb    = result.fmtKB(r.bytes);
+                        const tag   = SAFE_LABEL[r.safe] || r.safe;
+                        return `${emoji} *${r.key}*  [${tag}]\n` +
+                               `│  ├ ${r.count} · ${kb}\n` +
+                               `│  └ _${desc}_`;
+                });
+
+                const potensial = result.rows
+                        .filter(r => r.safe === 'HAPUS')
+                        .reduce((a, r) => a + r.bytes, 0);
+                const trimSaved = result.rows
+                        .filter(r => r.safe === 'TRIM')
+                        .reduce((a, r) => {
+                                const cnt = parseInt(r.count);
+                                if (cnt <= 100) return a;
+                                return a + Math.round(r.bytes * (1 - 100 / cnt));
+                        }, 0);
+
+                const teks =
+                        `╭─「 🗂️ *CEK SESI* 」\n` +
+                        `│  📂 ${sessionLabel} · ${result.fmtFileSize}\n` +
+                        `│  _💡 Data realtime dari memory (akurat)_\n` +
+                        `│\n` +
+                        `├─ ` + lines.join('\n├─ ') + `\n` +
+                        `│\n` +
+                        `├─ 💾 *Ukuran sesi :* ${result.fmtFileSize}\n` +
+                        `├─ 🧹 *Potensi hemat :* ~${result.fmtMB(potensial + trimSaved)} (ketik .clearsesi)\n` +
+                        `╰─ 🕐 ${new Date().toLocaleString('id-ID')}`;
+
+                await m.reply(teks);
+                logCommand(m, hisoka, 'ceksesi');
+        } catch (e) {
+                return tolak(hisoka, m, `❌ Gagal baca sesi: ${e.message}`);
+        }
+}
+
+module.exports.handleCeksesi = handleCeksesi;

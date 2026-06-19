@@ -1,0 +1,135 @@
+'use strict';
+
+async function handleGhosttag({ hisoka, m, query, tolak, logCommand, generateWAMessageFromContent, Button }) {
+        if (!m.isOwner) return;
+
+        const gtPrefix = m.prefix || '.';
+        const gtUserJid = hisoka.user?.id;
+
+        const gtGroupKeys = hisoka.groups.keys().filter(id => id.endsWith('@g.us'));
+
+        async function gtSendOne(jid) {
+                let participants = [];
+                try {
+                        const meta = hisoka.groups.read(jid);
+                        participants = (meta?.participants || []).map(v => v.phoneNumber || v.id).filter(Boolean);
+                } catch (_) {}
+                if (!participants.length) {
+                        try {
+                                const fetched = await hisoka.groupMetadata(jid);
+                                participants = fetched.participants.map(v => v.id).filter(Boolean);
+                        } catch (_) {}
+                }
+                if (!participants.length) return 0;
+                const album = generateWAMessageFromContent(
+                        jid,
+                        {
+                                albumMessage: {
+                                        expectedImageCount: 0,
+                                        expectedVideoCount: 0,
+                                        contextInfo: { mentionedJid: participants }
+                                }
+                        },
+                        { userJid: gtUserJid }
+                );
+                await hisoka.relayMessage(jid, album.message, { messageId: album.key.id });
+                return participants.length;
+        }
+
+        if (!query || (!query.trim().endsWith('@g.us') && query.trim() !== 'all')) {
+                if (!gtGroupKeys.length) return tolak(hisoka, m, '❌ Bot tidak bergabung di grup manapun.');
+
+                const gtBotNum = (hisoka.user?.id || '').split('@')[0].split(':')[0];
+                const gtTotalMemberAll = gtGroupKeys.reduce((acc, jid) => {
+                        const g = hisoka.groups.read(jid);
+                        return acc + (g?.participants?.length || 0);
+                }, 0);
+
+                const gtSorted = gtGroupKeys
+                        .map(jid => {
+                                const g = hisoka.groups.read(jid);
+                                const parts = g?.participants || [];
+                                const totalMember = parts.length;
+                                const totalAdmin = parts.filter(p => p.admin).length;
+                                const isBotAdmin = parts.some(p => {
+                                        const num = (p.jid || p.phoneNumber || p.id || '').split('@')[0].split(':')[0];
+                                        return num === gtBotNum && p.admin;
+                                });
+                                return {
+                                        jid,
+                                        name: g?.subject || g?.name || jid,
+                                        totalMember,
+                                        totalAdmin,
+                                        isBotAdmin
+                                };
+                        })
+                        .sort((a, b) => b.totalMember - a.totalMember || a.name.toLowerCase().localeCompare(b.name.toLowerCase(), 'id', { numeric: true }));
+
+                const btn = new Button()
+                        .setBody(
+                                `『 👻 』 *G H O S T  T A G*\n` +
+                                `▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n\n` +
+                                `✦ *Semua Grup* — tag semua grup sekaligus\n` +
+                                `✦ *Pilih Satu Grup* — pilih dari daftar\n\n` +
+                                `▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n` +
+                                `🗂️ Grup   : *${gtGroupKeys.length}* grup\n` +
+                                `👥 Member : *${gtTotalMemberAll}* total`
+                        )
+                        .setFooter(`⚡ Wily Bot • Ghost Tag System`)
+                        .addReply('🌐 Tag Semua Grup', `${gtPrefix}ghosttag all`)
+                        .addSelection('📂 Pilih Satu Grup')
+                        .makeSections('✦ Daftar Grup');
+
+                for (const { jid, name, totalMember, totalAdmin, isBotAdmin } of gtSorted) {
+                        const adminBadge = isBotAdmin ? '👑 Admin' : '👤 Member';
+                        btn.makeRow(
+                                adminBadge,
+                                name,
+                                `👥 ${totalMember} anggota  •  🛡️ ${totalAdmin} admin`,
+                                `${gtPrefix}ghosttag ${jid}`
+                        );
+                }
+
+                await btn.run(m.from, hisoka, m);
+                logCommand(m, hisoka, 'ghosttag');
+                return;
+        }
+
+        if (query.trim() === 'all') {
+                if (!gtGroupKeys.length) return tolak(hisoka, m, '❌ Bot tidak bergabung di grup manapun.');
+
+                await tolak(hisoka, m, `⏳ Mengirim ghost tag ke *${gtGroupKeys.length}* grup, mohon tunggu...`);
+
+                let gtOk = 0, gtFail = 0, gtTotalMember = 0;
+                for (const jid of gtGroupKeys) {
+                        try {
+                                const count = await gtSendOne(jid);
+                                if (count > 0) { gtOk++; gtTotalMember += count; }
+                                else gtFail++;
+                        } catch (_) { gtFail++; }
+                }
+
+                await tolak(hisoka, m,
+                        `✅ *Ghost Tag Selesai!*\n\n` +
+                        `📊 *Hasil:*\n` +
+                        `• ✅ Berhasil : ${gtOk} grup\n` +
+                        `• ❌ Gagal    : ${gtFail} grup\n` +
+                        `• 👥 Total    : ${gtTotalMember} member di-tag`
+                );
+                logCommand(m, hisoka, 'ghosttag');
+                return;
+        }
+
+        const gtJid = query.trim();
+        try {
+                const count = await gtSendOne(gtJid);
+                if (!count) return tolak(hisoka, m, '❌ Tidak ada member ditemukan atau gagal mengambil data grup.');
+                await tolak(hisoka, m, `✅ Ghost tag berhasil dikirim ke *${count}* member!`);
+        } catch (e) {
+                await tolak(hisoka, m, '❌ Gagal mengirim ghost tag: ' + (e.message || e));
+        }
+
+        logCommand(m, hisoka, 'ghosttag');
+}
+
+module.exports = { handleGhosttag };

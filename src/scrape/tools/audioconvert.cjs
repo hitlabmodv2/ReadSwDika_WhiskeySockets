@@ -217,3 +217,109 @@ async function toMP3(inputBuffer, inputMime = 'audio/ogg; codecs=opus') {
 }
 
 module.exports = { toVoiceNote, toMP3, generateWaveform };
+
+// ── HANDLER: tovn ─────────────────────────────────────────────────────────────
+
+async function handleTovn({ hisoka, m, tolak, logCommand, downloadMediaMessage, pfx }) {
+        try {
+                const audioTypes = ['audioMessage', 'documentMessage'];
+                const quoted = m.quoted;
+                const isAudio = m.isQuoted && audioTypes.includes(quoted?.type);
+                if (!isAudio) {
+                        await tolak(hisoka, m, `❌ Reply pesan audio/MP3 untuk dijadikan voice note!\n\nContoh: reply file MP3 lalu ketik *${pfx || '.'}tovn*`);
+                        return;
+                }
+
+                const quotedMime = quoted?.content?.mimetype || quoted?.msg?.mimetype || '';
+                const isAlreadyVN = quotedMime.includes('ogg') && quoted?.msg?.ptt;
+                if (isAlreadyVN) {
+                        await tolak(hisoka, m, '❌ File ini sudah berupa voice note!');
+                        return;
+                }
+
+                await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
+
+                const audioBuffer = await downloadMediaMessage(
+                        { ...m.quoted, message: m.quoted.raw },
+                        'buffer',
+                        {},
+                        { logger: hisoka.logger, reuploadRequest: hisoka.updateMediaMessage }
+                );
+
+                if (!audioBuffer || audioBuffer.length === 0) {
+                        await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
+                        await tolak(hisoka, m, '❌ Gagal download audio.');
+                        return;
+                }
+
+                const vnBuffer = await toVoiceNote(audioBuffer, quotedMime || 'audio/mpeg');
+
+                await hisoka.sendMessage(m.from, {
+                        audio: vnBuffer,
+                        mimetype: 'audio/ogg; codecs=opus',
+                        ptt: true
+                }, { quoted: m });
+
+                await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+                logCommand(m, hisoka, 'tovn');
+        } catch (error) {
+                console.error('\x1b[31m[ToVN] Error:\x1b[39m', error.message);
+                await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
+                await tolak(hisoka, m, `❌ Gagal konversi ke VN: ${error.message}`);
+        }
+}
+
+module.exports.handleTovn = handleTovn;
+
+// ── HANDLER: tomp3 ────────────────────────────────────────────────────────────
+
+async function handleTomp3({ hisoka, m, tolak, logCommand, downloadMediaMessage, pfx }) {
+        try {
+                const audioTypes = ['audioMessage', 'documentMessage'];
+                const quoted = m.quoted;
+                const isAudio = m.isQuoted && audioTypes.includes(quoted?.type);
+                if (!isAudio) {
+                        await tolak(hisoka, m, `❌ Reply voice note atau audio untuk dijadikan MP3!\n\nContoh: reply voice note lalu ketik *${pfx || '.'}tomp3*`);
+                        return;
+                }
+
+                const quotedMime = quoted?.content?.mimetype || quoted?.msg?.mimetype || '';
+                const isMP3 = quotedMime.includes('mpeg') || quotedMime.includes('mp3');
+                if (isMP3 && !quoted?.msg?.ptt) {
+                        await tolak(hisoka, m, '❌ File ini sudah berupa MP3!');
+                        return;
+                }
+
+                await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
+
+                const audioBuffer = await downloadMediaMessage(
+                        { ...m.quoted, message: m.quoted.raw },
+                        'buffer',
+                        {},
+                        { logger: hisoka.logger, reuploadRequest: hisoka.updateMediaMessage }
+                );
+
+                if (!audioBuffer || audioBuffer.length === 0) {
+                        await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
+                        await tolak(hisoka, m, '❌ Gagal download audio.');
+                        return;
+                }
+
+                const mp3Buffer = await toMP3(audioBuffer, quotedMime || 'audio/ogg; codecs=opus');
+
+                await hisoka.sendMessage(m.from, {
+                        audio: mp3Buffer,
+                        mimetype: 'audio/mpeg',
+                        ptt: false
+                }, { quoted: m });
+
+                await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+                logCommand(m, hisoka, 'tomp3');
+        } catch (error) {
+                console.error('\x1b[31m[ToMP3] Error:\x1b[39m', error.message);
+                await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
+                await tolak(hisoka, m, `❌ Gagal konversi ke MP3: ${error.message}`);
+        }
+}
+
+module.exports.handleTomp3 = handleTomp3;

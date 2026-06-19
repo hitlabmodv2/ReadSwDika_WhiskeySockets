@@ -54,3 +54,45 @@ async function getAllGCInfo(hisoka) {
 }
 
 module.exports = { getAllGCInfo };
+
+// ── HANDLER: alljidgc ─────────────────────────────────────────────────────────
+
+async function handleAlljidgc({ hisoka, m, tolak, logCommand, Button }) {
+        if (!m.isOwner) return tolak(hisoka, m, '❌ Perintah ini hanya untuk owner bot.');
+
+        await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
+
+        let cjgaResult;
+        try {
+                cjgaResult = await getAllGCInfo(hisoka);
+        } catch (err) {
+                if (err.message === 'BOT_NOT_IN_ANY_GROUP') return tolak(hisoka, m, '❌ Bot tidak tergabung di grup manapun saat ini.');
+                return tolak(hisoka, m, '❌ Gagal fetch daftar grup: ' + (err.message || 'Unknown error'));
+        }
+
+        const { groups, total } = cjgaResult;
+
+        const SEP = '─────────────────────────────';
+        let bodyText = `╭══ 🏠 *SEMUA JID GRUP BOT* ══╮\n│ 📊 Total: *${total} grup* | Urutan: member terbanyak\n╰══════════════════════════╯\n\n`;
+        const copyLines = [];
+
+        for (let i = 0; i < groups.length; i++) {
+                const { nama, jid, count } = groups[i];
+                bodyText += `*${i + 1}. ${nama}*\n🆔 \`${jid}\`\n👥 ${count} member\n${SEP}\n`;
+                copyLines.push(`${i + 1}. ${nama}\n🆔 ${jid}\n👥 ${count} member\n${SEP}`);
+        }
+
+        const copyCode = copyLines.join('\n');
+
+        await new Button()
+                .setTitle('🏠 Semua JID Grup Bot')
+                .setBody(bodyText.trimEnd())
+                .setFooter(`Total ${total} grup • Tap tombol untuk copy semua JID`)
+                .addCopy('📋 Copy Semua JID', copyCode, 'copy_all_jidgc')
+                .run(m.from, hisoka, m);
+
+        await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+        logCommand(m, hisoka, 'cekjidgcall');
+}
+
+module.exports.handleAlljidgc = handleAlljidgc;

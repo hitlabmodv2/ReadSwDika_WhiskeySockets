@@ -134,3 +134,77 @@ async function deepaiEditImage(input, prompt = 'make it cinematic', opts = {}) {
 }
 
 module.exports = { deepaiEditImage };
+
+// ── HANDLER: aiedit ───────────────────────────────────────────────────────────
+
+async function handleAiedit({ hisoka, m, query, tolak, logCommand, downloadMediaMessage }) {
+        try {
+                const isMediaMsg  = m.isMedia && m.type === 'imageMessage';
+                const quoted = m.quoted;
+                const isQuotedImg = m.isQuoted && quoted?.isMedia && quoted?.type === 'imageMessage';
+
+                if (!isMediaMsg && !isQuotedImg) {
+                        await tolak(hisoka, m,
+                                `╭═══『 🎨 *AI Image Editor* 』═══╮\n│\n` +
+                                `│ Edit gambar pakai teks prompt!\n│\n` +
+                                `│ *Cara Pakai:*\n` +
+                                `│ Kirim/reply gambar dengan caption:\n│\n` +
+                                `│ *.editgambar* [deskripsi edit]\n│\n` +
+                                `│ *Contoh:*\n` +
+                                `│ *.editgambar* make it cinematic\n` +
+                                `│ *.editgambar* ubah jadi malam hari\n` +
+                                `│ *.editgambar* tambahkan salju\n│\n` +
+                                `│ Alias: *.editai* / *.aiedit*\n│\n` +
+                                `╰══════════════════════════╯`
+                        );
+                        return;
+                }
+
+                const prompt = query?.trim() || 'make it look more cinematic';
+
+                let mediaBuffer;
+                if (isMediaMsg) {
+                        mediaBuffer = await m.downloadMedia();
+                } else {
+                        mediaBuffer = await downloadMediaMessage(
+                                { ...m.quoted, message: m.quoted.raw },
+                                'buffer',
+                                {},
+                                { logger: hisoka.logger, reuploadRequest: hisoka.updateMediaMessage }
+                        );
+                }
+
+                if (!mediaBuffer || mediaBuffer.length === 0) {
+                        await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
+                        await tolak(hisoka, m, '❌ Gagal download gambar. Coba lagi!');
+                        return;
+                }
+
+                await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
+                await tolak(hisoka, m, `⏳ Sedang mengedit gambar...\nPrompt: _"${prompt}"_\nMohon tunggu sebentar.`);
+
+                const result = await deepaiEditImage(mediaBuffer, prompt);
+
+                if (!result.status || !result.result_url) {
+                        throw new Error(result.error || 'DeepAI gagal memproses gambar');
+                }
+
+                const imgFetch = await fetch(result.result_url);
+                if (!imgFetch.ok) throw new Error('Gagal download hasil edit');
+                const imgBuffer = Buffer.from(await imgFetch.arrayBuffer());
+
+                await hisoka.sendMessage(m.from, {
+                        image  : imgBuffer,
+                        caption: `✅ *Gambar berhasil diedit!*\n✏️ Prompt: _"${prompt}"_\n🔗 Powered by DeepAI`,
+                }, { quoted: m });
+
+                await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+                logCommand(m, hisoka, 'editgambar');
+        } catch (error) {
+                console.error('\x1b[31m[EditGambar] Error:\x1b[39m', error.message);
+                await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
+                await tolak(hisoka, m, `❌ Gagal mengedit gambar: ${error.message}`);
+        }
+}
+
+module.exports.handleAiedit = handleAiedit;
