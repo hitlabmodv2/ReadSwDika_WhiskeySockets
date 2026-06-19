@@ -360,7 +360,7 @@
       "participant": "263445207371837@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-19T07:40:30.632Z",
+    "updatedAt": "2026-06-19T08:20:57.651Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -379,7 +379,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-19T07:40:30.632Z"
+    "processedAt": "2026-06-19T07:40:30.632Z",
+    "deleted": true,
+    "deletedAt": "2026-06-19T08:20:57.651Z"
   },
   "AC95A0CE5D9CBA1E01B78A0E35B7E33C": {
     "id": "AC95A0CE5D9CBA1E01B78A0E35B7E33C",
@@ -402,7 +404,7 @@
       "participant": "263445207371837@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-19T07:40:30.655Z",
+    "updatedAt": "2026-06-19T08:20:57.661Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -421,6 +423,75 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-19T07:40:30.654Z"
+    "processedAt": "2026-06-19T07:40:30.654Z",
+    "deleted": true,
+    "deletedAt": "2026-06-19T08:20:57.661Z"
+  },
+  "AC72E491BC5B735E748C384D870A2386": {
+    "id": "AC72E491BC5B735E748C384D870A2386",
+    "sender": "6289504802678@s.whatsapp.net",
+    "name": "Rakha pulang ada lolipop",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-19T08:20:57.662Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6289504802678",
+    "resolvedPn": "6289504802678@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6289504802678@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC72E491BC5B735E748C384D870A2386",
+      "participant": "263445207371837@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-19T08:20:57.772Z",
+    "deleted": true,
+    "deletedAt": "2026-06-19T08:20:57.772Z"
+  },
+  "AC36FDEDDA8F9001559E739FA9962EF1": {
+    "id": "AC36FDEDDA8F9001559E739FA9962EF1",
+    "sender": "6289504802678@s.whatsapp.net",
+    "name": "Rakha pulang ada lolipop",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-19T08:20:57.783Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🫜",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6289504802678",
+    "resolvedPn": "6289504802678@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6289504802678@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC36FDEDDA8F9001559E739FA9962EF1",
+      "participant": "263445207371837@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-19T08:21:17.073Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289504802678@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC36FDEDDA8F9001559E739FA9962EF1",
+        "participant": "263445207371837@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289504802678@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC36FDEDDA8F9001559E739FA9962EF1",
+        "participant": "6289504802678@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-19T08:21:17.072Z"
   }
 }
