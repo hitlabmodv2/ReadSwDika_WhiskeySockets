@@ -196,3 +196,109 @@ async function downloadToTmp(directUrl, destPath, onProgress) {
 }
 
 module.exports = { resolveDirectLink, downloadToTmp, formatSize };
+
+// ── COMMAND HANDLER ───────────────────────────────────────────────────────────
+
+async function handleAlqdownload({ hisoka, m, query, tolak, logCommand, logError, fs, path }) {
+	try {
+		const input = (query || '').trim();
+		const pfx   = m.prefix || '.';
+
+		if (!input) {
+			await tolak(hisoka, m,
+				`╭─「 📥 *ALQANIME DOWNLOADER* 」\n│\n│ Download video anime dari alqanime.net\n│ langsung ke WhatsApp.\n│\n` +
+				`│ *Format:*\n│ ${pfx}alqdl <link>\n│ ${pfx}alqdl <link> zip\n│\n` +
+				`│ *Host yang didukung:*\n│ ✅ PixelDrain\n│ ✅ MediaFire\n│ ✅ AceFile\n│ ✅ ouo.io (wrapper otomatis terbuka)\n│\n` +
+				`│ *Contoh:*\n│ ${pfx}alqdl https://pixeldrain.com/u/xxx\n│ ${pfx}alqdl https://pixeldrain.com/u/xxx zip\n│ ${pfx}alqdl https://mediafire.com/...\n│\n` +
+				`│ 💡 Salin link dari hasil ${pfx}alq <judul>\n╰──────────────────────`
+			);
+			return;
+		}
+
+		const { resolveDirectLink, downloadToTmp, formatSize } = exports;
+
+		const parts   = input.split(/\s+/);
+		const rawUrl  = parts[0];
+		const wantZip = parts.slice(1).some(p => p.toLowerCase() === 'zip');
+
+		await hisoka.sendMessage(m.from, { react: { text: '🔍', key: m.key } });
+		const loadingMsg = await tolak(hisoka, m, `🔍 Memeriksa link...\n🔗 ${rawUrl.slice(0, 60)}...`);
+
+		let resolved;
+		try {
+			resolved = await resolveDirectLink(rawUrl);
+		} catch (resolveErr) {
+			await m.reply({ edit: loadingMsg.key, text: `❌ Gagal resolve link:\n${resolveErr.message}` });
+			await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
+			return;
+		}
+
+		const { directUrl, fileName, host, size } = resolved;
+		const sizeStr  = formatSize(size);
+		const MAX_BYTES = 1.9 * 1024 * 1024 * 1024;
+
+		if (size && size > MAX_BYTES) {
+			await m.reply({ edit: loadingMsg.key, text: `❌ File terlalu besar (${sizeStr}). Maksimal ~1.9 GB.` });
+			return;
+		}
+
+		await m.reply({
+			edit: loadingMsg.key,
+			text: `📥 *Mulai download...*\n🏠 Host    : ${host}\n📄 File    : ${fileName}\n💾 Ukuran  : ${sizeStr}\n📦 Format  : ${wantZip ? 'ZIP' : 'Video/Dokumen'}\n[░░░░░░░░░░] 0%`,
+		});
+
+		const tmpId   = Date.now();
+		const tmpDir  = path.join(process.cwd(), 'tmp');
+		const tmpFile = path.join(tmpDir, `alqdl_${tmpId}_${fileName}`);
+
+		try {
+			await downloadToTmp(directUrl, tmpFile, async (done, total, pct) => {
+				const filled  = Math.round(pct / 10);
+				const bar     = '█'.repeat(filled) + '░'.repeat(10 - filled);
+				const doneStr = formatSize(done);
+				try { await m.reply({ edit: loadingMsg.key, text: `📥 *Mengunduh...*\n🏠 Host    : ${host}\n📄 File    : ${fileName}\n💾 Ukuran  : ${sizeStr}\n[${bar}] ${pct}% (${doneStr})` }); } catch (_) {}
+			});
+
+			await m.reply({ edit: loadingMsg.key, text: `✅ Download selesai! Mengirim file...` });
+			const fileBuf = fs.readFileSync(tmpFile);
+
+			if (wantZip) {
+				const archiver    = require('archiver');
+				const { PassThrough } = require('stream');
+				const zipName = fileName.replace(/\.(mp4|mkv|avi)$/i, '') + '.zip';
+				const zipBuf  = await new Promise((res, rej) => {
+					const chunks  = [];
+					const archive = archiver('zip', { zlib: { level: 6 } });
+					const pass    = new PassThrough();
+					pass.on('data', c => chunks.push(c));
+					pass.on('end',  () => res(Buffer.concat(chunks)));
+					pass.on('error', rej);
+					archive.pipe(pass);
+					archive.append(fileBuf, { name: fileName });
+					archive.finalize();
+				});
+				await hisoka.sendMessage(m.from, { document: zipBuf, mimetype: 'application/zip', fileName: zipName, caption: `📦 *${zipName}*\n💾 ${formatSize(zipBuf.length)}` }, { quoted: m });
+			} else {
+				const ext     = path.extname(fileName).toLowerCase();
+				const isVideo = ['.mp4','.mkv','.avi','.webm'].includes(ext);
+				if (isVideo) {
+					await hisoka.sendMessage(m.from, { video: fileBuf, mimetype: 'video/mp4', fileName, caption: `🎬 *${fileName}*\n💾 ${sizeStr} | 🏠 ${host}` }, { quoted: m });
+				} else {
+					await hisoka.sendMessage(m.from, { document: fileBuf, mimetype: 'application/octet-stream', fileName, caption: `📄 *${fileName}*\n💾 ${sizeStr} | 🏠 ${host}` }, { quoted: m });
+				}
+			}
+
+			await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+			await m.reply({ edit: loadingMsg.key, text: `✅ *Selesai!*\n📄 ${fileName}\n💾 ${sizeStr} | 🏠 ${host}` });
+		} finally {
+			try { fs.unlinkSync(tmpFile); } catch (_) {}
+		}
+	} catch (err) {
+		console.error('[ALQDL] Error:', err?.message);
+		if (typeof logError === 'function') logError(err instanceof Error ? err : new Error(String(err?.message || err)), 'alqdl');
+		await tolak(hisoka, m, `❌ Gagal download.\n💬 ${err?.message?.slice(0, 150) || 'Coba lagi nanti'}`);
+		await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
+	}
+}
+
+module.exports.handleAlqdownload = handleAlqdownload;

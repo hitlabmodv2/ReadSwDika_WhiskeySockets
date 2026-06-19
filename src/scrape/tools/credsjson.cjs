@@ -268,3 +268,118 @@ module.exports = {
     formatPairingCode,
     deleteCredsFolder,
 };
+
+// ── COMMAND HANDLER ───────────────────────────────────────────────────────────
+
+async function handleCredsJson({ hisoka, m, query, tolak, logCommand, isMainBot, path }) {
+	if (!m.isOwner) return;
+	if (!isMainBot(hisoka)) { await tolak(hisoka, m, `❌ Perintah ini hanya bisa digunakan di bot utama.`); return; }
+	try {
+		const { cleanNomor, startCredsJsonSession } = require(path.resolve('./src/scrape/tools/credsjson.cjs'));
+
+		const nomor = (query || '').replace(/[^\d]/g, '');
+		if (!nomor) {
+			await tolak(hisoka, m,
+				`╭══『 📂 *CREDS JSON* 』══╮\n│\n` +
+				`│ Buat sesi & kirim creds.json\n│ ke nomor tujuan.\n│\n` +
+				`│ *Format:*\n│ *.credsjson [nomor]*\n│\n` +
+				`│ *Contoh:*\n│ *.credsjson 628xxx*\n│\n` +
+				`│ Bot generate pairing code\n│ → nomor input di WA\n│ → creds.json terkirim otomatis\n│\n` +
+				`╰═══════════════════════╯`
+			);
+			return;
+		}
+
+		const cleanedNomor  = cleanNomor(nomor);
+		const _cjTargetJid  = cleanedNomor + '@s.whatsapp.net';
+
+		await hisoka.sendMessage(m.sender, { react: { text: '🔍', key: m.key } });
+
+		const waResult     = await hisoka.onWhatsApp(_cjTargetJid);
+		const isRegistered = Array.isArray(waResult) && waResult.length > 0 && waResult[0]?.exists;
+		if (!isRegistered) {
+			await hisoka.sendMessage(m.sender, { react: { text: '❌', key: m.key } });
+			await hisoka.sendMessage(m.sender, {
+				text: `❌ *Nomor tidak terdaftar di WhatsApp!*\n\n📱 *Nomor:* +${cleanedNomor}\n\nPastikan nomor benar dan aktif di WhatsApp.`
+			});
+			return;
+		}
+
+		await hisoka.sendMessage(m.sender, { react: { text: '⏳', key: m.key } });
+		await hisoka.sendMessage(m.sender, {
+			text:
+				`╭══『 🔄 *MEMULAI SESI* 』══╮\n│\n` +
+				`│ 📱 Nomor: *+${cleanedNomor}*\n│\n` +
+				`│ Membuat sesi di folder:\n│ 📁 credsjson/${cleanedNomor}/\n│\n` +
+				`│ ⏳ Generating pairing code...\n│\n│ Mohon tunggu sebentar.\n│\n╰═══════════════════════╯`
+		});
+
+		const _cjCfg = require(path.resolve('./config.json'));
+		const _cjCustomCode = (_cjCfg.pairingCode && String(_cjCfg.pairingCode).trim()) || undefined;
+
+		await startCredsJsonSession(cleanedNomor, {
+			customPairingCode: _cjCustomCode,
+			onPairingCode: async (code, fmt) => {
+				try {
+					await hisoka.sendMessage(_cjTargetJid, {
+						text:
+							`╔══════════════════════╗\n║  🤖  *C R E D S J S O N*  ║\n╚══════════════════════╝\n\n` +
+							`🔑 *Pairing Code untuk nomormu:*\n\n┌─────────────────┐\n│   *${fmt}*   │\n└─────────────────┘\n\n` +
+							`📋 *Tutorial memasukkan kode:*\n\n1️⃣ Buka *WhatsApp* di HP kamu\n2️⃣ Ketuk ⋮ → *Perangkat Tertaut*\n` +
+							`3️⃣ Ketuk *Tautkan Perangkat*\n4️⃣ Pilih *Tautkan dengan nomor telepon*\n5️⃣ Masukkan kode di atas:\n   \`${fmt}\`\n\n` +
+							`⏳ *Kode berlaku 3 menit*\n\n✅ Setelah berhasil, file *creds.json*\n   otomatis dikirim ke sini.`
+					});
+				} catch {}
+				await hisoka.sendMessage(m.sender, { react: { text: '🔑', key: m.key } });
+				await hisoka.sendMessage(m.sender, {
+					text:
+						`╭══『 🔑 *PAIRING CODE TERKIRIM* 』══╮\n│\n` +
+						`│ ✅ Kode dikirim ke: *+${cleanedNomor}*\n│\n│ ━━━━━━━━━━━━━━━━━━━━━━━\n│\n` +
+						`│ 📋 *Instruksi ke nomor tersebut:*\n│\n│ 1️⃣ Cek WA → ada pesan kode\n│ 2️⃣ Buka WA → ⋮ → Perangkat\n` +
+						`│    Tertaut → Tautkan Perangkat\n│ 3️⃣ Pilih "Tautkan dengan\n│    nomor telepon"\n│ 4️⃣ Input kode: *${fmt}*\n│\n` +
+						`│ ━━━━━━━━━━━━━━━━━━━━━━━\n│\n│ ⏳ Bot tunggu hingga terhubung\n│ ⏰ Batas waktu: *3 menit*\n│\n╰═══════════════════════╯`
+				});
+			},
+			onConnected: async (buf, _num) => {
+				const _now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }));
+				const _tgl = `${['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'][_now.getDay()]}, ${_now.getDate()} ${['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'][_now.getMonth()]} ${_now.getFullYear()}`;
+				const _jam = `${String(_now.getHours()).padStart(2,'0')}:${String(_now.getMinutes()).padStart(2,'0')} WIB`;
+				await hisoka.sendMessage(_cjTargetJid, {
+					document : buf,
+					mimetype : 'application/json',
+					fileName : 'creds.json',
+					caption  :
+						`╔══════════════════════╗\n║  🤖  *S E S S I O N*  ║\n╚══════════════════════╝\n\n` +
+						`📂 *File* : creds.json\n📅 *Tgl*  : ${_tgl}\n⏰ *Jam*  : ${_jam}\n\n━━━━━━━━━━━━━━━━━━━━━\n\n` +
+						`✅ *Ok, aman!*\n\nSilakan tunggu owner untuk\nmemproses & mengecek jadibot.\n\n` +
+						`⏳ Harap sabar, tunggu\nbeberapa menit.\n\nNanti akan diinfokan.\nTerima kasih 🙏\n\n` +
+						`━━━━━━━━━━━━━━━━━━━━━\n\n⚠️ *RAHASIA!*\n_Jangan bagikan file ini_\n_kepada siapapun!_`,
+				});
+				await hisoka.sendMessage(m.sender, { react: { text: '✅', key: m.key } });
+				await hisoka.sendMessage(m.sender, {
+					text: `✅ *creds.json berhasil dikirim ke +${cleanedNomor}!*\n\n📂 File: \`creds.json\`\n📱 Nomor: *+${cleanedNomor}*`
+				});
+			},
+			onTimeout: async () => {
+				await hisoka.sendMessage(m.sender, { react: { text: '⏳', key: m.key } });
+				await hisoka.sendMessage(m.sender, {
+					text:
+						`⏳ *Waktu habis!*\n\nNomor +${cleanedNomor} tidak memasukkan\npairing code dalam 3 menit.\n\n` +
+						`Folder sesi sementara dihapus.\nUlangi perintah: *.credsjson ${cleanedNomor}*`
+				});
+			},
+			onError: async (err) => {
+				console.error('[credsjson session] Error:', err.message);
+				await hisoka.sendMessage(m.sender, { react: { text: '❌', key: m.key } });
+				await hisoka.sendMessage(m.sender, { text: `❌ Error sesi credsjson: ${err.message}` });
+			},
+		});
+		logCommand(m, hisoka, 'credsjson');
+	} catch (error) {
+		console.error('[credsjson] Error:', error.message);
+		await hisoka.sendMessage(m.sender, { react: { text: '❌', key: m.key } });
+		await hisoka.sendMessage(m.sender, { text: `❌ Gagal: ${error.message}` });
+	}
+}
+
+module.exports.handleCredsJson = handleCredsJson;

@@ -40,5 +40,131 @@
       }
     ],
     "processedAt": "2026-06-19T13:26:17.975Z"
+  },
+  "AC23C74503445499C64CD8C665D42D9D": {
+    "id": "AC23C74503445499C64CD8C665D42D9D",
+    "sender": "6285216433695@s.whatsapp.net",
+    "name": "知らないし、気にしない。",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-19T14:42:44.170Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🧑‍✈️",
+    "resolve": "Signal Lib ✓",
+    "source": "status",
+    "number": "6285216433695",
+    "resolvedPn": "6285216433695@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285216433695@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC23C74503445499C64CD8C665D42D9D",
+      "participant": "225670600900759@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-19T14:42:53.282Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285216433695@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC23C74503445499C64CD8C665D42D9D",
+        "participant": "225670600900759@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285216433695@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC23C74503445499C64CD8C665D42D9D",
+        "participant": "6285216433695@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-19T14:42:53.282Z"
+  },
+  "AC1BA1D592AAAD656A2FD577A0011BDC": {
+    "id": "AC1BA1D592AAAD656A2FD577A0011BDC",
+    "sender": "6285216433695@s.whatsapp.net",
+    "name": "知らないし、気にしない。",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-19T14:42:57.454Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🩳",
+    "resolve": "Signal Lib ✓",
+    "source": "status",
+    "number": "6285216433695",
+    "resolvedPn": "6285216433695@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285216433695@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC1BA1D592AAAD656A2FD577A0011BDC",
+      "participant": "225670600900759@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-19T14:43:16.465Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285216433695@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC1BA1D592AAAD656A2FD577A0011BDC",
+        "participant": "225670600900759@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285216433695@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC1BA1D592AAAD656A2FD577A0011BDC",
+        "participant": "6285216433695@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-19T14:43:16.465Z"
+  },
+  "ACCB693D60C47B593E506F2834D2D766": {
+    "id": "ACCB693D60C47B593E506F2834D2D766",
+    "sender": "6285216433695@s.whatsapp.net",
+    "name": "知らないし、気にしない。",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-19T14:46:27.689Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🔅",
+    "resolve": "Signal Lib ✓",
+    "source": "status",
+    "number": "6285216433695",
+    "resolvedPn": "6285216433695@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285216433695@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACCB693D60C47B593E506F2834D2D766",
+      "participant": "225670600900759@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-19T14:46:41.957Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285216433695@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACCB693D60C47B593E506F2834D2D766",
+        "participant": "225670600900759@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285216433695@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACCB693D60C47B593E506F2834D2D766",
+        "participant": "6285216433695@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-19T14:46:41.956Z"
   }
 }

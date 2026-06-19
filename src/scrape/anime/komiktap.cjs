@@ -318,3 +318,95 @@ module.exports = {
     formatSearchResults,
     formatDetailText,
 };
+
+// ── COMMAND HANDLER (komik search) ────────────────────────────────────────────
+
+async function handleKomik({ hisoka, m, query, tolak, logCommand, logError, path, pendingKomikChoices, getJadibotChoiceKey }) {
+	try {
+		const input = (query || '').trim();
+		const pfx   = m.prefix || '.';
+
+		if (!input) {
+			await tolak(hisoka, m,
+				`╭─「 📖 *KOMIKTAP* 」\n│\n│ *Cari manga/manhwa/manhua:*\n│ ${pfx}komik <judul>\n│\n` +
+				`│ *Detail manga:*\n│ ${pfx}komikinfo <url manga>\n│\n` +
+				`│ *Download chapter jadi PDF:*\n│ ${pfx}komikget <url chapter>\n│ ${pfx}komikget <url chapter> <jumlah hal>\n│\n` +
+				`│ *Contoh:*\n│ ${pfx}komik naruto\n│ ${pfx}komikinfo https://komiktap.info/manga/naruto/\n│ ${pfx}komikget https://komiktap.info/naruto-chapter-1/\n│ ${pfx}komikget https://komiktap.info/naruto-chapter-1/ 15\n│\n│ ℹ️ Default 20 hal, max 50 hal\n╰──────────────────────`
+			);
+			return;
+		}
+
+		const { komiktapSearch } = exports;
+		const ax = require('axios');
+
+		await hisoka.sendMessage(m.from, { react: { text: '🔍', key: m.key } });
+		await tolak(hisoka, m, `🔍 Mencari *${input}* di Komiktap...`);
+
+		const results = await komiktapSearch(input);
+		if (!results.length) { await tolak(hisoka, m, `❌ Tidak ada hasil untuk: _${input}_`); return; }
+
+		const topResults = results.slice(0, 10);
+		const coverDownloads = await Promise.allSettled(
+			topResults.map((r) => {
+				if (!r.cover) return Promise.reject(new Error('no cover'));
+				return ax.get(r.cover, { responseType: 'arraybuffer', timeout: 12000, headers: { 'User-Agent': 'Mozilla/5.0', 'Referer': 'https://komiktap.info/' } }).then(res => Buffer.from(res.data));
+			})
+		);
+
+		const albumItems = [];
+		coverDownloads.forEach((res, i) => {
+			const r = topResults[i];
+			const statusTxt = r.status ? `[${r.status}]` : '';
+			const typeTxt   = r.type   ? ` • ${r.type}`  : '';
+			const ratingTxt = r.rating ? ` ⭐${r.rating}` : '';
+			const cap = `*${i + 1}.* ${r.title}${statusTxt ? '\n' + statusTxt : ''}${typeTxt}${ratingTxt}`;
+			if (res.status === 'fulfilled') albumItems.push({ image: res.value, caption: cap });
+		});
+
+		if (albumItems.length > 0) {
+			try {
+				await m.reply({ albumMessage: albumItems });
+			} catch {
+				const BATCH = 10;
+				for (let _b = 0; _b < albumItems.length; _b += BATCH) {
+					const _batch = albumItems.slice(_b, _b + BATCH);
+					try {
+						await (_b === 0 ? m.reply({ albumMessage: _batch }) : hisoka.sendMessage(m.from, { albumMessage: _batch }));
+					} catch {
+						for (const item of _batch) {
+							try { await m.reply({ image: item.image, caption: item.caption }); } catch (_) {}
+						}
+					}
+				}
+			}
+		}
+
+		let menuText = `╭─「 🔍 *KOMIKTAP SEARCH* 」\n│\n│ Hasil: _${input}_\n│\n`;
+		topResults.forEach((r, i) => {
+			const status = r.status ? ` [${r.status}]` : '';
+			const type   = r.type   ? ` • ${r.type}`   : '';
+			const rating = r.rating ? ` ⭐${r.rating}`  : '';
+			menuText += `│ *${i + 1}.* ${r.title.slice(0, 55)}${r.title.length > 55 ? '…' : ''}\n│     ${status}${type}${rating}\n`;
+		});
+		menuText += `│\n│ 💡 *Balas pesan ini* dengan nomor\n│ Contoh: balas *1* untuk manga pertama\n│ Ketik *batal* untuk membatalkan\n╰──────────────────────`;
+
+		const menuMsg = await m.reply(menuText);
+		const komikKey = getJadibotChoiceKey(m);
+		const oldKomik = pendingKomikChoices.get(komikKey);
+		if (oldKomik?.timeout) clearTimeout(oldKomik.timeout);
+		const komikTimeout = setTimeout(() => pendingKomikChoices.delete(komikKey), 5 * 60 * 1000);
+		pendingKomikChoices.set(komikKey, {
+			phase: 'search', results: topResults,
+			botMsgId: menuMsg?.key?.id || '',
+			expiresAt: Date.now() + 5 * 60 * 1000,
+			timeout: komikTimeout, loading: false,
+		});
+		await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+	} catch (err) {
+		console.error('[KOMIKTAP] Search error:', err?.message);
+		if (typeof logError === 'function') logError(err instanceof Error ? err : new Error(String(err?.message || err)), 'komiktap-search');
+		await tolak(hisoka, m, `❌ Gagal cari komik.\n💬 ${err?.message || 'Coba lagi nanti'}`);
+	}
+}
+
+module.exports.handleKomik = handleKomik;
