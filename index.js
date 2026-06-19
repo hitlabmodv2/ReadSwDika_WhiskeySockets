@@ -1161,23 +1161,49 @@ async function main() {
                                                         const urlGambar = game.image || null;
 
                                                         // Download image dulu sebagai buffer dengan header Referer
-                                                        // agar tidak diblok hotlink protection an1.com
+                                                        // Retry 3x, validasi magic bytes, support jpg/png/webp/gif
                                                         let imgBuffer = null;
                                                         if (urlGambar) {
-                                                                try {
-                                                                        const axios = _require('axios');
-                                                                        const resp  = await axios.get(urlGambar, {
-                                                                                responseType: 'arraybuffer',
-                                                                                timeout: 15000,
-                                                                                headers: {
-                                                                                        'Referer'   : 'https://an1.com/',
-                                                                                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-                                                                                },
-                                                                        });
-                                                                        imgBuffer = Buffer.from(resp.data);
-                                                                } catch (imgErr) {
-                                                                        console.warn(`[AniGame] ⚠️ Gagal download gambar, kirim teks saja: ${imgErr?.message}`);
+                                                                const axios = _require('axios');
+                                                                const IMG_HEADERS = {
+                                                                        'Referer'        : 'https://an1.com/',
+                                                                        'User-Agent'     : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+                                                                        'Accept'         : 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+                                                                        'Accept-Encoding': 'gzip, deflate, br',
+                                                                };
+
+                                                                // Deteksi mime type dari magic bytes buffer
+                                                                const detectMime = (buf) => {
+                                                                        if (!buf || buf.length < 4) return null;
+                                                                        if (buf[0] === 0xFF && buf[1] === 0xD8) return 'image/jpeg';
+                                                                        if (buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4E && buf[3] === 0x47) return 'image/png';
+                                                                        if (buf[0] === 0x47 && buf[1] === 0x49 && buf[2] === 0x46) return 'image/gif';
+                                                                        if (buf[0] === 0x52 && buf[1] === 0x49 && buf[2] === 0x46 && buf[3] === 0x46) return 'image/webp';
+                                                                        return null;
+                                                                };
+
+                                                                for (let attempt = 1; attempt <= 3; attempt++) {
+                                                                        try {
+                                                                                const resp = await axios.get(urlGambar, {
+                                                                                        responseType: 'arraybuffer',
+                                                                                        timeout: 20000,
+                                                                                        headers: IMG_HEADERS,
+                                                                                });
+                                                                                const buf  = Buffer.from(resp.data);
+                                                                                const mime = detectMime(buf);
+                                                                                if (!mime) {
+                                                                                        console.warn(`[AniGame] ⚠️ Attempt ${attempt}: Buffer bukan gambar valid (${buf.length} bytes), skip`);
+                                                                                        continue;
+                                                                                }
+                                                                                imgBuffer = buf;
+                                                                                console.log(`[AniGame] 🖼️ Gambar OK: ${buf.length} bytes (${mime}) [attempt ${attempt}]`);
+                                                                                break;
+                                                                        } catch (imgErr) {
+                                                                                console.warn(`[AniGame] ⚠️ Attempt ${attempt}/3 download gambar gagal: ${imgErr?.message}`);
+                                                                                if (attempt < 3) await new Promise(r => setTimeout(r, 2000 * attempt));
+                                                                        }
                                                                 }
+                                                                if (!imgBuffer) console.warn(`[AniGame] ⚠️ Semua attempt gagal — kirim teks saja`);
                                                         }
 
                                                         // Kirim ke semua grup aktif (batch 5)

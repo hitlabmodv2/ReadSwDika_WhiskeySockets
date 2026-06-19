@@ -9312,8 +9312,32 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                 if (!m.isOwner) return tolak(hisoka, m, '❌ Hanya owner yang bisa gunakan perintah ini.');
                                                 await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
                                                 const hasilT = await _agMod.simulasi();
+
+                                                // Download gambar sebagai buffer dengan retry 3x + validasi magic bytes
+                                                let imgBufT = null;
                                                 if (hasilT.urlGambar) {
-                                                        await hisoka.sendMessage(m.from, { image: { url: hasilT.urlGambar }, caption: hasilT.caption }, { quoted: m });
+                                                        const detectMimeT = (buf) => {
+                                                                if (!buf || buf.length < 4) return null;
+                                                                if (buf[0] === 0xFF && buf[1] === 0xD8) return 'image/jpeg';
+                                                                if (buf[0] === 0x89 && buf[1] === 0x50) return 'image/png';
+                                                                if (buf[0] === 0x47 && buf[1] === 0x49) return 'image/gif';
+                                                                if (buf[0] === 0x52 && buf[1] === 0x49) return 'image/webp';
+                                                                return null;
+                                                        };
+                                                        for (let at = 1; at <= 3; at++) {
+                                                                try {
+                                                                        const r = await _require('axios').get(hasilT.urlGambar, {
+                                                                                responseType: 'arraybuffer', timeout: 20000,
+                                                                                headers: { 'Referer': 'https://an1.com/', 'User-Agent': 'Mozilla/5.0', 'Accept': 'image/*,*/*;q=0.8' },
+                                                                        });
+                                                                        const b = Buffer.from(r.data);
+                                                                        if (detectMimeT(b)) { imgBufT = b; break; }
+                                                                } catch (_) { if (at < 3) await new Promise(r => setTimeout(r, 2000 * at)); }
+                                                        }
+                                                }
+
+                                                if (imgBufT) {
+                                                        await hisoka.sendMessage(m.from, { image: imgBufT, caption: hasilT.caption }, { quoted: m });
                                                 } else {
                                                         await tolak(hisoka, m, hasilT.caption);
                                                 }
