@@ -58,6 +58,7 @@ import { getJadibotAntidel, getJadibotReadsw, getJadibotAnticall, getJadibotAnti
 import { pruneSwStatsAt, countActiveSW } from '../helper/swtrack.js';
 import { buildMenuUtama } from '../scrape/menu/menu_utama.js';
 import { buildMenuJadibot } from '../scrape/menu/menu_jadibot.js';
+const { addWatermarkToImage } = _require('../scrape/tools/wm.cjs');
 
 const WILY_VERBOSE_LOGS = process.env.WILY_VERBOSE_LOGS === 'true' || process.env.BOT_DEBUG_LOG === 'true';
 const wilyLog = (...args) => {
@@ -15457,7 +15458,102 @@ hasil += `╰══════════════════════�
                                 }
                                 break;
                         }
-                                
+
+                        case 'wm':
+                        case 'swm': {
+                                try {
+                                        const pfxWm = m.prefix || '.';
+                                        const wmCurrentType = getMediaTypeFromMessage(m);
+                                        const wmQuotedType  = m.isQuoted ? getMediaTypeFromMessage(m.quoted) : '';
+                                        const canUseWmCurrent = m.isMedia && wmCurrentType === 'imageMessage';
+                                        const canUseWmQuoted  = m.isQuoted && wmQuotedType === 'imageMessage';
+
+                                        if (!canUseWmCurrent && !canUseWmQuoted) {
+                                                const helpText =
+                                                        `╭═══『 🖼️ *WATERMARK STICKER* 』═══╮\n` +
+                                                        `│\n` +
+                                                        `│ Tambahkan teks watermark ke gambar\n` +
+                                                        `│ lalu otomatis jadi *sticker*!\n` +
+                                                        `│\n` +
+                                                        `│ 📋 *Cara Pakai:*\n` +
+                                                        `│ • Kirim gambar + caption:\n` +
+                                                        `│   _${pfxWm}wm NamaPack|NamaAuthor_\n` +
+                                                        `│ • Reply gambar + ketik:\n` +
+                                                        `│   _${pfxWm}wm NamaPack|NamaAuthor_\n` +
+                                                        `│\n` +
+                                                        `│ 📝 *Contoh:*\n` +
+                                                        `│   ${pfxWm}wm Bang|Wily\n` +
+                                                        `│   ${pfxWm}wm Wilybot|Owner\n` +
+                                                        `│\n` +
+                                                        `│ ℹ️ Pisahkan PackName & Author\n` +
+                                                        `│    dengan tanda  *|*\n` +
+                                                        `│\n` +
+                                                        `│ 🏷️ Alias: ${pfxWm}wm · ${pfxWm}swm\n` +
+                                                        `╰══════════════════════════════╯`;
+                                                await tolak(hisoka, m, helpText);
+                                                break;
+                                        }
+
+                                        const rawQuery = (query || '').trim();
+                                        if (!rawQuery) {
+                                                await tolak(hisoka, m, `❌ Masukkan teks watermark!\n\nContoh: *${pfxWm}wm NamaPack|NamaAuthor*`);
+                                                break;
+                                        }
+
+                                        const parts     = rawQuery.split('|');
+                                        const packName  = (parts[0] || '').trim();
+                                        const authorName = (parts[1] || '').trim();
+
+                                        if (!packName && !authorName) {
+                                                await tolak(hisoka, m, `❌ Format salah!\n\nContoh: *${pfxWm}wm Bang|Wily*`);
+                                                break;
+                                        }
+
+                                        await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
+
+                                        let rawImgBuffer;
+                                        if (canUseWmCurrent) {
+                                                rawImgBuffer = await downloadMediaBuffer(hisoka, m);
+                                        } else {
+                                                rawImgBuffer = await getQuotedMediaBuffer(hisoka, m);
+                                        }
+
+                                        if (!rawImgBuffer || rawImgBuffer.length === 0) {
+                                                await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
+                                                await tolak(hisoka, m, '❌ Gagal download gambar, coba lagi');
+                                                break;
+                                        }
+
+                                        const watermarkedBuffer = await addWatermarkToImage(rawImgBuffer, { packName, authorName });
+
+                                        const { Sticker, StickerTypes } = await import('wa-sticker-formatter');
+                                        const sticker = new Sticker(watermarkedBuffer, {
+                                                pack: packName || 'Wily Bot',
+                                                author: authorName || 'Wilykun',
+                                                type: StickerTypes.FULL,
+                                                categories: ['🎭'],
+                                                id: 'com.wilykun.wm',
+                                                quality: 90
+                                        });
+                                        const stickerBuffer = await sticker.toBuffer();
+
+                                        if (!stickerBuffer || stickerBuffer.length === 0) {
+                                                await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
+                                                await tolak(hisoka, m, '❌ Gagal buat sticker watermark');
+                                                break;
+                                        }
+
+                                        await hisoka.sendMessage(m.from, { sticker: stickerBuffer }, { quoted: m });
+                                        await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+                                        logCommand(m, hisoka, 'wm');
+                                } catch (error) {
+                                        console.error('\x1b[31m[WM] Error:\x1b[39m', error.message);
+                                        await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
+                                        await tolak(hisoka, m, `❌ Gagal buat watermark: ${error.message}`);
+                                }
+                                break;
+                        }
+
                         case 'jadibot': {
                                 if (!isMainBot(hisoka)) return;
                                 if (!m.isOwner) return;

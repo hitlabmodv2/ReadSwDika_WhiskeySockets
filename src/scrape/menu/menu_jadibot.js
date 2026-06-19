@@ -52,6 +52,7 @@ export function getMenuJadibotBody() {
 
 ╭─「 🎨 *STICKER & GAMBAR* 」
 ├➤ *.sticker / .s*
+├➤ *.wm / .swm [Pack|Author]*
 ├➤ *.toimg*
 ╰➤ *.hd / .remini*
 
