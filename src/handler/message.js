@@ -1376,7 +1376,7 @@ const listAturBrowserMap = new Map();
 const TOTAL_CMD_COUNT = (() => {
         try {
                 const _src = fs.readFileSync(new URL(import.meta.url).pathname, 'utf8');
-                return (_src.match(/^\s*case\s+'[^']+'\s*':\s*\{|^\s*case\s+'[^']+'\s*:\s*\{/gm) || []).length;
+                return (_src.match(/^\s*case\s+'[^']+'\s*:/gm) || []).length;
         } catch { return 0; }
 })();
 
