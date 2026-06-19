@@ -10067,7 +10067,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
 ━━━━━━━━━━━━━━━━━━━━━━
 _📦 Powered by Wily Bot V22_ 🤖`;
-                                                const _jbTotalMenuCmd = (_jbMenuBody.match(/[├╰]➤/g) || []).length;
+                                                const _jbTotalMenuCmd = TOTAL_CMD_COUNT;
                                                 const menuTeks =
 `╭═══════════════════════╮
 ║   🤖 *WILY BOT V22*   
