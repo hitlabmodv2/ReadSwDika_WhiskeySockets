@@ -580,14 +580,21 @@ function buatCaption(game, detail = null) {
         infoRows[infoRows.length - 1] = infoRows[infoRows.length - 1].replace(/^├/, '╰');
     }
 
-    // Blok sinopsis Bahasa Indo (format > WhatsApp quote)
+    // Blok sinopsis Bahasa Indo (format > WhatsApp quote, tiap kalimat 1 baris)
     let sinopsisBlok = '';
     if (d.sinopsis) {
-        const kalimat = d.sinopsis.replace(/\n+/g, ' ').trim();
+        // Normalisasi spasi & newline jadi satu baris dulu
+        const raw = d.sinopsis.replace(/\n+/g, ' ').replace(/\s+/g, ' ').trim();
+        // Pecah per kalimat berdasarkan . ! ? — lalu tiap kalimat jadi baris > sendiri
+        const kalimatArr = raw
+            .match(/[^.!?]+[.!?]*/g)
+            ?.map(s => s.trim())
+            .filter(s => s.length > 2)
+            || [raw];
         sinopsisBlok =
             `\n📖 *Sinopsis*\n` +
             `${SEP2}\n` +
-            `> ${kalimat}\n`;
+            kalimatArr.map(k => `> ${k}`).join('\n') + '\n';
     }
 
     const infoBlok = infoRows.length

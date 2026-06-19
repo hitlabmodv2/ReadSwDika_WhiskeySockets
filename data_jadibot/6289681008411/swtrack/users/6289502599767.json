@@ -1,13 +1,13 @@
 {
-  "AC458E6EB2DD68F14FF13339FF83297E": {
-    "id": "AC458E6EB2DD68F14FF13339FF83297E",
+  "AC12860B8FE6070E3DC695D6791DE6EE": {
+    "id": "AC12860B8FE6070E3DC695D6791DE6EE",
     "sender": "6289502599767@s.whatsapp.net",
     "name": "~alyaa",
     "type": "imageMessage",
-    "arrivedAt": "2026-06-14T09:17:05.970Z",
+    "arrivedAt": "2026-06-19T11:03:34.820Z",
     "read": true,
     "reacted": true,
-    "emoji": "🎄",
+    "emoji": "🙅‍♀️",
     "resolve": "Signal Lib ✓",
     "source": "status",
     "number": "6289502599767",
@@ -16,17 +16,17 @@
       "remoteJid": "status@broadcast",
       "remoteJidAlt": "6289502599767@s.whatsapp.net",
       "fromMe": false,
-      "id": "AC458E6EB2DD68F14FF13339FF83297E",
+      "id": "AC12860B8FE6070E3DC695D6791DE6EE",
       "participant": "180075228098603@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-14T09:17:22.744Z",
+    "updatedAt": "2026-06-19T11:03:55.311Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6289502599767@s.whatsapp.net",
         "fromMe": false,
-        "id": "AC458E6EB2DD68F14FF13339FF83297E",
+        "id": "AC12860B8FE6070E3DC695D6791DE6EE",
         "participant": "180075228098603@lid",
         "addressingMode": "lid"
       },
@@ -34,11 +34,11 @@
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6289502599767@s.whatsapp.net",
         "fromMe": false,
-        "id": "AC458E6EB2DD68F14FF13339FF83297E",
+        "id": "AC12860B8FE6070E3DC695D6791DE6EE",
         "participant": "6289502599767@s.whatsapp.net",
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-14T09:17:22.744Z"
+    "processedAt": "2026-06-19T11:03:55.311Z"
   }
 }
