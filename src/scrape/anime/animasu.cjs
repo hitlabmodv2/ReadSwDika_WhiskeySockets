@@ -732,3 +732,213 @@ module.exports = {
     simulasi,
     getAiringStatus,
 };
+
+// ── COMMAND HANDLER ───────────────────────────────────────────────────────────
+
+async function handleAnimasu({ hisoka, m, query, tolak, logCommand, sendConfirmWithButtons, fs, path, loadConfig }) {
+	if (!m.isOwner) { await tolak(hisoka, m, '❌ Hanya owner yang bisa gunakan perintah ini.'); return; }
+	if (!m.isGroup) { await tolak(hisoka, m, '❌ Perintah ini hanya untuk grup.'); return; }
+
+	const cfgPathAM = path.join(process.cwd(), 'config.json');
+	const sub = (query || '').trim().toLowerCase().replace(/\s+/g, ' ');
+	const pfx = m.prefix || '.';
+
+	const cfgAM = loadConfig();
+	if (!cfgAM.animasu)        cfgAM.animasu        = { groups: {} };
+	if (!cfgAM.animasu.groups) cfgAM.animasu.groups = {};
+
+	if (!sub || sub === 'help') {
+		const aktif = cfgAM.animasu.groups[m.from]?.enabled === true;
+		await tolak(hisoka, m,
+			`╭─「 📺 *ANIMASU SUB INDO* 」\n` +
+			`│\n` +
+			`│ Status di grup ini: ${aktif ? '✅ *Aktif*' : '❌ *Nonaktif*'}\n` +
+			`│\n` +
+			`│ *Perintah:*\n` +
+			`│ • ${pfx}animasu on — aktifkan\n` +
+			`│ • ${pfx}animasu off — nonaktifkan\n` +
+			`│ • ${pfx}animasu test — kirim test ke sini\n` +
+			`│ • ${pfx}animasu test grup — kirim test ke semua grup aktif\n` +
+			`│ • ${pfx}animasu status — lihat semua grup\n` +
+			`│\n` +
+			`│ 💡 Bot otomatis kirim notif saat episode\n` +
+			`│    baru Sub Indo sudah tersedia di Animasu.\n` +
+			`╰──────────────────────`
+		);
+		return;
+	}
+
+	if (sub === 'on') {
+		const sebelumnyaAM = cfgAM.animasu.groups[m.from]?.enabled === true;
+		cfgAM.animasu.groups[m.from] = { enabled: true, diubahPada: Date.now() };
+		fs.writeFileSync(cfgPathAM, JSON.stringify(cfgAM, null, 2));
+		await sendConfirmWithButtons(hisoka, m,
+			`╭─「 📺 *ANIMASU SUB INDO* 」\n` +
+			`│\n` +
+			`│ Status sebelumnya : ${sebelumnyaAM ? '✅ *ON*' : '❌ *OFF*'}\n` +
+			`│ Status sekarang   : ✅ *ON*\n` +
+			`│\n` +
+			(sebelumnyaAM
+				? `│ ℹ️ Fitur ini sebelumnya sudah aktif,\n│    tidak ada perubahan.\n`
+				: `│ ✅ Fitur berhasil diaktifkan!\n│    Bot akan kirim notif otomatis\n│    saat episode Sub Indo baru tersedia.\n`) +
+			`│\n` +
+			`│ Ketik *${pfx}animasu off* untuk menonaktifkan.\n` +
+			`╰──────────────────────`,
+			[{ text: '➕ Aktifkan Semua Grup', id: '__addallgrp__animasu' }]
+		);
+		await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+		logCommand(m, hisoka, 'animasu-on');
+		return;
+	}
+
+	if (sub === 'off') {
+		const sebelumnyaAM = cfgAM.animasu.groups[m.from]?.enabled === true;
+		cfgAM.animasu.groups[m.from] = { enabled: false, diubahPada: Date.now() };
+		fs.writeFileSync(cfgPathAM, JSON.stringify(cfgAM, null, 2));
+		await tolak(hisoka, m,
+			`╭─「 📺 *ANIMASU SUB INDO* 」\n` +
+			`│\n` +
+			`│ Status sebelumnya : ${sebelumnyaAM ? '✅ *ON*' : '❌ *OFF*'}\n` +
+			`│ Status sekarang   : ❌ *OFF*\n` +
+			`│\n` +
+			(sebelumnyaAM
+				? `│ ❌ Fitur berhasil dinonaktifkan.\n│    Bot tidak akan kirim notif lagi\n│    di grup ini.\n`
+				: `│ ℹ️ Fitur ini sebelumnya sudah nonaktif,\n│    tidak ada perubahan.\n`) +
+			`│\n` +
+			`│ Ketik *${pfx}animasu on* untuk mengaktifkan kembali.\n` +
+			`╰──────────────────────`
+		);
+		await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+		logCommand(m, hisoka, 'animasu-off');
+		return;
+	}
+
+	if (sub === 'status') {
+		await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
+		let loadingMsg = null;
+		try {
+			loadingMsg = await hisoka.sendMessage(m.from, {
+				text: `⏳ *Memuat status anime...*\n` +
+				      `┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n` +
+				      `📡 Mengambil data realtime dari Animasu\n` +
+				      `🔄 Harap tunggu sebentar...`,
+			}, { quoted: m });
+
+			const daftarAnime = await getAiringStatus(40);
+			try { await hisoka.sendMessage(m.from, { delete: loadingMsg.key }); } catch (_) {}
+			loadingMsg = null;
+
+			if (!daftarAnime.length) {
+				await tolak(hisoka, m, '📋 Belum ada anime yang terpantau dari Animasu saat ini.');
+				return;
+			}
+
+			const waktu = new Date().toLocaleString('id-ID', {
+				timeZone: 'Asia/Jakarta',
+				day: '2-digit', month: 'short', year: 'numeric',
+				hour: '2-digit', minute: '2-digit', hour12: false,
+			});
+
+			let txt = `╭─「 📺 *STATUS ANIME ANIMASU* 」\n`;
+			txt += `│ 🕐 _${waktu} WIB_\n`;
+			txt += `│ 📊 Total: *${daftarAnime.length} anime* terpantau\n`;
+			txt += `│ 📶 Sumber: _animasu.app (realtime)_\n`;
+			txt += `│ _(diurutkan: sisa episode terbanyak di atas)_\n`;
+			txt += `│\n`;
+
+			for (let i = 0; i < daftarAnime.length; i++) {
+				const a       = daftarAnime[i];
+				const no      = String(i + 1).padStart(2, '0');
+				const epStr   = a.totalSeri ? `Ep ${a.epTerbaru}/${a.totalSeri}` : `Ep ${a.epTerbaru || '?'}`;
+				const sisaStr = a.sisaEp !== null ? `Sisa *${a.sisaEp} ep*` : `Sisa *?*`;
+				const musimStr = a.musim && a.musim !== '-' ? ` · _${a.musim}_` : '';
+				txt += `│ *${no}.* ${a.judul}\n`;
+				txt += `│     📺 ${epStr} | ${sisaStr}${musimStr}\n`;
+				if (a.latestEpUrl && a.latestEpUrl !== a.url) {
+					txt += `│     ▶️ *Tonton Ep ${a.epTerbaru}:* ${a.latestEpUrl}\n`;
+				}
+				if (a.batchDownload) {
+					txt += `│     📦 *Batch Tersedia!*\n`;
+					for (const r of a.batchDownload.resolutions) {
+						const mirrors = r.links.map(l => l.label).join(' · ');
+						txt += `│         [${r.res}] ${mirrors}\n`;
+					}
+					const firstRes = a.batchDownload.resolutions[0];
+					if (firstRes?.links[0]) txt += `│         🔗 ${firstRes.links[0].url}\n`;
+				} else {
+					txt += `│     🔗 ${a.url}\n`;
+				}
+				if (i < daftarAnime.length - 1) txt += `│\n`;
+			}
+			txt += `╰──────────────────────`;
+			await tolak(hisoka, m, txt);
+			await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+		} catch (err) {
+			if (loadingMsg) { try { await hisoka.sendMessage(m.from, { delete: loadingMsg.key }); } catch (_) {} }
+			await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
+			await tolak(hisoka, m, `❌ Gagal ambil status anime: ${err?.message || err}`);
+		}
+		return;
+	}
+
+	if (sub === 'test grup') {
+		await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
+		try {
+			const daftarGrup = getEnabledGroups();
+			if (!daftarGrup.length) {
+				await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
+				await tolak(hisoka, m, `❌ Belum ada grup yang mengaktifkan Animasu.\nKetik *${pfx}animasu on* di grup tujuan dulu.`);
+				return;
+			}
+			const hasil = await simulasi();
+			let berhasil = 0, gagal = 0;
+			for (const jid of daftarGrup) {
+				try {
+					if (hasil.urlGambar) {
+						await hisoka.sendMessage(jid, { image: { url: hasil.urlGambar }, caption: hasil.caption });
+					} else {
+						await hisoka.sendMessage(jid, { text: hasil.caption });
+					}
+					berhasil++;
+					await new Promise(r => setTimeout(r, 1500));
+				} catch (e) {
+					gagal++;
+					console.error(`[Animasu] Gagal kirim test ke ${jid}:`, e?.message);
+				}
+			}
+			await hisoka.sendMessage(m.from, {
+				text: `✅ *Test Animasu selesai!*\n\n` +
+				      `📤 Terkirim ke: *${berhasil}/${daftarGrup.length} grup*` +
+				      (gagal ? `\n❌ Gagal: ${gagal} grup` : ''),
+			}, { quoted: m });
+			await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+			logCommand(m, hisoka, 'animasu-test-grup');
+		} catch (err) {
+			await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
+			await tolak(hisoka, m, `❌ Gagal fetch Animasu: ${err?.message || err}`);
+		}
+		return;
+	}
+
+	if (sub === 'test') {
+		await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
+		try {
+			const hasil = await simulasi();
+			if (hasil.urlGambar) {
+				await hisoka.sendMessage(m.from, { image: { url: hasil.urlGambar }, caption: hasil.caption }, { quoted: m });
+			} else {
+				await tolak(hisoka, m, hasil.caption);
+			}
+			await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+			logCommand(m, hisoka, 'animasu-test');
+		} catch (err) {
+			await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
+			await tolak(hisoka, m, `❌ Gagal fetch Animasu: ${err?.message || err}`);
+		}
+		return;
+	}
+
+	await tolak(hisoka, m, `❌ Sub-perintah tidak dikenal. Ketik *${pfx}animasu* untuk bantuan.`);
+}
+
+module.exports.handleAnimasu = handleAnimasu;
