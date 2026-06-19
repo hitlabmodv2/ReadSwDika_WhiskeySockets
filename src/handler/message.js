@@ -56,8 +56,7 @@ import { buildFbVisionPrompt, buildFbCaptionPrompt, buildFbFallbackCaption, pars
 import { hashSticker, lookupSticker, saveSticker, incrementStickerSeen, buildStickerContextHint, getStickerMemoryStats } from '../helper/stickerMemory.js';
 import { getJadibotAntidel, getJadibotReadsw, getJadibotAnticall, getJadibotAnticallvid, getJadibotAutoOnline, getJadibotAutoTyping, getJadibotAutoRecording, setJadibotUserSetting, getJadibotNumber, addJadibotEmojis, deleteJadibotEmojis, listJadibotEmojis, getJadibotEmojiMode, setDefaultEmojiMode, setCustomEmojiMode, resetToDefaultEmojis, clearJadibotEmojis } from '../helper/jadibotSettings.js';
 import { pruneSwStatsAt, countActiveSW } from '../helper/swtrack.js';
-import { buildMenuUtama } from '../scrape/menu/menu_utama.js';
-import { buildMenuJadibot } from '../scrape/menu/menu_jadibot.js';
+import { getHandler } from '../helper/hotReload.js';
 const { makeWmSticker } = _require('../scrape/tools/wm.cjs');
 
 const WILY_VERBOSE_LOGS = process.env.WILY_VERBOSE_LOGS === 'true' || process.env.BOT_DEBUG_LOG === 'true';
@@ -9991,7 +9990,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                 const _jbNow = new Date();
                                                 const _jbTglFmt = new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }).format(_jbNow);
                                                 const _jbJamFmt = new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).format(_jbNow);
-                                                const menuTeks = buildMenuJadibot({
+                                                const menuTeks = getHandler('menuJadibot')?.buildMenuJadibot({
                                                         pushName: m.pushName || 'User',
                                                         jadibotNum,
                                                         juh, jum, jus,
@@ -10001,7 +10000,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                         totalAutoFitur: _jbTotalAutoFitur,
                                                         fiturCount: _jbFiturCount,
                                                         autoTidakAktif: _jbAutoTidakAktif,
-                                                });
+                                                }) ?? '❌ Menu tidak tersedia, coba lagi.';
                                                 let jbMenuSent = false;
                                                 try {
                                                         const btnJb = new Button()
@@ -10052,7 +10051,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                                         await hisoka.sendMessage(m.from, { react: { text: `🌊`, key: m.key } }).catch(() => {});
 
-                                        const teks = buildMenuUtama({
+                                        const teks = getHandler('menuUtama')?.buildMenuUtama({
                                                 pushName: m.pushName || 'User',
                                                 isOwner: m.isOwner,
                                                 uptimeStr,
@@ -10063,7 +10062,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                 totalSemuaFitur,
                                                 fiturAktif: totalCmd,
                                                 fiturTidakAktif: totalTidakAktif,
-                                        });
+                                        }) ?? '❌ Menu tidak tersedia, coba lagi.';
                                         const ppUser = await getUserProfilePictureUrl(hisoka, m.sender);
                                         const menuCtxInfo = ppUser
                                                 ? {

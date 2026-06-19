@@ -56,6 +56,10 @@ const WATCHED_FILES = [
     { key: 'botStats',     rel: 'src/db/botStats.js' },
     { key: 'jsondb',       rel: 'src/db/json.js' },
 
+    // ── Menu builders ────────────────────────────
+    { key: 'menuUtama',    rel: 'src/scrape/menu/menu_utama.js' },
+    { key: 'menuJadibot',  rel: 'src/scrape/menu/menu_jadibot.js' },
+
     // ── SwTrack helper ────────────────────────────
     { key: 'swtrack',      rel: 'src/helper/swtrack.js' },
 
