@@ -3,7 +3,7 @@ _📅 Minggu, 21 Juni 2026 — WIB_ 🕐
 _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurna_ 🙏
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V22*
-✨ *4 Fitur Baru*
+✨ *5 Fitur Baru*
 🔧 *3 Bug Fix*
 🚀 *3 Improvement*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -70,6 +70,13 @@ _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurn
 > ▸ _.sematkan 30_ → sematkan 30 hari
 > Bot wajib menjadi admin di grup
 > Hanya bisa digunakan di dalam grup
+
+> NO.5 🎨 *Ganti Watermark Stiker — .wm / .swm [Pack|Author]*
+> Ganti nama Pack dan Author pada stiker langsung lewat bot
+> Cara pakai: reply stiker → ketik .wm NamaPack|NamaAuthor
+> Contoh: _.wm Wilybot|Owner_ atau _.swm Bang|Wily_
+> Pisahkan Pack & Author menggunakan tanda | (pipe)
+> ✅ Kini juga bisa diakses di *userjadibot* — tidak hanya bot utama
 ━━━━━━━━━━━━━━━━━━━━━━
 🔧 *BUG FIX*
 ━━━━━━━━━━━━━━━━━━━━━━
