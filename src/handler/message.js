@@ -9343,13 +9343,13 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                 try {
                                                         const btn = new Button();
                                                         if (imgBufT) btn.setImage(imgBufT);
-                                                        btn.setBody(hasilT.caption)
+                                                        btn.setBody(hasilT.captionBtn || hasilT.caption)
                                                            .setFooter('🌐 AN1.COM — APK MOD Gratis');
                                                         if (dlUrlT)   btn.addUrl('📥 Download MOD APK', dlUrlT,   dlUrlT);
                                                         if (gameUrlT) btn.addUrl('🔗 Halaman Game',     gameUrlT, gameUrlT);
                                                         await btn.run(m.from, hisoka, m);
                                                 } catch (e) {
-                                                        // Fallback ke sendMessage biasa kalau Button gagal
+                                                        // Fallback ke sendMessage biasa kalau Button gagal (pakai caption dengan link)
                                                         if (imgBufT) await hisoka.sendMessage(m.from, { image: imgBufT, caption: hasilT.caption }, { quoted: m });
                                                         else         await tolak(hisoka, m, hasilT.caption);
                                                 }

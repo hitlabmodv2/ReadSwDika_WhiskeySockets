@@ -544,7 +544,7 @@ async function searchGames(query) {
 const SEP  = '━━━━━━━━━━━━━━━━━━━';
 const SEP2 = '┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄';
 
-function buatCaption(game, detail = null) {
+function buatCaption(game, detail = null, { hideDownload = false } = {}) {
     // d = sumber data utama: detail jika ada, fallback ke game (yang sudah merged)
     const d = detail || game || {};
 
@@ -602,8 +602,9 @@ function buatCaption(game, detail = null) {
         : '';
 
     // Link download: prioritaskan direct APK, fallback ke halaman game
+    // Kalau hideDownload=true (ada button), skip blok ini agar ga duplikat
     const apkUrl       = d.downloadUrl || '';
-    const downloadBlok = apkUrl
+    const downloadBlok = hideDownload ? '' : apkUrl
         ? `\n${SEP}\n📥 *Download APK (Langsung):*\n${apkUrl}\n\n🔗 *Halaman Game:*\n${urlGame}\n`
         : urlGame
             ? `\n${SEP}\n🔗 *Download / Info:*\n${urlGame}\n`
@@ -751,11 +752,13 @@ async function simulasi() {
     }
     const tipeUpdate = tentikanTipe(game.url, state);
 
-    const merged  = { ...game, ...(detail || {}), url: game.url, tipeUpdate };
-    const caption = buatCaption(merged, detail);
+    const merged      = { ...game, ...(detail || {}), url: game.url, tipeUpdate };
+    const caption     = buatCaption(merged, detail, { hideDownload: false }); // fallback plain text
+    const captionBtn  = buatCaption(merged, detail, { hideDownload: true  }); // untuk button msg
 
     return {
         caption,
+        captionBtn,
         urlGambar : detail?.image || game.image || null,
         game      : merged,
         tipeUpdate,

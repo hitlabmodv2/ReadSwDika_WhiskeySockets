@@ -1139,7 +1139,10 @@ async function main() {
                         /* =================== AUTO AN1GAME SCHEDULER =================== */
 
                         // Helper: kirim notif AniGame — gambar+caption+button dalam SATU pesan
-                        const kirimAnigameInteraktif = async (jid, imgBuffer, caption, apkUrl, gameUrl) => {
+                        // captionBtn  = caption tanpa link download (untuk body interactive msg)
+                        // captionText = caption dengan link download (untuk fallback plain text)
+                        const kirimAnigameInteraktif = async (jid, imgBuffer, captionBtn, apkUrl, gameUrl, captionText = null) => {
+                                const capFallback = captionText || captionBtn;
                                 // Kalau ga ada direct APK, tombol Download tetap muncul → arah ke game page
                                 const dlUrl  = apkUrl || gameUrl;
                                 const btnList = [];
@@ -1148,8 +1151,8 @@ async function main() {
 
                                 // Kalau ga ada URL sama sekali — kirim biasa
                                 if (!btnList.length) {
-                                        if (imgBuffer) await hisoka.sendMessage(jid, { image: imgBuffer, caption });
-                                        else           await hisoka.sendMessage(jid, { text: caption });
+                                        if (imgBuffer) await hisoka.sendMessage(jid, { image: imgBuffer, caption: capFallback });
+                                        else           await hisoka.sendMessage(jid, { text: capFallback });
                                         return;
                                 }
 
@@ -1161,7 +1164,7 @@ async function main() {
 
                                         const msg = generateWAMessageFromContent(jid, {
                                                 interactiveMessage: {
-                                                        body:   { text: caption },
+                                                        body:   { text: captionBtn },
                                                         footer: { text: '🌐 AN1.COM — APK MOD Gratis' },
                                                         header: { title: '', hasMediaAttachment: !!imgBuffer, ...headerMedia },
                                                         nativeFlowMessage: { messageParamsJson: '{}', buttons: btnList },
@@ -1174,8 +1177,8 @@ async function main() {
                                         });
                                 } catch (e) {
                                         console.warn(`[AniGame] ⚠️ Interactive gagal (${e?.message}), fallback`);
-                                        if (imgBuffer) await hisoka.sendMessage(jid, { image: imgBuffer, caption });
-                                        else           await hisoka.sendMessage(jid, { text: caption });
+                                        if (imgBuffer) await hisoka.sendMessage(jid, { image: imgBuffer, caption: capFallback });
+                                        else           await hisoka.sendMessage(jid, { text: capFallback });
                                 }
                         };
 
@@ -1202,8 +1205,9 @@ async function main() {
                                                 console.log(`[AniGame] 🎮 ${gameBaru.length} game baru ditemukan!`);
 
                                                 for (const game of gameBaru) {
-                                                        const caption   = _ag.buatCaption(game, game);
-                                                        const urlGambar = game.image || null;
+                                                        const caption    = _ag.buatCaption(game, game, { hideDownload: false }); // fallback plain text
+                                                        const captionBtn = _ag.buatCaption(game, game, { hideDownload: true  }); // untuk button msg
+                                                        const urlGambar  = game.image || null;
 
                                                         // Download image dulu sebagai buffer dengan header Referer
                                                         // Retry 3x, validasi magic bytes, support jpg/png/webp/gif
@@ -1261,7 +1265,7 @@ async function main() {
                                                         for (let i = 0; i < daftarGrup.length; i += BATCH) {
                                                                 const chunk   = daftarGrup.slice(i, i + BATCH);
                                                                 const results = await Promise.allSettled(chunk.map(async jid => {
-                                                                        await kirimAnigameInteraktif(jid, imgBuffer, caption, apkUrl, gameUrl);
+                                                                        await kirimAnigameInteraktif(jid, imgBuffer, captionBtn, apkUrl, gameUrl, caption);
                                                                 }));
                                                                 for (const r of results) {
                                                                         if (r.status === 'fulfilled') berhasil++;
