@@ -9339,13 +9339,14 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                 // Kirim gambar+caption+button dalam SATU pesan pakai Button class
                                                 const apkUrlT  = hasilT.game?.downloadUrl || '';
                                                 const gameUrlT = hasilT.game?.url         || '';
+                                                const dlUrlT   = apkUrlT || gameUrlT; // fallback ke game page kalau ga ada direct APK
                                                 try {
                                                         const btn = new Button();
                                                         if (imgBufT) btn.setImage(imgBufT);
                                                         btn.setBody(hasilT.caption)
                                                            .setFooter('🌐 AN1.COM — APK MOD Gratis');
-                                                        if (apkUrlT)  btn.addUrl('📥 Download APK', apkUrlT,  apkUrlT);
-                                                        if (gameUrlT) btn.addUrl('🔗 Halaman Game',  gameUrlT, gameUrlT);
+                                                        if (dlUrlT)   btn.addUrl('📥 Download MOD APK', dlUrlT,   dlUrlT);
+                                                        if (gameUrlT) btn.addUrl('🔗 Halaman Game',     gameUrlT, gameUrlT);
                                                         await btn.run(m.from, hisoka, m);
                                                 } catch (e) {
                                                         // Fallback ke sendMessage biasa kalau Button gagal

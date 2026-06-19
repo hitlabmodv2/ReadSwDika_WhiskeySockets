@@ -1140,11 +1140,13 @@ async function main() {
 
                         // Helper: kirim notif AniGame — gambar+caption+button dalam SATU pesan
                         const kirimAnigameInteraktif = async (jid, imgBuffer, caption, apkUrl, gameUrl) => {
+                                // Kalau ga ada direct APK, tombol Download tetap muncul → arah ke game page
+                                const dlUrl  = apkUrl || gameUrl;
                                 const btnList = [];
-                                if (apkUrl)  btnList.push({ name: 'cta_url', buttonParamsJson: JSON.stringify({ display_text: '📥 Download APK', url: apkUrl,  merchant_url: apkUrl  }) });
-                                if (gameUrl) btnList.push({ name: 'cta_url', buttonParamsJson: JSON.stringify({ display_text: '🔗 Halaman Game',  url: gameUrl, merchant_url: gameUrl }) });
+                                if (dlUrl)   btnList.push({ name: 'cta_url', buttonParamsJson: JSON.stringify({ display_text: '📥 Download MOD APK', url: dlUrl,  merchant_url: dlUrl  }) });
+                                if (gameUrl) btnList.push({ name: 'cta_url', buttonParamsJson: JSON.stringify({ display_text: '🔗 Halaman Game',     url: gameUrl, merchant_url: gameUrl }) });
 
-                                // Kalau ga ada URL button — kirim biasa
+                                // Kalau ga ada URL sama sekali — kirim biasa
                                 if (!btnList.length) {
                                         if (imgBuffer) await hisoka.sendMessage(jid, { image: imgBuffer, caption });
                                         else           await hisoka.sendMessage(jid, { text: caption });
