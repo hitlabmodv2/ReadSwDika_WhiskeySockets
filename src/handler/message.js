@@ -9336,7 +9336,34 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                         }
                                                 }
 
-                                                if (imgBufT) {
+                                                // Kirim pakai interactive message + URL button (konsisten dgn scheduler)
+                                                const apkUrlT  = hasilT.downloadUrl || hasilT.game?.downloadUrl || '';
+                                                const gameUrlT = hasilT.url         || hasilT.game?.url         || '';
+                                                const btnsT    = [];
+                                                if (apkUrlT)  btnsT.push({ name: 'cta_url', buttonParamsJson: JSON.stringify({ display_text: '📥 Download APK', url: apkUrlT,  merchant_url: apkUrlT  }) });
+                                                if (gameUrlT) btnsT.push({ name: 'cta_url', buttonParamsJson: JSON.stringify({ display_text: '🔗 Halaman Game',  url: gameUrlT, merchant_url: gameUrlT }) });
+
+                                                if (btnsT.length && imgBufT) {
+                                                        try {
+                                                                const hmT  = await prepareWAMessageMedia({ image: imgBufT }, { upload: hisoka.waUploadToServer });
+                                                                const msgT = generateWAMessageFromContent(m.from, {
+                                                                        viewOnceMessage: {
+                                                                                message: {
+                                                                                        messageContextInfo: { deviceListMetadata: {}, deviceListMetadataVersion: 2 },
+                                                                                        interactiveMessage: proto.Message.InteractiveMessage.create({
+                                                                                                body:   proto.Message.InteractiveMessage.Body.create({ text: hasilT.caption }),
+                                                                                                footer: proto.Message.InteractiveMessage.Footer.create({ text: '🌐 AN1.COM — APK MOD Gratis' }),
+                                                                                                header: proto.Message.InteractiveMessage.Header.create({ title: '', subtitle: '', gifPlayback: false, hasMediaAttachment: true, ...hmT }),
+                                                                                                nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.create({ buttons: btnsT }),
+                                                                                        }),
+                                                                                },
+                                                                        },
+                                                                }, { quoted: m });
+                                                                await hisoka.relayMessage(msgT.key.remoteJid, msgT.message, { messageId: msgT.key.id });
+                                                        } catch (_) {
+                                                                await hisoka.sendMessage(m.from, { image: imgBufT, caption: hasilT.caption }, { quoted: m });
+                                                        }
+                                                } else if (imgBufT) {
                                                         await hisoka.sendMessage(m.from, { image: imgBufT, caption: hasilT.caption }, { quoted: m });
                                                 } else {
                                                         await tolak(hisoka, m, hasilT.caption);

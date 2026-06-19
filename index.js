@@ -41,6 +41,9 @@ const {
         jidDecode,
         downloadMediaMessage,
         getContentType,
+        generateWAMessageFromContent,
+        prepareWAMessageMedia,
+        proto,
 } = _require('@whiskeysockets/baileys');
 const { createWelcomeCard } = _require('./src/scrape/system/welcomeCard.cjs');
 import pino from 'pino';
@@ -1134,6 +1137,51 @@ async function main() {
                         /* =================== END AUTO ANIMASU SCHEDULER =================== */
 
                         /* =================== AUTO AN1GAME SCHEDULER =================== */
+
+                        // Helper: kirim notif AniGame pakai interactive message + URL button
+                        const kirimAnigameInteraktif = async (jid, imgBuffer, caption, apkUrl, gameUrl) => {
+                                const buttons = [];
+                                if (apkUrl)  buttons.push({ name: 'cta_url', buttonParamsJson: JSON.stringify({ display_text: '📥 Download APK', url: apkUrl,  merchant_url: apkUrl  }) });
+                                if (gameUrl) buttons.push({ name: 'cta_url', buttonParamsJson: JSON.stringify({ display_text: '🔗 Halaman Game',  url: gameUrl, merchant_url: gameUrl }) });
+
+                                if (!buttons.length) {
+                                        // Tidak ada URL — fallback sendMessage biasa
+                                        if (imgBuffer) await hisoka.sendMessage(jid, { image: imgBuffer, caption });
+                                        else           await hisoka.sendMessage(jid, { text: caption });
+                                        return;
+                                }
+
+                                try {
+                                        const headerMedia = imgBuffer
+                                                ? await prepareWAMessageMedia({ image: imgBuffer }, { upload: hisoka.waUploadToServer })
+                                                : {};
+
+                                        const msg = generateWAMessageFromContent(jid, {
+                                                viewOnceMessage: {
+                                                        message: {
+                                                                messageContextInfo: { deviceListMetadata: {}, deviceListMetadataVersion: 2 },
+                                                                interactiveMessage: proto.Message.InteractiveMessage.create({
+                                                                        body:   proto.Message.InteractiveMessage.Body.create({ text: caption }),
+                                                                        footer: proto.Message.InteractiveMessage.Footer.create({ text: '🌐 AN1.COM — APK MOD Gratis' }),
+                                                                        header: proto.Message.InteractiveMessage.Header.create({
+                                                                                title: '', subtitle: '', gifPlayback: false,
+                                                                                hasMediaAttachment: !!imgBuffer,
+                                                                                ...headerMedia,
+                                                                        }),
+                                                                        nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.create({ buttons }),
+                                                                }),
+                                                        },
+                                                },
+                                        }, {});
+
+                                        await hisoka.relayMessage(msg.key.remoteJid, msg.message, { messageId: msg.key.id });
+                                } catch (btnErr) {
+                                        console.warn(`[AniGame] ⚠️ Gagal kirim interactive, fallback teks: ${btnErr?.message}`);
+                                        if (imgBuffer) await hisoka.sendMessage(jid, { image: imgBuffer, caption });
+                                        else           await hisoka.sendMessage(jid, { text: caption });
+                                }
+                        };
+
                         if (global.anigameInterval) {
                                 clearInterval(global.anigameInterval);
                                 global.anigameInterval = null;
@@ -1206,17 +1254,17 @@ async function main() {
                                                                 if (!imgBuffer) console.warn(`[AniGame] ⚠️ Semua attempt gagal — kirim teks saja`);
                                                         }
 
-                                                        // Kirim ke semua grup aktif (batch 5)
+                                                        // Ekstrak URL untuk tombol interaktif
+                                                        const apkUrl  = game.downloadUrl || '';
+                                                        const gameUrl = game.url         || '';
+
+                                                        // Kirim ke semua grup aktif (batch 5) — pakai interactive message + URL button
                                                         let berhasil = 0, gagal = 0;
                                                         const BATCH = 5;
                                                         for (let i = 0; i < daftarGrup.length; i += BATCH) {
                                                                 const chunk   = daftarGrup.slice(i, i + BATCH);
                                                                 const results = await Promise.allSettled(chunk.map(async jid => {
-                                                                        if (imgBuffer) {
-                                                                                await hisoka.sendMessage(jid, { image: imgBuffer, caption });
-                                                                        } else {
-                                                                                await hisoka.sendMessage(jid, { text: caption });
-                                                                        }
+                                                                        await kirimAnigameInteraktif(jid, imgBuffer, caption, apkUrl, gameUrl);
                                                                 }));
                                                                 for (const r of results) {
                                                                         if (r.status === 'fulfilled') berhasil++;
