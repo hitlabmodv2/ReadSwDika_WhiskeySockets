@@ -406,47 +406,68 @@ async function fetchGameDetail(gameUrl) {
     }
 }
 
-// ── PARSE GAMES LIST (halaman /games/) ────────────────────────────────────────
+// ── PARSE GAMES LIST DARI HTML (halaman /games/) ──────────────────────────────
+// Jina sudah tidak merender link URL di halaman games list,
+// sehingga kita fetch HTML langsung dari an1.com untuk dapat URL game.
 
-function parseGamesList(md) {
+async function fetchGamesListHTML(page = 1) {
+    const url = page > 1 ? `${BASE}/games/page/${page}/` : `${BASE}/games/`;
+    const res = await axios.get(url, {
+        headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.9',
+        },
+        timeout: 30000,
+    });
+    return typeof res.data === 'string' ? res.data : '';
+}
+
+function parseGamesListHTML(html) {
     const results = [];
     const seen    = new Set();
-    const lines   = md.split('\n');
 
-    for (let i = 0; i < lines.length; i++) {
-        const imgLine = lines[i].trim();
-        if (!imgLine.startsWith('![Image ') || !imgLine.includes('an1.com/uploads/')) continue;
+    // Setiap game ada di dalam <div class="item">...</div>
+    // Struktur: img src + alt (judul) | a href (URL game) | .developer (dev) | rating
+    const itemPattern = /<div class="item[^"]*">([\s\S]*?)(?=<div class="item|<div class="pager|<\/div>\s*<\/div>\s*<\/div>\s*<\/div>\s*<\/div>\s*<footer)/g;
+    const blocks = [...html.matchAll(itemPattern)];
 
-        const imgMatch = imgLine.match(/!\[Image \d+:\s*([^\]]+)\]\((https:\/\/an1\.com\/uploads\/[^)]+)\)/);
+    for (const block of blocks) {
+        const content = block[1];
+
+        // Image URL + judul dari alt
+        const imgMatch = content.match(/<img\s+src="(https:\/\/an1\.com\/uploads\/[^"]+)"[^>]+alt="([^"]+)"/);
         if (!imgMatch) continue;
 
-        const imgTitle = imgMatch[1].trim();
-        const imgUrl   = imgMatch[2];
+        const image = imgMatch[1];
+        const title = imgMatch[2].trim();
 
-        let gameUrl = '';
-        let title   = imgTitle;
-        let dev     = '';
-        let rating  = '';
+        // URL game dari href
+        const urlMatch = content.match(/href="(https:\/\/an1\.com\/\d+-[^"]+\.html)"/);
+        const gameUrl  = urlMatch ? urlMatch[1] : '';
+        if (!gameUrl || seen.has(gameUrl)) continue;
+        seen.add(gameUrl);
 
-        for (let j = i + 1; j < Math.min(i + 8, lines.length); j++) {
-            const ln = lines[j].trim();
-            if (!ln) continue;
-            if (!gameUrl && ln.startsWith('[') && ln.includes('an1.com/') && ln.includes('.html')) {
-                const m = ln.match(/\[([^\]]+)\]\((https:\/\/an1\.com\/[0-9]+-[^)"]+\.html)/);
-                if (m) { title = m[1].trim(); gameUrl = m[2]; }
-                continue;
-            }
-            if (!dev && !ln.startsWith('*') && !ln.startsWith('!') && !ln.startsWith('[') && !ln.startsWith('#') && ln.length > 1 && ln.length < 80) {
-                dev = ln; continue;
-            }
-            if (!rating && /^\*\s+[\d.]+$/.test(ln)) {
-                rating = ln.replace(/^\*\s+/, '').trim(); break;
-            }
+        // Developer
+        const devMatch = content.match(/<div class="developer[^"]*">([^<]+)<\/div>/);
+        const developer = devMatch ? devMatch[1].trim() : '';
+
+        // Rating
+        const ratingMatch = content.match(/class="current-rating"[^>]*>([\d.]+)</);
+        const rating = ratingMatch ? ratingMatch[1] : '';
+
+        results.push({ title, image, url: gameUrl, developer, rating });
+    }
+
+    // Fallback: kalau pattern block tidak match, coba regex sederhana per-item
+    if (!results.length) {
+        const simplePattern = /<img\s+src="(https:\/\/an1\.com\/uploads\/[^"]+)"[^>]+alt="([^"]+)"[\s\S]*?href="(https:\/\/an1\.com\/\d+-[^"]+\.html)"/g;
+        for (const m of html.matchAll(simplePattern)) {
+            const gameUrl = m[3];
+            if (seen.has(gameUrl)) continue;
+            seen.add(gameUrl);
+            results.push({ title: m[2].trim(), image: m[1], url: gameUrl, developer: '', rating: '' });
         }
-
-        if (!title || seen.has(gameUrl || title)) continue;
-        seen.add(gameUrl || title);
-        results.push({ title, image: imgUrl, url: gameUrl, developer: dev, rating });
     }
 
     return results;
@@ -497,11 +518,13 @@ function parseSearchResults(md) {
 }
 
 // ── FETCH GAMES LIST ──────────────────────────────────────────────────────────
+// Pakai HTML langsung (bukan Jina) karena Jina sudah tidak render link URL game
 
 async function getGamesList(page = 1) {
-    const url = page > 1 ? `${BASE}/games/page/${page}/` : `${BASE}/games/`;
-    const md  = await fetchMarkdown(url);
-    return parseGamesList(md);
+    const html = await fetchGamesListHTML(page);
+    const results = parseGamesListHTML(html);
+    console.log(`[AniGame] getGamesList: ${results.length} game ditemukan (page ${page})`);
+    return results;
 }
 
 // ── FETCH SEARCH ──────────────────────────────────────────────────────────────
