@@ -213,3 +213,70 @@ function formatPixivCaption(data, { index = null, total = null } = {}) {
 }
 
 module.exports = { pixivFetch, pixivFetchMultiple, pixivSearch, formatPixivCaption };
+
+// ── COMMAND HANDLER ────────────────────────────────────────────────────────────
+
+async function handlePixiv({ hisoka, m, query, tolak, logCommand, logError }) {
+        try {
+                const input = (query || '').trim();
+                const pfx   = m.prefix || '.';
+
+                if (!input) {
+                        await tolak(hisoka, m,
+                                `╭─「 🎨 *PIXIV SEARCH* 」\n│\n│ Cari ilustrasi anime dari Pixiv.\n│\n│ *Format:*\n│ • ${pfx}pixiv <query>\n│ • ${pfx}pixiv <query>,<jumlah>\n│\n│ *Contoh 1 gambar:*\n│ • ${pfx}pixiv megumin\n│ • ${pfx}pixiv rem re:zero\n│\n│ *Contoh banyak gambar (max 10):*\n│ • ${pfx}pixiv megumin chan,5\n│ • ${pfx}pixiv naruto,10\n│\n│ ℹ️ Hanya konten aman (safe).\n╰──────────────────────`
+                        );
+                        return;
+                }
+
+                let realQuery = input;
+                let imgCount  = 1;
+                const lastComma = input.lastIndexOf(',');
+                if (lastComma !== -1) {
+                        const maybeNum = input.slice(lastComma + 1).trim();
+                        if (/^\d+$/.test(maybeNum)) {
+                                imgCount  = Math.min(Math.max(1, parseInt(maybeNum)), 10);
+                                realQuery = input.slice(0, lastComma).trim();
+                        }
+                }
+                if (!realQuery) { await tolak(hisoka, m, `❌ Query kosong. Contoh: *.pixiv megumin,5*`); return; }
+
+                await hisoka.sendMessage(m.from, { react: { text: '🔍', key: m.key } });
+
+                const loadMsg = await tolak(hisoka, m,
+                        imgCount > 1
+                                ? `🔍 Mencari *${imgCount} ilustrasi* "${realQuery}" dari Pixiv...`
+                                : `🔍 Mencari ilustrasi *${realQuery}* di Pixiv...`
+                );
+
+                if (imgCount > 1) {
+                        const images     = await pixivFetchMultiple(realQuery, { safe: true, count: imgCount });
+                        const albumItems = images.map((img, i) => ({ image: img.buffer, caption: formatPixivCaption(img, { index: i, total: images.length }) }));
+                        if (loadMsg?.key) { try { await hisoka.sendMessage(m.from, { delete: loadMsg.key }); } catch (_) {} }
+                        try {
+                                await hisoka.sendMessage(m.from, { albumMessage: albumItems }, { quoted: m });
+                        } catch (_) {
+                                for (let i = 0; i < images.length; i++) {
+                                        await hisoka.sendMessage(m.from, { image: images[i].buffer, caption: formatPixivCaption(images[i], { index: i, total: images.length }) }, { quoted: i === 0 ? m : undefined });
+                                }
+                        }
+                } else {
+                        const randomIndex = Math.floor(Math.random() * 10);
+                        const data    = await pixivFetch(realQuery, { safe: true, index: randomIndex });
+                        const caption = formatPixivCaption(data);
+                        if (loadMsg?.key) { try { await hisoka.sendMessage(m.from, { delete: loadMsg.key }); } catch (_) {} }
+                        await hisoka.sendMessage(m.from, { image: data.buffer, caption }, { quoted: m });
+                }
+
+                await hisoka.sendMessage(m.from, { react: { text: '🎨', key: m.key } });
+                logCommand(m, hisoka, 'pixiv');
+        } catch (error) {
+                console.error('\x1b[31m[Pixiv] Error:\x1b[39m', error.message);
+                logError(error, 'command:pixiv');
+                await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } }).catch(() => {});
+                await tolak(hisoka, m,
+                        `❌ *Gagal mencari di Pixiv.*\n\n_${error.message}_\n\nContoh:\n• *.pixiv megumin* — 1 gambar\n• *.pixiv megumin,5* — 5 gambar sekaligus`
+                );
+        }
+}
+
+module.exports.handlePixiv = handlePixiv;

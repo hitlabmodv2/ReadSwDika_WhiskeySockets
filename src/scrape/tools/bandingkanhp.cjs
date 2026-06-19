@@ -676,3 +676,334 @@ async function bandingkanHP(rawQueryA, rawQueryB) {
 }
 
 module.exports = { bandingkanHP, formatComparison, buildRows, buildCombinedImage };
+
+// ── PDF GENERATOR (from bandingkanpdf.cjs) ────────────────────────────────────
+
+const PDFDocument = require('pdfkit');
+
+const CATEGORY_EMOJI_TXT = {
+  'Network': 'Network',
+  'Launch': 'Launch',
+  'Body': 'Body',
+  'Display': 'Display',
+  'Platform': 'Platform',
+  'Memory': 'Memory',
+  'Main Camera': 'Main Camera',
+  'Selfie camera': 'Selfie Camera',
+  'Sound': 'Sound',
+  'Comms': 'Comms',
+  'Features': 'Features',
+  'Battery': 'Battery',
+  'Misc': 'Misc',
+  'Our Tests': 'Our Tests',
+};
+
+const CATEGORY_ORDER = [
+  'Platform', 'Memory', 'Display', 'Main Camera', 'Selfie camera',
+  'Battery', 'Body', 'Network', 'Comms', 'Sound', 'Features', 'Launch', 'Misc', 'Our Tests',
+];
+
+function _pdfClean(v) {
+  if (v == null) return '-';
+  return String(v).replace(/\s+/g, ' ').trim() || '-';
+}
+
+function _applyVariant(specs, variant) {
+  if (!variant || !specs) return specs;
+  const mv = variant.match(/(\d+(?:\.\d+)?)\s*(GB|TB)\s*(?:\/|,|\s)\s*(\d+(?:\.\d+)?)\s*(GB|TB)/i);
+  if (!mv) return specs;
+  const out = JSON.parse(JSON.stringify(specs));
+  if (out.Memory) {
+    out.Memory.Internal = `${mv[3]}${mv[4].toUpperCase()} ${mv[1]}${mv[2].toUpperCase()} RAM`;
+  }
+  return out;
+}
+
+async function buildComparisonPDF(result) {
+  const { a, b, imgA, imgB, variantA, variantB } = result;
+  const labelA = variantA ? `${a.name} (${variantA})` : a.name;
+  const labelB = variantB ? `${b.name} (${variantB})` : b.name;
+
+  const specsA = _applyVariant(a.specs, variantA);
+  const specsB = _applyVariant(b.specs, variantB);
+
+  const doc = new PDFDocument({
+    size: 'A4',
+    margins: { top: 40, bottom: 40, left: 40, right: 40 },
+    info: {
+      Title: `Perbandingan ${a.name} vs ${b.name}`,
+      Author: 'Wily Bot',
+      Subject: 'Phone Comparison',
+    },
+  });
+
+  const chunks = [];
+  doc.on('data', (c) => chunks.push(c));
+  const done = new Promise((res) => doc.on('end', () => res(Buffer.concat(chunks))));
+
+  const PAGE_W = doc.page.width;
+  const PAGE_H = doc.page.height;
+  const MARGIN = 40;
+  const CONTENT_W = PAGE_W - MARGIN * 2;
+
+  doc.rect(0, 0, PAGE_W, 70).fill('#1f2937');
+  doc.fillColor('#ffffff').font('Helvetica-Bold').fontSize(20)
+    .text('PERBANDINGAN HP', MARGIN, 22, { align: 'center', width: CONTENT_W });
+  doc.fontSize(10).font('Helvetica').fillColor('#cbd5e1')
+    .text('Sumber data: GSMArena (realtime)', MARGIN, 48, { align: 'center', width: CONTENT_W });
+
+  doc.fillColor('#000000');
+  let y = 90;
+
+  const colW = (CONTENT_W - 20) / 2;
+  const leftX = MARGIN;
+  const rightX = MARGIN + colW + 20;
+
+  doc.roundedRect(leftX, y, colW, 30, 4).fill('#3b82f6');
+  doc.roundedRect(rightX, y, colW, 30, 4).fill('#ef4444');
+  doc.fillColor('#ffffff').font('Helvetica-Bold').fontSize(11)
+    .text(labelA, leftX + 8, y + 9, { width: colW - 16, ellipsis: true });
+  doc.text(labelB, rightX + 8, y + 9, { width: colW - 16, ellipsis: true });
+  doc.fillColor('#000000');
+  y += 40;
+
+  const imgH = 200;
+  if (imgA && imgA.length > 500) {
+    try { doc.image(imgA, leftX, y, { fit: [colW, imgH], align: 'center', valign: 'center' }); } catch (_) {}
+  }
+  if (imgB && imgB.length > 500) {
+    try { doc.image(imgB, rightX, y, { fit: [colW, imgH], align: 'center', valign: 'center' }); } catch (_) {}
+  }
+  y += imgH + 20;
+
+  const priceA = a.priceInfo?.raw || '-';
+  const priceB = b.priceInfo?.raw || '-';
+  const idrA = a.priceInfo?.idr ? 'Rp ' + Math.round(a.priceInfo.idr).toLocaleString('id-ID') : null;
+  const idrB = b.priceInfo?.idr ? 'Rp ' + Math.round(b.priceInfo.idr).toLocaleString('id-ID') : null;
+
+  doc.roundedRect(MARGIN, y, CONTENT_W, 50, 4).fill('#fef3c7').stroke('#f59e0b');
+  doc.fillColor('#92400e').font('Helvetica-Bold').fontSize(11).text('HARGA', MARGIN + 10, y + 8);
+  doc.font('Helvetica').fontSize(9).fillColor('#000000');
+  doc.text(`A: ${priceA}${idrA ? '  |  ' + idrA : ''}`, MARGIN + 10, y + 24, { width: CONTENT_W - 20 });
+  doc.text(`B: ${priceB}${idrB ? '  |  ' + idrB : ''}`, MARGIN + 10, y + 36, { width: CONTENT_W - 20 });
+  y += 60;
+
+  const specColW = 130;
+  const valColW = (CONTENT_W - specColW) / 2;
+  const rowPad = 6;
+
+  function ensureSpace(needed) {
+    if (y + needed > PAGE_H - MARGIN) { doc.addPage(); y = MARGIN; }
+  }
+
+  const pick = (specs, cat, keys) => {
+    const c = specs?.[cat];
+    if (!c) return '-';
+    for (const k of keys) {
+      const v = c[k];
+      if (v && String(v).trim() !== '-') return _pdfClean(v);
+    }
+    return '-';
+  };
+  const summary = [
+    { label: 'Chipset',      a: pick(specsA, 'Platform', ['Chipset']),       b: pick(specsB, 'Platform', ['Chipset']) },
+    { label: 'OS',           a: pick(specsA, 'Platform', ['OS']),            b: pick(specsB, 'Platform', ['OS']) },
+    { label: 'RAM/Storage',  a: pick(specsA, 'Memory', ['Internal']),        b: pick(specsB, 'Memory', ['Internal']) },
+    { label: 'Layar',        a: pick(specsA, 'Display', ['Size','Type']),    b: pick(specsB, 'Display', ['Size','Type']) },
+    { label: 'Resolusi',     a: pick(specsA, 'Display', ['Resolution']),     b: pick(specsB, 'Display', ['Resolution']) },
+    { label: 'Kamera Utama', a: pick(specsA, 'Main Camera', ['Triple','Quad','Dual','Single']),
+                              b: pick(specsB, 'Main Camera', ['Triple','Quad','Dual','Single']) },
+    { label: 'Kamera Depan', a: pick(specsA, 'Selfie camera', ['Single','Dual']),
+                              b: pick(specsB, 'Selfie camera', ['Single','Dual']) },
+    { label: 'Baterai',      a: pick(specsA, 'Battery', ['Type']),           b: pick(specsB, 'Battery', ['Type']) },
+    { label: 'Charging',     a: pick(specsA, 'Battery', ['Charging']),       b: pick(specsB, 'Battery', ['Charging']) },
+  ];
+
+  ensureSpace(24 + 20 + summary.length * 30);
+
+  doc.roundedRect(MARGIN, y, CONTENT_W, 24, 3).fill('#059669');
+  doc.fillColor('#ffffff').font('Helvetica-Bold').fontSize(13)
+    .text('RINGKASAN SPEK PENTING', MARGIN + 12, y + 6);
+  doc.fillColor('#000000');
+  y += 24;
+
+  doc.rect(MARGIN, y, specColW, 20).fill('#d1fae5');
+  doc.rect(MARGIN + specColW, y, valColW, 20).fill('#dbeafe');
+  doc.rect(MARGIN + specColW + valColW, y, valColW, 20).fill('#fee2e2');
+  doc.fillColor('#000000').font('Helvetica-Bold').fontSize(9.5);
+  doc.text('Spesifikasi', MARGIN + 6, y + 6, { width: specColW - 12 });
+  doc.text('A', MARGIN + specColW + 6, y + 6, { width: valColW - 12 });
+  doc.text('B', MARGIN + specColW + valColW + 6, y + 6, { width: valColW - 12 });
+  y += 20;
+
+  let zebraSum = false;
+  for (const r of summary) {
+    doc.font('Helvetica').fontSize(9.5);
+    const hL = doc.heightOfString(r.label, { width: specColW - 12 });
+    const hA = doc.heightOfString(r.a, { width: valColW - 12 });
+    const hB = doc.heightOfString(r.b, { width: valColW - 12 });
+    const rowH = Math.max(hL, hA, hB) + 14;
+    ensureSpace(rowH);
+    if (zebraSum) doc.rect(MARGIN, y, CONTENT_W, rowH).fill('#f0fdf4');
+    doc.strokeColor('#a7f3d0').lineWidth(0.5)
+      .moveTo(MARGIN, y + rowH).lineTo(MARGIN + CONTENT_W, y + rowH).stroke();
+    doc.moveTo(MARGIN + specColW, y).lineTo(MARGIN + specColW, y + rowH).stroke();
+    doc.moveTo(MARGIN + specColW + valColW, y).lineTo(MARGIN + specColW + valColW, y + rowH).stroke();
+    doc.fillColor('#065f46').font('Helvetica-Bold').fontSize(9.5)
+      .text(r.label, MARGIN + 6, y + 7, { width: specColW - 12 });
+    doc.fillColor('#000000').font('Helvetica').fontSize(9.5)
+      .text(r.a, MARGIN + specColW + 6, y + 7, { width: valColW - 12 });
+    doc.text(r.b, MARGIN + specColW + valColW + 6, y + 7, { width: valColW - 12 });
+    y += rowH;
+    zebraSum = !zebraSum;
+  }
+  y += 14;
+
+  const allCats = new Set([
+    ...CATEGORY_ORDER,
+    ...Object.keys(specsA || {}),
+    ...Object.keys(specsB || {}),
+  ]);
+
+  function drawCategoryHeader(catName) {
+    ensureSpace(24 + 20 + 30);
+    doc.roundedRect(MARGIN, y, CONTENT_W, 24, 3).fill('#1f2937');
+    doc.fillColor('#ffffff').font('Helvetica-Bold').fontSize(13)
+      .text(CATEGORY_EMOJI_TXT[catName] || catName, MARGIN + 12, y + 6);
+    doc.fillColor('#000000');
+    y += 24;
+    doc.rect(MARGIN, y, specColW, 20).fill('#e5e7eb');
+    doc.rect(MARGIN + specColW, y, valColW, 20).fill('#dbeafe');
+    doc.rect(MARGIN + specColW + valColW, y, valColW, 20).fill('#fee2e2');
+    doc.fillColor('#000000').font('Helvetica-Bold').fontSize(9.5);
+    doc.text('Spesifikasi', MARGIN + 6, y + 6, { width: specColW - 12 });
+    doc.text('A', MARGIN + specColW + 6, y + 6, { width: valColW - 12 });
+    doc.text('B', MARGIN + specColW + valColW + 6, y + 6, { width: valColW - 12 });
+    y += 20;
+  }
+
+  function drawRow(label, valA, valB, zebra) {
+    const cleanA = _pdfClean(valA);
+    const cleanB = _pdfClean(valB);
+    if (cleanA === '-' && cleanB === '-') return;
+    doc.font('Helvetica').fontSize(9.5);
+    const hLabel = doc.heightOfString(label, { width: specColW - 12 });
+    const hA = doc.heightOfString(cleanA, { width: valColW - 12 });
+    const hB = doc.heightOfString(cleanB, { width: valColW - 12 });
+    const rowH = Math.max(hLabel, hA, hB) + rowPad * 2;
+    ensureSpace(rowH);
+    if (zebra) doc.rect(MARGIN, y, CONTENT_W, rowH).fill('#f9fafb');
+    doc.strokeColor('#d1d5db').lineWidth(0.5)
+      .moveTo(MARGIN, y + rowH).lineTo(MARGIN + CONTENT_W, y + rowH).stroke();
+    doc.moveTo(MARGIN + specColW, y).lineTo(MARGIN + specColW, y + rowH).stroke();
+    doc.moveTo(MARGIN + specColW + valColW, y).lineTo(MARGIN + specColW + valColW, y + rowH).stroke();
+    doc.fillColor('#111827').font('Helvetica-Bold').fontSize(9.5)
+      .text(label, MARGIN + 6, y + rowPad, { width: specColW - 12 });
+    doc.fillColor('#000000').font('Helvetica').fontSize(9.5)
+      .text(cleanA, MARGIN + specColW + 6, y + rowPad, { width: valColW - 12 });
+    doc.text(cleanB, MARGIN + specColW + valColW + 6, y + rowPad, { width: valColW - 12 });
+    y += rowH;
+  }
+
+  for (const cat of allCats) {
+    const catA = (specsA && specsA[cat]) || null;
+    const catB = (specsB && specsB[cat]) || null;
+    if (!catA && !catB) continue;
+    const labels = [];
+    const seen = new Set();
+    if (catA) for (const k of Object.keys(catA)) { if (!seen.has(k)) { seen.add(k); labels.push(k); } }
+    if (catB) for (const k of Object.keys(catB)) { if (!seen.has(k)) { seen.add(k); labels.push(k); } }
+    if (!labels.length) continue;
+    let hasContent = false;
+    for (const lbl of labels) {
+      const va = catA?.[lbl];
+      const vb = catB?.[lbl];
+      if ((va && va !== '-') || (vb && vb !== '-')) { hasContent = true; break; }
+    }
+    if (!hasContent) continue;
+    drawCategoryHeader(cat);
+    let zebra = false;
+    for (const lbl of labels) { drawRow(lbl, catA?.[lbl], catB?.[lbl], zebra); zebra = !zebra; }
+    y += 8;
+  }
+
+  ensureSpace(30);
+  y = PAGE_H - MARGIN - 15;
+  doc.fontSize(7).fillColor('#6b7280').font('Helvetica-Oblique')
+    .text('Dibuat oleh Wily Bot — Data: GSMArena', MARGIN, y, { align: 'center', width: CONTENT_W });
+
+  doc.end();
+  return await done;
+}
+
+module.exports.buildComparisonPDF = buildComparisonPDF;
+
+// ── COMMAND HANDLER ────────────────────────────────────────────────────────────
+
+async function handleVsbandingkan({ hisoka, m, query, tolak, logCommand, logError }) {
+        try {
+                const input = (query || '').trim();
+                const pfx   = m.prefix || '.';
+
+                if (!input) {
+                        await tolak(hisoka, m,
+                                `╭─「 📱 *BANDINGKAN HP* 」\n│\n│ Bandingkan spesifikasi 2 HP secara\n│ side-by-side dari database GSMArena.\n│\n│ *Format:*\n│ ${pfx}bandingkan <HP1> vs <HP2>\n│\n│ *Contoh:*\n│ • ${pfx}bandingkan Redmi Note 13 Pro vs Poco X6 Pro\n│ • ${pfx}bandingkan iPhone 15 vs Samsung S24\n│ • ${pfx}bandingkan Xiaomi 14 vs Pixel 8 Pro\n╰────────────────────`
+                        );
+                        return;
+                }
+
+                const sepMatch = input.match(/^(.+?)\s+vs\.?\s+(.+)$/i);
+                if (!sepMatch) {
+                        await tolak(hisoka, m,
+                                `❌ Format salah.\n\nGunakan: *${pfx}bandingkan <HP1> vs <HP2>*\nContoh: *${pfx}bandingkan Redmi Note 13 Pro vs Poco X6 Pro*`
+                        );
+                        return;
+                }
+
+                const queryA = sepMatch[1].trim();
+                const queryB = sepMatch[2].trim();
+
+                await hisoka.sendMessage(m.from, { react: { text: '🔎', key: m.key } });
+                const loadingMsg = await tolak(hisoka, m, `🔎 Mencari data *${queryA}* dan *${queryB}*...\nMohon tunggu sebentar ⏳`);
+
+                const result = await bandingkanHP(queryA, queryB);
+
+                if (loadingMsg?.key) { try { await hisoka.sendMessage(m.from, { delete: loadingMsg.key }); } catch (_) {} }
+
+                const hasCombined = result.combined && result.combined.length > 500;
+                const hasImgA     = result.imgA && result.imgA.length > 500;
+                const hasImgB     = result.imgB && result.imgB.length > 500;
+
+                if      (hasCombined) await hisoka.sendMessage(m.from, { image: result.combined, caption: result.text }, { quoted: m });
+                else if (hasImgA)     await hisoka.sendMessage(m.from, { image: result.imgA,     caption: result.text }, { quoted: m });
+                else if (hasImgB)     await hisoka.sendMessage(m.from, { image: result.imgB,     caption: result.text }, { quoted: m });
+                else                  await hisoka.sendMessage(m.from, { text: result.text }, { quoted: m });
+
+                try {
+                        const pdfBuf = await buildComparisonPDF(result);
+                        if (pdfBuf && pdfBuf.length > 500) {
+                                const safeA = (result.a.name || 'A').replace(/[^a-zA-Z0-9]+/g, '_').slice(0, 30);
+                                const safeB = (result.b.name || 'B').replace(/[^a-zA-Z0-9]+/g, '_').slice(0, 30);
+                                await hisoka.sendMessage(m.from, {
+                                        document: pdfBuf, mimetype: 'application/pdf',
+                                        fileName: `Bandingkan_${safeA}_vs_${safeB}.pdf`,
+                                        caption: `📄 *Versi PDF rapih*\n${result.a.name} vs ${result.b.name}`,
+                                }, { quoted: m });
+                        }
+                } catch (pdfErr) {
+                        console.error('\x1b[31m[BandingkanHP][PDF] Error:\x1b[39m', pdfErr.message);
+                }
+
+                await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+                logCommand(m, hisoka, 'bandingkan');
+        } catch (error) {
+                console.error('\x1b[31m[BandingkanHP] Error:\x1b[39m', error.message);
+                logError(error, 'command:bandingkan');
+                await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } }).catch(() => {});
+                await tolak(hisoka, m,
+                        `❌ Gagal membandingkan HP.\n\n_${error.message}_\n\nPastikan nama HP ditulis lengkap dan dipisah dengan *vs*.\nContoh: *.bandingkan Redmi Note 13 Pro vs Poco X6 Pro*`
+                );
+        }
+}
+
+module.exports.handleVsbandingkan = handleVsbandingkan;

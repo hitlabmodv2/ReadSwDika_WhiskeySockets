@@ -332,85 +332,126 @@ module.exports = { nhentaiSearch, nhentaiGallery, nhentaiRandom, nhentaiPdf, nhe
 // ── COMMAND HANDLER ───────────────────────────────────────────────────────────
 
 async function handleNhdl({ hisoka, m, query, tolak, logCommand, logError, path }) {
-	try {
-		const input = (query || '').trim();
-		const pfx   = m.prefix || '.';
+        try {
+                const input = (query || '').trim();
+                const pfx   = m.prefix || '.';
 
-		if (!input) {
-			await tolak(hisoka, m,
-				`╭─「 📥 *NHENTAI DOWNLOAD* 」\n│\n│ *Format:*\n│ ${pfx}nhget <id>\n│ ${pfx}nhget <id> <jumlah hal>\n│ ${pfx}nhdl random\n│\n` +
-				`│ *Contoh:*\n│ ${pfx}nhget 177013\n│ ${pfx}nhget 489922 10\n│ ${pfx}nhdl random\n│\n│ ℹ️ Default 20 hal, max 50 hal.\n│ ⏳ Proses ~30–60 detik.\n╰──────────────────────`
-			);
-			return;
-		}
+                if (!input) {
+                        await tolak(hisoka, m,
+                                `╭─「 📥 *NHENTAI DOWNLOAD* 」\n│\n│ *Format:*\n│ ${pfx}nhget <id>\n│ ${pfx}nhget <id> <jumlah hal>\n│ ${pfx}nhdl random\n│\n` +
+                                `│ *Contoh:*\n│ ${pfx}nhget 177013\n│ ${pfx}nhget 489922 10\n│ ${pfx}nhdl random\n│\n│ ℹ️ Default 20 hal, max 50 hal.\n│ ⏳ Proses ~30–60 detik.\n╰──────────────────────`
+                        );
+                        return;
+                }
 
-		const { nhentaiGallery, nhentaiRandom, nhentaiPdf, nhentaiCover, formatGalleryInfo, makeProgressBar } = exports;
+                const { nhentaiGallery, nhentaiRandom, nhentaiPdf, nhentaiCover, formatGalleryInfo, makeProgressBar } = exports;
 
-		const isRandom   = input.toLowerCase() === 'random';
-		let galleryId    = input;
-		let customPages  = 20;
+                const isRandom   = input.toLowerCase() === 'random';
+                let galleryId    = input;
+                let customPages  = 20;
 
-		if (!isRandom) {
-			const parts = input.split(/\s+/);
-			galleryId   = parts[0];
-			if (!/^\d+$/.test(galleryId)) {
-				await tolak(hisoka, m, `❌ ID tidak valid. Contoh: *${pfx}nhget 177013*`);
-				return;
-			}
-			if (parts[1] && /^\d+$/.test(parts[1])) {
-				customPages = Math.min(Math.max(1, parseInt(parts[1])), 50);
-			}
-		}
+                if (!isRandom) {
+                        const parts = input.split(/\s+/);
+                        galleryId   = parts[0];
+                        if (!/^\d+$/.test(galleryId)) {
+                                await tolak(hisoka, m, `❌ ID tidak valid. Contoh: *${pfx}nhget 177013*`);
+                                return;
+                        }
+                        if (parts[1] && /^\d+$/.test(parts[1])) {
+                                customPages = Math.min(Math.max(1, parseInt(parts[1])), 50);
+                        }
+                }
 
-		await hisoka.sendMessage(m.from, { react: { text: '📥', key: m.key } });
-		await tolak(hisoka, m, isRandom ? `🎲 Mengambil doujin random...` : `🔍 Mengambil info gallery *#${galleryId}*...`);
+                await hisoka.sendMessage(m.from, { react: { text: '📥', key: m.key } });
+                await tolak(hisoka, m, isRandom ? `🎲 Mengambil doujin random...` : `🔍 Mengambil info gallery *#${galleryId}*...`);
 
-		const gallery   = isRandom ? await nhentaiRandom() : await nhentaiGallery(galleryId);
-		const infoText  = formatGalleryInfo(gallery, pfx);
-		const coverBuf  = await nhentaiCover(gallery).catch(() => null);
+                const gallery   = isRandom ? await nhentaiRandom() : await nhentaiGallery(galleryId);
+                const infoText  = formatGalleryInfo(gallery, pfx);
+                const coverBuf  = await nhentaiCover(gallery).catch(() => null);
 
-		if (coverBuf) {
-			await hisoka.sendMessage(m.from, { image: coverBuf, caption: infoText }, { quoted: m });
-		} else {
-			await tolak(hisoka, m, infoText);
-		}
+                if (coverBuf) {
+                        await hisoka.sendMessage(m.from, { image: coverBuf, caption: infoText }, { quoted: m });
+                } else {
+                        await tolak(hisoka, m, infoText);
+                }
 
-		const maxPg    = Math.min(gallery.numPages, customPages);
-		const loadingMsg = await m.reply(
-			`⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛ 0%\n📥 *Downloading ${maxPg} hal...*\n📖 _${gallery.title.slice(0, 55)}_`
-		);
+                const maxPg    = Math.min(gallery.numPages, customPages);
+                const loadingMsg = await m.reply(
+                        `⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛ 0%\n📥 *Downloading ${maxPg} hal...*\n📖 _${gallery.title.slice(0, 55)}_`
+                );
 
-		let lastPct = 0;
-		const onProgress = async (done, total) => {
-			const { pct, bar } = makeProgressBar(done, total);
-			if (pct - lastPct < 10 && pct < 100) return;
-			lastPct = pct;
-			try {
-				await m.reply({ edit: loadingMsg.key, text: `${bar} ${pct}%\n📥 *Downloading ${done}/${total} hal...*\n📖 _${gallery.title.slice(0, 55)}_` });
-			} catch (_) {}
-		};
+                let lastPct = 0;
+                const onProgress = async (done, total) => {
+                        const { pct, bar } = makeProgressBar(done, total);
+                        if (pct - lastPct < 10 && pct < 100) return;
+                        lastPct = pct;
+                        try {
+                                await m.reply({ edit: loadingMsg.key, text: `${bar} ${pct}%\n📥 *Downloading ${done}/${total} hal...*\n📖 _${gallery.title.slice(0, 55)}_` });
+                        } catch (_) {}
+                };
 
-		const pdfBuf = await nhentaiPdf(gallery, maxPg, onProgress);
+                const pdfBuf = await nhentaiPdf(gallery, maxPg, onProgress);
 
-		try {
-			await m.reply({ edit: loadingMsg.key, text: `██████████ 100%\n✅ *Selesai! Mengirim PDF...*\n📖 _${gallery.title.slice(0, 55)}_` });
-		} catch (_) {}
+                try {
+                        await m.reply({ edit: loadingMsg.key, text: `██████████ 100%\n✅ *Selesai! Mengirim PDF...*\n📖 _${gallery.title.slice(0, 55)}_` });
+                } catch (_) {}
 
-		const rawName = (gallery.titleEnglish || gallery.titlePretty || gallery.title)
-			.replace(/\[[^\]]*\]/g, '').replace(/\([^)]*\)/g, '').replace(/[^\w\s,!'-]/g, '').replace(/\s+/g, ' ').trim().slice(0, 60);
-		const safeName = rawName || `nhentai_${gallery.id}`;
+                const rawName = (gallery.titleEnglish || gallery.titlePretty || gallery.title)
+                        .replace(/\[[^\]]*\]/g, '').replace(/\([^)]*\)/g, '').replace(/[^\w\s,!'-]/g, '').replace(/\s+/g, ' ').trim().slice(0, 60);
+                const safeName = rawName || `nhentai_${gallery.id}`;
 
-		await hisoka.sendMessage(m.from, {
-			document: pdfBuf, mimetype: 'application/pdf', fileName: `${safeName}.pdf`,
-			caption: `📖 *${gallery.title.slice(0, 80)}*\n🆔 ID: ${gallery.id} | 📄 ${maxPg}/${gallery.numPages} hal.`,
-		}, { quoted: m });
+                await hisoka.sendMessage(m.from, {
+                        document: pdfBuf, mimetype: 'application/pdf', fileName: `${safeName}.pdf`,
+                        caption: `📖 *${gallery.title.slice(0, 80)}*\n🆔 ID: ${gallery.id} | 📄 ${maxPg}/${gallery.numPages} hal.`,
+                }, { quoted: m });
 
-		await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
-	} catch (err) {
-		console.error('[NH] Download error:', err?.message);
-		if (typeof logError === 'function') logError(err instanceof Error ? err : new Error(String(err?.message || err)), 'nhentai-download');
-		await tolak(hisoka, m, `❌ Gagal download nhentai.\n💬 ${err?.message || 'Coba lagi nanti'}`);
-	}
+                await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+        } catch (err) {
+                console.error('[NH] Download error:', err?.message);
+                if (typeof logError === 'function') logError(err instanceof Error ? err : new Error(String(err?.message || err)), 'nhentai-download');
+                await tolak(hisoka, m, `❌ Gagal download nhentai.\n💬 ${err?.message || 'Coba lagi nanti'}`);
+        }
 }
 
 module.exports.handleNhdl = handleNhdl;
+
+// ── COMMAND HANDLER: NH SEARCH ─────────────────────────────────────────────────
+
+async function handleNh({ hisoka, m, query, tolak, logError }) {
+        try {
+                const input = (query || '').trim();
+                const pfx   = m.prefix || '.';
+                if (!input) {
+                        await tolak(hisoka, m,
+                                `╭─「 📖 *NHENTAI* 」\n│\n│ *Search:*\n│ ${pfx}nh <judul/tag>\n│ ${pfx}nh naruto\n│ ${pfx}nh english translated\n│\n│ *Random:*\n│ ${pfx}nh random\n│ ${pfx}nhrand\n│\n│ *Download PDF:*\n│ ${pfx}nhget <id>\n│ ${pfx}nhget <id> <hal>\n│ ${pfx}nhdl random\n╰──────────────────────`
+                        );
+                        return;
+                }
+                const { nhentaiSearch, nhentaiRandom, nhentaiCover, formatSearchResults, formatGalleryInfo } = exports;
+                if (input.toLowerCase() === 'random') {
+                        await hisoka.sendMessage(m.from, { react: { text: '🎲', key: m.key } });
+                        await tolak(hisoka, m, `🎲 Mengambil doujin random...`);
+                        const gallery = await nhentaiRandom();
+                        const infoText = formatGalleryInfo(gallery, pfx);
+                        const coverBuf = await nhentaiCover(gallery).catch(() => null);
+                        if (coverBuf) {
+                                await hisoka.sendMessage(m.from, { image: coverBuf, caption: infoText }, { quoted: m });
+                        } else {
+                                await tolak(hisoka, m, infoText);
+                        }
+                        await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+                } else {
+                        await hisoka.sendMessage(m.from, { react: { text: '🔍', key: m.key } });
+                        await tolak(hisoka, m, `🔍 Mencari *${input}* di nhentai...`);
+                        const results = await nhentaiSearch(input);
+                        await tolak(hisoka, m, formatSearchResults(results, input));
+                        await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+                }
+        } catch (err) {
+                console.error('[NH] Search error:', err?.message);
+                logError(err instanceof Error ? err : new Error(String(err?.message || err)), 'nhentai-search');
+                await tolak(hisoka, m, `❌ Gagal nhentai.\n💬 ${err?.message || 'Coba lagi nanti'}`);
+        }
+}
+
+module.exports.handleNh = handleNh;

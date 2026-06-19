@@ -6327,7 +6327,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         }
                         case 'disksize':
                         case 'filesize': {
-                                const { handleFilesize } = _require(path.resolve('./src/scrape/tools/filesize-handler.cjs'));
+                                const { handleFilesize } = _require(path.resolve('./src/scrape/tools/ceksize.cjs'));
                                 await handleFilesize({ hisoka, m, tolak, logCommand, _require, path });
                                 break;
                         }
@@ -6437,7 +6437,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         }
                         case 'cuaca':
                         case 'weather': {
-                                const { handleWeather } = _require(path.resolve('./src/scrape/tools/weather-handler.cjs'));
+                                const { handleWeather } = _require(path.resolve('./src/scrape/tools/cuaca.cjs'));
                                 await handleWeather({ hisoka, m, query, tolak, logCommand, logError, _require, path });
                                 break;
                         }
@@ -7029,13 +7029,13 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         }
 
                         case 'pixiv': {
-                                const { handlePixiv } = _require(path.resolve('./src/scrape/anime/pixiv-handler.cjs'));
+                                const { handlePixiv } = _require(path.resolve('./src/scrape/anime/pixiv.cjs'));
                                 await handlePixiv({ hisoka, m, query, tolak, logCommand, logError, path, _require });
                                 break;
                         }
                         case 'nhentai':
                         case 'nh': {
-                                const { handleNh } = _require(path.resolve('./src/scrape/anime/nh-handler.cjs'));
+                                const { handleNh } = _require(path.resolve('./src/scrape/anime/nhentai.cjs'));
                                 await handleNh({ hisoka, m, query, tolak, logError, _require, path });
                                 break;
                         }
@@ -7060,19 +7060,19 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         }
 
                         case 'komikinfo': {
-                                const { handleKomikinfo } = _require(path.resolve('./src/scrape/anime/komikup-handler.cjs'));
+                                const { handleKomikinfo } = _require(path.resolve('./src/scrape/anime/komiktap.cjs'));
                                 await handleKomikinfo({ hisoka, m, query, tolak, logError, _require, path });
                                 break;
                         }
                         case 'komikget':
                         case 'komikdl': {
-                                const { handleKomikdl } = _require(path.resolve('./src/scrape/anime/komikdl-handler.cjs'));
+                                const { handleKomikdl } = _require(path.resolve('./src/scrape/anime/komiktap.cjs'));
                                 await handleKomikdl({ hisoka, m, query, tolak, logCommand, logError, path, _require });
                                 break;
                         }
                         case 'komikupdate':
                         case 'komikup': {
-                                const { handleKomikup } = _require(path.resolve('./src/scrape/anime/komikup-handler.cjs'));
+                                const { handleKomikup } = _require(path.resolve('./src/scrape/anime/komiktap.cjs'));
                                 await handleKomikup({ hisoka, m, tolak, logError, _require, path });
                                 break;
                         }
@@ -7293,7 +7293,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                         case 'pixivr18':
                         case 'pixiv18': {
-                                const { handlePixiv18 } = _require(path.resolve('./src/scrape/anime/pixiv-handler.cjs'));
+                                const { handlePixiv18 } = _require(path.resolve('./src/scrape/anime/pixivr18.cjs'));
                                 await handlePixiv18({ hisoka, m, query, tolak, logCommand, logError, path, _require });
                                 break;
                         }
@@ -7384,7 +7384,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                         case 'compare':
                         case 'vsbandingkan': {
-                                const { handleVsbandingkan } = _require(path.resolve('./src/scrape/tools/vsbandingkan-handler.cjs'));
+                                const { handleVsbandingkan } = _require(path.resolve('./src/scrape/tools/bandingkanhp.cjs'));
                                 await handleVsbandingkan({ hisoka, m, query, tolak, logCommand, logError, path, _require });
                                 break;
                         }
@@ -7399,13 +7399,13 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'bluearchive':
                         case 'bachar':
                         case 'ba': {
-                                const { handleBa } = _require(path.resolve('./src/scrape/anime/bluearchive-handler.cjs'));
+                                const { handleBa } = _require(path.resolve('./src/scrape/anime/bluearchive.cjs'));
                                 await handleBa({ hisoka, m, query, tolak, logCommand, logError, path, _require });
                                 break;
                         }
                         case 'geniussearch':
                         case 'carilagu': {
-                                const { handleCarilagu } = _require(path.resolve('./src/scrape/music/genius-handler.cjs'));
+                                const { handleCarilagu } = _require(path.resolve('./src/scrape/music/genius.cjs'));
                                 await handleCarilagu({ hisoka, m, query, tolak, logCommand, logError, _require, path });
                                 break;
                         }
@@ -7657,7 +7657,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                         case 'gdetail':
                         case 'detailgenius': {
-                                const { handleDetailgenius } = _require(path.resolve('./src/scrape/music/genius-handler.cjs'));
+                                const { handleDetailgenius } = _require(path.resolve('./src/scrape/music/genius.cjs'));
                                 await handleDetailgenius({ hisoka, m, query, tolak, logCommand, logError, _require, path });
                                 break;
                         }
@@ -11860,13 +11860,13 @@ response += `╰═════════════════╯`;
 
                         case 'ss':
                         case 'screenshot': {
-                                const { handleScreenshot } = _require(path.resolve('./src/scrape/tools/screenshot-handler.cjs'));
+                                const { handleScreenshot } = _require(path.resolve('./src/scrape/tools/screenshot.cjs'));
                                 await handleScreenshot({ hisoka, m, query, tolak, logCommand, _require });
                                 break;
                         }
                         case 'scrapeweb':
                         case 'webinfo': {
-                                const { handleWebinfo } = _require(path.resolve('./src/scrape/tools/webinfo-handler.cjs'));
+                                const { handleWebinfo } = _require(path.resolve('./src/scrape/tools/screenshot.cjs'));
                                 await handleWebinfo({ hisoka, m, query, tolak, logCommand, path, _require });
                                 break;
                         }

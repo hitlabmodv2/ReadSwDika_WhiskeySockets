@@ -322,91 +322,255 @@ module.exports = {
 // ── COMMAND HANDLER (komik search) ────────────────────────────────────────────
 
 async function handleKomik({ hisoka, m, query, tolak, logCommand, logError, path, pendingKomikChoices, getJadibotChoiceKey }) {
-	try {
-		const input = (query || '').trim();
-		const pfx   = m.prefix || '.';
+        try {
+                const input = (query || '').trim();
+                const pfx   = m.prefix || '.';
 
-		if (!input) {
-			await tolak(hisoka, m,
-				`╭─「 📖 *KOMIKTAP* 」\n│\n│ *Cari manga/manhwa/manhua:*\n│ ${pfx}komik <judul>\n│\n` +
-				`│ *Detail manga:*\n│ ${pfx}komikinfo <url manga>\n│\n` +
-				`│ *Download chapter jadi PDF:*\n│ ${pfx}komikget <url chapter>\n│ ${pfx}komikget <url chapter> <jumlah hal>\n│\n` +
-				`│ *Contoh:*\n│ ${pfx}komik naruto\n│ ${pfx}komikinfo https://komiktap.info/manga/naruto/\n│ ${pfx}komikget https://komiktap.info/naruto-chapter-1/\n│ ${pfx}komikget https://komiktap.info/naruto-chapter-1/ 15\n│\n│ ℹ️ Default 20 hal, max 50 hal\n╰──────────────────────`
-			);
-			return;
-		}
+                if (!input) {
+                        await tolak(hisoka, m,
+                                `╭─「 📖 *KOMIKTAP* 」\n│\n│ *Cari manga/manhwa/manhua:*\n│ ${pfx}komik <judul>\n│\n` +
+                                `│ *Detail manga:*\n│ ${pfx}komikinfo <url manga>\n│\n` +
+                                `│ *Download chapter jadi PDF:*\n│ ${pfx}komikget <url chapter>\n│ ${pfx}komikget <url chapter> <jumlah hal>\n│\n` +
+                                `│ *Contoh:*\n│ ${pfx}komik naruto\n│ ${pfx}komikinfo https://komiktap.info/manga/naruto/\n│ ${pfx}komikget https://komiktap.info/naruto-chapter-1/\n│ ${pfx}komikget https://komiktap.info/naruto-chapter-1/ 15\n│\n│ ℹ️ Default 20 hal, max 50 hal\n╰──────────────────────`
+                        );
+                        return;
+                }
 
-		const { komiktapSearch } = exports;
-		const ax = require('axios');
+                const { komiktapSearch } = exports;
+                const ax = require('axios');
 
-		await hisoka.sendMessage(m.from, { react: { text: '🔍', key: m.key } });
-		await tolak(hisoka, m, `🔍 Mencari *${input}* di Komiktap...`);
+                await hisoka.sendMessage(m.from, { react: { text: '🔍', key: m.key } });
+                await tolak(hisoka, m, `🔍 Mencari *${input}* di Komiktap...`);
 
-		const results = await komiktapSearch(input);
-		if (!results.length) { await tolak(hisoka, m, `❌ Tidak ada hasil untuk: _${input}_`); return; }
+                const results = await komiktapSearch(input);
+                if (!results.length) { await tolak(hisoka, m, `❌ Tidak ada hasil untuk: _${input}_`); return; }
 
-		const topResults = results.slice(0, 10);
-		const coverDownloads = await Promise.allSettled(
-			topResults.map((r) => {
-				if (!r.cover) return Promise.reject(new Error('no cover'));
-				return ax.get(r.cover, { responseType: 'arraybuffer', timeout: 12000, headers: { 'User-Agent': 'Mozilla/5.0', 'Referer': 'https://komiktap.info/' } }).then(res => Buffer.from(res.data));
-			})
-		);
+                const topResults = results.slice(0, 10);
+                const coverDownloads = await Promise.allSettled(
+                        topResults.map((r) => {
+                                if (!r.cover) return Promise.reject(new Error('no cover'));
+                                return ax.get(r.cover, { responseType: 'arraybuffer', timeout: 12000, headers: { 'User-Agent': 'Mozilla/5.0', 'Referer': 'https://komiktap.info/' } }).then(res => Buffer.from(res.data));
+                        })
+                );
 
-		const albumItems = [];
-		coverDownloads.forEach((res, i) => {
-			const r = topResults[i];
-			const statusTxt = r.status ? `[${r.status}]` : '';
-			const typeTxt   = r.type   ? ` • ${r.type}`  : '';
-			const ratingTxt = r.rating ? ` ⭐${r.rating}` : '';
-			const cap = `*${i + 1}.* ${r.title}${statusTxt ? '\n' + statusTxt : ''}${typeTxt}${ratingTxt}`;
-			if (res.status === 'fulfilled') albumItems.push({ image: res.value, caption: cap });
-		});
+                const albumItems = [];
+                coverDownloads.forEach((res, i) => {
+                        const r = topResults[i];
+                        const statusTxt = r.status ? `[${r.status}]` : '';
+                        const typeTxt   = r.type   ? ` • ${r.type}`  : '';
+                        const ratingTxt = r.rating ? ` ⭐${r.rating}` : '';
+                        const cap = `*${i + 1}.* ${r.title}${statusTxt ? '\n' + statusTxt : ''}${typeTxt}${ratingTxt}`;
+                        if (res.status === 'fulfilled') albumItems.push({ image: res.value, caption: cap });
+                });
 
-		if (albumItems.length > 0) {
-			try {
-				await m.reply({ albumMessage: albumItems });
-			} catch {
-				const BATCH = 10;
-				for (let _b = 0; _b < albumItems.length; _b += BATCH) {
-					const _batch = albumItems.slice(_b, _b + BATCH);
-					try {
-						await (_b === 0 ? m.reply({ albumMessage: _batch }) : hisoka.sendMessage(m.from, { albumMessage: _batch }));
-					} catch {
-						for (const item of _batch) {
-							try { await m.reply({ image: item.image, caption: item.caption }); } catch (_) {}
-						}
-					}
-				}
-			}
-		}
+                if (albumItems.length > 0) {
+                        try {
+                                await m.reply({ albumMessage: albumItems });
+                        } catch {
+                                const BATCH = 10;
+                                for (let _b = 0; _b < albumItems.length; _b += BATCH) {
+                                        const _batch = albumItems.slice(_b, _b + BATCH);
+                                        try {
+                                                await (_b === 0 ? m.reply({ albumMessage: _batch }) : hisoka.sendMessage(m.from, { albumMessage: _batch }));
+                                        } catch {
+                                                for (const item of _batch) {
+                                                        try { await m.reply({ image: item.image, caption: item.caption }); } catch (_) {}
+                                                }
+                                        }
+                                }
+                        }
+                }
 
-		let menuText = `╭─「 🔍 *KOMIKTAP SEARCH* 」\n│\n│ Hasil: _${input}_\n│\n`;
-		topResults.forEach((r, i) => {
-			const status = r.status ? ` [${r.status}]` : '';
-			const type   = r.type   ? ` • ${r.type}`   : '';
-			const rating = r.rating ? ` ⭐${r.rating}`  : '';
-			menuText += `│ *${i + 1}.* ${r.title.slice(0, 55)}${r.title.length > 55 ? '…' : ''}\n│     ${status}${type}${rating}\n`;
-		});
-		menuText += `│\n│ 💡 *Balas pesan ini* dengan nomor\n│ Contoh: balas *1* untuk manga pertama\n│ Ketik *batal* untuk membatalkan\n╰──────────────────────`;
+                let menuText = `╭─「 🔍 *KOMIKTAP SEARCH* 」\n│\n│ Hasil: _${input}_\n│\n`;
+                topResults.forEach((r, i) => {
+                        const status = r.status ? ` [${r.status}]` : '';
+                        const type   = r.type   ? ` • ${r.type}`   : '';
+                        const rating = r.rating ? ` ⭐${r.rating}`  : '';
+                        menuText += `│ *${i + 1}.* ${r.title.slice(0, 55)}${r.title.length > 55 ? '…' : ''}\n│     ${status}${type}${rating}\n`;
+                });
+                menuText += `│\n│ 💡 *Balas pesan ini* dengan nomor\n│ Contoh: balas *1* untuk manga pertama\n│ Ketik *batal* untuk membatalkan\n╰──────────────────────`;
 
-		const menuMsg = await m.reply(menuText);
-		const komikKey = getJadibotChoiceKey(m);
-		const oldKomik = pendingKomikChoices.get(komikKey);
-		if (oldKomik?.timeout) clearTimeout(oldKomik.timeout);
-		const komikTimeout = setTimeout(() => pendingKomikChoices.delete(komikKey), 5 * 60 * 1000);
-		pendingKomikChoices.set(komikKey, {
-			phase: 'search', results: topResults,
-			botMsgId: menuMsg?.key?.id || '',
-			expiresAt: Date.now() + 5 * 60 * 1000,
-			timeout: komikTimeout, loading: false,
-		});
-		await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
-	} catch (err) {
-		console.error('[KOMIKTAP] Search error:', err?.message);
-		if (typeof logError === 'function') logError(err instanceof Error ? err : new Error(String(err?.message || err)), 'komiktap-search');
-		await tolak(hisoka, m, `❌ Gagal cari komik.\n💬 ${err?.message || 'Coba lagi nanti'}`);
-	}
+                const menuMsg = await m.reply(menuText);
+                const komikKey = getJadibotChoiceKey(m);
+                const oldKomik = pendingKomikChoices.get(komikKey);
+                if (oldKomik?.timeout) clearTimeout(oldKomik.timeout);
+                const komikTimeout = setTimeout(() => pendingKomikChoices.delete(komikKey), 5 * 60 * 1000);
+                pendingKomikChoices.set(komikKey, {
+                        phase: 'search', results: topResults,
+                        botMsgId: menuMsg?.key?.id || '',
+                        expiresAt: Date.now() + 5 * 60 * 1000,
+                        timeout: komikTimeout, loading: false,
+                });
+                await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+        } catch (err) {
+                console.error('[KOMIKTAP] Search error:', err?.message);
+                if (typeof logError === 'function') logError(err instanceof Error ? err : new Error(String(err?.message || err)), 'komiktap-search');
+                await tolak(hisoka, m, `❌ Gagal cari komik.\n💬 ${err?.message || 'Coba lagi nanti'}`);
+        }
 }
 
 module.exports.handleKomik = handleKomik;
+
+// ── COMMAND HANDLER: KOMIKDL ──────────────────────────────────────────────────
+
+async function handleKomikdl({ hisoka, m, query, tolak, logCommand, logError }) {
+        try {
+                const input = (query || '').trim();
+                const pfx   = m.prefix || '.';
+
+                if (!input || !input.startsWith('http')) {
+                        await tolak(hisoka, m,
+                                `╭─「 📥 *KOMIKGET* 」\n│\n│ *Format:*\n│ ${pfx}komikget <url chapter>\n│ ${pfx}komikget <url chapter> <jumlah hal>\n│\n│ *Contoh:*\n│ ${pfx}komikget https://komiktap.info/naruto-chapter-1/\n│ ${pfx}komikget https://komiktap.info/naruto-chapter-1/ 15\n│\n│ ℹ️ Default 20 hal, max 50 hal\n│ ⏳ Proses ~30–90 detik\n╰──────────────────────`
+                        );
+                        return;
+                }
+
+                const parts      = input.split(/\s+/);
+                const chapterUrl = parts[0];
+                let maxPg = 20;
+                if (parts[1] && /^\d+$/.test(parts[1])) maxPg = Math.min(Math.max(1, parseInt(parts[1])), 50);
+
+                await hisoka.sendMessage(m.from, { react: { text: '📥', key: m.key } });
+                await tolak(hisoka, m, `📥 Mengambil daftar gambar chapter...`);
+
+                const images    = await komiktapChapterImages(chapterUrl);
+                const totalAvail = images.length;
+                const dlCount   = Math.min(totalAvail, maxPg);
+                const chapterName = chapterUrl.replace(/.*\/([^/]+)\/?$/, '$1').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+
+                const _buildDlProg = (bar, pct, done, total, status) =>
+                        `${bar} ${pct}%\n╭─「 📥 *MENGUNDUH PDF* 」\n│ 📖 ${chapterName}\n│ 📄 ${done}/${total} halaman\n│ ${status}\n╰──────────────────────`;
+
+                const loadingMsg = await m.reply(_buildDlProg('⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛', 0, 0, dlCount, '⏳ Memulai download...'));
+
+                let lastPct = 0;
+                const onProgress = async (done, total) => {
+                        const { pct, bar } = makeProgressBar(done, total);
+                        if (pct - lastPct < 10 && pct < 100) return;
+                        lastPct = pct;
+                        try { await m.reply({ edit: loadingMsg.key, text: _buildDlProg(bar, pct, done, total, `⏳ Mengunduh halaman ${done}...`) }); } catch (_) {}
+                };
+
+                const pdfBuf = await komiktapPdf(chapterUrl, maxPg, onProgress);
+
+                try { await m.reply({ edit: loadingMsg.key, text: _buildDlProg('██████████', 100, dlCount, dlCount, '📦 Mengemas & mengirim PDF...') }); } catch (_) {}
+
+                const safeName  = chapterName.slice(0, 60) || 'komiktap_chapter';
+                const sizeMB    = (pdfBuf.length / 1024 / 1024).toFixed(1);
+                const pdfCaption =
+                        `╭─「 📚 *KOMIKTAP* 」\n│\n│ 📖 *${chapterName}*\n│ 📄 ${dlCount}/${totalAvail} halaman\n│ 💾 ${sizeMB} MB\n│ 🔗 ${chapterUrl}\n╰──────────────────────`;
+
+                await m.reply({ document: pdfBuf, mimetype: 'application/pdf', fileName: `${safeName}.pdf`, caption: pdfCaption });
+                await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+        } catch (err) {
+                console.error('[KOMIKTAP] Download error:', err?.message);
+                logError(err instanceof Error ? err : new Error(String(err?.message || err)), 'komiktap-download');
+                await tolak(hisoka, m, `❌ Gagal download chapter.\n💬 ${err?.message || 'Coba lagi nanti'}`);
+        }
+}
+
+// ── COMMAND HANDLER: KOMIKUPDATE ──────────────────────────────────────────────
+
+async function handleKomikup({ hisoka, m, tolak, logError }) {
+        if (!m.prefix && m.query) return;
+        try {
+                await hisoka.sendMessage(m.from, { react: { text: '🔄', key: m.key } });
+                await tolak(hisoka, m, `🔄 Mengambil update terbaru dari Komiktap...`);
+
+                const items = await komiktapLatestUpdates();
+                if (!items.length) { await tolak(hisoka, m, `❌ Tidak ada data update saat ini.`); return; }
+
+                const coverDls = await Promise.allSettled(
+                        items.map(r => {
+                                if (!r.cover) return Promise.reject(new Error('no cover'));
+                                return axios.get(r.cover, {
+                                        responseType: 'arraybuffer', timeout: 12000,
+                                        headers: { 'User-Agent': 'Mozilla/5.0', 'Referer': 'https://komiktap.info/' },
+                                }).then(res => Buffer.from(res.data));
+                        })
+                );
+
+                const albumUpd = [];
+                coverDls.forEach((res, i) => {
+                        const r = items[i];
+                        const typeTxt = r.type ? ` • ${r.type}` : '';
+                        const statusTxt = r.status ? ` [${r.status}]` : '';
+                        const lastTxt = r.lastChap ? `\n📖 ${r.lastChap}` : '';
+                        const cap = `*${i + 1}.* ${r.title}${statusTxt}${typeTxt}${lastTxt}`;
+                        if (res.status === 'fulfilled') albumUpd.push({ image: res.value, caption: cap });
+                });
+
+                if (albumUpd.length > 0) {
+                        try {
+                                await m.reply({ albumMessage: albumUpd });
+                        } catch {
+                                const BATCH = 10;
+                                for (let _b = 0; _b < albumUpd.length; _b += BATCH) {
+                                        const _batch = albumUpd.slice(_b, _b + BATCH);
+                                        try {
+                                                await (_b === 0 ? m.reply({ albumMessage: _batch }) : hisoka.sendMessage(m.from, { albumMessage: _batch }));
+                                        } catch {
+                                                for (const item of _batch) {
+                                                        try { await m.reply({ image: item.image, caption: item.caption }); } catch (_) {}
+                                                }
+                                        }
+                                }
+                        }
+                }
+
+                let updText = `╭─「 🔄 *UPDATE TERBARU KOMIKTAP* 」\n│\n`;
+                items.forEach((r, i) => {
+                        const typeTxt = r.type ? ` • ${r.type}` : '';
+                        const lastTxt = r.lastChap ? `  _${r.lastChap}_` : '';
+                        updText += `│ *${i + 1}.* ${r.title.slice(0, 50)}${typeTxt}${lastTxt}\n`;
+                });
+                updText += `│\n│ 🔗 ${m.prefix || '.'}komik <judul> untuk cari & download\n╰──────────────────────`;
+                await m.reply(updText);
+                await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+        } catch (err) {
+                console.error('[KOMIKUPDATE] Error:', err?.message);
+                logError(err instanceof Error ? err : new Error(String(err?.message || err)), 'komiktap-update');
+                await tolak(hisoka, m, `❌ Gagal ambil update.\n💬 ${err?.message || 'Coba lagi nanti'}`);
+        }
+}
+
+// ── COMMAND HANDLER: KOMIKINFO ────────────────────────────────────────────────
+
+async function handleKomikinfo({ hisoka, m, query, tolak, logError }) {
+        try {
+                const input = (query || '').trim();
+                const pfx   = m.prefix || '.';
+                if (!input || !input.startsWith('http')) {
+                        await tolak(hisoka, m,
+                                `╭─「 📖 *KOMIKINFO* 」\n│\n│ Kirim URL manga dari komiktap.info\n│\n│ *Contoh:*\n│ ${pfx}komikinfo https://komiktap.info/manga/naruto/\n╰──────────────────────`
+                        );
+                        return;
+                }
+                await hisoka.sendMessage(m.from, { react: { text: '📖', key: m.key } });
+                await tolak(hisoka, m, `📖 Mengambil detail manga...`);
+                const detail = await komiktapDetail(input);
+                const text   = formatDetailText(detail, pfx);
+                if (detail.cover) {
+                        try {
+                                const imgRes = await axios.get(detail.cover, {
+                                        responseType: 'arraybuffer', timeout: 10000,
+                                        headers: { 'User-Agent': 'Mozilla/5.0', 'Referer': 'https://komiktap.info/' },
+                                });
+                                await hisoka.sendMessage(m.from, { image: Buffer.from(imgRes.data), caption: text }, { quoted: m });
+                        } catch {
+                                await tolak(hisoka, m, text);
+                        }
+                } else {
+                        await tolak(hisoka, m, text);
+                }
+                await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+        } catch (err) {
+                console.error('[KOMIKTAP] Detail error:', err?.message);
+                logError(err instanceof Error ? err : new Error(String(err?.message || err)), 'komiktap-detail');
+                await tolak(hisoka, m, `❌ Gagal ambil detail manga.\n💬 ${err?.message || 'Coba lagi nanti'}`);
+        }
+}
+
+module.exports.handleKomikdl = handleKomikdl;
+module.exports.handleKomikup = handleKomikup;
+module.exports.handleKomikinfo = handleKomikinfo;
