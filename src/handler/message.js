@@ -2748,7 +2748,8 @@ export default async function ({ message, type: messagesType }, hisoka) {
                             'emojiadd', 'emojidel', 'emojilist',
                             'emojidefault', 'emojicustom', 'emojiclear',
                             'ceksesi',
-                            'clearsesi', 'cs'
+                            'clearsesi', 'cs',
+                            'del', 'd'
                         ]);
                         if (!jadibotAllowedCommands.has(m.command)) {
                             return;
@@ -13594,7 +13595,6 @@ response += `╰═════════════════╯`;
 
                         case 'd':
                         case 'del': {
-                                if (!isMainBot(hisoka)) return;
                                 if (!m.prefix && m.query) break;
 
                                 if (m.isQuoted && !m.query) {
@@ -13631,6 +13631,8 @@ response += `╰═════════════════╯`;
                                         break;
                                 }
 
+                                // Del emoji: hanya main bot dan owner
+                                if (!isMainBot(hisoka)) break;
                                 if (!m.isOwner) return;
                                 if (!query || !query.toLowerCase().startsWith('emoji')) break;
                                 try {
