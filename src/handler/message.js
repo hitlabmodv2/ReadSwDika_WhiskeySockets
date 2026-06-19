@@ -56,6 +56,8 @@ import { buildFbVisionPrompt, buildFbCaptionPrompt, buildFbFallbackCaption, pars
 import { hashSticker, lookupSticker, saveSticker, incrementStickerSeen, buildStickerContextHint, getStickerMemoryStats } from '../helper/stickerMemory.js';
 import { getJadibotAntidel, getJadibotReadsw, getJadibotAnticall, getJadibotAnticallvid, getJadibotAutoOnline, getJadibotAutoTyping, getJadibotAutoRecording, setJadibotUserSetting, getJadibotNumber, addJadibotEmojis, deleteJadibotEmojis, listJadibotEmojis, getJadibotEmojiMode, setDefaultEmojiMode, setCustomEmojiMode, resetToDefaultEmojis, clearJadibotEmojis } from '../helper/jadibotSettings.js';
 import { pruneSwStatsAt, countActiveSW } from '../helper/swtrack.js';
+import { buildMenuUtama } from '../scrape/menu/menu_utama.js';
+import { buildMenuJadibot } from '../scrape/menu/menu_jadibot.js';
 
 const WILY_VERBOSE_LOGS = process.env.WILY_VERBOSE_LOGS === 'true' || process.env.BOT_DEBUG_LOG === 'true';
 const wilyLog = (...args) => {
@@ -9987,105 +9989,18 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                 const _jbNow = new Date();
                                                 const _jbTglFmt = new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }).format(_jbNow);
                                                 const _jbJamFmt = new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).format(_jbNow);
-                                                const _jbMenuBody =
-`
-━━━━━━━━━━━━━━━━━━━━━━
-
-╭─「 📌 *UMUM* 」
-├➤ *.p / .ping*
-╰➤ *.menu*
-
-╭─「 ⚙️ *SETTING* 」
-├➤ *.readsw on/off*
-├➤ *.readsw true*
-├➤ *.readsw false*
-├➤ *.antidel on/off*
-├➤ *.antidel private on/off*
-├➤ *.antidel group on/off*
-╰➤ *.antidel sendto self/chat/both*
-
-╭─「 💬 *AUTO PRESENCE* 」
-├➤ *.online on/off*
-├➤ *.online set [detik]*
-├➤ *.typing on/off*
-├➤ *.typing set [detik]*
-├➤ *.typing private on/off*
-├➤ *.typing group on/off*
-├➤ *.recording on/off*
-├➤ *.recording set [detik]*
-├➤ *.recording private on/off*
-╰➤ *.recording group on/off*
-
-╭─「 📊 *CEK & INFO* 」
-├➤ *.ceksetting*
-├➤ *.ceksw*
-├➤ *.ceksesi*
-╰➤ *.clearsesi / .cs*
-
-╭─「 🛡️ *ANTI CALL* 」
-├➤ *.anticall on/off*
-├➤ *.anticall msg [teks]*
-├➤ *.anticall add [nomor]*
-├➤ *.anticall del [nomor]*
-╰➤ *.anticall list*
-
-╭─「 📵 *ANTI CALL VIDEO* 」
-├➤ *.anticallvid on/off*
-├➤ *.anticallvid msg [teks]*
-├➤ *.anticallvid add [nomor]*
-├➤ *.anticallvid del [nomor]*
-╰➤ *.anticallvid list*
-
-╭─「 👁️ *VIEW ONCE* 」
-╰➤ *.rvo / .viewonce / .vo*
-
-╭─「 🎨 *STICKER & GAMBAR* 」
-├➤ *.sticker / .s*
-├➤ *.toimg*
-╰➤ *.hd / .remini*
-
-╭─「 😊 *EMOJI REAKSI SW* 」
-├➤ *.emojiadd 😊,😄*
-├➤ *.emojidel 😊*
-├➤ *.emojiclear*
-├➤ *.emojilist*
-├➤ *.emojidefault*
-╰➤ *.emojicustom*
-
-╭─「 📡 *STATUS & STORY* 」
-╰➤ *.upswgc [caption]*
-
-╭─「 📥 *DOWNLOAD* 」
-├➤ *.allunduh [link]*
-├➤ *.tt [link]*
-├➤ *.ig [link]*
-├➤ *.fb [link]*
-├➤ *.twdl [link]*
-├➤ *.ytmp3 [link]*
-├➤ *.ytmp4 [link]*
-╰➤ *.play [judul]*
-
-━━━━━━━━━━━━━━━━━━━━━━
-_📦 Powered by Wily Bot V22_ 🤖`;
-                                                const _jbTotalMenuCmd = TOTAL_CMD_COUNT;
-                                                const menuTeks =
-`╭═══════════════════════╮
-║   🤖 *WILY BOT V22*   
-├═══════════════════════╣
-║   🤖  *MENU JADIBOT*   
-├═══════════════════════╣
-│ 👤 » ${m.pushName || 'User'}
-│ 📱 » +${jadibotNum}
-│ ⏱️ » ${juh}j ${jum}m ${jus}d
-│ ${masaAktifLine}
-│ 📅 » ${_jbTglFmt}
-│ 🕐 » ${_jbJamFmt} WIB
-│ 📜 » ${_jbTotalMenuCmd} Total Semua Command
-│ 🗂️ » ${_jbTotalAutoFitur} Total Fitur Auto
-│ ✅ » ${_jbFiturCount} Fitur Auto Aktif
-│ ❌ » ${_jbAutoTidakAktif} Fitur Auto Tidak Aktif
-│ 🌐 » Online 🟢
-╰═══════════════════════╯${_jbMenuBody}`;
+                                                const menuTeks = buildMenuJadibot({
+                                                        pushName: m.pushName || 'User',
+                                                        jadibotNum,
+                                                        juh, jum, jus,
+                                                        masaAktifLine,
+                                                        tglFmt: _jbTglFmt,
+                                                        jamFmt: _jbJamFmt,
+                                                        totalMenuCmd: TOTAL_CMD_COUNT,
+                                                        totalAutoFitur: _jbTotalAutoFitur,
+                                                        fiturCount: _jbFiturCount,
+                                                        autoTidakAktif: _jbAutoTidakAktif,
+                                                });
                                                 let jbMenuSent = false;
                                                 try {
                                                         const btnJb = new Button()
@@ -10136,190 +10051,18 @@ _📦 Powered by Wily Bot V22_ 🤖`;
 
                                         await hisoka.sendMessage(m.from, { react: { text: `🌊`, key: m.key } }).catch(() => {});
 
-                                        const teks =
-`╭═════════════════════╮
-║   🤖 *WILY BOT V22*   
-├═════════════════════┤
-│ 👤 » ${m.pushName || 'User'} ${m.isOwner ? '👑' : ''}
-│ ⏱️ » ${uptimeStr}
-│ 📅 » ${_mnTgl}
-│ 🕐 » ${_mnJam} WIB
-│ 🖥️ » ${_mnBrowserLabel}
-│ 📜 » ${TOTAL_CMD_COUNT} Total Semua Command
-│ 🗂️ » ${totalSemuaFitur} Total Fitur Auto
-│ ✅ » ${totalCmd} Fitur Auto Aktif
-│ ❌ » ${totalTidakAktif} Fitur Auto Tidak Aktif
-│ 🌐 » Online 🟢
-├═════════════════════┤
-║   🤖 *AUTO FITUR*   
-├═════════════════════┤
-│ .setbrowser
-│ .typing
-│ .recording
-│ .online
-│ .readsw
-│ .telegram
-│ .autocleaner
-│ .sessioncleaner
-├═════════════════════┤
-║   🛡️ *ANTI FITUR*   
-├═════════════════════┤
-│ .antidel
-│ .anticall / .ac
-│ .anticallvid / .acv
-│ .antitagsw
-├═════════════════════┤
-║  💬 *PESAN & STICKER*  
-├═════════════════════┤
-│ .del / .d
-│ .s / .sticker
-│ .toimg
-│ .tovn
-│ .tomp3
-│ .stickerly
-│ .stickerpack
-│ .rvo / .viewonce
-│ .quoted / .q
-│ .react / .reaksi
-├═════════════════════┤
-║   👥 *FITUR GRUP*   
-├═════════════════════┤
-│ .hidetag / .ht
-│ .ghosttag / .gt
-│ .welcome
-│ .goodbye
-│ .welgod
-│ .listgroup
-│ .group
-├═════════════════════┤
-║  📡 *STATUS & STORY*  
-├═════════════════════┤
-│ .sw / .getsw
-│ .upswgc
-│ .sendstatus / .swgc
-├═════════════════════┤
-║   📥 *DOWNLOAD*   
-├═════════════════════┤
-│ .allunduh
-│ .tt
-│ .ig
-│ .fb
-│ .twdl
-│ .ytmp3
-│ .ytmp4
-│ .play
-│ .hd / .remini / .hdr
-│ .hdvid / .hdvideo
-├═════════════════════┤
-║   🔍 *INFO & CEK*   
-├═════════════════════┤
-│ .ping / .p
-│ .info
-│ .infoupdate / .changelog
-│ .owner / .own
-│ .cekhp / .spechp
-│ .bandingkan
-│ .cuaca
-│ .ba / .bluearchive
-│ .genius / .carilagu
-│ .geniusdetail
-│ .whatsmusik / .wmusik
-│ .infomusik / .infolirik
-│ .musikai / .aimusik
-│ .musikai2 / .aimusik2
-│ .speedtest / .speed
-│ .pixiv / .pixivr18
-├═════════════════════┤
-║   🤖 *AI CHAT*   
-├═════════════════════┤
-│ .ai / .tanya
-│ .mymemory
-│ .forgetme
-├═════════════════════┤
-║  🎌 *ANIME & MANGA*  
-├═════════════════════┤
-│ .kusonime / .anime
-│ .kusonimeupdate
-│ .alq / .alqanime
-│ .alqupdate
-│ .alqdl
-│ .komik / .komiktap
-│ .komikinfo
-│ .komikget / .komikdl
-│ .komikupdate
-├═════════════════════┤
-║   🔞 *KONTEN 18+*   
-├═════════════════════┤
-│ .nh / .nhentai
-│ .nhget
-│ .nhrand
-│ .nhdl
-│ .cosplay
-│ .cosplayrandom
-│ .pixivr18
-├═════════════════════┤
-║   🌐 *WEB & TOOLS*   
-├═════════════════════┤
-│ .ss / .screenshot
-│ .ssweb / .webinfo
-│ .tmail / .tempmail
-│ .tminbox
-│ .tmread
-│ .tmwait
-│ .tmdel
-├═════════════════════┤
-║   🤖 *JADIBOT*   
-├═════════════════════┤
-│ .jadibot
-│ .stopbot
-│ .listbot
-│ .setpairing
-├═════════════════════┤
-║   👑 *OWNER ONLY*   
-├═════════════════════┤
-│ .listowner
-│ .addowner
-│ .delowner
-│ .all
-│ .swgrup / .statusgroup
-│ .infowibu
-│ .animasu
-│ .tvone
-│ .malnews
-│ .alqanimenotif
-│ .cekauto
-│ .ceksw
-│ .wilyai
-│ .wily / .simi
-│ .setreactapi / .cekreact
-│ .emojiadd
-│ .emojidel
-│ .emojilist
-│ .ram
-│ .ceksize / .disksize
-│ .restart / .rebot / .rb
-│ .upbot
-│ .backup
-│ .ceksesi
-│ .autosholat
-│ .credsjson
-│ .eval / .bash
-│ .dbstats / .sessiondb
-│ .listcontact
-│ .cekerror
-│ .contact
-│ .mati / .shutdown
-├═════════════════════┤
-║   📋 *SUB MENU*   
-├═════════════════════┤
-│ .settingmenu
-│ .groupmenu
-│ .statusmenu
-│ .downloadmenu
-│ .jadibotmenu
-│ .ownermenu
-│ .allmenu
-╰═════════════════════╯`;
+                                        const teks = buildMenuUtama({
+                                                pushName: m.pushName || 'User',
+                                                isOwner: m.isOwner,
+                                                uptimeStr,
+                                                tgl: _mnTgl,
+                                                jam: _mnJam,
+                                                browserLabel: _mnBrowserLabel,
+                                                totalCmdCount: TOTAL_CMD_COUNT,
+                                                totalSemuaFitur,
+                                                fiturAktif: totalCmd,
+                                                fiturTidakAktif: totalTidakAktif,
+                                        });
                                         const ppUser = await getUserProfilePictureUrl(hisoka, m.sender);
                                         const menuCtxInfo = ppUser
                                                 ? {
