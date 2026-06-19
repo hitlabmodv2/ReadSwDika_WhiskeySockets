@@ -47,9 +47,9 @@
     "name": "harisulijar",
     "type": "imageMessage",
     "arrivedAt": "2026-06-19T10:08:54.654Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "🛖",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6281215324028",
@@ -62,6 +62,8 @@
       "participant": "176931194552515@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-19T10:08:54.654Z"
+    "updatedAt": "2026-06-19T10:15:40.297Z",
+    "retriedOnStartup": true,
+    "retriedAt": "2026-06-19T10:15:40.297Z"
   }
 }
