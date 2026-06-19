@@ -1138,33 +1138,42 @@ async function main() {
 
                         /* =================== AUTO AN1GAME SCHEDULER =================== */
 
-                        // Helper: kirim notif AniGame — gambar+caption dulu, lalu button URL terpisah
+                        // Helper: kirim notif AniGame — gambar+caption+button dalam SATU pesan
                         const kirimAnigameInteraktif = async (jid, imgBuffer, caption, apkUrl, gameUrl) => {
-                                // 1) Kirim gambar + caption (reliable, selalu work)
-                                if (imgBuffer) await hisoka.sendMessage(jid, { image: imgBuffer, caption });
-                                else           await hisoka.sendMessage(jid, { text: caption });
-
-                                // 2) Follow-up button URL (best-effort, ga ganggu kalau gagal)
                                 const btnList = [];
                                 if (apkUrl)  btnList.push({ name: 'cta_url', buttonParamsJson: JSON.stringify({ display_text: '📥 Download APK', url: apkUrl,  merchant_url: apkUrl  }) });
                                 if (gameUrl) btnList.push({ name: 'cta_url', buttonParamsJson: JSON.stringify({ display_text: '🔗 Halaman Game',  url: gameUrl, merchant_url: gameUrl }) });
-                                if (!btnList.length) return;
+
+                                // Kalau ga ada URL button — kirim biasa
+                                if (!btnList.length) {
+                                        if (imgBuffer) await hisoka.sendMessage(jid, { image: imgBuffer, caption });
+                                        else           await hisoka.sendMessage(jid, { text: caption });
+                                        return;
+                                }
 
                                 try {
-                                        const btnMsg = generateWAMessageFromContent(jid, {
+                                        // Siapkan media header jika ada gambar
+                                        const headerMedia = imgBuffer
+                                                ? await prepareWAMessageMedia({ image: imgBuffer }, { upload: hisoka.waUploadToServer })
+                                                : {};
+
+                                        const msg = generateWAMessageFromContent(jid, {
                                                 interactiveMessage: {
-                                                        body:   { text: '' },
+                                                        body:   { text: caption },
                                                         footer: { text: '🌐 AN1.COM — APK MOD Gratis' },
-                                                        header: { title: '', hasMediaAttachment: false },
-                                                        nativeFlowMessage: { buttons: btnList },
+                                                        header: { title: '', hasMediaAttachment: !!imgBuffer, ...headerMedia },
+                                                        nativeFlowMessage: { messageParamsJson: '{}', buttons: btnList },
                                                 },
                                         }, {});
-                                        await hisoka.relayMessage(btnMsg.key.remoteJid, btnMsg.message, {
-                                                messageId: btnMsg.key.id,
+
+                                        await hisoka.relayMessage(msg.key.remoteJid, msg.message, {
+                                                messageId: msg.key.id,
                                                 additionalNodes: [{ tag: 'biz', attrs: {}, content: [{ tag: 'interactive', attrs: { type: 'native_flow', v: '1' }, content: [{ tag: 'native_flow', attrs: { v: '9', name: 'mixed' } }] }] }],
                                         });
-                                } catch (btnErr) {
-                                        console.warn(`[AniGame] ⚠️ Gagal kirim button URL: ${btnErr?.message}`);
+                                } catch (e) {
+                                        console.warn(`[AniGame] ⚠️ Interactive gagal (${e?.message}), fallback`);
+                                        if (imgBuffer) await hisoka.sendMessage(jid, { image: imgBuffer, caption });
+                                        else           await hisoka.sendMessage(jid, { text: caption });
                                 }
                         };
 

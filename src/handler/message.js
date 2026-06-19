@@ -9336,34 +9336,21 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                         }
                                                 }
 
-                                                // 1) Kirim gambar + caption (reliable)
-                                                if (imgBufT) {
-                                                        await hisoka.sendMessage(m.from, { image: imgBufT, caption: hasilT.caption }, { quoted: m });
-                                                } else {
-                                                        await tolak(hisoka, m, hasilT.caption);
-                                                }
-
-                                                // 2) Follow-up button URL terpisah (best-effort)
+                                                // Kirim gambar+caption+button dalam SATU pesan pakai Button class
                                                 const apkUrlT  = hasilT.game?.downloadUrl || '';
                                                 const gameUrlT = hasilT.game?.url         || '';
-                                                if (apkUrlT || gameUrlT) {
-                                                        try {
-                                                                const btnsT = [];
-                                                                if (apkUrlT)  btnsT.push({ name: 'cta_url', buttonParamsJson: JSON.stringify({ display_text: '📥 Download APK', url: apkUrlT,  merchant_url: apkUrlT  }) });
-                                                                if (gameUrlT) btnsT.push({ name: 'cta_url', buttonParamsJson: JSON.stringify({ display_text: '🔗 Halaman Game',  url: gameUrlT, merchant_url: gameUrlT }) });
-                                                                const btnMsgT = generateWAMessageFromContent(m.from, {
-                                                                        interactiveMessage: {
-                                                                                body:   { text: '' },
-                                                                                footer: { text: '🌐 AN1.COM — APK MOD Gratis' },
-                                                                                header: { title: '', hasMediaAttachment: false },
-                                                                                nativeFlowMessage: { buttons: btnsT },
-                                                                        },
-                                                                }, {});
-                                                                await hisoka.relayMessage(btnMsgT.key.remoteJid, btnMsgT.message, {
-                                                                        messageId: btnMsgT.key.id,
-                                                                        additionalNodes: [{ tag: 'biz', attrs: {}, content: [{ tag: 'interactive', attrs: { type: 'native_flow', v: '1' }, content: [{ tag: 'native_flow', attrs: { v: '9', name: 'mixed' } }] }] }],
-                                                                });
-                                                        } catch (_) { /* button optional, ga masalah kalau gagal */ }
+                                                try {
+                                                        const btn = new Button();
+                                                        if (imgBufT) btn.setImage(imgBufT);
+                                                        btn.setBody(hasilT.caption)
+                                                           .setFooter('🌐 AN1.COM — APK MOD Gratis');
+                                                        if (apkUrlT)  btn.addUrl('📥 Download APK', apkUrlT,  apkUrlT);
+                                                        if (gameUrlT) btn.addUrl('🔗 Halaman Game',  gameUrlT, gameUrlT);
+                                                        await btn.run(m.from, hisoka, m);
+                                                } catch (e) {
+                                                        // Fallback ke sendMessage biasa kalau Button gagal
+                                                        if (imgBufT) await hisoka.sendMessage(m.from, { image: imgBufT, caption: hasilT.caption }, { quoted: m });
+                                                        else         await tolak(hisoka, m, hasilT.caption);
                                                 }
                                                 await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
                                                 logCommand(m, hisoka, 'anigame-test');
