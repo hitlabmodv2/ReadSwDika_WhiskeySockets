@@ -6321,8 +6321,8 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                         case 'cekspeed':
                         case 'testnet': {
-                                const { handleTestnet } = _require(path.resolve('./src/scrape/tools/simpletools-handler.cjs'));
-                                await handleTestnet({ hisoka, m, tolak, logCommand, _require });
+                                const { handleTestnet } = _require(path.resolve('./src/scrape/tools/speedtest.cjs'));
+                                await handleTestnet({ hisoka, m, tolak, logCommand });
                                 break;
                         }
                         case 'disksize':
@@ -6407,7 +6407,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'restart':
                         case 'rebot':
                         case 'rb': {
-                                const { handleRb } = _require(path.resolve('./src/scrape/tools/simpletools-handler.cjs'));
+                                const { handleRb } = _require(path.resolve('./src/scrape/system/shutdown.cjs'));
                                 await handleRb({ hisoka, m, tolak, logCommand, _require });
                                 break;
                         }
@@ -6419,19 +6419,19 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                         case 'sessiondb':
                         case 'sessionstat': {
-                                const { handleSessionstat } = _require(path.resolve('./src/scrape/tools/sessionstat-handler.cjs'));
+                                const { handleSessionstat } = _require(path.resolve('./src/scrape/tools/ceksesi.cjs'));
                                 await handleSessionstat({ hisoka, m, fs, path, logCommand });
                                 break;
                         }
                         case 'group':
                         case 'listgroup': {
-                                const { handleListgroup } = _require(path.resolve('./src/scrape/tools/group-handler.cjs'));
+                                const { handleListgroup } = _require(path.resolve('./src/scrape/tools/info.cjs'));
                                 await handleListgroup({ hisoka, m, tolak, logCommand });
                                 break;
                         }
                         case 'contact':
                         case 'listcontact': {
-                                const { handleListcontact } = _require(path.resolve('./src/scrape/tools/group-handler.cjs'));
+                                const { handleListcontact } = _require(path.resolve('./src/scrape/tools/info.cjs'));
                                 await handleListcontact({ hisoka, m, tolak, logCommand });
                                 break;
                         }
@@ -7040,8 +7040,8 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 break;
                         }
                         case 'nhrand': {
-                                const { handleNhrand } = _require(path.resolve('./src/scrape/tools/simpletools-handler.cjs'));
-                                await handleNhrand({ hisoka, m, tolak, logCommand, logError, _require });
+                                const { handleNhrand } = _require(path.resolve('./src/scrape/anime/nhentai.cjs'));
+                                await handleNhrand({ hisoka, m, tolak, logCommand, logError });
                                 break;
                         }
                         case 'nhget':
@@ -7086,8 +7086,8 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                         case 'kusonimeupdate':
                         case 'animeupdate': {
-                                const { handleAnimeupdate } = _require(path.resolve('./src/scrape/tools/simpletools-handler.cjs'));
-                                await handleAnimeupdate({ hisoka, m, tolak, logCommand, logError, _require, path });
+                                const { handleAnimeupdate } = _require(path.resolve('./src/scrape/anime/kusonime.cjs'));
+                                await handleAnimeupdate({ hisoka, m, tolak, logCommand, logError });
                                 break;
                         }
                         case 'alqanime':
@@ -7978,7 +7978,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 break;
                         }
                         case 'jadibotmenu': {
-                                const { handleJadibotmenu } = _require(path.resolve('./src/scrape/tools/misc-handler.cjs'));
+                                const { handleJadibotmenu } = _require(path.resolve('./src/scrape/tools/info.cjs'));
                                 await handleJadibotmenu({ hisoka, m, tolak, logCommand, loadConfig });
                                 break;
                         }
@@ -7995,30 +7995,30 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                         case 'changelog':
                         case 'update': {
-                                const { handleUpdate } = _require(path.resolve('./src/scrape/tools/group-handler.cjs'));
+                                const { handleUpdate } = _require(path.resolve('./src/scrape/tools/info.cjs'));
                                 await handleUpdate({ hisoka, m, tolak, logCommand, path, fs, isMainBot });
                                 break;
                         }
                         case 'addown':
                         case 'addowner': {
-                                const { handleAddowner } = _require(path.resolve('./src/scrape/tools/owner-handler.cjs'));
+                                const { handleAddowner } = _require(path.resolve('./src/scrape/tools/info.cjs'));
                                 await handleAddowner({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, isMainBot });
                                 break;
                         }
                         case 'delown':
                         case 'delowner': {
-                                const { handleDelowner } = _require(path.resolve('./src/scrape/tools/owner-handler.cjs'));
+                                const { handleDelowner } = _require(path.resolve('./src/scrape/tools/info.cjs'));
                                 await handleDelowner({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, isMainBot });
                                 break;
                         }
                         case 'owner':
                         case 'own': {
-                                const { handleOwn } = _require(path.resolve('./src/scrape/tools/owner-handler.cjs'));
+                                const { handleOwn } = _require(path.resolve('./src/scrape/tools/info.cjs'));
                                 await handleOwn({ hisoka, m, tolak, logCommand, loadConfig });
                                 break;
                         }
                         case 'memory': {
-                                const { handleMemory } = _require(path.resolve('./src/scrape/tools/memory-handler.cjs'));
+                                const { handleMemory } = _require(path.resolve('./src/scrape/tools/ceksesi.cjs'));
                                 await handleMemory({ hisoka, m, tolak, logCommand });
                                 break;
                         }
@@ -8038,7 +8038,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         }
 
                         case 'ram': {
-                                const { handleRam } = _require(path.resolve('./src/scrape/tools/owner-handler.cjs'));
+                                const { handleRam } = _require(path.resolve('./src/scrape/tools/ceksesi.cjs'));
                                 await handleRam({ hisoka, m, tolak, logCommand });
                                 break;
                         }
@@ -8054,7 +8054,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 break;
                         }
                         case 'simi': {
-                                const { handleSimi } = _require(path.resolve('./src/scrape/tools/simi-handler.cjs'));
+                                const { handleSimi } = _require(path.resolve('./src/scrape/tools/wilyai.cjs'));
                                 await handleSimi({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, isMainBot });
                                 break;
                         }
@@ -8973,7 +8973,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         }
 
                         case 'add': {
-                                const { handleAddEmoji } = _require(path.resolve('./src/scrape/tools/misc-handler.cjs'));
+                                const { handleAddEmoji } = _require(path.resolve('./src/scrape/tools/info.cjs'));
                                 await handleAddEmoji({ hisoka, m, query, tolak, logCommand, isMainBot });
                                 break;
                         }
@@ -9065,7 +9065,7 @@ response += `╰═════════════════╯`;
                         }
 
                         case 'list': {
-                                const { handleListEmoji } = _require(path.resolve('./src/scrape/tools/misc-handler.cjs'));
+                                const { handleListEmoji } = _require(path.resolve('./src/scrape/tools/info.cjs'));
                                 await handleListEmoji({ hisoka, m, query, tolak, logCommand, isMainBot });
                                 break;
                         }
@@ -9604,24 +9604,24 @@ response += `╰═════════════════╯`;
 
                         case 'react':
                         case 'reaksi': {
-                                const { handleReaksi } = _require(path.resolve('./src/scrape/tools/reaksi-handler.cjs'));
+                                const { handleReaksi } = _require(path.resolve('./src/scrape/tools/reactapi.cjs'));
                                 await handleReaksi({ hisoka, m, query, tolak, logCommand, loadConfig });
                                 break;
                         }
                         case 'cekreact':
                         case 'reactinfo': {
-                                const { handleReactinfo } = _require(path.resolve('./src/scrape/tools/reactapi-handler.cjs'));
+                                const { handleReactinfo } = _require(path.resolve('./src/scrape/tools/reactapi.cjs'));
                                 await handleReactinfo({ hisoka, m, tolak, logCommand, loadConfig });
                                 break;
                         }
                         case 'setreactapi':
                         case 'reactapi': {
-                                const { handleReactapi } = _require(path.resolve('./src/scrape/tools/reactapi-handler.cjs'));
+                                const { handleReactapi } = _require(path.resolve('./src/scrape/tools/reactapi.cjs'));
                                 await handleReactapi({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig });
                                 break;
                         }
                         case 'setpairing': {
-                                const { handleSetpairing } = _require(path.resolve('./src/scrape/tools/misc-handler.cjs'));
+                                const { handleSetpairing } = _require(path.resolve('./src/scrape/tools/info.cjs'));
                                 await handleSetpairing({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, isMainBot });
                                 break;
                         }
@@ -11417,7 +11417,7 @@ response += `╰═════════════════╯`;
 
                         case 'welgod':
                         case 'setwelgod': {
-                                const { handleSetwelgod } = _require(path.resolve('./src/scrape/tools/welgod-handler.cjs'));
+                                const { handleSetwelgod } = _require(path.resolve('./src/scrape/tools/info.cjs'));
                                 await handleSetwelgod({ hisoka, m, query, tolak, logCommand, loadConfig });
                                 break;
                         }

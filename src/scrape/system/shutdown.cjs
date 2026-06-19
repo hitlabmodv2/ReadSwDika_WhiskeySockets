@@ -63,3 +63,27 @@ function restartBot(delay = 2000) {
 }
 
 module.exports = { shutdownBot, restartBot };
+
+// ── HANDLER: rb (restart bot) ─────────────────────────────────────────────────
+
+async function handleRb({ hisoka, m, tolak, logCommand }) {
+        if (!m.isOwner) return tolak(hisoka, m, '❌ Hanya owner yang bisa merestart bot!');
+        if (!m.prefix && m.query) return;
+        const _rstSent = await hisoka.sendMessage(m.from, {
+                text:
+                        `╔══════════════════════╗\n║  🔄  *R E S T A R T*  ║\n╚══════════════════════╝\n\n` +
+                        `♻️ Bot akan direstart sekarang!\n\n` +
+                        `⚙️ Direstart oleh: @${m.sender.split('@')[0]}\n` +
+                        `🕐 Waktu: ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })}\n\n` +
+                        `⏳ Menunggu bot online kembali...`,
+                mentions: [m.sender]
+        }, { quoted: m });
+        try {
+                const { kvSet: _rstKvSet } = await import('../db/datadb.js');
+                _rstKvSet('system/restart_notify', { from: m.from, key: _rstSent?.key || null, by: m.sender, time: Date.now() });
+        } catch (_) {}
+        logCommand(m, hisoka, 'restart');
+        restartBot(2000);
+}
+
+module.exports.handleRb = handleRb;

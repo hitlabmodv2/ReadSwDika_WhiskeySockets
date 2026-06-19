@@ -161,3 +161,121 @@ function cekSesi() {
 }
 
 module.exports = { cekSesi };
+
+// ── HANDLER: memory ───────────────────────────────────────────────────────────
+
+function msToTime(ms) {
+        const s = Math.floor(ms / 1000);
+        const m = Math.floor(s / 60);
+        const h = Math.floor(m / 60);
+        const d = Math.floor(h / 24);
+        if (d > 0) return `${d}d ${h % 24}h ${m % 60}m`;
+        if (h > 0) return `${h}h ${m % 60}m ${s % 60}s`;
+        if (m > 0) return `${m}m ${s % 60}s`;
+        return `${s}s`;
+}
+
+async function handleMemory({ hisoka, m, tolak, logCommand }) {
+        if (!m.prefix && m.query) return;
+        try {
+                const memMonitor = global.memoryMonitor;
+                if (!memMonitor) { await tolak(hisoka, m, 'Memory monitor tidak tersedia.'); return; }
+                const status = memMonitor.getStatus();
+                const uptime = process.uptime();
+                let text = `╭═══『 *💾 MEMORY STATUS* 』═══╮\n`;
+                text += `│\n│ *📊 Process Memory*\n│ • Current: ${status.currentFormatted}\n│ • Limit: ${status.limitFormatted}\n│ • Usage: ${status.percentage}%\n│\n`;
+                text += `│ *🔧 Heap Memory*\n│ • Total: ${status.heap.totalFormatted}\n│ • Used: ${status.heap.usedFormatted}\n│\n`;
+                text += `│ *🖥️ System Memory (Server)*\n│ • Total: ${status.system.totalFormatted}\n│ • Used: ${status.system.usedFormatted}\n│ • Free: ${status.system.freeFormatted}\n│\n`;
+                text += `│ *⚙️ Monitor Config*\n│ • Enabled: ${status.enabled ? '✅ Yes' : '❌ No'}\n│ • Auto Detect: ${status.autoDetect ? '✅ ' + status.autoDetectPercentage + '%' : '❌ Manual'}\n│ • Check Interval: ${status.checkInterval / 1000}s\n│ • Log Usage: ${status.logUsage ? '✅ Yes' : '❌ No'}\n│ • Uptime: ${msToTime(uptime * 1000)}\n│\n`;
+                text += `╰═════════════════════╯`;
+                if (parseFloat(status.percentage) >= 80) text += `\n\n⚠️ *Warning:* Memory usage tinggi! Auto-restart akan terjadi jika mencapai limit.`;
+                await tolak(hisoka, m, text);
+                logCommand(m, hisoka, 'memory');
+        } catch (error) {
+                console.error('\x1b[31m[Memory] Error:\x1b[39m', error.message);
+                await tolak(hisoka, m, `Error: ${error.message}`);
+        }
+}
+
+module.exports.handleMemory = handleMemory;
+
+// ── HANDLER: ram ──────────────────────────────────────────────────────────────
+
+async function handleRam({ hisoka, m, tolak, logCommand }) {
+        if (!m.prefix && m.query) return;
+        try {
+                const { formatBytes, getCurrentMemoryUsage, getSystemMemoryInfo } = await import('../helper/memoryMonitor.js');
+                const memUsage  = getCurrentMemoryUsage();
+                const systemMem = getSystemMemoryInfo();
+                const memLimit  = global.memoryMonitor?.memoryLimit || systemMem.total;
+                const percentage       = ((memUsage.rss / memLimit) * 100).toFixed(1);
+                const systemPercentage = ((systemMem.used / systemMem.total) * 100).toFixed(1);
+                let text = `╭═══『 *RAM STATUS* 』═══╮\n│\n│ *Process Memory*\n│ ${formatBytes(memUsage.rss)} / ${formatBytes(memLimit)}\n│ Usage: ${percentage}%\n│\n│ *System Memory*\n│ ${formatBytes(systemMem.used)} / ${formatBytes(systemMem.total)}\n│ Usage: ${systemPercentage}%\n│\n╰═════════════════════╯`;
+                await tolak(hisoka, m, text);
+                logCommand(m, hisoka, 'cekram');
+        } catch (error) {
+                console.error('\x1b[31m[CekRAM] Error:\x1b[39m', error.message);
+                await tolak(hisoka, m, `Error: ${error.message}`);
+        }
+}
+
+module.exports.handleRam = handleRam;
+
+// ── HANDLER: sessionstat ──────────────────────────────────────────────────────
+
+async function handleSessionstat({ hisoka, m, fs, path, logCommand }) {
+        if (!m.prefix && m.query) return;
+        if (!m.isOwner) return;
+        try {
+                const readSessionStats = (sessionDir) => {
+                        const credsPath = path.join(sessionDir, 'creds.json');
+                        if (!fs.existsSync(credsPath)) return null;
+                        const files        = fs.readdirSync(sessionDir);
+                        const preKeys      = files.filter(f => f.startsWith('pre-key-')    && f.endsWith('.json')).length;
+                        const sessionFiles = files.filter(f => f.startsWith('session-')    && f.endsWith('.json')).length;
+                        const senderKeys   = files.filter(f => f.startsWith('sender-key-') && f.endsWith('.json')).length;
+                        let totalSize = 0;
+                        for (const f of files) { try { totalSize += fs.statSync(path.join(sessionDir, f)).size; } catch {} }
+                        return { preKeys, sessionFiles, senderKeys, totalFiles: files.length, totalSize };
+                };
+                const formatSize = (bytes) => {
+                        if (bytes < 1024)            return `${bytes} B`;
+                        if (bytes < 1024 * 1024)     return `${(bytes / 1024).toFixed(1)} KB`;
+                        return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
+                };
+                const mainStats = readSessionStats(global.sessionDir);
+                const now = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Asia/Jakarta' });
+
+                let out = `╭═══════════════════════╮\n║   🗄️ *SESSION STATS*   \n╠═══════════════════════╣\n│ 🕐 _Realtime: ${now} WIB_\n╠═══════════════════════╣\n║   📦 *MAIN SESSION*   \n╠═══════════════════════╣\n`;
+                if (!mainStats) {
+                        out += `│ ⚠️ creds.json belum ada\n`;
+                } else {
+                        out += `│ ✅ Creds      » Tersimpan\n│ 🔑 Pre-Keys   » ${mainStats.preKeys} file\n│ 📋 Sessions   » ${mainStats.sessionFiles} file\n│ 🗝️ Sender-Keys » ${mainStats.senderKeys} file\n│ 📁 Total Files» ${mainStats.totalFiles}\n│ 💾 Total Size » ${formatSize(mainStats.totalSize)}\n`;
+                }
+
+                const jadibotDir = path.join(process.cwd(), 'jadibot');
+                if (fs.existsSync(jadibotDir)) {
+                        const jadibotSessions = fs.readdirSync(jadibotDir).filter(n => fs.existsSync(path.join(jadibotDir, n, 'creds.json')));
+                        if (jadibotSessions.length > 0) {
+                                out += `╠═══════════════════════╣\n║   🤖 *JADIBOT SESSIONS*   \n╠═══════════════════════╣\n│ 📱 Total » ${jadibotSessions.length} sesi\n├───────────────────────┤\n`;
+                                let totalSize = 0;
+                                for (const num of jadibotSessions) {
+                                        const jStats = readSessionStats(path.join(jadibotDir, num));
+                                        if (jStats) {
+                                                totalSize += jStats.totalSize;
+                                                const shortNum = num.replace(/^62/, '0').slice(0, 12) + '..';
+                                                out += `│  📞 ${shortNum} » ${jStats.totalFiles} files (${formatSize(jStats.totalSize)})\n`;
+                                        }
+                                }
+                                out += `├───────────────────────┤\n│ 💾 Total Size » ${formatSize(totalSize)}\n`;
+                        }
+                }
+                out += `╰═══════════════════════╯`;
+                await m.reply(out);
+                logCommand(m, hisoka, 'dbstats');
+        } catch (err) {
+                await m.reply(`❌ Error baca DB stats:\n${err.message}`);
+        }
+}
+
+module.exports.handleSessionstat = handleSessionstat;

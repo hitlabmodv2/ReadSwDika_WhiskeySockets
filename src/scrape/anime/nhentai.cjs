@@ -455,3 +455,29 @@ async function handleNh({ hisoka, m, query, tolak, logError }) {
 }
 
 module.exports.handleNh = handleNh;
+
+// ── HANDLER: nhrand ───────────────────────────────────────────────────────────
+
+async function handleNhrand({ hisoka, m, tolak, logCommand, logError }) {
+        if (!m.prefix && m.query) return;
+        try {
+                const pfx = m.prefix || '.';
+                await hisoka.sendMessage(m.from, { react: { text: '🎲', key: m.key } });
+                await tolak(hisoka, m, `🎲 Mengambil doujin random dari nhentai...`);
+                const gallery  = await nhentaiRandom();
+                const infoText = formatGalleryInfo(gallery, pfx);
+                const coverBuf = await nhentaiCover(gallery).catch(() => null);
+                if (coverBuf) {
+                        await hisoka.sendMessage(m.from, { image: coverBuf, caption: infoText }, { quoted: m });
+                } else {
+                        await tolak(hisoka, m, infoText);
+                }
+                await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+        } catch (err) {
+                console.error('[NH] Random error:', err?.message);
+                logError(err instanceof Error ? err : new Error(String(err?.message || err)), 'nhentai-random');
+                await tolak(hisoka, m, `❌ Gagal ambil random.\n💬 ${err?.message || 'Coba lagi nanti'}`);
+        }
+}
+
+module.exports.handleNhrand = handleNhrand;

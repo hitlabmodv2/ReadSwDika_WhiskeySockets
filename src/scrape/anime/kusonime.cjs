@@ -404,124 +404,143 @@ module.exports = {
 // ── COMMAND HANDLER ───────────────────────────────────────────────────────────
 
 async function handleAnime({ hisoka, m, query, tolak, logCommand, logError, path }) {
-	try {
-		const input = (query || '').trim();
-		const pfx   = m.prefix || '.';
+        try {
+                const input = (query || '').trim();
+                const pfx   = m.prefix || '.';
 
-		if (!input) {
-			await tolak(hisoka, m,
-				`╭─「 🎌 *KUSONIME* 」\n│\n│ *Cari anime sub indo:*\n│ ${pfx}anime <judul>\n│\n` +
-				`│ *Per musim (kirim .txt + .pdf):*\n│ ${pfx}anime winter 2026\n│ ${pfx}anime spring 2025\n` +
-				`│ ${pfx}anime summer 2024\n│ ${pfx}anime fall 2024\n│\n│ *Cari judul:*\n` +
-				`│ ${pfx}anime one piece\n│ ${pfx}anime attack on titan\n│\n` +
-				`│ 📄 TXT: info + semua link download\n│ 🎨 PDF: desain keren + poster anime\n│ 🌐 Source: kusonime.com\n╰──────────────────────`
-			);
-			return;
-		}
+                if (!input) {
+                        await tolak(hisoka, m,
+                                `╭─「 🎌 *KUSONIME* 」\n│\n│ *Cari anime sub indo:*\n│ ${pfx}anime <judul>\n│\n` +
+                                `│ *Per musim (kirim .txt + .pdf):*\n│ ${pfx}anime winter 2026\n│ ${pfx}anime spring 2025\n` +
+                                `│ ${pfx}anime summer 2024\n│ ${pfx}anime fall 2024\n│\n│ *Cari judul:*\n` +
+                                `│ ${pfx}anime one piece\n│ ${pfx}anime attack on titan\n│\n` +
+                                `│ 📄 TXT: info + semua link download\n│ 🎨 PDF: desain keren + poster anime\n│ 🌐 Source: kusonime.com\n╰──────────────────────`
+                        );
+                        return;
+                }
 
-		const { searchKusonime, getDetailKusonime, formatDetailText, formatSearchResults, parseSeasonInput, getSeasonAnimeList, batchFetchDetails, formatSeasonTxt, SEASON_NAMES } = exports;
+                const { searchKusonime, getDetailKusonime, formatDetailText, formatSearchResults, parseSeasonInput, getSeasonAnimeList, batchFetchDetails, formatSeasonTxt, SEASON_NAMES } = exports;
 
-		const seasonParsed = parseSeasonInput(input);
+                const seasonParsed = parseSeasonInput(input);
 
-		if (seasonParsed) {
-			const { season, year } = seasonParsed;
-			const seasonLabel = SEASON_NAMES[season] || season;
-			const baseName    = `Kusonime_${seasonLabel}_${year}`;
+                if (seasonParsed) {
+                        const { season, year } = seasonParsed;
+                        const seasonLabel = SEASON_NAMES[season] || season;
+                        const baseName    = `Kusonime_${seasonLabel}_${year}`;
 
-			await hisoka.sendMessage(m.from, { react: { text: '📅', key: m.key } });
-			const loadingMsg = await m.reply(
-				`📅 *Mengambil daftar ${seasonLabel} ${year}...*\n⏳ Mohon tunggu, proses ~2–5 menit\n📡 Mengambil daftar anime...`
-			);
+                        await hisoka.sendMessage(m.from, { react: { text: '📅', key: m.key } });
+                        const loadingMsg = await m.reply(
+                                `📅 *Mengambil daftar ${seasonLabel} ${year}...*\n⏳ Mohon tunggu, proses ~2–5 menit\n📡 Mengambil daftar anime...`
+                        );
 
-			const animeList = await getSeasonAnimeList(season, year);
-			if (!animeList.length) {
-				await m.reply({ edit: loadingMsg.key, text: `❌ Season *${seasonLabel} ${year}* tidak ditemukan di Kusonime.` });
-				return;
-			}
+                        const animeList = await getSeasonAnimeList(season, year);
+                        if (!animeList.length) {
+                                await m.reply({ edit: loadingMsg.key, text: `❌ Season *${seasonLabel} ${year}* tidak ditemukan di Kusonime.` });
+                                return;
+                        }
 
-			await m.reply({
-				edit: loadingMsg.key,
-				text: `📅 *${seasonLabel} ${year}* — ${animeList.length} anime\n⏳ Mengambil detail + link download...\n[░░░░░░░░░░] 0/${animeList.length}`,
-			});
+                        await m.reply({
+                                edit: loadingMsg.key,
+                                text: `📅 *${seasonLabel} ${year}* — ${animeList.length} anime\n⏳ Mengambil detail + link download...\n[░░░░░░░░░░] 0/${animeList.length}`,
+                        });
 
-			let lastUpdate = 0;
-			const details  = await batchFetchDetails(animeList, async (done, total) => {
-				const now = Date.now();
-				if (now - lastUpdate < 4000 && done < total) return;
-				lastUpdate = now;
-				const pct    = Math.round((done / total) * 100);
-				const filled = Math.round(pct / 10);
-				const bar    = '█'.repeat(filled) + '░'.repeat(10 - filled);
-				try {
-					await m.reply({
-						edit: loadingMsg.key,
-						text: `📅 *${seasonLabel} ${year}* — ${animeList.length} anime\n⏳ Mengambil detail...\n[${bar}] ${pct}% (${done}/${total})`,
-					});
-				} catch (_) {}
-			});
+                        let lastUpdate = 0;
+                        const details  = await batchFetchDetails(animeList, async (done, total) => {
+                                const now = Date.now();
+                                if (now - lastUpdate < 4000 && done < total) return;
+                                lastUpdate = now;
+                                const pct    = Math.round((done / total) * 100);
+                                const filled = Math.round(pct / 10);
+                                const bar    = '█'.repeat(filled) + '░'.repeat(10 - filled);
+                                try {
+                                        await m.reply({
+                                                edit: loadingMsg.key,
+                                                text: `📅 *${seasonLabel} ${year}* — ${animeList.length} anime\n⏳ Mengambil detail...\n[${bar}] ${pct}% (${done}/${total})`,
+                                        });
+                                } catch (_) {}
+                        });
 
-			const validCount = details.filter(Boolean).length;
-			const txtContent = formatSeasonTxt(season, year, details);
-			const txtBuf     = Buffer.from(txtContent, 'utf8');
+                        const validCount = details.filter(Boolean).length;
+                        const txtContent = formatSeasonTxt(season, year, details);
+                        const txtBuf     = Buffer.from(txtContent, 'utf8');
 
-			try { await m.reply({ edit: loadingMsg.key, text: `✅ Detail selesai!\n🖨 Membuat file PDF (${validCount} anime + gambar)...` }); } catch (_) {}
+                        try { await m.reply({ edit: loadingMsg.key, text: `✅ Detail selesai!\n🖨 Membuat file PDF (${validCount} anime + gambar)...` }); } catch (_) {}
 
-			const { generateSeasonPdf } = require(path.resolve('./src/scrape/anime/kusonime-pdf.cjs'));
-			const pdfBuf = await generateSeasonPdf(season, year, details);
+                        const { generateSeasonPdf } = require(path.resolve('./src/scrape/anime/kusonime-pdf.cjs'));
+                        const pdfBuf = await generateSeasonPdf(season, year, details);
 
-			try { await m.reply({ edit: loadingMsg.key, text: `✅ Semua file siap! Mengirim TXT + PDF...` }); } catch (_) {}
+                        try { await m.reply({ edit: loadingMsg.key, text: `✅ Semua file siap! Mengirim TXT + PDF...` }); } catch (_) {}
 
-			const caption =
-				`📅 *Kusonime — ${seasonLabel} ${year}*\n━━━━━━━━━━━━━━━━━━━\n` +
-				`🎌 Total anime  : *${validCount}* judul\n📄 File TXT     : info + semua link download\n` +
-				`🎨 File PDF     : desain keren + gambar anime\n                   (GDrive, Mega, HXFile, dll)\n🌐 Sumber       : kusonime.com`;
+                        const caption =
+                                `📅 *Kusonime — ${seasonLabel} ${year}*\n━━━━━━━━━━━━━━━━━━━\n` +
+                                `🎌 Total anime  : *${validCount}* judul\n📄 File TXT     : info + semua link download\n` +
+                                `🎨 File PDF     : desain keren + gambar anime\n                   (GDrive, Mega, HXFile, dll)\n🌐 Sumber       : kusonime.com`;
 
-			await hisoka.sendMessage(m.from, { document: txtBuf, mimetype: 'text/plain', fileName: `${baseName}.txt`, caption }, { quoted: m });
-			await hisoka.sendMessage(m.from, {
-				document: pdfBuf, mimetype: 'application/pdf', fileName: `${baseName}.pdf`,
-				caption: `📄 *PDF ${seasonLabel} ${year}* — ${validCount} anime\n🎨 Termasuk cover, poster, info & link download tiap anime`,
-			}, { quoted: m });
-			await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+                        await hisoka.sendMessage(m.from, { document: txtBuf, mimetype: 'text/plain', fileName: `${baseName}.txt`, caption }, { quoted: m });
+                        await hisoka.sendMessage(m.from, {
+                                document: pdfBuf, mimetype: 'application/pdf', fileName: `${baseName}.pdf`,
+                                caption: `📄 *PDF ${seasonLabel} ${year}* — ${validCount} anime\n🎨 Termasuk cover, poster, info & link download tiap anime`,
+                        }, { quoted: m });
+                        await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
 
-		} else {
-			await hisoka.sendMessage(m.from, { react: { text: '🔍', key: m.key } });
-			await tolak(hisoka, m, `🔍 Mencari *${input}* di Kusonime...`);
-			const results = await searchKusonime(input);
+                } else {
+                        await hisoka.sendMessage(m.from, { react: { text: '🔍', key: m.key } });
+                        await tolak(hisoka, m, `🔍 Mencari *${input}* di Kusonime...`);
+                        const results = await searchKusonime(input);
 
-			if (!results.length) {
-				await tolak(hisoka, m, `❌ Tidak ada hasil untuk *${input}*.\nCoba kata kunci lain, contoh: _one piece batch_ atau _attack on titan_`);
-				return;
-			}
+                        if (!results.length) {
+                                await tolak(hisoka, m, `❌ Tidak ada hasil untuk *${input}*.\nCoba kata kunci lain, contoh: _one piece batch_ atau _attack on titan_`);
+                                return;
+                        }
 
-			if (results.length === 1) {
-				await tolak(hisoka, m, `📡 Mengambil detail *${results[0].title}*...`);
-				const detail   = await getDetailKusonime(results[0].url);
-				const text     = formatDetailText(detail, 5);
-				const thumbBuf = detail.thumbnail
-					? await require('axios').get(detail.thumbnail, { responseType: 'arraybuffer', timeout: 15000 }).then(r => Buffer.from(r.data)).catch(() => null)
-					: null;
-				if (thumbBuf) await hisoka.sendMessage(m.from, { image: thumbBuf, caption: text }, { quoted: m });
-				else           await tolak(hisoka, m, text);
-			} else {
-				const listText = formatSearchResults(results) + `\n\n💡 _Ketik *${pfx}anime <judul lebih spesifik>* untuk langsung ke detail_`;
-				await tolak(hisoka, m, listText);
-				await tolak(hisoka, m, `📡 Mengambil detail hasil pertama...`);
-				const detail   = await getDetailKusonime(results[0].url);
-				const text     = formatDetailText(detail, 3);
-				const thumbBuf = detail.thumbnail
-					? await require('axios').get(detail.thumbnail, { responseType: 'arraybuffer', timeout: 15000 }).then(r => Buffer.from(r.data)).catch(() => null)
-					: null;
-				if (thumbBuf) await hisoka.sendMessage(m.from, { image: thumbBuf, caption: text }, { quoted: m });
-				else           await tolak(hisoka, m, text);
-			}
-			await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
-		}
+                        if (results.length === 1) {
+                                await tolak(hisoka, m, `📡 Mengambil detail *${results[0].title}*...`);
+                                const detail   = await getDetailKusonime(results[0].url);
+                                const text     = formatDetailText(detail, 5);
+                                const thumbBuf = detail.thumbnail
+                                        ? await require('axios').get(detail.thumbnail, { responseType: 'arraybuffer', timeout: 15000 }).then(r => Buffer.from(r.data)).catch(() => null)
+                                        : null;
+                                if (thumbBuf) await hisoka.sendMessage(m.from, { image: thumbBuf, caption: text }, { quoted: m });
+                                else           await tolak(hisoka, m, text);
+                        } else {
+                                const listText = formatSearchResults(results) + `\n\n💡 _Ketik *${pfx}anime <judul lebih spesifik>* untuk langsung ke detail_`;
+                                await tolak(hisoka, m, listText);
+                                await tolak(hisoka, m, `📡 Mengambil detail hasil pertama...`);
+                                const detail   = await getDetailKusonime(results[0].url);
+                                const text     = formatDetailText(detail, 3);
+                                const thumbBuf = detail.thumbnail
+                                        ? await require('axios').get(detail.thumbnail, { responseType: 'arraybuffer', timeout: 15000 }).then(r => Buffer.from(r.data)).catch(() => null)
+                                        : null;
+                                if (thumbBuf) await hisoka.sendMessage(m.from, { image: thumbBuf, caption: text }, { quoted: m });
+                                else           await tolak(hisoka, m, text);
+                        }
+                        await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+                }
 
-	} catch (err) {
-		console.error('[KUSO] Error:', err?.message);
-		if (typeof logError === 'function') logError(err instanceof Error ? err : new Error(String(err?.message || err)), 'kusonime');
-		await tolak(hisoka, m, `❌ Gagal ambil data Kusonime.\n💬 ${err?.message?.slice(0, 120) || 'Coba lagi nanti'}`);
-	}
+        } catch (err) {
+                console.error('[KUSO] Error:', err?.message);
+                if (typeof logError === 'function') logError(err instanceof Error ? err : new Error(String(err?.message || err)), 'kusonime');
+                await tolak(hisoka, m, `❌ Gagal ambil data Kusonime.\n💬 ${err?.message?.slice(0, 120) || 'Coba lagi nanti'}`);
+        }
 }
 
 module.exports.handleAnime = handleAnime;
+
+// ── HANDLER: animeupdate ──────────────────────────────────────────────────────
+
+async function handleAnimeupdate({ hisoka, m, tolak, logCommand, logError }) {
+        if (!m.prefix && m.query) return;
+        try {
+                await hisoka.sendMessage(m.from, { react: { text: '📺', key: m.key } });
+                await tolak(hisoka, m, `📺 Mengambil update terbaru Kusonime...`);
+                const items = await getLatestUpdates(10);
+                await tolak(hisoka, m, formatLatestUpdates(items));
+                await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+        } catch (err) {
+                console.error('[KUSOUPDATE] Error:', err?.message);
+                logError(err instanceof Error ? err : new Error(String(err?.message || err)), 'kusoupdate');
+                await tolak(hisoka, m, `❌ Gagal ambil update Kusonime.\n💬 ${err?.message?.slice(0, 100) || 'Coba lagi nanti'}`);
+        }
+}
+
+module.exports.handleAnimeupdate = handleAnimeupdate;
