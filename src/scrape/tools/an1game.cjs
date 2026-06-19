@@ -585,7 +585,7 @@ function buatCaption(game, detail = null) {
     if (d.sinopsis) {
         // Normalisasi spasi & newline jadi satu baris dulu
         const raw = d.sinopsis.replace(/\n+/g, ' ').replace(/\s+/g, ' ').trim();
-        // Pecah per kalimat berdasarkan . ! ? — lalu tiap kalimat jadi baris > sendiri
+        // Pecah per kalimat berdasarkan . ! ? — tiap kalimat dipisah baris kosong
         const kalimatArr = raw
             .match(/[^.!?]+[.!?]*/g)
             ?.map(s => s.trim())
@@ -594,7 +594,7 @@ function buatCaption(game, detail = null) {
         sinopsisBlok =
             `\n📖 *Sinopsis*\n` +
             `${SEP2}\n` +
-            kalimatArr.map(k => `> ${k}`).join('\n') + '\n';
+            kalimatArr.join('\n\n') + '\n';
     }
 
     const infoBlok = infoRows.length
