@@ -61,7 +61,7 @@ import { hashSticker, lookupSticker, saveSticker, incrementStickerSeen, buildSti
 import { getJadibotAntidel, getJadibotReadsw, getJadibotAnticall, getJadibotAnticallvid, getJadibotAutoOnline, getJadibotAutoTyping, getJadibotAutoRecording, setJadibotUserSetting, getJadibotNumber, addJadibotEmojis, deleteJadibotEmojis, listJadibotEmojis, getJadibotEmojiMode, setDefaultEmojiMode, setCustomEmojiMode, resetToDefaultEmojis, clearJadibotEmojis } from '../helper/jadibotSettings.js';
 import { pruneSwStatsAt, countActiveSW } from '../helper/swtrack.js';
 import { getHandler } from '../helper/hotReload.js';
-const { makeWmSticker } = _require('../scrape/tools/wm.cjs');
+const { makeWmSticker, handleWmCommand } = _require('../scrape/tools/wm.cjs');
 
 const WILY_VERBOSE_LOGS = process.env.WILY_VERBOSE_LOGS === 'true' || process.env.BOT_DEBUG_LOG === 'true';
 const wilyLog = (...args) => {
@@ -15501,85 +15501,7 @@ hasil += `╰══════════════════════�
 
                         case 'wm':
                         case 'swm': {
-                                try {
-                                        const pfxWm = m.prefix || '.';
-                                        const wmCurrentType = getMediaTypeFromMessage(m);
-                                        const wmQuotedType  = m.isQuoted ? getMediaTypeFromMessage(m.quoted) : '';
-                                        const canUseWmCurrent = m.isMedia && wmCurrentType === 'imageMessage';
-                                        const canUseWmQuoted  = m.isQuoted && wmQuotedType === 'imageMessage';
-
-                                        if (!canUseWmCurrent && !canUseWmQuoted) {
-                                                const helpText =
-                                                        `╭═══『 🎭 *WM STICKER* 』═══╮\n` +
-                                                        `│\n` +
-                                                        `│ Buat sticker dengan *Pack* dan\n` +
-                                                        `│ *Author* nama kustom!\n` +
-                                                        `│\n` +
-                                                        `│ 📋 *Cara Pakai:*\n` +
-                                                        `│ • Kirim gambar + caption:\n` +
-                                                        `│   _${pfxWm}wm NamaPack|NamaAuthor_\n` +
-                                                        `│ • Reply gambar + ketik:\n` +
-                                                        `│   _${pfxWm}wm NamaPack|NamaAuthor_\n` +
-                                                        `│\n` +
-                                                        `│ 📝 *Contoh:*\n` +
-                                                        `│   ${pfxWm}wm Bang|Wily\n` +
-                                                        `│   ${pfxWm}wm Wilybot|Owner\n` +
-                                                        `│\n` +
-                                                        `│ ℹ️ Pisahkan Pack & Author\n` +
-                                                        `│    dengan tanda *|*\n` +
-                                                        `│\n` +
-                                                        `│ 🏷️ Alias: ${pfxWm}wm · ${pfxWm}swm\n` +
-                                                        `╰═══════════════════════════╯`;
-                                                await tolak(hisoka, m, helpText);
-                                                break;
-                                        }
-
-                                        const rawQuery = (query || '').trim();
-                                        if (!rawQuery) {
-                                                await tolak(hisoka, m, `❌ Masukkan nama Pack dan Author!\n\nContoh: *${pfxWm}wm NamaPack|NamaAuthor*`);
-                                                break;
-                                        }
-
-                                        const parts      = rawQuery.split('|');
-                                        const packName   = (parts[0] || '').trim();
-                                        const authorName = (parts[1] || '').trim();
-
-                                        if (!packName && !authorName) {
-                                                await tolak(hisoka, m, `❌ Format salah!\n\nContoh: *${pfxWm}wm Bang|Wily*`);
-                                                break;
-                                        }
-
-                                        await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
-
-                                        let imgBuffer;
-                                        if (canUseWmCurrent) {
-                                                imgBuffer = await downloadMediaBuffer(hisoka, m);
-                                        } else {
-                                                imgBuffer = await getQuotedMediaBuffer(hisoka, m);
-                                        }
-
-                                        if (!imgBuffer || imgBuffer.length === 0) {
-                                                await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
-                                                await tolak(hisoka, m, '❌ Gagal download gambar, coba lagi');
-                                                break;
-                                        }
-
-                                        const stickerBuffer = await makeWmSticker(imgBuffer, { packName, authorName });
-
-                                        if (!stickerBuffer || stickerBuffer.length === 0) {
-                                                await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
-                                                await tolak(hisoka, m, '❌ Gagal buat sticker');
-                                                break;
-                                        }
-
-                                        await hisoka.sendMessage(m.from, { sticker: stickerBuffer }, { quoted: m });
-                                        await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
-                                        logCommand(m, hisoka, 'wm');
-                                } catch (error) {
-                                        console.error('\x1b[31m[WM] Error:\x1b[39m', error.message);
-                                        await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
-                                        await tolak(hisoka, m, `❌ Gagal buat sticker WM: ${error.message}`);
-                                }
+                                await handleWmCommand({ hisoka, m, query, tolak, logCommand, downloadMediaBuffer, getQuotedMediaBuffer, getMediaTypeFromMessage });
                                 break;
                         }
 

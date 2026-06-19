@@ -6,8 +6,8 @@
     "type": "imageMessage",
     "arrivedAt": "2026-06-19T09:32:57.687Z",
     "read": true,
-    "reacted": false,
-    "emoji": null,
+    "reacted": true,
+    "emoji": "👩‍👦‍👦",
     "resolve": "Signal Lib ✓",
     "source": "status",
     "number": "62895323007900",
@@ -20,7 +20,7 @@
       "participant": "184151135252580@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-19T09:33:08.199Z",
+    "updatedAt": "2026-06-19T13:27:07.798Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -39,6 +39,49 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-19T09:33:08.199Z"
+    "processedAt": "2026-06-19T09:33:08.199Z",
+    "retriedAt": "2026-06-19T13:27:07.798Z"
+  },
+  "ACE2C4D90AD4922CD3AD6BC642C0792D": {
+    "id": "ACE2C4D90AD4922CD3AD6BC642C0792D",
+    "sender": "62895323007900@s.whatsapp.net",
+    "name": "Rejaanimm the 1975",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-19T13:26:56.949Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "✈️",
+    "resolve": "Signal Lib ✓",
+    "source": "status",
+    "number": "62895323007900",
+    "resolvedPn": "62895323007900@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "62895323007900@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACE2C4D90AD4922CD3AD6BC642C0792D",
+      "participant": "184151135252580@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-19T13:27:07.825Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62895323007900@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACE2C4D90AD4922CD3AD6BC642C0792D",
+        "participant": "184151135252580@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62895323007900@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACE2C4D90AD4922CD3AD6BC642C0792D",
+        "participant": "62895323007900@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-19T13:27:07.825Z"
   }
 }
