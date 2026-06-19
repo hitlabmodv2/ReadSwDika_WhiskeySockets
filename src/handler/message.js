@@ -9336,37 +9336,34 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                         }
                                                 }
 
-                                                // Kirim pakai interactive message + URL button (konsisten dgn scheduler)
-                                                const apkUrlT  = hasilT.downloadUrl || hasilT.game?.downloadUrl || '';
-                                                const gameUrlT = hasilT.url         || hasilT.game?.url         || '';
-                                                const btnsT    = [];
-                                                if (apkUrlT)  btnsT.push({ name: 'cta_url', buttonParamsJson: JSON.stringify({ display_text: '📥 Download APK', url: apkUrlT,  merchant_url: apkUrlT  }) });
-                                                if (gameUrlT) btnsT.push({ name: 'cta_url', buttonParamsJson: JSON.stringify({ display_text: '🔗 Halaman Game',  url: gameUrlT, merchant_url: gameUrlT }) });
-
-                                                if (btnsT.length && imgBufT) {
-                                                        try {
-                                                                const hmT  = await prepareWAMessageMedia({ image: imgBufT }, { upload: hisoka.waUploadToServer });
-                                                                const msgT = generateWAMessageFromContent(m.from, {
-                                                                        viewOnceMessage: {
-                                                                                message: {
-                                                                                        messageContextInfo: { deviceListMetadata: {}, deviceListMetadataVersion: 2 },
-                                                                                        interactiveMessage: proto.Message.InteractiveMessage.create({
-                                                                                                body:   proto.Message.InteractiveMessage.Body.create({ text: hasilT.caption }),
-                                                                                                footer: proto.Message.InteractiveMessage.Footer.create({ text: '🌐 AN1.COM — APK MOD Gratis' }),
-                                                                                                header: proto.Message.InteractiveMessage.Header.create({ title: '', subtitle: '', gifPlayback: false, hasMediaAttachment: true, ...hmT }),
-                                                                                                nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.create({ buttons: btnsT }),
-                                                                                        }),
-                                                                                },
-                                                                        },
-                                                                }, { quoted: m });
-                                                                await hisoka.relayMessage(msgT.key.remoteJid, msgT.message, { messageId: msgT.key.id });
-                                                        } catch (_) {
-                                                                await hisoka.sendMessage(m.from, { image: imgBufT, caption: hasilT.caption }, { quoted: m });
-                                                        }
-                                                } else if (imgBufT) {
+                                                // 1) Kirim gambar + caption (reliable)
+                                                if (imgBufT) {
                                                         await hisoka.sendMessage(m.from, { image: imgBufT, caption: hasilT.caption }, { quoted: m });
                                                 } else {
                                                         await tolak(hisoka, m, hasilT.caption);
+                                                }
+
+                                                // 2) Follow-up button URL terpisah (best-effort)
+                                                const apkUrlT  = hasilT.game?.downloadUrl || '';
+                                                const gameUrlT = hasilT.game?.url         || '';
+                                                if (apkUrlT || gameUrlT) {
+                                                        try {
+                                                                const btnsT = [];
+                                                                if (apkUrlT)  btnsT.push({ name: 'cta_url', buttonParamsJson: JSON.stringify({ display_text: '📥 Download APK', url: apkUrlT,  merchant_url: apkUrlT  }) });
+                                                                if (gameUrlT) btnsT.push({ name: 'cta_url', buttonParamsJson: JSON.stringify({ display_text: '🔗 Halaman Game',  url: gameUrlT, merchant_url: gameUrlT }) });
+                                                                const btnMsgT = generateWAMessageFromContent(m.from, {
+                                                                        interactiveMessage: {
+                                                                                body:   { text: '' },
+                                                                                footer: { text: '🌐 AN1.COM — APK MOD Gratis' },
+                                                                                header: { title: '', hasMediaAttachment: false },
+                                                                                nativeFlowMessage: { buttons: btnsT },
+                                                                        },
+                                                                }, {});
+                                                                await hisoka.relayMessage(btnMsgT.key.remoteJid, btnMsgT.message, {
+                                                                        messageId: btnMsgT.key.id,
+                                                                        additionalNodes: [{ tag: 'biz', attrs: {}, content: [{ tag: 'interactive', attrs: { type: 'native_flow', v: '1' }, content: [{ tag: 'native_flow', attrs: { v: '9', name: 'mixed' } }] }] }],
+                                                                });
+                                                        } catch (_) { /* button optional, ga masalah kalau gagal */ }
                                                 }
                                                 await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
                                                 logCommand(m, hisoka, 'anigame-test');

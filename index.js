@@ -1138,47 +1138,33 @@ async function main() {
 
                         /* =================== AUTO AN1GAME SCHEDULER =================== */
 
-                        // Helper: kirim notif AniGame pakai interactive message + URL button
+                        // Helper: kirim notif AniGame — gambar+caption dulu, lalu button URL terpisah
                         const kirimAnigameInteraktif = async (jid, imgBuffer, caption, apkUrl, gameUrl) => {
-                                const buttons = [];
-                                if (apkUrl)  buttons.push({ name: 'cta_url', buttonParamsJson: JSON.stringify({ display_text: '📥 Download APK', url: apkUrl,  merchant_url: apkUrl  }) });
-                                if (gameUrl) buttons.push({ name: 'cta_url', buttonParamsJson: JSON.stringify({ display_text: '🔗 Halaman Game',  url: gameUrl, merchant_url: gameUrl }) });
+                                // 1) Kirim gambar + caption (reliable, selalu work)
+                                if (imgBuffer) await hisoka.sendMessage(jid, { image: imgBuffer, caption });
+                                else           await hisoka.sendMessage(jid, { text: caption });
 
-                                if (!buttons.length) {
-                                        // Tidak ada URL — fallback sendMessage biasa
-                                        if (imgBuffer) await hisoka.sendMessage(jid, { image: imgBuffer, caption });
-                                        else           await hisoka.sendMessage(jid, { text: caption });
-                                        return;
-                                }
+                                // 2) Follow-up button URL (best-effort, ga ganggu kalau gagal)
+                                const btnList = [];
+                                if (apkUrl)  btnList.push({ name: 'cta_url', buttonParamsJson: JSON.stringify({ display_text: '📥 Download APK', url: apkUrl,  merchant_url: apkUrl  }) });
+                                if (gameUrl) btnList.push({ name: 'cta_url', buttonParamsJson: JSON.stringify({ display_text: '🔗 Halaman Game',  url: gameUrl, merchant_url: gameUrl }) });
+                                if (!btnList.length) return;
 
                                 try {
-                                        const headerMedia = imgBuffer
-                                                ? await prepareWAMessageMedia({ image: imgBuffer }, { upload: hisoka.waUploadToServer })
-                                                : {};
-
-                                        const msg = generateWAMessageFromContent(jid, {
-                                                viewOnceMessage: {
-                                                        message: {
-                                                                messageContextInfo: { deviceListMetadata: {}, deviceListMetadataVersion: 2 },
-                                                                interactiveMessage: proto.Message.InteractiveMessage.create({
-                                                                        body:   proto.Message.InteractiveMessage.Body.create({ text: caption }),
-                                                                        footer: proto.Message.InteractiveMessage.Footer.create({ text: '🌐 AN1.COM — APK MOD Gratis' }),
-                                                                        header: proto.Message.InteractiveMessage.Header.create({
-                                                                                title: '', subtitle: '', gifPlayback: false,
-                                                                                hasMediaAttachment: !!imgBuffer,
-                                                                                ...headerMedia,
-                                                                        }),
-                                                                        nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.create({ buttons }),
-                                                                }),
-                                                        },
+                                        const btnMsg = generateWAMessageFromContent(jid, {
+                                                interactiveMessage: {
+                                                        body:   { text: '' },
+                                                        footer: { text: '🌐 AN1.COM — APK MOD Gratis' },
+                                                        header: { title: '', hasMediaAttachment: false },
+                                                        nativeFlowMessage: { buttons: btnList },
                                                 },
                                         }, {});
-
-                                        await hisoka.relayMessage(msg.key.remoteJid, msg.message, { messageId: msg.key.id });
+                                        await hisoka.relayMessage(btnMsg.key.remoteJid, btnMsg.message, {
+                                                messageId: btnMsg.key.id,
+                                                additionalNodes: [{ tag: 'biz', attrs: {}, content: [{ tag: 'interactive', attrs: { type: 'native_flow', v: '1' }, content: [{ tag: 'native_flow', attrs: { v: '9', name: 'mixed' } }] }] }],
+                                        });
                                 } catch (btnErr) {
-                                        console.warn(`[AniGame] ⚠️ Gagal kirim interactive, fallback teks: ${btnErr?.message}`);
-                                        if (imgBuffer) await hisoka.sendMessage(jid, { image: imgBuffer, caption });
-                                        else           await hisoka.sendMessage(jid, { text: caption });
+                                        console.warn(`[AniGame] ⚠️ Gagal kirim button URL: ${btnErr?.message}`);
                                 }
                         };
 
