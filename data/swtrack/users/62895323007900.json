@@ -6,8 +6,8 @@
     "type": "imageMessage",
     "arrivedAt": "2026-06-19T09:32:58.168Z",
     "read": true,
-    "reacted": false,
-    "emoji": null,
+    "reacted": true,
+    "emoji": "🇬🇭",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "62895323007900",
@@ -20,7 +20,7 @@
       "participant": "184151135252580@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-19T09:34:02.859Z",
+    "updatedAt": "2026-06-19T09:35:17.526Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -41,6 +41,6 @@
     ],
     "processedAt": "2026-06-19T09:33:06.297Z",
     "retriedOnStartup": true,
-    "retriedAt": "2026-06-19T09:34:02.859Z"
+    "retriedAt": "2026-06-19T09:35:17.526Z"
   }
 }
