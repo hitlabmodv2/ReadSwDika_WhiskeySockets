@@ -10067,7 +10067,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
 ━━━━━━━━━━━━━━━━━━━━━━
 _📦 Powered by Wily Bot V22_ 🤖`;
-                                                const _jbTotalMenuCmd = (_jbMenuBody.match(/[├╰]➤/g) || []).length;
+                                                const _jbTotalMenuCmd = hisoka.loadedCommands?.length ?? (_jbMenuBody.match(/[├╰]➤/g) || []).length;
                                                 const menuTeks =
 `╭═══════════════════════╮
 ║   🤖 *WILY BOT V22*   
@@ -10145,7 +10145,7 @@ _📦 Powered by Wily Bot V22_ 🤖`;
 │ 📅 » ${_mnTgl}
 │ 🕐 » ${_mnJam} WIB
 │ 🖥️ » ${_mnBrowserLabel}
-│ 📜 » ${TOTAL_CMD_COUNT} Total Semua Command
+│ 📜 » ${hisoka.loadedCommands?.length ?? TOTAL_CMD_COUNT} Total Semua Command
 │ 🗂️ » ${totalSemuaFitur} Total Fitur Auto
 │ ✅ » ${totalCmd} Fitur Auto Aktif
 │ ❌ » ${totalTidakAktif} Fitur Auto Tidak Aktif
