@@ -4,8 +4,8 @@ _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurn
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V22*
 ✨ *4 Fitur Baru*
-🔧 *2 Bug Fix*
-🚀 *1 Improvement*
+🔧 *3 Bug Fix*
+🚀 *3 Improvement*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -91,6 +91,11 @@ _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurn
 > 2️⃣ Di panel → Startup → ubah Startup Command jadi:
 >     pm2 delete wily-bot 2>/dev/null; pm2 start ecosystem.config.cjs && pm2 monit
 
+> NO.3 🎮 *Anigame — Tidak Merespons di Grup saat ON*
+> Bug: bot tidak merespons command anigame di grup meskipun fitur sudah diaktifkan (.anigame on)
+> Fix: pengecekan status grup diperbaiki — bot kini langsung merespons di grup saat fitur on
+> Berlaku untuk: semua command anigame (on, off, test, status, list, cari game)
+
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *IMPROVEMENT*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -104,3 +109,16 @@ _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurn
 > Browser label diambil langsung dari runtime (sesuai yang WA lihat di Perangkat Tertaut)
 > Menu jadibot (.menu) juga menampilkan total command, total fitur auto, aktif & tidak aktif
 > Jadibot tidak tampilkan browser (browser milik bot utama, bukan jadibot)
+
+> NO.2 🎮 *Anigame — Tampilan Respons dengan 2 Button*
+> Perintah .anigame on kini menampilkan respons interaktif dengan 2 button:
+> ▸ Button 1: ➕ Aktifkan Semua Grup — aktifkan notif di semua grup sekaligus
+> ▸ Button 2: aksi cepat tambahan untuk kemudahan penggunaan
+> Tampilan lebih rapi dengan info status sebelum dan sesudah perubahan
+
+> NO.3 📋 *Menu Utama & Menu Userbot — Dipindah ke src/scrape/menu*
+> Builder teks menu utama (.menu) dan menu userbot/jadibot dipindahkan ke folder tersendiri
+> ▸ Menu utama bot    → src/scrape/menu/menu_utama.js
+> ▸ Menu userbot      → src/scrape/menu/menu_jadibot.js
+> Struktur kode lebih rapi — mudah diedit tanpa harus buka file handler besar
+> Tampilan menu juga diperbarui mengikuti struktur baru
