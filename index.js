@@ -1147,33 +1147,68 @@ async function main() {
                                                 const daftarGrup = _ag.getEnabledGroups();
                                                 if (!daftarGrup.length) return;
 
+                                                console.log(`[AniGame] 🔍 Cek game baru... (${daftarGrup.length} grup aktif)`);
                                                 const gameBaru = await _ag.cariGameBaru();
-                                                if (!gameBaru.length) return;
+                                                if (!gameBaru.length) {
+                                                        console.log(`[AniGame] ℹ️ Tidak ada game baru.`);
+                                                        return;
+                                                }
+
+                                                console.log(`[AniGame] 🎮 ${gameBaru.length} game baru ditemukan!`);
 
                                                 for (const game of gameBaru) {
-                                                        const caption   = _ag.buatCaption(game, game); // game sudah merged dengan detail
+                                                        const caption   = _ag.buatCaption(game, game);
                                                         const urlGambar = game.image || null;
 
+                                                        // Download image dulu sebagai buffer dengan header Referer
+                                                        // agar tidak diblok hotlink protection an1.com
+                                                        let imgBuffer = null;
+                                                        if (urlGambar) {
+                                                                try {
+                                                                        const axios = _require('axios');
+                                                                        const resp  = await axios.get(urlGambar, {
+                                                                                responseType: 'arraybuffer',
+                                                                                timeout: 15000,
+                                                                                headers: {
+                                                                                        'Referer'   : 'https://an1.com/',
+                                                                                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+                                                                                },
+                                                                        });
+                                                                        imgBuffer = Buffer.from(resp.data);
+                                                                } catch (imgErr) {
+                                                                        console.warn(`[AniGame] ⚠️ Gagal download gambar, kirim teks saja: ${imgErr?.message}`);
+                                                                }
+                                                        }
+
                                                         // Kirim ke semua grup aktif (batch 5)
+                                                        let berhasil = 0, gagal = 0;
                                                         const BATCH = 5;
                                                         for (let i = 0; i < daftarGrup.length; i += BATCH) {
-                                                                const chunk = daftarGrup.slice(i, i + BATCH);
-                                                                await Promise.allSettled(chunk.map(async jid => {
-                                                                        try {
-                                                                                if (urlGambar) {
-                                                                                        await hisoka.sendMessage(jid, { image: { url: urlGambar }, caption });
-                                                                                } else {
-                                                                                        await hisoka.sendMessage(jid, { text: caption });
-                                                                                }
-                                                                        } catch (e) {
-                                                                                console.error(`[AniGame] Gagal kirim ke ${jid}:`, e?.message);
+                                                                const chunk   = daftarGrup.slice(i, i + BATCH);
+                                                                const results = await Promise.allSettled(chunk.map(async jid => {
+                                                                        if (imgBuffer) {
+                                                                                await hisoka.sendMessage(jid, { image: imgBuffer, caption });
+                                                                        } else {
+                                                                                await hisoka.sendMessage(jid, { text: caption });
                                                                         }
                                                                 }));
+                                                                for (const r of results) {
+                                                                        if (r.status === 'fulfilled') berhasil++;
+                                                                        else {
+                                                                                gagal++;
+                                                                                console.error(`[AniGame] Gagal kirim ke grup:`, r.reason?.message);
+                                                                        }
+                                                                }
                                                                 if (i + BATCH < daftarGrup.length) await new Promise(r => setTimeout(r, 1000));
                                                         }
 
-                                                        _ag.tandaiDanLog(game, daftarGrup);
-                                                        console.log(`[AniGame] ✅ "${game.title}" terkirim ke ${daftarGrup.length} grup`);
+                                                        // Tandai terkirim hanya jika minimal 1 grup berhasil menerima
+                                                        if (berhasil > 0) {
+                                                                _ag.tandaiDanLog(game, daftarGrup);
+                                                                console.log(`[AniGame] ✅ "${game.title || game.fullTitle}" terkirim ke ${berhasil}/${daftarGrup.length} grup`);
+                                                        } else {
+                                                                console.error(`[AniGame] ❌ "${game.title || game.fullTitle}" GAGAL dikirim ke semua grup (${gagal} gagal) — TIDAK ditandai terkirim, akan dicoba lagi nanti`);
+                                                        }
                                                         await new Promise(r => setTimeout(r, 2000));
                                                 }
                                         } catch (err) {
