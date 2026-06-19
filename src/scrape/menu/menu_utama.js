@@ -140,7 +140,7 @@ export function buildMenuUtama({ pushName, isOwner, uptimeStr, tgl, jam, browser
 ├═════════════════════┤
 ║   👑 *OWNER ONLY*   
 ├═════════════════════┤
-│ .listowner
+│ .owner / .own
 │ .addowner
 │ .delowner
 │ .all
