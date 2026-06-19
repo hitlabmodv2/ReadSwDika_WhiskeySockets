@@ -80,7 +80,19 @@ export function getMenuJadibotBody() {
 _📦 Powered by Wily Bot V22_ 🤖`;
 }
 
-export function buildMenuJadibot({ pushName, jadibotNum, juh, jum, jus, masaAktifLine, tglFmt, jamFmt, totalMenuCmd, totalAutoFitur, fiturCount, autoTidakAktif }) {
+function countMenuJadibotCmd() {
+        const body = getMenuJadibotBody();
+        const cmdSet = new Set();
+        const matches = body.matchAll(/[├╰]➤[^.]*\.([a-z0-9]+)/g);
+        for (const m of matches) {
+                cmdSet.add(m[1]);
+        }
+        return cmdSet.size;
+}
+
+export const JADIBOT_CMD_COUNT = countMenuJadibotCmd();
+
+export function buildMenuJadibot({ pushName, jadibotNum, juh, jum, jus, masaAktifLine, tglFmt, jamFmt, totalAutoFitur, fiturCount, autoTidakAktif }) {
         const body = getMenuJadibotBody();
         return `╭═══════════════════════╮
 ║   🤖 *WILY BOT V22*   
@@ -93,7 +105,7 @@ export function buildMenuJadibot({ pushName, jadibotNum, juh, jum, jus, masaAkti
 │ ${masaAktifLine}
 │ 📅 » ${tglFmt}
 │ 🕐 » ${jamFmt} WIB
-│ 📜 » ${totalMenuCmd} Total Semua Command
+│ 📜 » ${JADIBOT_CMD_COUNT} Total Semua Command
 │ 🗂️ » ${totalAutoFitur} Total Fitur Auto
 │ ✅ » ${fiturCount} Fitur Auto Aktif
 │ ❌ » ${autoTidakAktif} Fitur Auto Tidak Aktif

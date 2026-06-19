@@ -9996,7 +9996,6 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                         masaAktifLine,
                                                         tglFmt: _jbTglFmt,
                                                         jamFmt: _jbJamFmt,
-                                                        totalMenuCmd: TOTAL_CMD_COUNT,
                                                         totalAutoFitur: _jbTotalAutoFitur,
                                                         fiturCount: _jbFiturCount,
                                                         autoTidakAktif: _jbAutoTidakAktif,
