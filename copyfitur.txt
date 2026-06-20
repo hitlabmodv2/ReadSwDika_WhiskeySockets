@@ -101,7 +101,7 @@ const HEADERS = {
     let updatedRaw = '';
     let price      = '';
     let installs   = '';
-    let ratedFor   = '';
+    let usiaMin   = '';
     for (const ln of lines) {
         const l = ln.trim();
         if (!updatedRaw) {
@@ -116,9 +116,9 @@ const HEADERS = {
             const m = l.match(/\*\*Installs\*\*\s*(.+)/);
             if (m) installs = m[1].trim();
         }
-        if (!ratedFor) {
-            const m = l.match(/\*\*Rated for\*\*\*\*(.+?)\*\*/);
-            if (m) ratedFor = m[1].trim();
+        if (!usiaMin) {
+            const m = l.match(/\*\*Usia Min\*\*\*\*(.+?)\*\*/);
+            if (m) usiaMin = m[1].trim();
         }
     }
 
@@ -139,7 +139,7 @@ const HEADERS = {
         updated: formatTanggalIndo(updatedRaw),
         price,
         installs: formatInstalls(installs),
-        ratedFor,
+        usiaMin,
         modInfo,
         url: fallbackUrl || '',
     };
@@ -294,7 +294,7 @@ function buatCaption(game, detail = null, { hideDownload = false } = {}) {
     if (d.koneksi)  infoRows.push(`├ 📶 *Koneksi*   : \`${d.koneksi}\``);
     if (d.updated)  infoRows.push(`├ 📅 *Update*    : ${d.updated}`);
     if (d.installs) infoRows.push(`├ 📲 *Unduhan*   : ${d.installs}`);
-    if (d.ratedFor) infoRows.push(`├ 🔞 *Rating*    : ${d.ratedFor} tahun+`);
+    if (d.usiaMin) infoRows.push(`├ 📊 *Rating*    : ${d.usiaMin} tahun+`);
     if (d.category) infoRows.push(`├ 📂 *Kategori*  : ${d.category}`);
     if (d.price)    infoRows.push(`├ 💰 *Harga*     : ${d.price === '$0' ? 'Gratis' : d.price}`);
     if (rating)     infoRows.push(`├ ⭐ *Bintang*   : ${rating}/5`);
@@ -706,7 +706,7 @@ async function handler({ hisoka, m, query, tolak, logCommand, sendConfirmWithBut
                 logCommand(m, hisoka, 'anigame');
 
         } catch (error) {
-                console.error('\x1b[31m[AniGame Cmd] Error:\x1b[39m', error.message);
+                console.error('[AniGame Cmd] Error:', error.message);
                 await tolak(hisoka, m, `❌ *Gagal mengambil data game.*\n\n_${error.message}_\n\n🌐 Cek manual: https://an1.com/games/`);
         }
 }

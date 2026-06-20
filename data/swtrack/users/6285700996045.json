@@ -89,9 +89,9 @@
     "name": "ǝǝǝǝɐ⅄",
     "type": "videoMessage",
     "arrivedAt": "2026-06-20T16:39:44.334Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "🗂️",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6285700996045",
@@ -104,6 +104,25 @@
       "participant": "10436871233676@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-20T16:39:44.334Z"
+    "updatedAt": "2026-06-20T16:39:57.645Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285700996045@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACF266AEF9CF95A2A07793817372BCCD",
+        "participant": "10436871233676@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285700996045@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACF266AEF9CF95A2A07793817372BCCD",
+        "participant": "6285700996045@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-20T16:39:57.645Z"
   }
 }

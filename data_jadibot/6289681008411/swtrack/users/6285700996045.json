@@ -89,9 +89,9 @@
     "name": "ǝǝǝǝɐ⅄",
     "type": "videoMessage",
     "arrivedAt": "2026-06-20T16:39:44.381Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "🥀",
     "resolve": "Signal Lib ✓",
     "source": "status",
     "number": "6285700996045",
@@ -104,7 +104,7 @@
       "participant": "10436871233676@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-20T16:39:48.213Z",
+    "updatedAt": "2026-06-20T16:39:48.902Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -122,6 +122,7 @@
         "participant": "6285700996045@s.whatsapp.net",
         "addressingMode": "lid"
       }
-    ]
+    ],
+    "processedAt": "2026-06-20T16:39:48.901Z"
   }
 }
