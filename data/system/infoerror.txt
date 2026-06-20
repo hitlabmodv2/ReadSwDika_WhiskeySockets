@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 20/06/2026, 07.54.22  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 20/06/2026, 08.05.52  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -26,21 +26,21 @@
 │  #001  —  console.error
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [31m[CrashGuard] Too many errors, forcing restart...[39m
+│  [31m[HotReload] ✗ Gagal reload 'src/handler/message.js', pakai versi lama.[39m
 │
 │  DETAIL
 │  Sumber      : console.error
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 20/06/2026, 07.54.22
-│  Terakhir    : 20/06/2026, 07.54.22
+│  Pertama     : 20/06/2026, 08.05.52
+│  Terakhir    : 20/06/2026, 08.05.52
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [31m[CrashGuard] Too many errors, forcing restart...[39m
+│  ▶  Error: [31m[HotReload] ✗ Gagal reload 'src/handler/message.js', pakai versi lama.[39m
 │     at console.error (file:///home/runner/workspace/index.js:414:27)
-│     at process.<anonymous> (file:///home/runner/workspace/src/helper/crashGuard.js:115:21)
+│     at Timeout._onTimeout (file:///home/runner/workspace/src/helper/hotReload.js:141:29)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 20/06/2026, 07.54.22
+  Terakhir diperbarui: 20/06/2026, 08.05.52
 ════════════════════════════════════════════════════════════════════════
