@@ -62,6 +62,10 @@ import { getJadibotAntidel, getJadibotReadsw, getJadibotAnticall, getJadibotAnti
 import { pruneSwStatsAt, countActiveSW } from '../helper/swtrack.js';
 import { getHandler } from '../helper/hotReload.js';
 const { makeWmSticker, handleWmCommand } = _require('../scrape/tools/wm.cjs');
+const { makeCekautoHelpers: _makeCekautoHelpers } = _require(path.resolve('./src/scrape/tools/cekauto-cmd.cjs'));
+const { normalizeJadibotNumber } = _require(path.resolve('./src/scrape/tools/jadibot-cmd.cjs'));
+const { formatAlqLinkMsg, pickBestAlqLink, getAllAlqLinksByPriority } = _require(path.resolve('./src/scrape/anime/alqolam-helpers.cjs'));
+const { detectImageSearchQuery, extractImageCount, cleanImageTitle, makeWilyHelpers: _makeWilyHelpers } = _require(path.resolve('./src/scrape/ai/wily-helpers.cjs'));
 
 const WILY_VERBOSE_LOGS = process.env.WILY_VERBOSE_LOGS === 'true' || process.env.BOT_DEBUG_LOG === 'true';
 const wilyLog = (...args) => {
@@ -90,95 +94,6 @@ function startTyping(hisoka, m) {
         };
         setTimeout(stop, 60000);
         return stop;
-}
-
-async function sendStickerPackCard(hisoka, jid, quoted, pack, zipBuffer) {
-        if (!zipBuffer?.length) throw new Error('ZIP pack kosong.');
-
-        const packMedia = await prepareWAMessageMedia({
-                sticker: zipBuffer,
-                mimetype: 'image/webp'
-        }, { upload: hisoka.waUploadToServer });
-        const stickerMessage = packMedia.stickerMessage;
-        if (!stickerMessage?.directPath) throw new Error('Upload ZIP pack ke WhatsApp gagal.');
-
-        let thumbnailMessage = null;
-        if (pack.thumbnailUrl) {
-                try {
-                        const thumbnailMedia = await prepareWAMessageMedia({
-                                image: { url: pack.thumbnailUrl }
-                        }, { upload: hisoka.waUploadToServer });
-                        thumbnailMessage = thumbnailMedia.imageMessage || null;
-                } catch (thumbErr) {
-                        console.error('[StickerLy] Thumbnail upload failed:', thumbErr.message);
-                }
-        }
-
-        const stickers = pack.files.map(item => ({
-                fileName: item.fileName,
-                isAnimated: !!item.isAnimated,
-                emojis: ['✨'],
-                accessibilityLabel: item.id || item.fileName || '',
-                isLottie: false,
-                mimetype: 'image/webp'
-        }));
-
-        const stickerPackMessage = proto.Message.StickerPackMessage.fromObject({
-                stickerPackId: String(pack.id || crypto.randomBytes(4).toString('hex')),
-                name: String(pack.name || 'StickerLy Pack').slice(0, 128),
-                publisher: String(pack.author?.name || 'StickerLy').slice(0, 128),
-                stickers,
-                fileLength: stickerMessage.fileLength,
-                fileSha256: stickerMessage.fileSha256,
-                fileEncSha256: stickerMessage.fileEncSha256,
-                mediaKey: stickerMessage.mediaKey,
-                directPath: stickerMessage.directPath,
-                caption: pack.url || '',
-                contextInfo: {
-                        quotedMessage: quoted?.message,
-                        stanzaId: quoted?.key?.id,
-                        participant: quoted?.sender || quoted?.key?.participant || quoted?.key?.remoteJid
-                },
-                packDescription: `Stickerly pack: ${pack.url || pack.id}`,
-                mediaKeyTimestamp: stickerMessage.mediaKeyTimestamp,
-                trayIconFileName: pack.trayIconFileName || pack.files[0]?.fileName || '',
-                thumbnailDirectPath: thumbnailMessage?.directPath,
-                thumbnailSha256: thumbnailMessage?.fileSha256,
-                thumbnailEncSha256: thumbnailMessage?.fileEncSha256,
-                thumbnailHeight: thumbnailMessage?.height || 512,
-                thumbnailWidth: thumbnailMessage?.width || 512,
-                imageDataHash: pack.id ? String(pack.id) : undefined,
-                stickerPackSize: stickers.length,
-                stickerPackOrigin: proto.Message.StickerPackMessage.StickerPackOrigin.THIRD_PARTY
-        });
-
-        const msg = generateWAMessageFromContent(jid, { stickerPackMessage }, { quoted });
-        await hisoka.relayMessage(msg.key.remoteJid, msg.message, { messageId: msg.key.id });
-        return msg;
-}
-
-function zipFiles(files) {
-        return new Promise((resolve, reject) => {
-                const archiver = _require('archiver');
-                const archive = archiver('zip', { zlib: { level: 0 } });
-                const output = new PassThrough();
-                const chunks = [];
-
-                output.on('data', chunk => chunks.push(chunk));
-                output.on('end', () => resolve(Buffer.concat(chunks)));
-                output.on('error', reject);
-                archive.on('error', reject);
-                archive.pipe(output);
-
-                for (const file of files) {
-                        archive.append(file.buffer, {
-                                name: file.fileName,
-                                store: true
-                        });
-                }
-
-                archive.finalize();
-        });
 }
 
 function resolveThumbnailMedia(thumbnailUrl) {
@@ -344,200 +259,12 @@ function isMainBot(hisoka) {
     return hisoka?.isMainBot === true;
 }
 
-function parseJadibotCommandQuery(raw = '') {
-    const text = String(raw || '').trim();
-    if (!text) return { number: '', durationInput: '', rawNumberPart: '' };
-
-    let numberPart = '';
-    let durationRaw = '';
-
-    // Support comma format: "628xxx,1h" atau "+628xxx,p"
-    const commaIdx = text.indexOf(',');
-    if (commaIdx !== -1) {
-        numberPart = text.slice(0, commaIdx).trim();
-        durationRaw = text.slice(commaIdx + 1).trim();
-    } else {
-        // Space-separated: "628xxx 1h" atau "628xxx permanent"
-        const durationMatch = text.match(/\s((?:\d+\s*(?:menit|mnt|min|minute|minutes|m|jam|hour|hours|j|hari|day|days|h|d))|(?:permanent|permanen|perm|perma|selamanya|p))\s*$/i);
-        durationRaw = durationMatch ? durationMatch[1].trim() : '';
-        numberPart = durationMatch ? text.slice(0, durationMatch.index).trim() : text;
-    }
-
-    const rawNumberPart = numberPart;
-    // Karakter valid nomor telepon: angka, +, spasi, -, (), .
-    const hasInvalidPhoneChars = rawNumberPart ? /[^0-9+\-\s().]/.test(rawNumberPart) : false;
-    let number = numberPart.replace(/[^0-9]/g, '');
-    if (number.startsWith('00')) number = number.slice(2);
-    if (number.startsWith('08')) number = '62' + number.slice(1);
-    else if (number.startsWith('8')) number = '62' + number;
-
-    return { number, durationInput: durationRaw, rawNumberPart, hasInvalidPhoneChars };
-}
-
-function normalizeJadibotNumber(raw = '') {
-    let number = String(raw || '').replace(/[^0-9]/g, '');
-    if (number.startsWith('00')) number = number.slice(2);
-    if (number.startsWith('08')) number = '62' + number.slice(1);
-    else if (number.startsWith('8')) number = '62' + number;
-    return number;
-}
-
-// Deteksi negara dari nomor WA (E.164 tanpa +)
-function getPhoneCountryInfo(number = '') {
-    const n = String(number).replace(/[^0-9]/g, '');
-    // Sorted longest-first untuk match paling spesifik
-    const codes = [
-        ['1684','🇦🇸','Samoa Amerika'],['1242','🇧🇸','Bahamas'],['1246','🇧🇧','Barbados'],
-        ['1264','🇦🇮','Anguilla'],['1268','🇦🇬','Antigua & Barbuda'],['1284','🇻🇬','British Virgin Islands'],
-        ['1340','🇻🇮','US Virgin Islands'],['1345','🇰🇾','Cayman Islands'],['1441','🇧🇲','Bermuda'],
-        ['1473','🇬🇩','Grenada'],['1649','🇹🇨','Turks & Caicos'],['1664','🇲🇸','Montserrat'],
-        ['1670','🇲🇵','Northern Mariana Islands'],['1671','🇬🇺','Guam'],['1684','🇦🇸','American Samoa'],
-        ['1721','🇸🇽','Sint Maarten'],['1758','🇱🇨','Saint Lucia'],['1767','🇩🇲','Dominica'],
-        ['1784','🇻🇨','St. Vincent & Grenadines'],['1809','🇩🇴','Dominika Republic'],
-        ['1829','🇩🇴','Dominika Republic'],['1849','🇩🇴','Dominika Republic'],
-        ['1868','🇹🇹','Trinidad & Tobago'],['1869','🇰🇳','Saint Kitts & Nevis'],
-        ['1876','🇯🇲','Jamaika'],['1939','🇵🇷','Puerto Rico'],
-        ['7840','🇬🇪','Abkhazia'],['7940','🇬🇪','Abkhazia'],
-        ['212','🇲🇦','Maroko'],['213','🇩🇿','Aljazair'],['216','🇹🇳','Tunisia'],['218','🇱🇾','Libya'],
-        ['220','🇬🇲','Gambia'],['221','🇸🇳','Senegal'],['222','🇲🇷','Mauritania'],['223','🇲🇱','Mali'],
-        ['224','🇬🇳','Guinea'],['225','🇨🇮','Pantai Gading'],['226','🇧🇫','Burkina Faso'],
-        ['227','🇳🇪','Niger'],['228','🇹🇬','Togo'],['229','🇧🇯','Benin'],['230','🇲🇺','Mauritius'],
-        ['231','🇱🇷','Liberia'],['232','🇸🇱','Sierra Leone'],['233','🇬🇭','Ghana'],
-        ['234','🇳🇬','Nigeria'],['235','🇹🇩','Chad'],['236','🇨🇫','Republik Afrika Tengah'],
-        ['237','🇨🇲','Kamerun'],['238','🇨🇻','Tanjung Verde'],['239','🇸🇹','São Tomé & Príncipe'],
-        ['240','🇬🇶','Guinea Khatulistiwa'],['241','🇬🇦','Gabon'],['242','🇨🇬','Kongo'],
-        ['243','🇨🇩','DR Kongo'],['244','🇦🇴','Angola'],['245','🇬🇼','Guinea-Bissau'],
-        ['248','🇸🇨','Seychelles'],['249','🇸🇩','Sudan'],['250','🇷🇼','Rwanda'],
-        ['251','🇪🇹','Ethiopia'],['252','🇸🇴','Somalia'],['253','🇩🇯','Djibouti'],
-        ['254','🇰🇪','Kenya'],['255','🇹🇿','Tanzania'],['256','🇺🇬','Uganda'],
-        ['257','🇧🇮','Burundi'],['258','🇲🇿','Mozambik'],['260','🇿🇲','Zambia'],
-        ['261','🇲🇬','Madagaskar'],['263','🇿🇼','Zimbabwe'],['264','🇳🇦','Namibia'],
-        ['265','🇲🇼','Malawi'],['266','🇱🇸','Lesotho'],['267','🇧🇼','Botswana'],
-        ['268','🇸🇿','Eswatini'],['269','🇰🇲','Komoro'],
-        ['290','🇸🇭','Saint Helena'],['291','🇪🇷','Eritrea'],
-        ['297','🇦🇼','Aruba'],['298','🇫🇴','Faroe Islands'],['299','🇬🇱','Greenland'],
-        ['350','🇬🇮','Gibraltar'],['351','🇵🇹','Portugal'],['352','🇱🇺','Luksemburg'],
-        ['353','🇮🇪','Irlandia'],['354','🇮🇸','Islandia'],['355','🇦🇱','Albania'],
-        ['356','🇲🇹','Malta'],['357','🇨🇾','Siprus'],['358','🇫🇮','Finlandia'],
-        ['359','🇧🇬','Bulgaria'],['370','🇱🇹','Lithuania'],['371','🇱🇻','Latvia'],
-        ['372','🇪🇪','Estonia'],['373','🇲🇩','Moldova'],['374','🇦🇲','Armenia'],
-        ['375','🇧🇾','Belarus'],['376','🇦🇩','Andorra'],['377','🇲🇨','Monako'],
-        ['378','🇸🇲','San Marino'],['380','🇺🇦','Ukraina'],['381','🇷🇸','Serbia'],
-        ['382','🇲🇪','Montenegro'],['385','🇭🇷','Kroasia'],['386','🇸🇮','Slovenia'],
-        ['387','🇧🇦','Bosnia & Herzegovina'],['389','🇲🇰','Makedonia Utara'],
-        ['420','🇨🇿','Ceko'],['421','🇸🇰','Slovakia'],['423','🇱🇮','Liechtenstein'],
-        ['500','🇫🇰','Kepulauan Falkland'],['501','🇧🇿','Belize'],['502','🇬🇹','Guatemala'],
-        ['503','🇸🇻','El Salvador'],['504','🇭🇳','Honduras'],['505','🇳🇮','Nikaragua'],
-        ['506','🇨🇷','Kosta Rika'],['507','🇵🇦','Panama'],['509','🇭🇹','Haiti'],
-        ['590','🇬🇵','Guadeloupe'],['591','🇧🇴','Bolivia'],['592','🇬🇾','Guyana'],
-        ['593','🇪🇨','Ekuador'],['595','🇵🇾','Paraguay'],['597','🇸🇷','Suriname'],
-        ['598','🇺🇾','Uruguay'],['670','🇹🇱','Timor-Leste'],['673','🇧🇳','Brunei'],
-        ['674','🇳🇷','Nauru'],['675','🇵🇬','Papua Nugini'],['676','🇹🇴','Tonga'],
-        ['677','🇸🇧','Kepulauan Solomon'],['678','🇻🇺','Vanuatu'],['679','🇫🇯','Fiji'],
-        ['680','🇵🇼','Palau'],['682','🇨🇰','Kepulauan Cook'],['685','🇼🇸','Samoa'],
-        ['686','🇰🇮','Kiribati'],['687','🇳🇨','Kaledonia Baru'],['688','🇹🇻','Tuvalu'],
-        ['689','🇵🇫','Polinesia Prancis'],['691','🇫🇲','Mikronesia'],
-        ['692','🇲🇭','Kepulauan Marshall'],['850','🇰🇵','Korea Utara'],
-        ['852','🇭🇰','Hong Kong'],['853','🇲🇴','Makau'],['855','🇰🇭','Kamboja'],
-        ['856','🇱🇦','Laos'],['880','🇧🇩','Bangladesh'],['886','🇹🇼','Taiwan'],
-        ['960','🇲🇻','Maladewa'],['961','🇱🇧','Lebanon'],['962','🇯🇴','Yordania'],
-        ['963','🇸🇾','Suriah'],['964','🇮🇶','Irak'],['965','🇰🇼','Kuwait'],
-        ['966','🇸🇦','Arab Saudi'],['967','🇾🇪','Yaman'],['968','🇴🇲','Oman'],
-        ['970','🇵🇸','Palestina'],['971','🇦🇪','Uni Emirat Arab'],['972','🇮🇱','Israel'],
-        ['973','🇧🇭','Bahrain'],['974','🇶🇦','Qatar'],['975','🇧🇹','Bhutan'],
-        ['976','🇲🇳','Mongolia'],['977','🇳🇵','Nepal'],
-        ['992','🇹🇯','Tajikistan'],['993','🇹🇲','Turkmenistan'],['994','🇦🇿','Azerbaijan'],
-        ['995','🇬🇪','Georgia'],['996','🇰🇬','Kirgizstan'],['998','🇺🇿','Uzbekistan'],
-        ['20','🇪🇬','Mesir'],['27','🇿🇦','Afrika Selatan'],['30','🇬🇷','Yunani'],
-        ['31','🇳🇱','Belanda'],['32','🇧🇪','Belgia'],['33','🇫🇷','Prancis'],
-        ['34','🇪🇸','Spanyol'],['36','🇭🇺','Hungaria'],['39','🇮🇹','Italia'],
-        ['40','🇷🇴','Rumania'],['41','🇨🇭','Swiss'],['43','🇦🇹','Austria'],
-        ['44','🇬🇧','Inggris'],['45','🇩🇰','Denmark'],['46','🇸🇪','Swedia'],
-        ['47','🇳🇴','Norwegia'],['48','🇵🇱','Polandia'],['49','🇩🇪','Jerman'],
-        ['51','🇵🇪','Peru'],['52','🇲🇽','Meksiko'],['53','🇨🇺','Kuba'],
-        ['54','🇦🇷','Argentina'],['55','🇧🇷','Brasil'],['56','🇨🇱','Chile'],
-        ['57','🇨🇴','Kolombia'],['58','🇻🇪','Venezuela'],
-        ['60','🇲🇾','Malaysia'],['61','🇦🇺','Australia'],['62','🇮🇩','Indonesia'],
-        ['63','🇵🇭','Filipina'],['64','🇳🇿','Selandia Baru'],['65','🇸🇬','Singapura'],
-        ['66','🇹🇭','Thailand'],
-        ['81','🇯🇵','Jepang'],['82','🇰🇷','Korea Selatan'],['84','🇻🇳','Vietnam'],
-        ['86','🇨🇳','Tiongkok'],
-        ['90','🇹🇷','Turki'],['91','🇮🇳','India'],['92','🇵🇰','Pakistan'],
-        ['93','🇦🇫','Afghanistan'],['94','🇱🇰','Sri Lanka'],['95','🇲🇲','Myanmar'],
-        ['98','🇮🇷','Iran'],
-        ['7','🇷🇺','Rusia'],['1','🇺🇸','Amerika Serikat / 🇨🇦 Kanada'],
-    ];
-    for (const [code, flag, name] of codes) {
-        if (n.startsWith(code)) return { flag, name };
-    }
-    return { flag: '🌐', name: 'Tidak diketahui' };
-}
-
 function getJadibotChoiceKey(m) {
     return `${m.from}:${m.sender}`;
 }
 
 function isOuoLink(url) {
     return typeof url === 'string' && (url.includes('ouo.io') || url.includes('ouo.press'));
-}
-
-function formatAlqLinkMsg(animeTitle, ep, prefRes, resList) {
-    let msg = `🔗 *LINK DOWNLOAD LANGSUNG*\n`;
-    msg += `━━━━━━━━━━━━━━━━━━━\n`;
-    msg += `🎌 *${animeTitle}*\n`;
-    msg += `📺 Episode *${ep.episode}*\n\n`;
-    msg += `📌 *Buka link berikut di browser:*\n`;
-
-    const targetRes = prefRes ? [prefRes, ...resList.filter(r => r !== prefRes)] : resList;
-    for (const res of targetRes) {
-        const hosts = ep.links[res] || [];
-        if (!hosts.length) continue;
-        msg += `\n🎞 *${res.toUpperCase()}*\n`;
-        hosts.forEach(h => { msg += `• ${h.host}: ${h.url}\n`; });
-    }
-    msg += `\n⚠️ _Link melalui ouo.io (ada iklan singkat, klik "I'm Human" lalu download)_`;
-    return msg;
-}
-
-function pickBestAlqLink(links, preferredRes) {
-    const hostPriority = ['pixeldrain', 'acefile', 'mediafire'];
-    const resPriority = ['1080p', '720p', '480p', '360p'];
-    function getBestHost(hosts) {
-        if (!hosts?.length) return null;
-        return hosts.find(h => hostPriority.some(hp => h.host.toLowerCase().includes(hp))) || hosts[0];
-    }
-    if (preferredRes && links[preferredRes]?.length) {
-        const h = getBestHost(links[preferredRes]);
-        return h ? { url: h.url, host: h.host, res: preferredRes } : null;
-    }
-    for (const r of resPriority) {
-        if (links[r]?.length) {
-            const h = getBestHost(links[r]);
-            if (h) return { url: h.url, host: h.host, res: r };
-        }
-    }
-    return null;
-}
-
-function getAllAlqLinksByPriority(links, preferredRes) {
-    const hostPriority = ['pixeldrain', 'acefile', 'mediafire'];
-    const resPriority = ['1080p', '720p', '480p', '360p'];
-    function sortHosts(hosts) {
-        if (!hosts?.length) return [];
-        const ordered = [];
-        for (const hp of hostPriority) {
-            const match = hosts.find(h => h.host.toLowerCase().includes(hp));
-            if (match) ordered.push(match);
-        }
-        for (const h of hosts) {
-            if (!ordered.includes(h)) ordered.push(h);
-        }
-        return ordered;
-    }
-    const res = preferredRes && links[preferredRes]?.length ? preferredRes
-        : resPriority.find(r => links[r]?.length);
-    if (!res) return [];
-    return sortHosts(links[res]).map(h => ({ url: h.url, host: h.host, res }));
 }
 
 function isNoSpaceError(error) {
@@ -563,148 +290,30 @@ async function getUserProfilePictureUrl(hisoka, jid) {
     }
 }
 
-function detectImageSearchQuery(text) {
-    if (!text) return null;
-    const t = text.trim();
+// ── Initialize AI image/media helpers from wily-helpers.cjs ──
+const {
+    buildSmartImageWaitText, buildSmartAlbumCaptions, sendImageAlbum,
+    buildSmartImageHistoryReply, ensureYtdlp, processAIMediaAndSend,
+} = _makeWilyHelpers({
+    gemini, buildSmartImageWaitPrompt, buildSmartAlbumCaptionPrompt, buildSmartImageHistoryPrompt,
+    rememberAIMedia, sendAIReply, tolak,
+    extractImagesFromText, hasStickerMarker, extractStickersFromText, extractReplyStickersFromText,
+    extractVoiceNotesFromText, extractSongsFromText, extractVideosFromText, extractYouTubeAudioFromText,
+    extractTikTokFromText, extractInstagramFromText, hasMediaDownloadMarker, hasSocialDLMarker,
+    wilyLog, wilyError,
+});
 
-    // Jika teks mengandung tanda tanya atau terlihat seperti pertanyaan, jangan cari gambar
-    const questionIndicators = /\?|apakah|kenapa|mengapa|bagaimana|gimana|apa itu|siapa|kapan|berapa|benarkah|iya ga|iya gak|beneran|emang|bisa gak|bisa ga|itu apa|apa yang|gimana cara/i;
-    if (questionIndicators.test(t)) return null;
-
-    // Prefix umum di awal kalimat sebelum kata kunci
-    const prefixPattern = /^(?:boleh\s+|bisa\s+|tolong\s+|dong\s+|coba\s+|mau\s+|aku\s+mau\s+|aku\s+minta\s+|saya\s+minta\s+|please\s+|pls\s+)?/i;
-
-    const patterns = [
-        // "cariin/cari/carikan gambar/foto X"
-        /^(?:boleh\s+|bisa\s+|tolong\s+|dong\s+|coba\s+|mau\s+)?cari(?:kan|in|i)?\s+(?:gambar|foto|image|pic|picture)\s+(?:dari\s+|tentang\s+)?(.+)/i,
-        // "kirimin/kirimkan gambar/foto X"
-        /^(?:boleh\s+|bisa\s+|tolong\s+)?kirim(?:in|kan)?\s+(?:aku\s+|saya\s+)?(?:gambar|foto|image)\s+(?:dari\s+|tentang\s+)?(.+)/i,
-        // "boleh/bisa minta gambar X" / "minta gambar X" / "pengen gambar X" / "request gambar X"
-        /^(?:boleh\s+|bisa\s+)?(?:minta|pengen|pengin|ingin|mau|request|order)\s+(?:\d+\s+)?(?:gambar|foto|image)\s+(?:anime\s+|manga\s+)?(.+)/i,
-        // "minta X gambar/foto" (urutan terbalik)
-        /^(?:boleh\s+|bisa\s+)?(?:minta|pengen|pengin)\s+(.+?)\s+(?:\d+\s+)?(?:gambar|foto|image)(?:\s+dong|\s+ya|\s+yuk)?$/i,
-        // "gambar X dong/ya" / "foto X dong" — di awal kalimat
-        /^(?:gambar|foto)\s+(.{2,50})(?:\s+dong|\s+ya|\s+yuk|\s+aja|\s+saja)?$/i,
-        // "kirim gambar X" — singkat
-        /^kirim\s+(?:gambar|foto)\s+(.+)/i,
-        // "find/search image of X" — bahasa Inggris
-        /^(?:find|search|get|send)\s+(?:\d+\s+)?(?:image|picture|photo)s?\s+(?:of\s+)?(.+)/i,
-        // "show me X picture/image"
-        /^show\s+me\s+(?:\d+\s+)?(?:images?|pictures?|photos?)\s+(?:of\s+)?(.+)/i,
-    ];
-
-    for (const pat of patterns) {
-        const match = t.match(pat);
-        if (match && match[1]) {
-            // Bersihkan trailing: angka + kata seperti "2 saja", "3 aja", "dong", "ya", dll
-            let q = match[1].trim()
-                .replace(/\s+\d+\s+(?:saja|aja|doang|dulu|deh|aja)$/i, '')
-                .replace(/\s+(?:saja|aja|doang|dulu|deh|dong|ya|yuk)$/i, '')
-                .replace(/[?.!,]+$/, '')
-                .trim();
-            // Query harus pendek dan spesifik
-            if (q.length >= 2 && q.length <= 80 && !questionIndicators.test(q)) return q;
-        }
-    }
-    return null;
-}
-
-// Ekstrak jumlah gambar dari teks user (misal: "2 saja", "3 foto", "beberapa")
-function extractImageCount(text) {
-    if (!text) return 1;
-    const t = text.toLowerCase();
-    const numMatch = t.match(/\b(\d+)\s*(?:gambar|foto|image|saja|aja|buah|lembar)?\b/);
-    if (numMatch) {
-        const n = parseInt(numMatch[1]);
-        if (n >= 1 && n <= 5) return n;
-    }
-    if (/\b(beberapa|beberapa|few|some|multiple)\b/.test(t)) return 3;
-    return 1;
-}
-
-function cleanImageTitle(title, fallback) {
-    const raw = String(title || fallback || 'Gambar').replace(/\s+/g, ' ').trim();
-    return raw.length > 70 ? raw.slice(0, 67) + '...' : raw;
-}
-
-async function buildSmartImageWaitText({ userName, userQuestion, query, count }) {
-    const fallback = count > 1
-        ? `Oke ${userName}, aku seleksi ${count} gambar *${query}* yang paling nyambung dulu ya, nanti kukirim jadi satu album.`
-        : `Oke ${userName}, aku pilihkan gambar *${query}* yang paling pas dulu ya.`;
-    try {
-        const prompt = buildSmartImageWaitPrompt({ userName, userQuestion, query, count });
-        const result = await gemini.ask(prompt);
-        const clean = result.trim().replace(/\n+/g, ' ').replace(/^["']|["']$/g, '').trim();
-        if (clean.length >= 10 && clean.length <= 220) return clean;
-    } catch (_) {}
-    return fallback;
-}
-
-async function buildSmartAlbumCaptions({ userQuestion, query, images }) {
-    const total = images.length;
-    const captions = [];
-    for (let i = 0; i < images.length; i++) {
-        const image = images[i];
-        const fallbackTitle = cleanImageTitle(image.title, query);
-        const fallback = `🖼️ *${i + 1} dari ${total}*\n${fallbackTitle}\nSesuai permintaan: ${query}`;
-        try {
-            const prompt = buildSmartAlbumCaptionPrompt({ userQuestion, query, index: i, total });
-            const result = await gemini.askWithImage(prompt, image.buffer, 'image/jpeg');
-            const clean = result.trim().replace(/\n{3,}/g, '\n\n').slice(0, 700);
-            captions.push(clean.startsWith('🖼️') ? clean : fallback);
-        } catch (_) {
-            captions.push(fallback);
-        }
-    }
-    return captions;
-}
-
-async function sendImageAlbum(hisoka, m, images, captions) {
-    const albumItems = images.map((img, i) => ({
-        image: img.buffer,
-        caption: captions[i] || `🖼️ *${i + 1} dari ${images.length}*`,
-    }));
-    try {
-        const sent = await hisoka.sendMessage(m.from, { albumMessage: albumItems }, { quoted: m });
-        rememberAIMedia(hisoka, sent, images.map((img, i) => ({
-            buffer: img.buffer,
-            mime: 'image/jpeg',
-            label: 'gambar',
-            caption: captions[i] || '',
-        })));
-    } catch (_) {
-        for (let i = 0; i < images.length; i++) {
-            const sent = await hisoka.sendMessage(m.from, {
-                image: images[i].buffer,
-                caption: captions[i] || `🖼️ *${i + 1} dari ${images.length}*`,
-            }, { quoted: i === 0 ? m : undefined });
-            rememberAIMedia(hisoka, sent, [{
-                buffer: images[i].buffer,
-                mime: 'image/jpeg',
-                label: 'gambar',
-                caption: captions[i] || '',
-            }]);
-        }
-    }
-}
-
-async function buildSmartImageHistoryReply({ userQuestion, query, images = [], captions = [] }) {
-    const count = images.length || captions.length || 1;
-    const captionContext = captions
-        .filter(Boolean)
-        .map((caption, index) => `${index + 1}. ${caption.replace(/\s+/g, ' ').trim()}`)
-        .join('\n')
-        .slice(0, 1500);
-    try {
-        const prompt = buildSmartImageHistoryPrompt({ userQuestion, query, count, captionContext });
-        const result = await gemini.ask(prompt);
-        const clean = result.trim().replace(/\n+/g, ' ').replace(/^["']|["']$/g, '').trim();
-        if (clean.length >= 8 && clean.length <= 300) return clean;
-    } catch (_) {}
-    return count > 1
-        ? `Sudah aku kirim ${count} pilihan gambar yang paling cocok buat "${query}".`
-        : `Sudah aku kirim gambar yang paling cocok buat "${query}".`;
-}
+// ── Initialize cekauto helpers from cekauto-cmd.cjs ──
+const {
+    CEKAUTO_FITUR_LIST, CEKAUTO_GROUP_FITUR_LIST,
+    getFeatureTimestamp, saveCekautoTimestamp, formatRelativeTime,
+    getActiveGroupsForFeature, disableFeatureForGroup, disableFeatureForAllGroups,
+    sendCekautoGrupSelectMsg, sendCekautoGrupMsg, sendCekautoMsg,
+    handleCekauto: _handleCekautoFn,
+} = _makeCekautoHelpers({
+    loadConfig, saveConfig, getAllAntiTagSWGroups, toggleAntiTagSW, isAntiTagSWEnabled,
+    sendConfirmWithButtons, tolak,
+});
 
 const pendingPlayChoices = new Map();
 const pendingMusikaiCache  = new Map(); // key → { results, params, ts }
@@ -737,232 +346,6 @@ function parseYtdlpError(stderr, fallback) {
     return fallback || stderr.substring(0, 150);
 }
 
-async function ensureYtdlp(hisoka, m) {
-    const binDir = path.join(process.cwd(), 'bin');
-    const ytdlpBin = path.join(binDir, 'yt-dlp');
-
-    if (!fs.existsSync(binDir)) {
-        fs.mkdirSync(binDir, { recursive: true });
-    }
-
-    if (fs.existsSync(ytdlpBin)) return ytdlpBin;
-
-    console.log('\x1b[33m[YT-DLP] Binary tidak ditemukan, mengunduh otomatis...\x1b[39m');
-
-    if (hisoka && m) {
-        await hisoka.sendMessage(m.from, { react: { text: '⬇️', key: m.key } });
-        await tolak(hisoka, m, '⬇️ *Mohon tunggu sebentar...*\n\nSistem sedang mempersiapkan downloader YouTube. Proses ini hanya terjadi sekali dan tidak akan terulang lagi. Permintaanmu akan otomatis dilanjutkan setelah siap. ⏳');
-    }
-
-    const downloadUrl = 'https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_linux';
-
-    await new Promise((resolve, reject) => {
-        exec(`curl -L "${downloadUrl}" -o "${ytdlpBin}"`, { timeout: 120000 }, (err) => {
-            if (err) return reject(new Error('Gagal mengunduh yt-dlp: ' + err.message));
-            resolve();
-        });
-    });
-
-    fs.chmodSync(ytdlpBin, 0o755);
-    console.log('\x1b[32m[YT-DLP] ✓ Binary berhasil diunduh dan siap digunakan.\x1b[39m');
-
-    if (hisoka && m) {
-        await tolak(hisoka, m, '✅ *Downloader siap!* Sedang memproses permintaanmu...');
-    }
-
-    return ytdlpBin;
-}
-
-/**
- * Unified pipeline buat respons AI:
- * 1. Extract semua marker media ([GAMBAR:], [VN:], [LAGU:], [VIDEO:])
- * 2. Kirim media-media tersebut ke chat
- * 3. Kirim sisa teks (cleanText) lewat sendAIReply
- *
- * @returns {Promise<{cleanText: string, sentText: string|null, counts: object}>}
- */
-async function processAIMediaAndSend(hisoka, m, response, opts = {}) {
-    let working = String(response || '').trim();
-    if (!working) return { cleanText: '', sentText: null, counts: { images: 0, stickers: 0, voiceNotes: 0, songs: 0, videos: 0 } };
-    const _sessionKey = opts.sessionKey || '';
-
-    // ── 1. GAMBAR (cepat, tanpa yt-dlp) ──
-    const imgRes = await extractImagesFromText(working);
-    working = imgRes.cleanText;
-    const images = imgRes.images || [];
-
-    // ── 2. STIKER (search img → webp) + REPLY-STIKER ──
-    let stickers = [];
-    if (hasStickerMarker(working)) {
-        try {
-            const stickerRes = await extractStickersFromText(working);
-            working = stickerRes.cleanText;
-            stickers = stickerRes.stickers || [];
-        } catch (e) {
-            wilyError(`[AIMedia] ❌ extractStickers gagal: ${e.message}`);
-        }
-        try {
-            const replyStkRes = await extractReplyStickersFromText(working, { sessionKey: _sessionKey, contextText: String(response || '').substring(0, 300) });
-            working = replyStkRes.cleanText;
-            if (replyStkRes.stickers?.length) {
-                stickers.push(...replyStkRes.stickers);
-            }
-        } catch (e) {
-            wilyError(`[AIMedia] ❌ extractReplyStickers gagal: ${e.message}`);
-        }
-    }
-
-    // ── 3. VN / TTS (cepat, tanpa yt-dlp) ──
-    const vnRes = await extractVoiceNotesFromText(working);
-    working = vnRes.cleanText;
-    const voiceNotes = vnRes.voiceNotes || [];
-
-    // ── 4. LAGU + VIDEO + YTMP3 (butuh yt-dlp, ensure dulu sekali) ──
-    let songs = [];
-    let videos = [];
-    let ytAudios = [];
-    if (hasMediaDownloadMarker(working)) {
-        try {
-            const ytdlpBin = await ensureYtdlp(hisoka, m);
-            const songRes = await extractSongsFromText(working, { ytdlpBin });
-            working = songRes.cleanText;
-            songs = songRes.songs || [];
-            const videoRes = await extractVideosFromText(working, { ytdlpBin });
-            working = videoRes.cleanText;
-            videos = videoRes.videos || [];
-            const ytAudioRes = await extractYouTubeAudioFromText(working, { ytdlpBin });
-            working = ytAudioRes.cleanText;
-            ytAudios = ytAudioRes.ytAudios || [];
-        } catch (e) {
-            wilyError(`[AIMedia] ❌ ensureYtdlp gagal: ${e.message}`);
-        }
-    }
-
-    // ── 4b. TT + IG (sosmed, tanpa yt-dlp) ──
-    let tikToks = [];
-    let instagrams = [];
-    if (hasSocialDLMarker(working)) {
-        try {
-            const ttRes = await extractTikTokFromText(working);
-            working = ttRes.cleanText;
-            tikToks = ttRes.tikToks || [];
-        } catch (e) {
-            wilyError(`[AIMedia] ❌ extractTikTok gagal: ${e.message}`);
-        }
-        try {
-            const igRes = await extractInstagramFromText(working);
-            working = igRes.cleanText;
-            instagrams = igRes.instagrams || [];
-        } catch (e) {
-            wilyError(`[AIMedia] ❌ extractInstagram gagal: ${e.message}`);
-        }
-    }
-
-    // ── 5. KIRIM SEMUA MEDIA ──
-    for (const img of images) {
-        try {
-            await hisoka.sendMessage(m.from, { image: img.buffer, caption: '🖼️' }, { quoted: m });
-        } catch (e) { wilyError(`[AIMedia] kirim gambar gagal: ${e.message}`); }
-    }
-    for (const stk of stickers) {
-        try {
-            await hisoka.sendMessage(m.from, { sticker: stk.buffer }, { quoted: m });
-        } catch (e) { wilyError(`[AIMedia] kirim sticker gagal: ${e.message}`); }
-    }
-    for (const vn of voiceNotes) {
-        try {
-            await hisoka.sendMessage(m.from, {
-                audio: vn.buffer,
-                mimetype: 'audio/mp4',
-                ptt: true,
-            }, { quoted: m });
-        } catch (e) { wilyError(`[AIMedia] kirim VN gagal: ${e.message}`); }
-    }
-    for (const song of songs) {
-        try {
-            const safeName = (song.title || 'lagu').replace(/[^\w\s-]/g, '').slice(0, 80) || 'lagu';
-            await hisoka.sendMessage(m.from, {
-                audio: song.buffer,
-                mimetype: 'audio/mpeg',
-                fileName: `${safeName}.mp3`,
-                ptt: false,
-            }, { quoted: m });
-        } catch (e) { wilyError(`[AIMedia] kirim lagu gagal: ${e.message}`); }
-    }
-    for (const video of videos) {
-        try {
-            const cap = `🎬 *${video.title}*\n👤 ${video.channel}`;
-            await hisoka.sendMessage(m.from, {
-                video: video.buffer,
-                caption: cap,
-                mimetype: 'video/mp4',
-            }, { quoted: m });
-        } catch (e) { wilyError(`[AIMedia] kirim video gagal: ${e.message}`); }
-    }
-    for (const yta of ytAudios) {
-        try {
-            const safeName = (yta.title || 'audio').replace(/[^\w\s-]/g, '').slice(0, 80) || 'audio';
-            await hisoka.sendMessage(m.from, {
-                audio: yta.buffer,
-                mimetype: 'audio/mpeg',
-                fileName: `${safeName}.mp3`,
-                ptt: false,
-            }, { quoted: m });
-        } catch (e) { wilyError(`[AIMedia] kirim ytmp3 gagal: ${e.message}`); }
-    }
-    for (const tt of tikToks) {
-        try {
-            const shortDesc = (tt.desc || '').length > 200 ? tt.desc.slice(0, 200) + '...' : (tt.desc || '');
-            const cap = `╭═══ *TIKTOK* ═══╮\n│ 👤 @${tt.author}\n${shortDesc ? '│\n│ 📝 ' + shortDesc + '\n' : ''}╰════════════════╯`;
-            if (tt.videoUrl) {
-                await hisoka.sendMessage(m.from, { video: { url: tt.videoUrl }, caption: cap }, { quoted: m });
-            } else if (tt.images?.length > 0) {
-                await hisoka.sendMessage(m.from, { text: cap }, { quoted: m });
-                for (let i = 0; i < Math.min(tt.images.length, 10); i++) {
-                    await hisoka.sendMessage(m.from, {
-                        image: { url: tt.images[i] },
-                        caption: `📷 ${i + 1}/${tt.images.length}`,
-                    }, { quoted: m });
-                }
-            }
-        } catch (e) { wilyError(`[AIMedia] kirim tiktok gagal: ${e.message}`); }
-    }
-    for (const ig of instagrams) {
-        try {
-            const shortCap = (ig.caption || '').length > 200 ? ig.caption.slice(0, 200) + '...' : (ig.caption || '');
-            const infoText = `╭═══ *INSTAGRAM* ═══╮\n│ 👤 @${ig.username}\n${shortCap ? '│\n│ 📝 ' + shortCap + '\n' : ''}╰═════════════════╯`;
-            for (let i = 0; i < ig.mediaItems.length; i++) {
-                const item = ig.mediaItems[i];
-                const isFirst = i === 0;
-                try {
-                    if (item.isVideo) {
-                        await hisoka.sendMessage(m.from, { video: { url: item.url }, caption: isFirst ? infoText : '' }, { quoted: m });
-                    } else {
-                        await hisoka.sendMessage(m.from, { image: { url: item.url }, caption: isFirst ? infoText : '' }, { quoted: m });
-                    }
-                } catch (sendErr) { wilyError(`[AIMedia] kirim ig item ${i + 1} gagal: ${sendErr.message}`); }
-            }
-        } catch (e) { wilyError(`[AIMedia] kirim instagram gagal: ${e.message}`); }
-    }
-
-    // ── 5. KIRIM TEKS SISA ──
-    const finalText = working.replace(/\n{3,}/g, '\n\n').trim();
-    let sentText = null;
-    if (finalText) {
-        sentText = await sendAIReply(hisoka, m, finalText);
-    }
-
-    const totalMedia = images.length + stickers.length + voiceNotes.length + songs.length + videos.length + ytAudios.length + tikToks.length + instagrams.length;
-    if (totalMedia > 0) {
-        wilyLog(`\x1b[36m[AIMedia]\x1b[39m sent → ${images.length} img + ${stickers.length} stk + ${voiceNotes.length} vn + ${songs.length} lagu + ${videos.length} video + ${ytAudios.length} ytmp3 + ${tikToks.length} tt + ${instagrams.length} ig`);
-    }
-
-    return {
-        cleanText: finalText,
-        sentText,
-        counts: { images: images.length, stickers: stickers.length, voiceNotes: voiceNotes.length, songs: songs.length, videos: videos.length, ytAudios: ytAudios.length, tikToks: tikToks.length, instagrams: instagrams.length },
-    };
-}
 
 function getSenderNumber(m) {
     if (m.key?.participant) return m.key.participant.split('@')[0];
@@ -1241,140 +624,6 @@ function logCommand(m, hisoka, command) {
 }
 
 // ── ZIP FILE PARSER (pure Node.js, no external lib) ──
-function parseZipBuffer(buffer) {
-    const result = { files: [], isPasswordProtected: false, error: null };
-    try {
-        const LOCAL_FILE_HEADER_SIG = 0x04034b50;
-        const CENTRAL_DIR_SIG = 0x02014b50;
-        const EOCD_SIG = 0x06054b50;
-
-        let eocdOffset = -1;
-        for (let i = buffer.length - 22; i >= 0; i--) {
-            if (buffer.readUInt32LE(i) === EOCD_SIG) {
-                eocdOffset = i;
-                break;
-            }
-        }
-        if (eocdOffset === -1) {
-            result.error = 'Bukan file ZIP yang valid';
-            return result;
-        }
-
-        const centralDirSize = buffer.readUInt32LE(eocdOffset + 12);
-        const centralDirOffset = buffer.readUInt32LE(eocdOffset + 16);
-
-        let pos = centralDirOffset;
-        while (pos < centralDirOffset + centralDirSize && pos + 46 <= buffer.length) {
-            if (buffer.readUInt32LE(pos) !== CENTRAL_DIR_SIG) break;
-            const generalFlag = buffer.readUInt16LE(pos + 8);
-            const isEncrypted = (generalFlag & 0x01) !== 0;
-            if (isEncrypted) result.isPasswordProtected = true;
-            const compressedSize = buffer.readUInt32LE(pos + 20);
-            const uncompressedSize = buffer.readUInt32LE(pos + 24);
-            const fileNameLen = buffer.readUInt16LE(pos + 28);
-            const extraFieldLen = buffer.readUInt16LE(pos + 30);
-            const commentLen = buffer.readUInt16LE(pos + 32);
-            const fileName = buffer.slice(pos + 46, pos + 46 + fileNameLen).toString('utf8');
-            const isDir = fileName.endsWith('/');
-            if (!isDir) {
-                const sizeKb = uncompressedSize > 0 ? (uncompressedSize / 1024).toFixed(1) : (compressedSize / 1024).toFixed(1);
-                result.files.push({ name: fileName, size: parseFloat(sizeKb), encrypted: isEncrypted });
-            }
-            pos += 46 + fileNameLen + extraFieldLen + commentLen;
-        }
-    } catch (e) {
-        result.error = 'Gagal parse ZIP: ' + e.message;
-    }
-    return result;
-}
-
-// ── PDF TEXT EXTRACTOR via pdftotext ──
-async function extractPdfText(pdfBuffer) {
-    const execAsync = util.promisify(exec);
-    const tmpFile = `/tmp/wily_pdf_${Date.now()}.pdf`;
-    try {
-        fs.writeFileSync(tmpFile, pdfBuffer);
-        const { stdout } = await execAsync(`pdftotext "${tmpFile}" -`, { timeout: 15000 });
-        return stdout.trim().substring(0, 4000);
-    } catch (e) {
-        throw new Error('Gagal baca PDF: ' + e.message);
-    } finally {
-        try { fs.unlinkSync(tmpFile); } catch (_) {}
-    }
-}
-
-function extractMediaFromMessage(quotedMsg) {
-        let targetMessage = quotedMsg;
-        let foundViewOnce = false;
-
-        if (quotedMsg.ephemeralMessage?.message) {
-                targetMessage = quotedMsg.ephemeralMessage.message;
-        }
-
-        if (targetMessage.viewOnceMessage?.message) {
-                targetMessage = targetMessage.viewOnceMessage.message;
-                foundViewOnce = true;
-        }
-
-        if (targetMessage.viewOnceMessageV2?.message) {
-                targetMessage = targetMessage.viewOnceMessageV2.message;
-                foundViewOnce = true;
-        }
-
-        if (targetMessage.viewOnceMessageV2Extension?.message) {
-                targetMessage = targetMessage.viewOnceMessageV2Extension.message;
-                foundViewOnce = true;
-        }
-
-        const mediaTypes = [
-                'imageMessage',
-                'videoMessage',
-                'audioMessage',
-                'documentMessage',
-                'stickerMessage'
-        ];
-
-        for (const mediaType of mediaTypes) {
-                if (targetMessage[mediaType]) {
-                        return {
-                                mediaMessage: targetMessage[mediaType],
-                                mediaType: mediaType,
-                                isViewOnce: foundViewOnce || 
-                                        targetMessage[mediaType].viewOnce === true ||
-                                        quotedMsg.viewOnceMessage ||
-                                        quotedMsg.viewOnceMessageV2 ||
-                                        quotedMsg.viewOnceMessageV2Extension
-                        };
-                }
-        }
-
-        return null;
-}
-
-function isViewOnceMessage(quotedMsg) {
-        if (quotedMsg.viewOnceMessage) return true;
-        if (quotedMsg.viewOnceMessageV2) return true;
-        if (quotedMsg.viewOnceMessageV2Extension) return true;
-
-        if (quotedMsg.ephemeralMessage?.message) {
-                const ephemeralContent = quotedMsg.ephemeralMessage.message;
-                if (ephemeralContent.viewOnceMessage) return true;
-                if (ephemeralContent.viewOnceMessageV2) return true;
-                if (ephemeralContent.viewOnceMessageV2Extension) return true;
-
-                const mediaTypes = ['imageMessage', 'videoMessage', 'audioMessage', 'documentMessage', 'stickerMessage'];
-                for (const type of mediaTypes) {
-                        if (ephemeralContent[type]?.viewOnce) return true;
-                }
-        }
-
-        const mediaTypes = ['imageMessage', 'videoMessage', 'audioMessage', 'documentMessage', 'stickerMessage'];
-        for (const type of mediaTypes) {
-                if (quotedMsg[type]?.viewOnce) return true;
-        }
-
-        return false;
-}
 
 const pendingAturBrowser = new Map();
 const listAturBrowserMap = new Map();
@@ -1385,99 +634,6 @@ const TOTAL_CMD_COUNT = (() => {
                 return (_src.match(/^\s*case\s+'[^']+'\s*:\s*\{/gm) || []).length;
         } catch { return 0; }
 })();
-
-const CEKAUTO_FITUR_LIST = [
-        { key: 'antiCall',       nama: 'Anti Call',        cmd: '.anticall on/off',        type: 'global', toggleKey: 'antiCall',       toggleable: true  },
-        { key: 'antiCallVideo',  nama: 'Anti Call Video',  cmd: '.anticallvid on/off',     type: 'global', toggleKey: 'antiCallVideo',  toggleable: true  },
-        { key: 'antiDelete',     nama: 'Anti Delete',      cmd: '.antidel on/off',         type: 'global', toggleKey: 'antiDelete',     toggleable: true  },
-        { key: 'antiTagSW',      nama: 'Anti Tag SW',      cmd: '.antitagsw on/off',       type: 'global', toggleKey: 'antiTagSW',      toggleable: true  },
-        { key: 'autoCleaner',    nama: 'Auto Cleaner',     cmd: '.autocleaner on/off',     type: 'global', toggleKey: 'autoCleaner',    toggleable: true  },
-        { key: 'autoOnline',     nama: 'Auto Online',      cmd: '.online on/off',          type: 'global', toggleKey: 'autoOnline',     toggleable: true  },
-        { key: 'autoReadStory',  nama: 'Auto Read Story',  cmd: '.readsw on/off',          type: 'global', toggleKey: 'autoReadStory',  toggleable: true  },
-        { key: 'autoRecording',  nama: 'Auto Recording',   cmd: '.recording on/off',       type: 'global', toggleKey: 'autoRecording',  toggleable: true  },
-        { key: 'autoSimi',       nama: 'Auto Simi (AI)',   cmd: '.simi on/off',            type: 'global', toggleKey: 'autoSimi',       toggleable: true  },
-        { key: 'autoTyping',     nama: 'Auto Typing',      cmd: '.typing on/off',          type: 'global', toggleKey: 'autoTyping',     toggleable: true  },
-        { key: 'infowibu',       nama: 'Info Wibu',        cmd: '.infowibu on/off',        type: 'group',  toggleable: false             },
-        { key: 'memoryMonitor',  nama: 'Memory Monitor',   cmd: '.ram',                    type: 'global', toggleable: false             },
-        { key: 'reactApi',       nama: 'React API',        cmd: '.setreactapi on/off',     type: 'global', toggleKey: 'reactApi',       toggleable: true  },
-        { key: 'sessionCleaner', nama: 'Session Cleaner',  cmd: '.sessioncleaner on/off',  type: 'global', toggleKey: 'sessionCleaner', toggleable: true  },
-        { key: 'telegram',       nama: 'Telegram Bridge',  cmd: '.telegram on/off',        type: 'global', toggleKey: 'telegram',       toggleable: true  },
-        { key: 'welcomeGoodbye', nama: 'Welcome/Goodbye',  cmd: '.welcome on/off',         type: 'global', toggleable: false, checkFn: (cfg) => { const g = cfg.welcomeGoodbye?.groups || {}; return Object.values(g).some(v => v?.welcome === true || v?.goodbye === true); } },
-        { key: 'wilyAI',         nama: 'Wily AI',          cmd: '.wilyai on/off',          type: 'global', toggleKey: 'wilyAI',         toggleable: true  },
-        { key: 'cekswTracking',  nama: 'Cek SW Tracking',  cmd: '.ceksw on/off',           type: 'custom', toggleKey: 'cekswTracking',  toggleable: true,  checkFn: (cfg) => cfg.cekswTracking !== false },
-        { key: 'alqanimenotif',  nama: 'Alqanime Notif',   cmd: '.alqanimenotif on/off',   type: 'group',  toggleable: false             },
-        { key: 'animasu',        nama: 'Animasu Notif',    cmd: '.animasu on/off',         type: 'group',  toggleable: false             },
-        { key: 'malnews',        nama: 'MAL News',         cmd: '.malnews on/off',         type: 'group',  toggleable: false             },
-        { key: 'tvonenews',      nama: 'TV One News',      cmd: '.tvone on/off',           type: 'group',  toggleable: false             },
-        { key: 'autoSholat',     nama: 'Auto Sholat',      cmd: '.autosholat add/remove',  type: 'group',  toggleable: false, checkFn: (cfg) => Array.isArray(cfg.autoSholat?.groups) && cfg.autoSholat.groups.length > 0 },
-];
-
-const CEKAUTO_GROUP_FITUR_LIST = [
-        {
-                key: 'infowibu', nama: 'Info Wibu', cmd: '.infowibu on/off', toggleable: true,
-                desc: 'Kirim info & jadwal anime/wibu terbaru ke grup ini secara otomatis.',
-                checkFn: (cfg, jid) => cfg.infowibu?.groups?.[jid]?.enabled === true
-        },
-        {
-                key: 'animasu', nama: 'Animasu Notif', cmd: '.animasu on/off', toggleable: true,
-                desc: 'Notifikasi update episode anime terbaru dari Animasu ke grup.',
-                checkFn: (cfg, jid) => cfg.animasu?.groups?.[jid]?.enabled === true
-        },
-        {
-                key: 'alqanimenotif', nama: 'Alqanime Notif', cmd: '.alqanimenotif on/off', toggleable: true,
-                desc: 'Notifikasi rilis anime terbaru dari Alqanime ke grup ini.',
-                checkFn: (cfg, jid) => cfg.alqanimenotif?.groups?.[jid]?.enabled === true
-        },
-        {
-                key: 'tvonenews', nama: 'TV One News', cmd: '.tvone on/off', toggleable: true,
-                desc: 'Kirim berita terkini dari TV One ke grup ini secara otomatis.',
-                checkFn: (cfg, jid) => cfg.tvonenews?.groups?.[jid]?.enabled === true
-        },
-        {
-                key: 'malnews', nama: 'MAL News', cmd: '.malnews on/off', toggleable: true,
-                desc: 'Kirim berita & update anime/manga dari MyAnimeList ke grup.',
-                checkFn: (cfg, jid) => cfg.malnews?.groups?.[jid]?.enabled === true
-        },
-        {
-                key: 'welcome', nama: 'Welcome', cmd: '.welcome on/off', toggleable: true,
-                desc: 'Kirim pesan sambutan otomatis saat member baru bergabung ke grup.',
-                checkFn: (cfg, jid) => cfg.welcomeGoodbye?.groups?.[jid]?.welcome === true
-        },
-        {
-                key: 'goodbye', nama: 'Goodbye', cmd: '.goodbye on/off', toggleable: true,
-                desc: 'Kirim pesan perpisahan otomatis saat member keluar atau dikick.',
-                checkFn: (cfg, jid) => cfg.welcomeGoodbye?.groups?.[jid]?.goodbye === true
-        },
-        {
-                key: 'antiTagSWGrup', nama: 'Anti Tag SW (Grup)', cmd: '.antitagsw on/off', toggleable: true,
-                descFn: (cfg) => {
-                        const globalOn = cfg.antiTagSW?.enabled === true;
-                        return `Cegah member mentag grup via SW. Global: ${globalOn ? '🟢 Aktif' : '🔴 Nonaktif → ketik .antitagsw global on'}`;
-                },
-                checkFn: (_cfg, jid) => isAntiTagSWEnabled(jid)
-        },
-        {
-                key: 'autoSholat', nama: 'Auto Sholat', cmd: '.autosholat add/remove', toggleable: true,
-                desc: 'Kirim notif waktu sholat + gambar masjid + suara adzan ke grup otomatis.',
-                checkFn: (cfg, jid) => Array.isArray(cfg.autoSholat?.groups) && cfg.autoSholat.groups.includes(jid)
-        },
-];
-
-function getFeatureTimestamp(featureKey, jid) {
-        const cfg = loadConfig();
-        if (['infowibu', 'animasu', 'alqanimenotif', 'tvonenews', 'malnews'].includes(featureKey)) {
-                return cfg[featureKey]?.groups?.[jid]?.diubahPada || cfg.cekautoTimestamps?.[featureKey]?.[jid] || null;
-        }
-        return cfg.cekautoTimestamps?.[featureKey]?.[jid] || null;
-}
-
-function saveCekautoTimestamp(featureKey, jid) {
-        const cfg = loadConfig();
-        if (!cfg.cekautoTimestamps) cfg.cekautoTimestamps = {};
-        if (!cfg.cekautoTimestamps[featureKey]) cfg.cekautoTimestamps[featureKey] = {};
-        cfg.cekautoTimestamps[featureKey][jid] = Date.now();
-        saveConfig(cfg);
-}
 
 async function sendConfirmWithButtons(hisoka, m, txt, buttons, opts = {}) {
         const quoteSource = (opts.quoteBot && m.quoted?.key?.id) ? m.quoted : m;
@@ -1576,297 +732,6 @@ async function sendAudioWithButtons(hisoka, m, audioBuf, bodyTxt, rows, opts = {
                 sent = true;
         } catch (_) {}
         if (!sent) await tolak(hisoka, m, bodyTxt);
-}
-
-function formatRelativeTime(ts) {
-        if (!ts) return null;
-        const diff = Date.now() - ts;
-        const days = Math.floor(diff / 86400000);
-        const hours = Math.floor(diff / 3600000);
-        const mins = Math.floor(diff / 60000);
-        if (days >= 1) return `${days} hari lalu`;
-        if (hours >= 1) return `${hours} jam lalu`;
-        if (mins >= 1) return `${mins} menit lalu`;
-        return 'baru saja';
-}
-
-function getActiveGroupsForFeature(featureKey) {
-        const cfg = loadConfig();
-        if (featureKey === 'welcome') {
-                return Object.entries(cfg.welcomeGoodbye?.groups || {})
-                        .filter(([, v]) => v?.welcome === true).map(([jid]) => jid);
-        }
-        if (featureKey === 'goodbye') {
-                return Object.entries(cfg.welcomeGoodbye?.groups || {})
-                        .filter(([, v]) => v?.goodbye === true).map(([jid]) => jid);
-        }
-        if (featureKey === 'antiTagSWGrup') return getAllAntiTagSWGroups();
-        return Object.entries(cfg[featureKey]?.groups || {})
-                .filter(([, v]) => v?.enabled === true).map(([jid]) => jid);
-}
-
-function disableFeatureForGroup(featureKey, jid) {
-        const cfg = loadConfig();
-        if (featureKey === 'welcome' || featureKey === 'goodbye') {
-                if (!cfg.welcomeGoodbye) cfg.welcomeGoodbye = { enabled: true, groups: {} };
-                if (!cfg.welcomeGoodbye.groups) cfg.welcomeGoodbye.groups = {};
-                if (!cfg.welcomeGoodbye.groups[jid]) cfg.welcomeGoodbye.groups[jid] = {};
-                cfg.welcomeGoodbye.groups[jid][featureKey] = false;
-                saveConfig(cfg);
-        } else if (featureKey === 'antiTagSWGrup') {
-                toggleAntiTagSW(jid, false);
-        } else {
-                if (!cfg[featureKey]) cfg[featureKey] = { groups: {} };
-                if (!cfg[featureKey].groups) cfg[featureKey].groups = {};
-                cfg[featureKey].groups[jid] = { enabled: false, diubahPada: Date.now() };
-                saveConfig(cfg);
-        }
-}
-
-function disableFeatureForAllGroups(featureKey) {
-        const groups = getActiveGroupsForFeature(featureKey);
-        for (const jid of groups) disableFeatureForGroup(featureKey, jid);
-}
-
-async function sendCekautoGrupSelectMsg(hisoka, m, featureKey) {
-        const namaMapSel = {
-                infowibu: 'Info Wibu', animasu: 'Animasu Notif',
-                alqanimenotif: 'Alqanime Notif', tvonenews: 'TV One News',
-                malnews: 'MAL News', welcome: 'Welcome',
-                goodbye: 'Goodbye',
-                antiTagSWGrup: 'Anti Tag SW (Grup)',
-        };
-        const namFitur = namaMapSel[featureKey] || featureKey;
-        const activeJids = getActiveGroupsForFeature(featureKey);
-
-        if (activeJids.length === 0) {
-                return sendConfirmWithButtons(hisoka, m,
-                        `ℹ️ Tidak ada grup yang aktif untuk fitur *${namFitur}*.`,
-                        [{ text: '🏘️ Lihat Fitur GC', id: '__cekauto_gc__' }]
-                );
-        }
-
-        const resolveAdminName = (p) => {
-                let realJid = p.id || '';
-                if (realJid.endsWith('@lid')) {
-                        const pn = p.phoneNumber || p.jid || '';
-                        if (pn && !pn.endsWith('@lid')) realJid = jidNormalizedUser(pn);
-                } else if (realJid) {
-                        realJid = jidNormalizedUser(realJid);
-                }
-                const numOnly = jidDecode(realJid)?.user || realJid.split('@')[0];
-                let name = hisoka.getName
-                        ? (hisoka.getName(realJid, true) || hisoka.getName(realJid) || null)
-                        : null;
-                if (!name || name === numOnly) {
-                        const contact = hisoka.contacts?.read ? hisoka.contacts.read(realJid) : null;
-                        name = contact?.name || contact?.notify || contact?.verifiedName || null;
-                }
-                return name || `+${numOnly}`;
-        };
-
-        const grupRows = [];
-        for (const jid of activeJids) {
-                try {
-                        const meta = await hisoka.groupMetadata(jid);
-                        const memberCount = meta.participants?.length || 0;
-                        const adminNames = (meta.participants || [])
-                                .filter(p => p.admin)
-                                .map(p => resolveAdminName(p));
-                        const adminText = adminNames.length
-                                ? `Admin: ${adminNames.slice(0, 3).join(', ')}${adminNames.length > 3 ? ` +${adminNames.length - 3} lainnya` : ''}`
-                                : 'Tidak ada admin';
-                        const ts = getFeatureTimestamp(featureKey, jid);
-                        const tsText = ts ? ` • Aktif ${formatRelativeTime(ts)}` : '';
-                        grupRows.push({
-                                header: `🏘️ ${meta.subject || jid}`,
-                                title: `👥 ${memberCount} member${tsText}`,
-                                description: adminText,
-                                id: `__cgrupoff__${featureKey}__${jid}`
-                        });
-                } catch (_) {
-                        grupRows.push({
-                                header: `🏘️ ${jid}`,
-                                title: '⚠️ Gagal ambil info grup',
-                                description: jid,
-                                id: `__cgrupoff__${featureKey}__${jid}`
-                        });
-                }
-        }
-
-        const sections = [
-                { title: `🏘️ Pilih Grup — Nonaktifkan ${namFitur}`, rows: grupRows },
-                {
-                        title: '⚠️ Opsi Lainnya',
-                        rows: [{
-                                header: '🔴 Off Semua Grup',
-                                title: `Matikan ${namFitur} di semua ${activeJids.length} grup`,
-                                description: 'Nonaktifkan sekaligus untuk semua grup aktif',
-                                id: `__cgrupall__${featureKey}`
-                        }]
-                }
-        ];
-
-        let txt =
-                `╔══════════════════════════╗\n` +
-                `║  🏘️  *PILIH GRUP*  ║\n` +
-                `╚══════════════════════════╝\n\n` +
-                `Fitur: *${namFitur}*\n` +
-                `Aktif di *${activeJids.length}* grup\n\n` +
-                `Pilih grup yang ingin di-nonaktifkan,\natau pilih *Off Semua Grup* untuk sekaligus.\n\n` +
-                `┌─────────────────────────────┐\n` +
-                `│  🟢 *Grup Aktif*\n` +
-                `└─────────────────────────────┘\n` +
-                grupRows.map(r => `  🏘️  *${r.header.replace('🏘️ ', '')}*\n     _↳ ${r.title} · ${r.description}_`).join('\n') + '\n\n' +
-                `_Gunakan tombol di bawah untuk memilih_`;
-
-        const replyCtx = m.key?.id ? {
-                stanzaId: m.key.id,
-                participant: m.sender || m.key?.participant || '',
-                quotedMessage: m.message || {},
-        } : {};
-
-        let botPpMedia = {};
-        try {
-                const botJid = hisoka.user?.id;
-                if (botJid) {
-                        const ppUrl = await hisoka.profilePictureUrl(botJid, 'image');
-                        if (ppUrl) {
-                                botPpMedia = await prepareWAMessageMedia(
-                                        { image: { url: ppUrl } },
-                                        { upload: hisoka.waUploadToServer }
-                                );
-                        }
-                }
-        } catch (_) {}
-
-        const hasPp = Object.keys(botPpMedia).length > 0;
-        const selMsg = generateWAMessageFromContent(
-                m.from,
-                {
-                        viewOnceMessage: {
-                                message: {
-                                        messageContextInfo: { deviceListMetadata: {}, deviceListMetadataVersion: 2 },
-                                        interactiveMessage: {
-                                                contextInfo: replyCtx,
-                                                ...(hasPp ? { header: { hasMediaAttachment: true, ...botPpMedia } } : {}),
-                                                body: { text: txt },
-                                                nativeFlowMessage: {
-                                                        buttons: [
-                                                                {
-                                                                        name: 'single_select',
-                                                                        buttonParamsJson: JSON.stringify({ title: '🏘️ Pilih Grup', sections })
-                                                                },
-                                                                {
-                                                                        name: 'quick_reply',
-                                                                        buttonParamsJson: JSON.stringify({ display_text: '🏘️ Lihat Fitur GC', id: '__cekauto_gc__' })
-                                                                }
-                                                        ]
-                                                }
-                                        }
-                                }
-                        }
-                },
-                {},
-                {}
-        );
-        await hisoka.relayMessage(selMsg.key.remoteJid, selMsg.message, { messageId: selMsg.key.id });
-}
-
-async function sendCekautoGrupMsg(hisoka, m) {
-        if (!m.isGroup) return m.reply('❌ Perintah ini hanya bisa digunakan di dalam grup!');
-        const cfg = loadConfig();
-        const jid = m.from;
-
-        const totalAktif = CEKAUTO_GROUP_FITUR_LIST.filter(f => f.checkFn(cfg, jid)).length;
-        const totalMati  = CEKAUTO_GROUP_FITUR_LIST.length - totalAktif;
-
-        const allGrupFitur = CEKAUTO_GROUP_FITUR_LIST;
-        const aktifGrup   = allGrupFitur.filter(f => f.checkFn(cfg, jid));
-        const nonaktifGrup = allGrupFitur.filter(f => !f.checkFn(cfg, jid));
-        aktifGrup.sort((a, b) => a.nama.localeCompare(b.nama));
-        nonaktifGrup.sort((a, b) => a.nama.localeCompare(b.nama));
-
-        let txt =
-                `╔══════════════════════════╗\n` +
-                `║  🏘️  *FITUR GRUP*  ║\n` +
-                `╚══════════════════════════╝\n\n` +
-                `┌─────────────────────────────┐\n` +
-                `│  ✅ *AKTIF*  ·  ${totalAktif} fitur aktif\n` +
-                `└─────────────────────────────┘\n` +
-                (aktifGrup.length
-                        ? aktifGrup.map(f => `  🟢  *${f.nama}*`).join('\n') + '\n'
-                        : `  _Tidak ada fitur yang aktif_\n`) +
-                `\n┌─────────────────────────────┐\n` +
-                `│  ❌ *NONAKTIF*  ·  ${totalMati} fitur mati\n` +
-                `└─────────────────────────────┘\n` +
-                (nonaktifGrup.length
-                        ? nonaktifGrup.map(f => `  🔴  *${f.nama}*`).join('\n') + '\n'
-                        : `  _Semua fitur aktif_ ✨\n`) +
-                `\n╔══════════════════════════╗\n` +
-                `║  📦 *Total* : ${CEKAUTO_GROUP_FITUR_LIST.length} fitur terdaftar\n` +
-                `╚══════════════════════════╝\n\n` +
-                `┌─────────────────────────────┐\n` +
-                `│  📋 *DAFTAR PERINTAH*\n` +
-                `└─────────────────────────────┘\n` +
-                [...CEKAUTO_GROUP_FITUR_LIST]
-                        .sort((a, b) => a.nama.localeCompare(b.nama))
-                        .map(f => `  • *${f.nama}* → \`${f.cmd}\``)
-                        .join('\n');
-
-        await m.reply(txt);
-}
-
-async function sendCekautoMsg(hisoka, m) {
-        const cfg = loadConfig();
-        const aktif = [];
-        const nonaktif = [];
-
-        for (const f of CEKAUTO_FITUR_LIST) {
-                const val = cfg[f.key];
-                let isOn = false;
-                if (f.checkFn) {
-                        isOn = f.checkFn(cfg);
-                } else if (f.type === 'global') {
-                        isOn = val?.enabled === true;
-                } else {
-                        const groups = val?.groups || {};
-                        isOn = Object.values(groups).some(g => g?.enabled === true);
-                }
-                (isOn ? aktif : nonaktif).push({ nama: f.nama, cmd: f.cmd, key: f.key });
-        }
-
-        aktif.sort((a, b) => a.nama.localeCompare(b.nama));
-        nonaktif.sort((a, b) => a.nama.localeCompare(b.nama));
-
-        let txt =
-                `╔══════════════════════════╗\n` +
-                `║  ⚙️  *AUTO FITUR BOT*  ║\n` +
-                `╚══════════════════════════╝\n\n`;
-        txt += `┌─────────────────────────────┐\n`;
-        txt += `│  ✅ *AKTIF*  ·  ${aktif.length} fitur aktif\n`;
-        txt += `└─────────────────────────────┘\n`;
-        txt += aktif.length
-                ? aktif.map(f => `  🟢  *${f.nama}*`).join('\n') + '\n'
-                : `  _Tidak ada fitur yang aktif_\n`;
-        txt += `\n┌─────────────────────────────┐\n`;
-        txt += `│  ❌ *NONAKTIF*  ·  ${nonaktif.length} fitur mati\n`;
-        txt += `└─────────────────────────────┘\n`;
-        txt += nonaktif.length
-                ? nonaktif.map(f => `  🔴  *${f.nama}*`).join('\n') + '\n'
-                : `  _Semua fitur aktif_ ✨\n`;
-        txt += `\n╔══════════════════════════╗\n`;
-        txt += `║  📦 *Total* : ${CEKAUTO_FITUR_LIST.length} fitur terdaftar\n`;
-        txt += `╚══════════════════════════╝\n\n`;
-        txt += `┌─────────────────────────────┐\n`;
-        txt += `│  📋 *DAFTAR PERINTAH*\n`;
-        txt += `└─────────────────────────────┘\n`;
-        txt += [...CEKAUTO_FITUR_LIST]
-                .sort((a, b) => a.nama.localeCompare(b.nama))
-                .map(f => `  • *${f.nama}* → \`${f.cmd}\``)
-                .join('\n');
-
-        await m.reply(txt);
 }
 
 export default async function ({ message, type: messagesType }, hisoka) {
@@ -6223,7 +5088,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'viewonce':
                         case 'vo': {
                                 const { handleVo } = _require(path.resolve('./src/scrape/tools/viewonce.cjs'));
-                                await handleVo({ hisoka, m, query, tolak, logCommand, loadConfig, quoted, downloadMediaMessage, isJidGroup, extractMediaFromMessage, hasViewOnceCache, getViewOnceCache });
+                                await handleVo({ hisoka, m, query, tolak, logCommand, loadConfig, quoted, downloadMediaMessage, isJidGroup, hasViewOnceCache, getViewOnceCache });
                                 break;
                         }
 
@@ -6265,7 +5130,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'ai':
                         case 'tanya': {
                                 const { handleWily } = _require(path.resolve('./src/scrape/ai/wilycmd.cjs'));
-                                await handleWily({ hisoka, m, query, tolak, logCommand, loadConfig, gemini, getUserName, getSessionKey, getHistory, addToHistory, clearHistory, buildHistoryMeta, wrapCurrentUserMessage, detectAndUpdateMemory, searchAndGetImages, buildWilyAICommandPrompt, buildWilyMediaUserPrompt, startTyping, parseZipBuffer, extractPdfText, getMediaTypeFromMessage, getQuotedMediaBuffer, getCachedQuotedMedia, getMediaInfo, rememberAIMedia, detectImageSearchQuery, extractImageCount, buildSmartImageWaitText, buildSmartAlbumCaptions, sendImageAlbum, buildSmartImageHistoryReply, processAIMediaAndSend });
+                                await handleWily({ hisoka, m, query, tolak, logCommand, loadConfig, gemini, getUserName, getSessionKey, getHistory, addToHistory, clearHistory, buildHistoryMeta, wrapCurrentUserMessage, detectAndUpdateMemory, searchAndGetImages, buildWilyAICommandPrompt, buildWilyMediaUserPrompt, startTyping, getMediaTypeFromMessage, getQuotedMediaBuffer, getCachedQuotedMedia, getMediaInfo, rememberAIMedia, detectImageSearchQuery, extractImageCount, buildSmartImageWaitText, buildSmartAlbumCaptions, sendImageAlbum, buildSmartImageHistoryReply, processAIMediaAndSend });
                                 break;
                         }
 
@@ -6286,7 +5151,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'cekfitur':
                         case 'autolist': {
                                 const { handleCekauto } = _require(path.resolve('./src/scrape/tools/cekauto-cmd.cjs'));
-                                await handleCekauto({ hisoka, m, query, tolak, logCommand, sendCekautoMsg, sendCekautoGrupMsg });
+                                await _handleCekautoFn({ hisoka, m, query, tolak, logCommand });
                                 break;
                         }
 
@@ -6509,7 +5374,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'stickerpack':
                         case 'stikerpack': {
                                 const { handleStikerpack } = _require(path.resolve('./src/scrape/download/stickerly.cjs'));
-                                await handleStikerpack({ hisoka, m, query, tolak, logCommand, path, zipFiles, sendStickerPackCard });
+                                await handleStikerpack({ hisoka, m, query, tolak, logCommand, path });
                                 break;
                         }
 
@@ -6556,13 +5421,13 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                         case 'jadibot': {
                                 const { handleJadibot } = _require(path.resolve('./src/scrape/tools/jadibot-cmd.cjs'));
-                                await handleJadibot({ hisoka, m, query, tolak, logCommand, isMainBot, path, fs, jadibotMap, parseJadibotCommandQuery, parseJadibotDuration, startJadibot, maskNumber, getJadibotExpirySummary, scheduleJadibotExpiry, setPermanentJadibot, removeJadibotExpiry, ensureJadibotExpiry, getPhoneCountryInfo });
+                                await handleJadibot({ hisoka, m, query, tolak, logCommand, isMainBot, path, fs, jadibotMap, parseJadibotDuration, startJadibot, maskNumber, getJadibotExpirySummary, scheduleJadibotExpiry, setPermanentJadibot, removeJadibotExpiry, ensureJadibotExpiry });
                                 break;
                         }
 
                         case 'upbot': {
                                 const { handleUpbot } = _require(path.resolve('./src/scrape/tools/jadibot-cmd.cjs'));
-                                await handleUpbot({ hisoka, m, query, tolak, logCommand, isMainBot, jadibotMap, parseJadibotCommandQuery, parseJadibotDuration, getJadibotExpirySummary, getJadibotExpiry, extendJadibotExpiry, setPermanentJadibot, scheduleJadibotExpiry, maskNumber, formatRemainingTime });
+                                await handleUpbot({ hisoka, m, query, tolak, logCommand, isMainBot, jadibotMap, parseJadibotDuration, getJadibotExpirySummary, getJadibotExpiry, extendJadibotExpiry, setPermanentJadibot, scheduleJadibotExpiry, maskNumber, formatRemainingTime });
                                 break;
                         }
 

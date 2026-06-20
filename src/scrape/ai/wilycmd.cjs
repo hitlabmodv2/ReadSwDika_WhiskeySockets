@@ -4,13 +4,81 @@ const WILY_VERBOSE_LOGS = process.env.WILY_VERBOSE_LOGS === 'true' || process.en
 const wilyLog = (...args) => { if (WILY_VERBOSE_LOGS) console.log(...args); };
 const wilyError = (...args) => { if (WILY_VERBOSE_LOGS) console.error(...args); };
 
+
+const _exec = require('child_process').exec;
+const _util = require('util');
+const _fs = require('fs');
+
+function parseZipBuffer(buffer) {
+    const result = { files: [], isPasswordProtected: false, error: null };
+    try {
+        const LOCAL_FILE_HEADER_SIG = 0x04034b50;
+        const CENTRAL_DIR_SIG = 0x02014b50;
+        const EOCD_SIG = 0x06054b50;
+
+        let eocdOffset = -1;
+        for (let i = buffer.length - 22; i >= 0; i--) {
+            if (buffer.readUInt32LE(i) === EOCD_SIG) {
+                eocdOffset = i;
+                break;
+            }
+        }
+        if (eocdOffset === -1) {
+            result.error = 'Bukan file ZIP yang valid';
+            return result;
+        }
+
+        const centralDirSize = buffer.readUInt32LE(eocdOffset + 12);
+        const centralDirOffset = buffer.readUInt32LE(eocdOffset + 16);
+
+        let pos = centralDirOffset;
+        while (pos < centralDirOffset + centralDirSize && pos + 46 <= buffer.length) {
+            if (buffer.readUInt32LE(pos) !== CENTRAL_DIR_SIG) break;
+            const generalFlag = buffer.readUInt16LE(pos + 8);
+            const isEncrypted = (generalFlag & 0x01) !== 0;
+            if (isEncrypted) result.isPasswordProtected = true;
+            const compressedSize = buffer.readUInt32LE(pos + 20);
+            const uncompressedSize = buffer.readUInt32LE(pos + 24);
+            const fileNameLen = buffer.readUInt16LE(pos + 28);
+            const extraFieldLen = buffer.readUInt16LE(pos + 30);
+            const commentLen = buffer.readUInt16LE(pos + 32);
+            const fileName = buffer.slice(pos + 46, pos + 46 + fileNameLen).toString('utf8');
+            const isDir = fileName.endsWith('/');
+            if (!isDir) {
+                const sizeKb = uncompressedSize > 0 ? (uncompressedSize / 1024).toFixed(1) : (compressedSize / 1024).toFixed(1);
+                result.files.push({ name: fileName, size: parseFloat(sizeKb), encrypted: isEncrypted });
+            }
+            pos += 46 + fileNameLen + extraFieldLen + commentLen;
+        }
+    } catch (e) {
+        result.error = 'Gagal parse ZIP: ' + e.message;
+    }
+    return result;
+}
+
+// ── PDF TEXT EXTRACTOR via pdftotext ──
+async function extractPdfText(pdfBuffer) {
+    const execAsync = _util.promisify(_exec);
+    const tmpFile = `/tmp/wily_pdf_${Date.now()}.pdf`;
+    try {
+        _fs.writeFileSync(tmpFile, pdfBuffer);
+        const { stdout } = await execAsync(`pdftotext "${tmpFile}" -`, { timeout: 15000 });
+        return stdout.trim().substring(0, 4000);
+    } catch (e) {
+        throw new Error('Gagal baca PDF: ' + e.message);
+    } finally {
+        try { _fs.unlinkSync(tmpFile); } catch (_) {}
+    }
+}
+
+
 async function handleWily({
         hisoka, m, query, tolak, logCommand, loadConfig, gemini,
         getUserName, getSessionKey, getHistory, addToHistory, clearHistory, buildHistoryMeta, wrapCurrentUserMessage,
         detectAndUpdateMemory,
         searchAndGetImages,
         buildWilyAICommandPrompt, buildWilyMediaUserPrompt,
-        startTyping, parseZipBuffer, extractPdfText,
+        startTyping,
         getMediaTypeFromMessage, getQuotedMediaBuffer, getCachedQuotedMedia, getMediaInfo, rememberAIMedia,
         detectImageSearchQuery, extractImageCount,
         buildSmartImageWaitText, buildSmartAlbumCaptions, sendImageAlbum, buildSmartImageHistoryReply,

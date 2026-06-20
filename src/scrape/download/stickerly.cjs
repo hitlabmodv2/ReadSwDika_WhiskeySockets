@@ -187,7 +187,101 @@ module.exports = {
 };
 // ── COMMAND HANDLER ───────────────────────────────────────────────────────────
 
-async function handleStikerpack({ hisoka, m, query, tolak, logCommand, path, zipFiles, sendStickerPackCard }) {
+
+const { prepareWAMessageMedia, generateWAMessageFromContent, proto } = require('@whiskeysockets/baileys');
+const crypto = require('crypto');
+const { PassThrough } = require('stream');
+
+async function sendStickerPackCard(hisoka, jid, quoted, pack, zipBuffer) {
+	if (!zipBuffer?.length) throw new Error('ZIP pack kosong.');
+
+	const packMedia = await prepareWAMessageMedia({
+		sticker: zipBuffer,
+		mimetype: 'image/webp'
+	}, { upload: hisoka.waUploadToServer });
+	const stickerMessage = packMedia.stickerMessage;
+	if (!stickerMessage?.directPath) throw new Error('Upload ZIP pack ke WhatsApp gagal.');
+
+	let thumbnailMessage = null;
+	if (pack.thumbnailUrl) {
+		try {
+			const thumbnailMedia = await prepareWAMessageMedia({
+				image: { url: pack.thumbnailUrl }
+			}, { upload: hisoka.waUploadToServer });
+			thumbnailMessage = thumbnailMedia.imageMessage || null;
+		} catch (thumbErr) {
+			console.error('[StickerLy] Thumbnail upload failed:', thumbErr.message);
+		}
+	}
+
+	const stickers = pack.files.map(item => ({
+		fileName: item.fileName,
+		isAnimated: !!item.isAnimated,
+		emojis: ['✨'],
+		accessibilityLabel: item.id || item.fileName || '',
+		isLottie: false,
+		mimetype: 'image/webp'
+	}));
+
+	const stickerPackMessage = proto.Message.StickerPackMessage.fromObject({
+		stickerPackId: String(pack.id || crypto.randomBytes(4).toString('hex')),
+		name: String(pack.name || 'StickerLy Pack').slice(0, 128),
+		publisher: String(pack.author?.name || 'StickerLy').slice(0, 128),
+		stickers,
+		fileLength: stickerMessage.fileLength,
+		fileSha256: stickerMessage.fileSha256,
+		fileEncSha256: stickerMessage.fileEncSha256,
+		mediaKey: stickerMessage.mediaKey,
+		directPath: stickerMessage.directPath,
+		caption: pack.url || '',
+		contextInfo: {
+			quotedMessage: quoted?.message,
+			stanzaId: quoted?.key?.id,
+			participant: quoted?.sender || quoted?.key?.participant || quoted?.key?.remoteJid
+		},
+		packDescription: `Stickerly pack: ${pack.url || pack.id}`,
+		mediaKeyTimestamp: stickerMessage.mediaKeyTimestamp,
+		trayIconFileName: pack.trayIconFileName || pack.files[0]?.fileName || '',
+		thumbnailDirectPath: thumbnailMessage?.directPath,
+		thumbnailSha256: thumbnailMessage?.fileSha256,
+		thumbnailEncSha256: thumbnailMessage?.fileEncSha256,
+		thumbnailHeight: thumbnailMessage?.height || 512,
+		thumbnailWidth: thumbnailMessage?.width || 512,
+		imageDataHash: pack.id ? String(pack.id) : undefined,
+		stickerPackSize: stickers.length,
+		stickerPackOrigin: proto.Message.StickerPackMessage.StickerPackOrigin.THIRD_PARTY
+	});
+
+	const msg = generateWAMessageFromContent(jid, { stickerPackMessage }, { quoted });
+	await hisoka.relayMessage(msg.key.remoteJid, msg.message, { messageId: msg.key.id });
+	return msg;
+}
+
+function zipFiles(files) {
+	return new Promise((resolve, reject) => {
+		const archiver = require('archiver');
+		const archive = archiver('zip', { zlib: { level: 0 } });
+		const output = new PassThrough();
+		const chunks = [];
+
+		output.on('data', chunk => chunks.push(chunk));
+		output.on('end', () => resolve(Buffer.concat(chunks)));
+		output.on('error', reject);
+		archive.on('error', reject);
+		archive.pipe(output);
+
+		for (const file of files) {
+			archive.append(file.buffer, {
+				name: file.fileName,
+				store: true
+			});
+		}
+
+		archive.finalize();
+	});
+}
+
+async function handleStikerpack({ hisoka, m, query, tolak, logCommand, path }) {
 	try {
 		const input = (query || '').trim();
 		const pfx   = m.prefix || '.';

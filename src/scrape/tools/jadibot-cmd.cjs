@@ -1,6 +1,136 @@
 'use strict';
 
-async function handleJadibot({ hisoka, m, query, tolak, logCommand, isMainBot, path, fs, jadibotMap, parseJadibotCommandQuery, parseJadibotDuration, startJadibot, maskNumber, getJadibotExpirySummary, scheduleJadibotExpiry, setPermanentJadibot, removeJadibotExpiry, ensureJadibotExpiry, getPhoneCountryInfo }) {
+
+function parseJadibotCommandQuery(raw = '') {
+    const text = String(raw || '').trim();
+    if (!text) return { number: '', durationInput: '', rawNumberPart: '' };
+
+    let numberPart = '';
+    let durationRaw = '';
+
+    // Support comma format: "628xxx,1h" atau "+628xxx,p"
+    const commaIdx = text.indexOf(',');
+    if (commaIdx !== -1) {
+        numberPart = text.slice(0, commaIdx).trim();
+        durationRaw = text.slice(commaIdx + 1).trim();
+    } else {
+        // Space-separated: "628xxx 1h" atau "628xxx permanent"
+        const durationMatch = text.match(/\s((?:\d+\s*(?:menit|mnt|min|minute|minutes|m|jam|hour|hours|j|hari|day|days|h|d))|(?:permanent|permanen|perm|perma|selamanya|p))\s*$/i);
+        durationRaw = durationMatch ? durationMatch[1].trim() : '';
+        numberPart = durationMatch ? text.slice(0, durationMatch.index).trim() : text;
+    }
+
+    const rawNumberPart = numberPart;
+    // Karakter valid nomor telepon: angka, +, spasi, -, (), .
+    const hasInvalidPhoneChars = rawNumberPart ? /[^0-9+\-\s().]/.test(rawNumberPart) : false;
+    let number = numberPart.replace(/[^0-9]/g, '');
+    if (number.startsWith('00')) number = number.slice(2);
+    if (number.startsWith('08')) number = '62' + number.slice(1);
+    else if (number.startsWith('8')) number = '62' + number;
+
+    return { number, durationInput: durationRaw, rawNumberPart, hasInvalidPhoneChars };
+}
+
+function normalizeJadibotNumber(raw = '') {
+    let number = String(raw || '').replace(/[^0-9]/g, '');
+    if (number.startsWith('00')) number = number.slice(2);
+    if (number.startsWith('08')) number = '62' + number.slice(1);
+    else if (number.startsWith('8')) number = '62' + number;
+    return number;
+}
+
+// Deteksi negara dari nomor WA (E.164 tanpa +)
+function getPhoneCountryInfo(number = '') {
+    const n = String(number).replace(/[^0-9]/g, '');
+    // Sorted longest-first untuk match paling spesifik
+    const codes = [
+        ['1684','🇦🇸','Samoa Amerika'],['1242','🇧🇸','Bahamas'],['1246','🇧🇧','Barbados'],
+        ['1264','🇦🇮','Anguilla'],['1268','🇦🇬','Antigua & Barbuda'],['1284','🇻🇬','British Virgin Islands'],
+        ['1340','🇻🇮','US Virgin Islands'],['1345','🇰🇾','Cayman Islands'],['1441','🇧🇲','Bermuda'],
+        ['1473','🇬🇩','Grenada'],['1649','🇹🇨','Turks & Caicos'],['1664','🇲🇸','Montserrat'],
+        ['1670','🇲🇵','Northern Mariana Islands'],['1671','🇬🇺','Guam'],['1684','🇦🇸','American Samoa'],
+        ['1721','🇸🇽','Sint Maarten'],['1758','🇱🇨','Saint Lucia'],['1767','🇩🇲','Dominica'],
+        ['1784','🇻🇨','St. Vincent & Grenadines'],['1809','🇩🇴','Dominika Republic'],
+        ['1829','🇩🇴','Dominika Republic'],['1849','🇩🇴','Dominika Republic'],
+        ['1868','🇹🇹','Trinidad & Tobago'],['1869','🇰🇳','Saint Kitts & Nevis'],
+        ['1876','🇯🇲','Jamaika'],['1939','🇵🇷','Puerto Rico'],
+        ['7840','🇬🇪','Abkhazia'],['7940','🇬🇪','Abkhazia'],
+        ['212','🇲🇦','Maroko'],['213','🇩🇿','Aljazair'],['216','🇹🇳','Tunisia'],['218','🇱🇾','Libya'],
+        ['220','🇬🇲','Gambia'],['221','🇸🇳','Senegal'],['222','🇲🇷','Mauritania'],['223','🇲🇱','Mali'],
+        ['224','🇬🇳','Guinea'],['225','🇨🇮','Pantai Gading'],['226','🇧🇫','Burkina Faso'],
+        ['227','🇳🇪','Niger'],['228','🇹🇬','Togo'],['229','🇧🇯','Benin'],['230','🇲🇺','Mauritius'],
+        ['231','🇱🇷','Liberia'],['232','🇸🇱','Sierra Leone'],['233','🇬🇭','Ghana'],
+        ['234','🇳🇬','Nigeria'],['235','🇹🇩','Chad'],['236','🇨🇫','Republik Afrika Tengah'],
+        ['237','🇨🇲','Kamerun'],['238','🇨🇻','Tanjung Verde'],['239','🇸🇹','São Tomé & Príncipe'],
+        ['240','🇬🇶','Guinea Khatulistiwa'],['241','🇬🇦','Gabon'],['242','🇨🇬','Kongo'],
+        ['243','🇨🇩','DR Kongo'],['244','🇦🇴','Angola'],['245','🇬🇼','Guinea-Bissau'],
+        ['248','🇸🇨','Seychelles'],['249','🇸🇩','Sudan'],['250','🇷🇼','Rwanda'],
+        ['251','🇪🇹','Ethiopia'],['252','🇸🇴','Somalia'],['253','🇩🇯','Djibouti'],
+        ['254','🇰🇪','Kenya'],['255','🇹🇿','Tanzania'],['256','🇺🇬','Uganda'],
+        ['257','🇧🇮','Burundi'],['258','🇲🇿','Mozambik'],['260','🇿🇲','Zambia'],
+        ['261','🇲🇬','Madagaskar'],['263','🇿🇼','Zimbabwe'],['264','🇳🇦','Namibia'],
+        ['265','🇲🇼','Malawi'],['266','🇱🇸','Lesotho'],['267','🇧🇼','Botswana'],
+        ['268','🇸🇿','Eswatini'],['269','🇰🇲','Komoro'],
+        ['290','🇸🇭','Saint Helena'],['291','🇪🇷','Eritrea'],
+        ['297','🇦🇼','Aruba'],['298','🇫🇴','Faroe Islands'],['299','🇬🇱','Greenland'],
+        ['350','🇬🇮','Gibraltar'],['351','🇵🇹','Portugal'],['352','🇱🇺','Luksemburg'],
+        ['353','🇮🇪','Irlandia'],['354','🇮🇸','Islandia'],['355','🇦🇱','Albania'],
+        ['356','🇲🇹','Malta'],['357','🇨🇾','Siprus'],['358','🇫🇮','Finlandia'],
+        ['359','🇧🇬','Bulgaria'],['370','🇱🇹','Lithuania'],['371','🇱🇻','Latvia'],
+        ['372','🇪🇪','Estonia'],['373','🇲🇩','Moldova'],['374','🇦🇲','Armenia'],
+        ['375','🇧🇾','Belarus'],['376','🇦🇩','Andorra'],['377','🇲🇨','Monako'],
+        ['378','🇸🇲','San Marino'],['380','🇺🇦','Ukraina'],['381','🇷🇸','Serbia'],
+        ['382','🇲🇪','Montenegro'],['385','🇭🇷','Kroasia'],['386','🇸🇮','Slovenia'],
+        ['387','🇧🇦','Bosnia & Herzegovina'],['389','🇲🇰','Makedonia Utara'],
+        ['420','🇨🇿','Ceko'],['421','🇸🇰','Slovakia'],['423','🇱🇮','Liechtenstein'],
+        ['500','🇫🇰','Kepulauan Falkland'],['501','🇧🇿','Belize'],['502','🇬🇹','Guatemala'],
+        ['503','🇸🇻','El Salvador'],['504','🇭🇳','Honduras'],['505','🇳🇮','Nikaragua'],
+        ['506','🇨🇷','Kosta Rika'],['507','🇵🇦','Panama'],['509','🇭🇹','Haiti'],
+        ['590','🇬🇵','Guadeloupe'],['591','🇧🇴','Bolivia'],['592','🇬🇾','Guyana'],
+        ['593','🇪🇨','Ekuador'],['595','🇵🇾','Paraguay'],['597','🇸🇷','Suriname'],
+        ['598','🇺🇾','Uruguay'],['670','🇹🇱','Timor-Leste'],['673','🇧🇳','Brunei'],
+        ['674','🇳🇷','Nauru'],['675','🇵🇬','Papua Nugini'],['676','🇹🇴','Tonga'],
+        ['677','🇸🇧','Kepulauan Solomon'],['678','🇻🇺','Vanuatu'],['679','🇫🇯','Fiji'],
+        ['680','🇵🇼','Palau'],['682','🇨🇰','Kepulauan Cook'],['685','🇼🇸','Samoa'],
+        ['686','🇰🇮','Kiribati'],['687','🇳🇨','Kaledonia Baru'],['688','🇹🇻','Tuvalu'],
+        ['689','🇵🇫','Polinesia Prancis'],['691','🇫🇲','Mikronesia'],
+        ['692','🇲🇭','Kepulauan Marshall'],['850','🇰🇵','Korea Utara'],
+        ['852','🇭🇰','Hong Kong'],['853','🇲🇴','Makau'],['855','🇰🇭','Kamboja'],
+        ['856','🇱🇦','Laos'],['880','🇧🇩','Bangladesh'],['886','🇹🇼','Taiwan'],
+        ['960','🇲🇻','Maladewa'],['961','🇱🇧','Lebanon'],['962','🇯🇴','Yordania'],
+        ['963','🇸🇾','Suriah'],['964','🇮🇶','Irak'],['965','🇰🇼','Kuwait'],
+        ['966','🇸🇦','Arab Saudi'],['967','🇾🇪','Yaman'],['968','🇴🇲','Oman'],
+        ['970','🇵🇸','Palestina'],['971','🇦🇪','Uni Emirat Arab'],['972','🇮🇱','Israel'],
+        ['973','🇧🇭','Bahrain'],['974','🇶🇦','Qatar'],['975','🇧🇹','Bhutan'],
+        ['976','🇲🇳','Mongolia'],['977','🇳🇵','Nepal'],
+        ['992','🇹🇯','Tajikistan'],['993','🇹🇲','Turkmenistan'],['994','🇦🇿','Azerbaijan'],
+        ['995','🇬🇪','Georgia'],['996','🇰🇬','Kirgizstan'],['998','🇺🇿','Uzbekistan'],
+        ['20','🇪🇬','Mesir'],['27','🇿🇦','Afrika Selatan'],['30','🇬🇷','Yunani'],
+        ['31','🇳🇱','Belanda'],['32','🇧🇪','Belgia'],['33','🇫🇷','Prancis'],
+        ['34','🇪🇸','Spanyol'],['36','🇭🇺','Hungaria'],['39','🇮🇹','Italia'],
+        ['40','🇷🇴','Rumania'],['41','🇨🇭','Swiss'],['43','🇦🇹','Austria'],
+        ['44','🇬🇧','Inggris'],['45','🇩🇰','Denmark'],['46','🇸🇪','Swedia'],
+        ['47','🇳🇴','Norwegia'],['48','🇵🇱','Polandia'],['49','🇩🇪','Jerman'],
+        ['51','🇵🇪','Peru'],['52','🇲🇽','Meksiko'],['53','🇨🇺','Kuba'],
+        ['54','🇦🇷','Argentina'],['55','🇧🇷','Brasil'],['56','🇨🇱','Chile'],
+        ['57','🇨🇴','Kolombia'],['58','🇻🇪','Venezuela'],
+        ['60','🇲🇾','Malaysia'],['61','🇦🇺','Australia'],['62','🇮🇩','Indonesia'],
+        ['63','🇵🇭','Filipina'],['64','🇳🇿','Selandia Baru'],['65','🇸🇬','Singapura'],
+        ['66','🇹🇭','Thailand'],
+        ['81','🇯🇵','Jepang'],['82','🇰🇷','Korea Selatan'],['84','🇻🇳','Vietnam'],
+        ['86','🇨🇳','Tiongkok'],
+        ['90','🇹🇷','Turki'],['91','🇮🇳','India'],['92','🇵🇰','Pakistan'],
+        ['93','🇦🇫','Afghanistan'],['94','🇱🇰','Sri Lanka'],['95','🇲🇲','Myanmar'],
+        ['98','🇮🇷','Iran'],
+        ['7','🇷🇺','Rusia'],['1','🇺🇸','Amerika Serikat / 🇨🇦 Kanada'],
+    ];
+    for (const [code, flag, name] of codes) {
+        if (n.startsWith(code)) return { flag, name };
+    }
+    return { flag: '🌐', name: 'Tidak diketahui' };
+}
+
+async function handleJadibot({ hisoka, m, query, tolak, logCommand, isMainBot, path, fs, jadibotMap, parseJadibotDuration, startJadibot, maskNumber, getJadibotExpirySummary, scheduleJadibotExpiry, setPermanentJadibot, removeJadibotExpiry, ensureJadibotExpiry }) {
         if (!isMainBot(hisoka)) return;
         if (!m.isOwner) return;
 
@@ -438,4 +568,4 @@ async function handleStopbot({ hisoka, m, query, tolak, logCommand, isMainBot, j
         );
 }
 
-module.exports = { handleJadibot, handleUpbot, handleStopbot };
+module.exports = { handleJadibot, handleUpbot, handleStopbot, normalizeJadibotNumber };

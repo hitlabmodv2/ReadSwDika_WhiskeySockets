@@ -1,6 +1,80 @@
 'use strict';
 
-async function handleVo({ hisoka, m, query, tolak, logCommand, loadConfig, quoted, downloadMediaMessage, isJidGroup, extractMediaFromMessage, hasViewOnceCache, getViewOnceCache }) {
+
+function extractMediaFromMessage(quotedMsg) {
+	let targetMessage = quotedMsg;
+	let foundViewOnce = false;
+
+	if (quotedMsg.ephemeralMessage?.message) {
+		targetMessage = quotedMsg.ephemeralMessage.message;
+	}
+
+	if (targetMessage.viewOnceMessage?.message) {
+		targetMessage = targetMessage.viewOnceMessage.message;
+		foundViewOnce = true;
+	}
+
+	if (targetMessage.viewOnceMessageV2?.message) {
+		targetMessage = targetMessage.viewOnceMessageV2.message;
+		foundViewOnce = true;
+	}
+
+	if (targetMessage.viewOnceMessageV2Extension?.message) {
+		targetMessage = targetMessage.viewOnceMessageV2Extension.message;
+		foundViewOnce = true;
+	}
+
+	const mediaTypes = [
+		'imageMessage',
+		'videoMessage',
+		'audioMessage',
+		'documentMessage',
+		'stickerMessage'
+	];
+
+	for (const mediaType of mediaTypes) {
+		if (targetMessage[mediaType]) {
+			return {
+				mediaMessage: targetMessage[mediaType],
+				mediaType: mediaType,
+				isViewOnce: foundViewOnce ||
+					targetMessage[mediaType].viewOnce === true ||
+					quotedMsg.viewOnceMessage ||
+					quotedMsg.viewOnceMessageV2 ||
+					quotedMsg.viewOnceMessageV2Extension
+			};
+		}
+	}
+
+	return null;
+}
+
+function isViewOnceMessage(quotedMsg) {
+	if (quotedMsg.viewOnceMessage) return true;
+	if (quotedMsg.viewOnceMessageV2) return true;
+	if (quotedMsg.viewOnceMessageV2Extension) return true;
+
+	if (quotedMsg.ephemeralMessage?.message) {
+		const ephemeralContent = quotedMsg.ephemeralMessage.message;
+		if (ephemeralContent.viewOnceMessage) return true;
+		if (ephemeralContent.viewOnceMessageV2) return true;
+		if (ephemeralContent.viewOnceMessageV2Extension) return true;
+
+		const mediaTypes = ['imageMessage', 'videoMessage', 'audioMessage', 'documentMessage', 'stickerMessage'];
+		for (const type of mediaTypes) {
+			if (ephemeralContent[type]?.viewOnce) return true;
+		}
+	}
+
+	const mediaTypes = ['imageMessage', 'videoMessage', 'audioMessage', 'documentMessage', 'stickerMessage'];
+	for (const type of mediaTypes) {
+		if (quotedMsg[type]?.viewOnce) return true;
+	}
+
+	return false;
+}
+
+async function handleVo({ hisoka, m, query, tolak, logCommand, loadConfig, quoted, downloadMediaMessage, isJidGroup, hasViewOnceCache, getViewOnceCache }) {
 	try {
 		if (!m.isQuoted) {
 			if (query) return;

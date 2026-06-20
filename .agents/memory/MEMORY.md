@@ -1,1 +1,2 @@
 - [WilyBot V22 refactor](wilybot-refactor.md) — pattern refactor message.js: pindah case block ke handler .cjs, Python line-based replace
+- [WilyBot cekauto factory](wilybot-cekauto-factory.md) — makeCekautoHelpers factory di cekauto-cmd.cjs; ES module deps (loadConfig, saveConfig, toggleAntiTagSW, isAntiTagSWEnabled, getAllAntiTagSWGroups, sendConfirmWithButtons, tolak) di-pass sebagai params
