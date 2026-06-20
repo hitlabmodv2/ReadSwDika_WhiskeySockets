@@ -37,7 +37,7 @@
  *
  * Usage di message.js:
  *   const { handleTiktokDl, handleInstagramDl, handleFacebookDl,
- *           handlePlay, handleYtmp3, handleYtmp4 } = _require(path.resolve('./scrape/downloader.cjs'));
+ *           handlePlay, handleYtmp3, handleYtmp4 } = _require(path.resolve('./SEMUA_FITUR/downloader.cjs'));
  */
 
 const { handleTiktokDl }    = require('./tiktok-dl.cjs');

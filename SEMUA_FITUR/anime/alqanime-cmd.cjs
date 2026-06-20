@@ -88,7 +88,7 @@ async function handleAlqUpdateChoice({
         await tolak(hisoka, m, `📡 Mengambil detail *${chosen.title}*...`);
 
         try {
-                const _alqPath = path.resolve('./scrape/anime/alqanime.cjs');
+                const _alqPath = path.resolve('./SEMUA_FITUR/anime/alqanime.cjs');
                 delete require.cache[_alqPath];
                 const { getDetailAlqanime } = require(_alqPath);
                 const detail = await getDetailAlqanime(chosen.url);
@@ -108,7 +108,7 @@ async function handleAlqUpdateChoice({
                                 return true;
                         }
 
-                        const _dlPath = path.resolve('./scrape/anime/alqanime-dl.cjs');
+                        const _dlPath = path.resolve('./SEMUA_FITUR/anime/alqanime-dl.cjs');
                         delete require.cache[_dlPath];
                         const { resolveDirectLink: alqResolve, downloadToTmp: alqDownload, formatSize: alqSize } = require(_dlPath);
 
@@ -288,7 +288,7 @@ async function handleAlqDlChoice({
                 return true;
         }
 
-        const _dlPath2 = path.resolve('./scrape/anime/alqanime-dl.cjs');
+        const _dlPath2 = path.resolve('./SEMUA_FITUR/anime/alqanime-dl.cjs');
         delete require.cache[_dlPath2];
         const { resolveDirectLink: alqResolve, downloadToTmp: alqDownload, formatSize: alqSize } = require(_dlPath2);
 

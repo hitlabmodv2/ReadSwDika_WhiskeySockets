@@ -29,7 +29,7 @@
  *  cloud iLoveIMG — dipakai oleh fitur edit foto bot.
  * ═══════════════════════════════════════════════════════════════
  */
-// Source: https://github.com/hitlabmodv2/MD-FURINA/blob/main/scrape/iloveimg.js
+// Source: https://github.com/hitlabmodv2/MD-FURINA/blob/main/SEMUA_FITUR/iloveimg.js
 
 const axios = require('axios');
 const cheerio = require('cheerio');

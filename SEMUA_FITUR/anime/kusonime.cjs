@@ -474,7 +474,7 @@ async function handleAnime({ hisoka, m, query, tolak, logCommand, logError, path
 
                         try { await m.reply({ edit: loadingMsg.key, text: `✅ Detail selesai!\n🖨 Membuat file PDF (${validCount} anime + gambar)...` }); } catch (_) {}
 
-                        const { generateSeasonPdf } = require(path.resolve('./scrape/anime/kusonime-pdf.cjs'));
+                        const { generateSeasonPdf } = require(path.resolve('./SEMUA_FITUR/anime/kusonime-pdf.cjs'));
                         const pdfBuf = await generateSeasonPdf(season, year, details);
 
                         try { await m.reply({ edit: loadingMsg.key, text: `✅ Semua file siap! Mengirim TXT + PDF...` }); } catch (_) {}

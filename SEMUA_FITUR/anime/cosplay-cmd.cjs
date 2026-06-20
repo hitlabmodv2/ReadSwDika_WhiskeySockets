@@ -123,7 +123,7 @@ async function handleCosplayChoice({
         );
 
         try {
-                const { cosplayteleGetPost, downloadBuffer, formatCosplayteleCaption } = require(path.resolve('./scrape/anime/cosplaytele.cjs'));
+                const { cosplayteleGetPost, downloadBuffer, formatCosplayteleCaption } = require(path.resolve('./SEMUA_FITUR/anime/cosplaytele.cjs'));
                 const post = await cosplayteleGetPost(chosen.id);
 
                 if (loadMsg?.key) {

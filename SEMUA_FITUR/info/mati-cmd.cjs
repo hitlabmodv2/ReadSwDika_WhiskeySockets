@@ -27,7 +27,7 @@
 async function handleMati({ hisoka, m, tolak, logCommand, _require, path }) {
 	if (!m.isOwner) return tolak(hisoka, m, '❌ Hanya owner yang bisa mematikan bot!');
 	if (!m.prefix && m.query) return;
-	const { shutdownBot } = _require(path.resolve('./scrape/system/shutdown.cjs'));
+	const { shutdownBot } = _require(path.resolve('./SEMUA_FITUR/system/shutdown.cjs'));
 	await hisoka.sendMessage(m.from, {
 		text:
 			`╔══════════════════════╗\n` +

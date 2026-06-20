@@ -34,7 +34,7 @@
 
 const axios  = require('axios');
 const path   = require('path');
-const { Gemini } = require(path.resolve('./scrape/ai/gemini.cjs'));
+const { Gemini } = require(path.resolve('./SEMUA_FITUR/ai/gemini.cjs'));
 
 // ─── Singleton Gemini (pakai gemini.cjs — token pool x3, fallback akurat) ─
 // Model chain: gemini-flash-latest → gemini-pro-latest → gemini-2.5-flash
@@ -754,7 +754,7 @@ async function handleMusikai2({ hisoka, m, query, tolak, logCommand, logError, _
                         return;
                 }
 
-                const { ChatMusicAPI2 } = _require(path.resolve('./scrape/music/chatmusic2.cjs'));
+                const { ChatMusicAPI2 } = _require(path.resolve('./SEMUA_FITUR/music/chatmusic2.cjs'));
 
                 if (!input.includes('|')) {
                         const tema = input.slice(0, 200);

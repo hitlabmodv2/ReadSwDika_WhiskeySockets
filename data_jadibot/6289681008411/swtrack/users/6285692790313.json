@@ -5,9 +5,9 @@
     "name": "?",
     "type": "videoMessage",
     "arrivedAt": "2026-06-20T15:54:51.216Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "🛏️",
     "resolve": "Signal Lib ✓",
     "source": "status",
     "number": "6285692790313",
@@ -20,6 +20,25 @@
       "participant": "11528178778195@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-20T15:54:51.216Z"
+    "updatedAt": "2026-06-20T15:55:07.628Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285692790313@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC083A57CA44690CAC2E8CF9D37C91E9",
+        "participant": "11528178778195@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285692790313@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC083A57CA44690CAC2E8CF9D37C91E9",
+        "participant": "6285692790313@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-20T15:55:07.628Z"
   }
 }

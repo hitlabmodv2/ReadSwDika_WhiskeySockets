@@ -452,11 +452,11 @@ export async function startBrowserSwitch(hisoka, browserVal, from, editFn, newBr
                     if (typeof global.__internalRestart === 'function') {
                         global.__internalRestart().catch(err => {
                             console.error('[BrowserSwitch] Internal restart gagal, fallback restart:', err?.message);
-                            const { restartBot } = _require(path.resolve('./scrape/system/shutdown.cjs'));
+                            const { restartBot } = _require(path.resolve('./SEMUA_FITUR/system/shutdown.cjs'));
                             restartBot(500);
                         });
                     } else {
-                        const { restartBot } = _require(path.resolve('./scrape/system/shutdown.cjs'));
+                        const { restartBot } = _require(path.resolve('./SEMUA_FITUR/system/shutdown.cjs'));
                         restartBot(500);
                     }
                 }

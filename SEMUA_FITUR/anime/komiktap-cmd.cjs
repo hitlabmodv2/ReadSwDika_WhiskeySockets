@@ -167,7 +167,7 @@ async function handleKomiktapChoice({
                 return true;
         }
 
-        const { komiktapDetail, komiktapPdf, komiktapChapterImages, makeProgressBar, formatDetailText } = require(path.resolve('./scrape/anime/komiktap.cjs'));
+        const { komiktapDetail, komiktapPdf, komiktapChapterImages, makeProgressBar, formatDetailText } = require(path.resolve('./SEMUA_FITUR/anime/komiktap.cjs'));
 
         // FASE 1: user balas nomor dari daftar pencarian
         if (pendingKomik.phase === 'search') {

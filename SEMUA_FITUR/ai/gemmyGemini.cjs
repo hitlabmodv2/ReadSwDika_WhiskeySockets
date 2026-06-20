@@ -34,7 +34,7 @@
  * ───────────────────────────────
  *  Helper    : Gemini AI wrapper untuk analisa email tempmail
  *  Tujuan    : Pilih SATU link verifikasi paling penting + label akurat
- *  Dipakai   : scrape/tmail.cjs → analyzeEmail()
+ *  Dipakai   : SEMUA_FITUR/tmail.cjs → analyzeEmail()
  * ───────────────────────────────
  */
 'use strict';

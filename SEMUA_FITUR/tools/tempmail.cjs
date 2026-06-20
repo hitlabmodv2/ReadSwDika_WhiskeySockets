@@ -37,7 +37,7 @@
  * Handler untuk command: tempmail, tmail, tminbox, tmread, tmwait, tmdel
  */
 async function handleTempmail({ hisoka, m, query, tolak, logCommand, logError, path, _require }) {
-        const Tmail = _require(path.resolve('./scrape/tools/tmail.cjs'));
+        const Tmail = _require(path.resolve('./SEMUA_FITUR/tools/tmail.cjs'));
         const fs = _require('fs');
         const TMAIL_DB = path.resolve('./data/tmail/db.json');
         if (!global.__tmailSessions) global.__tmailSessions = new Map();

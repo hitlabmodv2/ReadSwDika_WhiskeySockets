@@ -75,7 +75,7 @@ async function handleInfomusik({ hisoka, m, tolak, logCommand, getMediaTypeFromM
                 return;
         }
 
-        const { analyzeAudio } = _require(path.resolve('./scrape/music/whatgenre.cjs'));
+        const { analyzeAudio } = _require(path.resolve('./SEMUA_FITUR/music/whatgenre.cjs'));
         const result = await analyzeAudio(audioBuffer, targetMime);
 
         await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });

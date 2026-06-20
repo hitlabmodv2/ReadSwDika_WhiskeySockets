@@ -22,7 +22,7 @@
  *  Upscale & sharpen via AI, dukung gambar & video
  * ───────────────────────────────
  */
-// Source: https://github.com/hitlabmodv2/MD-FURINA/blob/main/scrape/hdvid.js
+// Source: https://github.com/hitlabmodv2/MD-FURINA/blob/main/SEMUA_FITUR/hdvid.js
 
 const crypto = require('crypto');
 
@@ -126,8 +126,8 @@ module.exports = { hdvideo };
 async function handleHdvideo({ hisoka, m, query, tolak, logCommand, fs, path, quoted, downloadMediaMessage }) {
         try {
                 const { hdvideo }           = module.exports;
-                const { sparkpixHdUpscale } = require(path.resolve('./scrape/ai/sparkpix.cjs'));
-                const { hdr: iloveimgHdr }  = require(path.resolve('./scrape/ai/iloveimg.cjs'));
+                const { sparkpixHdUpscale } = require(path.resolve('./SEMUA_FITUR/ai/sparkpix.cjs'));
+                const { hdr: iloveimgHdr }  = require(path.resolve('./SEMUA_FITUR/ai/iloveimg.cjs'));
 
                 const isMediaMsg    = m.isMedia && (m.type === 'imageMessage' || m.type === 'videoMessage' || m.type === 'stickerMessage');
                 const isQuotedMedia = m.isQuoted && quoted && quoted.isMedia && (quoted.type === 'imageMessage' || quoted.type === 'videoMessage' || quoted.type === 'stickerMessage');

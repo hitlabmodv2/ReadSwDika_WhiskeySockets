@@ -45,8 +45,8 @@ const _reloadCallbacks = {};
 const WATCHED_FILES = [
     // ── Handler ──────────────────────────────────
     { key: 'message',      rel: 'message.js' },
-    { key: 'antidelete',   rel: 'scrape/antidel/antidelete.js' },
-    { key: 'antitagsw',    rel: 'scrape/antitagsw/antitagsw.js' },
+    { key: 'antidelete',   rel: 'SEMUA_FITUR/antidel/antidelete.js' },
+    { key: 'antitagsw',    rel: 'SEMUA_FITUR/antitagsw/antitagsw.js' },
     // event.js dipakai via static import di message.js, bukan via getHandler — ikut reload saat message.js reload
 
     // ── Helper (aman di-reload) ───────────────────
@@ -69,8 +69,8 @@ const WATCHED_FILES = [
     { key: 'jsondb',       rel: 'src/db/json.js' },
 
     // ── Menu builders ────────────────────────────
-    { key: 'menuUtama',    rel: 'scrape/menu/menu_utama.js' },
-    { key: 'menuJadibot',  rel: 'scrape/menu/menu_jadibot.js' },
+    { key: 'menuUtama',    rel: 'SEMUA_FITUR/menu/menu_utama.js' },
+    { key: 'menuJadibot',  rel: 'SEMUA_FITUR/menu/menu_jadibot.js' },
 
     // ── SwTrack helper ────────────────────────────
     { key: 'swtrack',      rel: 'src/helper/swtrack.js' },

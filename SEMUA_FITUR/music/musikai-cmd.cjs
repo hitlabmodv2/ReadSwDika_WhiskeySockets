@@ -37,7 +37,7 @@ const path = require('path');
 // ─── Factory: buat _generateMusik dengan deps yang sudah di-bind ──────────────
 function _makeGenerateMusik({ hisoka, m, pendingMusikaiCache, sendAudioWithButtons, logCommand }) {
         return async function _generateMusik(params) {
-                const { ChatMusicAPI, formatDuration: fmtDur, MODELS: MusicModels } = require(path.resolve('./scrape/music/chatmusic.cjs'));
+                const { ChatMusicAPI, formatDuration: fmtDur, MODELS: MusicModels } = require(path.resolve('./SEMUA_FITUR/music/chatmusic.cjs'));
                 await hisoka.sendMessage(m.from, { react: { text: '🎵', key: m.key } }).catch(() => {});
 
                 const txtLoading =
@@ -339,7 +339,7 @@ async function handleMusikaiCmd({
                                 try { await hisoka.sendMessage(m.from, { text: txt, edit: loadingMsg.key }); } catch (_) {}
                         };
 
-                        const { ChatMusicAPI } = require(path.resolve('./scrape/music/chatmusic.cjs'));
+                        const { ChatMusicAPI } = require(path.resolve('./SEMUA_FITUR/music/chatmusic.cjs'));
                         const api = new ChatMusicAPI();
                         await api.login();
                         const preset = await api.aiThemePreset(tema, 'vocal');
@@ -469,7 +469,7 @@ async function handleMusicAICallbacks({
         if (/^__musikai_rlang__(id|jp|en)$/.test(txt)) {
                 const lang = txt.replace('__musikai_rlang__', '');
                 const langLabel = lang === 'jp' ? '🇯🇵 Jepang' : lang === 'en' ? '🇬🇧 English' : '🇮🇩 Indonesia';
-                const { _GENRES, _GENRES_JP, _GENRES_EN } = require(path.resolve('./scrape/music/chatmusic.cjs'));
+                const { _GENRES, _GENRES_JP, _GENRES_EN } = require(path.resolve('./SEMUA_FITUR/music/chatmusic.cjs'));
                 const pool = lang === 'jp' ? _GENRES_JP : lang === 'en' ? _GENRES_EN : _GENRES;
                 const sampleGenre = pool[Math.floor(Math.random() * pool.length)];
                 const modeMsg = generateWAMessageFromContent(
@@ -537,7 +537,7 @@ async function handleMusicAICallbacks({
                 const langLabel = lang === 'jp' ? '🇯🇵 Jepang' : lang === 'en' ? '🇬🇧 English' : '🇮🇩 Indonesia';
                 const modeLabel = forceMode === 'vocal' ? '🎤 Vokal' : '🎹 Instrumental';
                 try {
-                        const _chatmusicPath = path.resolve('./scrape/music/chatmusic.cjs');
+                        const _chatmusicPath = path.resolve('./SEMUA_FITUR/music/chatmusic.cjs');
                         delete require.cache[_chatmusicPath];
                         const { ChatMusicAPI, _GENRES, _GENRES_JP, _GENRES_EN } = require(_chatmusicPath);
                         const api = new ChatMusicAPI();
@@ -577,7 +577,7 @@ async function handleMusicAICallbacks({
                 const forceMode = txt === '__musikai_random__vocal__' ? 'vocal' : 'instrumental';
                 const modeLabel = forceMode === 'vocal' ? '🎤 Vokal' : '🎹 Instrumental';
                 try {
-                        const _chatmusicPath = path.resolve('./scrape/music/chatmusic.cjs');
+                        const _chatmusicPath = path.resolve('./SEMUA_FITUR/music/chatmusic.cjs');
                         delete require.cache[_chatmusicPath];
                         const { ChatMusicAPI, _GENRES } = require(_chatmusicPath);
                         const api = new ChatMusicAPI();
@@ -620,7 +620,7 @@ async function handleMusicAICallbacks({
         if (txt.startsWith('__musikai_genre__')) {
                 const selectedGenre = txt.replace('__musikai_genre__', '').trim();
                 try {
-                        const _chatmusicPath2 = path.resolve('./scrape/music/chatmusic.cjs');
+                        const _chatmusicPath2 = path.resolve('./SEMUA_FITUR/music/chatmusic.cjs');
                         delete require.cache[_chatmusicPath2];
                         const { ChatMusicAPI } = require(_chatmusicPath2);
                         const api = new ChatMusicAPI();
@@ -704,7 +704,7 @@ async function handleMusicAICallbacks({
                         await tolak(hisoka, m, `⏰ *Cache expired.* Silakan generate ulang dengan *.musikai*`);
                         return true;
                 }
-                const { MODELS: MusicModels } = require(path.resolve('./scrape/music/chatmusic.cjs'));
+                const { MODELS: MusicModels } = require(path.resolve('./SEMUA_FITUR/music/chatmusic.cjs'));
                 const modelVer = MusicModels.find(md => md.id === modelId)?.version || `id:${modelId}`;
                 await hisoka.sendMessage(m.from, { react: { text: '🤖', key: m.key } }).catch(() => {});
                 await _generateMusik({ ...cached.params, modelId });

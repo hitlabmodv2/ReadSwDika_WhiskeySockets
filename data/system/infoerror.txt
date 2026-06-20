@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 20/06/2026, 14.06.23  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 20/06/2026, 15.56.41  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  unhandledRejection
+│  #001  —  console.error
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  Connection Closed
+│  [31m[HotReload] Tidak bisa watch 'scrape/menu/menu_jadibot.js':[39m ENOENT: no such file or directory, watch '/home/runner/workspace/scrape/menu/menu_jadibot.js'
 │
 │  DETAIL
-│  Sumber      : unhandledRejection
+│  Sumber      : console.error
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 20/06/2026, 14.06.23
-│  Terakhir    : 20/06/2026, 14.06.23
+│  Pertama     : 20/06/2026, 15.56.41
+│  Terakhir    : 20/06/2026, 15.56.41
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: Connection Closed
-│     at sendRawMessage (file:///home/runner/workspace/node_modules/@whiskeysockets/baileys/lib/Socket/socket.js:57:19)
-│     at sendNode (file:///home/runner/workspace/node_modules/@whiskeysockets/baileys/lib/Socket/socket.js:76:16)
+│  ▶  Error: [31m[HotReload] Tidak bisa watch 'scrape/menu/menu_jadibot.js':[39m ENOENT: no such file or directory, watch '/home/runner/workspace/scrape/menu/menu_jadibot.js'
+│     at console.error (file:///home/runner/workspace/index.js:414:27)
+│     at watchFile (file:///home/runner/workspace/src/helper/hotReload.js:158:17)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 20/06/2026, 14.06.23
+  Terakhir diperbarui: 20/06/2026, 15.56.41
 ════════════════════════════════════════════════════════════════════════
