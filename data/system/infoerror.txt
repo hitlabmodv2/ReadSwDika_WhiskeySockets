@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 19/06/2026, 09.33.59  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 20/06/2026, 05.26.03  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  unhandledRejection
+│  #001  —  console.error
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  Connection Closed
+│  [31m[Groups] Gagal fetch grup:[39m Connection Closed
 │
 │  DETAIL
-│  Sumber      : unhandledRejection
+│  Sumber      : console.error
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 19/06/2026, 09.33.59
-│  Terakhir    : 19/06/2026, 09.33.59
+│  Pertama     : 20/06/2026, 05.26.03
+│  Terakhir    : 20/06/2026, 05.26.03
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: Connection Closed
-│     at sendRawMessage (file:///home/runner/workspace/node_modules/@whiskeysockets/baileys/lib/Socket/socket.js:57:19)
-│     at sendNode (file:///home/runner/workspace/node_modules/@whiskeysockets/baileys/lib/Socket/socket.js:76:16)
+│  ▶  Error: [31m[Groups] Gagal fetch grup:[39m Connection Closed
+│     at console.error (file:///home/runner/workspace/index.js:414:27)
+│     at fetchGroupsWithRetry (file:///home/runner/workspace/index.js:803:65)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 19/06/2026, 09.33.59
+  Terakhir diperbarui: 20/06/2026, 05.26.03
 ════════════════════════════════════════════════════════════════════════
