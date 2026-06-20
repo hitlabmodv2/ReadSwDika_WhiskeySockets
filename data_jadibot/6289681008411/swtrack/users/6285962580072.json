@@ -86,5 +86,47 @@
     "processedAt": "2026-06-20T07:42:55.856Z",
     "deleted": true,
     "deletedAt": "2026-06-20T07:42:58.019Z"
+  },
+  "ACD20590487B156ED5FF0838AFABFF72": {
+    "id": "ACD20590487B156ED5FF0838AFABFF72",
+    "sender": "6285962580072@s.whatsapp.net",
+    "name": "calm_dindaa",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-20T07:44:09.965Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🇲🇫",
+    "resolve": "Signal Lib ✓",
+    "source": "status",
+    "number": "6285962580072",
+    "resolvedPn": "6285962580072@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285962580072@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACD20590487B156ED5FF0838AFABFF72",
+      "participant": "10806624301107@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-20T07:44:26.314Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285962580072@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACD20590487B156ED5FF0838AFABFF72",
+        "participant": "10806624301107@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285962580072@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACD20590487B156ED5FF0838AFABFF72",
+        "participant": "6285962580072@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-20T07:44:26.313Z"
   }
 }
