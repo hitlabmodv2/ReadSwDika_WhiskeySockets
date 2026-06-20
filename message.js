@@ -679,7 +679,6 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         }
 
                         case 'memori':
-                        case 'memory':
                         case 'mymemory':
                         case 'myprofile': {
                                 const { handleMemori } = _require(path.resolve('./scrape/info/memory-cmd.cjs'));
