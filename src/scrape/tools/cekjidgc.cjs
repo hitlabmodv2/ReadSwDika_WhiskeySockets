@@ -66,4 +66,22 @@ async function getGCInfo(hisoka, groupJid) {
         return { teks, namaGrup, jidGrup, totalMember, totalAdmin, admins };
 }
 
-module.exports = { getGCInfo };
+async function handleCekjidgc({ hisoka, m, tolak, logCommand, Button }) {
+        if (!m.isGroup) return tolak(hisoka, m, '❌ Perintah ini hanya bisa dipakai di dalam grup!');
+        let cjgMeta;
+        try {
+                cjgMeta = await getGCInfo(hisoka, m.from);
+        } catch (err) {
+                return tolak(hisoka, m, '❌ Gagal ambil info grup: ' + (err.message || 'Unknown error'));
+        }
+        const { teks, jidGrup } = cjgMeta;
+        await new Button()
+                .setTitle('🏠 Info Grup')
+                .setBody(teks)
+                .setFooter('Tap tombol di bawah untuk copy JID')
+                .addCopy('📋 Copy JID Grup', jidGrup, 'copy_jidgc')
+                .run(m.from, hisoka, m);
+        logCommand(m, hisoka, 'cekjidgc');
+}
+
+module.exports = { getGCInfo, handleCekjidgc };
