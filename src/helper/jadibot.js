@@ -1404,8 +1404,12 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
     'anticallvid', 'acv',
     'autocallaudio', 'aca',
     'online',
+    'typing', 'typ',
+    'recording', 'record',
     'tt', 'ig', 'fb', 'ytmp3', 'ytmp4', 'play',
+    'allunduh', 'twdl',
     'sticker', 's',
+    'wm', 'swm',
     'toimg', 'hd',
     'upswgc', 'swgc', 'swgrup', 'swgroup', 'statusgrup', 'statusgroup',
     'upswgcv2', 'swgcv2', 'swgrupv2', 'swgroupv2', 'statusgrupv2', 'statusgroupv2',
@@ -1413,7 +1417,9 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
     'ceksw',
     'ceksetting',
     'emojiadd', 'emojidel', 'emojilist',
-    'emojidefault', 'emojicustom', 'emojiclear'
+    'emojidefault', 'emojicustom', 'emojiclear',
+    'ceksesi', 'clearsesi', 'cs',
+    'del', 'd'
   ]
 
   sock.ev.on('creds.update', async (...args) => {
@@ -2093,8 +2099,12 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
     'anticallvid', 'acv',
     'autocallaudio', 'aca',
     'online',
+    'typing', 'typ',
+    'recording', 'record',
     'tt', 'ig', 'fb', 'ytmp3', 'ytmp4', 'play',
+    'allunduh', 'twdl',
     'sticker', 's',
+    'wm', 'swm',
     'toimg', 'hd',
     'upswgc', 'swgc', 'swgrup', 'swgroup', 'statusgrup', 'statusgroup',
     'upswgcv2', 'swgcv2', 'swgrupv2', 'swgroupv2', 'statusgrupv2', 'statusgroupv2',
@@ -2102,7 +2112,9 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
     'ceksw',
     'ceksetting',
     'emojiadd', 'emojidel', 'emojilist',
-    'emojidefault', 'emojicustom', 'emojiclear'
+    'emojidefault', 'emojicustom', 'emojiclear',
+    'ceksesi', 'clearsesi', 'cs',
+    'del', 'd'
   ]
 
   sock.ev.on('creds.update', async (...args) => {
