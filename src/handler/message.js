@@ -5888,10 +5888,8 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'memory':
                         case 'mymemory':
                         case 'myprofile': {
-                                if (!m.prefix && m.query) break;
-                                const mem = loadUserMemory(m.sender);
-                                await m.reply(memoryToReadable(mem));
-                                logCommand(m, hisoka, 'memori');
+                                const { handleMemori } = _require(path.resolve('./src/scrape/tools/memory-cmd.cjs'));
+                                await handleMemori({ hisoka, m, logCommand, loadUserMemory, memoryToReadable });
                                 break;
                         }
 
@@ -5899,35 +5897,15 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'resetmemori':
                         case 'resetmemory':
                         case 'forgetme': {
-                                if (!m.prefix && m.query) break;
-                                clearUserMemory(m.sender);
-                                await m.reply('> *🧠 Memori AI tentang kamu sudah dihapus*\n\n_AI bakal mulai pelan-pelan kenal kamu lagi dari awal._');
-                                logCommand(m, hisoka, 'lupakanaku');
+                                const { handleLupakanaku } = _require(path.resolve('./src/scrape/tools/memory-cmd.cjs'));
+                                await handleLupakanaku({ hisoka, m, logCommand, clearUserMemory });
                                 break;
                         }
 
                         case 'q':
                         case 'quoted': {
-                                if (!m.prefix && m.query) break;
-                                if (!m.isQuoted) {
-                                        await tolak(hisoka, m, 'No quoted message found.');
-                                        return;
-                                }
-
-                                const message = hisoka.cacheMsg.get(m.quoted.key.id);
-                                if (!message) {
-                                        await tolak(hisoka, m, 'Quoted message not found.');
-                                        return;
-                                }
-
-                                const IMessage = await injectMessage(hisoka, message);
-                                if (!IMessage.isQuoted) {
-                                        await tolak(hisoka, m, 'Quoted message not found.');
-                                        return;
-                                }
-
-                                await m.reply({ forward: IMessage.quoted });
-                                logCommand(m, hisoka, 'quoted');
+                                const { handleQuoted } = _require(path.resolve('./src/scrape/tools/quoted-cmd.cjs'));
+                                await handleQuoted({ hisoka, m, tolak, logCommand, injectMessage });
                                 break;
                         }
 
@@ -7661,81 +7639,20 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         }
 
                         case 'emojidefault': {
-                                if (hisoka?.isMainBot !== false) return;
-                                if (!m.prefix && m.query) break;
-                                try {
-                                        const _jbNum = getJadibotNumber(hisoka);
-                                        const count = resetToDefaultEmojis(_jbNum);
-                                        let response = `╭═══『 *DEFAULT EMOJI* 』═══╮\n│\n`;
-                                        response += `│ 👤 *Milik:* +${_jbNum}\n│\n`;
-                                        response += `│ ✅ Mode diubah ke *Default*\n`;
-                                        response += `│\n│ 🌐 Reaksi SW sekarang pakai\n`;
-                                        response += `│ emoji dari *bot utama* (${count} emoji)\n`;
-                                        response += `│\n│ 💡 Ketik *.emojicustom* untuk\n`;
-                                        response += `│ balik ke emoji kamu sendiri\n│\n`;
-                                        response += `│ *.emojilist* — cek daftar emoji\n`;
-                                        response += `╰═════════════════════╯`;
-                                        await tolak(hisoka, m, response);
-                                        logCommand(m, hisoka, 'emojidefault');
-                                } catch (error) {
-                                        console.error('\x1b[31m[EmojiDefault] Error:\x1b[39m', error.message);
-                                        await tolak(hisoka, m, `❌ Error: ${error.message}`);
-                                }
+                                const { handleEmojidefault } = _require(path.resolve('./src/scrape/tools/emoji-cmd.cjs'));
+                                await handleEmojidefault({ hisoka, m, tolak, logCommand, getJadibotNumber, resetToDefaultEmojis });
                                 break;
                         }
 
                         case 'emojicustom': {
-                                if (hisoka?.isMainBot !== false) return;
-                                if (!m.prefix && m.query) break;
-                                try {
-                                        const _jbNum = getJadibotNumber(hisoka);
-                                        setCustomEmojiMode(_jbNum);
-                                        const data = listJadibotEmojis(_jbNum);
-                                        let response = `╭═══『 *CUSTOM EMOJI* 』═══╮\n│\n`;
-                                        response += `│ 👤 *Milik:* +${_jbNum}\n│\n`;
-                                        response += `│ ✅ Mode diubah ke *Custom*\n`;
-                                        response += `│\n│ 🎨 Reaksi SW sekarang pakai\n`;
-                                        response += `│ emoji dari *file kamu sendiri*\n`;
-                                        response += `│ (${data.count} emoji tersimpan)\n`;
-                                        response += `│\n│ 💡 Atur emoji kamu:\n`;
-                                        response += `│ .emojiadd 😊,😄 — tambah\n`;
-                                        response += `│ .emojidel 😊 — hapus\n`;
-                                        response += `│ .emojiclear — reset ke seed WA\n`;
-                                        response += `│ .emojilist — lihat daftar\n`;
-                                        response += `│ .emojidefault — balik ke default\n`;
-                                        response += `╰═════════════════════╯`;
-                                        await tolak(hisoka, m, response);
-                                        logCommand(m, hisoka, 'emojicustom');
-                                } catch (error) {
-                                        console.error('\x1b[31m[EmojiCustom] Error:\x1b[39m', error.message);
-                                        await tolak(hisoka, m, `❌ Error: ${error.message}`);
-                                }
+                                const { handleEmojicustom } = _require(path.resolve('./src/scrape/tools/emoji-cmd.cjs'));
+                                await handleEmojicustom({ hisoka, m, tolak, logCommand, getJadibotNumber, setCustomEmojiMode, listJadibotEmojis });
                                 break;
                         }
 
                         case 'emojiclear': {
-                                if (hisoka?.isMainBot !== false) return;
-                                if (!m.prefix && m.query) break;
-                                try {
-                                        const _jbNum = getJadibotNumber(hisoka);
-                                        const seedEmojis = clearJadibotEmojis(_jbNum);
-                                        let response = `╭═══『 *CLEAR EMOJI* 』═══╮\n│\n`;
-                                        response += `│ 👤 *Milik:* +${_jbNum}\n│\n`;
-                                        response += `│ ✅ Emoji berhasil di-reset!\n│\n`;
-                                        response += `│ 💚 Sekarang pakai *1 emoji* seed WA:\n`;
-                                        response += `│ ${seedEmojis.join(' ')}\n│\n`;
-                                        response += `│ ⚙️ Mode otomatis: *Custom*\n│\n`;
-                                        response += `│ 💡 Tambah emoji kamu sendiri:\n`;
-                                        response += `│ .emojiadd 😊,😄,😁\n│\n`;
-                                        response += `│ Balik ke 1900 emoji bot utama:\n`;
-                                        response += `│ .emojidefault\n`;
-                                        response += `╰═════════════════════╯`;
-                                        await tolak(hisoka, m, response);
-                                        logCommand(m, hisoka, 'emojiclear');
-                                } catch (error) {
-                                        console.error('\x1b[31m[ClearEmoji] Error:\x1b[39m', error.message);
-                                        await tolak(hisoka, m, `❌ Error: ${error.message}`);
-                                }
+                                const { handleEmojiclear } = _require(path.resolve('./src/scrape/tools/emoji-cmd.cjs'));
+                                await handleEmojiclear({ hisoka, m, tolak, logCommand, getJadibotNumber, clearJadibotEmojis });
                                 break;
                         }
 
