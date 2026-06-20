@@ -34,7 +34,7 @@
 
 const axios  = require('axios');
 const path   = require('path');
-const { Gemini } = require(path.resolve('./scrape/gemini.cjs'));
+const { Gemini } = require(path.resolve('./scrape/ai/gemini.cjs'));
 
 // ─── Singleton Gemini (pakai gemini.cjs — token pool x3, fallback akurat) ─
 // Model chain: gemini-flash-latest → gemini-pro-latest → gemini-2.5-flash

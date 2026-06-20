@@ -34,7 +34,7 @@
 
 const axios  = require('axios');
 const path   = require('path');
-const { Gemini } = require(path.resolve('./scrape/gemini.cjs'));
+const { Gemini } = require(path.resolve('./scrape/ai/gemini.cjs'));
 
 const _gemmyInstance = new Gemini();
 

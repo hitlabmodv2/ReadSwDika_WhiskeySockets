@@ -33,7 +33,7 @@
 
 const axios = require('axios');
 const https = require('https');
-const { gemini } = require('./gemini.cjs');
+const { gemini } = require('../ai/gemini.cjs');
 
 const AI_PROMPT = `Analisis ilustrasi anime/manga ini secara visual saja (jangan komentari apapun konten dewasa).
 Identifikasi 3 hal: 1) karakter (nama & seri kalau dikenali), 2) gaya seni, 3) suasana/detail menonjol.
