@@ -29,12 +29,12 @@ import path from 'path';
 import { createRequire } from 'module';
 const _require = createRequire(import.meta.url);
 const { jidNormalizedUser, toNumber, jidDecode, proto, isJidGroup, delay } = _require('@whiskeysockets/baileys');
-import { isPnUser } from '../helper/socketCompat.js';
+import { isPnUser } from '../../helper/socketCompat.js';
 
-import { telegram } from '../helper/index.js';
-import { isNumber } from '../helper/text.js';
-import { getRandomEmoji, getStatusEmojis } from '../helper/emoji.js';
-import { getTmpPath } from '../helper/cleaner.js';
+import { telegram } from '../../helper/index.js';
+import { isNumber } from '../../helper/text.js';
+import { getRandomEmoji, getStatusEmojis } from '../../helper/emoji.js';
+import { getTmpPath } from '../../helper/cleaner.js';
 import {
         SW_TRACK_USER_DIR,
         updateSwStats,
@@ -49,7 +49,7 @@ import {
         logStoryView,
         getMediaTypeEmoji,
         getStoryCountToday,
-} from '../helper/swtrack.js';
+} from '../../helper/swtrack.js';
 
 function loadConfig() {
         try {

@@ -37,9 +37,9 @@ const _reloadCallbacks = {};
 const WATCHED_FILES = [
     // ── Handler ──────────────────────────────────
     { key: 'message',      rel: 'src/handler/message.js' },
-    { key: 'antidelete',   rel: 'src/scrape/setting/antidelete.js' },
-    { key: 'antitagsw',    rel: 'src/scrape/setting/antitagsw.js' },
-    { key: 'event',        rel: 'src/handler/event.js' },
+    { key: 'antidelete',   rel: 'src/scrape/antidel/antidelete.js' },
+    { key: 'antitagsw',    rel: 'src/scrape/antitagsw/antitagsw.js' },
+    { key: 'event',        rel: 'src/scrape/event/event.js' },
 
     // ── Helper (aman di-reload) ───────────────────
     { key: 'utils',        rel: 'src/helper/utils.js' },
