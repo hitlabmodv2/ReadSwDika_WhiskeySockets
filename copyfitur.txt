@@ -18,7 +18,7 @@
  *  Terima kasih sudah support.
  * ───────────────────────────────
  *
- *  an1game.js — Scraper AN1.com (.an1game)
+ *  an1game.cjs — Scraper AN1.com (.an1game)
  *  Cari & info game Android modded dari an1.com
  * ───────────────────────────────
  */
@@ -31,11 +31,10 @@
  * ═══════════════════════════════════════════════════════════════
  */
 
+
 import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
 
 const BASE        = 'https://an1.com';
 const JINA        = 'https://r.jina.ai';
@@ -72,6 +71,7 @@ function tentikanTipe(gameUrl, state) {
     const id  = extractId(gameUrl);
     if (!id) return 'update';
     const ids = state?.idsTerlihat || [];
+    // Kalau ID-nya belum pernah ada di daftar saat init → kemungkinan game baru
     return ids.includes(id) ? 'update' : 'baru';
 }
 
@@ -141,7 +141,7 @@ async function translateToIndo(text) {
         return hasil || text;
     } catch (e) {
         console.warn('[AniGame] Translate gagal, pakai teks asli:', e?.message);
-        return text;
+        return text; // fallback ke bahasa Inggris
     }
 }
 
@@ -156,6 +156,7 @@ function potongTeks(teks, maks = 280) {
 
 function formatInstalls(raw) {
     if (!raw) return '';
+    // "500 000 000+" → "500.000.000+"
     return raw.replace(/\s+/g, '.').replace(/\.$/, '');
 }
 
@@ -167,6 +168,7 @@ function formatTanggalIndo(raw) {
         August: 'Agustus', September: 'September', October: 'Oktober',
         November: 'November', December: 'Desember',
     };
+    // Coba reorder "Month DD, YYYY" → "DD Month YYYY"
     let tgl = raw.trim();
     const mArr = tgl.match(/^([A-Za-z]+)\s+(\d{1,2}),?\s+(\d{4})$/);
     if (mArr) tgl = `${mArr[2]} ${mArr[1]} ${mArr[3]}`;
@@ -177,16 +179,43 @@ function formatTanggalIndo(raw) {
 }
 
 // ── PARSE HALAMAN DETAIL GAME ─────────────────────────────────────────────────
+//
+// Struktur markdown jina untuk halaman detail an1.com:
+//
+// Title: Download TITLE VERSION APK for android
+// Published Time: ...
+//
+// *   [AN1.com](...)
+// *   [Games](...)
+// *   [CATEGORY](...)        ← breadcrumb kategori
+//
+// ![Image 1: NAME mod apk](IMAGE_URL)ONLINE_STATUS  ← bisa ada "Offline"/"Online" langsung setelah ]
+//
+// *   Android X.X +
+// *    Version: X.X.X
+// *   XXXMb
+//
+// DEVELOPER
+//
+// **FULL_GAME_TITLE** - SINOPSIS TEXT
+//
+// Additional Information:
+// *   **Updated**DATE
+// *   **Price**$X
+// *   **Installs** XXX
+// *   **Rated for****X+** years
 
 function parseDetailPage(md, fallbackUrl) {
     const lines = md.split('\n');
 
+    // Judul dari baris Title:
     let fullTitle = '';
     const titleLine = lines.find(l => l.startsWith('Title:'));
     if (titleLine) {
         fullTitle = titleLine.replace(/^Title:\s*/, '').replace(/\s*APK for android$/i, '').replace(/^Download\s+/i, '').trim();
     }
 
+    // Versi dari judul (misal "6.38.0" di akhir judul sebelum "APK")
     let version = '';
     const verFromTitle = fullTitle.match(/\s+([\d.]+)$/);
     if (verFromTitle) {
@@ -194,6 +223,7 @@ function parseDetailPage(md, fallbackUrl) {
         fullTitle = fullTitle.replace(verFromTitle[0], '').trim();
     }
 
+    // Kategori dari breadcrumb (baris ke-3 link setelah [AN1.com] dan [Games])
     let category = '';
     let bcCount = 0;
     for (const ln of lines) {
@@ -205,6 +235,7 @@ function parseDetailPage(md, fallbackUrl) {
         }
     }
 
+    // Image + Online/Offline — pola: ![Image 1: NAME](URL)Offline atau ![...](URL)
     let image      = '';
     let koneksi    = '';
     for (const ln of lines) {
@@ -216,21 +247,26 @@ function parseDetailPage(md, fallbackUrl) {
         }
     }
 
+    // Spesifikasi: Android, Version, Size (3 bullet list berurutan)
     let android = '';
     let size    = '';
     for (let i = 0; i < lines.length; i++) {
         const ln = lines[i].trim();
+        // Android requirement
         if (!android && /^\*\s+Android\s+[\d.]+/.test(ln)) {
             android = ln.replace(/^\*\s+/, '').trim();
         }
+        // Version dari list (kalau belum dari title)
         if (!version && /^\*\s+Version:\s+[\d.]+/.test(ln)) {
             version = ln.replace(/^\*\s+Version:\s+/, '').trim();
         }
+        // Size: angka + Mb/Gb
         if (!size && /^\*\s+[\d.]+\s*(Mb|Gb|MB|GB)/i.test(ln)) {
             size = ln.replace(/^\*\s+/, '').trim();
         }
     }
 
+    // Developer — baris teks biasa setelah blok spesifikasi
     let developer = '';
     let foundSpec = false;
     for (let i = 0; i < lines.length; i++) {
@@ -244,6 +280,7 @@ function parseDetailPage(md, fallbackUrl) {
         }
     }
 
+    // Sinopsis — baris yang dimulai **JUDUL** - DESKRIPSI (ambil teks PENUH, tanpa potong)
     let sinopsis = '';
     for (const ln of lines) {
         const m = ln.match(/^\*\*[^*]+\*\*\s*[-–]\s*(.+)/);
@@ -252,6 +289,7 @@ function parseDetailPage(md, fallbackUrl) {
             break;
         }
     }
+    // Fallback: ambil baris deskripsi panjang pertama
     if (!sinopsis) {
         for (const ln of lines) {
             const clean = ln.trim();
@@ -262,8 +300,10 @@ function parseDetailPage(md, fallbackUrl) {
             }
         }
     }
+    // Bersihkan trailing elipsis jika ada (kadang jina tambah "...")
     sinopsis = sinopsis.replace(/\s*\.\.\.\s*$/, '').trim();
 
+    // Additional Information block
     let updatedRaw = '';
     let price      = '';
     let installs   = '';
@@ -288,6 +328,7 @@ function parseDetailPage(md, fallbackUrl) {
         }
     }
 
+    // MOD info dari judul: "(MOD, Unlimited Coins)" dll
     let modInfo = '';
     const modMatch = fullTitle.match(/\(MOD[^)]*\)/i);
     if (modMatch) modInfo = modMatch[0];
@@ -301,7 +342,7 @@ function parseDetailPage(md, fallbackUrl) {
         android,
         size,
         developer,
-        sinopsis,
+        sinopsis,          // teks penuh, belum di-translate (dilakukan di fetchGameDetail)
         updated: formatTanggalIndo(updatedRaw),
         price,
         installs: formatInstalls(installs),
@@ -312,9 +353,11 @@ function parseDetailPage(md, fallbackUrl) {
 }
 
 // ── FETCH DIRECT APK DOWNLOAD LINK ────────────────────────────────────────────
+// Ambil dari /file_ID-dw.html menggunakan axios (jina tidak render JS download btn)
 
 async function fetchDownloadUrl(gameUrl) {
     try {
+        // Extract ID dari URL: https://an1.com/266-slug.html → 266
         const idMatch = gameUrl.match(/an1\.com\/(\d+)-/);
         if (!idMatch) return '';
 
@@ -334,6 +377,7 @@ async function fetchDownloadUrl(gameUrl) {
 
         const html = typeof res.data === 'string' ? res.data : JSON.stringify(res.data);
 
+        // Cari semua files.an1.net/*.apk — abaikan an1store.apk
         const matches = html.match(/https:\/\/files\.an1\.net\/[^\s"'<>]+\.apk/g) || [];
         const apkUrl  = matches.find(u => !u.includes('an1store'));
         return apkUrl || '';
@@ -347,6 +391,7 @@ async function fetchDownloadUrl(gameUrl) {
 
 async function fetchGameDetail(gameUrl) {
     try {
+        // Fetch detail page via jina + download URL secara paralel
         const [md, dlUrl] = await Promise.all([
             fetchMarkdown(gameUrl),
             fetchDownloadUrl(gameUrl),
@@ -357,6 +402,7 @@ async function fetchGameDetail(gameUrl) {
 
         detail.downloadUrl = dlUrl || '';
 
+        // Translate sinopsis ke Bahasa Indonesia (teks penuh, tanpa potong)
         if (detail.sinopsis) {
             detail.sinopsis = await translateToIndo(detail.sinopsis);
         }
@@ -369,6 +415,8 @@ async function fetchGameDetail(gameUrl) {
 }
 
 // ── PARSE GAMES LIST DARI HTML (halaman /games/) ──────────────────────────────
+// Jina sudah tidak merender link URL di halaman games list,
+// sehingga kita fetch HTML langsung dari an1.com untuk dapat URL game.
 
 async function fetchGamesListHTML(page = 1) {
     const url = page > 1 ? `${BASE}/games/page/${page}/` : `${BASE}/games/`;
@@ -387,32 +435,39 @@ function parseGamesListHTML(html) {
     const results = [];
     const seen    = new Set();
 
+    // Setiap game ada di dalam <div class="item">...</div>
+    // Struktur: img src + alt (judul) | a href (URL game) | .developer (dev) | rating
     const itemPattern = /<div class="item[^"]*">([\s\S]*?)(?=<div class="item|<div class="pager|<\/div>\s*<\/div>\s*<\/div>\s*<\/div>\s*<\/div>\s*<footer)/g;
     const blocks = [...html.matchAll(itemPattern)];
 
     for (const block of blocks) {
         const content = block[1];
 
+        // Image URL + judul dari alt
         const imgMatch = content.match(/<img\s+src="(https:\/\/an1\.com\/uploads\/[^"]+)"[^>]+alt="([^"]+)"/);
         if (!imgMatch) continue;
 
         const image = imgMatch[1];
         const title = imgMatch[2].trim();
 
+        // URL game dari href
         const urlMatch = content.match(/href="(https:\/\/an1\.com\/\d+-[^"]+\.html)"/);
         const gameUrl  = urlMatch ? urlMatch[1] : '';
         if (!gameUrl || seen.has(gameUrl)) continue;
         seen.add(gameUrl);
 
+        // Developer
         const devMatch = content.match(/<div class="developer[^"]*">([^<]+)<\/div>/);
         const developer = devMatch ? devMatch[1].trim() : '';
 
+        // Rating
         const ratingMatch = content.match(/class="current-rating"[^>]*>([\d.]+)</);
         const rating = ratingMatch ? ratingMatch[1] : '';
 
         results.push({ title, image, url: gameUrl, developer, rating });
     }
 
+    // Fallback: kalau pattern block tidak match, coba regex sederhana per-item
     if (!results.length) {
         const simplePattern = /<img\s+src="(https:\/\/an1\.com\/uploads\/[^"]+)"[^>]+alt="([^"]+)"[\s\S]*?href="(https:\/\/an1\.com\/\d+-[^"]+\.html)"/g;
         for (const m of html.matchAll(simplePattern)) {
@@ -471,6 +526,7 @@ function parseSearchResults(md) {
 }
 
 // ── FETCH GAMES LIST ──────────────────────────────────────────────────────────
+// Pakai HTML langsung (bukan Jina) karena Jina sudah tidak render link URL game
 
 async function getGamesList(page = 1) {
     const html = await fetchGamesListHTML(page);
@@ -497,8 +553,10 @@ const SEP  = '━━━━━━━━━━━━━━━━━━━';
 const SEP2 = '┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄';
 
 function buatCaption(game, detail = null, { hideDownload = false } = {}) {
+    // d = sumber data utama: detail jika ada, fallback ke game (yang sudah merged)
     const d = detail || game || {};
 
+    // Waktu kirim
     const now      = new Date();
     const opsiHari = { timeZone: 'Asia/Jakarta', weekday: 'long' };
     const opsiTgl  = { timeZone: 'Asia/Jakarta', day: '2-digit', month: 'long', year: 'numeric' };
@@ -512,6 +570,7 @@ function buatCaption(game, detail = null, { hideDownload = false } = {}) {
     const urlGame = d.url         || game?.url   || '';
     const rating  = game?.rating  || d.rating    || '';
 
+    // Baris info teknis (hanya tampilkan yang ada datanya)
     const infoRows = [];
     if (d.version)  infoRows.push(`├ 📦 *Versi*     : \`${d.version}\``);
     if (d.android)  infoRows.push(`├ 🤖 *Android*   : \`${d.android}\``);
@@ -524,13 +583,17 @@ function buatCaption(game, detail = null, { hideDownload = false } = {}) {
     if (d.price)    infoRows.push(`├ 💰 *Harga*     : ${d.price === '$0' ? 'Gratis' : d.price}`);
     if (rating)     infoRows.push(`├ ⭐ *Bintang*   : ${rating}/5`);
 
+    // Ubah baris terakhir dari ├ ke ╰
     if (infoRows.length > 0) {
         infoRows[infoRows.length - 1] = infoRows[infoRows.length - 1].replace(/^├/, '╰');
     }
 
+    // Blok sinopsis Bahasa Indo (format > WhatsApp quote, tiap kalimat 1 baris)
     let sinopsisBlok = '';
     if (d.sinopsis) {
+        // Normalisasi spasi & newline jadi satu baris dulu
         const raw = d.sinopsis.replace(/\n+/g, ' ').replace(/\s+/g, ' ').trim();
+        // Pecah per kalimat berdasarkan . ! ? — tiap kalimat dipisah baris kosong
         const kalimatArr = raw
             .match(/[^.!?]+[.!?]*/g)
             ?.map(s => s.trim())
@@ -546,6 +609,8 @@ function buatCaption(game, detail = null, { hideDownload = false } = {}) {
         ? `\n${SEP}\n📋 *Info Game*\n${SEP2}\n${infoRows.join('\n')}\n`
         : '';
 
+    // Link download: prioritaskan direct APK, fallback ke halaman game
+    // Kalau hideDownload=true (ada button), skip blok ini agar ga duplikat
     const apkUrl       = d.downloadUrl || '';
     const downloadBlok = hideDownload ? '' : apkUrl
         ? `\n${SEP}\n📥 *Download APK (Langsung):*\n${apkUrl}\n\n🔗 *Halaman Game:*\n${urlGame}\n`
@@ -553,6 +618,7 @@ function buatCaption(game, detail = null, { hideDownload = false } = {}) {
             ? `\n${SEP}\n🔗 *Download / Info:*\n${urlGame}\n`
             : '';
 
+    // Header dinamis: game baru vs update versi
     const tipe        = game?.tipeUpdate || 'baru';
     const headerEmoji = tipe === 'update' ? '🔄' : '🎮';
     const headerTeks  = tipe === 'update'
@@ -629,6 +695,7 @@ async function cariGameBaru() {
         return [];
     }
 
+    // Inisialisasi pertama: tandai semua game saat ini, jangan kirim
     if (!state.initialized) {
         state.initialized = true;
         if (!state.urlTerkirim)  state.urlTerkirim  = [];
@@ -646,6 +713,7 @@ async function cariGameBaru() {
         return [];
     }
 
+    // Migrasi: isi idsTerlihat dari urlTerkirim yang sudah ada (kalau belum ada)
     if (!state.idsTerlihat || !state.idsTerlihat.length) {
         state.idsTerlihat = (state.urlTerkirim || [])
             .map(u => extractId(u))
@@ -654,9 +722,11 @@ async function cariGameBaru() {
 
     simpanState(state);
 
+    // Game yang belum pernah terkirim
     const baruList = games.filter(g => g.url && !sudahDikirim(g.url));
     if (!baruList.length) return [];
 
+    // Fetch detail untuk tiap game baru (max 5 agar tidak lambat)
     const hasilBaru = [];
     for (const game of baruList.slice(0, 5)) {
         const tipeUpdate = tentikanTipe(game.url, state);
@@ -664,8 +734,8 @@ async function cariGameBaru() {
         hasilBaru.push({
             ...game,
             ...(detail || {}),
-            url       : game.url,
-            tipeUpdate,
+            url       : game.url, // pastikan URL tidak tertimpa
+            tipeUpdate,           // 'baru' atau 'update'
         });
         await new Promise(r => setTimeout(r, 1000));
     }
@@ -682,15 +752,17 @@ async function simulasi() {
     const game   = games[0];
     const detail = await fetchGameDetail(game.url);
 
+    // Tentukan tipe realtime berdasarkan state
     const state      = bacaState();
+    // Migrasi state lama yang belum punya idsTerlihat
     if (!state.idsTerlihat || !state.idsTerlihat.length) {
         state.idsTerlihat = (state.urlTerkirim || []).map(u => extractId(u)).filter(Boolean);
     }
     const tipeUpdate = tentikanTipe(game.url, state);
 
     const merged      = { ...game, ...(detail || {}), url: game.url, tipeUpdate };
-    const caption     = buatCaption(merged, detail, { hideDownload: false });
-    const captionBtn  = buatCaption(merged, detail, { hideDownload: true  });
+    const caption     = buatCaption(merged, detail, { hideDownload: false }); // fallback plain text
+    const captionBtn  = buatCaption(merged, detail, { hideDownload: true  }); // untuk button msg
 
     return {
         caption,
@@ -701,248 +773,251 @@ async function simulasi() {
     };
 }
 
+// ── EXPORT ────────────────────────────────────────────────────────────────────
+
+export { getGamesList, searchGames, fetchGameDetail, getEnabledGroups, setGroupEnabled, cariGameBaru, simulasi, buatCaption, tandaiSudahKirim, tandaiDanLog };
+
 // ── COMMAND HANDLER ───────────────────────────────────────────────────────────
 
-async function handler({ hisoka, m, query, tolak, logCommand, sendConfirmWithButtons, fs: _fs, path: _path, loadConfig, Button }) {
-    const sub = (query || '').trim().toLowerCase().replace(/\s+/g, ' ');
-    const pfx = m.prefix || '.';
+async function handler({ hisoka, m, query, tolak, logCommand, sendConfirmWithButtons, fs, path, loadConfig, Button }) {
+        const sub = (query || '').trim().toLowerCase().replace(/\s+/g, ' ');
+        const pfx = m.prefix || '.';
 
-    const isOwnerSub = ['on', 'off', 'test', 'test grup', 'status'].includes(sub);
-    if (isOwnerSub) {
-        if (!m.isOwner) { await tolak(hisoka, m, '❌ Hanya owner yang bisa gunakan perintah ini.'); return; }
-        if (!m.isGroup && sub !== 'test grup' && sub !== 'status') { await tolak(hisoka, m, '❌ Perintah ini hanya untuk grup.'); return; }
-    }
-
-    try {
-        if (!sub || sub === 'help') {
-            const cfgHlp  = loadConfig();
-            const aktifHlp = m.isGroup ? cfgHlp?.anigame?.groups?.[m.from]?.enabled === true : null;
-            await tolak(hisoka, m,
-                `╭─「 🎮 *AN1.COM GAME NOTIF* 」\n│\n` +
-                (m.isGroup ? `│ Status grup ini : ${aktifHlp ? '✅ *Aktif*' : '❌ *Nonaktif*'}\n│\n` : '') +
-                `│ *🔔 Auto Notif (owner, di grup):*\n` +
-                `│ • ${pfx}anigame on — aktifkan notif game baru\n` +
-                `│ • ${pfx}anigame off — nonaktifkan\n` +
-                `│ • ${pfx}anigame test — kirim test ke grup ini\n` +
-                `│ • ${pfx}anigame test grup — kirim test ke semua grup aktif\n` +
-                `│ • ${pfx}anigame status — lihat daftar grup aktif\n│\n` +
-                `│ *🔍 Cari/Lihat Game (semua user):*\n` +
-                `│ • ${pfx}anigame list — daftar game terbaru\n` +
-                `│ • ${pfx}anigame minecraft — cari game\n` +
-                `│ • ${pfx}anigame gta san andreas — cari game\n│\n` +
-                `│ 💡 Bot otomatis kirim notif tiap 10 menit\n` +
-                `│    saat ada game MOD baru di AN1.COM.\n` +
-                `│ 🌐 Sumber: an1.com/games/\n` +
-                `╰──────────────────────`
-            );
-            return;
+        const isOwnerSub = ['on', 'off', 'test', 'test grup', 'status'].includes(sub);
+        if (isOwnerSub) {
+                if (!m.isOwner) { await tolak(hisoka, m, '❌ Hanya owner yang bisa gunakan perintah ini.'); return; }
+                if (!m.isGroup && sub !== 'test grup' && sub !== 'status') { await tolak(hisoka, m, '❌ Perintah ini hanya untuk grup.'); return; }
         }
 
-        if (sub === 'on') {
-            if (!m.isOwner) { await tolak(hisoka, m, '❌ Hanya owner yang bisa gunakan perintah ini.'); return; }
-            if (!m.isGroup) { await tolak(hisoka, m, '❌ Perintah ini hanya untuk grup.'); return; }
-            const cfgOn = loadConfig();
-            if (!cfgOn.anigame)        cfgOn.anigame        = { groups: {} };
-            if (!cfgOn.anigame.groups) cfgOn.anigame.groups = {};
-            const sebelumOn = cfgOn.anigame.groups[m.from]?.enabled === true;
-            cfgOn.anigame.groups[m.from] = { enabled: true, diubahPada: Date.now() };
-            fs.writeFileSync(path.join(process.cwd(), 'config.json'), JSON.stringify(cfgOn, null, 2));
-            await sendConfirmWithButtons(hisoka, m,
-                `╭─「 🎮 *AN1.COM GAME NOTIF* 」\n│\n` +
-                `│ Status sebelumnya : ${sebelumOn ? '✅ *ON*' : '❌ *OFF*'}\n` +
-                `│ Status sekarang   : ✅ *ON*\n│\n` +
-                (sebelumOn
-                    ? `│ ℹ️ Fitur ini sebelumnya sudah aktif,\n│    tidak ada perubahan.\n`
-                    : `│ ✅ Fitur berhasil diaktifkan!\n│    Bot akan kirim notif otomatis\n│    saat ada game MOD baru di AN1.COM.\n│    ⏱️ Cek setiap 10 menit.\n`) +
-                `│\n│ Ketik *${pfx}anigame off* untuk menonaktifkan.\n╰──────────────────────`,
-                [{ text: '➕ Aktifkan Semua Grup', id: '__addallgrp__anigame' }]
-            );
-            await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
-            logCommand(m, hisoka, 'anigame-on');
-            return;
-        }
-
-        if (sub === 'off') {
-            if (!m.isOwner) { await tolak(hisoka, m, '❌ Hanya owner yang bisa gunakan perintah ini.'); return; }
-            if (!m.isGroup) { await tolak(hisoka, m, '❌ Perintah ini hanya untuk grup.'); return; }
-            const cfgOff = loadConfig();
-            if (!cfgOff.anigame)        cfgOff.anigame        = { groups: {} };
-            if (!cfgOff.anigame.groups) cfgOff.anigame.groups = {};
-            const sebelumOff = cfgOff.anigame.groups[m.from]?.enabled === true;
-            cfgOff.anigame.groups[m.from] = { enabled: false, diubahPada: Date.now() };
-            fs.writeFileSync(path.join(process.cwd(), 'config.json'), JSON.stringify(cfgOff, null, 2));
-            await tolak(hisoka, m,
-                `╭─「 🎮 *AN1.COM GAME NOTIF* 」\n│\n` +
-                `│ Status sebelumnya : ${sebelumOff ? '✅ *ON*' : '❌ *OFF*'}\n` +
-                `│ Status sekarang   : ❌ *OFF*\n│\n` +
-                (sebelumOff
-                    ? `│ ❌ Fitur berhasil dinonaktifkan.\n│    Bot tidak akan kirim notif game\n│    di grup ini.\n`
-                    : `│ ℹ️ Fitur ini sebelumnya sudah nonaktif,\n│    tidak ada perubahan.\n`) +
-                `│\n│ Ketik *${pfx}anigame on* untuk mengaktifkan kembali.\n╰──────────────────────`
-            );
-            await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
-            logCommand(m, hisoka, 'anigame-off');
-            return;
-        }
-
-        if (sub === 'status') {
-            if (!m.isOwner) { await tolak(hisoka, m, '❌ Hanya owner yang bisa gunakan perintah ini.'); return; }
-            const cfgStat  = loadConfig();
-            const groupsStat = cfgStat?.anigame?.groups || {};
-            const entries    = Object.entries(groupsStat);
-            if (!entries.length) { await tolak(hisoka, m, '📋 Belum ada grup yang terdaftar untuk AniGame Notif.'); return; }
-            let txt = `╭─「 🎮 *STATUS AN1.COM GAME NOTIF* 」\n│\n`;
-            for (const [jid, val] of entries) {
-                const aktifSt = val?.enabled === true;
-                const tgl     = val?.diubahPada ? new Date(val.diubahPada).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }) : '-';
-                txt += `│ ${aktifSt ? '✅' : '❌'} ${jid}\n│    _(diubah: ${tgl})_\n│\n`;
-            }
-            txt += `╰──────────────────────`;
-            await tolak(hisoka, m, txt);
-            logCommand(m, hisoka, 'anigame-status');
-            return;
-        }
-
-        if (sub === 'test grup') {
-            if (!m.isOwner) { await tolak(hisoka, m, '❌ Hanya owner yang bisa gunakan perintah ini.'); return; }
-            await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
-            const daftarGrupTG = getEnabledGroups();
-            if (!daftarGrupTG.length) {
-                await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
-                await tolak(hisoka, m, `❌ Belum ada grup yang mengaktifkan AniGame Notif.\nKetik *${pfx}anigame on* di grup tujuan dulu.`);
-                return;
-            }
-            const hasilTG = await simulasi();
-            let berhasilTG = 0, gagalTG = 0;
-            for (const jid of daftarGrupTG) {
-                try {
-                    if (hasilTG.urlGambar) await hisoka.sendMessage(jid, { image: { url: hasilTG.urlGambar }, caption: hasilTG.caption });
-                    else                   await hisoka.sendMessage(jid, { text: hasilTG.caption });
-                    berhasilTG++;
-                    await new Promise(r => setTimeout(r, 1500));
-                } catch (e) {
-                    gagalTG++;
-                    console.error(`[AniGame] Gagal kirim test ke ${jid}:`, e?.message);
+        try {
+                if (!sub || sub === 'help') {
+                        const cfgHlp  = loadConfig();
+                        const aktifHlp = m.isGroup ? cfgHlp?.anigame?.groups?.[m.from]?.enabled === true : null;
+                        await tolak(hisoka, m,
+                                `╭─「 🎮 *AN1.COM GAME NOTIF* 」\n│\n` +
+                                (m.isGroup ? `│ Status grup ini : ${aktifHlp ? '✅ *Aktif*' : '❌ *Nonaktif*'}\n│\n` : '') +
+                                `│ *🔔 Auto Notif (owner, di grup):*\n` +
+                                `│ • ${pfx}anigame on — aktifkan notif game baru\n` +
+                                `│ • ${pfx}anigame off — nonaktifkan\n` +
+                                `│ • ${pfx}anigame test — kirim test ke grup ini\n` +
+                                `│ • ${pfx}anigame test grup — kirim test ke semua grup aktif\n` +
+                                `│ • ${pfx}anigame status — lihat daftar grup aktif\n│\n` +
+                                `│ *🔍 Cari/Lihat Game (semua user):*\n` +
+                                `│ • ${pfx}anigame list — daftar game terbaru\n` +
+                                `│ • ${pfx}anigame minecraft — cari game\n` +
+                                `│ • ${pfx}anigame gta san andreas — cari game\n│\n` +
+                                `│ 💡 Bot otomatis kirim notif tiap 10 menit\n` +
+                                `│    saat ada game MOD baru di AN1.COM.\n` +
+                                `│ 🌐 Sumber: an1.com/games/\n` +
+                                `╰──────────────────────`
+                        );
+                        return;
                 }
-            }
-            await hisoka.sendMessage(m.from, {
-                text: `✅ *Test AniGame selesai!*\n\n📤 Terkirim ke: *${berhasilTG}/${daftarGrupTG.length} grup*` +
-                      (gagalTG ? `\n❌ Gagal: ${gagalTG} grup` : ''),
-            }, { quoted: m });
-            await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
-            logCommand(m, hisoka, 'anigame-test-grup');
-            return;
-        }
 
-        if (sub === 'test') {
-            if (!m.isOwner) { await tolak(hisoka, m, '❌ Hanya owner yang bisa gunakan perintah ini.'); return; }
-            await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
-            const hasilT = await simulasi();
-            let imgBufT = null;
-            if (hasilT.urlGambar) {
-                const detectMimeT = (buf) => {
-                    if (!buf || buf.length < 4) return null;
-                    if (buf[0] === 0xFF && buf[1] === 0xD8) return 'image/jpeg';
-                    if (buf[0] === 0x89 && buf[1] === 0x50) return 'image/png';
-                    if (buf[0] === 0x47 && buf[1] === 0x49) return 'image/gif';
-                    if (buf[0] === 0x52 && buf[1] === 0x49) return 'image/webp';
-                    return null;
-                };
-                for (let at = 1; at <= 3; at++) {
-                    try {
-                        const r = await axios.get(hasilT.urlGambar, {
-                            responseType: 'arraybuffer', timeout: 20000,
-                            headers: { 'Referer': 'https://an1.com/', 'User-Agent': 'Mozilla/5.0', 'Accept': 'image/*,*/*;q=0.8' },
-                        });
-                        const b = Buffer.from(r.data);
-                        if (detectMimeT(b)) { imgBufT = b; break; }
-                    } catch (_) { if (at < 3) await new Promise(r => setTimeout(r, 2000 * at)); }
+                if (sub === 'on') {
+                        if (!m.isOwner) { await tolak(hisoka, m, '❌ Hanya owner yang bisa gunakan perintah ini.'); return; }
+                        if (!m.isGroup) { await tolak(hisoka, m, '❌ Perintah ini hanya untuk grup.'); return; }
+                        const cfgOn = loadConfig();
+                        if (!cfgOn.anigame)        cfgOn.anigame        = { groups: {} };
+                        if (!cfgOn.anigame.groups) cfgOn.anigame.groups = {};
+                        const sebelumOn = cfgOn.anigame.groups[m.from]?.enabled === true;
+                        cfgOn.anigame.groups[m.from] = { enabled: true, diubahPada: Date.now() };
+                        fs.writeFileSync(path.join(process.cwd(), 'config.json'), JSON.stringify(cfgOn, null, 2));
+                        await sendConfirmWithButtons(hisoka, m,
+                                `╭─「 🎮 *AN1.COM GAME NOTIF* 」\n│\n` +
+                                `│ Status sebelumnya : ${sebelumOn ? '✅ *ON*' : '❌ *OFF*'}\n` +
+                                `│ Status sekarang   : ✅ *ON*\n│\n` +
+                                (sebelumOn
+                                        ? `│ ℹ️ Fitur ini sebelumnya sudah aktif,\n│    tidak ada perubahan.\n`
+                                        : `│ ✅ Fitur berhasil diaktifkan!\n│    Bot akan kirim notif otomatis\n│    saat ada game MOD baru di AN1.COM.\n│    ⏱️ Cek setiap 10 menit.\n`) +
+                                `│\n│ Ketik *${pfx}anigame off* untuk menonaktifkan.\n╰──────────────────────`,
+                                [{ text: '➕ Aktifkan Semua Grup', id: '__addallgrp__anigame' }]
+                        );
+                        await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+                        logCommand(m, hisoka, 'anigame-on');
+                        return;
                 }
-            }
-            const apkUrlT  = hasilT.game?.downloadUrl || '';
-            const gameUrlT = hasilT.game?.url         || '';
-            const dlUrlT   = apkUrlT || gameUrlT;
-            try {
-                const btn = new Button();
-                if (imgBufT) btn.setImage(imgBufT);
-                btn.setBody(hasilT.captionBtn || hasilT.caption).setFooter('🌐 AN1.COM — APK MOD Gratis');
-                if (dlUrlT)   btn.addUrl('📥 Download MOD APK', dlUrlT,   dlUrlT);
-                if (gameUrlT) btn.addUrl('🔗 Halaman Game',     gameUrlT, gameUrlT);
-                await btn.run(m.from, hisoka, m);
-            } catch (e) {
-                if (imgBufT) await hisoka.sendMessage(m.from, { image: imgBufT, caption: hasilT.caption }, { quoted: m });
-                else         await tolak(hisoka, m, hasilT.caption);
-            }
-            await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
-            logCommand(m, hisoka, 'anigame-test');
-            return;
-        }
 
-        if (sub === 'list') {
-            await hisoka.sendMessage(m.from, { react: { text: '🎮', key: m.key } });
-            const loadingL = await tolak(hisoka, m, `🎮 *Mengambil daftar game terbaru dari AN1.COM...*`);
-            const gamesL   = await getGamesList();
-            await hisoka.sendMessage(m.from, { delete: loadingL.key }).catch(() => {});
-            if (!gamesL.length) { await tolak(hisoka, m, `❌ Gagal mengambil daftar game. Coba lagi nanti.`); return; }
-            const listL = gamesL.slice(0, 12).map((g, i) => {
-                const no  = String(i + 1).padStart(2, ' ');
-                const rat = g.rating ? ` ⭐${g.rating}` : '';
-                const dev = g.developer ? `\n│    👤 ${g.developer}` : '';
-                const url = g.url ? `\n│    🔗 ${g.url}` : '';
-                return `│ ${no}. *${g.title}*${rat}${dev}${url}`;
-            }).join('\n│\n');
-            const teksL =
-                `╭─「 🎮 *AN1.COM — GAME TERBARU* 」\n│\n${listL}\n│\n` +
-                `│ 🌐 *Sumber:* https://an1.com/games/\n│\n` +
-                `│ 💡 Cari game: *${pfx}anigame minecraft*\n╰────────────────────`;
-            const thumbL = gamesL[0]?.image || '';
-            if (thumbL) {
-                const imgL = await axios.get(thumbL, { responseType: 'arraybuffer', timeout: 10000, headers: { 'Referer': 'https://an1.com/', 'User-Agent': 'Mozilla/5.0' } })
-                    .then(r => Buffer.from(r.data)).catch(() => null);
-                if (imgL) { await hisoka.sendMessage(m.from, { image: imgL, caption: teksL }, { quoted: m }); logCommand(m, hisoka, 'anigame'); return; }
-            }
-            await tolak(hisoka, m, teksL);
-            logCommand(m, hisoka, 'anigame');
-            return;
-        }
+                if (sub === 'off') {
+                        if (!m.isOwner) { await tolak(hisoka, m, '❌ Hanya owner yang bisa gunakan perintah ini.'); return; }
+                        if (!m.isGroup) { await tolak(hisoka, m, '❌ Perintah ini hanya untuk grup.'); return; }
+                        const cfgOff = loadConfig();
+                        if (!cfgOff.anigame)        cfgOff.anigame        = { groups: {} };
+                        if (!cfgOff.anigame.groups) cfgOff.anigame.groups = {};
+                        const sebelumOff = cfgOff.anigame.groups[m.from]?.enabled === true;
+                        cfgOff.anigame.groups[m.from] = { enabled: false, diubahPada: Date.now() };
+                        fs.writeFileSync(path.join(process.cwd(), 'config.json'), JSON.stringify(cfgOff, null, 2));
+                        await tolak(hisoka, m,
+                                `╭─「 🎮 *AN1.COM GAME NOTIF* 」\n│\n` +
+                                `│ Status sebelumnya : ${sebelumOff ? '✅ *ON*' : '❌ *OFF*'}\n` +
+                                `│ Status sekarang   : ❌ *OFF*\n│\n` +
+                                (sebelumOff
+                                        ? `│ ❌ Fitur berhasil dinonaktifkan.\n│    Bot tidak akan kirim notif game\n│    di grup ini.\n`
+                                        : `│ ℹ️ Fitur ini sebelumnya sudah nonaktif,\n│    tidak ada perubahan.\n`) +
+                                `│\n│ Ketik *${pfx}anigame on* untuk mengaktifkan kembali.\n╰──────────────────────`
+                        );
+                        await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+                        logCommand(m, hisoka, 'anigame-off');
+                        return;
+                }
 
-        // ── SEARCH ──
-        await hisoka.sendMessage(m.from, { react: { text: '🔎', key: m.key } });
-        const loadingS = await tolak(hisoka, m, `🔎 *Mencari game "${sub}" di AN1.COM...*`);
-        const { games: hasilS, total: totalS, searchUrl: searchUrlS } = await searchGames(sub);
-        await hisoka.sendMessage(m.from, { delete: loadingS.key }).catch(() => {});
-        if (!hasilS || !hasilS.length) {
-            await tolak(hisoka, m, `❌ *Game "${sub}" tidak ditemukan di AN1.COM.*\n\nCoba kata kunci lain atau cek langsung:\n🔗 ${searchUrlS}`);
-            return;
-        }
-        const totalTeksS = totalS ? ` (${totalS} hasil)` : '';
-        const listHasilS = hasilS.slice(0, 10).map((g, i) => {
-            const no  = String(i + 1).padStart(2, ' ');
-            const dev = g.developer ? ` — ${g.developer}` : '';
-            const url = g.url ? `\n│    🔗 ${g.url}` : '';
-            return `│ ${no}. *${g.title}*${dev}${url}`;
-        }).join('\n│\n');
-        const teksCariS =
-            `╭─「 🔎 *AN1.COM — HASIL PENCARIAN* 」\n│ 🔍 Keyword: *${sub}*${totalTeksS}\n│\n` +
-            `${listHasilS}\n│\n│ 🌐 *Semua hasil:*\n│ ${searchUrlS}\n╰────────────────────`;
-        const thumbS = hasilS[0]?.image || '';
-        if (thumbS) {
-            const imgS = await axios.get(thumbS, { responseType: 'arraybuffer', timeout: 10000, headers: { 'Referer': 'https://an1.com/', 'User-Agent': 'Mozilla/5.0' } })
-                .then(r => Buffer.from(r.data)).catch(() => null);
-            if (imgS) { await hisoka.sendMessage(m.from, { image: imgS, caption: teksCariS }, { quoted: m }); logCommand(m, hisoka, 'anigame'); return; }
-        }
-        await tolak(hisoka, m, teksCariS);
-        logCommand(m, hisoka, 'anigame');
+                if (sub === 'status') {
+                        if (!m.isOwner) { await tolak(hisoka, m, '❌ Hanya owner yang bisa gunakan perintah ini.'); return; }
+                        const cfgStat  = loadConfig();
+                        const groupsStat = cfgStat?.anigame?.groups || {};
+                        const entries    = Object.entries(groupsStat);
+                        if (!entries.length) { await tolak(hisoka, m, '📋 Belum ada grup yang terdaftar untuk AniGame Notif.'); return; }
+                        let txt = `╭─「 🎮 *STATUS AN1.COM GAME NOTIF* 」\n│\n`;
+                        for (const [jid, val] of entries) {
+                                const aktifSt = val?.enabled === true;
+                                const tgl     = val?.diubahPada ? new Date(val.diubahPada).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }) : '-';
+                                txt += `│ ${aktifSt ? '✅' : '❌'} ${jid}\n│    _(diubah: ${tgl})_\n│\n`;
+                        }
+                        txt += `╰──────────────────────`;
+                        await tolak(hisoka, m, txt);
+                        logCommand(m, hisoka, 'anigame-status');
+                        return;
+                }
 
-    } catch (error) {
-        console.error('\x1b[31m[AniGame Cmd] Error:\x1b[39m', error.message);
-        await tolak(hisoka, m, `❌ *Gagal mengambil data game.*\n\n_${error.message}_\n\n🌐 Cek manual: https://an1.com/games/`);
-    }
+                if (sub === 'test grup') {
+                        if (!m.isOwner) { await tolak(hisoka, m, '❌ Hanya owner yang bisa gunakan perintah ini.'); return; }
+                        await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
+                        const daftarGrupTG = getEnabledGroups();
+                        if (!daftarGrupTG.length) {
+                                await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
+                                await tolak(hisoka, m, `❌ Belum ada grup yang mengaktifkan AniGame Notif.\nKetik *${pfx}anigame on* di grup tujuan dulu.`);
+                                return;
+                        }
+                        const hasilTG = await simulasi();
+                        let berhasilTG = 0, gagalTG = 0;
+                        for (const jid of daftarGrupTG) {
+                                try {
+                                        if (hasilTG.urlGambar) await hisoka.sendMessage(jid, { image: { url: hasilTG.urlGambar }, caption: hasilTG.caption });
+                                        else                   await hisoka.sendMessage(jid, { text: hasilTG.caption });
+                                        berhasilTG++;
+                                        await new Promise(r => setTimeout(r, 1500));
+                                } catch (e) {
+                                        gagalTG++;
+                                        console.error(`[AniGame] Gagal kirim test ke ${jid}:`, e?.message);
+                                }
+                        }
+                        await hisoka.sendMessage(m.from, {
+                                text: `✅ *Test AniGame selesai!*\n\n📤 Terkirim ke: *${berhasilTG}/${daftarGrupTG.length} grup*` +
+                                      (gagalTG ? `\n❌ Gagal: ${gagalTG} grup` : ''),
+                        }, { quoted: m });
+                        await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+                        logCommand(m, hisoka, 'anigame-test-grup');
+                        return;
+                }
+
+                if (sub === 'test') {
+                        if (!m.isOwner) { await tolak(hisoka, m, '❌ Hanya owner yang bisa gunakan perintah ini.'); return; }
+                        await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
+                        const hasilT = await simulasi();
+                        let imgBufT = null;
+                        if (hasilT.urlGambar) {
+                                const detectMimeT = (buf) => {
+                                        if (!buf || buf.length < 4) return null;
+                                        if (buf[0] === 0xFF && buf[1] === 0xD8) return 'image/jpeg';
+                                        if (buf[0] === 0x89 && buf[1] === 0x50) return 'image/png';
+                                        if (buf[0] === 0x47 && buf[1] === 0x49) return 'image/gif';
+                                        if (buf[0] === 0x52 && buf[1] === 0x49) return 'image/webp';
+                                        return null;
+                                };
+                                for (let at = 1; at <= 3; at++) {
+                                        try {
+                                                const r = await axios.get(hasilT.urlGambar, {
+                                                        responseType: 'arraybuffer', timeout: 20000,
+                                                        headers: { 'Referer': 'https://an1.com/', 'User-Agent': 'Mozilla/5.0', 'Accept': 'image/*,*/*;q=0.8' },
+                                                });
+                                                const b = Buffer.from(r.data);
+                                                if (detectMimeT(b)) { imgBufT = b; break; }
+                                        } catch (_) { if (at < 3) await new Promise(r => setTimeout(r, 2000 * at)); }
+                                }
+                        }
+                        const apkUrlT  = hasilT.game?.downloadUrl || '';
+                        const gameUrlT = hasilT.game?.url         || '';
+                        const dlUrlT   = apkUrlT || gameUrlT;
+                        try {
+                                const btn = new Button();
+                                if (imgBufT) btn.setImage(imgBufT);
+                                btn.setBody(hasilT.captionBtn || hasilT.caption).setFooter('🌐 AN1.COM — APK MOD Gratis');
+                                if (dlUrlT)   btn.addUrl('📥 Download MOD APK', dlUrlT,   dlUrlT);
+                                if (gameUrlT) btn.addUrl('🔗 Halaman Game',     gameUrlT, gameUrlT);
+                                await btn.run(m.from, hisoka, m);
+                        } catch (e) {
+                                if (imgBufT) await hisoka.sendMessage(m.from, { image: imgBufT, caption: hasilT.caption }, { quoted: m });
+                                else         await tolak(hisoka, m, hasilT.caption);
+                        }
+                        await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+                        logCommand(m, hisoka, 'anigame-test');
+                        return;
+                }
+
+                if (sub === 'list') {
+                        await hisoka.sendMessage(m.from, { react: { text: '🎮', key: m.key } });
+                        const loadingL = await tolak(hisoka, m, `🎮 *Mengambil daftar game terbaru dari AN1.COM...*`);
+                        const gamesL   = await getGamesList();
+                        await hisoka.sendMessage(m.from, { delete: loadingL.key }).catch(() => {});
+                        if (!gamesL.length) { await tolak(hisoka, m, `❌ Gagal mengambil daftar game. Coba lagi nanti.`); return; }
+                        const listL = gamesL.slice(0, 12).map((g, i) => {
+                                const no  = String(i + 1).padStart(2, ' ');
+                                const rat = g.rating ? ` ⭐${g.rating}` : '';
+                                const dev = g.developer ? `\n│    👤 ${g.developer}` : '';
+                                const url = g.url ? `\n│    🔗 ${g.url}` : '';
+                                return `│ ${no}. *${g.title}*${rat}${dev}${url}`;
+                        }).join('\n│\n');
+                        const teksL =
+                                `╭─「 🎮 *AN1.COM — GAME TERBARU* 」\n│\n${listL}\n│\n` +
+                                `│ 🌐 *Sumber:* https://an1.com/games/\n│\n` +
+                                `│ 💡 Cari game: *${pfx}anigame minecraft*\n╰────────────────────`;
+                        const thumbL = gamesL[0]?.image || '';
+                        if (thumbL) {
+                                const imgL = await axios.get(thumbL, { responseType: 'arraybuffer', timeout: 10000, headers: { 'Referer': 'https://an1.com/', 'User-Agent': 'Mozilla/5.0' } })
+                                        .then(r => Buffer.from(r.data)).catch(() => null);
+                                if (imgL) { await hisoka.sendMessage(m.from, { image: imgL, caption: teksL }, { quoted: m }); logCommand(m, hisoka, 'anigame'); return; }
+                        }
+                        await tolak(hisoka, m, teksL);
+                        logCommand(m, hisoka, 'anigame');
+                        return;
+                }
+
+                // ── SEARCH ──
+                await hisoka.sendMessage(m.from, { react: { text: '🔎', key: m.key } });
+                const loadingS = await tolak(hisoka, m, `🔎 *Mencari game "${sub}" di AN1.COM...*`);
+                const { games: hasilS, total: totalS, searchUrl: searchUrlS } = await searchGames(sub);
+                await hisoka.sendMessage(m.from, { delete: loadingS.key }).catch(() => {});
+                if (!hasilS || !hasilS.length) {
+                        await tolak(hisoka, m, `❌ *Game "${sub}" tidak ditemukan di AN1.COM.*\n\nCoba kata kunci lain atau cek langsung:\n🔗 ${searchUrlS}`);
+                        return;
+                }
+                const totalTeksS = totalS ? ` (${totalS} hasil)` : '';
+                const listHasilS = hasilS.slice(0, 10).map((g, i) => {
+                        const no  = String(i + 1).padStart(2, ' ');
+                        const dev = g.developer ? ` — ${g.developer}` : '';
+                        const url = g.url ? `\n│    🔗 ${g.url}` : '';
+                        return `│ ${no}. *${g.title}*${dev}${url}`;
+                }).join('\n│\n');
+                const teksCariS =
+                        `╭─「 🔎 *AN1.COM — HASIL PENCARIAN* 」\n│ 🔍 Keyword: *${sub}*${totalTeksS}\n│\n` +
+                        `${listHasilS}\n│\n│ 🌐 *Semua hasil:*\n│ ${searchUrlS}\n╰────────────────────`;
+                const thumbS = hasilS[0]?.image || '';
+                if (thumbS) {
+                        const imgS = await axios.get(thumbS, { responseType: 'arraybuffer', timeout: 10000, headers: { 'Referer': 'https://an1.com/', 'User-Agent': 'Mozilla/5.0' } })
+                                .then(r => Buffer.from(r.data)).catch(() => null);
+                        if (imgS) { await hisoka.sendMessage(m.from, { image: imgS, caption: teksCariS }, { quoted: m }); logCommand(m, hisoka, 'anigame'); return; }
+                }
+                await tolak(hisoka, m, teksCariS);
+                logCommand(m, hisoka, 'anigame');
+
+        } catch (error) {
+                console.error('\x1b[31m[AniGame Cmd] Error:\x1b[39m', error.message);
+                await tolak(hisoka, m, `❌ *Gagal mengambil data game.*\n\n_${error.message}_\n\n🌐 Cek manual: https://an1.com/games/`);
+        }
 }
 
-handler.help = ["anigame - cari/lihat game MOD di AN1.COM", "anigame <nama game> - cari game tertentu", "anigame list - daftar game terbaru", "anigame on/off - aktifkan notif game baru di grup (owner)"];
+handler.help = ["anigame - cari/lihat game MOD dari AN1.COM", "anigame <nama game> - cari game", "anigame list - game terbaru", "anigame on/off - notif grup (owner)"];
 handler.tags = ["tools"];
 handler.command = /^(anigame|an1game|an1)$/i;
 
-export { getGamesList, searchGames, fetchGameDetail, getEnabledGroups, setGroupEnabled, cariGameBaru, simulasi, buatCaption, tandaiSudahKirim, tandaiDanLog };
 export default handler;
