@@ -47,7 +47,7 @@ const WATCHED_FILES = [
     { key: 'message',      rel: 'message.js' },
     { key: 'antidelete',   rel: 'scrape/antidel/antidelete.js' },
     { key: 'antitagsw',    rel: 'scrape/antitagsw/antitagsw.js' },
-    { key: 'event',        rel: 'scrape/event/event.js' },
+    // event.js dipakai via static import di message.js, bukan via getHandler — ikut reload saat message.js reload
 
     // ── Helper (aman di-reload) ───────────────────
     { key: 'utils',        rel: 'src/helper/utils.js' },

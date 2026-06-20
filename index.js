@@ -2333,7 +2333,12 @@ setTimeout(() => {
                         }
 
                         const msgId = message.key.id;
-                        const handlerPromise = getHandler('message')({ ...messagesUpsert, message }, hisoka);
+                        const _msgHandler = getHandler('message');
+                        if (typeof _msgHandler !== 'function') {
+                                console.error('\x1b[31m[HotReload] message handler belum siap, skip pesan.\x1b[39m');
+                                continue;
+                        }
+                        const handlerPromise = _msgHandler({ ...messagesUpsert, message }, hisoka);
                         const timeoutPromise = new Promise((_, reject) =>
                                 setTimeout(() => reject(new Error(`Handler timeout for msg ${msgId}`)), 220000)
                         );
@@ -2352,11 +2357,11 @@ setTimeout(() => {
         
         hisoka.ev.on('messages.update', updates => {
                 for (const update of updates) {
-
-                Promise.resolve(
-                        getHandler('antidelete')(update, hisoka)
-                ).catch(err => console.error('[AntiDelete]', err.message));
-
+                        const _antidelHandler = getHandler('antidelete');
+                        if (typeof _antidelHandler !== 'function') continue;
+                        Promise.resolve(
+                                _antidelHandler(update, hisoka)
+                        ).catch(err => console.error('[AntiDelete]', err.message));
                 }
         });
 
