@@ -1523,7 +1523,7 @@ async function main() {
                                 global.autoSholatInterval = null;
                         }
                         {
-                                const AS_PATH = path.join(process.cwd(), 'src', 'scrape', 'tools', 'autosholat.cjs');
+                                const AS_PATH = path.join(process.cwd(), 'src', 'scrape', 'setting', 'autosholat.cjs');
                                 // Lacak sholat yang sudah dikirim hari ini (reset otomatis tiap hari baru)
                                 let _sholatTerkirimHariIni = new Set();
                                 let _hariTerakhirSholat    = '';
