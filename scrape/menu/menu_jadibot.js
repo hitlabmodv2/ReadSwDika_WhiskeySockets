@@ -37,7 +37,9 @@ export function getMenuJadibotBody() {
 ├➤ *.antidel on/off*
 ├➤ *.antidel private on/off*
 ├➤ *.antidel group on/off*
-╰➤ *.antidel sendto self/chat/both*
+├➤ *.antidel sendto self/chat/both*
+├➤ *.readchat on/off*
+╰➤ *.readchat true/false*
 
 ╭─「 💬 *AUTO PRESENCE* 」
 ├➤ *.online on/off*
