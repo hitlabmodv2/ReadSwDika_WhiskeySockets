@@ -1198,7 +1198,6 @@ async function main() {
                                                 console.log(`[AniGame] 🔍 Cek game baru... (${daftarGrup.length} grup aktif)`);
                                                 const gameBaru = await _ag.cariGameBaru();
                                                 if (!gameBaru.length) {
-                                                        console.log(`[AniGame] ℹ️ Tidak ada game baru.`);
                                                         return;
                                                 }
 
