@@ -223,7 +223,7 @@ async function handleAlqdownload({ hisoka, m, query, tolak, logCommand, logError
                         return;
                 }
 
-                const { resolveDirectLink, downloadToTmp, formatSize } = exports;
+                const { resolveDirectLink, downloadToTmp, formatSize } = module.exports;
 
                 const parts   = input.split(/\s+/);
                 const rawUrl  = parts[0];

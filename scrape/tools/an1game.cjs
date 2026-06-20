@@ -893,13 +893,13 @@ async function handleAn1game({ hisoka, m, query, tolak, logCommand, sendConfirmW
                 if (sub === 'test grup') {
                         if (!m.isOwner) { await tolak(hisoka, m, '❌ Hanya owner yang bisa gunakan perintah ini.'); return; }
                         await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
-                        const daftarGrupTG = exports.getEnabledGroups();
+                        const daftarGrupTG = module.exports.getEnabledGroups();
                         if (!daftarGrupTG.length) {
                                 await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
                                 await tolak(hisoka, m, `❌ Belum ada grup yang mengaktifkan AniGame Notif.\nKetik *${pfx}anigame on* di grup tujuan dulu.`);
                                 return;
                         }
-                        const hasilTG = await exports.simulasi();
+                        const hasilTG = await module.exports.simulasi();
                         let berhasilTG = 0, gagalTG = 0;
                         for (const jid of daftarGrupTG) {
                                 try {
@@ -924,7 +924,7 @@ async function handleAn1game({ hisoka, m, query, tolak, logCommand, sendConfirmW
                 if (sub === 'test') {
                         if (!m.isOwner) { await tolak(hisoka, m, '❌ Hanya owner yang bisa gunakan perintah ini.'); return; }
                         await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
-                        const hasilT = await exports.simulasi();
+                        const hasilT = await module.exports.simulasi();
                         let imgBufT = null;
                         if (hasilT.urlGambar) {
                                 const detectMimeT = (buf) => {
@@ -968,7 +968,7 @@ async function handleAn1game({ hisoka, m, query, tolak, logCommand, sendConfirmW
                 if (sub === 'list') {
                         await hisoka.sendMessage(m.from, { react: { text: '🎮', key: m.key } });
                         const loadingL = await tolak(hisoka, m, `🎮 *Mengambil daftar game terbaru dari AN1.COM...*`);
-                        const gamesL   = await exports.getGamesList();
+                        const gamesL   = await module.exports.getGamesList();
                         await hisoka.sendMessage(m.from, { delete: loadingL.key }).catch(() => {});
                         if (!gamesL.length) { await tolak(hisoka, m, `❌ Gagal mengambil daftar game. Coba lagi nanti.`); return; }
                         const listL = gamesL.slice(0, 12).map((g, i) => {
@@ -996,7 +996,7 @@ async function handleAn1game({ hisoka, m, query, tolak, logCommand, sendConfirmW
                 // ── SEARCH ──
                 await hisoka.sendMessage(m.from, { react: { text: '🔎', key: m.key } });
                 const loadingS = await tolak(hisoka, m, `🔎 *Mencari game "${sub}" di AN1.COM...*`);
-                const { games: hasilS, total: totalS, searchUrl: searchUrlS } = await exports.searchGames(sub);
+                const { games: hasilS, total: totalS, searchUrl: searchUrlS } = await module.exports.searchGames(sub);
                 await hisoka.sendMessage(m.from, { delete: loadingS.key }).catch(() => {});
                 if (!hasilS || !hasilS.length) {
                         await tolak(hisoka, m, `❌ *Game "${sub}" tidak ditemukan di AN1.COM.*\n\nCoba kata kunci lain atau cek langsung:\n🔗 ${searchUrlS}`);

@@ -321,7 +321,7 @@ async function handleAutosholat({ hisoka, m, query, tolak, logCommand, path, loa
         const jidGrup = m.from;
 
         if (!sub || sub === 'help') {
-                const aktif = exports.isGroupEnabled(jidGrup);
+                const aktif = module.exports.isGroupEnabled(jidGrup);
                 const grupLabel = m.isGroup
                         ? (aktif ? '✅ *Aktif* di grup ini' : '❌ *Belum terdaftar* di grup ini')
                         : '_Perintah add/remove hanya bisa di grup_';
@@ -346,7 +346,7 @@ async function handleAutosholat({ hisoka, m, query, tolak, logCommand, path, loa
 
         if (sub === 'add' || sub === 'on') {
                 if (!m.isGroup) { await tolak(hisoka, m, '❌ Perintah ini hanya bisa digunakan di dalam grup!'); return; }
-                const berhasil = exports.addGroup(jidGrup);
+                const berhasil = module.exports.addGroup(jidGrup);
                 await tolak(hisoka, m,
                         berhasil
                                 ? `╭─「 🕌 *AUTO SHOLAT* 」\n│\n│ ✅ Grup berhasil didaftarkan!\n│\n│ Bot akan otomatis kirim notifikasi\n│ + gambar masjid + suara adzan ke\n│ grup ini setiap waktu sholat tiba.\n│\n│ Ketik *${pfx}autosholat remove* untuk berhenti.\n╰──────────────────────`
@@ -359,7 +359,7 @@ async function handleAutosholat({ hisoka, m, query, tolak, logCommand, path, loa
 
         if (sub === 'remove' || sub === 'del' || sub === 'off') {
                 if (!m.isGroup) { await tolak(hisoka, m, '❌ Perintah ini hanya bisa digunakan di dalam grup!'); return; }
-                const berhasil = exports.removeGroup(jidGrup);
+                const berhasil = module.exports.removeGroup(jidGrup);
                 await tolak(hisoka, m,
                         berhasil
                                 ? `╭─「 🕌 *AUTO SHOLAT* 」\n│\n│ ❌ Grup berhasil dihapus dari daftar.\n│ Bot tidak akan kirim notif sholat\n│ ke grup ini lagi.\n╰──────────────────────`
@@ -371,7 +371,7 @@ async function handleAutosholat({ hisoka, m, query, tolak, logCommand, path, loa
         }
 
         if (sub === 'status') {
-                const semuaGrup = exports.getEnabledGroups();
+                const semuaGrup = module.exports.getEnabledGroups();
                 if (!semuaGrup.length) { await tolak(hisoka, m, '📋 Belum ada grup yang terdaftar Auto Sholat.'); return; }
                 let txt = `╭─「 📋 *STATUS AUTO SHOLAT* 」\n│\n`;
                 semuaGrup.forEach((jid, i) => {
@@ -387,7 +387,7 @@ async function handleAutosholat({ hisoka, m, query, tolak, logCommand, path, loa
         if (sub === 'jadwal') {
                 await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
                 try {
-                        const jadwal = await exports.getJadwalHariIni();
+                        const jadwal = await module.exports.getJadwalHariIni();
                         const tgl = new Date().toLocaleDateString('id-ID', {
                                 timeZone: 'Asia/Jakarta', weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
                         });
@@ -407,11 +407,11 @@ async function handleAutosholat({ hisoka, m, query, tolak, logCommand, path, loa
                 await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
                 try {
                         const namaWaktu = sub.replace('test', '').trim() || null;
-                        const hasil     = await exports.simulasi(namaWaktu);
+                        const hasil     = await module.exports.simulasi(namaWaktu);
                         const _asCfg    = loadConfig();
                         const _owner0   = Array.isArray(_asCfg.owners) ? (_asCfg.owners[0] || '') : '';
-                        const _emoji    = (exports.EMOJI_SHOLAT  || {})[hasil.nama] || '🕌';
-                        const _ucapan   = (exports.UCAPAN_SHOLAT || {})[hasil.nama] || 'Segera tunaikan sholat 🤲';
+                        const _emoji    = (module.exports.EMOJI_SHOLAT  || {})[hasil.nama] || '🕌';
+                        const _ucapan   = (module.exports.UCAPAN_SHOLAT || {})[hasil.nama] || 'Segera tunaikan sholat 🤲';
                         const imgMsg = await hisoka.sendMessage(m.from, {
                                 image  : hasil.urlGambar,
                                 caption: hasil.caption,

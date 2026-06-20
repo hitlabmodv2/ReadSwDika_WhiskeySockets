@@ -197,7 +197,7 @@ async function handleCarilagu({ hisoka, m, query, tolak, logCommand, logError })
                         );
                         return;
                 }
-                const { geniusSearch: _search, formatGeniusSearch: _fmt } = exports;
+                const { geniusSearch: _search, formatGeniusSearch: _fmt } = module.exports;
                 await hisoka.sendMessage(m.from, { react: { text: '🔎', key: m.key } });
                 const loadingMsg = await tolak(hisoka, m, `🔎 Mencari lagu *${input}* di Genius...`);
                 const results = await _search(input);
@@ -224,7 +224,7 @@ async function handleDetailgenius({ hisoka, m, query, tolak, logCommand, logErro
                         );
                         return;
                 }
-                const { geniusDetail: _detail, formatGeniusDetail: _fmtD } = exports;
+                const { geniusDetail: _detail, formatGeniusDetail: _fmtD } = module.exports;
                 await hisoka.sendMessage(m.from, { react: { text: '🎼', key: m.key } });
                 const loadingMsg = await tolak(hisoka, m, `🎼 Mengambil detail lagu ID *${input}*...`);
                 const result = await _detail(input);

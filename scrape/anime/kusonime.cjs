@@ -427,7 +427,7 @@ async function handleAnime({ hisoka, m, query, tolak, logCommand, logError, path
                         return;
                 }
 
-                const { searchKusonime, getDetailKusonime, formatDetailText, formatSearchResults, parseSeasonInput, getSeasonAnimeList, batchFetchDetails, formatSeasonTxt, SEASON_NAMES } = exports;
+                const { searchKusonime, getDetailKusonime, formatDetailText, formatSearchResults, parseSeasonInput, getSeasonAnimeList, batchFetchDetails, formatSeasonTxt, SEASON_NAMES } = module.exports;
 
                 const seasonParsed = parseSeasonInput(input);
 

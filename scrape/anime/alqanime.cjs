@@ -219,7 +219,7 @@ async function handleAlq({ hisoka, m, query, tolak, logCommand, logError, path, 
                         return;
                 }
 
-                const { searchAlqanime, getDetailAlqanime } = exports;
+                const { searchAlqanime, getDetailAlqanime } = module.exports;
 
                 await hisoka.sendMessage(m.from, { react: { text: '🔍', key: m.key } });
                 await tolak(hisoka, m, `🔍 Mencari *${input}* di Alqanime...`);

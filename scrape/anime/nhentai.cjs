@@ -352,7 +352,7 @@ async function handleNhdl({ hisoka, m, query, tolak, logCommand, logError, path 
                         return;
                 }
 
-                const { nhentaiGallery, nhentaiRandom, nhentaiPdf, nhentaiCover, formatGalleryInfo, makeProgressBar } = exports;
+                const { nhentaiGallery, nhentaiRandom, nhentaiPdf, nhentaiCover, formatGalleryInfo, makeProgressBar } = module.exports;
 
                 const isRandom   = input.toLowerCase() === 'random';
                 let galleryId    = input;
@@ -435,7 +435,7 @@ async function handleNh({ hisoka, m, query, tolak, logError }) {
                         );
                         return;
                 }
-                const { nhentaiSearch, nhentaiRandom, nhentaiCover, formatSearchResults, formatGalleryInfo } = exports;
+                const { nhentaiSearch, nhentaiRandom, nhentaiCover, formatSearchResults, formatGalleryInfo } = module.exports;
                 if (input.toLowerCase() === 'random') {
                         await hisoka.sendMessage(m.from, { react: { text: '🎲', key: m.key } });
                         await tolak(hisoka, m, `🎲 Mengambil doujin random...`);

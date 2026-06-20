@@ -344,7 +344,7 @@ async function handleKomik({ hisoka, m, query, tolak, logCommand, logError, path
                         return;
                 }
 
-                const { komiktapSearch } = exports;
+                const { komiktapSearch } = module.exports;
                 const ax = require('axios');
 
                 await hisoka.sendMessage(m.from, { react: { text: '🔍', key: m.key } });
