@@ -47,6 +47,7 @@ import { execFile } from 'child_process'
 import { getRandomEmoji, getStatusEmojis } from '../helper/emoji.js' // masih dipakai di bot utama via hotReload, jangan hapus
 import {
   updateSwStatsAt,
+  pruneSwStatsAt,
   extractSwNumber,
   storyDebounce,
   maskNumber,
@@ -1598,6 +1599,9 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
       // Auto-init emoji.json per jadibot — copy dari bot utama jika belum ada
       try { getJadibotEmojis(number) } catch {}
 
+      // SwStats: prune activeSW expired supaya data jadibot realtime & akurat
+      try { pruneSwStatsAt(path.join(process.cwd(), 'data_jadibot', number, 'ceksw', 'swstats.json')) } catch {}
+
       // Pastikan registered = true tersimpan agar reconnect tidak trigger pairing ulang
       if (!state.creds.registered) {
         state.creds.registered = true
@@ -2114,6 +2118,9 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
 
       // Auto-init emoji.json per jadibot — copy dari bot utama jika belum ada
       try { getJadibotEmojis(number) } catch {}
+
+      // SwStats: prune activeSW expired supaya data jadibot realtime & akurat
+      try { pruneSwStatsAt(path.join(process.cwd(), 'data_jadibot', number, 'ceksw', 'swstats.json')) } catch {}
 
       // Pastikan registered = true tersimpan agar reconnect tidak trigger QR ulang
       if (!state.creds.registered) {
