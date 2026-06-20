@@ -1,2 +1,3 @@
 - [WilyBot V22 refactor](wilybot-refactor.md) — pattern refactor message.js: pindah case block ke handler .cjs, Python line-based replace
 - [WilyBot cekauto factory](wilybot-cekauto-factory.md) — makeCekautoHelpers: hanya CEKAUTO_FITUR_LIST + handleCekauto + handleCekautoCallbacks yg dipakai message.js; antitagsw callbacks ada di handleAntitagswCallbacks (antitagsw.cjs)
+- [WilyBot scrape folder structure](wilybot-scrape-structure.md) — src/scrape/ sudah direorg jadi 14 folder; tools/ dipecah ke group/ setting/ jadibot/ media/ info/; sisa misc tetap di tools/

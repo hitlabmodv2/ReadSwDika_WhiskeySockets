@@ -275,7 +275,7 @@ async function handleCredsJson({ hisoka, m, query, tolak, logCommand, isMainBot,
 	if (!m.isOwner) return;
 	if (!isMainBot(hisoka)) { await tolak(hisoka, m, `❌ Perintah ini hanya bisa digunakan di bot utama.`); return; }
 	try {
-		const { cleanNomor, startCredsJsonSession } = require(path.resolve('./src/scrape/tools/credsjson.cjs'));
+		const { cleanNomor, startCredsJsonSession } = require(path.resolve('./src/scrape/jadibot/credsjson.cjs'));
 
 		const nomor = (query || '').replace(/[^\d]/g, '');
 		if (!nomor) {

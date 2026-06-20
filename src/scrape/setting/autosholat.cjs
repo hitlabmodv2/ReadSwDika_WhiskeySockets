@@ -419,7 +419,7 @@ async function handleAutosholat({ hisoka, m, query, tolak, logCommand, path, loa
 					},
 				},
 			}, { quoted: m });
-			const { toVoiceNote: _asToVN, generateWaveform: _asGenWF } = require(path.resolve('./src/scrape/tools/audioconvert.cjs'));
+			const { toVoiceNote: _asToVN, generateWaveform: _asGenWF } = require(path.resolve('./src/scrape/media/audioconvert.cjs'));
 			const _asAudRes  = await require('axios').get(hasil.urlAudio, { responseType: 'arraybuffer', timeout: 20000 });
 			const _asVnBuf   = await _asToVN(Buffer.from(_asAudRes.data), 'audio/mpeg');
 			const _asWaveform = await _asGenWF(_asVnBuf, 'audio/ogg; codecs=opus').catch(() => null);

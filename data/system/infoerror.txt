@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 20/06/2026, 08.05.52  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 20/06/2026, 08.16.35  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,26 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  console.error
+│  #001  —  AutoSholat
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [31m[HotReload] ✗ Gagal reload 'src/handler/message.js', pakai versi lama.[39m
+│  [AutoSholat] Error scheduler: Cannot find module '/home/runner/workspace/src/scrape/tools/autosholat.cjs'
+Require stack:
+- /home/runner/workspace/index.js
 │
 │  DETAIL
-│  Sumber      : console.error
+│  Sumber      : AutoSholat
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 20/06/2026, 08.05.52
-│  Terakhir    : 20/06/2026, 08.05.52
+│  Pertama     : 20/06/2026, 08.16.35
+│  Terakhir    : 20/06/2026, 08.16.35
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [31m[HotReload] ✗ Gagal reload 'src/handler/message.js', pakai versi lama.[39m
-│     at console.error (file:///home/runner/workspace/index.js:414:27)
-│     at Timeout._onTimeout (file:///home/runner/workspace/src/helper/hotReload.js:141:29)
+│  ▶  Error: [AutoSholat] Error scheduler: Cannot find module '/home/runner/workspace/src/scrape/tools/autosholat.cjs'
+│     Require stack:
+│     - /home/runner/workspace/index.js
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 20/06/2026, 08.05.52
+  Terakhir diperbarui: 20/06/2026, 08.16.35
 ════════════════════════════════════════════════════════════════════════
