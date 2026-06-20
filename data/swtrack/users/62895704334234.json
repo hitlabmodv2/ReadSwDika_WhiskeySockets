@@ -499,5 +499,47 @@
       }
     ],
     "processedAt": "2026-06-20T06:49:02.789Z"
+  },
+  "AC59DCEDF3E450F82C2506C45FAE27D6": {
+    "id": "AC59DCEDF3E450F82C2506C45FAE27D6",
+    "sender": "62895704334234@s.whatsapp.net",
+    "name": ".",
+    "type": "extendedTextMessage",
+    "arrivedAt": "2026-06-20T07:00:44.389Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "📀",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "62895704334234",
+    "resolvedPn": "62895704334234@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "62895704334234@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC59DCEDF3E450F82C2506C45FAE27D6",
+      "participant": "142696211599405@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-20T07:00:58.755Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62895704334234@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC59DCEDF3E450F82C2506C45FAE27D6",
+        "participant": "142696211599405@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62895704334234@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC59DCEDF3E450F82C2506C45FAE27D6",
+        "participant": "62895704334234@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-20T07:00:58.755Z"
   }
 }

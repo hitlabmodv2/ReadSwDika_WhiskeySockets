@@ -149,6 +149,32 @@ function getSenderNumber(m) {
     return null;
 }
 
+function getJadibotChoiceKey(m) {
+    const sender = m.key?.participant || m.key?.remoteJid || m.sender || '';
+    const chat   = m.key?.remoteJid || m.from || '';
+    return `${chat}::${sender}`;
+}
+
+function isMainBot(hisoka) {
+    return hisoka?.isMainBot !== false;
+}
+
+function isNoSpaceError(error) {
+    if (!error) return false;
+    const code = error.code || '';
+    const msg  = (error.message || String(error)).toLowerCase();
+    return code === 'ENOSPC' || msg.includes('no space left') || msg.includes('enospc');
+}
+
+async function cleanupWritePressure() {
+    try {
+        await clearTmpFolder();
+    } catch (_) {}
+    try {
+        await clearOldFiles();
+    } catch (_) {}
+}
+
 
 class Button {
     constructor() {

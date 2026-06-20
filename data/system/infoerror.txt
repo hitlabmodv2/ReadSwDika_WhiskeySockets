@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 20/06/2026, 06.52.56  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 20/06/2026, 07.01.25  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,23 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  console.error
+│  #001  —  command:❌
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [31m[Handler Error][39m isNoSpaceError is not defined
+│  isMainBot is not defined
 │
 │  DETAIL
-│  Sumber      : console.error
+│  Sumber      : command:❌
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 20/06/2026, 06.52.56
-│  Terakhir    : 20/06/2026, 06.52.56
+│  Pertama     : 20/06/2026, 07.01.25
+│  Terakhir    : 20/06/2026, 07.01.25
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [31m[Handler Error][39m isNoSpaceError is not defined
-│     at console.error (file:///home/runner/workspace/index.js:414:27)
-│     at file:///home/runner/workspace/index.js:2348:57
+│  ▶  ReferenceError: isMainBot is not defined
+│     at default (file:///home/runner/workspace/src/handler/message.js?t=1781938842279:2228:17)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 20/06/2026, 06.52.56
+  Terakhir diperbarui: 20/06/2026, 07.01.25
 ════════════════════════════════════════════════════════════════════════
