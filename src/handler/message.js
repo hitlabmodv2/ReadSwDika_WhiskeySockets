@@ -42,7 +42,7 @@ import { getUptimeFormatted, getBotStats } from '../db/botStats.js';
 import { logError, formatErrorReport, clearErrors, generateErrorFileTxt, getInfoErrorTxtPath, getErrorStats } from '../db/errorLog.js';
 import { startJadibot, startJadibotQR, stopJadibot, jadibotMap, jadibotClearSesiMap, jadibotSesiReportMap, jadibotConnectedAt, pendingJadibotChoices, formatPairingCode, maskNumber, parseJadibotDuration, getJadibotExpiry, formatRemainingTime, getJadibotExpirySummary, cleanupExpiredJadibots, removeJadibotExpiry, setPermanentJadibot, ensureJadibotExpiry, extendJadibotExpiry, scheduleJadibotExpiry, startJadibotAutoOnline } from '../helper/jadibot.js';
 import { hasViewOnceCache, getViewOnceCache } from '../helper/voCache.js';
-import { isAntiTagSWEnabled, toggleAntiTagSW, resetWarnings, getWarnings, getAllAntiTagSWGroups, getAntiTagSWLog, clearAntiTagSWLog, resolveLidFromContacts } from './antitagsw.js';
+import { isAntiTagSWEnabled, toggleAntiTagSW, resetWarnings, getWarnings, getAllAntiTagSWGroups, getAntiTagSWLog, clearAntiTagSWLog, resolveLidFromContacts } from '../scrape/setting/antitagsw.js';
 // yg bawah pindah ke sini
 import { injectMessage } from '../helper/inject.js';
 import listenEvent from './event.js';

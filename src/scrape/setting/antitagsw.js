@@ -39,7 +39,7 @@ import { createRequire } from 'module';
 const _require = createRequire(import.meta.url);
 const { isJidGroup, jidNormalizedUser, areJidsSameUser, jidDecode, getContentType } = _require('@whiskeysockets/baileys');
 
-import { kvGet, kvSet, kvMigrateFromJSON, kvMigrateKey } from '../db/datadb.js';
+import { kvGet, kvSet, kvMigrateFromJSON, kvMigrateKey } from '../../db/datadb.js';
 kvMigrateFromJSON('security/antitagsw', path.join(process.cwd(), 'data', 'antitagsw.json'));
 kvMigrateKey('antitagsw', 'security/antitagsw');
 

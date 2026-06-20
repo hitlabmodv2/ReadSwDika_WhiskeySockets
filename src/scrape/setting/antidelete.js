@@ -36,9 +36,9 @@ import path from 'path';
 import { createRequire } from 'module';
 const _require = createRequire(import.meta.url);
 const { jidNormalizedUser, jidDecode, isJidGroup, getContentType, downloadMediaMessage } = _require('@whiskeysockets/baileys');
-import { isPnUser } from '../helper/socketCompat.js';
-import { getTmpPath } from '../helper/cleaner.js';
-import { getJadibotAntidel, getJadibotNumber } from '../helper/jadibotSettings.js';
+import { isPnUser } from '../../helper/socketCompat.js';
+import { getTmpPath } from '../../helper/cleaner.js';
+import { getJadibotAntidel, getJadibotNumber } from '../../helper/jadibotSettings.js';
 
 function loadConfig() {
         try {
