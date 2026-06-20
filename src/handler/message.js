@@ -8032,7 +8032,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                         case 'jadibot': {
                                 const { handleJadibot } = _require(path.resolve('./src/scrape/tools/jadibot-cmd.cjs'));
-                                await handleJadibot({ hisoka, m, query, tolak, logCommand, isMainBot, jadibotMap, startJadibot, parseJadibotCommandQuery, parseJadibotDuration, getJadibotExpirySummary, maskNumber, mainNum, pendingJadibotChoices, getJadibotChoiceKey });
+                                await handleJadibot({ hisoka, m, query, tolak, logCommand, isMainBot, path, fs, jadibotMap, parseJadibotCommandQuery, parseJadibotDuration, startJadibot, maskNumber, getJadibotExpirySummary, scheduleJadibotExpiry, setPermanentJadibot, removeJadibotExpiry, ensureJadibotExpiry, getPhoneCountryInfo });
                                 break;
                         }
 
@@ -8071,8 +8071,6 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 await handleListbot({ hisoka, m, tolak, logCommand, isMainBot, jadibotMap, getJadibotExpiry, getJadibotExpirySummary, cleanupExpiredJadibots, pendingJadibotChoices, getJadibotChoiceKey, jadibotConnectedAt, getUserName });
                                 break;
                         }
-                                break;
-                        
 
                         case 'play': {
                                 try {
