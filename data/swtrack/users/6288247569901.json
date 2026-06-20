@@ -166,5 +166,47 @@
       }
     ],
     "processedAt": "2026-06-19T13:24:48.251Z"
+  },
+  "ACEB396F77ECED3C168CB416CE95870B": {
+    "id": "ACEB396F77ECED3C168CB416CE95870B",
+    "sender": "6288247569901@s.whatsapp.net",
+    "name": "Aii Gntng😎",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-20T08:30:56.493Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🍙",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6288247569901",
+    "resolvedPn": "6288247569901@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6288247569901@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACEB396F77ECED3C168CB416CE95870B",
+      "participant": "4213446820079@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-20T08:31:04.218Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6288247569901@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACEB396F77ECED3C168CB416CE95870B",
+        "participant": "4213446820079@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6288247569901@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACEB396F77ECED3C168CB416CE95870B",
+        "participant": "6288247569901@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-20T08:31:04.218Z"
   }
 }
