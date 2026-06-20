@@ -294,5 +294,47 @@
       }
     ],
     "processedAt": "2026-06-20T07:54:19.242Z"
+  },
+  "ACFFEE68754FBE871ECACD84869DB921": {
+    "id": "ACFFEE68754FBE871ECACD84869DB921",
+    "sender": "6287768752790@s.whatsapp.net",
+    "name": "dinni.",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-20T07:54:31.906Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🔷",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6287768752790",
+    "resolvedPn": "6287768752790@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6287768752790@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACFFEE68754FBE871ECACD84869DB921",
+      "participant": "105420123283659@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-20T07:54:43.692Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287768752790@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACFFEE68754FBE871ECACD84869DB921",
+        "participant": "105420123283659@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287768752790@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACFFEE68754FBE871ECACD84869DB921",
+        "participant": "6287768752790@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-20T07:54:43.692Z"
   }
 }

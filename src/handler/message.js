@@ -92,7 +92,7 @@ const tolak = async (_hydro, m, teks) => await m.reply(teks);
 const { listbut2, sendConfirmWithButtons, sendAudioWithButtons } = _makeInteractiveMsg({ loadConfig, tolak });
 
 // ── Initialize log command helpers ──
-const { logCommand } = _makeLogCmd({ maskNumber });
+const { logCommand, _logCmdBox } = _makeLogCmd({ maskNumber });
 
 // ── Initialize AI image/media helpers from wily-helpers.cjs ──
 const {
@@ -1615,6 +1615,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 await handleRam({ hisoka, m, tolak, logCommand });
                                 break;
                         }
+                        case 'typing':
                         case 'typ': {
                                 const { handleTyp } = _require(path.resolve('./src/scrape/tools/autotyprec.cjs'));
                                 await handleTyp({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, getJadibotNumber, getJadibotAutoTyping, setJadibotUserSetting });
