@@ -175,6 +175,14 @@ async function cleanupWritePressure() {
     } catch (_) {}
 }
 
+async function getUserProfilePictureUrl(hisoka, jid) {
+    try {
+        return await hisoka.profilePictureUrl(jid, 'image');
+    } catch (_) {
+        return null;
+    }
+}
+
 
 class Button {
     constructor() {
@@ -4970,12 +4978,14 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                         case 'tovn': {
                                 const { handleTovn } = _require(path.resolve('./src/scrape/tools/audioconvert.cjs'));
+                                const pfx = m.prefix || '.';
                                 await handleTovn({ hisoka, m, tolak, logCommand, downloadMediaMessage, pfx });
                                 break;
                         }
 
                         case 'tomp3': {
                                 const { handleTomp3 } = _require(path.resolve('./src/scrape/tools/audioconvert.cjs'));
+                                const pfx = m.prefix || '.';
                                 await handleTomp3({ hisoka, m, tolak, logCommand, downloadMediaMessage, pfx });
                                 break;
                         }
