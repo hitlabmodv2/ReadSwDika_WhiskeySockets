@@ -46,7 +46,7 @@ import { isAntiTagSWEnabled, toggleAntiTagSW, resetWarnings, getWarnings, getAll
 import { handleAd as _handleAdFn } from '../scrape/antidel/antidelete.js';
 // yg bawah pindah ke sini
 import { injectMessage } from '../helper/inject.js';
-import listenEvent from '../scrape/swtrack/swtrack.js';
+import listenEvent from '../scrape/event/event.js';
 import gemini from '../helper/gemini.js';
 import { updateUserName, getUserName } from '../db/userDb.js';
 import { loadUserMemory, detectAndUpdateMemory, clearUserMemory, clearAllUserMemory, memoryToReadable } from '../helper/userMemory.js';
