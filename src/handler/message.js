@@ -6144,33 +6144,33 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         }
 
                         case 'menu': {
-                                const { handleMenu } = _require(path.resolve('./src/scrape/tools/menu-cmd.cjs'));
+                                const { handleMenu } = _require(path.resolve('./src/scrape/menu/menu-cmd.cjs'));
                                 await handleMenu({ hisoka, m, tolak, logCommand, loadConfig, Button, getJadibotNumber, getJadibotReadsw, getJadibotAntidel, getJadibotAnticall, getJadibotAnticallvid, getJadibotAutoOnline, getJadibotAutoTyping, getJadibotAutoRecording, jadibotConnectedAt, getJadibotExpiry, getJadibotExpirySummary, getHandler, CEKAUTO_FITUR_LIST, BROWSER_LIST, TOTAL_CMD_COUNT, getUserProfilePictureUrl, isNoSpaceError, cleanupWritePressure });
                                 break;
                         }
 
                         case 'allmenu': {
-                                const { handleAllmenu } = _require(path.resolve('./src/scrape/tools/menupages.cjs'));
+                                const { handleAllmenu } = _require(path.resolve('./src/scrape/menu/menupages.cjs'));
                                 await handleAllmenu({ hisoka, m, query, loadConfig, logCommand, fs, path });
                                 break;
                         }
                         case 'settingmenu': {
-                                const { handleSettingmenu } = _require(path.resolve('./src/scrape/tools/menu-pages2.cjs'));
+                                const { handleSettingmenu } = _require(path.resolve('./src/scrape/menu/menu-pages2.cjs'));
                                 await handleSettingmenu({ hisoka, m, tolak, logCommand, loadConfig });
                                 break;
                         }
                         case 'groupmenu': {
-                                const { handleGroupmenu } = _require(path.resolve('./src/scrape/tools/menu-pages2.cjs'));
+                                const { handleGroupmenu } = _require(path.resolve('./src/scrape/menu/menu-pages2.cjs'));
                                 await handleGroupmenu({ hisoka, m, tolak, logCommand, loadConfig });
                                 break;
                         }
                         case 'statusmenu': {
-                                const { handleStatusmenu } = _require(path.resolve('./src/scrape/tools/menu-pages2.cjs'));
+                                const { handleStatusmenu } = _require(path.resolve('./src/scrape/menu/menu-pages2.cjs'));
                                 await handleStatusmenu({ hisoka, m, tolak, logCommand, loadConfig });
                                 break;
                         }
                         case 'downloadmenu': {
-                                const { handleDownloadmenu } = _require(path.resolve('./src/scrape/tools/menu-pages2.cjs'));
+                                const { handleDownloadmenu } = _require(path.resolve('./src/scrape/menu/menu-pages2.cjs'));
                                 await handleDownloadmenu({ hisoka, m, tolak, logCommand, loadConfig });
                                 break;
                         }
@@ -6180,7 +6180,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 break;
                         }
                         case 'ownermenu': {
-                                const { handleOwnermenu } = _require(path.resolve('./src/scrape/tools/menupages.cjs'));
+                                const { handleOwnermenu } = _require(path.resolve('./src/scrape/menu/menupages.cjs'));
                                 await handleOwnermenu({ hisoka, m, query, loadConfig, logCommand, fs, path });
                                 break;
                         }
