@@ -59,7 +59,7 @@ import { buildSmartAlbumCaptionPrompt, buildSmartImageHistoryPrompt, buildSmartI
 import { buildIgVisionPrompt, buildIgCaptionPrompt, buildIgFallbackCaption, parseIgMetaHtml, formatIgCount } from './src/helper/AiPromptIg.js';
 import { buildFbVisionPrompt, buildFbCaptionPrompt, buildFbFallbackCaption, parseFbMetaHtml, formatFbCount } from './src/helper/AiPromptFb.js';
 import { hashSticker, lookupSticker, saveSticker, incrementStickerSeen, buildStickerContextHint, getStickerMemoryStats } from './src/helper/stickerMemory.js';
-import { getJadibotAntidel, getJadibotReadsw, getJadibotAnticall, getJadibotAnticallvid, getJadibotAutoOnline, getJadibotAutoTyping, getJadibotAutoRecording, setJadibotUserSetting, getJadibotNumber, addJadibotEmojis, deleteJadibotEmojis, listJadibotEmojis, getJadibotEmojiMode, setDefaultEmojiMode, setCustomEmojiMode, resetToDefaultEmojis, clearJadibotEmojis } from './src/helper/jadibotSettings.js';
+import { getJadibotAntidel, getJadibotReadsw, getJadibotAnticall, getJadibotAnticallvid, getJadibotAutoOnline, getJadibotAutoTyping, getJadibotAutoRecording, getJadibotReadchat, setJadibotUserSetting, getJadibotNumber, addJadibotEmojis, deleteJadibotEmojis, listJadibotEmojis, getJadibotEmojiMode, setDefaultEmojiMode, setCustomEmojiMode, resetToDefaultEmojis, clearJadibotEmojis } from './src/helper/jadibotSettings.js';
 import { pruneSwStatsAt, countActiveSW } from './src/helper/swtrack.js';
 import { getHandler } from './src/helper/hotReload.js';
 const { makeWmSticker, handleWmCommand } = _require('./scrape/media/wm.cjs');

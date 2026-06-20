@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 20/06/2026, 10.44.21  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 20/06/2026, 10.44.54  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -31,15 +31,15 @@
 │  DETAIL
 │  Sumber      : command:readchat
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 20/06/2026, 10.44.21
-│  Terakhir    : 20/06/2026, 10.44.21
+│  Pertama     : 20/06/2026, 10.44.54
+│  Terakhir    : 20/06/2026, 10.44.54
 │
 │  STACK TRACE (3 baris pertama)
 │  ▶  ReferenceError: getJadibotReadchat is not defined
-│     at default (file:///home/runner/workspace/message.js?t=1781952231206:1188:135)
+│     at default (file:///home/runner/workspace/message.js?t=1781952291172:1188:135)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 20/06/2026, 10.44.21
+  Terakhir diperbarui: 20/06/2026, 10.44.54
 ════════════════════════════════════════════════════════════════════════
