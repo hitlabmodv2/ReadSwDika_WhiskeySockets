@@ -1,2 +1,2 @@
 - [WilyBot V22 refactor](wilybot-refactor.md) — pattern refactor message.js: pindah case block ke handler .cjs, Python line-based replace
-- [WilyBot cekauto factory](wilybot-cekauto-factory.md) — makeCekautoHelpers factory di cekauto-cmd.cjs; semua callback interaktif (__cauto__, __cgrup__, dll) ada di handleCekautoCallbacks, dipanggil 1 baris di message.js dengan deps restartAutoCleaner & stopAutoCleaner
+- [WilyBot cekauto factory](wilybot-cekauto-factory.md) — makeCekautoHelpers: hanya CEKAUTO_FITUR_LIST + handleCekauto + handleCekautoCallbacks yg dipakai message.js; antitagsw callbacks ada di handleAntitagswCallbacks (antitagsw.cjs)

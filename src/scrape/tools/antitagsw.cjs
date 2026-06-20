@@ -436,4 +436,163 @@ async function handleAntitagsw({ hisoka, m, query, tolak, logCommand, loadConfig
         }
 }
 
-module.exports = { handleAntitagsw };
+// ─── handleAntitagswCallbacks ─────────────────────────────────────────────────
+// Menangani semua callback interaktif AntiTagSW (button reply, session reply).
+// @returns {boolean} true jika pesan sudah ditangani
+// ──────────────────────────────────────────────────────────────────────────────
+async function handleAntitagswCallbacks({ hisoka, m, tolak, toggleAntiTagSW, resetWarnings, getAllAntiTagSWGroups }) {
+        // ── Reply-based session delete (dari .antitagsw list) ─────────────────────
+        if (global.__antiTagSWListSessions?.size && m.quoted?.key?.id && (m.isOwner || m.isAdmin)) {
+                const sessId = m.quoted.key.id;
+                const sess = global.__antiTagSWListSessions?.get(sessId);
+                if (sess && sess.from === m.from) {
+                        const rawReply = (m.text || m.body || '').trim().toLowerCase();
+                        if (rawReply) {
+                                global.__antiTagSWListSessions.delete(sessId);
+                                try {
+                                        const { groups: sessGroups } = sess;
+                                        if (rawReply === 'semua') {
+                                                const total = sessGroups.length;
+                                                for (const g of sessGroups) toggleAntiTagSW(g.gid, false);
+                                                await tolak(hisoka, m,
+                                                        `╭───〔 *🗑️ HAPUS SEMUA* 〕───╮\n` +
+                                                        `│\n` +
+                                                        `│ ✅ Semua grup dihapus!\n` +
+                                                        `│ 🗑️ Total: *${total} grup*\n` +
+                                                        `│ ⚠️ Semua warning juga direset.\n` +
+                                                        `│\n` +
+                                                        `╰────────────────────────────────────╯`
+                                                );
+                                        } else if (rawReply === 'reset') {
+                                                for (const g of sessGroups) resetWarnings(g.gid);
+                                                await tolak(hisoka, m,
+                                                        `╭───〔 *🔄 RESET WARNING* 〕───╮\n` +
+                                                        `│\n` +
+                                                        `│ ✅ Warning direset!\n` +
+                                                        `│ 📊 Total: *${sessGroups.length} grup*\n` +
+                                                        `│ 🟢 Grup tetap terdaftar.\n` +
+                                                        `│\n` +
+                                                        `╰────────────────────────────────────╯`
+                                                );
+                                        } else {
+                                                const nums = rawReply.split(/[,\s]+/)
+                                                        .map(n => parseInt(n.trim(), 10))
+                                                        .filter(n => !isNaN(n) && n >= 1 && n <= sessGroups.length);
+                                                const uniq = [...new Set(nums)];
+                                                if (!uniq.length) {
+                                                        await tolak(hisoka, m,
+                                                                `❌ Nomor tidak valid!\n` +
+                                                                `Masukkan angka 1-${sessGroups.length}, contoh: *1* atau *1,2,3*\n` +
+                                                                `Atau ketik *semua* / *reset*`
+                                                        );
+                                                } else {
+                                                        const dihapus = [];
+                                                        for (const n of uniq) {
+                                                                const g = sessGroups[n - 1];
+                                                                if (g) {
+                                                                        toggleAntiTagSW(g.gid, false);
+                                                                        dihapus.push(`${n}. *${g.namaGrup}*`);
+                                                                }
+                                                        }
+                                                        const listDihapus = dihapus.map(d => `│ ✅ ${d}`).join('\n');
+                                                        await tolak(hisoka, m,
+                                                                `╭───〔 *🗑️ ANTITAGSW REMOVED* 〕───╮\n` +
+                                                                `│\n` +
+                                                                `│ ✅ *${dihapus.length} grup* berhasil dihapus!\n` +
+                                                                `│\n` +
+                                                                listDihapus + `\n` +
+                                                                `│\n` +
+                                                                `│ ⚠️ Warning di grup tersebut direset.\n` +
+                                                                `│\n` +
+                                                                `╰────────────────────────────────────╯`
+                                                        );
+                                                }
+                                        }
+                                } catch (e) {
+                                        await tolak(hisoka, m, `❌ Gagal proses: ${e.message}`);
+                                }
+                                return true;
+                        }
+                }
+        }
+
+        const txt = typeof m.text === 'string' ? m.text : '';
+
+        // ── __antitagsw_del__ — hapus satu grup dari daftar ───────────────────────
+        if ((m.isOwner || m.isAdmin) && txt.startsWith('__antitagsw_del__')) {
+                const targetGid = txt.slice('__antitagsw_del__'.length).trim();
+                if (targetGid) {
+                        try {
+                                let namaGrup = targetGid;
+                                try { const mt = await hisoka.groupMetadata(targetGid); namaGrup = mt?.subject || targetGid; } catch { try { namaGrup = hisoka.groups?.read(targetGid)?.subject || targetGid; } catch {} }
+                                toggleAntiTagSW(targetGid, false);
+                                await tolak(hisoka, m,
+                                        `╭───〔 *🗑️ ANTITAGSW REMOVED* 〕───╮\n` +
+                                        `│\n` +
+                                        `│ ✅ Grup berhasil dihapus!\n` +
+                                        `│\n` +
+                                        `│ 📌 *${namaGrup}*\n` +
+                                        `│ 🆔 \`${targetGid}\`\n` +
+                                        `│\n` +
+                                        `│ ⚠️ Warning di grup ini juga direset.\n` +
+                                        `│\n` +
+                                        `╰────────────────────────────────────╯`
+                                );
+                        } catch (e) {
+                                await tolak(hisoka, m, `❌ Gagal hapus grup: ${e.message}`);
+                        }
+                        return true;
+                }
+                return false;
+        }
+
+        // ── __antitagsw_delall__ — hapus semua grup dari daftar ───────────────────
+        if ((m.isOwner || m.isAdmin) && txt === '__antitagsw_delall__') {
+                try {
+                        const allG = getAllAntiTagSWGroups();
+                        const total = allG.length;
+                        for (const gid of allG) toggleAntiTagSW(gid, false);
+                        await tolak(hisoka, m,
+                                `╭───〔 *🗑️ ANTITAGSW HAPUS SEMUA* 〕───╮\n` +
+                                `│\n` +
+                                `│ ✅ Semua grup berhasil dihapus!\n` +
+                                `│\n` +
+                                `│ 🗑️ Total dihapus: *${total} grup*\n` +
+                                `│ ⚠️ Semua warning juga direset.\n` +
+                                `│\n` +
+                                `│ 💡 Gunakan *.antitagsw add* untuk\n` +
+                                `│    mendaftarkan ulang grup.\n` +
+                                `│\n` +
+                                `╰────────────────────────────────────╯`
+                        );
+                } catch (e) {
+                        await tolak(hisoka, m, `❌ Gagal hapus semua: ${e.message}`);
+                }
+                return true;
+        }
+
+        // ── __antitagsw_resetall__ — reset semua warning ──────────────────────────
+        if ((m.isOwner || m.isAdmin) && txt === '__antitagsw_resetall__') {
+                try {
+                        const allG = getAllAntiTagSWGroups();
+                        for (const gid of allG) resetWarnings(gid);
+                        await tolak(hisoka, m,
+                                `╭───〔 *🔄 ANTITAGSW RESET SEMUA* 〕───╮\n` +
+                                `│\n` +
+                                `│ ✅ Semua warning berhasil direset!\n` +
+                                `│\n` +
+                                `│ 📊 Total grup direset: *${allG.length} grup*\n` +
+                                `│ 🟢 Grup tetap terdaftar di AntiTagSW.\n` +
+                                `│\n` +
+                                `╰────────────────────────────────────╯`
+                        );
+                } catch (e) {
+                        await tolak(hisoka, m, `❌ Gagal reset semua: ${e.message}`);
+                }
+                return true;
+        }
+
+        return false;
+}
+
+module.exports = { handleAntitagsw, handleAntitagswCallbacks };
