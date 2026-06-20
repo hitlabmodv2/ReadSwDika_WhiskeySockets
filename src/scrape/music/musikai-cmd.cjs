@@ -2,18 +2,9 @@
 
 const path = require('path');
 
-async function handleMusicAICallbacks({
-        hisoka, m,
-        pendingMusikaiCache,
-        generateWAMessageFromContent,
-        sendAudioWithButtons,
-        sendConfirmWithButtons,
-        logCommand,
-        logError,
-        tolak,
-}) {
-        // ─── Internal: generate musik helper ──────────────────────────────────
-        const _generateMusik = async (params) => {
+// ─── Factory: buat _generateMusik dengan deps yang sudah di-bind ──────────────
+function _makeGenerateMusik({ hisoka, m, pendingMusikaiCache, sendAudioWithButtons, logCommand }) {
+        return async function _generateMusik(params) {
                 const { ChatMusicAPI, formatDuration: fmtDur, MODELS: MusicModels } = require(path.resolve('./src/scrape/music/chatmusic.cjs'));
                 await hisoka.sendMessage(m.from, { react: { text: '🎵', key: m.key } }).catch(() => {});
 
@@ -174,9 +165,11 @@ async function handleMusicAICallbacks({
                         throw err;
                 }
         };
+}
 
-        // ─── Internal: show genre select ──────────────────────────────────────
-        const _showGenreSelect = async () => {
+// ─── Factory: buat _showGenreSelect dengan deps yang sudah di-bind ────────────
+function _makeShowGenreSelect({ hisoka, m, generateWAMessageFromContent }) {
+        return async function _showGenreSelect() {
                 const genreSections = [
                         {
                                 title: '🎵 Pop & Ballad',
@@ -259,10 +252,122 @@ async function handleMusicAICallbacks({
                 );
                 await hisoka.relayMessage(msg.key.remoteJid, msg.message, { messageId: msg.key.id });
         };
+}
 
-        // ─── Callbacks ────────────────────────────────────────────────────────
+// ─── Command handler: .musikai / .aimusik ─────────────────────────────────────
+async function handleMusikaiCmd({
+        hisoka, m, query,
+        tolak, logCommand, logError,
+        sendConfirmWithButtons,
+        pendingMusikaiCache, generateWAMessageFromContent, sendAudioWithButtons,
+}) {
+        const _generateMusik = _makeGenerateMusik({ hisoka, m, pendingMusikaiCache, sendAudioWithButtons, logCommand });
+        const _showGenreSelect = _makeShowGenreSelect({ hisoka, m, generateWAMessageFromContent });
+
+        const pfx = m.prefix || '.';
+        const input = (query || '').trim();
+
+        if (!input) {
+                await sendConfirmWithButtons(hisoka, m,
+                        `╭──『 🎵 *MUSIK AI* 』\n` +
+                        `│\n` +
+                        `│ Generate lagu original pakai AI.\n` +
+                        `│ Hasil: *2 variasi audio* + cover art.\n` +
+                        `│\n` +
+                        `│ *Cara pakai:*\n` +
+                        `│ • _${pfx}musikai hujan di kota_ — tema bebas\n` +
+                        `│ • _${pfx}musikai random_ — genre random\n` +
+                        `│ • _${pfx}musikai judul | lirik | genre_ — manual\n` +
+                        `│\n` +
+                        `│ ✨ AI pilih genre + judul + lirik otomatis!\n` +
+                        `╰──────────────────────────────`,
+                        [
+                                { text: '🎲 Generate Random', id: '__musikai_random__' },
+                                { text: '📖 Cara Pakai Custom', id: '__musikai_help__' },
+                        ]
+                );
+                return;
+        }
+
+        try {
+                if (input.toLowerCase() === 'random') {
+                        await _showGenreSelect();
+                        return;
+                }
+
+                if (!input.includes('|')) {
+                        const tema = input.slice(0, 200);
+                        await hisoka.sendMessage(m.from, { react: { text: '🎵', key: m.key } }).catch(() => {});
+                        const loadingMsg = await hisoka.sendMessage(m.from,
+                                { text: `🎵 *AI sedang meracik lagu...*\n│ Tema  : *${tema}*\n│\n│ ⏳ AI memilih genre, judul & lirik yang pas...` },
+                                { quoted: m }
+                        ).catch(() => null);
+                        const _edit = async (txt) => {
+                                if (!loadingMsg?.key) return;
+                                try { await hisoka.sendMessage(m.from, { text: txt, edit: loadingMsg.key }); } catch (_) {}
+                        };
+
+                        const { ChatMusicAPI } = require(path.resolve('./src/scrape/music/chatmusic.cjs'));
+                        const api = new ChatMusicAPI();
+                        await api.login();
+                        const preset = await api.aiThemePreset(tema, 'vocal');
+                        await _edit(
+                                `🎵 *AI selesai meracik!*\n` +
+                                `│ Tema  : *${tema}*\n` +
+                                `│ Judul : *${preset.title}*\n` +
+                                `│ Genre : *${preset.genreLabel}*\n` +
+                                `│\n` +
+                                `│ ⏳ Mengirim ke server musik...`
+                        );
+
+                        if (loadingMsg?.key) {
+                                try { await hisoka.sendMessage(m.from, { delete: loadingMsg.key }); } catch (_) {}
+                        }
+                        await _generateMusik({
+                                title: preset.title, lyrics: preset.lyrics, musicStyle: preset.musicStyle,
+                                genreLabel: preset.genreLabel, prompt: preset.prompt, isInstrumental: preset.isInstrumental,
+                        });
+                        console.log(`\x1b[35m[MusicAI/Tema]\x1b[0m ✅ tema="${tema}" → judul="${preset.title}" genre="${preset.genreLabel}"`);
+                        return;
+                }
+
+                const parts = input.split('|').map(s => s.trim());
+                await _generateMusik({
+                        title: parts[0] || 'My Song', lyrics: parts[1] || '', musicStyle: parts[2] || 'pop',
+                        isInstrumental: !parts[1] ? 1 : 0, prompt: `${parts[2] || 'pop'} indonesia`,
+                });
+        } catch (error) {
+                console.error('\x1b[31m[MusicAI] Error:\x1b[39m', error.message);
+                logError(error, 'command:musikai');
+                await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } }).catch(() => {});
+                const isSensitive = /sensitive words|prohibited/i.test(error.message);
+                const errMsg = isSensitive
+                        ? `╭──『 ⚠️ *LIRIK DIBLOKIR* 』\n│\n│ API mendeteksi *kata sensitif* dalam lirik.\n│\n│ 💡 *Solusi:*\n│ Hindari kata-kata terkait narkoba,\n│ SARA, kekerasan, atau konten dewasa.\n│\n│ Coba ganti lirikmu & kirim ulang ↓\n╰──────────────────────────────`
+                        : `╭──『 ❌ *GAGAL GENERATE* 』\n│\n│ ${error.message}\n│\n│ Coba lagi atau pilih genre random ↓\n╰──────────────────────────────`;
+                await sendConfirmWithButtons(hisoka, m, errMsg,
+                        isSensitive
+                                ? [{ text: '📖 Lihat Contoh Format', id: '__musikai_help__' }]
+                                : [{ text: '🔁 Coba Random Lagi', id: '__musikai_random__' }]
+                );
+        }
+}
+
+// ─── Button callback handler (dipanggil dari message.js sebelum switch-case) ──
+async function handleMusicAICallbacks({
+        hisoka, m,
+        pendingMusikaiCache,
+        generateWAMessageFromContent,
+        sendAudioWithButtons,
+        sendConfirmWithButtons,
+        logCommand,
+        logError,
+        tolak,
+}) {
         const txt = typeof m.text === 'string' ? m.text : null;
         if (txt === null) return false;
+
+        const _generateMusik = _makeGenerateMusik({ hisoka, m, pendingMusikaiCache, sendAudioWithButtons, logCommand });
+        const _showGenreSelect = _makeShowGenreSelect({ hisoka, m, generateWAMessageFromContent });
 
         // 🤖 Random: tampilkan pilihan Bahasa dulu
         if (txt === '__musikai_random__') {
@@ -631,4 +736,4 @@ async function handleMusicAICallbacks({
         return false;
 }
 
-module.exports = { handleMusicAICallbacks };
+module.exports = { handleMusicAICallbacks, handleMusikaiCmd };
