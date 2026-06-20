@@ -36,7 +36,7 @@ const _reloadCallbacks = {};
 
 const WATCHED_FILES = [
     // ── Handler ──────────────────────────────────
-    { key: 'message',      rel: 'src/handler/message.js' },
+    { key: 'message',      rel: 'message.js' },
     { key: 'antidelete',   rel: 'scrape/antidel/antidelete.js' },
     { key: 'antitagsw',    rel: 'scrape/antitagsw/antitagsw.js' },
     { key: 'event',        rel: 'scrape/event/event.js' },

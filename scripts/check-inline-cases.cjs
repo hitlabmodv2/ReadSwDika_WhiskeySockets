@@ -3,7 +3,7 @@
 
 /**
  * check-inline-cases.js
- * Scan src/handler/message.js — temukan case block yang masih punya inline logic.
+ * Scan message.js — temukan case block yang masih punya inline logic.
  * Idealnya setiap case cuma: require → await handler → break
  *
  * Jalankan: node scripts/check-inline-cases.js
@@ -12,7 +12,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const TARGET = path.resolve('./src/handler/message.js');
+const TARGET = path.resolve('./message.js');
 const INLINE_THRESHOLD = 6; // baris substantif max sebelum dianggap "inline"
 
 if (!fs.existsSync(TARGET)) {
