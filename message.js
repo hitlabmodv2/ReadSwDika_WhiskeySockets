@@ -716,8 +716,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 await handleTestnet({ hisoka, m, tolak, logCommand });
                                 break;
                         }
-                        case 'disksize':
-                        case 'filesize': {
+                        case 'ceksize': {
                                 const { handleFilesize } = _require(path.resolve('./scrape/info/ceksize.cjs'));
                                 await handleFilesize({ hisoka, m, tolak, logCommand, _require, path });
                                 break;
