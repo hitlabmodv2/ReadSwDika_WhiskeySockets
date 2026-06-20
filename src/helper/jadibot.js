@@ -60,7 +60,7 @@ import { useSingleFileAuthState } from './authState.js'
 import JSONDB from '../db/json.js'
 import { cleanStaleSessionFiles } from './cleaner.js'
 import { logError } from '../db/errorLog.js'
-import { getJadibotAnticall, getJadibotAnticallvid, getJadibotNumber, getJadibotReadsw, getJadibotAutoOnline, getJadibotEmojis, getJadibotRandomEmoji, getJadibotAutoTyping, getJadibotAutoRecording } from './jadibotSettings.js'
+import { getJadibotAnticall, getJadibotAnticallvid, getJadibotNumber, getJadibotReadsw, getJadibotAutoOnline, getJadibotEmojis, getJadibotRandomEmoji, getJadibotAutoTyping, getJadibotAutoRecording, getJadibotReadchat } from './jadibotSettings.js'
 import { getHandler } from './hotReload.js'
 
 /* ================= LOGGER ================= */
@@ -1956,6 +1956,17 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
         }
       } catch {}
 
+      // Auto Read Chat — private only, terisolasi per-jadibot
+      try {
+        const _rcJid = msg.key?.remoteJid
+        const _rcIsPrivate = _rcJid && !_rcJid.endsWith('@g.us') && _rcJid !== 'status@broadcast'
+        if (_rcIsPrivate && !msg.key?.fromMe) {
+          if (getJadibotReadchat(number)?.enabled) {
+            sock.readMessages([msg.key]).catch(() => {})
+          }
+        }
+      } catch {}
+
       try {
         await getHandler('message')(
           { message: msg, type: 'notify' },
@@ -2381,6 +2392,17 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
             const _delaySec = _doType ? (_atCfg.delaySeconds || 5) : (_arCfg.delaySeconds || 5)
             try { sock.sendPresenceUpdate(_presence, _atJid) } catch {}
             setTimeout(() => { try { sock.sendPresenceUpdate('paused', _atJid) } catch {} }, Math.min(_delaySec * 1000, 30000))
+          }
+        }
+      } catch {}
+
+      // Auto Read Chat — private only, terisolasi per-jadibot
+      try {
+        const _rcJid = msg.key?.remoteJid
+        const _rcIsPrivate = _rcJid && !_rcJid.endsWith('@g.us') && _rcJid !== 'status@broadcast'
+        if (_rcIsPrivate && !msg.key?.fromMe) {
+          if (getJadibotReadchat(number)?.enabled) {
+            sock.readMessages([msg.key]).catch(() => {})
           }
         }
       } catch {}

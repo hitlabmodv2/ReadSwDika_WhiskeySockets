@@ -20,6 +20,9 @@
       "privateChat": true,
       "groupChat": true
     },
-    "updatedAt": 1781280482356
+    "updatedAt": 1781952495125,
+    "readchat": {
+      "enabled": true
+    }
   }
 }
