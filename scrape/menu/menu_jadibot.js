@@ -91,7 +91,8 @@ export function getMenuJadibotBody() {
 ╰➤ *.emojicustom*
 
 ╭─「 📡 *STATUS & STORY* 」
-╰➤ *.upswgc [caption]*
+├➤ *.upswgc [caption]*
+╰➤ *.swgcv2 [teks]|[warna]|[grup]*
 
 ╭─「 📥 *DOWNLOAD* 」
 ├➤ *.allunduh [link]*
