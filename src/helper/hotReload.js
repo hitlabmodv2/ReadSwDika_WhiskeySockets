@@ -39,7 +39,7 @@ const WATCHED_FILES = [
     { key: 'message',      rel: 'src/handler/message.js' },
     { key: 'antidelete',   rel: 'src/scrape/antidel/antidelete.js' },
     { key: 'antitagsw',    rel: 'src/scrape/antitagsw/antitagsw.js' },
-    { key: 'event',        rel: 'src/scrape/event/event.js' },
+    { key: 'swtrack',      rel: 'src/scrape/swtrack/swtrack.js' },
 
     // ── Helper (aman di-reload) ───────────────────
     { key: 'utils',        rel: 'src/helper/utils.js' },
