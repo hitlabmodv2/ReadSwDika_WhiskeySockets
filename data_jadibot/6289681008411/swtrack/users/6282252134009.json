@@ -131,9 +131,9 @@
     "name": "NISKI || CONVAIRESS",
     "type": "videoMessage",
     "arrivedAt": "2026-06-20T10:12:28.733Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "🇩🇪",
     "resolve": "Signal Lib ✓",
     "source": "status",
     "number": "6282252134009",
@@ -146,7 +146,26 @@
       "participant": "76790290767977@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-20T10:12:28.734Z"
+    "updatedAt": "2026-06-20T10:12:45.712Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282252134009@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACC37C9471A1AD3A28A7EB1111BDF7D0",
+        "participant": "76790290767977@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282252134009@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACC37C9471A1AD3A28A7EB1111BDF7D0",
+        "participant": "6282252134009@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-20T10:12:45.711Z"
   },
   "AC5AFFF1F16C2612E86A0B8DBE6E7BCB": {
     "id": "AC5AFFF1F16C2612E86A0B8DBE6E7BCB",
@@ -280,9 +299,9 @@
     "name": "NISKI || CONVAIRESS",
     "type": "videoMessage",
     "arrivedAt": "2026-06-20T10:12:30.031Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "😩",
     "resolve": "Signal Lib ✓",
     "source": "status",
     "number": "6282252134009",
@@ -295,7 +314,26 @@
       "participant": "76790290767977@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-20T10:12:30.031Z"
+    "updatedAt": "2026-06-20T10:12:45.546Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282252134009@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC6EA7A6A26D04099367B89CE86BCE8D",
+        "participant": "76790290767977@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282252134009@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC6EA7A6A26D04099367B89CE86BCE8D",
+        "participant": "6282252134009@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-20T10:12:45.545Z"
   },
   "AC9F926E86AABDE8A3CE64CEFA80750A": {
     "id": "AC9F926E86AABDE8A3CE64CEFA80750A",

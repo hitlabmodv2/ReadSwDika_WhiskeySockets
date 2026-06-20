@@ -91,9 +91,9 @@
     "name": "Zacky Ariansyah",
     "type": "imageMessage",
     "arrivedAt": "2026-06-20T10:12:26.791Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "🛬",
     "resolve": "Signal Lib ✓",
     "source": "status",
     "number": "6289678522775",
@@ -106,7 +106,26 @@
       "participant": "193020829909081@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-20T10:12:26.791Z"
+    "updatedAt": "2026-06-20T10:12:42.535Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289678522775@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC2B20E3725FC01659BA1A2F66F9883C",
+        "participant": "193020829909081@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289678522775@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC2B20E3725FC01659BA1A2F66F9883C",
+        "participant": "6289678522775@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-20T10:12:42.535Z"
   },
   "ACB1E9EC77428F34F7E9A4442C8C3174": {
     "id": "ACB1E9EC77428F34F7E9A4442C8C3174",
@@ -156,9 +175,9 @@
     "name": "Zacky Ariansyah",
     "type": "extendedTextMessage",
     "arrivedAt": "2026-06-20T10:12:27.665Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "🇪🇹",
     "resolve": "Signal Lib ✓",
     "source": "status",
     "number": "6289678522775",
@@ -171,6 +190,25 @@
       "participant": "193020829909081@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-20T10:12:27.666Z"
+    "updatedAt": "2026-06-20T10:12:44.052Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289678522775@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC329616856865AF551341757136DFC0",
+        "participant": "193020829909081@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289678522775@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC329616856865AF551341757136DFC0",
+        "participant": "6289678522775@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-20T10:12:44.052Z"
   }
 }
