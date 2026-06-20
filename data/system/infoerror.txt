@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 20/06/2026, 07.01.25  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 20/06/2026, 07.54.22  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,23 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  command:❌
+│  #001  —  console.error
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  isMainBot is not defined
+│  [31m[CrashGuard] Too many errors, forcing restart...[39m
 │
 │  DETAIL
-│  Sumber      : command:❌
+│  Sumber      : console.error
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 20/06/2026, 07.01.25
-│  Terakhir    : 20/06/2026, 07.01.25
+│  Pertama     : 20/06/2026, 07.54.22
+│  Terakhir    : 20/06/2026, 07.54.22
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  ReferenceError: isMainBot is not defined
-│     at default (file:///home/runner/workspace/src/handler/message.js?t=1781938842279:2228:17)
+│  ▶  Error: [31m[CrashGuard] Too many errors, forcing restart...[39m
+│     at console.error (file:///home/runner/workspace/index.js:414:27)
+│     at process.<anonymous> (file:///home/runner/workspace/src/helper/crashGuard.js:115:21)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 20/06/2026, 07.01.25
+  Terakhir diperbarui: 20/06/2026, 07.54.22
 ════════════════════════════════════════════════════════════════════════
