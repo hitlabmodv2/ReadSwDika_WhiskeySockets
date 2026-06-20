@@ -398,6 +398,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                             'anticallvid', 'acv',
                             'autocallaudio', 'aca',
                             'online',
+                            'readchat',
                             'typing', 'typ',
                             'recording', 'record',
                             'allunduh', 'tt', 'ig', 'fb', 'twdl', 'ytmp3', 'ytmp4', 'play',
