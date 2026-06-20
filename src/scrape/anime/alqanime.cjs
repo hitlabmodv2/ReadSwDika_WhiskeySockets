@@ -198,105 +198,155 @@ module.exports = { searchAlqanime, getDetailAlqanime, getLatestAlqanime, getRili
 // ── COMMAND HANDLER ───────────────────────────────────────────────────────────
 
 async function handleAlq({ hisoka, m, query, tolak, logCommand, logError, path, pendingAlqDlChoices, getJadibotChoiceKey }) {
-	try {
-		const input = (query || '').trim();
-		const pfx   = m.prefix || '.';
+        try {
+                const input = (query || '').trim();
+                const pfx   = m.prefix || '.';
 
-		if (!input) {
-			await tolak(hisoka, m,
-				`╭─「 🎌 *ALQANIME* 」\n│\n│ *Cari anime sub indo (batch/episode):*\n│ ${pfx}alq <judul>\n│\n` +
-				`│ *Contoh:*\n│ ${pfx}alq one piece\n│ ${pfx}alq naruto\n│ ${pfx}alq attack on titan\n│\n` +
-				`│ 📺 Info + link download per resolusi\n│ 🌐 Source: alqanime.net\n╰──────────────────────`
-			);
-			return;
-		}
+                if (!input) {
+                        await tolak(hisoka, m,
+                                `╭─「 🎌 *ALQANIME* 」\n│\n│ *Cari anime sub indo (batch/episode):*\n│ ${pfx}alq <judul>\n│\n` +
+                                `│ *Contoh:*\n│ ${pfx}alq one piece\n│ ${pfx}alq naruto\n│ ${pfx}alq attack on titan\n│\n` +
+                                `│ 📺 Info + link download per resolusi\n│ 🌐 Source: alqanime.net\n╰──────────────────────`
+                        );
+                        return;
+                }
 
-		const { searchAlqanime, getDetailAlqanime } = exports;
+                const { searchAlqanime, getDetailAlqanime } = exports;
 
-		await hisoka.sendMessage(m.from, { react: { text: '🔍', key: m.key } });
-		await tolak(hisoka, m, `🔍 Mencari *${input}* di Alqanime...`);
+                await hisoka.sendMessage(m.from, { react: { text: '🔍', key: m.key } });
+                await tolak(hisoka, m, `🔍 Mencari *${input}* di Alqanime...`);
 
-		const results = await searchAlqanime(input);
-		if (!results.length) { await tolak(hisoka, m, `❌ Tidak ada hasil untuk *${input}*.\nCoba kata kunci lain.`); return; }
+                const results = await searchAlqanime(input);
+                if (!results.length) { await tolak(hisoka, m, `❌ Tidak ada hasil untuk *${input}*.\nCoba kata kunci lain.`); return; }
 
-		if (results.length > 1) {
-			let listText = `🎌 *Hasil Pencarian: "${input}"*\n━━━━━━━━━━━━━━━━━━━\n`;
-			results.slice(0, 8).forEach((r, i) => { listText += `${i + 1}. ${r.title}\n`; });
-			listText += `\n_Menampilkan detail hasil pertama..._`;
-			await tolak(hisoka, m, listText);
-		}
+                if (results.length > 1) {
+                        let listText = `🎌 *Hasil Pencarian: "${input}"*\n━━━━━━━━━━━━━━━━━━━\n`;
+                        results.slice(0, 8).forEach((r, i) => { listText += `${i + 1}. ${r.title}\n`; });
+                        listText += `\n_Menampilkan detail hasil pertama..._`;
+                        await tolak(hisoka, m, listText);
+                }
 
-		await tolak(hisoka, m, `📡 Mengambil detail *${results[0].title}*...`);
-		const detail = await getDetailAlqanime(results[0].url);
-		const info   = detail.info || {};
-		const eps    = detail.episodes || [];
-		const latestEp = eps[0];
+                await tolak(hisoka, m, `📡 Mengambil detail *${results[0].title}*...`);
+                const detail = await getDetailAlqanime(results[0].url);
+                const info   = detail.info || {};
+                const eps    = detail.episodes || [];
+                const latestEp = eps[0];
 
-		let text = `🎌 *${detail.title}*\n━━━━━━━━━━━━━━━━━━━\n`;
-		if (info.Status)  text += `📌 Status   : ${info.Status}\n`;
-		if (info.Tipe)    text += `🎬 Tipe     : ${info.Tipe}\n`;
-		if (info.Studio)  text += `🏢 Studio   : ${info.Studio}\n`;
-		if (info.Dirilis) text += `📅 Dirilis  : ${info.Dirilis}\n`;
-		if (info.Durasi)  text += `⏱ Durasi   : ${info.Durasi}\n`;
-		if (info.Episode) text += `📺 Episode  : ${info.Episode}\n`;
-		if (info.Score)   text += `⭐ Score    : ${info.Score}\n`;
-		if (detail.genres?.length) text += `🏷 Genre    : ${detail.genres.join(', ')}\n`;
-		if (detail.sinopsis) {
-			text += `━━━━━━━━━━━━━━━━━━━\n📖 *Sinopsis:*\n${detail.sinopsis.slice(0, 300)}${detail.sinopsis.length > 300 ? '...' : ''}\n`;
-		}
-		if (latestEp) {
-			text += `━━━━━━━━━━━━━━━━━━━\n📥 *Download Episode ${latestEp.episode}:*\n`;
-			for (const [res, hosts] of Object.entries(latestEp.links)) {
-				const hostList = hosts.map(h => `[${h.host}](${h.url})`).join(' | ');
-				text += `• *${res.toUpperCase()}* : ${hostList}\n`;
-			}
-			if (eps.length > 1) text += `\n_...dan ${eps.length - 1} episode lainnya_\n`;
-		}
-		text += `━━━━━━━━━━━━━━━━━━━\n🌐 ${results[0].url}`;
+                let text = `🎌 *${detail.title}*\n━━━━━━━━━━━━━━━━━━━\n`;
+                if (info.Status)  text += `📌 Status   : ${info.Status}\n`;
+                if (info.Tipe)    text += `🎬 Tipe     : ${info.Tipe}\n`;
+                if (info.Studio)  text += `🏢 Studio   : ${info.Studio}\n`;
+                if (info.Dirilis) text += `📅 Dirilis  : ${info.Dirilis}\n`;
+                if (info.Durasi)  text += `⏱ Durasi   : ${info.Durasi}\n`;
+                if (info.Episode) text += `📺 Episode  : ${info.Episode}\n`;
+                if (info.Score)   text += `⭐ Score    : ${info.Score}\n`;
+                if (detail.genres?.length) text += `🏷 Genre    : ${detail.genres.join(', ')}\n`;
+                if (detail.sinopsis) {
+                        text += `━━━━━━━━━━━━━━━━━━━\n📖 *Sinopsis:*\n${detail.sinopsis.slice(0, 300)}${detail.sinopsis.length > 300 ? '...' : ''}\n`;
+                }
+                if (latestEp) {
+                        text += `━━━━━━━━━━━━━━━━━━━\n📥 *Download Episode ${latestEp.episode}:*\n`;
+                        for (const [res, hosts] of Object.entries(latestEp.links)) {
+                                const hostList = hosts.map(h => `[${h.host}](${h.url})`).join(' | ');
+                                text += `• *${res.toUpperCase()}* : ${hostList}\n`;
+                        }
+                        if (eps.length > 1) text += `\n_...dan ${eps.length - 1} episode lainnya_\n`;
+                }
+                text += `━━━━━━━━━━━━━━━━━━━\n🌐 ${results[0].url}`;
 
-		if (detail.thumbnail) {
-			const thumbBuf = await require('axios').get(detail.thumbnail, { responseType: 'arraybuffer', timeout: 15000 }).then(r => Buffer.from(r.data)).catch(() => null);
-			if (thumbBuf) await hisoka.sendMessage(m.from, { image: thumbBuf, caption: text }, { quoted: m });
-			else          await tolak(hisoka, m, text);
-		} else {
-			await tolak(hisoka, m, text);
-		}
-		await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+                if (detail.thumbnail) {
+                        const thumbBuf = await require('axios').get(detail.thumbnail, { responseType: 'arraybuffer', timeout: 15000 }).then(r => Buffer.from(r.data)).catch(() => null);
+                        if (thumbBuf) await hisoka.sendMessage(m.from, { image: thumbBuf, caption: text }, { quoted: m });
+                        else          await tolak(hisoka, m, text);
+                } else {
+                        await tolak(hisoka, m, text);
+                }
+                await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
 
-		if (eps.length > 0) {
-			const allRes = new Set();
-			for (const ep of eps) for (const r of Object.keys(ep.links)) if (r !== 'batch') allRes.add(r);
-			const resList = ['360p','480p','720p','1080p'].filter(r => allRes.has(r));
-			let dlMenu = `📥 *PILIH EPISODE & RESOLUSI*\n━━━━━━━━━━━━━━━━━━━\n🎌 *${detail.title}*\n\n*Daftar Episode (${eps.length}):*\n`;
-			const maxShow = Math.min(eps.length, 15);
-			eps.slice(0, maxShow).forEach((ep, i) => {
-				const epRes = Object.keys(ep.links).filter(r => r !== 'batch');
-				dlMenu += `${i + 1}. Ep ${ep.episode}`;
-				if (epRes.length) dlMenu += ` _(${epRes.join('/')})_`;
-				dlMenu += `\n`;
-			});
-			if (eps.length > maxShow) dlMenu += `_...dan ${eps.length - maxShow} episode lainnya_\n`;
-			dlMenu += `\n`;
-			if (resList.length) dlMenu += `📺 Resolusi: *${resList.join(' | ')}*\n`;
-			dlMenu += `\n━━━━━━━━━━━━━━━━━━━\n📌 *Reply pesan ini:*\n• *1 720p* — 1 episode, kirim video\n• *1-3 480p* — batch ep 1-3 (ZIP)\n• *1,3,5 360p* — ep pilihan (ZIP)\n• *all 360p* — semua episode (ZIP)\n• Tanpa resolusi = otomatis terbaik\n\n⏳ Menu berlaku *5 menit*`;
+                if (eps.length > 0) {
+                        const allRes = new Set();
+                        for (const ep of eps) for (const r of Object.keys(ep.links)) if (r !== 'batch') allRes.add(r);
+                        const resList = ['360p','480p','720p','1080p'].filter(r => allRes.has(r));
+                        let dlMenu = `📥 *PILIH EPISODE & RESOLUSI*\n━━━━━━━━━━━━━━━━━━━\n🎌 *${detail.title}*\n\n*Daftar Episode (${eps.length}):*\n`;
+                        const maxShow = Math.min(eps.length, 15);
+                        eps.slice(0, maxShow).forEach((ep, i) => {
+                                const epRes = Object.keys(ep.links).filter(r => r !== 'batch');
+                                dlMenu += `${i + 1}. Ep ${ep.episode}`;
+                                if (epRes.length) dlMenu += ` _(${epRes.join('/')})_`;
+                                dlMenu += `\n`;
+                        });
+                        if (eps.length > maxShow) dlMenu += `_...dan ${eps.length - maxShow} episode lainnya_\n`;
+                        dlMenu += `\n`;
+                        if (resList.length) dlMenu += `📺 Resolusi: *${resList.join(' | ')}*\n`;
+                        dlMenu += `\n━━━━━━━━━━━━━━━━━━━\n📌 *Reply pesan ini:*\n• *1 720p* — 1 episode, kirim video\n• *1-3 480p* — batch ep 1-3 (ZIP)\n• *1,3,5 360p* — ep pilihan (ZIP)\n• *all 360p* — semua episode (ZIP)\n• Tanpa resolusi = otomatis terbaik\n\n⏳ Menu berlaku *5 menit*`;
 
-			const menuMsg = await hisoka.sendMessage(m.from, { text: dlMenu }, { quoted: m });
-			const alqKey  = getJadibotChoiceKey(m);
-			const oldAlq  = pendingAlqDlChoices.get(alqKey);
-			if (oldAlq?.timeout) clearTimeout(oldAlq.timeout);
-			const alqTimeout = setTimeout(() => pendingAlqDlChoices.delete(alqKey), 5 * 60 * 1000);
-			pendingAlqDlChoices.set(alqKey, {
-				animeTitle: detail.title, episodes: eps,
-				botMsgId: menuMsg?.key?.id || '',
-				expiresAt: Date.now() + 5 * 60 * 1000,
-				timeout: alqTimeout,
-			});
-		}
-	} catch (err) {
-		console.error('[ALQANIME] Error:', err?.message);
-		if (typeof logError === 'function') logError(err instanceof Error ? err : new Error(String(err?.message || err)), 'alqanime');
-		await tolak(hisoka, m, `❌ Gagal ambil data Alqanime.\n💬 ${err?.message?.slice(0, 120) || 'Coba lagi nanti'}`);
-	}
+                        const menuMsg = await hisoka.sendMessage(m.from, { text: dlMenu }, { quoted: m });
+                        const alqKey  = getJadibotChoiceKey(m);
+                        const oldAlq  = pendingAlqDlChoices.get(alqKey);
+                        if (oldAlq?.timeout) clearTimeout(oldAlq.timeout);
+                        const alqTimeout = setTimeout(() => pendingAlqDlChoices.delete(alqKey), 5 * 60 * 1000);
+                        pendingAlqDlChoices.set(alqKey, {
+                                animeTitle: detail.title, episodes: eps,
+                                botMsgId: menuMsg?.key?.id || '',
+                                expiresAt: Date.now() + 5 * 60 * 1000,
+                                timeout: alqTimeout,
+                        });
+                }
+        } catch (err) {
+                console.error('[ALQANIME] Error:', err?.message);
+                if (typeof logError === 'function') logError(err instanceof Error ? err : new Error(String(err?.message || err)), 'alqanime');
+                await tolak(hisoka, m, `❌ Gagal ambil data Alqanime.\n💬 ${err?.message?.slice(0, 120) || 'Coba lagi nanti'}`);
+        }
 }
 
 module.exports.handleAlq = handleAlq;
+
+async function handleAlqupdate({ hisoka, m, tolak, logCommand, logError, _require, path, getJadibotChoiceKey, pendingAlqUpdateChoices }) {
+        if (!m.prefix && m.query) return;
+        try {
+                const items = await getLatestAlqanime();
+
+                if (!items.length) {
+                        await tolak(hisoka, m, `❌ Gagal ambil data terbaru.`);
+                        return;
+                }
+
+                await hisoka.sendMessage(m.from, { react: { text: '📺', key: m.key } });
+                await tolak(hisoka, m, `📺 Mengambil rilisan terbaru Alqanime...`);
+
+                const showItems = items.slice(0, 15);
+                let text = `🎌 *Rilisan Terbaru — Alqanime*\n`;
+                text += `━━━━━━━━━━━━━━━━━━━\n`;
+                showItems.forEach((a, i) => {
+                        text += `${i + 1}. ${a.title}\n`;
+                });
+                text += `━━━━━━━━━━━━━━━━━━━\n`;
+                text += `🌐 alqanime.net\n\n`;
+                text += `📌 *Reply pesan ini:*\n`;
+                text += `• *1* — lihat episode & pilih resolusi\n`;
+                text += `• *1 720p* — langsung download ep terbaru 720p\n`;
+                text += `• *batal* — batalkan\n`;
+                text += `⏳ Menu berlaku *5 menit*`;
+
+                const updMenuMsg = await hisoka.sendMessage(m.from, { text }, { quoted: m });
+                await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+
+                const alqUpdKey2 = getJadibotChoiceKey(m);
+                const oldUpd = pendingAlqUpdateChoices.get(alqUpdKey2);
+                if (oldUpd?.timeout) clearTimeout(oldUpd.timeout);
+                const updTimeout = setTimeout(() => pendingAlqUpdateChoices.delete(alqUpdKey2), 5 * 60 * 1000);
+                pendingAlqUpdateChoices.set(alqUpdKey2, {
+                        items: showItems,
+                        botMsgId: updMenuMsg?.key?.id || '',
+                        expiresAt: Date.now() + 5 * 60 * 1000,
+                        timeout: updTimeout,
+                });
+
+        } catch (err) {
+                console.error('[ALQUPDATE] Error:', err?.message);
+                logError(err instanceof Error ? err : new Error(String(err?.message || err)), 'alqanimeupdate');
+                await tolak(hisoka, m, `❌ Gagal ambil update Alqanime.\n💬 ${err?.message?.slice(0, 100) || 'Coba lagi nanti'}`);
+        }
+}
+
+module.exports.handleAlqupdate = handleAlqupdate;

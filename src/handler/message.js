@@ -6667,7 +6667,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                         case 'alqupdate':
                         case 'alqanimeupdate': {
-                                const { handleAlqupdate } = _require(path.resolve('./src/scrape/anime/alqanime-cmd.cjs'));
+                                const { handleAlqupdate } = _require(path.resolve('./src/scrape/anime/alqanime.cjs'));
                                 await handleAlqupdate({ hisoka, m, tolak, logCommand, logError, _require, path, getJadibotChoiceKey, pendingAlqUpdateChoices });
                                 break;
                         }
@@ -6683,7 +6683,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'cosplayrandom':
                         case 'cosplay':
                         case 'ctele': {
-                                const { handleCosplay } = _require(path.resolve('./src/scrape/anime/cosplay-cmd.cjs'));
+                                const { handleCosplay } = _require(path.resolve('./src/scrape/anime/cosplaytele.cjs'));
                                 await handleCosplay({ hisoka, m, query, tolak, logCommand, logError, _require, path, _sendCosplayImages, pendingCosplayChoices });
                                 break;
                         }
@@ -6697,7 +6697,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'cekhp':
                         case 'spechp':
                         case 'infohp': {
-                                const { handleCekhp } = _require(path.resolve('./src/scrape/tools/cekhp-cmd.cjs'));
+                                const { handleCekhp } = _require(path.resolve('./src/scrape/tools/cekhp.cjs'));
                                 await handleCekhp({ hisoka, m, query, tolak, logCommand, logError, _require, path, gemini });
                                 break;
                         }
@@ -6731,13 +6731,13 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         }
                         case 'musikai':
                         case 'aimusik': {
-                                const { handleMusikai } = _require(path.resolve('./src/scrape/music/musikai-cmd.cjs'));
+                                const { handleMusikai } = _require(path.resolve('./src/scrape/music/chatmusic.cjs'));
                                 await handleMusikai({ hisoka, m, query, tolak, logCommand, logError, _require, path, sendConfirmWithButtons, _generateMusik, _showGenreSelect });
                                 break;
                         }
                         case 'musikai2':
                         case 'aimusik2': {
-                                const { handleMusikai2 } = _require(path.resolve('./src/scrape/music/musikai-cmd.cjs'));
+                                const { handleMusikai2 } = _require(path.resolve('./src/scrape/music/chatmusic.cjs'));
                                 await handleMusikai2({ hisoka, m, query, tolak, logCommand, logError, _require, path, sendConfirmWithButtons, _generateMusik2 });
                                 break;
                         }
@@ -6754,7 +6754,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'tebaklagu':
                         case 'shazam':
                         case 'carijudullagu': {
-                                const { handleWhatsmusik } = _require(path.resolve('./src/scrape/music/whatsmusik-cmd.cjs'));
+                                const { handleWhatsmusik } = _require(path.resolve('./src/scrape/music/whatsmusik.cjs'));
                                 await handleWhatsmusik({ hisoka, m, query, tolak, logCommand, logError, _require, path, getMediaTypeFromMessage, downloadMediaBuffer, ensureYtdlp });
                                 break;
                         }
@@ -8891,7 +8891,7 @@ response += `╰═════════════════╯`;
                         }
 
                         case 'infowibu': {
-                                const { handleInfowibu } = _require(path.resolve('./src/scrape/anime/infowibu-cmd.cjs'));
+                                const { handleInfowibu } = _require(path.resolve('./src/scrape/anime/infowibu.cjs'));
                                 await handleInfowibu({ hisoka, m, query, tolak, logCommand, sendConfirmWithButtons, fs, path, loadConfig, _require });
                                 break;
                         }
