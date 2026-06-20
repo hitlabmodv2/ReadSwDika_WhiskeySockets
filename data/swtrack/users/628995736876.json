@@ -47,9 +47,9 @@
     "name": "Adrian",
     "type": "imageMessage",
     "arrivedAt": "2026-06-20T10:38:25.936Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "⏏️",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "628995736876",
@@ -62,6 +62,25 @@
       "participant": "126942120571040@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-20T10:38:25.936Z"
+    "updatedAt": "2026-06-20T10:38:46.764Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "628995736876@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACF194CDA7790B87480BECC22B1F49CB",
+        "participant": "126942120571040@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "628995736876@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACF194CDA7790B87480BECC22B1F49CB",
+        "participant": "628995736876@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-20T10:38:46.764Z"
   }
 }

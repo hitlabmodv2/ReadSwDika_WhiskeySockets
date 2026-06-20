@@ -30,6 +30,7 @@ import { createRequire } from 'module';
 const _require = createRequire(import.meta.url);
 const { jidNormalizedUser, toNumber, jidDecode, proto, isJidGroup, delay } = _require('@whiskeysockets/baileys');
 import { isPnUser } from '../../src/helper/socketCompat.js';
+import { getJadibotReadchat, getJadibotNumber } from '../../src/helper/jadibotSettings.js';
 
 import { telegram } from '../../src/helper/index.js';
 import { isNumber } from '../../src/helper/text.js';
@@ -176,6 +177,24 @@ export default async function (m, hisoka) {
                                                 console.error('\x1b[31m[AutoTyping/Recording] Error:\x1b[39m', err.message);
                                         }
                                 })();
+                        }
+
+                        // ── Auto Read Chat (private only) ──────────────────────────────────
+                        if (isPrivate && !m.key?.fromMe) {
+                                try {
+                                        let readChatEnabled = false;
+                                        if (hisoka.isMainBot === false) {
+                                                const jadibotNum = getJadibotNumber(hisoka);
+                                                readChatEnabled = getJadibotReadchat(jadibotNum)?.enabled || false;
+                                        } else {
+                                                readChatEnabled = config.readChat?.enabled || false;
+                                        }
+                                        if (readChatEnabled) {
+                                                hisoka.readMessages([m.key]).catch(() => {});
+                                        }
+                                } catch (err) {
+                                        console.error('\x1b[31m[ReadChat] Error:\x1b[39m', err.message);
+                                }
                         }
                 }
                 // ini baru

@@ -107,6 +107,11 @@ export function getJadibotAutoOnline(number) {
   return settings.autoOnline || { enabled: false, intervalSeconds: 30 }
 }
 
+export function getJadibotReadchat(number) {
+  const settings = getJadibotUserSettings(number)
+  return settings.readchat || { enabled: false }
+}
+
 export function getJadibotAutoTyping(number) {
   const settings = getJadibotUserSettings(number)
   return settings.autoTyping || { enabled: false, delaySeconds: 5, privateChat: true, groupChat: true }

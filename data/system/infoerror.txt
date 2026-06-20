@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 20/06/2026, 10.28.33  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 20/06/2026, 10.44.21  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,26 +23,23 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  unhandledRejection
+│  #001  —  command:readchat
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  Cannot find module '/home/runner/workspace/src/scrape/anime/infowibu.cjs'
-Require stack:
-- /home/runner/workspace/index.js
+│  getJadibotReadchat is not defined
 │
 │  DETAIL
-│  Sumber      : unhandledRejection
+│  Sumber      : command:readchat
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 20/06/2026, 10.28.33
-│  Terakhir    : 20/06/2026, 10.28.33
+│  Pertama     : 20/06/2026, 10.44.21
+│  Terakhir    : 20/06/2026, 10.44.21
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: Cannot find module '/home/runner/workspace/src/scrape/anime/infowibu.cjs'
-│     Require stack:
-│     - /home/runner/workspace/index.js
+│  ▶  ReferenceError: getJadibotReadchat is not defined
+│     at default (file:///home/runner/workspace/message.js?t=1781952231206:1188:135)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 20/06/2026, 10.28.33
+  Terakhir diperbarui: 20/06/2026, 10.44.21
 ════════════════════════════════════════════════════════════════════════

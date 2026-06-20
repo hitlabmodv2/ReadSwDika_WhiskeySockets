@@ -1183,6 +1183,11 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 break;
                         }
 
+                        case 'readchat': {
+                                const { handleReadchat } = _require(path.resolve('./scrape/setting/readchat.cjs'));
+                                await handleReadchat({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, getJadibotNumber, getJadibotReadchat, setJadibotUserSetting });
+                                break;
+                        }
                         case 'anticall':
                         case 'ac': {
                                 const { handleAc } = _require(path.resolve('./scrape/setting/anticall.cjs'));
