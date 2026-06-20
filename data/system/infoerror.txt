@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 20/06/2026, 05.26.03  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 20/06/2026, 06.51.23  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -26,21 +26,21 @@
 │  #001  —  console.error
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [31m[Groups] Gagal fetch grup:[39m Connection Closed
+│  [31m[HotReload] ✗ Gagal reload 'src/handler/message.js', pakai versi lama.[39m
 │
 │  DETAIL
 │  Sumber      : console.error
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 20/06/2026, 05.26.03
-│  Terakhir    : 20/06/2026, 05.26.03
+│  Pertama     : 20/06/2026, 06.51.23
+│  Terakhir    : 20/06/2026, 06.51.23
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [31m[Groups] Gagal fetch grup:[39m Connection Closed
+│  ▶  Error: [31m[HotReload] ✗ Gagal reload 'src/handler/message.js', pakai versi lama.[39m
 │     at console.error (file:///home/runner/workspace/index.js:414:27)
-│     at fetchGroupsWithRetry (file:///home/runner/workspace/index.js:803:65)
+│     at Timeout._onTimeout (file:///home/runner/workspace/src/helper/hotReload.js:141:29)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 20/06/2026, 05.26.03
+  Terakhir diperbarui: 20/06/2026, 06.51.23
 ════════════════════════════════════════════════════════════════════════
