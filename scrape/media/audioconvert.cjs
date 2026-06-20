@@ -22,6 +22,14 @@
  *  MP3/M4A/OGG/OPUS/MP4 via ffmpeg, .tomp3/.tovn command
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Audio Format Converter
+ *  Perintah .tomp3 dan .tovn untuk konversi audio/video ke
+ *  format MP3 atau voice note (OGG OPUS) menggunakan ffmpeg —
+ *  mendukung input dari pesan reply maupun URL langsung.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 const fs = require('fs');

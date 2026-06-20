@@ -22,6 +22,14 @@
  *  Cari & info anime dari alqanime.org, mendukung pencarian
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  AlqAnime Scraper
+ *  Cari & ambil info anime terbaru dari alqanime.net —
+ *  mendukung pencarian judul, daftar episode, dan link download
+ *  Sub Indo. Dipakai oleh alqanime-cmd.cjs & alqanime-dl.cjs.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 const axios = require('axios');

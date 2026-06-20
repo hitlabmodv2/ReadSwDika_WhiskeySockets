@@ -22,6 +22,14 @@
  *  Simpan stack trace untuk debugging & .cekerror
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Error Log Database
+ *  Catat & simpan semua error + stack trace bot ke file log —
+ *  dapat dibaca via perintah .cekerror, dihapus, atau diekspor
+ *  sebagai file .txt untuk debugging server.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 import fs from 'fs';

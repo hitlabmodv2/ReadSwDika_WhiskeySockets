@@ -22,6 +22,14 @@
  *  Tambah m.isOwner, m.isQuoted, m.command, dll ke Baileys msg
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Message Object Injector
+ *  Inject properti & method tambahan ke object pesan Baileys:
+ *  m.isOwner, m.isAdmin, m.isQuoted, m.command, m.reply, dll
+ *  — menyederhanakan penulisan handler di seluruh codebase.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 import { createRequire } from 'module';

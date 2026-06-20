@@ -22,6 +22,14 @@
  *  Statistik, filter duplikat, prune otomatis
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Status WhatsApp Tracker (SwTrack)
+ *  Lacak & catat semua status WA yang masuk — filter duplikat,
+ *  statistik per kontak, dan prune otomatis data lama —
+ *  dipakai oleh fitur auto-read status & anti-miss retry.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 import fs from 'fs';

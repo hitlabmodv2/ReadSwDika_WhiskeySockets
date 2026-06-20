@@ -22,6 +22,14 @@
  *  Perintah .tempmail untuk buat email sementara dan cek inbox secara real-time
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Temporary Email Command (.tempmail)
+ *  Buat email sementara sekali pakai dan pantau inbox secara
+ *  real-time langsung dari WhatsApp — berguna untuk registrasi
+ *  website tanpa pakai email pribadi.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 /**

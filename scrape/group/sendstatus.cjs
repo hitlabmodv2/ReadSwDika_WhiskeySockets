@@ -22,6 +22,14 @@
  *  Perintah untuk kirim pesan/status WA ke semua kontak terdaftar
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Send Status Command Handler
+ *  Perintah untuk broadcast pesan/gambar/video sebagai status
+ *  WhatsApp ke semua kontak yang terdaftar — berguna untuk
+ *  kirim pengumuman massal via status.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 const crypto = require('crypto');

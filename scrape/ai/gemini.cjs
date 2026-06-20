@@ -22,6 +22,14 @@
  *  Text/vision chat untuk scraper anime & musik
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Gemini API Wrapper (CJS)
+ *  Wrapper ringan untuk Google Gemini API — mendukung text
+ *  generation & vision analysis, dipakai oleh scraper anime,
+ *  musik, dan modul lain yang butuh AI dari CommonJS.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 const axios = require('axios');

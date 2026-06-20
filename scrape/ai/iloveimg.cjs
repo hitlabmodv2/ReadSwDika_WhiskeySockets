@@ -22,6 +22,13 @@
  *  Edit, compress, convert gambar via layanan iLoveIMG
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  iLoveIMG API Integration
+ *  Edit, compress, convert, dan resize gambar via layanan
+ *  cloud iLoveIMG — dipakai oleh fitur edit foto bot.
+ * ═══════════════════════════════════════════════════════════════
+ */
 // Source: https://github.com/hitlabmodv2/MD-FURINA/blob/main/scrape/iloveimg.js
 
 const axios = require('axios');

@@ -22,6 +22,14 @@
  *  Persist ke disk, update atomik
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Bot Statistics Database
+ *  Catat & simpan statistik bot (total perintah diproses,
+ *  uptime, jumlah user, dll) ke disk secara atomik — dipakai
+ *  untuk tampilan .ping dan laporan performa bot.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 import path from 'path';

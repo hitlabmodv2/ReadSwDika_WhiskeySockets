@@ -22,6 +22,14 @@
  *  Data dari Open-Meteo + Nominatim, gratis tanpa API key
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Cek Cuaca & Prakiraan (.cuaca)
+ *  Tampilkan cuaca saat ini dan prakiraan beberapa hari ke
+ *  depan berdasarkan nama kota — data dari Open-Meteo &
+ *  Nominatim, gratis tanpa perlu API key berbayar.
+ * ═══════════════════════════════════════════════════════════════
+ */
 const axios = require('axios');
 
 const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search';

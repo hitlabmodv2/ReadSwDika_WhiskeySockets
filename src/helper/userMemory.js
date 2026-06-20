@@ -22,6 +22,14 @@
  *  Simpan gaya bicara, nickname, bahasa per nomor WA
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  User Memory Manager
+ *  Simpan & kelola memori personal per nomor WA: gaya bicara
+ *  AI, nickname, preferensi bahasa, dan fakta tentang user —
+ *  membuat bot bisa berinteraksi secara personal & konsisten.
+ * ═══════════════════════════════════════════════════════════════
+ */
 import { getUserExtra, setUserExtra, getAllUserIds } from '../db/userDb.js';
 
 const DEFAULT_MEMORY = { style: null, nickname: null, lang: null, lastUpdated: null, msgCount: 0 };

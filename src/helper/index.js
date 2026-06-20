@@ -22,6 +22,14 @@
  *  Single import point untuk utils, inject, text, dll
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Helper Index — Centralized Re-Export
+ *  Single entry point untuk semua modul helper utama (utils,
+ *  inject, text, emoji, dll) — cukup import dari sini, tidak
+ *  perlu import satu-satu dari masing-masing file.
+ * ═══════════════════════════════════════════════════════════════
+ */
 export * as inject from './inject.js';
 export * as text from './text.js';
 export * as telegram from './telegram.js';

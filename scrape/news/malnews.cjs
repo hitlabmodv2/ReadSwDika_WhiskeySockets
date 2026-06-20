@@ -22,6 +22,14 @@
  *  Scrape berita terbaru MAL, kirim ringkasan ke WA
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  MyAnimeList News Scraper & Monitor
+ *  Scrape berita & update terbaru dari myanimelist.net secara
+ *  berkala — kirim ringkasan otomatis ke grup WhatsApp yang
+ *  sudah mendaftar notifikasi berita anime.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 /**
@@ -636,159 +644,159 @@ module.exports = {
 // ── COMMAND HANDLER ───────────────────────────────────────────────────────────
 
 async function handleMalnews({ hisoka, m, query, tolak, logCommand, sendConfirmWithButtons, fs, path }) {
-	const cfgPathMAL = path.join(process.cwd(), 'config.json');
-	const sub = (query || '').trim().toLowerCase().replace(/\s+/g, ' ');
-	const pfx = m.prefix || '.';
+        const cfgPathMAL = path.join(process.cwd(), 'config.json');
+        const sub = (query || '').trim().toLowerCase().replace(/\s+/g, ' ');
+        const pfx = m.prefix || '.';
 
-	let cfgMAL = {};
-	try { cfgMAL = JSON.parse(fs.readFileSync(cfgPathMAL, 'utf-8')); } catch (_) {}
-	if (!cfgMAL.malnews)        cfgMAL.malnews        = { groups: {} };
-	if (!cfgMAL.malnews.groups) cfgMAL.malnews.groups = {};
+        let cfgMAL = {};
+        try { cfgMAL = JSON.parse(fs.readFileSync(cfgPathMAL, 'utf-8')); } catch (_) {}
+        if (!cfgMAL.malnews)        cfgMAL.malnews        = { groups: {} };
+        if (!cfgMAL.malnews.groups) cfgMAL.malnews.groups = {};
 
-	if (!sub || sub === 'help') {
-		const aktif = cfgMAL.malnews.groups[m.from]?.enabled === true;
-		await tolak(hisoka, m,
-			`╭─「 📰 *MYANIMELIST NEWS* 」\n` +
-			`│\n` +
-			`│ Status di grup ini: ${aktif ? '🟢 *Aktif*' : '🔴 *Nonaktif*'}\n` +
-			`│\n` +
-			`│ Perintah:\n` +
-			`│ • ${pfx}malnews on — aktifkan notif berita anime\n` +
-			`│ • ${pfx}malnews off — nonaktifkan notif\n` +
-			`│ • ${pfx}malnews test — kirim test ke sini\n` +
-			`│ • ${pfx}malnews test grup — test ke semua grup aktif\n` +
-			`│ • ${pfx}malnews status — lihat semua grup\n` +
-			`│ • ${pfx}malnews log — 5 berita terakhir terkirim\n` +
-			`│\n` +
-			`│ 💡 Bot otomatis kirim notif setiap kali ada\n` +
-			`│    berita baru dari MyAnimeList (cek tiap 5 menit)\n` +
-			`│    Teks diterjemahkan ke Bahasa Indonesia 🇮🇩\n` +
-			`╰──────────────────────`
-		);
-		return;
-	}
+        if (!sub || sub === 'help') {
+                const aktif = cfgMAL.malnews.groups[m.from]?.enabled === true;
+                await tolak(hisoka, m,
+                        `╭─「 📰 *MYANIMELIST NEWS* 」\n` +
+                        `│\n` +
+                        `│ Status di grup ini: ${aktif ? '🟢 *Aktif*' : '🔴 *Nonaktif*'}\n` +
+                        `│\n` +
+                        `│ Perintah:\n` +
+                        `│ • ${pfx}malnews on — aktifkan notif berita anime\n` +
+                        `│ • ${pfx}malnews off — nonaktifkan notif\n` +
+                        `│ • ${pfx}malnews test — kirim test ke sini\n` +
+                        `│ • ${pfx}malnews test grup — test ke semua grup aktif\n` +
+                        `│ • ${pfx}malnews status — lihat semua grup\n` +
+                        `│ • ${pfx}malnews log — 5 berita terakhir terkirim\n` +
+                        `│\n` +
+                        `│ 💡 Bot otomatis kirim notif setiap kali ada\n` +
+                        `│    berita baru dari MyAnimeList (cek tiap 5 menit)\n` +
+                        `│    Teks diterjemahkan ke Bahasa Indonesia 🇮🇩\n` +
+                        `╰──────────────────────`
+                );
+                return;
+        }
 
-	if (sub === 'on') {
-		const sebelumnya = cfgMAL.malnews.groups[m.from]?.enabled === true;
-		setGroupEnabled(m.from, true);
-		await sendConfirmWithButtons(hisoka, m,
-			`╭─「 📰 *MYANIMELIST NEWS* 」\n` +
-			`│\n` +
-			`│ Sebelumnya : ${sebelumnya ? '🟢 Aktif' : '🔴 Nonaktif'}\n` +
-			`│ Sekarang   : 🟢 *Aktif*\n` +
-			`│\n` +
-			`│ ✅ Notifikasi berita anime terbaru akan dikirim\n` +
-			`│    ke grup ini setiap ada berita baru.\n` +
-			`│    Teks otomatis Bahasa Indonesia 🇮🇩\n` +
-			`╰──────────────────────`,
-			[{ text: '➕ Aktifkan Semua Grup', id: '__addallgrp__malnews' }]
-		);
-		logCommand(m, hisoka, 'malnews-on');
-		return;
-	}
+        if (sub === 'on') {
+                const sebelumnya = cfgMAL.malnews.groups[m.from]?.enabled === true;
+                setGroupEnabled(m.from, true);
+                await sendConfirmWithButtons(hisoka, m,
+                        `╭─「 📰 *MYANIMELIST NEWS* 」\n` +
+                        `│\n` +
+                        `│ Sebelumnya : ${sebelumnya ? '🟢 Aktif' : '🔴 Nonaktif'}\n` +
+                        `│ Sekarang   : 🟢 *Aktif*\n` +
+                        `│\n` +
+                        `│ ✅ Notifikasi berita anime terbaru akan dikirim\n` +
+                        `│    ke grup ini setiap ada berita baru.\n` +
+                        `│    Teks otomatis Bahasa Indonesia 🇮🇩\n` +
+                        `╰──────────────────────`,
+                        [{ text: '➕ Aktifkan Semua Grup', id: '__addallgrp__malnews' }]
+                );
+                logCommand(m, hisoka, 'malnews-on');
+                return;
+        }
 
-	if (sub === 'off') {
-		const sebelumnya = cfgMAL.malnews.groups[m.from]?.enabled === true;
-		setGroupEnabled(m.from, false);
-		await tolak(hisoka, m,
-			`╭─「 📰 *MYANIMELIST NEWS* 」\n` +
-			`│\n` +
-			`│ Sebelumnya : ${sebelumnya ? '🟢 Aktif' : '🔴 Nonaktif'}\n` +
-			`│ Sekarang   : 🔴 *Nonaktif*\n` +
-			`│\n` +
-			`│ ⛔ Notifikasi berita dimatikan untuk grup ini.\n` +
-			`╰──────────────────────`
-		);
-		logCommand(m, hisoka, 'malnews-off');
-		return;
-	}
+        if (sub === 'off') {
+                const sebelumnya = cfgMAL.malnews.groups[m.from]?.enabled === true;
+                setGroupEnabled(m.from, false);
+                await tolak(hisoka, m,
+                        `╭─「 📰 *MYANIMELIST NEWS* 」\n` +
+                        `│\n` +
+                        `│ Sebelumnya : ${sebelumnya ? '🟢 Aktif' : '🔴 Nonaktif'}\n` +
+                        `│ Sekarang   : 🔴 *Nonaktif*\n` +
+                        `│\n` +
+                        `│ ⛔ Notifikasi berita dimatikan untuk grup ini.\n` +
+                        `╰──────────────────────`
+                );
+                logCommand(m, hisoka, 'malnews-off');
+                return;
+        }
 
-	if (sub === 'status') {
-		const semuaGrup     = getEnabledGroups();
-		const daftarGrupAll = cfgMAL.malnews.groups || {};
-		const rows = Object.entries(daftarGrupAll)
-			.sort(([, a], [, b]) => (b.diubahPada || 0) - (a.diubahPada || 0))
-			.map(([jid, v]) => `${v.enabled ? '🟢' : '🔴'} ${jid}`);
-		await tolak(hisoka, m,
-			`╭─「 📰 *MYANIMELIST NEWS STATUS* 」\n` +
-			`│\n` +
-			`│ Total aktif : ${semuaGrup.length} grup\n` +
-			`│\n` +
-			(rows.length ? rows.map(r => `│ ${r}`).join('\n') + '\n' : `│ Belum ada grup terdaftar.\n`) +
-			`╰──────────────────────`
-		);
-		return;
-	}
+        if (sub === 'status') {
+                const semuaGrup     = getEnabledGroups();
+                const daftarGrupAll = cfgMAL.malnews.groups || {};
+                const rows = Object.entries(daftarGrupAll)
+                        .sort(([, a], [, b]) => (b.diubahPada || 0) - (a.diubahPada || 0))
+                        .map(([jid, v]) => `${v.enabled ? '🟢' : '🔴'} ${jid}`);
+                await tolak(hisoka, m,
+                        `╭─「 📰 *MYANIMELIST NEWS STATUS* 」\n` +
+                        `│\n` +
+                        `│ Total aktif : ${semuaGrup.length} grup\n` +
+                        `│\n` +
+                        (rows.length ? rows.map(r => `│ ${r}`).join('\n') + '\n' : `│ Belum ada grup terdaftar.\n`) +
+                        `╰──────────────────────`
+                );
+                return;
+        }
 
-	if (sub === 'log') {
-		const logs = getRecentLog(5);
-		if (!logs.length) { await tolak(hisoka, m, `📭 Belum ada berita yang pernah dikirim.`); return; }
-		const baris = logs.map((l, i) =>
-			`${i + 1}. *${(l.judul || '-').slice(0, 60)}*\n` +
-			`   📅 ${l.waktuKirim ? new Date(l.waktuKirim).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }) : '-'}\n` +
-			`   👥 ${l.grupCount || 0} grup`
-		).join('\n\n');
-		await tolak(hisoka, m, `📋 *5 Berita MAL Terakhir Terkirim*\n\n${baris}`);
-		return;
-	}
+        if (sub === 'log') {
+                const logs = getRecentLog(5);
+                if (!logs.length) { await tolak(hisoka, m, `📭 Belum ada berita yang pernah dikirim.`); return; }
+                const baris = logs.map((l, i) =>
+                        `${i + 1}. *${(l.judul || '-').slice(0, 60)}*\n` +
+                        `   📅 ${l.waktuKirim ? new Date(l.waktuKirim).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }) : '-'}\n` +
+                        `   👥 ${l.grupCount || 0} grup`
+                ).join('\n\n');
+                await tolak(hisoka, m, `📋 *5 Berita MAL Terakhir Terkirim*\n\n${baris}`);
+                return;
+        }
 
-	if (sub === 'test grup') {
-		await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
-		try {
-			const daftarGrup = getEnabledGroups();
-			if (!daftarGrup.length) {
-				await tolak(hisoka, m, `❌ Belum ada grup yang mengaktifkan MAL News.\nKetik *${pfx}malnews on* di grup tujuan dulu.`);
-				return;
-			}
-			const hasil = await simulasi();
-			let berhasil = 0, gagal = 0;
-			for (const jid of daftarGrup) {
-				try {
-					if (hasil.urlGambar) {
-						await hisoka.sendMessage(jid, { image: { url: hasil.urlGambar }, caption: hasil.caption });
-					} else {
-						await hisoka.sendMessage(jid, { text: hasil.caption });
-					}
-					berhasil++;
-					await new Promise(r => setTimeout(r, 1500));
-				} catch (e) {
-					gagal++;
-					console.error(`[MALNews] Gagal kirim test ke ${jid}:`, e?.message);
-				}
-			}
-			await hisoka.sendMessage(m.from, {
-				text: `✅ *Test MAL News selesai!*\n\n` +
-				      `📤 Terkirim ke: *${berhasil}/${daftarGrup.length} grup*` +
-				      (gagal ? `\n❌ Gagal: ${gagal} grup` : ''),
-			}, { quoted: m });
-			await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
-			logCommand(m, hisoka, 'malnews-test-grup');
-		} catch (err) {
-			await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
-			await tolak(hisoka, m, `❌ Gagal fetch MAL News: ${err?.message || err}`);
-		}
-		return;
-	}
+        if (sub === 'test grup') {
+                await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
+                try {
+                        const daftarGrup = getEnabledGroups();
+                        if (!daftarGrup.length) {
+                                await tolak(hisoka, m, `❌ Belum ada grup yang mengaktifkan MAL News.\nKetik *${pfx}malnews on* di grup tujuan dulu.`);
+                                return;
+                        }
+                        const hasil = await simulasi();
+                        let berhasil = 0, gagal = 0;
+                        for (const jid of daftarGrup) {
+                                try {
+                                        if (hasil.urlGambar) {
+                                                await hisoka.sendMessage(jid, { image: { url: hasil.urlGambar }, caption: hasil.caption });
+                                        } else {
+                                                await hisoka.sendMessage(jid, { text: hasil.caption });
+                                        }
+                                        berhasil++;
+                                        await new Promise(r => setTimeout(r, 1500));
+                                } catch (e) {
+                                        gagal++;
+                                        console.error(`[MALNews] Gagal kirim test ke ${jid}:`, e?.message);
+                                }
+                        }
+                        await hisoka.sendMessage(m.from, {
+                                text: `✅ *Test MAL News selesai!*\n\n` +
+                                      `📤 Terkirim ke: *${berhasil}/${daftarGrup.length} grup*` +
+                                      (gagal ? `\n❌ Gagal: ${gagal} grup` : ''),
+                        }, { quoted: m });
+                        await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+                        logCommand(m, hisoka, 'malnews-test-grup');
+                } catch (err) {
+                        await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
+                        await tolak(hisoka, m, `❌ Gagal fetch MAL News: ${err?.message || err}`);
+                }
+                return;
+        }
 
-	if (sub === 'test') {
-		await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
-		try {
-			const hasil = await simulasi();
-			if (hasil.urlGambar) {
-				await hisoka.sendMessage(m.from, { image: { url: hasil.urlGambar }, caption: hasil.caption }, { quoted: m });
-			} else {
-				await tolak(hisoka, m, hasil.caption);
-			}
-			await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
-			logCommand(m, hisoka, 'malnews-test');
-		} catch (err) {
-			await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
-			await tolak(hisoka, m, `❌ Gagal fetch MAL News: ${err?.message || err}`);
-		}
-		return;
-	}
+        if (sub === 'test') {
+                await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
+                try {
+                        const hasil = await simulasi();
+                        if (hasil.urlGambar) {
+                                await hisoka.sendMessage(m.from, { image: { url: hasil.urlGambar }, caption: hasil.caption }, { quoted: m });
+                        } else {
+                                await tolak(hisoka, m, hasil.caption);
+                        }
+                        await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+                        logCommand(m, hisoka, 'malnews-test');
+                } catch (err) {
+                        await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
+                        await tolak(hisoka, m, `❌ Gagal fetch MAL News: ${err?.message || err}`);
+                }
+                return;
+        }
 
-	await tolak(hisoka, m, `❌ Sub-perintah tidak dikenal. Ketik *${pfx}malnews* untuk bantuan.`);
+        await tolak(hisoka, m, `❌ Sub-perintah tidak dikenal. Ketik *${pfx}malnews* untuk bantuan.`);
 }
 
 module.exports.handleMalnews = handleMalnews;

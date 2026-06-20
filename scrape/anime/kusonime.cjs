@@ -22,6 +22,14 @@
  *  Cari anime batch download subtitle Indonesia dari kusonime.com
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Kusonime Scraper
+ *  Cari anime & ambil link batch download Sub Indo dari
+ *  kusonime.com — mendukung berbagai resolusi & format
+ *  (MKV/MP4), kirim link langsung ke WhatsApp.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 const axios = require('axios');

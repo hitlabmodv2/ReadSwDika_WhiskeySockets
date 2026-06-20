@@ -23,6 +23,14 @@
  * ───────────────────────────────
  */
 /**
+ * ═══════════════════════════════════════════════════════════════
+ *  GemmyGemini — Gemini AI Dual-Purpose Helper
+ *  Dua fungsi utama: (1) deteksi genre musik dari nama lagu
+ *  & artis, (2) analisis email tempmail & ekstrak link
+ *  verifikasi paling penting menggunakan Gemini AI.
+ * ═══════════════════════════════════════════════════════════════
+ */
+/**
  * ───────────────────────────────
  *  Helper    : Gemini AI wrapper untuk analisa email tempmail
  *  Tujuan    : Pilih SATU link verifikasi paling penting + label akurat

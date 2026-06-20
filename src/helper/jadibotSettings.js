@@ -22,6 +22,14 @@
  *  Antidel, typing, recording, online, emoji per jadibot user
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  JadiBot Per-Session Settings
+ *  Kelola pengaturan individu tiap sesi JadiBot: antidel,
+ *  auto typing/recording, status online, emoji set kustom —
+ *  setiap JadiBot user punya konfigurasi yang independen.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict'
 
 import fs from 'fs'

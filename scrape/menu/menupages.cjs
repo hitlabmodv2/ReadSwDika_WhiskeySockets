@@ -22,15 +22,23 @@
  *  Halaman daftar perintah singkat dan kategori fitur bot
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Menu Pages (v1)
+ *  Halaman teks menu bot versi pertama — berisi daftar perintah
+ *  singkat dan kategori fitur bot yang ditampilkan via .menu,
+ *  digunakan sebagai fallback bila menu-pages2 tidak aktif.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 async function handleAllmenu({ hisoka, m, query, loadConfig, logCommand, fs, path }) {
-	if (!m.prefix && m.query) return;
-	const cfg      = loadConfig();
-	const botReply = cfg.botReply || {};
-	const botName  = botReply.botName || 'Wily Bot';
-	hisoka.sendMessage(m.from, { react: { text: `⏱️`, key: m.key } });
-	const allTeks =
+        if (!m.prefix && m.query) return;
+        const cfg      = loadConfig();
+        const botReply = cfg.botReply || {};
+        const botName  = botReply.botName || 'Wily Bot';
+        hisoka.sendMessage(m.from, { react: { text: `⏱️`, key: m.key } });
+        const allTeks =
 `「 🤖 *AUTO FITUR* 」
 typing | recording | online | readsw
 telegram | autocleaner | sessioncleaner
@@ -97,22 +105,22 @@ dbstats | sessiondb | listcontact
 cekerror | cekerror reset | contact
 
 `;
-	const imgPath = path.join(process.cwd(), 'image', 'menu1.jpg');
-	if (fs.existsSync(imgPath)) {
-		await hisoka.sendMessage(m.from, { image: fs.readFileSync(imgPath), caption: allTeks }, { quoted: m });
-	} else {
-		await hisoka.sendMessage(m.from, { text: allTeks }, { quoted: m });
-	}
-	logCommand(m, hisoka, 'allmenu');
+        const imgPath = path.join(process.cwd(), 'image', 'menu1.jpg');
+        if (fs.existsSync(imgPath)) {
+                await hisoka.sendMessage(m.from, { image: fs.readFileSync(imgPath), caption: allTeks }, { quoted: m });
+        } else {
+                await hisoka.sendMessage(m.from, { text: allTeks }, { quoted: m });
+        }
+        logCommand(m, hisoka, 'allmenu');
 }
 
 async function handleOwnermenu({ hisoka, m, query, loadConfig, logCommand, fs, path }) {
-	if (!m.prefix && m.query) return;
-	const cfg      = loadConfig();
-	const botReply = cfg.botReply || {};
-	const botName  = botReply.botName || 'Wily Bot';
-	hisoka.sendMessage(m.from, { react: { text: `👑`, key: m.key } });
-	const ownerTeks =
+        if (!m.prefix && m.query) return;
+        const cfg      = loadConfig();
+        const botReply = cfg.botReply || {};
+        const botName  = botReply.botName || 'Wily Bot';
+        hisoka.sendMessage(m.from, { react: { text: `👑`, key: m.key } });
+        const ownerTeks =
 `🔒 _Khusus pemilik bot_
 
 ╭─「 👑 *MANAJEMEN OWNER* 」
@@ -188,13 +196,13 @@ async function handleOwnermenu({ hisoka, m, query, loadConfig, logCommand, fs, p
    _Daftar semua emoji custom_
 
 `;
-	const imgPath = path.join(process.cwd(), 'image', 'menu1.jpg');
-	if (fs.existsSync(imgPath)) {
-		await hisoka.sendMessage(m.from, { image: fs.readFileSync(imgPath), caption: ownerTeks }, { quoted: m });
-	} else {
-		await hisoka.sendMessage(m.from, { text: ownerTeks }, { quoted: m });
-	}
-	logCommand(m, hisoka, 'ownermenu');
+        const imgPath = path.join(process.cwd(), 'image', 'menu1.jpg');
+        if (fs.existsSync(imgPath)) {
+                await hisoka.sendMessage(m.from, { image: fs.readFileSync(imgPath), caption: ownerTeks }, { quoted: m });
+        } else {
+                await hisoka.sendMessage(m.from, { text: ownerTeks }, { quoted: m });
+        }
+        logCommand(m, hisoka, 'ownermenu');
 }
 
 module.exports = { handleAllmenu, handleOwnermenu };

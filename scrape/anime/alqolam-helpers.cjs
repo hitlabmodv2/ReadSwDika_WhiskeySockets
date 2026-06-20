@@ -22,6 +22,14 @@
  *  Fungsi pembantu parsing & format data episode AlqAnime
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  AlqOlam Helper Utilities
+ *  Kumpulan fungsi pembantu untuk parsing data, format pesan
+ *  link download, dan penyajian info episode anime AlqAnime
+ *  agar tampil rapi di WhatsApp.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 function formatAlqLinkMsg(animeTitle, ep, prefRes, resList) {

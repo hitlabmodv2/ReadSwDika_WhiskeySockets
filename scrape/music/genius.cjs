@@ -22,6 +22,14 @@
  *  Cari lirik, info lagu, dan detail artis dari genius.com
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Genius.com Scraper — Lirik & Info Lagu
+ *  Cari & ambil lirik lagu, info detail (artis, album, tahun),
+ *  dan anotasi dari genius.com — dipakai oleh fitur musik bot
+ *  untuk tampilkan lirik saat .play atau .lirik.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 const axios = require('axios');

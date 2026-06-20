@@ -22,6 +22,14 @@
  *  Welcome/goodbye grup, connection update, QR code
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Baileys Event Handler
+ *  Menangani semua event non-pesan: welcome/goodbye anggota
+ *  grup, auto typing/recording, auto read status (SW),
+ *  SwTrack anti-miss retry, dan auto read chat private.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 import fs from 'fs';

@@ -22,6 +22,14 @@
  *  Analisis & temukan gambar relevan dari konten pesan
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Image Search via Gemini Vision
+ *  Cari & temukan gambar relevan menggunakan Gemini vision AI
+ *  — analisis konten pesan untuk menentukan query pencarian
+ *  gambar yang akurat dan relevan dengan konteks chat.
+ * ═══════════════════════════════════════════════════════════════
+ */
 import axios from 'axios';
 
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';

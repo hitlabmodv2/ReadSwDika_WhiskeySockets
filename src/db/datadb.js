@@ -22,6 +22,14 @@
  *  Simpan config dinamis, sesi, dan data bot
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  General Key-Value Database (SQLite/JSON)
+ *  Penyimpanan key-value serbaguna untuk konfigurasi dinamis,
+ *  data sesi, dan state bot — abstraksi di atas SQLite/JSON
+ *  agar mudah dipakai dari mana saja di codebase.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 import path from 'path';

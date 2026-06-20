@@ -22,6 +22,14 @@
  *  Input nama lagu/artis, output genre akurat dari AI
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Music Genre Detector via Gemini AI
+ *  Identifikasi genre musik dari nama lagu atau artis
+ *  menggunakan Gemini AI — digunakan internal oleh fitur
+ *  musik untuk tag genre pada file audio yang dikirim.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 const axios = require('axios');

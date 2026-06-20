@@ -22,20 +22,28 @@
  *  Perintah .memori dan .lupakan untuk kelola memori percakapan AI per pengguna
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  AI Memory Command Handler
+ *  Perintah .memoriai untuk lihat & .lupakan untuk hapus memori
+ *  percakapan AI per pengguna — memori disimpan di database
+ *  agar AI tetap ingat konteks antar sesi.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 async function handleMemori({ hisoka, m, logCommand, loadUserMemory, memoryToReadable }) {
-	if (!m.prefix && m.query) return;
-	const mem = loadUserMemory(m.sender);
-	await m.reply(memoryToReadable(mem));
-	logCommand(m, hisoka, 'memori');
+        if (!m.prefix && m.query) return;
+        const mem = loadUserMemory(m.sender);
+        await m.reply(memoryToReadable(mem));
+        logCommand(m, hisoka, 'memori');
 }
 
 async function handleLupakanaku({ hisoka, m, logCommand, clearUserMemory }) {
-	if (!m.prefix && m.query) return;
-	clearUserMemory(m.sender);
-	await m.reply('> *🧠 Memori AI tentang kamu sudah dihapus*\n\n_AI bakal mulai pelan-pelan kenal kamu lagi dari awal._');
-	logCommand(m, hisoka, 'lupakanaku');
+        if (!m.prefix && m.query) return;
+        clearUserMemory(m.sender);
+        await m.reply('> *🧠 Memori AI tentang kamu sudah dihapus*\n\n_AI bakal mulai pelan-pelan kenal kamu lagi dari awal._');
+        logCommand(m, hisoka, 'lupakanaku');
 }
 
 module.exports = { handleMemori, handleLupakanaku };

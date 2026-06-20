@@ -22,6 +22,14 @@
  *  Simpan memory, style bicara, nickname, bahasa
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Per-User Database
+ *  Simpan data per pengguna: memori AI, gaya bicara, nickname,
+ *  preferensi bahasa, dan data personalisasi lainnya —
+ *  membuat bot bisa "mengenal" setiap user secara individual.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 import path from 'path';

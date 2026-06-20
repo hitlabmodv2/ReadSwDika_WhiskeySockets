@@ -22,6 +22,14 @@
  *  Scrape spesifikasi dari GSMArena, tampilkan tabel perbandingan
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Bandingkan HP (.bandingkan)
+ *  Scrape spesifikasi dua HP dari GSMArena dan tampilkan tabel
+ *  perbandingan lengkap (layar, kamera, baterai, prosesor) —
+ *  membantu user memilih HP terbaik sesuai kebutuhan.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 const { cekHP, getHPImage } = require('./cekhp.cjs');

@@ -22,6 +22,13 @@
  *  Fetch gambar cosplay dari channel Telegram publik
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Cosplay Telegram Fetcher
+ *  Ambil & kirim gambar cosplay langsung dari channel Telegram
+ *  publik — menjadi sumber gambar cosplay berkualitas tinggi.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 const axios = require('axios');

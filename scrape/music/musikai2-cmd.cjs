@@ -22,6 +22,14 @@
  *  Perintah generate musik AI menggunakan model generasi v2
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  MusicAI v2 Command Handler (.musikai2)
+ *  Generate lagu/musik orisinal menggunakan model AI generasi
+ *  v2 — cukup beri deskripsi/lirik & genre, bot akan hasilkan
+ *  dan kirim file audio langsung ke WhatsApp.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 const path = require('path');

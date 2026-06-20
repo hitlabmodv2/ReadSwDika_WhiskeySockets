@@ -22,6 +22,14 @@
  *  Perintah .simi untuk percakapan AI berbasis Simi API
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Auto Simi (AI Chat) Command Handler
+ *  Perintah .simi untuk auto-reply percakapan menggunakan
+ *  Simi API & Gemini AI sebagai fallback, mendukung toggle
+ *  on/off per private chat maupun grup.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 async function handleAutoSimi({

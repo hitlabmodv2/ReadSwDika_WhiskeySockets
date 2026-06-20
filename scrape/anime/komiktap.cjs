@@ -22,6 +22,14 @@
  *  Cari, info, dan baca manga/komik dari komiktap.com
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  KomikTap Scraper
+ *  Cari, ambil info, dan baca halaman manga/komik dari
+ *  komiktap.com — mendukung pencarian judul, daftar chapter,
+ *  dan kirim gambar halaman komik langsung ke WhatsApp.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 const axios = require('axios');

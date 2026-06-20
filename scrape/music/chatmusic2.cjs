@@ -22,6 +22,14 @@
  *  Versi update chatmusic dengan fallback & format lebih baik
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Chat Music v2 — Pencari & Kirim Lagu
+ *  Cari & kirim file audio lagu langsung ke chat WhatsApp —
+ *  versi 2 dengan multi-sumber fallback, format pesan yang
+ *  lebih rapi, dan penanganan error yang lebih baik.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 const axios  = require('axios');

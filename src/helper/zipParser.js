@@ -23,6 +23,14 @@
  * ───────────────────────────────
  */
 /**
+ * ═══════════════════════════════════════════════════════════════
+ *  ZIP File Parser (Pure JavaScript)
+ *  Baca struktur & isi file ZIP, deteksi apakah terproteksi
+ *  password — semua murni JavaScript tanpa dependency eksternal,
+ *  dipakai untuk preview & info file ZIP yang dikirim di chat.
+ * ═══════════════════════════════════════════════════════════════
+ */
+/**
  * zipParser.js — Pure JS ZIP file parser (no external library)
  * Parses ZIP central directory to list files and detect password protection.
  * ZIP spec: https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT

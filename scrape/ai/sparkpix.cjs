@@ -23,6 +23,14 @@
  * ───────────────────────────────
  */
 /**
+ * ═══════════════════════════════════════════════════════════════
+ *  SparkPix — Text-to-Image & HD Upscaler
+ *  Generate gambar dari teks via Bing Image Creator / DALL-E
+ *  dan upscale gambar ke resolusi HD (4K/6K/8K) + face
+ *  enhancement opsional menggunakan sparkpix.ai API.
+ * ═══════════════════════════════════════════════════════════════
+ */
+/**
  * 【 SparkPix Free HD Upscale 】
  * Creator  : rhmt
  * Base     : https://sparkpix.ai/

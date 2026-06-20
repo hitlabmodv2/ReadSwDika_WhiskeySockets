@@ -22,6 +22,14 @@
  *  Perintah pencarian & download foto cosplay dari berbagai sumber
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Cosplay Command Handler
+ *  Perintah .cosplay untuk pencarian & pengiriman foto cosplay
+ *  dari berbagai sumber web, mendukung filter karakter & seri
+ *  anime tertentu.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 const path = require('path');

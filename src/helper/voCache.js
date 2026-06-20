@@ -22,6 +22,14 @@
  *  Simpan sementara media VO untuk fitur anti-delete
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  View-Once Media Cache
+ *  Cache sementara media bertipe view-once (foto/video sekali
+ *  lihat) di memori — memungkinkan fitur anti-delete menyimpan
+ *  dan meneruskan kembali media VO yang dihapus pengirim.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict'
 
 import fs from 'fs'

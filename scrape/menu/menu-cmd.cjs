@@ -22,6 +22,14 @@
  *  Perintah .menu untuk tampilkan daftar lengkap fitur dan perintah bot
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Menu Command Handler (.menu)
+ *  Tampilkan daftar lengkap semua fitur & perintah bot dengan
+ *  tampilan terstruktur per kategori — mendukung sub-menu dan
+ *  navigasi via tombol interaktif.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 async function handleMenu({

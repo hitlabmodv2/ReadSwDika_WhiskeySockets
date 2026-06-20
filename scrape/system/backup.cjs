@@ -22,6 +22,14 @@
  *  Compress ke ZIP, kirim ke owner, hanya owner yang bisa
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Backup Config & Session Bot (.backup)
+ *  Compress semua file konfigurasi dan sesi WhatsApp ke arsip
+ *  ZIP, lalu kirim langsung ke owner bot — hanya owner yang
+ *  bisa menggunakan untuk keamanan data.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 /**

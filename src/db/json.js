@@ -22,6 +22,14 @@
  *  Baca/tulis JSON debounced ke disk, cache in-memory
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  JSON Database Helper
+ *  Baca & tulis data JSON ke disk dengan debounce (tidak spam
+ *  write) dan cache in-memory untuk performa — digunakan
+ *  oleh hampir semua modul yang butuh simpan data lokal.
+ * ═══════════════════════════════════════════════════════════════
+ */
 import fs from 'fs';
 import path from 'path';
 

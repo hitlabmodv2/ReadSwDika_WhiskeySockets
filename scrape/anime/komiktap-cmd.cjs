@@ -22,6 +22,14 @@
  *  Perintah baca & download komik/manga dari KomikTap
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  KomikTap Command Handler
+ *  Perintah .komik, .komikinfo, dan .komikbaca untuk pencarian,
+ *  info detail, dan membaca chapter manga/komik dari KomikTap
+ *  langsung di WhatsApp.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 const path = require('path');

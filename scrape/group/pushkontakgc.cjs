@@ -22,6 +22,14 @@
  *  Kirim vCard kontak massal via generateWAMessageFromContent
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Push Kontak ke Grup WhatsApp
+ *  Kirim daftar kontak (vCard) massal ke grup WhatsApp —
+ *  berguna untuk menyebarkan nomor anggota baru atau kontak
+ *  penting ke semua member grup sekaligus.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 const { generateWAMessageFromContent, prepareWAMessageMedia } = require('@whiskeysockets/baileys');

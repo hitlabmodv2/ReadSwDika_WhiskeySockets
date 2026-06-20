@@ -22,6 +22,14 @@
  *  Data dari AniList/MAL, format siap kirim ke WA
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Info Wibu — Jadwal & Sinopsis Anime
+ *  Ambil jadwal tayang, sinopsis, genre, dan rating anime dari
+ *  AniList & MyAnimeList, kirim otomatis ke grup terdaftar
+ *  setiap ada update episode baru.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 /**

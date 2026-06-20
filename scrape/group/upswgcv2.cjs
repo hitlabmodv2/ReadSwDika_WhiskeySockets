@@ -23,6 +23,14 @@
  *  hex background, close_friends, custom audience
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Upload Status ke Grup WhatsApp (v2)
+ *  Kirim status WA (teks/gambar/video/audio) ke semua grup
+ *  menggunakan castleys-community — mendukung hex background,
+ *  custom audience, dan close_friends audience.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 /**

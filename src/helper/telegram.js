@@ -22,6 +22,14 @@
  *  Kirim teks/media ke channel Telegram via Bot API
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Telegram Bot Integration
+ *  Forward teks, gambar, video, dan dokumen dari WhatsApp ke
+ *  channel/grup Telegram via Telegram Bot API — berguna untuk
+ *  logging pesan penting atau notifikasi ke channel Telegram.
+ * ═══════════════════════════════════════════════════════════════
+ */
 import { toCapitalize } from './text.js';
 import { loadConfig } from './utils.js';
 

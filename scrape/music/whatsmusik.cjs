@@ -22,6 +22,14 @@
  *  Identifikasi lagu dari audio yang dikirim, cek genre
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Whats Musiq — Identifikasi Lagu dari Audio
+ *  Analisis file audio yang dikirim ke bot untuk identifikasi
+ *  judul lagu, artis, dan genre — mirip fitur Shazam tapi
+ *  langsung di WhatsApp menggunakan AI.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 const fs = require('fs');

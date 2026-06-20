@@ -22,6 +22,14 @@
  *  Perintah .play untuk putar dan download audio/video dari YouTube
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Play Command Handler (.play / .playvid)
+ *  Cari & download audio (.play) atau video (.playvid) dari
+ *  YouTube — tampilkan thumbnail, judul, durasi, dan kirim
+ *  file media langsung ke chat WhatsApp.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 const path = require('path');

@@ -22,6 +22,14 @@
  *  Cari lagu via Gemini + Spotify, download & kirim ke WA
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Chat Music v1 — Pencari & Kirim Lagu
+ *  Cari lagu menggunakan Gemini AI + Spotify, download file
+ *  audio, dan kirim langsung ke chat WhatsApp — versi awal
+ *  sebelum chatmusic2.cjs.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 const axios  = require('axios');

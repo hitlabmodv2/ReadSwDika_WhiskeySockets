@@ -22,6 +22,14 @@
  *  Hapus hisoka.json tanpa perlu pairing ulang penuh
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Clear Sesi WA (.clearsesi)
+ *  Hapus & reset file sesi WhatsApp (hisoka.json) tanpa perlu
+ *  pairing ulang secara penuh — berguna saat bot terkena ban
+ *  atau sesi corrupt, juga tersedia mode per-sesi JadiBot.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 /**

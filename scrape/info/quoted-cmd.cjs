@@ -22,29 +22,37 @@
  *  Perintah .quoted untuk tampilkan ulang isi pesan yang sedang di-reply
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Quoted Message Command (.quoted)
+ *  Perintah .quoted untuk menampilkan ulang / meneruskan isi
+ *  pesan yang sedang di-reply — berguna untuk forward pesan
+ *  tersembunyi atau pesan lama yang susah dicari.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 async function handleQuoted({ hisoka, m, tolak, logCommand, injectMessage }) {
-	if (!m.prefix && m.query) return;
-	if (!m.isQuoted) {
-		await tolak(hisoka, m, 'No quoted message found.');
-		return;
-	}
+        if (!m.prefix && m.query) return;
+        if (!m.isQuoted) {
+                await tolak(hisoka, m, 'No quoted message found.');
+                return;
+        }
 
-	const message = hisoka.cacheMsg.get(m.quoted.key.id);
-	if (!message) {
-		await tolak(hisoka, m, 'Quoted message not found.');
-		return;
-	}
+        const message = hisoka.cacheMsg.get(m.quoted.key.id);
+        if (!message) {
+                await tolak(hisoka, m, 'Quoted message not found.');
+                return;
+        }
 
-	const IMessage = await injectMessage(hisoka, message);
-	if (!IMessage.isQuoted) {
-		await tolak(hisoka, m, 'Quoted message not found.');
-		return;
-	}
+        const IMessage = await injectMessage(hisoka, message);
+        if (!IMessage.isQuoted) {
+                await tolak(hisoka, m, 'Quoted message not found.');
+                return;
+        }
 
-	await m.reply({ forward: IMessage.quoted });
-	logCommand(m, hisoka, 'quoted');
+        await m.reply({ forward: IMessage.quoted });
+        logCommand(m, hisoka, 'quoted');
 }
 
 module.exports = { handleQuoted };

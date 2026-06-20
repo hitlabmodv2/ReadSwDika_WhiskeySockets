@@ -22,6 +22,14 @@
  *  Lookup prefix internasional (+62 = ID, +1 = US, dll)
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Phone Region Detector
+ *  Deteksi asal negara dari nomor telepon berdasarkan prefix
+ *  internasional (+62 → Indonesia, +1 → AS, dll) — dipakai
+ *  untuk personalisasi respons dan info nomor di pesan.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 const countryPhoneCodes = {

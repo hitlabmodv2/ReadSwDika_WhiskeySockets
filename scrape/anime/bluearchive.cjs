@@ -22,6 +22,13 @@
  *  Scrape data karakter & tier list game gacha Blue Archive
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Blue Archive Character Info
+ *  Scrape data karakter, skill, statistik, dan tier list dari
+ *  game gacha Blue Archive — sajikan info lengkap ke WhatsApp.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 const axios = require('axios');

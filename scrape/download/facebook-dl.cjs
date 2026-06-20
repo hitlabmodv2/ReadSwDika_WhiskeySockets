@@ -22,6 +22,14 @@
  *  Download video/reels Facebook tanpa login
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Facebook Video Downloader
+ *  Perintah .fb untuk download video & Reels Facebook tanpa
+ *  perlu login — mendukung berbagai kualitas (SD/HD) dan kirim
+ *  langsung ke WhatsApp.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 /**

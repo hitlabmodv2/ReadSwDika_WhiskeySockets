@@ -22,6 +22,14 @@
  *  Upload teks/gambar/video sebagai status ke semua grup
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Upload Status ke Grup WhatsApp (v1)
+ *  Perintah untuk upload teks/gambar/video sebagai status WA
+ *  yang dikirimkan ke semua grup terdaftar — versi awal sebelum
+ *  upswgcv2.cjs dengan pendekatan posting yang berbeda.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 /**

@@ -22,6 +22,14 @@
  *  Text/vision chat, retry otomatis, history management
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Gemini API Wrapper (ESM)
+ *  Wrapper utama untuk Google Gemini API dalam format ESM —
+ *  mendukung text & vision chat, retry otomatis saat rate
+ *  limit, dan management history percakapan per user.
+ * ═══════════════════════════════════════════════════════════════
+ */
 import axios from 'axios';
 import https from 'https';
 import path from 'path';

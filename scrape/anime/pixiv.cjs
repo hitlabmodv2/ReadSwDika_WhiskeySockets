@@ -22,6 +22,14 @@
  *  Ambil ilustrasi dari pixiv.net via Gemini vision AI
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Pixiv Illustration Scraper
+ *  Cari & ambil ilustrasi dari pixiv.net menggunakan Gemini
+ *  vision AI untuk analisis konten — mendukung pencarian tag,
+ *  karakter, dan artis tertentu.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 const axios = require('axios');

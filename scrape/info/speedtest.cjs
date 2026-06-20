@@ -22,6 +22,14 @@
  *  Ukur download/upload via fast.com API, tampilkan hasil
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Speed Test Command (.speedtest)
+ *  Ukur kecepatan internet bot (download/upload/latency) via
+ *  fast.com API — tampilkan hasil lengkap dengan grafik ASCII
+ *  dan informasi lokasi server test.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 /**

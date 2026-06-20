@@ -22,6 +22,14 @@
  *  Pin pesan 24 jam/7 hari/30 hari, resolve LID ke phone JID
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Pin Pesan Grup (Sematkan)
+ *  Perintah .sematkan untuk pin/sematkan pesan di grup dengan
+ *  durasi pilihan: 24 jam, 7 hari, atau 30 hari — mendukung
+ *  resolve LID ke phone JID agar kompatibel dengan akun baru.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 /**

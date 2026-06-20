@@ -22,6 +22,14 @@
  *  Simpan & ambil deskripsi stiker dari ai_history.json
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Sticker Memory Database
+ *  Simpan & ambil hasil analisis deskripsi stiker yang sudah
+ *  pernah diproses AI — menghindari analisis ulang stiker yang
+ *  sama dan mempercepat respons auto-reply berbasis stiker.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 /**

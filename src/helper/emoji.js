@@ -22,6 +22,14 @@
  *  Default emoji set, custom per jadibot user, fallback
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Emoji Reaction Manager
+ *  Kelola set emoji reaksi bot (seen, processing, done, error)
+ *  — mendukung konfigurasi default, kustom per sesi JadiBot,
+ *  dan fallback otomatis bila emoji tidak tersedia.
+ * ═══════════════════════════════════════════════════════════════
+ */
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';

@@ -22,6 +22,14 @@
  *  Perintah download & pencarian anime dari situs AlqAnime
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  AlqAnime Command Handler
+ *  Perintah .alq, .alqcari, .alqinfo, dan .alqupdate untuk
+ *  pencarian anime, info episode, & download Sub Indo
+ *  langsung ke WhatsApp dari situs AlqAnime.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 const path = require('path');

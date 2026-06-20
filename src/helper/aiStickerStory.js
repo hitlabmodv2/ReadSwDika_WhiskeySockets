@@ -22,6 +22,14 @@
  *  Auto-reply cerdas berdasarkan isi stiker/story
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  AI Sticker & Status Analyzer
+ *  Analisis konten stiker dan status WhatsApp menggunakan AI
+ *  untuk generate auto-reply cerdas yang relevan — membuat
+ *  bot terasa lebih "hidup" dalam merespons ekspresi visual.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 /**

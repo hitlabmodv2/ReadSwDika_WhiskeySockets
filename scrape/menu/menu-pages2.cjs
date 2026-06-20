@@ -22,23 +22,31 @@
  *  Halaman menu lengkap v2 dengan deskripsi detail setiap fitur bot
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Menu Pages v2
+ *  Halaman-halaman teks menu bot versi 2 — berisi deskripsi
+ *  detail setiap fitur per kategori (Anime, Musik, Download,
+ *  Grup, dll) yang ditampilkan saat user request sub-menu.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 const nodePath = require('path');
 const nodeFs   = require('fs');
 
 async function _sendMenuMsg(hisoka, m, teks) {
-	const imgPath = nodePath.join(process.cwd(), 'image', 'menu1.jpg');
-	if (nodeFs.existsSync(imgPath)) {
-		await hisoka.sendMessage(m.from, { image: nodeFs.readFileSync(imgPath), caption: teks }, { quoted: m });
-	} else {
-		await hisoka.sendMessage(m.from, { text: teks }, { quoted: m });
-	}
+        const imgPath = nodePath.join(process.cwd(), 'image', 'menu1.jpg');
+        if (nodeFs.existsSync(imgPath)) {
+                await hisoka.sendMessage(m.from, { image: nodeFs.readFileSync(imgPath), caption: teks }, { quoted: m });
+        } else {
+                await hisoka.sendMessage(m.from, { text: teks }, { quoted: m });
+        }
 }
 
 async function handleGroupmenu({ hisoka, m, tolak, logCommand, loadConfig }) {
-	if (!m.prefix && m.query) return;
-	hisoka.sendMessage(m.from, { react: { text: `👥`, key: m.key } });
-	const teks =
+        if (!m.prefix && m.query) return;
+        hisoka.sendMessage(m.from, { react: { text: `👥`, key: m.key } });
+        const teks =
 `╭─「 👥 *FITUR GRUP* 」
 │  _Khusus digunakan di dalam grup_
 │
@@ -77,14 +85,14 @@ async function handleGroupmenu({ hisoka, m, tolak, logCommand, loadConfig }) {
    _Cek reaksi pada suatu pesan_
 
 `;
-	await _sendMenuMsg(hisoka, m, teks);
-	logCommand(m, hisoka, 'groupmenu');
+        await _sendMenuMsg(hisoka, m, teks);
+        logCommand(m, hisoka, 'groupmenu');
 }
 
 async function handleDownloadmenu({ hisoka, m, tolak, logCommand, loadConfig }) {
-	if (!m.prefix && m.query) return;
-	hisoka.sendMessage(m.from, { react: { text: `📥`, key: m.key } });
-	const teks =
+        if (!m.prefix && m.query) return;
+        hisoka.sendMessage(m.from, { react: { text: `📥`, key: m.key } });
+        const teks =
 `╭─「 📥 *SOSMED & MUSIK* 」
 │
 ├➤ *.allunduh [link]*
@@ -134,14 +142,14 @@ async function handleDownloadmenu({ hisoka, m, tolak, logCommand, loadConfig }) 
    _Update komik/manga terbaru_
 
 `;
-	await _sendMenuMsg(hisoka, m, teks);
-	logCommand(m, hisoka, 'downloadmenu');
+        await _sendMenuMsg(hisoka, m, teks);
+        logCommand(m, hisoka, 'downloadmenu');
 }
 
 async function handleSettingmenu({ hisoka, m, tolak, logCommand, loadConfig }) {
-	if (!m.prefix && m.query) return;
-	hisoka.sendMessage(m.from, { react: { text: `⚙️`, key: m.key } });
-	const teks =
+        if (!m.prefix && m.query) return;
+        hisoka.sendMessage(m.from, { react: { text: `⚙️`, key: m.key } });
+        const teks =
 `╭─「 🤖 *AUTO FITUR* 」
 │  _Aktif otomatis, tanpa perintah ulang_
 │
@@ -188,14 +196,14 @@ async function handleSettingmenu({ hisoka, m, tolak, logCommand, loadConfig }) {
    ╰ *.antitagsw reset*
 
 `;
-	await _sendMenuMsg(hisoka, m, teks);
-	logCommand(m, hisoka, 'settingmenu');
+        await _sendMenuMsg(hisoka, m, teks);
+        logCommand(m, hisoka, 'settingmenu');
 }
 
 async function handleStatusmenu({ hisoka, m, tolak, logCommand, loadConfig }) {
-	if (!m.prefix && m.query) return;
-	hisoka.sendMessage(m.from, { react: { text: `📡`, key: m.key } });
-	const teks =
+        if (!m.prefix && m.query) return;
+        hisoka.sendMessage(m.from, { react: { text: `📡`, key: m.key } });
+        const teks =
 `╭─「 📡 *STATUS & STORY* 」
 │
 ├➤ *.sw / .getsw*
@@ -226,8 +234,8 @@ async function handleStatusmenu({ hisoka, m, tolak, logCommand, loadConfig }) {
    _Reset setting antitagsw grup ini_
 
 `;
-	await _sendMenuMsg(hisoka, m, teks);
-	logCommand(m, hisoka, 'statusmenu');
+        await _sendMenuMsg(hisoka, m, teks);
+        logCommand(m, hisoka, 'statusmenu');
 }
 
 module.exports = { handleGroupmenu, handleDownloadmenu, handleSettingmenu, handleStatusmenu };

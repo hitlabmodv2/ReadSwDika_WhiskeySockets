@@ -5,17 +5,7 @@
     "reads": 41,
     "reactions": 41,
     "lastSeen": "2026-06-18T07:38:49.485Z",
-    "activeSW": {
-      "3EB0089EAFBCD74C61D2ED": 1781766258903,
-      "3EB0141A3BADFA9D7E3D7D": 1781766694363,
-      "3EB0BBAF5E11A4C753F5F7": 1781766871364,
-      "3EB01A415ECD63E31F4725": 1781767032929,
-      "3EB0A9FBB29D7398EB33F3": 1781767113375,
-      "3EB06D5B269DEEE890C5E0": 1781767534543,
-      "3EB0B8C477466021A794A3": 1781768008991,
-      "3EB052EF70651B7DE674E1": 1781768205652,
-      "3EB00B7BD652A7D46AFC17": 1781768329485
-    }
+    "activeSW": {}
   },
   "6281227315377": {
     "name": "Nabill.",
@@ -41,26 +31,7 @@
     "reads": 18,
     "reactions": 18,
     "lastSeen": "2026-06-16T07:33:09.579Z",
-    "activeSW": {
-      "3EB08FE9A79AD8C8A5A3AB": 1781534466157,
-      "3EB00778955394D82E06E6": 1781534502720,
-      "3EB0408A05CE4433B7F1C9": 1781534603600,
-      "3EB0035610E45E6A693712": 1781534803736,
-      "3EB0EFB74DCAA9B6819175": 1781535205538,
-      "3EB06234AF120F2E9C5748": 1781535558795,
-      "3EB0D4A1CD83931FB86ADA": 1781535820565,
-      "3EB033A8C7AC3259C1C169": 1781535965639,
-      "3EB0F402B8AAB135F0475D": 1781537474224,
-      "3EB08C8391674C07CEE78F": 1781537516997,
-      "3EB0583562B548E777BC4B": 1781539329206,
-      "3EB02AD9918ED55CDDE8AA": 1781591166932,
-      "3EB0C39386E5695BE21863": 1781591192181,
-      "3EB082006B6AFAB9C57F08": 1781593147982,
-      "3EB003C5416245D5E239CF": 1781593151991,
-      "3EB0E332AC1372728824A4": 1781593162028,
-      "3EB0B4CD019CF4815DCFB6": 1781595188730,
-      "3EB081F76E5032A7278CE9": 1781595189579
-    }
+    "activeSW": {}
   },
   "6282252134009": {
     "name": "NISKI || CONVAIRESS",
@@ -86,7 +57,6 @@
     "reactions": 17,
     "lastSeen": "2026-06-20T10:41:42.923Z",
     "activeSW": {
-      "AC2EDAF446E2DC79D373B109A7B758C3": 1781867214129,
       "ACB1E9EC77428F34F7E9A4442C8C3174": 1781950354890,
       "AC8CBBAACE56A81B9526003DD4EABAD7": 1781950359870,
       "AC2B20E3725FC01659BA1A2F66F9883C": 1781950362533,
@@ -109,9 +79,9 @@
   "6285216433695": {
     "name": "知らないし、気にしない。",
     "number": "6285216433695",
-    "reads": 14,
-    "reactions": 14,
-    "lastSeen": "2026-06-19T16:28:06.425Z",
+    "reads": 15,
+    "reactions": 15,
+    "lastSeen": "2026-06-20T11:52:12.658Z",
     "activeSW": {
       "AC6D23B88545ED8A62214A7D18FD6550": 1781875577974,
       "AC23C74503445499C64CD8C665D42D9D": 1781880173281,
@@ -119,7 +89,8 @@
       "ACCB693D60C47B593E506F2834D2D766": 1781880401954,
       "AC29453FC7BBEDB8E80715432B2FD3BF": 1781885454230,
       "AC58985574A43384EC501E914AD3B6CE": 1781885775794,
-      "ACC3A8D6EF43E844447B7309D30375BA": 1781886486425
+      "ACC3A8D6EF43E844447B7309D30375BA": 1781886486425,
+      "AC489AC72FC4E7E7D171B3843A380C35": 1781956332658
     }
   },
   "6285700996045": {
@@ -161,11 +132,6 @@
     "reactions": 10,
     "lastSeen": "2026-06-20T05:55:04.307Z",
     "activeSW": {
-      "A5D99819036735DD0E51A3A7B0A74796": 1781854508821,
-      "A5D480EF2DA51126D911CD77E24AF266": 1781854510126,
-      "A5E8770E92E1A16B9076E6604B02583B": 1781857589272,
-      "A5A02EF481D9EF143B8622FCAF6C795C": 1781867547635,
-      "A5D0ACF8B78BCAE6902071BC2D3134A6": 1781867744502,
       "A5FE0E40C00C8A3009AA60FDA45946C6": 1781934896014,
       "A57DED7A0C433F782CBA76C087A378C2": 1781934904307
     }
@@ -176,12 +142,7 @@
     "reads": 8,
     "reactions": 8,
     "lastSeen": "2026-06-19T11:26:50.991Z",
-    "activeSW": {
-      "AC8B79AACE214BA96DAF6FC6B5D9D6AD": 1781865949624,
-      "AC52E424714C2A573A04FCA6E9923868": 1781865954659,
-      "AC5F1F356905CBE98D5522DE7CA5156A": 1781868407060,
-      "AC88315601BDCEE2A0A353131A11C535": 1781868410991
-    }
+    "activeSW": {}
   },
   "6287864841886": {
     "name": "Yakuza Dyy",
@@ -190,7 +151,6 @@
     "reactions": 8,
     "lastSeen": "2026-06-19T16:32:18.955Z",
     "activeSW": {
-      "AC50C3513ED55E98FF6EEC818A188CB6": 1781858004347,
       "AC657AB1E8F3238EB204844DEBE6704A": 1781886026042,
       "AC4A2078528433530D8F50042A6FC0D5": 1781886371820,
       "ACF7CCCA6E77FF22D5BCF9D37C277C54": 1781886738955
@@ -213,7 +173,6 @@
     "reactions": 8,
     "lastSeen": "2026-06-20T10:40:32.459Z",
     "activeSW": {
-      "AC4843FF8E3D38B54C30C3FA646C0057": 1781868143748,
       "AC6C8136D3F763E553ED64FD600C415F": 1781951983201,
       "AC84B0D43928DAF26C093928FFFF4610": 1781952032458
     }
@@ -225,7 +184,6 @@
     "reactions": 7,
     "lastSeen": "2026-06-19T16:13:51.361Z",
     "activeSW": {
-      "A5C4BFB3FAF09A975F351C61354EAAFB": 1781860200622,
       "A53BAF951FAB3494F169D72A4183E318": 1781875580921,
       "A50F7E9FAB4554A211AF77C37AA530A1": 1781884617187,
       "A598475C8954D37C09F189A31783455A": 1781885631361
@@ -238,8 +196,6 @@
     "reactions": 7,
     "lastSeen": "2026-06-20T06:17:44.340Z",
     "activeSW": {
-      "AC362A8D0CDF9BFC565C0B22329CD83D": 1781854510108,
-      "AC18CE092B81640BACD5E9E1B6408CB7": 1781854524013,
       "ACBBEDE7E28C340BEBCF535F77B5935C": 1781936264340
     }
   },
@@ -249,13 +205,7 @@
     "reads": 6,
     "reactions": 6,
     "lastSeen": "2026-06-18T09:34:08.914Z",
-    "activeSW": {
-      "ACA3B4C27D1E617FE458CCC98869F089": 1781691473108,
-      "AC0A6E8553753167BEE67169F8A9D82D": 1781702050969,
-      "ACE52D598F80323DC7F309367C159688": 1781769110197,
-      "AC962A1C9868A60203AE4EE2AA3ABD3A": 1781771021126,
-      "ACBAFEDF44F9941BC1AAD2594F41C412": 1781775248914
-    }
+    "activeSW": {}
   },
   "6282189076619": {
     "name": "F",
@@ -287,11 +237,7 @@
     "reads": 5,
     "reactions": 5,
     "lastSeen": "2026-06-18T06:51:55.802Z",
-    "activeSW": {
-      "ACFFA02C3C6FE800BCAF0971550753B3": 1781702775656,
-      "ACF1A4CA2B822E99618721F8B13CB432": 1781762940316,
-      "ACEC3B267AE20806FDEBB5162AADA7E3": 1781765515802
-    }
+    "activeSW": {}
   },
   "6281337711694": {
     "name": ".",
@@ -299,11 +245,7 @@
     "reads": 5,
     "reactions": 5,
     "lastSeen": "2026-06-18T10:23:18.770Z",
-    "activeSW": {
-      "ACC26F3EEC72F669F7DE5C5ECBF3395E": 1781760765566,
-      "AC9725C690AC6EED048301641692A212": 1781763611948,
-      "ACED850C4F385CBB0AEF719D71CE7743": 1781778198770
-    }
+    "activeSW": {}
   },
   "6289654837567": {
     "name": "Olin 🌟✌",
@@ -311,12 +253,7 @@
     "reads": 4,
     "reactions": 4,
     "lastSeen": "2026-06-18T11:14:35.767Z",
-    "activeSW": {
-      "AC4C2D0A1AD6B5054CE49466A112B259": 1781695874691,
-      "AC9CEB2D1A13438669D219FD5021F150": 1781756020068,
-      "ACA26681F17436182DFEEB45C6060E48": 1781771396415,
-      "AC69295D80EAB96FDCF3ACA42318037C": 1781781275767
-    }
+    "activeSW": {}
   },
   "6285183687492": {
     "name": "MAULANA",
@@ -324,9 +261,7 @@
     "reads": 4,
     "reactions": 4,
     "lastSeen": "2026-06-19T08:32:10.308Z",
-    "activeSW": {
-      "A5CDFB18D8FB281A992D5A28555CD13A": 1781857930308
-    }
+    "activeSW": {}
   },
   "628388589625": {
     "name": "𝙢𝙖𝙪𝙡𝙖𝙣𝙖 𝙣𝙜𝙚𝙣",
@@ -334,9 +269,7 @@
     "reads": 4,
     "reactions": 4,
     "lastSeen": "2026-06-19T09:45:07.653Z",
-    "activeSW": {
-      "ACD20975CAED8BAF2A99167031996868": 1781862307653
-    }
+    "activeSW": {}
   },
   "62882003110997": {
     "name": ".",
@@ -345,7 +278,6 @@
     "reactions": 4,
     "lastSeen": "2026-06-19T12:03:12.977Z",
     "activeSW": {
-      "ACC99689286CB17B69D8DDE2F890A07F": 1781857335435,
       "AC8E10B1DEB2670446CCD7A3570CF8F5": 1781870592977
     }
   },
@@ -411,11 +343,7 @@
     "reads": 3,
     "reactions": 3,
     "lastSeen": "2026-06-14T09:10:54.661Z",
-    "activeSW": {
-      "ACEF17BC3F41D86C80EC40D8FE718789": 1781426730617,
-      "AC31AA7902CE8046D04249577B148236": 1781426777293,
-      "AC5C114628A4AA026F118B441BE64611": 1781428254661
-    }
+    "activeSW": {}
   },
   "6281326870686": {
     "name": "reki fans nganjuk pipel",
@@ -423,10 +351,7 @@
     "reads": 3,
     "reactions": 3,
     "lastSeen": "2026-06-15T14:45:06.535Z",
-    "activeSW": {
-      "AC460B205A39CBB3BE99412E25546557": 1781534667786,
-      "AC0BE9B453A36EBF4A8A2A72829D99F4": 1781534706535
-    }
+    "activeSW": {}
   },
   "6287812372599": {
     "name": "BnZ_Enquarorth",
@@ -434,9 +359,7 @@
     "reads": 3,
     "reactions": 3,
     "lastSeen": "2026-06-16T06:48:41.213Z",
-    "activeSW": {
-      "A5CD52196175F9B101E12C02781FAFFF": 1781592521213
-    }
+    "activeSW": {}
   },
   "6283866511317": {
     "name": "𓍯    09;02—      Beauty Meets     “   神秘   ”     LuluㅤFt. Avant Garde",
@@ -444,9 +367,7 @@
     "reads": 3,
     "reactions": 3,
     "lastSeen": "2026-06-17T14:32:03.337Z",
-    "activeSW": {
-      "A59EBF9505A543E3E8FF1BE224C10E14": 1781706723337
-    }
+    "activeSW": {}
   },
   "6283833697404": {
     "name": "MJ",
@@ -454,10 +375,7 @@
     "reads": 3,
     "reactions": 3,
     "lastSeen": "2026-06-18T08:45:51.277Z",
-    "activeSW": {
-      "AC91CD4F4DF26F1C2B0920506CF0B67D": 1781772141680,
-      "AC53E9F734BA79F07444CD54188B3F2C": 1781772351277
-    }
+    "activeSW": {}
   },
   "62895346275224": {
     "name": "Nanael",
@@ -465,9 +383,7 @@
     "reads": 3,
     "reactions": 3,
     "lastSeen": "2026-06-19T10:08:54.036Z",
-    "activeSW": {
-      "AC3DFE40B0A23796FC0A97AC7881F961": 1781863734036
-    }
+    "activeSW": {}
   },
   "62895328878799": {
     "name": "Erlic",
@@ -475,9 +391,7 @@
     "reads": 3,
     "reactions": 3,
     "lastSeen": "2026-06-19T11:38:02.037Z",
-    "activeSW": {
-      "ACBFE49DBF4BAC9BDE2CF03BD1E0655F": 1781869082037
-    }
+    "activeSW": {}
   },
   "6282398295590": {
     "name": "Isami Minato",
@@ -496,7 +410,6 @@
     "reactions": 3,
     "lastSeen": "2026-06-19T14:21:24.006Z",
     "activeSW": {
-      "ACC44153FF8FB44534ABD2DDC9D70B4F": 1781854517659,
       "AC9A5BA714CF1A2B4196EB817EB3DB5C": 1781878884006
     }
   },
@@ -506,9 +419,7 @@
     "reads": 2,
     "reactions": 2,
     "lastSeen": "2026-06-15T14:14:05.780Z",
-    "activeSW": {
-      "ACCC48405ABBCB52B26FBEBFEFA4545D": 1781532845780
-    }
+    "activeSW": {}
   },
   "6282297242178": {
     "name": "ura",
@@ -516,9 +427,7 @@
     "reads": 2,
     "reactions": 2,
     "lastSeen": "2026-06-17T11:57:03.616Z",
-    "activeSW": {
-      "AC74C949B9F300597AB4C6F1C189CFB2": 1781697423616
-    }
+    "activeSW": {}
   },
   "6282268990535": {
     "name": "Otaku Hakase",
@@ -526,10 +435,7 @@
     "reads": 2,
     "reactions": 2,
     "lastSeen": "2026-06-17T14:02:31.604Z",
-    "activeSW": {
-      "A542C4EA018C20EFD1C7C39416FEF8EC": 1781704940204,
-      "A510DA1F47248B8391A803E0CD07F8B1": 1781704951604
-    }
+    "activeSW": {}
   },
   "6283137961488": {
     "name": "M.FTH.IZ",
@@ -537,9 +443,7 @@
     "reads": 2,
     "reactions": 2,
     "lastSeen": "2026-06-18T07:03:44.443Z",
-    "activeSW": {
-      "AC764A6FE28DFCEF6991E07905B5DE48": 1781766224443
-    }
+    "activeSW": {}
   },
   "6281356196476": {
     "name": "Naomi",
@@ -547,10 +451,7 @@
     "reads": 2,
     "reactions": 2,
     "lastSeen": "2026-06-18T09:30:14.563Z",
-    "activeSW": {
-      "A553ECC49DEB224D562E6B95D80E14A1": 1781775005567,
-      "A50D0F9C7F27E1662C9B853A3786008A": 1781775014563
-    }
+    "activeSW": {}
   },
   "6282142532503": {
     "name": "darkness",
@@ -558,10 +459,7 @@
     "reads": 2,
     "reactions": 2,
     "lastSeen": "2026-06-18T10:34:22.215Z",
-    "activeSW": {
-      "AC5679B308466D0BFF9028F9D608C208": 1781697128359,
-      "ACE080108E1CB692B76700FD2A356CA5": 1781778862215
-    }
+    "activeSW": {}
   },
   "6281973145146": {
     "name": "𝘿𝙚𝙡𝙩𝙖 𝙣𝙩4×",
@@ -569,9 +467,7 @@
     "reads": 2,
     "reactions": 2,
     "lastSeen": "2026-06-19T10:19:12.756Z",
-    "activeSW": {
-      "AC1AC87A50DA861C79A8887B07DA88C3": 1781864352756
-    }
+    "activeSW": {}
   },
   "6289502599767": {
     "name": "~alyaa",
@@ -579,9 +475,7 @@
     "reads": 2,
     "reactions": 2,
     "lastSeen": "2026-06-19T11:03:55.309Z",
-    "activeSW": {
-      "AC12860B8FE6070E3DC695D6791DE6EE": 1781867035309
-    }
+    "activeSW": {}
   },
   "6285246277215": {
     "name": "정한",
@@ -610,7 +504,6 @@
     "reactions": 2,
     "lastSeen": "2026-06-20T05:35:22.160Z",
     "activeSW": {
-      "AC849E892A9257822B62455BD690E327": 1781861304318,
       "ACEADFED12B2AD1C8BD0D3F3CC5BBC4B": 1781933722160
     }
   },
@@ -650,9 +543,7 @@
     "reads": 1,
     "reactions": 1,
     "lastSeen": "2026-06-14T08:42:45.742Z",
-    "activeSW": {
-      "AC05A2CDF2523916CF83540E6177A0A3": 1781426565742
-    }
+    "activeSW": {}
   },
   "6283134844523": {
     "name": "Anda Siapa?",
@@ -660,9 +551,7 @@
     "reads": 1,
     "reactions": 1,
     "lastSeen": "2026-06-15T08:09:38.429Z",
-    "activeSW": {
-      "A553458F40FD8C91D69540C03E7732CB": 1781510978429
-    }
+    "activeSW": {}
   },
   "6281288237083": {
     "name": "Ryo V 1",
@@ -670,9 +559,7 @@
     "reads": 1,
     "reactions": 1,
     "lastSeen": "2026-06-15T14:18:00.210Z",
-    "activeSW": {
-      "AC56AC2B8DFB398560BB55AA27C3AFB8": 1781533080210
-    }
+    "activeSW": {}
   },
   "6281527116245": {
     "name": "Liu Jing (刘静)",
@@ -680,9 +567,7 @@
     "reads": 1,
     "reactions": 1,
     "lastSeen": "2026-06-15T14:30:30.888Z",
-    "activeSW": {
-      "AC263A3A70B0571ABEF2675525FE24E8": 1781533830888
-    }
+    "activeSW": {}
   },
   "6285835809302": {
     "name": "Cal'",
@@ -690,9 +575,7 @@
     "reads": 1,
     "reactions": 1,
     "lastSeen": "2026-06-15T14:44:20.852Z",
-    "activeSW": {
-      "ACF979C7DFF975512175D76CE72D0726": 1781534660852
-    }
+    "activeSW": {}
   },
   "6281368074650": {
     "name": "⚔️",
@@ -700,9 +583,7 @@
     "reads": 1,
     "reactions": 1,
     "lastSeen": "2026-06-16T07:09:10.428Z",
-    "activeSW": {
-      "3EB04948ED6EED534D8735": 1781593750428
-    }
+    "activeSW": {}
   },
   "6289690733492": {
     "name": "Neyo",
@@ -710,9 +591,7 @@
     "reads": 1,
     "reactions": 1,
     "lastSeen": "2026-06-16T10:51:15.649Z",
-    "activeSW": {
-      "AC5C489FE942B5AAA4EAEA392E979457": 1781607075649
-    }
+    "activeSW": {}
   },
   "6282228431883": {
     "name": "Ikyysigmax",
@@ -720,9 +599,7 @@
     "reads": 1,
     "reactions": 1,
     "lastSeen": "2026-06-16T10:59:33.068Z",
-    "activeSW": {
-      "AC05E90911A76B49650230C72CD656C2": 1781607573068
-    }
+    "activeSW": {}
   },
   "6285778517902": {
     "name": "Stephanie Floriska",
@@ -730,9 +607,7 @@
     "reads": 1,
     "reactions": 1,
     "lastSeen": "2026-06-16T13:22:51.492Z",
-    "activeSW": {
-      "AC20CA656E776C71AADAD07CA6BFBD01": 1781616171492
-    }
+    "activeSW": {}
   },
   "6285845967819": {
     "name": "Ikbal",
@@ -740,9 +615,7 @@
     "reads": 1,
     "reactions": 1,
     "lastSeen": "2026-06-17T04:27:45.540Z",
-    "activeSW": {
-      "A5A95C7B24CA297F1100C02CB512694D": 1781670465540
-    }
+    "activeSW": {}
   },
   "6287813185842": {
     "name": "keyy|𝐛𝐚𝐫𝐜𝐢𝐚",
@@ -750,9 +623,7 @@
     "reads": 1,
     "reactions": 1,
     "lastSeen": "2026-06-17T06:17:33.103Z",
-    "activeSW": {
-      "AC1EF918BE870F42E2C92B30FB857A07": 1781677053103
-    }
+    "activeSW": {}
   },
   "62882020696316": {
     "name": "lee",
@@ -760,9 +631,7 @@
     "reads": 1,
     "reactions": 1,
     "lastSeen": "2026-06-17T07:40:19.408Z",
-    "activeSW": {
-      "AC76AFB45F7FA4064A7AD78FDE23C7B4": 1781682019408
-    }
+    "activeSW": {}
   },
   "6285799241374": {
     "name": "𝕱𝖆𝖉𝖑𝖎𝕰𝖛𝖊𝖗𝖞𝖔𝖓𝖊",
@@ -770,9 +639,7 @@
     "reads": 1,
     "reactions": 1,
     "lastSeen": "2026-06-17T09:06:12.849Z",
-    "activeSW": {
-      "A5C4DCA2FC141C0E188D0236E1105B2E": 1781687172849
-    }
+    "activeSW": {}
   },
   "6287761753469": {
     "name": "wilva lili purnani",
@@ -780,9 +647,7 @@
     "reads": 1,
     "reactions": 1,
     "lastSeen": "2026-06-17T09:54:26.091Z",
-    "activeSW": {
-      "AC95F1C87E742C082A340809590B9266": 1781690066091
-    }
+    "activeSW": {}
   },
   "6281349600400": {
     "name": "Jaydes",
@@ -790,9 +655,7 @@
     "reads": 1,
     "reactions": 1,
     "lastSeen": "2026-06-17T11:55:18.617Z",
-    "activeSW": {
-      "AC103245B25D691500F7E3FB76413440": 1781697318617
-    }
+    "activeSW": {}
   },
   "6282172560701": {
     "name": "Nemuri•",
@@ -800,9 +663,7 @@
     "reads": 1,
     "reactions": 1,
     "lastSeen": "2026-06-18T04:05:30.946Z",
-    "activeSW": {
-      "AC7CB3FD5FC7AEF08151826DE292852F": 1781755530946
-    }
+    "activeSW": {}
   },
   "60172160495": {
     "name": "aldysensei🍃",
@@ -810,9 +671,7 @@
     "reads": 1,
     "reactions": 1,
     "lastSeen": "2026-06-18T04:24:08.890Z",
-    "activeSW": {
-      "AC964AEC1B3D356823DC3C859B8AB826": 1781756648890
-    }
+    "activeSW": {}
   },
   "6281263867008": {
     "name": "nopen.",
@@ -820,9 +679,7 @@
     "reads": 1,
     "reactions": 1,
     "lastSeen": "2026-06-18T06:18:58.458Z",
-    "activeSW": {
-      "A5FFAD7C2014BF5B107204146A240036": 1781763538458
-    }
+    "activeSW": {}
   },
   "6285714738465": {
     "name": "RenzZ~",
@@ -830,9 +687,7 @@
     "reads": 1,
     "reactions": 1,
     "lastSeen": "2026-06-18T07:32:17.027Z",
-    "activeSW": {
-      "ACF4EB18CA2E45A3CD0CB116C3124580": 1781767937027
-    }
+    "activeSW": {}
   },
   "628972241704": {
     "name": "Milim Nava",
@@ -840,9 +695,7 @@
     "reads": 1,
     "reactions": 1,
     "lastSeen": "2026-06-18T08:23:57.378Z",
-    "activeSW": {
-      "AC2585933F35E6E7B8E22DE056EFC532": 1781771037378
-    }
+    "activeSW": {}
   },
   "6287766516011": {
     "name": "Abauu'u",
@@ -850,9 +703,7 @@
     "reads": 1,
     "reactions": 1,
     "lastSeen": "2026-06-19T07:35:09.477Z",
-    "activeSW": {
-      "A5E2B26EFAA117E403A0628278DC5364": 1781854509477
-    }
+    "activeSW": {}
   },
   "6287748574387": {
     "name": "Pria",
@@ -860,9 +711,7 @@
     "reads": 1,
     "reactions": 1,
     "lastSeen": "2026-06-19T11:13:40.846Z",
-    "activeSW": {
-      "3EB06EEFF42D97ADD04D48": 1781867620846
-    }
+    "activeSW": {}
   },
   "62895323007900": {
     "name": "Rejaanimm the 1975",
@@ -871,7 +720,6 @@
     "reactions": 1,
     "lastSeen": "2026-06-19T13:27:07.824Z",
     "activeSW": {
-      "ACF6FCC40047AE6D0C0DDE833B804DC4": 1781861588198,
       "ACE2C4D90AD4922CD3AD6BC642C0792D": 1781875627824
     }
   },
@@ -893,6 +741,16 @@
     "lastSeen": "2026-06-20T07:35:40.171Z",
     "activeSW": {
       "AC3928A5994C5650E7A3F614675514A2": 1781940940171
+    }
+  },
+  "6285624062667": {
+    "name": "Dly",
+    "number": "6285624062667",
+    "reads": 1,
+    "reactions": 1,
+    "lastSeen": "2026-06-20T11:45:29.678Z",
+    "activeSW": {
+      "AC57689587BFCC912FA836A1D9BF7967": 1781955929678
     }
   },
   "_emojiStats": {
@@ -1237,6 +1095,8 @@
     "📭": 1,
     "🚝": 1,
     "📃": 1,
-    "👑": 1
+    "👑": 1,
+    "👨‍👦‍👦": 1,
+    "🍀": 1
   }
 }

@@ -22,6 +22,14 @@
  *  Kirim data memory, uptime, cmd count via IPC process.send()
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  PM2 Custom Metrics Reporter
+ *  Kirim metrik kustom (memory, CPU, uptime, command count)
+ *  ke PM2 monitoring via IPC process.send() — memungkinkan
+ *  pemantauan performa bot langsung dari dashboard PM2 monit.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 import os from 'os';

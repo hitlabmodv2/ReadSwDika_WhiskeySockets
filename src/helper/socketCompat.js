@@ -22,6 +22,14 @@
  *  Normalize versi API & patch method yang berubah antar versi
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Baileys Socket Compatibility Layer
+ *  Normalisasi API socket Baileys lintas versi — patch method
+ *  yang berubah atau dihapus agar kode handler tetap berjalan
+ *  tanpa perlu refactor saat Baileys update besar.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 import { createRequire } from 'module';

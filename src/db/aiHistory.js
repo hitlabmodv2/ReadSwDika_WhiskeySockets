@@ -22,6 +22,14 @@
  *  Read/write per nomor user, lock tulis aman
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  AI Conversation History Database
+ *  Simpan & baca riwayat percakapan Gemini AI per nomor user
+ *  ke disk secara aman dengan write-lock — memastikan konteks
+ *  chat AI tidak hilang antar sesi.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 import path from 'path';

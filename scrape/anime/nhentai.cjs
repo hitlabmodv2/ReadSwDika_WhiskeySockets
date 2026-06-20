@@ -22,6 +22,14 @@
  *  Cari, info, dan download doujin dari nhentai.net
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  NHentai Scraper (18+)
+ *  Cari, ambil info (judul, tag, halaman), dan download doujin
+ *  dari nhentai.net — fitur khusus grup dewasa, memerlukan
+ *  aktifasi oleh owner.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 const axios = require('axios');

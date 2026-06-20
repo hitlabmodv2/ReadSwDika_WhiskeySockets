@@ -22,6 +22,14 @@
  *  Watch file perubahan, reload ESM dengan cache-busting
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Hot Reload — Reload Modul Tanpa Restart Bot
+ *  Pantau perubahan file scraper/handler, reload otomatis
+ *  dengan cache-busting ESM — memungkinkan update fitur
+ *  tanpa perlu mematikan dan menyalakan bot kembali.
+ * ═══════════════════════════════════════════════════════════════
+ */
 import fs from 'fs';
 import path from 'path';
 import { pathToFileURL } from 'url';

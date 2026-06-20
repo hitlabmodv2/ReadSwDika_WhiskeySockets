@@ -22,6 +22,14 @@
  *  Perintah atur pesan selamat tinggal saat anggota keluar dari grup
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Set Goodbye Message Handler
+ *  Perintah .goodbye untuk atur/aktifkan pesan perpisahan
+ *  otomatis saat anggota keluar atau dikick dari grup —
+ *  mendukung variabel nama dan nomor anggota.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 async function handleSetgoodbye({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, sendConfirmWithButtons, saveCekautoTimestamp, fs, path }) {

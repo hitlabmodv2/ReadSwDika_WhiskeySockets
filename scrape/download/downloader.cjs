@@ -22,6 +22,14 @@
  *  Re-export semua platform downloader, single entry point
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Centralized Download Handler
+ *  Re-export semua downloader platform (TikTok, YouTube,
+ *  Instagram, Twitter, Facebook, dll) sebagai single entry
+ *  point — memudahkan impor di message.js.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 /**

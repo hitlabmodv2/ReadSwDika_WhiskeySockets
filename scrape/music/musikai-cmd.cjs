@@ -22,6 +22,14 @@
  *  Perintah .musikai untuk generate lagu/musik menggunakan AI
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  MusicAI v1 Command Handler (.musikai)
+ *  Generate lagu/musik orisinal menggunakan AI — cukup beri
+ *  deskripsi tema/lirik, bot akan buat dan kirim audio hasil
+ *  generate langsung ke chat WhatsApp.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 const path = require('path');

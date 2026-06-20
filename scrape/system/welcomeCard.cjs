@@ -22,6 +22,14 @@
  *  Generate gambar selamat datang/perpisahan anggota grup
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Welcome & Goodbye Card Generator
+ *  Generate gambar kartu selamat datang / perpisahan anggota
+ *  grup dengan foto profil, nama, dan latar belakang kustom —
+ *  dikirim otomatis saat member join atau keluar grup.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 const https = require('https');

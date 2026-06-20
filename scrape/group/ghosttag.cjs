@@ -22,6 +22,14 @@
  *  Perintah .ghosttag untuk mention semua anggota grup tanpa notifikasi
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Ghost Tag Command Handler
+ *  Perintah .ghosttag untuk mention (@tag) semua anggota grup
+ *  sekaligus tanpa mengirim notifikasi pop-up ke mereka —
+ *  hanya admin grup yang bisa menggunakan.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 async function handleGhosttag({ hisoka, m, query, tolak, logCommand, generateWAMessageFromContent, Button }) {

@@ -22,6 +22,14 @@
  *  Simpan & load creds + keys WA, Mutex-safe
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Baileys Auth State Manager
+ *  Simpan & load kredensial + keys sesi WhatsApp (Baileys) ke
+ *  disk secara Mutex-safe — mencegah race condition saat
+ *  multi-socket menulis sesi secara bersamaan.
+ * ═══════════════════════════════════════════════════════════════
+ */
 import { Mutex } from 'async-mutex'
 import { mkdir, readFile, readdir, stat, unlink, writeFile } from 'fs/promises'
 import { join, dirname } from 'path'

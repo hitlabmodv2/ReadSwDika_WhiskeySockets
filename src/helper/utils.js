@@ -22,6 +22,14 @@
  *  loadConfig, format waktu, download media, helper Baileys
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  General Bot Utilities
+ *  Kumpulan fungsi utilitas inti: loadConfig, format waktu,
+ *  download media dari URL, helper Baileys (getBuffer, mime,
+ *  dll) — tulang punggung hampir semua fitur bot.
+ * ═══════════════════════════════════════════════════════════════
+ */
 import fs from 'fs';
 import path from 'path';
 import { createRequire } from 'module';

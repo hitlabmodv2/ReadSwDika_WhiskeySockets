@@ -22,6 +22,14 @@
  *  isNumber, toCapitalize, format angka, parsing string
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Text Utility & Formatter
+ *  Kumpulan fungsi teks: cek angka, capitalize, format angka
+ *  ribuan, parsing string argumen — dipakai di seluruh handler
+ *  untuk memproses dan memformat isi pesan WhatsApp.
+ * ═══════════════════════════════════════════════════════════════
+ */
 export const isNumber = value => {
         value = Number(value);
         return !isNaN(value) && typeof value === 'number';

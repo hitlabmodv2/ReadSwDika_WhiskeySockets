@@ -22,6 +22,14 @@
  *  Perintah .hidetag untuk mention tersembunyi ke seluruh anggota grup
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Hide Tag Command Handler
+ *  Perintah .hidetag untuk mention tersembunyi seluruh anggota
+ *  grup — tag masuk ke pesan tapi tidak terlihat teksnya,
+ *  semua member mendapat notifikasi secara diam-diam.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 async function handleHidetag({ hisoka, m, query, tolak, logCommand, getQuotedMediaBuffer }) {

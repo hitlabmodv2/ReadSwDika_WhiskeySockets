@@ -22,6 +22,14 @@
  *  Scrape detail HP dari GSMArena berdasarkan nama/model
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Cek Spesifikasi HP (.cekhp)
+ *  Cari & tampilkan spesifikasi lengkap smartphone dari
+ *  GSMArena — layar, kamera, prosesor, RAM, baterai, harga —
+ *  cukup ketik nama atau model HP.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 const axios = require('axios');

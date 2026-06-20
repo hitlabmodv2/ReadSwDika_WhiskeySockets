@@ -22,6 +22,13 @@
  *  Ambil ilustrasi konten dewasa dari Pixiv dengan filter R18
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Pixiv R18 Scraper (18+)
+ *  Ambil ilustrasi konten dewasa dari Pixiv dengan filter R18
+ *  aktif — fitur khusus grup dewasa, memerlukan aktifasi owner.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 const axios = require('axios');

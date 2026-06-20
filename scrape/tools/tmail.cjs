@@ -22,6 +22,14 @@
  *  Buat & cek email sementara via Guerrilla Mail API
  * ───────────────────────────────
  */
+/**
+ * ═══════════════════════════════════════════════════════════════
+ *  Temporary Email (.tmail) via Guerrilla Mail
+ *  Buat & pantau inbox email sementara menggunakan Guerrilla
+ *  Mail API — AI (Gemini) secara otomatis memilih & tampilkan
+ *  link verifikasi paling penting dari email masuk.
+ * ═══════════════════════════════════════════════════════════════
+ */
 'use strict';
 
 const axios = require('axios');
