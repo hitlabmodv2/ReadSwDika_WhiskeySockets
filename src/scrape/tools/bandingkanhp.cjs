@@ -698,7 +698,7 @@ const CATEGORY_EMOJI_TXT = {
   'Our Tests': 'Our Tests',
 };
 
-const CATEGORY_ORDER = [
+const CATEGORY_ORDER_PDF = [
   'Platform', 'Memory', 'Display', 'Main Camera', 'Selfie camera',
   'Battery', 'Body', 'Network', 'Comms', 'Sound', 'Features', 'Launch', 'Misc', 'Our Tests',
 ];
@@ -860,7 +860,7 @@ async function buildComparisonPDF(result) {
   y += 14;
 
   const allCats = new Set([
-    ...CATEGORY_ORDER,
+    ...CATEGORY_ORDER_PDF,
     ...Object.keys(specsA || {}),
     ...Object.keys(specsB || {}),
   ]);
