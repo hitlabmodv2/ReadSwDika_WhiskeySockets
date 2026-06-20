@@ -137,6 +137,7 @@ const jadibotTrackers = new Map()
 const jadibotCleanerTimers = new Map()
 // Per-jadibot autoonline interval — isolated per jadibot, tidak mempengaruhi bot utama/jadibot lain
 const autoOnlineIntervalMap = new Map()
+const swPruneIntervalMap = new Map()
 
 /* ─── PER-JADIBOT AUTOONLINE ─── */
 export function startJadibotAutoOnline(sock, jadibotNum) {
@@ -161,6 +162,29 @@ export function stopJadibotAutoOnline(jadibotNum) {
   if (autoOnlineIntervalMap.has(jadibotNum)) {
     clearInterval(autoOnlineIntervalMap.get(jadibotNum))
     autoOnlineIntervalMap.delete(jadibotNum)
+  }
+}
+
+/* ─── PER-JADIBOT SW PRUNE (auto tiap 6 jam) ─── */
+const _SW_PRUNE_INTERVAL_MS = 6 * 60 * 60 * 1000 // 6 jam
+
+function startJadibotSwPrune(jadibotNum) {
+  // Bersihkan interval lama dulu (reconnect)
+  if (swPruneIntervalMap.has(jadibotNum)) {
+    clearInterval(swPruneIntervalMap.get(jadibotNum))
+    swPruneIntervalMap.delete(jadibotNum)
+  }
+  const statsPath = path.join(process.cwd(), 'data_jadibot', jadibotNum, 'ceksw', 'swstats.json')
+  const iv = setInterval(() => {
+    try { pruneSwStatsAt(statsPath) } catch {}
+  }, _SW_PRUNE_INTERVAL_MS)
+  swPruneIntervalMap.set(jadibotNum, iv)
+}
+
+function stopJadibotSwPrune(jadibotNum) {
+  if (swPruneIntervalMap.has(jadibotNum)) {
+    clearInterval(swPruneIntervalMap.get(jadibotNum))
+    swPruneIntervalMap.delete(jadibotNum)
   }
 }
 
@@ -530,6 +554,7 @@ async function expireJadibot(number, sendReply = null) {
   // Langkah 4: bersihkan semua Map/Set
   jadibotMap.delete(number)
   stopJadibotAutoOnline(number)
+  stopJadibotSwPrune(number)
   pairingRequested.delete(number)
   reconnectingJadibot.delete(number)
   activeOrStartingJadibot.delete(number)
@@ -1596,6 +1621,9 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
       // Start per-jadibot autoonline (isolated dari bot utama & jadibot lain)
       try { startJadibotAutoOnline(sock, number) } catch {}
 
+      // Start auto-prune SwStats tiap 6 jam (isolated per jadibot)
+      try { startJadibotSwPrune(number) } catch {}
+
       // Auto-init emoji.json per jadibot — copy dari bot utama jika belum ada
       try { getJadibotEmojis(number) } catch {}
 
@@ -1714,6 +1742,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
         stoppingJadibot.delete(number)
         jadibotMap.delete(number)
         stopJadibotAutoOnline(number)
+        stopJadibotSwPrune(number)
         activeOrStartingJadibot.delete(number)
         const _C = '\x1b[36m', _R = '\x1b[0m', _B = '\x1b[1m';
         console.log(`${_C}╠══════════════════════════════════╣${_R}`);
@@ -1727,6 +1756,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
         // Hapus dari map DULU baru ambil sisa list (agar nomor ini tidak muncul di list)
         jadibotMap.delete(number)
         stopJadibotAutoOnline(number)
+        stopJadibotSwPrune(number)
         activeOrStartingJadibot.delete(number)
 
         const _C = '\x1b[36m', _R2 = '\x1b[0m', _B2 = '\x1b[1m';
@@ -1785,6 +1815,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
       if (!isSessionValid(sessionDir)) {
         jadibotMap.delete(number)
         stopJadibotAutoOnline(number)
+        stopJadibotSwPrune(number)
         activeOrStartingJadibot.delete(number)
         const _C = '\x1b[36m', _R = '\x1b[0m', _B = '\x1b[1m';
         console.log(`${_C}╠══════════════════════════════════╣${_R}`);
@@ -2116,6 +2147,9 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
       // Start per-jadibot autoonline (isolated dari bot utama & jadibot lain)
       try { startJadibotAutoOnline(sock, number) } catch {}
 
+      // Start auto-prune SwStats tiap 6 jam (isolated per jadibot)
+      try { startJadibotSwPrune(number) } catch {}
+
       // Auto-init emoji.json per jadibot — copy dari bot utama jika belum ada
       try { getJadibotEmojis(number) } catch {}
 
@@ -2192,6 +2226,7 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
         stoppingJadibot.delete(number)
         jadibotMap.delete(number)
         stopJadibotAutoOnline(number)
+        stopJadibotSwPrune(number)
         activeOrStartingJadibot.delete(number)
         const _C = '\x1b[36m', _R = '\x1b[0m', _B = '\x1b[1m';
         console.log(`${_C}╠══════════════════════════════════╣${_R}`);
@@ -2203,6 +2238,7 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
       if (reason === DisconnectReason.loggedOut) {
         jadibotMap.delete(number)
         stopJadibotAutoOnline(number)
+        stopJadibotSwPrune(number)
         activeOrStartingJadibot.delete(number)
         const _C = '\x1b[36m', _R2 = '\x1b[0m', _B2 = '\x1b[1m';
         console.log(`${_C}╠══════════════════════════════════╣${_R2}`);
@@ -2286,6 +2322,7 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
 
       jadibotMap.delete(number)
       stopJadibotAutoOnline(number)
+      stopJadibotSwPrune(number)
       activeOrStartingJadibot.delete(number)
       const _C = '\x1b[36m', _R = '\x1b[0m', _B = '\x1b[1m';
       console.log(`${_C}╠══════════════════════════════════╣${_R}`);
@@ -2499,6 +2536,7 @@ async function stopJadibot(number, sendReply) {
     jadibotCleanerTimers.delete(number)
   }
   stopJadibotAutoOnline(number)
+  stopJadibotSwPrune(number)
   if (pairingTimeout.has(number)) {
     clearTimeout(pairingTimeout.get(number))
     pairingTimeout.delete(number)
