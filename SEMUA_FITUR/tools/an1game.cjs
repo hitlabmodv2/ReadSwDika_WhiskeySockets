@@ -531,7 +531,6 @@ function parseSearchResults(md) {
 async function getGamesList(page = 1) {
     const html = await fetchGamesListHTML(page);
     const results = parseGamesListHTML(html);
-    console.log(`[AniGame] getGamesList: ${results.length} game ditemukan (page ${page})`);
     return results;
 }
 

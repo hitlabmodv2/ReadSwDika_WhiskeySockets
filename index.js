@@ -1195,7 +1195,6 @@ async function main() {
                                                 const daftarGrup = _ag.getEnabledGroups();
                                                 if (!daftarGrup.length) return;
 
-                                                console.log(`[AniGame] 🔍 Cek game baru... (${daftarGrup.length} grup aktif)`);
                                                 const gameBaru = await _ag.cariGameBaru();
                                                 if (!gameBaru.length) {
                                                         return;
