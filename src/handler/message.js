@@ -42,7 +42,8 @@ import { getUptimeFormatted, getBotStats } from '../db/botStats.js';
 import { logError, formatErrorReport, clearErrors, generateErrorFileTxt, getInfoErrorTxtPath, getErrorStats } from '../db/errorLog.js';
 import { startJadibot, startJadibotQR, stopJadibot, jadibotMap, jadibotClearSesiMap, jadibotSesiReportMap, jadibotConnectedAt, pendingJadibotChoices, formatPairingCode, maskNumber, parseJadibotDuration, getJadibotExpiry, formatRemainingTime, getJadibotExpirySummary, cleanupExpiredJadibots, removeJadibotExpiry, setPermanentJadibot, ensureJadibotExpiry, extendJadibotExpiry, scheduleJadibotExpiry, startJadibotAutoOnline } from '../helper/jadibot.js';
 import { hasViewOnceCache, getViewOnceCache } from '../helper/voCache.js';
-import { isAntiTagSWEnabled, toggleAntiTagSW, resetWarnings, getWarnings, getAllAntiTagSWGroups, getAntiTagSWLog, clearAntiTagSWLog, resolveLidFromContacts } from '../scrape/antitagsw/antitagsw.js';
+import { isAntiTagSWEnabled, toggleAntiTagSW, resetWarnings, getWarnings, getAllAntiTagSWGroups, getAntiTagSWLog, clearAntiTagSWLog, resolveLidFromContacts, handleAntitagsw as _handleAntitagswFn, handleAntitagswCallbacks as _handleAntitagswCallbacksFn } from '../scrape/antitagsw/antitagsw.js';
+import { handleAd as _handleAdFn } from '../scrape/antidel/antidelete.js';
 // yg bawah pindah ke sini
 import { injectMessage } from '../helper/inject.js';
 import listenEvent from '../scrape/event/event.js';
@@ -117,8 +118,7 @@ const {
     sendConfirmWithButtons, tolak,
 });
 
-// ── AntiTagSW callbacks (button/session reply) ──
-const { handleAntitagswCallbacks: _handleAntitagswCallbacksFn } = _require(path.resolve('./src/scrape/antitagsw/antitagsw.cjs'));
+// ── AntiTagSW callbacks (button/session reply) — imported from antitagsw.js ──
 
 const pendingPlayChoices = new Map();
 const pendingMusikaiCache  = new Map(); // key → { results, params, ts }
@@ -1084,8 +1084,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                         case 'antidel':
                         case 'ad': {
-                                const { handleAd } = _require(path.resolve('./src/scrape/antidel/antidel.cjs'));
-                                await handleAd({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, getJadibotNumber, getJadibotAntidel, setJadibotUserSetting });
+                                await _handleAdFn({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, getJadibotNumber, getJadibotAntidel, setJadibotUserSetting });
                                 break;
                         }
 
@@ -1428,8 +1427,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 break;
                         }
                         case 'antitagsw': {
-                                const { handleAntitagsw } = _require(path.resolve('./src/scrape/antitagsw/antitagsw.cjs'));
-                                await handleAntitagsw({ hisoka, m, query, tolak, logCommand, isMainBot, loadConfig, saveConfig, getJadibotNumber, jadibotMap, sendConfirmWithButtons });
+                                await _handleAntitagswFn({ hisoka, m, query, tolak, logCommand, isMainBot, loadConfig, saveConfig, getJadibotNumber, jadibotMap, sendConfirmWithButtons });
                                 break;
                         }
 
