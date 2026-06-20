@@ -1429,7 +1429,7 @@ classify_commit() {
 
   local scope="" scope_count=0
   declare -A scope_map=(
-    [src/scrape/]="scrape"
+    [scrape/]="scrape"
     [src/handler/]="handler"
     [src/helper/]="helper"
     [src/db/]="db"

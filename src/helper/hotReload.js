@@ -37,9 +37,9 @@ const _reloadCallbacks = {};
 const WATCHED_FILES = [
     // ── Handler ──────────────────────────────────
     { key: 'message',      rel: 'src/handler/message.js' },
-    { key: 'antidelete',   rel: 'src/scrape/antidel/antidelete.js' },
-    { key: 'antitagsw',    rel: 'src/scrape/antitagsw/antitagsw.js' },
-    { key: 'event',        rel: 'src/scrape/event/event.js' },
+    { key: 'antidelete',   rel: 'scrape/antidel/antidelete.js' },
+    { key: 'antitagsw',    rel: 'scrape/antitagsw/antitagsw.js' },
+    { key: 'event',        rel: 'scrape/event/event.js' },
 
     // ── Helper (aman di-reload) ───────────────────
     { key: 'utils',        rel: 'src/helper/utils.js' },
@@ -61,8 +61,8 @@ const WATCHED_FILES = [
     { key: 'jsondb',       rel: 'src/db/json.js' },
 
     // ── Menu builders ────────────────────────────
-    { key: 'menuUtama',    rel: 'src/scrape/menu/menu_utama.js' },
-    { key: 'menuJadibot',  rel: 'src/scrape/menu/menu_jadibot.js' },
+    { key: 'menuUtama',    rel: 'scrape/menu/menu_utama.js' },
+    { key: 'menuJadibot',  rel: 'scrape/menu/menu_jadibot.js' },
 
     // ── SwTrack helper ────────────────────────────
     { key: 'swtrack',      rel: 'src/helper/swtrack.js' },

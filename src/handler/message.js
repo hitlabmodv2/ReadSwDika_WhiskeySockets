@@ -42,11 +42,11 @@ import { getUptimeFormatted, getBotStats } from '../db/botStats.js';
 import { logError, formatErrorReport, clearErrors, generateErrorFileTxt, getInfoErrorTxtPath, getErrorStats } from '../db/errorLog.js';
 import { startJadibot, startJadibotQR, stopJadibot, jadibotMap, jadibotClearSesiMap, jadibotSesiReportMap, jadibotConnectedAt, pendingJadibotChoices, formatPairingCode, maskNumber, parseJadibotDuration, getJadibotExpiry, formatRemainingTime, getJadibotExpirySummary, cleanupExpiredJadibots, removeJadibotExpiry, setPermanentJadibot, ensureJadibotExpiry, extendJadibotExpiry, scheduleJadibotExpiry, startJadibotAutoOnline } from '../helper/jadibot.js';
 import { hasViewOnceCache, getViewOnceCache } from '../helper/voCache.js';
-import { isAntiTagSWEnabled, toggleAntiTagSW, resetWarnings, getWarnings, getAllAntiTagSWGroups, getAntiTagSWLog, clearAntiTagSWLog, resolveLidFromContacts, handleAntitagsw as _handleAntitagswFn, handleAntitagswCallbacks as _handleAntitagswCallbacksFn } from '../scrape/antitagsw/antitagsw.js';
-import { handleAd as _handleAdFn } from '../scrape/antidel/antidelete.js';
+import { isAntiTagSWEnabled, toggleAntiTagSW, resetWarnings, getWarnings, getAllAntiTagSWGroups, getAntiTagSWLog, clearAntiTagSWLog, resolveLidFromContacts, handleAntitagsw as _handleAntitagswFn, handleAntitagswCallbacks as _handleAntitagswCallbacksFn } from '../../scrape/antitagsw/antitagsw.js';
+import { handleAd as _handleAdFn } from '../../scrape/antidel/antidelete.js';
 // yg bawah pindah ke sini
 import { injectMessage } from '../helper/inject.js';
-import listenEvent from '../scrape/event/event.js';
+import listenEvent from '../../scrape/event/event.js';
 import gemini from '../helper/gemini.js';
 import { updateUserName, getUserName } from '../db/userDb.js';
 import { loadUserMemory, detectAndUpdateMemory, clearUserMemory, clearAllUserMemory, memoryToReadable } from '../helper/userMemory.js';
@@ -62,22 +62,22 @@ import { hashSticker, lookupSticker, saveSticker, incrementStickerSeen, buildSti
 import { getJadibotAntidel, getJadibotReadsw, getJadibotAnticall, getJadibotAnticallvid, getJadibotAutoOnline, getJadibotAutoTyping, getJadibotAutoRecording, setJadibotUserSetting, getJadibotNumber, addJadibotEmojis, deleteJadibotEmojis, listJadibotEmojis, getJadibotEmojiMode, setDefaultEmojiMode, setCustomEmojiMode, resetToDefaultEmojis, clearJadibotEmojis } from '../helper/jadibotSettings.js';
 import { pruneSwStatsAt, countActiveSW } from '../helper/swtrack.js';
 import { getHandler } from '../helper/hotReload.js';
-const { makeWmSticker, handleWmCommand } = _require('../scrape/media/wm.cjs');
-const { makeCekautoHelpers: _makeCekautoHelpers } = _require(path.resolve('./src/scrape/setting/cekauto-cmd.cjs'));
-const { resolveThumbnailMedia, startTyping, makeInteractiveMsg: _makeInteractiveMsg } = _require(path.resolve('./src/scrape/helper/interactive-msg.cjs'));
-const { AI_MEDIA_CACHE_TTL, AI_MEDIA_TYPES, ensureAIMediaCache, rememberAIMedia, getQuotedStanzaId, getCachedQuotedMedia, unwrapMessagePayload, getMediaTypeFromMessage, downloadMediaBuffer, getQuotedMediaBuffer, getMediaInfo } = _require(path.resolve('./src/scrape/helper/media-helper.cjs'));
-const { makeLogCmd: _makeLogCmd } = _require(path.resolve('./src/scrape/helper/log-cmd.cjs'));
-const { normalizeJadibotNumber } = _require(path.resolve('./src/scrape/jadibot/jadibot-cmd.cjs'));
-const { formatAlqLinkMsg, pickBestAlqLink, getAllAlqLinksByPriority } = _require(path.resolve('./src/scrape/anime/alqolam-helpers.cjs'));
-const { detectImageSearchQuery, extractImageCount, cleanImageTitle, makeWilyHelpers: _makeWilyHelpers } = _require(path.resolve('./src/scrape/ai/wily-helpers.cjs'));
-const { handleAutoSimi } = _require(path.resolve('./src/scrape/ai/autosimi-cmd.cjs'));
-const { handleMusicAICallbacks } = _require(path.resolve('./src/scrape/music/musikai-cmd.cjs'));
-const { handleMusicAI2Callbacks } = _require(path.resolve('./src/scrape/music/musikai2-cmd.cjs'));
-const { handleAlqUpdateChoice, handleAlqDlChoice } = _require(path.resolve('./src/scrape/anime/alqanime-cmd.cjs'));
-const { handleCosplayChoice, sendCosplayImages: _sendCosplayImages } = _require(path.resolve('./src/scrape/anime/cosplay-cmd.cjs'));
-const { handleKomiktapChoice } = _require(path.resolve('./src/scrape/anime/komiktap-cmd.cjs'));
-const { handleSetbrowserListReply, handleSetbrowserConfirmReply } = _require(path.resolve('./src/scrape/setting/setbrowser-cmd.cjs'));
-const { handlePlayChoice } = _require(path.resolve('./src/scrape/music/play-cmd.cjs'));
+const { makeWmSticker, handleWmCommand } = _require('../../scrape/media/wm.cjs');
+const { makeCekautoHelpers: _makeCekautoHelpers } = _require(path.resolve('./scrape/setting/cekauto-cmd.cjs'));
+const { resolveThumbnailMedia, startTyping, makeInteractiveMsg: _makeInteractiveMsg } = _require(path.resolve('./scrape/helper/interactive-msg.cjs'));
+const { AI_MEDIA_CACHE_TTL, AI_MEDIA_TYPES, ensureAIMediaCache, rememberAIMedia, getQuotedStanzaId, getCachedQuotedMedia, unwrapMessagePayload, getMediaTypeFromMessage, downloadMediaBuffer, getQuotedMediaBuffer, getMediaInfo } = _require(path.resolve('./scrape/helper/media-helper.cjs'));
+const { makeLogCmd: _makeLogCmd } = _require(path.resolve('./scrape/helper/log-cmd.cjs'));
+const { normalizeJadibotNumber } = _require(path.resolve('./scrape/jadibot/jadibot-cmd.cjs'));
+const { formatAlqLinkMsg, pickBestAlqLink, getAllAlqLinksByPriority } = _require(path.resolve('./scrape/anime/alqolam-helpers.cjs'));
+const { detectImageSearchQuery, extractImageCount, cleanImageTitle, makeWilyHelpers: _makeWilyHelpers } = _require(path.resolve('./scrape/ai/wily-helpers.cjs'));
+const { handleAutoSimi } = _require(path.resolve('./scrape/ai/autosimi-cmd.cjs'));
+const { handleMusicAICallbacks } = _require(path.resolve('./scrape/music/musikai-cmd.cjs'));
+const { handleMusicAI2Callbacks } = _require(path.resolve('./scrape/music/musikai2-cmd.cjs'));
+const { handleAlqUpdateChoice, handleAlqDlChoice } = _require(path.resolve('./scrape/anime/alqanime-cmd.cjs'));
+const { handleCosplayChoice, sendCosplayImages: _sendCosplayImages } = _require(path.resolve('./scrape/anime/cosplay-cmd.cjs'));
+const { handleKomiktapChoice } = _require(path.resolve('./scrape/anime/komiktap-cmd.cjs'));
+const { handleSetbrowserListReply, handleSetbrowserConfirmReply } = _require(path.resolve('./scrape/setting/setbrowser-cmd.cjs'));
+const { handlePlayChoice } = _require(path.resolve('./scrape/music/play-cmd.cjs'));
 
 const WILY_VERBOSE_LOGS = process.env.WILY_VERBOSE_LOGS === 'true' || process.env.BOT_DEBUG_LOG === 'true';
 const wilyLog = (...args) => {
@@ -634,7 +634,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'hidetag':
                         case 'ht':
                         case 'all': {
-                                const { handleHidetag } = _require(path.resolve('./src/scrape/group/hidetag.cjs'));
+                                const { handleHidetag } = _require(path.resolve('./scrape/group/hidetag.cjs'));
                                 await handleHidetag({ hisoka, m, query, tolak, logCommand, getQuotedMediaBuffer });
                                 break;
                         }
@@ -642,21 +642,21 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'sematkan':
                         case 'pin':
                         case 'pinpesan': {
-                                const { handleSematkan } = _require(path.resolve('./src/scrape/group/sematkan.cjs'));
+                                const { handleSematkan } = _require(path.resolve('./scrape/group/sematkan.cjs'));
                                 const _smOk = await handleSematkan(hisoka, m, query, tolak, kvGet);
                                 if (_smOk) logCommand(m, hisoka, 'sematkan');
                                 break;
                         }
 
                         case 'pushkontakgc': {
-                                const { handlePushkontakgc } = _require(path.resolve('./src/scrape/group/pushkontakgc.cjs'));
+                                const { handlePushkontakgc } = _require(path.resolve('./scrape/group/pushkontakgc.cjs'));
                                 await handlePushkontakgc({ hisoka, m, query, tolak, logCommand, getQuotedMediaBuffer });
                                 break;
                         }
 
                         case 'clearsesi':
                         case 'cs': {
-                                const { handleClearsesi } = _require(path.resolve('./src/scrape/jadibot/clearsesi.cjs'));
+                                const { handleClearsesi } = _require(path.resolve('./scrape/jadibot/clearsesi.cjs'));
                                 await handleClearsesi({ hisoka, m, query, tolak, logCommand, getJadibotNumber, jadibotClearSesiMap });
                                 break;
                         }
@@ -664,7 +664,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'cekjidgc':
                         case 'jidgc':
                         case 'infogc': {
-                                const { handleCekjidgc } = _require(path.resolve('./src/scrape/info/cekjidgc.cjs'));
+                                const { handleCekjidgc } = _require(path.resolve('./scrape/info/cekjidgc.cjs'));
                                 await handleCekjidgc({ hisoka, m, tolak, logCommand, Button });
                                 break;
                         }
@@ -673,7 +673,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'jidgcall':
                         case 'listjidgc':
                         case 'alljidgc': {
-                                const { handleAlljidgc } = _require(path.resolve('./src/scrape/info/cekjidgcall.cjs'));
+                                const { handleAlljidgc } = _require(path.resolve('./scrape/info/cekjidgcall.cjs'));
                                 await handleAlljidgc({ hisoka, m, tolak, logCommand, Button });
                                 break;
                         }
@@ -682,7 +682,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'memory':
                         case 'mymemory':
                         case 'myprofile': {
-                                const { handleMemori } = _require(path.resolve('./src/scrape/info/memory-cmd.cjs'));
+                                const { handleMemori } = _require(path.resolve('./scrape/info/memory-cmd.cjs'));
                                 await handleMemori({ hisoka, m, logCommand, loadUserMemory, memoryToReadable });
                                 break;
                         }
@@ -691,47 +691,47 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'resetmemori':
                         case 'resetmemory':
                         case 'forgetme': {
-                                const { handleLupakanaku } = _require(path.resolve('./src/scrape/info/memory-cmd.cjs'));
+                                const { handleLupakanaku } = _require(path.resolve('./scrape/info/memory-cmd.cjs'));
                                 await handleLupakanaku({ hisoka, m, logCommand, clearUserMemory });
                                 break;
                         }
 
                         case 'q':
                         case 'quoted': {
-                                const { handleQuoted } = _require(path.resolve('./src/scrape/info/quoted-cmd.cjs'));
+                                const { handleQuoted } = _require(path.resolve('./scrape/info/quoted-cmd.cjs'));
                                 await handleQuoted({ hisoka, m, tolak, logCommand, injectMessage });
                                 break;
                         }
 
                                 case 'ping':
                                 case 'p': {
-                                        const { handlePing } = _require(path.resolve('./src/scrape/info/ping.cjs'));
+                                        const { handlePing } = _require(path.resolve('./scrape/info/ping.cjs'));
                                         await handlePing({ hisoka, m, tolak, logCommand, getBotStats, os });
                                         break;
                                 }
 
                         case 'cekspeed':
                         case 'testnet': {
-                                const { handleTestnet } = _require(path.resolve('./src/scrape/info/speedtest.cjs'));
+                                const { handleTestnet } = _require(path.resolve('./scrape/info/speedtest.cjs'));
                                 await handleTestnet({ hisoka, m, tolak, logCommand });
                                 break;
                         }
                         case 'disksize':
                         case 'filesize': {
-                                const { handleFilesize } = _require(path.resolve('./src/scrape/info/ceksize.cjs'));
+                                const { handleFilesize } = _require(path.resolve('./scrape/info/ceksize.cjs'));
                                 await handleFilesize({ hisoka, m, tolak, logCommand, _require, path });
                                 break;
                         }
                         case '>':
                         case 'eval': {
-                                const { handleEval } = _require(path.resolve('./src/scrape/info/eval-cmd.cjs'));
+                                const { handleEval } = _require(path.resolve('./scrape/info/eval-cmd.cjs'));
                                 await handleEval({ hisoka, m, query, text, tolak, logCommand, util });
                                 break;
                         }
 
                         case '$':
                         case 'bash': {
-                                const { handleBash } = _require(path.resolve('./src/scrape/info/eval-cmd.cjs'));
+                                const { handleBash } = _require(path.resolve('./scrape/info/eval-cmd.cjs'));
                                 await handleBash({ hisoka, m, query, tolak, logCommand, exec, util });
                                 break;
                         }
@@ -739,7 +739,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'mati':
                         case 'shutdown':
                         case 'matiin': {
-                                const { handleMati } = _require(path.resolve('./src/scrape/info/mati-cmd.cjs'));
+                                const { handleMati } = _require(path.resolve('./scrape/info/mati-cmd.cjs'));
                                 await handleMati({ hisoka, m, tolak, logCommand, _require, path });
                                 break;
                         }
@@ -747,37 +747,37 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'restart':
                         case 'rebot':
                         case 'rb': {
-                                const { handleRb } = _require(path.resolve('./src/scrape/system/shutdown.cjs'));
+                                const { handleRb } = _require(path.resolve('./scrape/system/shutdown.cjs'));
                                 await handleRb({ hisoka, m, tolak, logCommand, _require });
                                 break;
                         }
                         case 'credsjson': {
-                                const { handleCredsJson } = _require(path.resolve('./src/scrape/jadibot/credsjson.cjs'));
+                                const { handleCredsJson } = _require(path.resolve('./scrape/jadibot/credsjson.cjs'));
                                 await handleCredsJson({ hisoka, m, query, tolak, logCommand, isMainBot, path });
                                 break;
                         }
 
                         case 'sessiondb':
                         case 'sessionstat': {
-                                const { handleSessionstat } = _require(path.resolve('./src/scrape/jadibot/ceksesi.cjs'));
+                                const { handleSessionstat } = _require(path.resolve('./scrape/jadibot/ceksesi.cjs'));
                                 await handleSessionstat({ hisoka, m, fs, path, logCommand });
                                 break;
                         }
                         case 'group':
                         case 'listgroup': {
-                                const { handleListgroup } = _require(path.resolve('./src/scrape/info/info.cjs'));
+                                const { handleListgroup } = _require(path.resolve('./scrape/info/info.cjs'));
                                 await handleListgroup({ hisoka, m, tolak, logCommand });
                                 break;
                         }
                         case 'contact':
                         case 'listcontact': {
-                                const { handleListcontact } = _require(path.resolve('./src/scrape/info/info.cjs'));
+                                const { handleListcontact } = _require(path.resolve('./scrape/info/info.cjs'));
                                 await handleListcontact({ hisoka, m, tolak, logCommand });
                                 break;
                         }
                         case 'cuaca':
                         case 'weather': {
-                                const { handleWeather } = _require(path.resolve('./src/scrape/tools/cuaca.cjs'));
+                                const { handleWeather } = _require(path.resolve('./scrape/tools/cuaca.cjs'));
                                 await handleWeather({ hisoka, m, query, tolak, logCommand, logError, _require, path });
                                 break;
                         }
@@ -787,90 +787,90 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'tmread':
                         case 'tmwait':
                         case 'tmdel': {
-                                const { handleTempmail } = _require(path.resolve('./src/scrape/tools/tempmail.cjs'));
+                                const { handleTempmail } = _require(path.resolve('./scrape/tools/tempmail.cjs'));
                                 await handleTempmail({ hisoka, m, query, tolak, logCommand, logError, path, _require });
                                 break;
                         }
 
                         case 'pixiv': {
-                                const { handlePixiv } = _require(path.resolve('./src/scrape/anime/pixiv.cjs'));
+                                const { handlePixiv } = _require(path.resolve('./scrape/anime/pixiv.cjs'));
                                 await handlePixiv({ hisoka, m, query, tolak, logCommand, logError, path, _require });
                                 break;
                         }
                         case 'nhentai':
                         case 'nh': {
-                                const { handleNh } = _require(path.resolve('./src/scrape/anime/nhentai.cjs'));
+                                const { handleNh } = _require(path.resolve('./scrape/anime/nhentai.cjs'));
                                 await handleNh({ hisoka, m, query, tolak, logError, _require, path });
                                 break;
                         }
                         case 'nhrand': {
-                                const { handleNhrand } = _require(path.resolve('./src/scrape/anime/nhentai.cjs'));
+                                const { handleNhrand } = _require(path.resolve('./scrape/anime/nhentai.cjs'));
                                 await handleNhrand({ hisoka, m, tolak, logCommand, logError });
                                 break;
                         }
                         case 'nhget':
                         case 'nhdownload':
                         case 'nhdl': {
-                                const { handleNhdl } = _require(path.resolve('./src/scrape/anime/nhentai.cjs'));
+                                const { handleNhdl } = _require(path.resolve('./scrape/anime/nhentai.cjs'));
                                 await handleNhdl({ hisoka, m, query, tolak, logCommand, logError, path });
                                 break;
                         }
 
                         case 'komiktap':
                         case 'komik': {
-                                const { handleKomik } = _require(path.resolve('./src/scrape/anime/komiktap.cjs'));
+                                const { handleKomik } = _require(path.resolve('./scrape/anime/komiktap.cjs'));
                                 await handleKomik({ hisoka, m, query, tolak, logCommand, logError, path, pendingKomikChoices, getJadibotChoiceKey });
                                 break;
                         }
 
                         case 'komikinfo': {
-                                const { handleKomikinfo } = _require(path.resolve('./src/scrape/anime/komiktap.cjs'));
+                                const { handleKomikinfo } = _require(path.resolve('./scrape/anime/komiktap.cjs'));
                                 await handleKomikinfo({ hisoka, m, query, tolak, logError, _require, path });
                                 break;
                         }
                         case 'komikget':
                         case 'komikdl': {
-                                const { handleKomikdl } = _require(path.resolve('./src/scrape/anime/komiktap.cjs'));
+                                const { handleKomikdl } = _require(path.resolve('./scrape/anime/komiktap.cjs'));
                                 await handleKomikdl({ hisoka, m, query, tolak, logCommand, logError, path, _require });
                                 break;
                         }
                         case 'komikupdate':
                         case 'komikup': {
-                                const { handleKomikup } = _require(path.resolve('./src/scrape/anime/komiktap.cjs'));
+                                const { handleKomikup } = _require(path.resolve('./scrape/anime/komiktap.cjs'));
                                 await handleKomikup({ hisoka, m, tolak, logError, _require, path });
                                 break;
                         }
                         case 'kusonime':
                         case 'kuso':
                         case 'anime': {
-                                const { handleAnime } = _require(path.resolve('./src/scrape/anime/kusonime.cjs'));
+                                const { handleAnime } = _require(path.resolve('./scrape/anime/kusonime.cjs'));
                                 await handleAnime({ hisoka, m, query, tolak, logCommand, logError, path });
                                 break;
                         }
 
                         case 'kusonimeupdate':
                         case 'animeupdate': {
-                                const { handleAnimeupdate } = _require(path.resolve('./src/scrape/anime/kusonime.cjs'));
+                                const { handleAnimeupdate } = _require(path.resolve('./scrape/anime/kusonime.cjs'));
                                 await handleAnimeupdate({ hisoka, m, tolak, logCommand, logError });
                                 break;
                         }
                         case 'alqanime':
                         case 'alq': {
-                                const { handleAlq } = _require(path.resolve('./src/scrape/anime/alqanime.cjs'));
+                                const { handleAlq } = _require(path.resolve('./scrape/anime/alqanime.cjs'));
                                 await handleAlq({ hisoka, m, query, tolak, logCommand, logError, path, pendingAlqDlChoices, getJadibotChoiceKey });
                                 break;
                         }
 
                         case 'alqupdate':
                         case 'alqanimeupdate': {
-                                const { handleAlqupdate } = _require(path.resolve('./src/scrape/anime/alqanime.cjs'));
+                                const { handleAlqupdate } = _require(path.resolve('./scrape/anime/alqanime.cjs'));
                                 await handleAlqupdate({ hisoka, m, tolak, logCommand, logError, _require, path, getJadibotChoiceKey, pendingAlqUpdateChoices });
                                 break;
                         }
 
                         case 'alqdl':
                         case 'alqdownload': {
-                                const { handleAlqdownload } = _require(path.resolve('./src/scrape/anime/alqanime-dl.cjs'));
+                                const { handleAlqdownload } = _require(path.resolve('./scrape/anime/alqanime-dl.cjs'));
                                 await handleAlqdownload({ hisoka, m, query, tolak, logCommand, logError, fs, path });
                                 break;
                         }
@@ -879,35 +879,35 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'cosplayrandom':
                         case 'cosplay':
                         case 'ctele': {
-                                const { handleCosplay } = _require(path.resolve('./src/scrape/anime/cosplaytele.cjs'));
+                                const { handleCosplay } = _require(path.resolve('./scrape/anime/cosplaytele.cjs'));
                                 await handleCosplay({ hisoka, m, query, tolak, logCommand, logError, _require, path, _sendCosplayImages, pendingCosplayChoices });
                                 break;
                         }
 
                         case 'pixivr18':
                         case 'pixiv18': {
-                                const { handlePixiv18 } = _require(path.resolve('./src/scrape/anime/pixivr18.cjs'));
+                                const { handlePixiv18 } = _require(path.resolve('./scrape/anime/pixivr18.cjs'));
                                 await handlePixiv18({ hisoka, m, query, tolak, logCommand, logError, path, _require });
                                 break;
                         }
                         case 'cekhp':
                         case 'spechp':
                         case 'infohp': {
-                                const { handleCekhp } = _require(path.resolve('./src/scrape/tools/cekhp.cjs'));
+                                const { handleCekhp } = _require(path.resolve('./scrape/tools/cekhp.cjs'));
                                 await handleCekhp({ hisoka, m, query, tolak, logCommand, logError, _require, path, gemini });
                                 break;
                         }
 
                         case 'compare':
                         case 'vsbandingkan': {
-                                const { handleVsbandingkan } = _require(path.resolve('./src/scrape/tools/bandingkanhp.cjs'));
+                                const { handleVsbandingkan } = _require(path.resolve('./scrape/tools/bandingkanhp.cjs'));
                                 await handleVsbandingkan({ hisoka, m, query, tolak, logCommand, logError, path, _require });
                                 break;
                         }
                         case 'anigame':
                         case 'gamean1':
                         case 'an1game': {
-                                const { handleAn1game } = _require(path.resolve('./src/scrape/tools/an1game.cjs'));
+                                const { handleAn1game } = _require(path.resolve('./scrape/tools/an1game.cjs'));
                                 await handleAn1game({ hisoka, m, query, tolak, logCommand, sendConfirmWithButtons, fs, path, loadConfig, Button });
                                 break;
                         }
@@ -915,32 +915,32 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'bluearchive':
                         case 'bachar':
                         case 'ba': {
-                                const { handleBa } = _require(path.resolve('./src/scrape/anime/bluearchive.cjs'));
+                                const { handleBa } = _require(path.resolve('./scrape/anime/bluearchive.cjs'));
                                 await handleBa({ hisoka, m, query, tolak, logCommand, logError, path, _require });
                                 break;
                         }
                         case 'geniussearch':
                         case 'carilagu': {
-                                const { handleCarilagu } = _require(path.resolve('./src/scrape/music/genius.cjs'));
+                                const { handleCarilagu } = _require(path.resolve('./scrape/music/genius.cjs'));
                                 await handleCarilagu({ hisoka, m, query, tolak, logCommand, logError, _require, path });
                                 break;
                         }
                         case 'musikai':
                         case 'aimusik': {
-                                const { handleMusikaiCmd } = _require(path.resolve('./src/scrape/music/musikai-cmd.cjs'));
+                                const { handleMusikaiCmd } = _require(path.resolve('./scrape/music/musikai-cmd.cjs'));
                                 await handleMusikaiCmd({ hisoka, m, query, tolak, logCommand, logError, sendConfirmWithButtons, pendingMusikaiCache, generateWAMessageFromContent, sendAudioWithButtons });
                                 break;
                         }
                         case 'musikai2':
                         case 'aimusik2': {
-                                const { handleMusikai2Cmd } = _require(path.resolve('./src/scrape/music/musikai2-cmd.cjs'));
+                                const { handleMusikai2Cmd } = _require(path.resolve('./scrape/music/musikai2-cmd.cjs'));
                                 await handleMusikai2Cmd({ hisoka, m, query, tolak, logCommand, logError, sendConfirmWithButtons, pendingMusikai2Cache, sendAudioWithButtons });
                                 break;
                         }
 
                         case 'gdetail':
                         case 'detailgenius': {
-                                const { handleDetailgenius } = _require(path.resolve('./src/scrape/music/genius.cjs'));
+                                const { handleDetailgenius } = _require(path.resolve('./scrape/music/genius.cjs'));
                                 await handleDetailgenius({ hisoka, m, query, tolak, logCommand, logError, _require, path });
                                 break;
                         }
@@ -950,126 +950,126 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'tebaklagu':
                         case 'shazam':
                         case 'carijudullagu': {
-                                const { handleWhatsmusik } = _require(path.resolve('./src/scrape/music/whatsmusik.cjs'));
+                                const { handleWhatsmusik } = _require(path.resolve('./scrape/music/whatsmusik.cjs'));
                                 await handleWhatsmusik({ hisoka, m, query, tolak, logCommand, logError, _require, path, getMediaTypeFromMessage, downloadMediaBuffer, ensureYtdlp });
                                 break;
                         }
 
                         case 'menu': {
-                                const { handleMenu } = _require(path.resolve('./src/scrape/menu/menu-cmd.cjs'));
+                                const { handleMenu } = _require(path.resolve('./scrape/menu/menu-cmd.cjs'));
                                 await handleMenu({ hisoka, m, tolak, logCommand, loadConfig, Button, getJadibotNumber, getJadibotReadsw, getJadibotAntidel, getJadibotAnticall, getJadibotAnticallvid, getJadibotAutoOnline, getJadibotAutoTyping, getJadibotAutoRecording, jadibotConnectedAt, getJadibotExpiry, getJadibotExpirySummary, getHandler, CEKAUTO_FITUR_LIST, BROWSER_LIST, TOTAL_CMD_COUNT, getUserProfilePictureUrl, isNoSpaceError, cleanupWritePressure });
                                 break;
                         }
 
                         case 'allmenu': {
-                                const { handleAllmenu } = _require(path.resolve('./src/scrape/menu/menupages.cjs'));
+                                const { handleAllmenu } = _require(path.resolve('./scrape/menu/menupages.cjs'));
                                 await handleAllmenu({ hisoka, m, query, loadConfig, logCommand, fs, path });
                                 break;
                         }
                         case 'settingmenu': {
-                                const { handleSettingmenu } = _require(path.resolve('./src/scrape/menu/menu-pages2.cjs'));
+                                const { handleSettingmenu } = _require(path.resolve('./scrape/menu/menu-pages2.cjs'));
                                 await handleSettingmenu({ hisoka, m, tolak, logCommand, loadConfig });
                                 break;
                         }
                         case 'groupmenu': {
-                                const { handleGroupmenu } = _require(path.resolve('./src/scrape/menu/menu-pages2.cjs'));
+                                const { handleGroupmenu } = _require(path.resolve('./scrape/menu/menu-pages2.cjs'));
                                 await handleGroupmenu({ hisoka, m, tolak, logCommand, loadConfig });
                                 break;
                         }
                         case 'statusmenu': {
-                                const { handleStatusmenu } = _require(path.resolve('./src/scrape/menu/menu-pages2.cjs'));
+                                const { handleStatusmenu } = _require(path.resolve('./scrape/menu/menu-pages2.cjs'));
                                 await handleStatusmenu({ hisoka, m, tolak, logCommand, loadConfig });
                                 break;
                         }
                         case 'downloadmenu': {
-                                const { handleDownloadmenu } = _require(path.resolve('./src/scrape/menu/menu-pages2.cjs'));
+                                const { handleDownloadmenu } = _require(path.resolve('./scrape/menu/menu-pages2.cjs'));
                                 await handleDownloadmenu({ hisoka, m, tolak, logCommand, loadConfig });
                                 break;
                         }
                         case 'jadibotmenu': {
-                                const { handleJadibotmenu } = _require(path.resolve('./src/scrape/info/info.cjs'));
+                                const { handleJadibotmenu } = _require(path.resolve('./scrape/info/info.cjs'));
                                 await handleJadibotmenu({ hisoka, m, tolak, logCommand, loadConfig });
                                 break;
                         }
                         case 'ownermenu': {
-                                const { handleOwnermenu } = _require(path.resolve('./src/scrape/menu/menupages.cjs'));
+                                const { handleOwnermenu } = _require(path.resolve('./scrape/menu/menupages.cjs'));
                                 await handleOwnermenu({ hisoka, m, query, loadConfig, logCommand, fs, path });
                                 break;
                         }
                         case 'info': {
-                                const { handleInfo } = _require(path.resolve('./src/scrape/info/info.cjs'));
+                                const { handleInfo } = _require(path.resolve('./scrape/info/info.cjs'));
                                 await handleInfo({ hisoka, m, query, tolak, logCommand, loadConfig, fs, path });
                                 break;
                         }
 
                         case 'changelog':
                         case 'update': {
-                                const { handleUpdate } = _require(path.resolve('./src/scrape/info/info.cjs'));
+                                const { handleUpdate } = _require(path.resolve('./scrape/info/info.cjs'));
                                 await handleUpdate({ hisoka, m, tolak, logCommand, path, fs, isMainBot });
                                 break;
                         }
                         case 'addown':
                         case 'addowner': {
-                                const { handleAddowner } = _require(path.resolve('./src/scrape/info/info.cjs'));
+                                const { handleAddowner } = _require(path.resolve('./scrape/info/info.cjs'));
                                 await handleAddowner({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, isMainBot });
                                 break;
                         }
                         case 'delown':
                         case 'delowner': {
-                                const { handleDelowner } = _require(path.resolve('./src/scrape/info/info.cjs'));
+                                const { handleDelowner } = _require(path.resolve('./scrape/info/info.cjs'));
                                 await handleDelowner({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, isMainBot });
                                 break;
                         }
                         case 'owner':
                         case 'own': {
-                                const { handleOwn } = _require(path.resolve('./src/scrape/info/info.cjs'));
+                                const { handleOwn } = _require(path.resolve('./scrape/info/info.cjs'));
                                 await handleOwn({ hisoka, m, tolak, logCommand, loadConfig });
                                 break;
                         }
                         case 'memory': {
-                                const { handleMemory } = _require(path.resolve('./src/scrape/jadibot/ceksesi.cjs'));
+                                const { handleMemory } = _require(path.resolve('./scrape/jadibot/ceksesi.cjs'));
                                 await handleMemory({ hisoka, m, tolak, logCommand });
                                 break;
                         }
                         case 'rvo':
                         case 'viewonce':
                         case 'vo': {
-                                const { handleVo } = _require(path.resolve('./src/scrape/media/viewonce.cjs'));
+                                const { handleVo } = _require(path.resolve('./scrape/media/viewonce.cjs'));
                                 await handleVo({ hisoka, m, query, tolak, logCommand, loadConfig, quoted, downloadMediaMessage, isJidGroup, hasViewOnceCache, getViewOnceCache });
                                 break;
                         }
 
                         case 'getsw':
                         case 'sw': {
-                                const { handleSw } = _require(path.resolve('./src/scrape/media/getsw.cjs'));
+                                const { handleSw } = _require(path.resolve('./scrape/media/getsw.cjs'));
                                 await handleSw({ hisoka, m, query, tolak, logCommand, loadConfig, downloadMediaMessage, isJidGroup });
                                 break;
                         }
 
                         case 'ram': {
-                                const { handleRam } = _require(path.resolve('./src/scrape/jadibot/ceksesi.cjs'));
+                                const { handleRam } = _require(path.resolve('./scrape/jadibot/ceksesi.cjs'));
                                 await handleRam({ hisoka, m, tolak, logCommand });
                                 break;
                         }
                         case 'typing':
                         case 'typ': {
-                                const { handleTyp } = _require(path.resolve('./src/scrape/setting/autotyprec.cjs'));
+                                const { handleTyp } = _require(path.resolve('./scrape/setting/autotyprec.cjs'));
                                 await handleTyp({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, getJadibotNumber, getJadibotAutoTyping, setJadibotUserSetting });
                                 break;
                         }
                         case 'recording':
                         case 'record': {
-                                const { handleRecord } = _require(path.resolve('./src/scrape/setting/autotyprec.cjs'));
+                                const { handleRecord } = _require(path.resolve('./scrape/setting/autotyprec.cjs'));
                                 await handleRecord({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, getJadibotNumber, getJadibotAutoRecording, setJadibotUserSetting });
                                 break;
                         }
                         case 'simi': {
-                                const { handleSimi } = _require(path.resolve('./src/scrape/tools/wilyai.cjs'));
+                                const { handleSimi } = _require(path.resolve('./scrape/tools/wilyai.cjs'));
                                 await handleSimi({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, isMainBot });
                                 break;
                         }
                         case 'wilyai': {
-                                const { handleWilyai } = _require(path.resolve('./src/scrape/tools/wilyai.cjs'));
+                                const { handleWilyai } = _require(path.resolve('./scrape/tools/wilyai.cjs'));
                                 await handleWilyai({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, isMainBot, countHistory, clearAllHistory, clearAllUserMemory });
                                 break;
                         }
@@ -1077,7 +1077,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'wily':
                         case 'ai':
                         case 'tanya': {
-                                const { handleWily } = _require(path.resolve('./src/scrape/ai/wilycmd.cjs'));
+                                const { handleWily } = _require(path.resolve('./scrape/ai/wilycmd.cjs'));
                                 await handleWily({ hisoka, m, query, tolak, logCommand, loadConfig, gemini, getUserName, getSessionKey, getHistory, addToHistory, clearHistory, buildHistoryMeta, wrapCurrentUserMessage, detectAndUpdateMemory, searchAndGetImages, buildWilyAICommandPrompt, buildWilyMediaUserPrompt, startTyping, getMediaTypeFromMessage, getQuotedMediaBuffer, getCachedQuotedMedia, getMediaInfo, rememberAIMedia, detectImageSearchQuery, extractImageCount, buildSmartImageWaitText, buildSmartAlbumCaptions, sendImageAlbum, buildSmartImageHistoryReply, processAIMediaAndSend });
                                 break;
                         }
@@ -1089,7 +1089,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         }
 
                         case 'readsw': {
-                                const { handleReadsw } = _require(path.resolve('./src/scrape/readsw/readsw.cjs'));
+                                const { handleReadsw } = _require(path.resolve('./scrape/readsw/readsw.cjs'));
                                 await handleReadsw({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, getJadibotNumber, getJadibotReadsw, setJadibotUserSetting });
                                 break;
                         }
@@ -1102,154 +1102,154 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         }
 
                         case 'botadmin': {
-                                const { handleBotadmin } = _require(path.resolve('./src/scrape/setting/botadmin-cmd.cjs'));
+                                const { handleBotadmin } = _require(path.resolve('./scrape/setting/botadmin-cmd.cjs'));
                                 await handleBotadmin({ hisoka, m, query, tolak, logCommand, isMainBot, kvGet });
                                 break;
                         }
 
                         case 'ceksw': {
-                                const { handleCeksw } = _require(path.resolve('./src/scrape/setting/ceksw.cjs'));
+                                const { handleCeksw } = _require(path.resolve('./scrape/setting/ceksw.cjs'));
                                 await handleCeksw({ hisoka, m, query, tolak, logCommand, fs, path, loadConfig, saveConfig, getJadibotNumber, pruneSwStatsAt, countActiveSW });
                                 break;
                         }
 
                         case 'ceksetting': {
-                                const { handleCeksetting } = _require(path.resolve('./src/scrape/setting/ceksetting.cjs'));
+                                const { handleCeksetting } = _require(path.resolve('./scrape/setting/ceksetting.cjs'));
                                 await handleCeksetting({ hisoka, m, tolak, logCommand, isMainBot, getJadibotNumber, getJadibotExpiry, getJadibotExpirySummary, jadibotMap, maskNumber, formatRemainingTime, loadConfig });
                                 break;
                         }
 
                         case 'telegram':
                         case 'tele': {
-                                const { handleTele } = _require(path.resolve('./src/scrape/tools/telegram.cjs'));
+                                const { handleTele } = _require(path.resolve('./scrape/tools/telegram.cjs'));
                                 await handleTele({ hisoka, m, query, tolak, logCommand, isMainBot, loadConfig, saveConfig });
                                 break;
                         }
 
                         case 'add': {
-                                const { handleAddEmoji } = _require(path.resolve('./src/scrape/info/info.cjs'));
+                                const { handleAddEmoji } = _require(path.resolve('./scrape/info/info.cjs'));
                                 await handleAddEmoji({ hisoka, m, query, tolak, logCommand, isMainBot });
                                 break;
                         }
                         case 'd':
                         case 'del': {
-                                const { handleDel } = _require(path.resolve('./src/scrape/info/del-cmd.cjs'));
+                                const { handleDel } = _require(path.resolve('./scrape/info/del-cmd.cjs'));
                                 await handleDel({ hisoka, m, query, tolak, logCommand, isMainBot, kvGet });
                                 break;
                         }
 
                         case 'list': {
-                                const { handleListEmoji } = _require(path.resolve('./src/scrape/info/info.cjs'));
+                                const { handleListEmoji } = _require(path.resolve('./scrape/info/info.cjs'));
                                 await handleListEmoji({ hisoka, m, query, tolak, logCommand, isMainBot });
                                 break;
                         }
                         case 'emojiadd': {
-                                const { handleEmojiadd } = _require(path.resolve('./src/scrape/info/info.cjs'));
+                                const { handleEmojiadd } = _require(path.resolve('./scrape/info/info.cjs'));
                                 await handleEmojiadd({ hisoka, m, query, tolak, logCommand, getJadibotNumber, addJadibotEmojis, listJadibotEmojis });
                                 break;
                         }
 
                         case 'emojidel': {
-                                const { handleEmojidel } = _require(path.resolve('./src/scrape/info/info.cjs'));
+                                const { handleEmojidel } = _require(path.resolve('./scrape/info/info.cjs'));
                                 await handleEmojidel({ hisoka, m, query, tolak, logCommand, getJadibotNumber, deleteJadibotEmojis, listJadibotEmojis });
                                 break;
                         }
 
                         case 'emojilist': {
-                                const { handleEmojilist } = _require(path.resolve('./src/scrape/info/info.cjs'));
+                                const { handleEmojilist } = _require(path.resolve('./scrape/info/info.cjs'));
                                 await handleEmojilist({ hisoka, m, tolak, logCommand, getJadibotNumber, listJadibotEmojis });
                                 break;
                         }
 
                         case 'emojidefault': {
-                                const { handleEmojidefault } = _require(path.resolve('./src/scrape/info/emoji-cmd.cjs'));
+                                const { handleEmojidefault } = _require(path.resolve('./scrape/info/emoji-cmd.cjs'));
                                 await handleEmojidefault({ hisoka, m, tolak, logCommand, getJadibotNumber, resetToDefaultEmojis });
                                 break;
                         }
 
                         case 'emojicustom': {
-                                const { handleEmojicustom } = _require(path.resolve('./src/scrape/info/emoji-cmd.cjs'));
+                                const { handleEmojicustom } = _require(path.resolve('./scrape/info/emoji-cmd.cjs'));
                                 await handleEmojicustom({ hisoka, m, tolak, logCommand, getJadibotNumber, setCustomEmojiMode, listJadibotEmojis });
                                 break;
                         }
 
                         case 'emojiclear': {
-                                const { handleEmojiclear } = _require(path.resolve('./src/scrape/info/emoji-cmd.cjs'));
+                                const { handleEmojiclear } = _require(path.resolve('./scrape/info/emoji-cmd.cjs'));
                                 await handleEmojiclear({ hisoka, m, tolak, logCommand, getJadibotNumber, clearJadibotEmojis });
                                 break;
                         }
 
                         case 'online': {
-                                const { handleOnline } = _require(path.resolve('./src/scrape/setting/online.cjs'));
+                                const { handleOnline } = _require(path.resolve('./scrape/setting/online.cjs'));
                                 await handleOnline({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, getJadibotNumber, getJadibotAutoOnline, setJadibotUserSetting, startJadibotAutoOnline });
                                 break;
                         }
 
                         case 'anticall':
                         case 'ac': {
-                                const { handleAc } = _require(path.resolve('./src/scrape/setting/anticall.cjs'));
+                                const { handleAc } = _require(path.resolve('./scrape/setting/anticall.cjs'));
                                 await handleAc({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, getJadibotNumber, getJadibotAnticall, setJadibotUserSetting });
                                 break;
                         }
 
                         case 'anticallvid':
                         case 'acv': {
-                                const { handleAcv } = _require(path.resolve('./src/scrape/setting/anticall.cjs'));
+                                const { handleAcv } = _require(path.resolve('./scrape/setting/anticall.cjs'));
                                 await handleAcv({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, getJadibotNumber, getJadibotAnticallvid, setJadibotUserSetting });
                                 break;
                         }
 
                         case 'autocleaner': {
-                                const { handleAutocleaner } = _require(path.resolve('./src/scrape/system/autocleaner.cjs'));
+                                const { handleAutocleaner } = _require(path.resolve('./scrape/system/autocleaner.cjs'));
                                 await handleAutocleaner({ hisoka, m, query, tolak, logCommand, isMainBot, loadConfig, saveConfig, restartAutoCleaner, stopAutoCleaner, clearOldFiles });
                                 break;
                         }
 
                         case 'sessioncleaner': {
-                                const { handleSessioncleaner } = _require(path.resolve('./src/scrape/system/sessioncleaner.cjs'));
+                                const { handleSessioncleaner } = _require(path.resolve('./scrape/system/sessioncleaner.cjs'));
                                 await handleSessioncleaner({ hisoka, m, query, tolak, logCommand, isMainBot, loadConfig, saveConfig, cleanStaleSessionFiles });
                                 break;
                         }
 
                         case 'aturbrowser':
                         case 'setbrowser': {
-                                const { handleAturBrowser } = _require(path.resolve('./src/scrape/setting/aturbrowser.cjs'));
+                                const { handleAturBrowser } = _require(path.resolve('./scrape/setting/aturbrowser.cjs'));
                                 await handleAturBrowser({ hisoka, m, query, tolak, logCommand, isMainBot, loadConfig, BROWSER_LIST, listAturBrowserMap, pendingAturBrowser });
                                 break;
                         }
 
                         case 'batalbrowser': {
-                                const { handleBatalBrowser } = _require(path.resolve('./src/scrape/setting/aturbrowser.cjs'));
+                                const { handleBatalBrowser } = _require(path.resolve('./scrape/setting/aturbrowser.cjs'));
                                 await handleBatalBrowser({ hisoka, m, tolak, logCommand, isMainBot, pendingAturBrowser });
                                 break;
                         }
 
                         case 'react':
                         case 'reaksi': {
-                                const { handleReaksi } = _require(path.resolve('./src/scrape/reactionsw/reactapi.cjs'));
+                                const { handleReaksi } = _require(path.resolve('./scrape/reactionsw/reactapi.cjs'));
                                 await handleReaksi({ hisoka, m, query, tolak, logCommand, loadConfig });
                                 break;
                         }
                         case 'cekreact':
                         case 'reactinfo': {
-                                const { handleReactinfo } = _require(path.resolve('./src/scrape/reactionsw/reactapi.cjs'));
+                                const { handleReactinfo } = _require(path.resolve('./scrape/reactionsw/reactapi.cjs'));
                                 await handleReactinfo({ hisoka, m, tolak, logCommand, loadConfig });
                                 break;
                         }
                         case 'setreactapi':
                         case 'reactapi': {
-                                const { handleReactapi } = _require(path.resolve('./src/scrape/reactionsw/reactapi.cjs'));
+                                const { handleReactapi } = _require(path.resolve('./scrape/reactionsw/reactapi.cjs'));
                                 await handleReactapi({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig });
                                 break;
                         }
                         case 'setpairing': {
-                                const { handleSetpairing } = _require(path.resolve('./src/scrape/info/info.cjs'));
+                                const { handleSetpairing } = _require(path.resolve('./scrape/info/info.cjs'));
                                 await handleSetpairing({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, isMainBot });
                                 break;
                         }
                         case 'tt': {
                                 try {
-                                        const { handleTiktokDl } = _require(path.resolve('./src/scrape/download/downloader.cjs'));
+                                        const { handleTiktokDl } = _require(path.resolve('./scrape/download/downloader.cjs'));
                                         await handleTiktokDl(hisoka, m, query, { gemini, tolak, logCommand, buildVideoDownloadCaptionPrompt });
                                 } catch (error) {
                                         console.error('\x1b[31m[TikTok] Error:\x1b[39m', error.message);
@@ -1260,7 +1260,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                         case 'ig': {
                                 try {
-                                        const { handleInstagramDl } = _require(path.resolve('./src/scrape/download/downloader.cjs'));
+                                        const { handleInstagramDl } = _require(path.resolve('./scrape/download/downloader.cjs'));
                                         await handleInstagramDl(hisoka, m, query, { gemini, tolak, logCommand, exec, util, buildIgVisionPrompt, buildIgCaptionPrompt, buildIgFallbackCaption, parseIgMetaHtml, formatIgCount });
                                 } catch (error) {
                                         console.error('\x1b[31m[Instagram] Error:\x1b[39m', error.message);
@@ -1271,7 +1271,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                         case 'fb': {
                                 try {
-                                        const { handleFacebookDl } = _require(path.resolve('./src/scrape/download/downloader.cjs'));
+                                        const { handleFacebookDl } = _require(path.resolve('./scrape/download/downloader.cjs'));
                                         await handleFacebookDl(hisoka, m, query, { gemini, tolak, logCommand, buildFbVisionPrompt, buildFbCaptionPrompt, buildFbFallbackCaption, parseFbMetaHtml, formatFbCount });
                                 } catch (error) {
                                         console.error('\x1b[31m[Facebook] Error:\x1b[39m', error.message);
@@ -1285,7 +1285,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'twitterdl':
                         case 'twitter': {
                                 try {
-                                        const _twPath = path.resolve('./src/scrape/download/twitter-dl.cjs');
+                                        const _twPath = path.resolve('./scrape/download/twitter-dl.cjs');
                                         delete _require.cache[_twPath];
                                         const { handleTwitterDl } = _require(_twPath);
                                         await handleTwitterDl(hisoka, m, query, { tolak, logCommand });
@@ -1300,7 +1300,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'unduhsemua':
                         case 'dl': {
                                 try {
-                                        const { handleAllUnduh } = _require(path.resolve('./src/scrape/download/downloader.cjs'));
+                                        const { handleAllUnduh } = _require(path.resolve('./scrape/download/downloader.cjs'));
                                         await handleAllUnduh(hisoka, m, query, {
                                                 gemini, tolak, logCommand, exec, util,
                                                 buildVideoDownloadCaptionPrompt,
@@ -1319,7 +1319,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'stickly':
                         case 'stickerpack':
                         case 'stikerpack': {
-                                const { handleStikerpack } = _require(path.resolve('./src/scrape/download/stickerly.cjs'));
+                                const { handleStikerpack } = _require(path.resolve('./scrape/download/stickerly.cjs'));
                                 await handleStikerpack({ hisoka, m, query, tolak, logCommand, path });
                                 break;
                         }
@@ -1327,20 +1327,20 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'stiker':
                         case 'sticker':
                         case 's': {
-                                const { handleSticker } = _require(path.resolve('./src/scrape/media/sticker-cmd.cjs'));
+                                const { handleSticker } = _require(path.resolve('./scrape/media/sticker-cmd.cjs'));
                                 await handleSticker({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, getMediaTypeFromMessage, downloadMediaBuffer, getQuotedMediaBuffer, unwrapMessagePayload, exec, util, path, fs });
                                 break;
                         }
 
                         case 'tovn': {
-                                const { handleTovn } = _require(path.resolve('./src/scrape/media/audioconvert.cjs'));
+                                const { handleTovn } = _require(path.resolve('./scrape/media/audioconvert.cjs'));
                                 const pfx = m.prefix || '.';
                                 await handleTovn({ hisoka, m, tolak, logCommand, downloadMediaMessage, pfx });
                                 break;
                         }
 
                         case 'tomp3': {
-                                const { handleTomp3 } = _require(path.resolve('./src/scrape/media/audioconvert.cjs'));
+                                const { handleTomp3 } = _require(path.resolve('./scrape/media/audioconvert.cjs'));
                                 const pfx = m.prefix || '.';
                                 await handleTomp3({ hisoka, m, tolak, logCommand, downloadMediaMessage, pfx });
                                 break;
@@ -1350,13 +1350,13 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'infolirik':
                         case 'musicinfo':
                         case 'cekmusik': {
-                                const { handleInfomusik } = _require(path.resolve('./src/scrape/music/infomusik.cjs'));
+                                const { handleInfomusik } = _require(path.resolve('./scrape/music/infomusik.cjs'));
                                 await handleInfomusik({ hisoka, m, tolak, logCommand, getMediaTypeFromMessage, downloadMediaMessage, Button, loadConfig, _require, path });
                                 break;
                         }
 
                         case 'toimg': {
-                                const { handleToimg } = _require(path.resolve('./src/scrape/media/toimg-cmd.cjs'));
+                                const { handleToimg } = _require(path.resolve('./scrape/media/toimg-cmd.cjs'));
                                 await handleToimg({ hisoka, m, query, tolak, logCommand, quoted, downloadMediaMessage, exec, util, path, fs });
                                 break;
                         }
@@ -1368,61 +1368,61 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         }
 
                         case 'jadibot': {
-                                const { handleJadibot } = _require(path.resolve('./src/scrape/jadibot/jadibot-cmd.cjs'));
+                                const { handleJadibot } = _require(path.resolve('./scrape/jadibot/jadibot-cmd.cjs'));
                                 await handleJadibot({ hisoka, m, query, tolak, logCommand, isMainBot, path, fs, jadibotMap, parseJadibotDuration, startJadibot, maskNumber, getJadibotExpirySummary, scheduleJadibotExpiry, setPermanentJadibot, removeJadibotExpiry, ensureJadibotExpiry });
                                 break;
                         }
 
                         case 'upbot': {
-                                const { handleUpbot } = _require(path.resolve('./src/scrape/jadibot/jadibot-cmd.cjs'));
+                                const { handleUpbot } = _require(path.resolve('./scrape/jadibot/jadibot-cmd.cjs'));
                                 await handleUpbot({ hisoka, m, query, tolak, logCommand, isMainBot, jadibotMap, parseJadibotDuration, getJadibotExpirySummary, getJadibotExpiry, extendJadibotExpiry, setPermanentJadibot, scheduleJadibotExpiry, maskNumber, formatRemainingTime });
                                 break;
                         }
 
                         case 'stopbot': {
-                                const { handleStopbot } = _require(path.resolve('./src/scrape/jadibot/jadibot-cmd.cjs'));
+                                const { handleStopbot } = _require(path.resolve('./scrape/jadibot/jadibot-cmd.cjs'));
                                 await handleStopbot({ hisoka, m, query, tolak, logCommand, isMainBot, jadibotMap, stopJadibot, getJadibotExpiry, getJadibotChoiceKey, pendingJadibotChoices, maskNumber, formatRemainingTime });
                                 break;
                         }
 
                         case 'backup': {
-                                const { runBackup } = _require(path.resolve('./src/scrape/system/backup.cjs'));
+                                const { runBackup } = _require(path.resolve('./scrape/system/backup.cjs'));
                                 await runBackup(hisoka, m, query, tolak, loadConfig, logCommand);
                         }
                                 break;
 
                         case 'ceksesi': {
-                                const { handleCeksesi } = _require(path.resolve('./src/scrape/jadibot/ceksesi.cjs'));
+                                const { handleCeksesi } = _require(path.resolve('./scrape/jadibot/ceksesi.cjs'));
                                 await handleCeksesi({ hisoka, m, tolak, logCommand, getJadibotNumber, jadibotSesiReportMap });
                                 break;
                         }
 
                         case 'cekerror': {
-                                const { handleCekerror } = _require(path.resolve('./src/scrape/setting/cekerror-cmd.cjs'));
+                                const { handleCekerror } = _require(path.resolve('./scrape/setting/cekerror-cmd.cjs'));
                                 await handleCekerror({ hisoka, m, query, tolak, logCommand, clearErrors, formatErrorReport, generateErrorFileTxt, getInfoErrorTxtPath, getErrorStats, fs });
                                 break;
                         }
 
                         case 'listbot': {
-                                const { handleListbot } = _require(path.resolve('./src/scrape/jadibot/listbot-cmd.cjs'));
+                                const { handleListbot } = _require(path.resolve('./scrape/jadibot/listbot-cmd.cjs'));
                                 await handleListbot({ hisoka, m, tolak, logCommand, isMainBot, jadibotMap, getJadibotExpiry, getJadibotExpirySummary, cleanupExpiredJadibots, pendingJadibotChoices, getJadibotChoiceKey, jadibotConnectedAt, getUserName });
                                 break;
                         }
 
                         case 'play': {
-                                const { handlePlay } = _require(path.resolve('./src/scrape/download/downloader.cjs'));
+                                const { handlePlay } = _require(path.resolve('./scrape/download/downloader.cjs'));
                                 await handlePlay(hisoka, m, query, { tolak, logCommand, pendingPlayChoices, Button });
                                 break;
                         }
 
                         case 'ytmp3': {
-                                const { handleYtmp3 } = _require(path.resolve('./src/scrape/download/downloader.cjs'));
+                                const { handleYtmp3 } = _require(path.resolve('./scrape/download/downloader.cjs'));
                                 await handleYtmp3(hisoka, m, query, { gemini, tolak, logCommand, buildVideoDownloadCaptionPrompt });
                                 break;
                         }
 
                         case 'ytmp4': {
-                                const { handleYtmp4 } = _require(path.resolve('./src/scrape/download/downloader.cjs'));
+                                const { handleYtmp4 } = _require(path.resolve('./scrape/download/downloader.cjs'));
                                 await handleYtmp4(hisoka, m, query, { gemini, tolak, logCommand, buildVideoDownloadCaptionPrompt });
                                 break;
                         }
@@ -1433,7 +1433,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                         case 'welgod':
                         case 'setwelgod': {
-                                const { handleSetwelgod } = _require(path.resolve('./src/scrape/info/info.cjs'));
+                                const { handleSetwelgod } = _require(path.resolve('./scrape/info/info.cjs'));
                                 await handleSetwelgod({ hisoka, m, query, tolak, logCommand, loadConfig });
                                 break;
                         }
@@ -1441,7 +1441,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'goodbye':
                         case 'setwelcome':
                         case 'setgoodbye': {
-                                const { handleSetgoodbye } = _require(path.resolve('./src/scrape/group/setgoodbye.cjs'));
+                                const { handleSetgoodbye } = _require(path.resolve('./scrape/group/setgoodbye.cjs'));
                                 await handleSetgoodbye({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, sendConfirmWithButtons, fs, path });
                                 break;
                         }
@@ -1452,7 +1452,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'swgroup':
                         case 'statusgrup':
                         case 'statusgroup': {
-                                const { handleUpswgc } = _require(path.resolve('./src/scrape/group/upswgc.cjs'));
+                                const { handleUpswgc } = _require(path.resolve('./scrape/group/upswgc.cjs'));
                                 return handleUpswgc(hisoka, m, query, tolak);
                         }
 
@@ -1462,12 +1462,12 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'swgroupv2':
                         case 'statusgrupv2':
                         case 'statusgroupv2': {
-                                const { handleUpswgcV2 } = _require(path.resolve('./src/scrape/group/upswgcv2.cjs'));
+                                const { handleUpswgcV2 } = _require(path.resolve('./scrape/group/upswgcv2.cjs'));
                                 return handleUpswgcV2(hisoka, m, query, tolak);
                         }
 
                         case 'sendstatus': {
-                                const { handleSendstatus } = _require(path.resolve('./src/scrape/group/sendstatus.cjs'));
+                                const { handleSendstatus } = _require(path.resolve('./scrape/group/sendstatus.cjs'));
                                 await handleSendstatus({ hisoka, m, query, tolak, logCommand, generateWAMessageContent, generateWAMessageFromContent });
                                 break;
                         }
@@ -1475,7 +1475,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'ghosttag':
                         case 'gt':
                         case 'gtag': {
-                                const { handleGhosttag } = _require(path.resolve('./src/scrape/group/ghosttag.cjs'));
+                                const { handleGhosttag } = _require(path.resolve('./scrape/group/ghosttag.cjs'));
                                 await handleGhosttag({ hisoka, m, query, tolak, logCommand, generateWAMessageFromContent, Button });
                                 break;
                         }
@@ -1486,7 +1486,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'hdvid':
                         case 'vidhd':
                         case 'hdvideo': {
-                                const { handleHdvideo } = _require(path.resolve('./src/scrape/download/hdvid.cjs'));
+                                const { handleHdvideo } = _require(path.resolve('./scrape/download/hdvid.cjs'));
                                 await handleHdvideo({ hisoka, m, query, tolak, logCommand, fs, path, quoted, downloadMediaMessage });
                                 break;
                         }
@@ -1494,55 +1494,55 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'aiedit':
                         case 'editgambar':
                         case 'editai': {
-                                const { handleAiedit } = _require(path.resolve('./src/scrape/ai/imageEdit.cjs'));
+                                const { handleAiedit } = _require(path.resolve('./scrape/ai/imageEdit.cjs'));
                                 await handleAiedit({ hisoka, m, query, tolak, logCommand, downloadMediaMessage });
                                 break;
                         }
 
                         case 'ss':
                         case 'screenshot': {
-                                const { handleScreenshot } = _require(path.resolve('./src/scrape/tools/screenshot.cjs'));
+                                const { handleScreenshot } = _require(path.resolve('./scrape/tools/screenshot.cjs'));
                                 await handleScreenshot({ hisoka, m, query, tolak, logCommand, _require });
                                 break;
                         }
                         case 'scrapeweb':
                         case 'webinfo': {
-                                const { handleWebinfo } = _require(path.resolve('./src/scrape/tools/screenshot.cjs'));
+                                const { handleWebinfo } = _require(path.resolve('./scrape/tools/screenshot.cjs'));
                                 await handleWebinfo({ hisoka, m, query, tolak, logCommand, path, _require });
                                 break;
                         }
                         case 'autosholat': {
-                                const { handleAutosholat } = _require(path.resolve('./src/scrape/setting/autosholat.cjs'));
+                                const { handleAutosholat } = _require(path.resolve('./scrape/setting/autosholat.cjs'));
                                 await handleAutosholat({ hisoka, m, query, tolak, logCommand, path, loadConfig });
                                 break;
                         }
 
                         case 'infowibu': {
-                                const { handleInfowibu } = _require(path.resolve('./src/scrape/anime/infowibu.cjs'));
+                                const { handleInfowibu } = _require(path.resolve('./scrape/anime/infowibu.cjs'));
                                 await handleInfowibu({ hisoka, m, query, tolak, logCommand, sendConfirmWithButtons, fs, path, loadConfig, _require });
                                 break;
                         }
 
                         case 'animasu': {
-                                const { handleAnimasu } = _require(path.resolve('./src/scrape/anime/animasu.cjs'));
+                                const { handleAnimasu } = _require(path.resolve('./scrape/anime/animasu.cjs'));
                                 await handleAnimasu({ hisoka, m, query, tolak, logCommand, sendConfirmWithButtons, fs, path, loadConfig });
                                 break;
                         }
 
                         case 'alqanimenotif': {
-                                const { handleAlqanimeNotif } = _require(path.resolve('./src/scrape/anime/alqanime-monitor.cjs'));
+                                const { handleAlqanimeNotif } = _require(path.resolve('./scrape/anime/alqanime-monitor.cjs'));
                                 await handleAlqanimeNotif({ hisoka, m, query, tolak, logCommand, sendConfirmWithButtons, fs, path, loadConfig });
                                 break;
                         }
 
                         case 'tvone': {
-                                const { handleTvone } = _require(path.resolve('./src/scrape/news/tvonenews.cjs'));
+                                const { handleTvone } = _require(path.resolve('./scrape/news/tvonenews.cjs'));
                                 await handleTvone({ hisoka, m, query, tolak, logCommand, sendConfirmWithButtons, fs, path });
                                 break;
                         }
 
                         case 'malnews': {
-                                const { handleMalnews } = _require(path.resolve('./src/scrape/news/malnews.cjs'));
+                                const { handleMalnews } = _require(path.resolve('./scrape/news/malnews.cjs'));
                                 await handleMalnews({ hisoka, m, query, tolak, logCommand, sendConfirmWithButtons, fs, path });
                                 break;
                         }

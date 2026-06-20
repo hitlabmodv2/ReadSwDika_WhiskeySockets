@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 20/06/2026, 10.06.56  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 20/06/2026, 10.25.55  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,26 +23,26 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  AutoSholat
+│  #001  —  unhandledRejection
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [AutoSholat] Error scheduler: Cannot find module '/home/runner/workspace/src/scrape/tools/autosholat.cjs'
+│  Cannot find module '/home/runner/workspace/src/scrape/anime/infowibu.cjs'
 Require stack:
 - /home/runner/workspace/index.js
 │
 │  DETAIL
-│  Sumber      : AutoSholat
+│  Sumber      : unhandledRejection
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 20/06/2026, 10.06.56
-│  Terakhir    : 20/06/2026, 10.06.56
+│  Pertama     : 20/06/2026, 10.25.55
+│  Terakhir    : 20/06/2026, 10.25.55
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [AutoSholat] Error scheduler: Cannot find module '/home/runner/workspace/src/scrape/tools/autosholat.cjs'
+│  ▶  Error: Cannot find module '/home/runner/workspace/src/scrape/anime/infowibu.cjs'
 │     Require stack:
 │     - /home/runner/workspace/index.js
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 20/06/2026, 10.06.56
+  Terakhir diperbarui: 20/06/2026, 10.25.55
 ════════════════════════════════════════════════════════════════════════

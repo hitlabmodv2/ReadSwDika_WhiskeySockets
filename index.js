@@ -45,7 +45,7 @@ const {
         prepareWAMessageMedia,
         proto,
 } = _require('@whiskeysockets/baileys');
-const { createWelcomeCard } = _require('./src/scrape/system/welcomeCard.cjs');
+const { createWelcomeCard } = _require('./scrape/system/welcomeCard.cjs');
 import pino from 'pino';
 import { Boom } from '@hapi/boom';
 import qrcode from 'qrcode-terminal';
@@ -1555,7 +1555,7 @@ async function main() {
                                                 let _asVnBuf   = null;
                                                 let _asWaveform = null;
                                                 try {
-                                                        const { toVoiceNote: _asToVN, generateWaveform: _asGenWF } = _require(path.resolve('./src/scrape/media/audioconvert.cjs'));
+                                                        const { toVoiceNote: _asToVN, generateWaveform: _asGenWF } = _require(path.resolve('./scrape/media/audioconvert.cjs'));
                                                         const _asAudRes = await _require('axios').get(urlAud, { responseType: 'arraybuffer', timeout: 20000 });
                                                         _asVnBuf    = await _asToVN(Buffer.from(_asAudRes.data), 'audio/mpeg');
                                                         _asWaveform = await _asGenWF(_asVnBuf, 'audio/ogg; codecs=opus').catch(() => null);

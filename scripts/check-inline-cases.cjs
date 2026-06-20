@@ -140,7 +140,7 @@ console.log(`${DIM}Threshold: >${INLINE_THRESHOLD} baris substantif = inline log
 
 if (issues.length === 0) {
         console.log(`${GRN}${BOLD}✅ BERSIH — tidak ada case dengan inline logic yang tersisa.${RST}`);
-        console.log(`${GRN}Semua case sudah pakai pola simple delegate ke src/scrape/.${RST}\n`);
+        console.log(`${GRN}Semua case sudah pakai pola simple delegate ke scrape/.${RST}\n`);
         process.exit(0);
 }
 
@@ -149,12 +149,12 @@ console.log(`${RED}${BOLD}⚠️  Ditemukan ${issues.length} case yang masih pun
 for (const issue of issues) {
         const label = issue.labels.join(` / `);
         console.log(`${YLW}${BOLD}• L${issue.lineNo} — case '${label}'${RST}  ${DIM}(${issue.count} baris substantif)${RST}`);
-        console.log(`${DIM}  Rekomendasi: pindahkan ke src/scrape/<folder-sesuai-fitur>/<nama>.cjs${RST}`);
+        console.log(`${DIM}  Rekomendasi: pindahkan ke scrape/<folder-sesuai-fitur>/<nama>.cjs${RST}`);
         for (const pl of issue.preview) {
                 console.log(`  ${DIM}${pl}${RST}`);
         }
         console.log();
 }
 
-console.log(`${RED}Total: ${issues.length} case perlu dimigrasikan ke src/scrape/.${RST}\n`);
+console.log(`${RED}Total: ${issues.length} case perlu dimigrasikan ke scrape/.${RST}\n`);
 process.exit(1);
