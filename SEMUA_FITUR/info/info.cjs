@@ -637,6 +637,7 @@ async function handleEmoji({ hisoka, m, tolak, logCommand, getJadibotNumber, lis
                 if (_isJb) {
                         response += `│ .emojicustom → pakai emoji kamu sendiri\n`;
                         response += `│ .emojidefault → ikut emoji bot utama\n`;
+                        response += `│ .emojiclear → reset emoji kamu ke awal\n`;
                 } else {
                         response += `│ .emojicustom → aktifkan emoji kustom\n`;
                         response += `│ .emojidefault → balik ke 1900 emoji default\n`;
@@ -644,6 +645,7 @@ async function handleEmoji({ hisoka, m, tolak, logCommand, getJadibotNumber, lis
                 }
                 response += `│ .emojilist → lihat daftar emoji aktif\n`;
                 response += `│ .emoji → tampilkan panduan ini\n`;
+                if (_isJb) response += `│\n│ 📁 *Data tersimpan di folder kamu sendiri*\n│ *tidak berpengaruh ke bot utama* ✅\n`;
                 response += `╰══════════════════════╯`;
 
                 await tolak(hisoka, m, response);
