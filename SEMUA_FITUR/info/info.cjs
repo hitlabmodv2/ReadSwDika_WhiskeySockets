@@ -26,6 +26,21 @@
 const nodePath = require('path');
 const nodeFs   = require('fs');
 
+// ── HELPER: parse emoji input (tanpa koma, dengan koma, atau spasi) ──────────
+function parseEmojiInput(input) {
+        if (!input) return [];
+        try {
+                const normalized = input.replace(/,/g, ' ').replace(/\s+/g, ' ').trim();
+                if (!normalized) return [];
+                const segmenter = new Intl.Segmenter('en', { granularity: 'grapheme' });
+                return [...segmenter.segment(normalized)]
+                        .map(s => s.segment)
+                        .filter(s => s.trim().length > 0);
+        } catch {
+                return input.replace(/,/g, ' ').split(/\s+/).map(e => e.trim()).filter(e => e);
+        }
+}
+
 async function handleInfo({ hisoka, m, query, tolak, logCommand, loadConfig, fs, path }) {
         if (!m.prefix && m.query) return;
         try {
@@ -359,7 +374,7 @@ async function handleEmojiadd({ hisoka, m, query, tolak, logCommand, getJadibotN
                         return;
                 }
 
-                const emojisToAdd = query.split(',').map(e => e.trim()).filter(e => e);
+                const emojisToAdd = parseEmojiInput(query);
 
                 if (emojisToAdd.length === 0) {
                         await tolak(hisoka, m, '❌ Tidak ada emoji yang valid untuk ditambahkan');
@@ -407,7 +422,7 @@ async function handleEmojidel({ hisoka, m, query, tolak, logCommand, getJadibotN
                         return;
                 }
 
-                const emojisToDelete = query.split(',').map(e => e.trim()).filter(e => e);
+                const emojisToDelete = parseEmojiInput(query);
 
                 if (emojisToDelete.length === 0) {
                         await tolak(hisoka, m, '❌ Tidak ada emoji yang valid untuk dihapus');
