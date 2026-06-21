@@ -409,7 +409,24 @@ async function handleEmojiadd({ hisoka, m, query, tolak, logCommand, getJadibotN
                 const _jbNum = _isJb ? getJadibotNumber(hisoka) : null;
 
                 if (!query) {
-                        await tolak(hisoka, m, `❌ Format salah!\n\nContoh:\n.emojiadd 😊\n.emojiadd 😊,😄,😁\n.emojiadd 👮🧠🦓 *(tanpa pemisah)*\n.emojiadd 👮+🧠+🦓 *(gabung jadi 1, hanya mode Custom)*`);
+                        let _curList = _isJb ? listJadibotEmojis(_jbNum) : null;
+                        if (!_isJb) { const { listEmojis } = await import('../helper/emoji.js'); _curList = listEmojis(); }
+                        const _modeNow = _curList.mode === 'custom' ? '🎨 Custom' : '🌐 Default';
+                        let msg = `╭═══『 *EMOJIADD* 』═══╮\n│\n`;
+                        msg += `│ ⚙️ *Mode sekarang:* ${_modeNow}\n`;
+                        msg += `│ 📊 *Emoji aktif:* ${_curList.count} emoji\n`;
+                        if (_curList.emojis.length > 0) msg += `│ *Daftar:* ${_curList.emojis.join(' ')}\n`;
+                        msg += `│\n│ 📋 *Cara pakai:*\n`;
+                        msg += `│ .emojiadd 😊 — tambah 1 emoji\n`;
+                        msg += `│ .emojiadd 😊,😄,😁 — pakai koma\n`;
+                        msg += `│ .emojiadd 😊 😄 😁 — pakai spasi\n`;
+                        msg += `│ .emojiadd 😊😄😁 — tanpa pemisah\n`;
+                        msg += `│\n│ 🔗 *Gabung jadi 1 emoji (custom only):*\n`;
+                        msg += `│ .emojiadd 👮+🧠+🦓\n`;
+                        msg += `│ → tersimpan sbg 1: 👮🧠🦓\n`;
+                        msg += `│ → aktifkan dulu: .emojicustom\n`;
+                        msg += `╰═════════════════╯`;
+                        await tolak(hisoka, m, msg);
                         return;
                 }
 
@@ -491,15 +508,43 @@ async function handleEmojidel({ hisoka, m, query, tolak, logCommand, getJadibotN
                 const _jbNum = _isJb ? getJadibotNumber(hisoka) : null;
 
                 if (!query) {
-                        await tolak(hisoka, m, `❌ Format salah!\n\nContoh:\n.emojidel 😊\n.emojidel 😊,😄,😁`);
+                        let _curList = _isJb ? listJadibotEmojis(_jbNum) : null;
+                        if (!_isJb) { const { listEmojis } = await import('../helper/emoji.js'); _curList = listEmojis(); }
+                        const _modeNow = _curList.mode === 'custom' ? '🎨 Custom' : '🌐 Default';
+                        let msg = `╭═══『 *EMOJIDEL* 』═══╮\n│\n`;
+                        msg += `│ ⚙️ *Mode sekarang:* ${_modeNow}\n`;
+                        msg += `│ 📊 *Emoji aktif:* ${_curList.count} emoji\n`;
+                        if (_curList.emojis.length > 0) msg += `│ *Daftar:* ${_curList.emojis.join(' ')}\n`;
+                        msg += `│\n│ 📋 *Cara pakai:*\n`;
+                        msg += `│ .emojidel 😊 — hapus 1 emoji\n`;
+                        msg += `│ .emojidel 😊,😄,😁 — pakai koma\n`;
+                        msg += `│ .emojidel 😊 😄 😁 — pakai spasi\n`;
+                        msg += `│\n│ 🔗 *Hapus emoji gabungan (pakai +):*\n`;
+                        msg += `│ .emojidel 👮+🧠+🦓\n`;
+                        msg += `│ → hapus emoji: 👮🧠🦓\n`;
+                        msg += `╰═════════════════╯`;
+                        await tolak(hisoka, m, msg);
                         return;
                 }
 
-                const emojisToDelete = parseEmojiInput(query);
+                // Deteksi mode gabung: + di antara karakter → hapus emoji gabungan
+                const isGabungMode = /\S\+\S/.test(query);
+                let emojisToDelete = [];
 
-                if (emojisToDelete.length === 0) {
-                        await tolak(hisoka, m, '❌ Tidak ada emoji yang valid untuk dihapus');
-                        return;
+                if (isGabungMode) {
+                        // Gabungkan emoji (hapus +) → cari & hapus string gabungan itu
+                        const combined = gabungEmojiInput(query);
+                        if (!combined) {
+                                await tolak(hisoka, m, '❌ Tidak ada emoji yang valid untuk dihapus');
+                                return;
+                        }
+                        emojisToDelete = [combined];
+                } else {
+                        emojisToDelete = parseEmojiInput(query);
+                        if (emojisToDelete.length === 0) {
+                                await tolak(hisoka, m, '❌ Tidak ada emoji yang valid untuk dihapus');
+                                return;
+                        }
                 }
 
                 let results, newList;
@@ -518,11 +563,14 @@ async function handleEmojidel({ hisoka, m, query, tolak, logCommand, getJadibotN
 
                 let response = `╭═══『 *DEL EMOJI* 』═══╮\n│\n`;
                 if (_isJb) response += `│ 👤 *Emoji milik:* +${_jbNum}\n`;
-                response += `│ ⚙️ *Mode:* ${_modeLabelDel}\n│\n`;
+                response += `│ ⚙️ *Mode:* ${_modeLabelDel}\n`;
+                if (isGabungMode) response += `│ 🔗 *Tipe:* Hapus emoji gabungan\n`;
+                response += `│\n`;
                 if (results.deleted.length > 0) response += `│ ✅ *Dihapus (${results.deleted.length}):* ${results.deleted.join(' ')}\n`;
-                if (results.notFound.length > 0) response += `│ ⚠️ *Tidak ada (${results.notFound.length}):* ${results.notFound.join(' ')}\n`;
+                if (results.notFound.length > 0) response += `│ ⚠️ *Tidak ditemukan (${results.notFound.length}):* ${results.notFound.join(' ')}\n`;
                 response += `│\n│ 📊 *Sisa:* ${newList.count} emoji\n`;
                 if (newList.emojis.length > 0) response += `│ *Daftar:* ${newList.emojis.join(' ')}\n`;
+                else response += `│ ❌ Tidak ada emoji tersisa\n`;
                 response += `╰═════════════════╯`;
 
                 await tolak(hisoka, m, response);
@@ -534,6 +582,79 @@ async function handleEmojidel({ hisoka, m, query, tolak, logCommand, getJadibotN
 }
 
 module.exports.handleEmojidel = handleEmojidel;
+
+// ── HANDLER: emoji (panduan lengkap) ──────────────────────────────────────────
+
+async function handleEmoji({ hisoka, m, tolak, logCommand, getJadibotNumber, listJadibotEmojis }) {
+        if (!m.prefix && m.query) return;
+        if (!m.isOwner && hisoka?.isMainBot !== false) return;
+        try {
+                const _isJb = hisoka?.isMainBot === false;
+                const _jbNum = _isJb ? getJadibotNumber(hisoka) : null;
+
+                let data;
+                if (_isJb) {
+                        data = listJadibotEmojis(_jbNum);
+                } else {
+                        const { listEmojis } = await import('../helper/emoji.js');
+                        data = listEmojis();
+                }
+
+                const isCustom = data.mode === 'custom';
+                const _modeLabel = isCustom
+                        ? (_isJb ? '🎨 Custom (emoji kamu sendiri)' : '🎨 Custom (kustom kamu)')
+                        : (_isJb ? '🌐 Default (ikut bot utama)' : '🌐 Default (pool 1900 emoji)');
+
+                let response = `╭═══『 *🎭 EMOJI MANAGER* 』═══╮\n│\n`;
+                if (_isJb) response += `│ 👤 *Milik:* +${_jbNum}\n`;
+                response += `│ ⚙️ *Mode:* ${_modeLabel}\n`;
+                response += `│ 📊 *Total:* ${data.count} emoji aktif\n`;
+                if (data.emojis.length > 0) {
+                        response += `│ *Daftar:* ${data.emojis.join(' ')}\n`;
+                } else {
+                        response += `│ ❌ Belum ada emoji tersimpan\n`;
+                }
+                response += `│\n├──『 *➕ Tambah Emoji* 』──\n│\n`;
+                response += `│ .emojiadd 😊\n`;
+                response += `│  └ tambah 1 emoji\n`;
+                response += `│ .emojiadd 😊,😄,😁\n`;
+                response += `│  └ banyak pakai koma\n`;
+                response += `│ .emojiadd 😊 😄 😁\n`;
+                response += `│  └ banyak pakai spasi\n`;
+                response += `│ .emojiadd 😊😄😁\n`;
+                response += `│  └ tanpa pemisah (otomatis pisah)\n`;
+                response += `│\n│ 🔗 *Gabung jadi 1 (custom only):*\n`;
+                response += `│ .emojiadd 👮+🧠+🦓\n`;
+                response += `│  └ tersimpan sbg 1: 👮🧠🦓\n`;
+                response += `│\n├──『 *➖ Hapus Emoji* 』──\n│\n`;
+                response += `│ .emojidel 😊\n`;
+                response += `│  └ hapus 1 emoji\n`;
+                response += `│ .emojidel 😊,😄,😁\n`;
+                response += `│  └ hapus banyak pakai koma\n`;
+                response += `│ .emojidel 👮+🧠+🦓\n`;
+                response += `│  └ hapus emoji gabungan 👮🧠🦓\n`;
+                response += `│\n├──『 *⚙️ Mode & Lainnya* 』──\n│\n`;
+                if (_isJb) {
+                        response += `│ .emojicustom → pakai emoji kamu sendiri\n`;
+                        response += `│ .emojidefault → ikut emoji bot utama\n`;
+                } else {
+                        response += `│ .emojicustom → aktifkan emoji kustom\n`;
+                        response += `│ .emojidefault → balik ke 1900 emoji default\n`;
+                        response += `│ .emojiclear → reset emoji kustom ke awal\n`;
+                }
+                response += `│ .emojilist → lihat daftar emoji aktif\n`;
+                response += `│ .emoji → tampilkan panduan ini\n`;
+                response += `╰══════════════════════╯`;
+
+                await tolak(hisoka, m, response);
+                logCommand(m, hisoka, 'emoji');
+        } catch (error) {
+                console.error('\x1b[31m[Emoji] Error:\x1b[39m', error.message);
+                await tolak(hisoka, m, `❌ Error: ${error.message}`);
+        }
+}
+
+module.exports.handleEmoji = handleEmoji;
 
 // ── HANDLER: emojilist ────────────────────────────────────────────────────────
 

@@ -410,6 +410,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                             'upswgcv2', 'swgcv2', 'swgrupv2', 'swgroupv2', 'statusgrupv2', 'statusgroupv2',
                             'ceksw',
                             'ceksetting',
+                            'emoji',
                             'emojiadd', 'emojidel', 'emojilist',
                             'emojidefault', 'emojicustom', 'emojiclear',
                             'ceksesi',
@@ -1142,6 +1143,12 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 await handleListEmoji({ hisoka, m, query, tolak, logCommand, isMainBot });
                                 break;
                         }
+                        case 'emoji': {
+                                const { handleEmoji } = _require(path.resolve('./SEMUA_FITUR/info/info.cjs'));
+                                await handleEmoji({ hisoka, m, tolak, logCommand, getJadibotNumber, listJadibotEmojis });
+                                break;
+                        }
+
                         case 'emojiadd': {
                                 const { handleEmojiadd } = _require(path.resolve('./SEMUA_FITUR/info/info.cjs'));
                                 await handleEmojiadd({ hisoka, m, query, tolak, logCommand, getJadibotNumber, addJadibotEmojis, listJadibotEmojis });
