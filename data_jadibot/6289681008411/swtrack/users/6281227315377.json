@@ -280,7 +280,7 @@
       "participant": "113322762481669@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-21T08:41:45.101Z",
+    "updatedAt": "2026-06-21T14:21:50.226Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -299,7 +299,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-21T08:41:45.101Z"
+    "processedAt": "2026-06-21T08:41:45.101Z",
+    "deleted": true,
+    "deletedAt": "2026-06-21T14:21:50.226Z"
   },
   "AC6ECF087DBCFCFC3B8B5646FBE86754": {
     "id": "AC6ECF087DBCFCFC3B8B5646FBE86754",
@@ -364,7 +366,7 @@
       "participant": "113322762481669@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-21T09:55:46.099Z",
+    "updatedAt": "2026-06-21T14:21:47.246Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -383,7 +385,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-21T09:55:46.099Z"
+    "processedAt": "2026-06-21T09:55:46.099Z",
+    "deleted": true,
+    "deletedAt": "2026-06-21T14:21:47.246Z"
   },
   "AC82A72D864CD78C6A8CE57723A14D45": {
     "id": "AC82A72D864CD78C6A8CE57723A14D45",
@@ -406,7 +410,7 @@
       "participant": "113322762481669@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-21T10:04:25.368Z",
+    "updatedAt": "2026-06-21T14:21:51.030Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -425,6 +429,8 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-21T10:04:25.367Z"
+    "processedAt": "2026-06-21T10:04:25.367Z",
+    "deleted": true,
+    "deletedAt": "2026-06-21T14:21:51.030Z"
   }
 }

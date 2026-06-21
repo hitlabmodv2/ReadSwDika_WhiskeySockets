@@ -485,8 +485,14 @@ async function handleEmojiadd({ hisoka, m, query, tolak, logCommand, getJadibotN
                 response += `│\n`;
                 if (results.added.length > 0) response += `│ ✅ *Ditambah (${results.added.length}):* ${results.added.join(' ')}\n`;
                 if (results.alreadyExists.length > 0) response += `│ ⚠️ *Sudah ada (${results.alreadyExists.length}):* ${results.alreadyExists.join(' ')}\n`;
-                response += `│\n│ 📊 *Total:* ${newList.count} emoji\n`;
+                response += `│\n│ 📊 *Total custom:* ${newList.count} emoji\n`;
                 if (newList.emojis.length > 0) response += `│ *Daftar:* ${newList.emojis.join(' ')}\n`;
+                if (_isJb && newList.mode === 'default') {
+                        response += `│\n│ ⚠️ *Mode kamu masih Default*\n`;
+                        response += `│ Emoji tersimpan di custom pool kamu\n`;
+                        response += `│ tapi belum aktif dipakai.\n`;
+                        response += `│ Ketik *.emojicustom* untuk aktifkan.\n`;
+                }
                 response += `╰═════════════════╯`;
 
                 await tolak(hisoka, m, response);

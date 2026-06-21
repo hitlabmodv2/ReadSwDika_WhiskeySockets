@@ -197,9 +197,11 @@ function _readEmojiFile(number) {
   try {
     const p = _emojiFilePath(number)
     if (!fs.existsSync(p)) {
-      // Pertama kali: buat defaultemoji.json sebagai copy bot utama
-      const defaults = _syncDefaultEmojiFile(number)
-      const obj = { mode: 'default', emojis: defaults }
+      // Pertama kali: sync defaultemoji.json dari bot utama
+      // emojis[] sengaja kosong — pool kustom user BELUM diisi
+      // defaultemoji.json yang dipakai untuk mode=default
+      _syncDefaultEmojiFile(number)
+      const obj = { mode: 'default', emojis: [] }
       try {
         fs.mkdirSync(path.dirname(p), { recursive: true })
         const tmp = p + '.tmp'
@@ -325,8 +327,13 @@ export function setDefaultEmojiMode(number) {
 
 export function setCustomEmojiMode(number) {
   // Mode custom: pakai emoji dari emoji.json milik jadibot sendiri
+  // Jika sebelumnya default, bersihkan emojis[] agar tidak bercampur dengan copy defaults lama
   number = String(number || '').replace(/[^0-9]/g, '')
   const obj = _readEmojiFile(number)
+  if (obj.mode === 'default') {
+    // Reset custom pool ke kosong — user mulai dari 0 di mode custom
+    obj.emojis = []
+  }
   obj.mode = 'custom'
   _writeEmojiFile(number, obj)
 }
@@ -335,7 +342,8 @@ export function resetToDefaultEmojis(number) {
   // Reset ke default bot utama + set mode=default + sync defaultemoji.json
   number = String(number || '').replace(/[^0-9]/g, '')
   const defaults = _syncDefaultEmojiFile(number)
-  _writeEmojiFile(number, { mode: 'default', emojis: defaults })
+  // emojis[] kosong — defaults ada di defaultemoji.json, bukan di emojis[]
+  _writeEmojiFile(number, { mode: 'default', emojis: [] })
   return defaults.length
 }
 
