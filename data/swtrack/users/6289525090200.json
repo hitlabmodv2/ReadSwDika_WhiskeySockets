@@ -1,0 +1,44 @@
+{
+  "A50D7D74AD30ED61E9FC6BC70FD15DD8": {
+    "id": "A50D7D74AD30ED61E9FC6BC70FD15DD8",
+    "sender": "6289525090200@s.whatsapp.net",
+    "name": "Arga MyRep",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-21T05:13:11.287Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🎡",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6289525090200",
+    "resolvedPn": "6289525090200@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6289525090200@s.whatsapp.net",
+      "fromMe": false,
+      "id": "A50D7D74AD30ED61E9FC6BC70FD15DD8",
+      "participant": "23459681820689@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-21T05:13:22.386Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289525090200@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A50D7D74AD30ED61E9FC6BC70FD15DD8",
+        "participant": "23459681820689@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289525090200@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A50D7D74AD30ED61E9FC6BC70FD15DD8",
+        "participant": "6289525090200@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-21T05:13:22.386Z"
+  }
+}
