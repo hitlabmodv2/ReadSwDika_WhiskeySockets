@@ -26,19 +26,33 @@
 const nodePath = require('path');
 const nodeFs   = require('fs');
 
-// ── HELPER: parse emoji input (tanpa koma, dengan koma, +, atau spasi) ───────
+// ── HELPER: parse emoji input (tanpa koma, dengan koma, atau spasi) ──────────
+// Catatan: tanda + BUKAN separator di sini — + berarti gabung (lihat handleEmojiadd)
 function parseEmojiInput(input) {
         if (!input) return [];
         try {
-                // Support separator: koma (,), plus (+), atau spasi
-                const normalized = input.replace(/[,+]/g, ' ').replace(/\s+/g, ' ').trim();
+                const normalized = input.replace(/,/g, ' ').replace(/\s+/g, ' ').trim();
                 if (!normalized) return [];
                 const segmenter = new Intl.Segmenter('en', { granularity: 'grapheme' });
                 return [...segmenter.segment(normalized)]
                         .map(s => s.segment)
-                        .filter(s => s.trim().length > 0);
+                        .filter(s => s.trim().length > 0 && s !== '+');
         } catch {
-                return input.replace(/[,+]/g, ' ').split(/\s+/).map(e => e.trim()).filter(e => e);
+                return input.replace(/,/g, ' ').split(/\s+/).map(e => e.trim()).filter(e => e && e !== '+');
+        }
+}
+
+// ── HELPER: gabungkan emoji dengan tanda + (hapus tanda +, sisakan emoji saja) ─
+// Contoh: "👮+🧠+🦓" → "👮🧠🦓" (1 string gabungan)
+// Hanya berlaku di mode custom
+function gabungEmojiInput(input) {
+        if (!input) return '';
+        try {
+                // Hapus semua tanda + → sisanya adalah emoji yang bergabung
+                const combined = input.replace(/\+/g, '').trim();
+                return combined;
+        } catch {
+                return input.replace(/\+/g, '').trim();
         }
 }
 
@@ -211,15 +225,39 @@ async function handleAddEmoji({ hisoka, m, query, tolak, logCommand, isMainBot }
         try {
                 const { addEmojis, listEmojis } = await import('../helper/emoji.js');
                 const emojiInput = query.replace(/^emoji\s*/i, '').trim();
-                if (!emojiInput) { await tolak(hisoka, m, `❌ Format: add emoji 😊,😄,😁\n\nContoh:\nadd emoji 😊\nadd emoji 😊,😄,😁\nadd emoji 👮+🧠+🦓`); return; }
-                const emojisToAdd = parseEmojiInput(emojiInput);
-                if (!emojisToAdd.length) { await tolak(hisoka, m, '❌ Tidak ada emoji yang valid untuk ditambahkan'); return; }
+                if (!emojiInput) {
+                        await tolak(hisoka, m, `❌ Format: add emoji 😊,😄,😁\n\nContoh:\nadd emoji 😊\nadd emoji 😊,😄,😁\nadd emoji 👮🧠🦓 *(tanpa pemisah)*\nadd emoji 👮+🧠+🦓 *(gabung jadi 1, hanya Custom)*`);
+                        return;
+                }
+
+                const isGabungMode = /\S\+\S/.test(emojiInput);
+                let emojisToAdd = [];
+
+                if (isGabungMode) {
+                        const currentMode = listEmojis().mode;
+                        if (currentMode !== 'custom') {
+                                await tolak(hisoka, m, `❌ *Gabung emoji (+) hanya berlaku di mode Custom!*\n\nSekarang mode: *${currentMode === 'default' ? '🌐 Default' : currentMode}*\n\n💡 Aktifkan dulu dengan: *.emojicustom*`);
+                                return;
+                        }
+                        const combined = gabungEmojiInput(emojiInput);
+                        if (!combined) { await tolak(hisoka, m, '❌ Tidak ada emoji yang valid untuk digabungkan'); return; }
+                        emojisToAdd = [combined];
+                } else {
+                        emojisToAdd = parseEmojiInput(emojiInput);
+                        if (!emojisToAdd.length) { await tolak(hisoka, m, '❌ Tidak ada emoji yang valid untuk ditambahkan'); return; }
+                }
+
                 const results = addEmojis(emojisToAdd);
                 const newList = listEmojis();
+                const _modeLabel = newList.mode === 'custom' ? '🎨 Custom (kustom kamu)' : '🌐 Default (pool 1900)';
+
                 let response = `╭═══『 *ADD EMOJI* 』═══╮\n│\n`;
-                if (results.added.length > 0) response += `│ ✅ *Berhasil (${results.added.length}):* ${results.added.join(',')}\n`;
-                if (results.alreadyExists.length > 0) response += `│ ⚠️ *Sudah ada (${results.alreadyExists.length}):* ${results.alreadyExists.join(',')}\n`;
-                response += `│\n│ 📊 *Total:* ${newList.count} emoji\n│ *Daftar:* ${newList.emojis.join(',')}\n╰═════════════════╯`;
+                response += `│ ⚙️ *Mode:* ${_modeLabel}\n`;
+                if (isGabungMode) response += `│ 🔗 *Tipe:* Gabung (disimpan sebagai 1 emoji)\n`;
+                response += `│\n`;
+                if (results.added.length > 0) response += `│ ✅ *Ditambah (${results.added.length}):* ${results.added.join(' ')}\n`;
+                if (results.alreadyExists.length > 0) response += `│ ⚠️ *Sudah ada (${results.alreadyExists.length}):* ${results.alreadyExists.join(' ')}\n`;
+                response += `│\n│ 📊 *Total:* ${newList.count} emoji\n│ *Daftar:* ${newList.emojis.join(' ')}\n╰═════════════════╯`;
                 await tolak(hisoka, m, response);
                 logCommand(m, hisoka, 'add emoji');
         } catch (error) {
@@ -371,15 +409,42 @@ async function handleEmojiadd({ hisoka, m, query, tolak, logCommand, getJadibotN
                 const _jbNum = _isJb ? getJadibotNumber(hisoka) : null;
 
                 if (!query) {
-                        await tolak(hisoka, m, `❌ Format salah!\n\nContoh:\n.emojiadd 😊\n.emojiadd 😊,😄,😁`);
+                        await tolak(hisoka, m, `❌ Format salah!\n\nContoh:\n.emojiadd 😊\n.emojiadd 😊,😄,😁\n.emojiadd 👮🧠🦓 *(tanpa pemisah)*\n.emojiadd 👮+🧠+🦓 *(gabung jadi 1, hanya mode Custom)*`);
                         return;
                 }
 
-                const emojisToAdd = parseEmojiInput(query);
+                // Deteksi mode gabung: ada tanda + di antara karakter (bukan di awal/akhir)
+                const isGabungMode = /\S\+\S/.test(query);
+                let emojisToAdd = [];
 
-                if (emojisToAdd.length === 0) {
-                        await tolak(hisoka, m, '❌ Tidak ada emoji yang valid untuk ditambahkan');
-                        return;
+                if (isGabungMode) {
+                        // ── MODE GABUNG (hanya custom) ─────────────────────────────
+                        // Cek mode dulu sebelum proses
+                        let currentMode;
+                        if (_isJb) {
+                                currentMode = listJadibotEmojis(_jbNum).mode;
+                        } else {
+                                const { listEmojis } = await import('../helper/emoji.js');
+                                currentMode = listEmojis().mode;
+                        }
+                        if (currentMode !== 'custom') {
+                                await tolak(hisoka, m, `❌ *Gabung emoji (+) hanya berlaku di mode Custom!*\n\nSekarang mode: *${currentMode === 'default' ? '🌐 Default' : currentMode}*\n\n💡 Aktifkan dulu dengan: *.emojicustom*`);
+                                return;
+                        }
+                        // Hapus semua tanda + → jadikan 1 emoji gabungan
+                        const combined = gabungEmojiInput(query);
+                        if (!combined) {
+                                await tolak(hisoka, m, '❌ Tidak ada emoji yang valid untuk digabungkan');
+                                return;
+                        }
+                        emojisToAdd = [combined];
+                } else {
+                        // ── MODE BIASA (pisah per emoji) ───────────────────────────
+                        emojisToAdd = parseEmojiInput(query);
+                        if (emojisToAdd.length === 0) {
+                                await tolak(hisoka, m, '❌ Tidak ada emoji yang valid untuk ditambahkan');
+                                return;
+                        }
                 }
 
                 let results, newList;
@@ -398,7 +463,9 @@ async function handleEmojiadd({ hisoka, m, query, tolak, logCommand, getJadibotN
 
                 let response = `╭═══『 *ADD EMOJI* 』═══╮\n│\n`;
                 if (_isJb) response += `│ 👤 *Emoji milik:* +${_jbNum}\n`;
-                response += `│ ⚙️ *Mode:* ${_modeLabel}\n│\n`;
+                response += `│ ⚙️ *Mode:* ${_modeLabel}\n`;
+                if (isGabungMode) response += `│ 🔗 *Tipe:* Gabung (disimpan sebagai 1 emoji)\n`;
+                response += `│\n`;
                 if (results.added.length > 0) response += `│ ✅ *Ditambah (${results.added.length}):* ${results.added.join(' ')}\n`;
                 if (results.alreadyExists.length > 0) response += `│ ⚠️ *Sudah ada (${results.alreadyExists.length}):* ${results.alreadyExists.join(' ')}\n`;
                 response += `│\n│ 📊 *Total:* ${newList.count} emoji\n`;
