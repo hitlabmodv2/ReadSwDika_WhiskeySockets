@@ -1620,52 +1620,6 @@ async function main() {
                         }
                         /* =================== END AUTO SHOLAT SCHEDULER =================== */
 
-                        /* =================== AUTO GETCONTACT MONITOR =================== */
-                        if (global.gcMonitorInterval) {
-                                clearInterval(global.gcMonitorInterval);
-                                global.gcMonitorInterval = null;
-                        }
-                        {
-                                const GC_PATH        = path.join(process.cwd(), 'SEMUA_FITUR', 'tools', 'getcontact.cjs');
-                                const GC_INTERVAL_MS = 30 * 60 * 1000; // 30 menit
-
-                                const runGcMonitor = async () => {
-                                        try {
-                                                const _gc  = _require(GC_PATH);
-                                                const mon  = _gc.getMonitorConfig();
-                                                if (!mon.aktif) return;
-
-                                                const sess = _gc.getSession();
-                                                if (!sess.token || !sess.hash) return;
-
-                                                const { error, baru, total } = await _gc.cekTagBaru(sess.token, sess.hash);
-                                                if (error || !baru.length) return;
-
-                                                console.log(`[GcMonitor] 🏷️ ${baru.length} tag baru ditemukan!`);
-
-                                                // Kirim notif ke owner
-                                                const ownerNum = (process.env.BOT_NUMBER_OWNER || '').replace(/[^0-9]/g, '');
-                                                if (!ownerNum) return;
-                                                const ownerJid = ownerNum + '@s.whatsapp.net';
-
-                                                const notif = _gc.buatNotifTagBaru(baru, total);
-                                                await hisoka.sendMessage(ownerJid, { text: notif }).catch(e => {
-                                                        console.error('[GcMonitor] Gagal kirim notif ke owner:', e?.message);
-                                                });
-
-                                        } catch (err) {
-                                                console.error('[GcMonitor] Error scheduler:', err?.message);
-                                        }
-                                };
-
-                                // Mulai 5 menit setelah bot start
-                                setTimeout(() => {
-                                        runGcMonitor();
-                                        global.gcMonitorInterval = setInterval(runGcMonitor, GC_INTERVAL_MS);
-                                }, 5 * 60 * 1000);
-                        }
-                        /* =================== END AUTO GETCONTACT MONITOR =================== */
-
                         /* ===================== AUTO START SEMUA JADIBOT (STABIL) ===================== */
 const jadibotDir = path.join(process.cwd(), 'jadibot');
 
