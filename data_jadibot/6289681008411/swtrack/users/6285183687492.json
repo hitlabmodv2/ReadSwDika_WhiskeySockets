@@ -20,7 +20,7 @@
       "participant": "154481887056083@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-20T15:12:42.421Z",
+    "updatedAt": "2026-06-21T05:23:43.492Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -39,7 +39,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-20T15:12:42.421Z"
+    "processedAt": "2026-06-20T15:12:42.421Z",
+    "deleted": true,
+    "deletedAt": "2026-06-21T05:23:43.492Z"
   },
   "A5AC365CD6B7DE7FE9F9E6268FA9FA3A": {
     "id": "A5AC365CD6B7DE7FE9F9E6268FA9FA3A",
@@ -82,5 +84,47 @@
       }
     ],
     "processedAt": "2026-06-20T15:31:50.455Z"
+  },
+  "A592416CDFE2C83742C9459C0562A1CA": {
+    "id": "A592416CDFE2C83742C9459C0562A1CA",
+    "sender": "6285183687492@s.whatsapp.net",
+    "name": "MAULANA",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-21T05:23:47.367Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "❄️",
+    "resolve": "Signal Lib ✓",
+    "source": "status",
+    "number": "6285183687492",
+    "resolvedPn": "6285183687492@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285183687492@s.whatsapp.net",
+      "fromMe": false,
+      "id": "A592416CDFE2C83742C9459C0562A1CA",
+      "participant": "154481887056083@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-21T05:24:03.426Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285183687492@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A592416CDFE2C83742C9459C0562A1CA",
+        "participant": "154481887056083@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285183687492@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A592416CDFE2C83742C9459C0562A1CA",
+        "participant": "6285183687492@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-21T05:24:03.426Z"
   }
 }
