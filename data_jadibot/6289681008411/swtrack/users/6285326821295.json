@@ -5,9 +5,9 @@
     "name": "Sevenfold",
     "type": "videoMessage",
     "arrivedAt": "2026-06-21T13:55:23.996Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "🦨",
     "resolve": "Signal Lib ✓",
     "source": "status",
     "number": "6285326821295",
@@ -20,6 +20,25 @@
       "participant": "47815887736878@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-21T13:55:23.996Z"
+    "updatedAt": "2026-06-21T13:55:43.557Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285326821295@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC882CBC5CA51CD9421E8F7F929869EE",
+        "participant": "47815887736878@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285326821295@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC882CBC5CA51CD9421E8F7F929869EE",
+        "participant": "6285326821295@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-21T13:55:43.557Z"
   }
 }
