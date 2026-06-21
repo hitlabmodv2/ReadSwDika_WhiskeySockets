@@ -1,14 +1,23 @@
 📢 *INFORMASI RILIS*
-_📅 Minggu, 21 Juni 2026 — WIB_ 🕐
+_📅 Masih dipikirkan_ 🕐
 _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurna_ 🙏
 ━━━━━━━━━━━━━━━━━━━━━━
-🤖 *WILY BOT — V22*
-✨ *0 Fitur Baru*
+🤖 *WILY BOT — V23*
+✨ *1 Fitur Baru*
 🔧 *0 Bug Fix*
 🚀 *0 Improvement*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
+> NO.1 📌 *Sematkan Pesan — .sematkan (GC & Private)*
+> Fitur sematkan (pin) pesan kini bisa dipakai di *grup maupun private chat*
+> Cara pakai: reply pesan yang mau disematkan → ketik .sematkan
+> Durasi pilihan:
+> ▸ _.sematkan_ → sematkan 24 jam (default)
+> ▸ _.sematkan 7_ → sematkan 7 hari
+> ▸ _.sematkan 30_ → sematkan 30 hari
+> Di grup: bot wajib jadi admin
+> Di private: langsung jalan tanpa syarat apapun
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🔧 *BUG FIX*
