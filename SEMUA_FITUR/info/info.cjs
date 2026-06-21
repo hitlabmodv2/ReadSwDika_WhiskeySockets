@@ -391,8 +391,13 @@ async function handleEmojiadd({ hisoka, m, query, tolak, logCommand, getJadibotN
                         newList = listEmojis();
                 }
 
+                const _modeLabel = _isJb
+                        ? (newList.mode === 'custom' ? '🎨 Custom' : '🌐 Default')
+                        : (newList.mode === 'custom' ? '🎨 Custom (kustom kamu)' : '🌐 Default (pool 1900)');
+
                 let response = `╭═══『 *ADD EMOJI* 』═══╮\n│\n`;
-                if (_isJb) response += `│ 👤 *Emoji milik:* +${_jbNum}\n│\n`;
+                if (_isJb) response += `│ 👤 *Emoji milik:* +${_jbNum}\n`;
+                response += `│ ⚙️ *Mode:* ${_modeLabel}\n│\n`;
                 if (results.added.length > 0) response += `│ ✅ *Ditambah (${results.added.length}):* ${results.added.join(' ')}\n`;
                 if (results.alreadyExists.length > 0) response += `│ ⚠️ *Sudah ada (${results.alreadyExists.length}):* ${results.alreadyExists.join(' ')}\n`;
                 response += `│\n│ 📊 *Total:* ${newList.count} emoji\n`;
@@ -439,8 +444,13 @@ async function handleEmojidel({ hisoka, m, query, tolak, logCommand, getJadibotN
                         newList = listEmojis();
                 }
 
+                const _modeLabelDel = _isJb
+                        ? (newList.mode === 'custom' ? '🎨 Custom' : '🌐 Default')
+                        : (newList.mode === 'custom' ? '🎨 Custom (kustom kamu)' : '🌐 Default (pool 1900)');
+
                 let response = `╭═══『 *DEL EMOJI* 』═══╮\n│\n`;
-                if (_isJb) response += `│ 👤 *Emoji milik:* +${_jbNum}\n│\n`;
+                if (_isJb) response += `│ 👤 *Emoji milik:* +${_jbNum}\n`;
+                response += `│ ⚙️ *Mode:* ${_modeLabelDel}\n│\n`;
                 if (results.deleted.length > 0) response += `│ ✅ *Dihapus (${results.deleted.length}):* ${results.deleted.join(' ')}\n`;
                 if (results.notFound.length > 0) response += `│ ⚠️ *Tidak ada (${results.notFound.length}):* ${results.notFound.join(' ')}\n`;
                 response += `│\n│ 📊 *Sisa:* ${newList.count} emoji\n`;
