@@ -194,19 +194,13 @@ async function checkBotAdmin(hisoka, groupJid, kvGet) {
  * @returns {Promise<boolean>} true = sukses (untuk logCommand di caller)
  */
 async function handleSematkan(hisoka, m, query, tolak, kvGet) {
-    const pfx = m.prefix || '.';
+    const pfx     = m.prefix || '.';
+    const isGroup = !!m.isGroup;
 
     console.log(`${LOG} ─────────────────────────────────`);
-    console.log(`${LOG} Command: ${pfx}sematkan | query: "${query || ''}" | dari: ${m.sender} | grup: ${m.from || '-'}`);
+    console.log(`${LOG} Command: ${pfx}sematkan | query: "${query || ''}" | dari: ${m.sender} | chat: ${m.from || '-'} | isGroup: ${isGroup}`);
 
-    // ── 1. Harus di grup ──────────────────────────────────────────────────────
-    if (!m.isGroup) {
-        console.log(`${LOG} Bukan grup — ditolak`);
-        await tolak(hisoka, m, '❌ Fitur ini hanya bisa dipakai di dalam *grup*.');
-        return false;
-    }
-
-    // ── 2. Harus reply pesan ──────────────────────────────────────────────────
+    // ── 1. Harus reply pesan ──────────────────────────────────────────────────
     if (!m.isQuoted || !m.quoted?.key) {
         console.log(`${LOG} Tidak ada pesan yang di-reply — ditolak`);
         await tolak(hisoka, m,
@@ -228,24 +222,25 @@ async function handleSematkan(hisoka, m, query, tolak, kvGet) {
         return false;
     }
 
-    // ── 3. Cek bot admin ──────────────────────────────────────────────────────
-    const isBotAdmin = await checkBotAdmin(hisoka, m.from, kvGet);
-    if (!isBotAdmin) {
-        console.log(`${LOG} Bot bukan admin di grup ${m.from} — ditolak`);
-        await tolak(hisoka, m,
-            `╭─「 📌 *SEMATKAN PESAN* 」\n` +
-            `│\n` +
-            `│ ❌ *Bot harus jadi admin grup!*\n` +
-            `│\n` +
-            `│ Jadikan bot sebagai admin terlebih dahulu,\n` +
-            `│ lalu coba lagi.\n` +
-            `╰──────────────────────`
-        );
-        return false;
+    // ── 2. Cek bot admin (khusus grup) ───────────────────────────────────────
+    if (isGroup) {
+        const isBotAdmin = await checkBotAdmin(hisoka, m.from, kvGet);
+        if (!isBotAdmin) {
+            console.log(`${LOG} Bot bukan admin di grup ${m.from} — ditolak`);
+            await tolak(hisoka, m,
+                `╭─「 📌 *SEMATKAN PESAN* 」\n` +
+                `│\n` +
+                `│ ❌ *Bot harus jadi admin grup!*\n` +
+                `│\n` +
+                `│ Jadikan bot sebagai admin terlebih dahulu,\n` +
+                `│ lalu coba lagi.\n` +
+                `╰──────────────────────`
+            );
+            return false;
+        }
     }
 
-    // ── 4. Parse durasi ───────────────────────────────────────────────────────
-    // type SELALU 1 (PIN_FOR_ALL), durasi dikontrol field "time" dalam detik
+    // ── 3. Parse durasi ───────────────────────────────────────────────────────
     const durasiSecs = parseDurasi(query);
     const durasiStr  = durasiLabel(durasiSecs);
     const rawKey     = m.quoted.key;
@@ -254,22 +249,20 @@ async function handleSematkan(hisoka, m, query, tolak, kvGet) {
     console.log(`${LOG} Raw key: ${JSON.stringify(rawKey)}`);
     console.log(`${LOG} Durasi: ${durasiStr} (${durasiSecs} detik)`);
 
-    // ── 5. Resolve LID participant → phone number ─────────────────────────────
-    // Penting: semua grup pakai addressingMode:lid, participant bisa @lid
-    // WhatsApp server butuh phone number JID untuk pin
-    const pinKey = await resolveKeyForPin(hisoka, rawKey);
+    // ── 4. Resolve LID participant → phone number (khusus grup) ──────────────
+    // Private chat tidak pakai LID, langsung pakai rawKey
+    const pinKey = isGroup ? await resolveKeyForPin(hisoka, rawKey) : { ...rawKey };
     console.log(`${LOG} Pin key final: ${JSON.stringify(pinKey)}`);
 
-    // ── 6. Kirim pin via Baileys ──────────────────────────────────────────────
-    // type=1 (PIN_FOR_ALL) selalu, time=detik untuk durasi
+    // ── 5. Kirim pin via Baileys ──────────────────────────────────────────────
     try {
         await hisoka.sendMessage(m.from, {
             pin  : pinKey,
             type : 1,           // PIN_FOR_ALL
-            time : durasiSecs,  // 86400 / 604800 / 2592000
+            time : durasiSecs,
         });
 
-        console.log(`${LOG} ✅ Berhasil disematkan — durasi: ${durasiStr} | grup: ${m.from}`);
+        console.log(`${LOG} ✅ Berhasil disematkan — durasi: ${durasiStr} | chat: ${m.from}`);
 
         await tolak(hisoka, m,
             `╭─「 📌 *PESAN DISEMATKAN* 」\n` +
@@ -291,7 +284,7 @@ async function handleSematkan(hisoka, m, query, tolak, kvGet) {
             `│\n` +
             `│ ⚠️ Error : ${err.message}\n` +
             `│\n` +
-            `│ 💡 Pastikan bot masih jadi admin\n` +
+            `│ 💡 ${isGroup ? 'Pastikan bot masih jadi admin' : 'Pastikan bot tidak diblokir'}\n` +
             `│    dan coba lagi.\n` +
             `╰──────────────────────`
         );
