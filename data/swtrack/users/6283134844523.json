@@ -5,9 +5,9 @@
     "name": "Anda Siapa?",
     "type": "extendedTextMessage",
     "arrivedAt": "2026-06-21T13:40:48.012Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "1️⃣2️⃣3️⃣",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6283134844523",
@@ -20,7 +20,26 @@
       "participant": "239328697536578@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-21T13:40:48.012Z"
+    "updatedAt": "2026-06-21T13:41:06.903Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283134844523@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A5C9872371FAB211D80C3ADE3A815B5A",
+        "participant": "239328697536578@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283134844523@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A5C9872371FAB211D80C3ADE3A815B5A",
+        "participant": "6283134844523@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-21T13:41:06.903Z"
   },
   "A5A2B3FDCF59264F591DEF01930F213C": {
     "id": "A5A2B3FDCF59264F591DEF01930F213C",
@@ -70,9 +89,9 @@
     "name": "Anda Siapa?",
     "type": "extendedTextMessage",
     "arrivedAt": "2026-06-21T13:41:00.217Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "1️⃣2️⃣3️⃣",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6283134844523",
@@ -85,6 +104,25 @@
       "participant": "239328697536578@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-21T13:41:00.217Z"
+    "updatedAt": "2026-06-21T13:41:03.272Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283134844523@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A555FF88339D85A7C9B2AB4768C338E8",
+        "participant": "239328697536578@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283134844523@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A555FF88339D85A7C9B2AB4768C338E8",
+        "participant": "6283134844523@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-21T13:41:03.271Z"
   }
 }
