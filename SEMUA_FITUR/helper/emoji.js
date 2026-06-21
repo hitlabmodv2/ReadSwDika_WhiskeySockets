@@ -10,7 +10,11 @@ export {
     addEmojis,
     deleteEmojis,
     listEmojis,
-    getRandomEmoji
+    getRandomEmoji,
+    getMode,
+    setCustomMode,
+    setDefaultMode,
+    resetCustomEmojis
 } from '../../src/helper/emoji.js';
 
 export { default } from '../../src/helper/emoji.js';

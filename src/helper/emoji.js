@@ -28,6 +28,12 @@
  *  Kelola set emoji reaksi bot (seen, processing, done, error)
  *  — mendukung konfigurasi default, kustom per sesi JadiBot,
  *  dan fallback otomatis bila emoji tidak tersedia.
+ *
+ *  Mode Bot Utama:
+ *  - 'default' → pakai pool 1900 emoji (emojis[])
+ *  - 'custom'  → pakai customEmojis[] yang terpisah (tidak sentuh pool default)
+ *
+ *  Jadibot sync: selalu sinkron data.emojis (pool default), tidak terpengaruh mode.
  * ═══════════════════════════════════════════════════════════════
  */
 import fs from 'fs';
@@ -38,16 +44,21 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const EMOJI_JSON_PATH = path.join(__dirname, 'emoji.json');
 
+const DEFAULT_SEED = ['❤️'];
+
 function loadEmojiData() {
     try {
         if (fs.existsSync(EMOJI_JSON_PATH)) {
-            const data = fs.readFileSync(EMOJI_JSON_PATH, 'utf8');
-            return JSON.parse(data);
+            const raw = fs.readFileSync(EMOJI_JSON_PATH, 'utf8');
+            const data = JSON.parse(raw);
+            if (!data.mode) data.mode = 'default';
+            if (!Array.isArray(data.customEmojis)) data.customEmojis = [];
+            return data;
         }
     } catch (error) {
         console.error('Error loading emoji.json:', error.message);
     }
-    return { emojis: [] };
+    return { mode: 'default', emojis: [], customEmojis: [] };
 }
 
 function saveEmojiData(data) {
@@ -55,7 +66,7 @@ function saveEmojiData(data) {
         const tmp = EMOJI_JSON_PATH + '.tmp';
         fs.writeFileSync(tmp, JSON.stringify(data, null, 2), 'utf8');
         fs.renameSync(tmp, EMOJI_JSON_PATH);
-        // Auto-sync defaultemoji.json ke semua jadibot mode=default
+        // Selalu sync pool default (emojis[]) ke jadibot — tidak terpengaruh mode
         _syncAllJadibotDefaults(data.emojis || []);
         return true;
     } catch (error) {
@@ -92,24 +103,90 @@ function _syncAllJadibotDefaults(emojis) {
     } catch (_) {}
 }
 
+// ── MODE MANAGEMENT ───────────────────────────────────────────
+
+function getMode() {
+    const data = loadEmojiData();
+    return data.mode || 'default';
+}
+
+/**
+ * Ganti ke mode Custom.
+ * Jika customEmojis masih kosong, isi dengan seed emoji.
+ * Tidak mengubah pool default (emojis[]).
+ * @returns {{ count: number, emojis: string[], isNew: boolean }}
+ */
+function setCustomMode() {
+    const data = loadEmojiData();
+    const wasEmpty = !data.customEmojis || data.customEmojis.length === 0;
+    if (wasEmpty) data.customEmojis = [...DEFAULT_SEED];
+    data.mode = 'custom';
+    saveEmojiData(data);
+    return {
+        count: data.customEmojis.length,
+        emojis: data.customEmojis,
+        isNew: wasEmpty
+    };
+}
+
+/**
+ * Reset customEmojis ke seed, paksa mode Custom.
+ * Tidak mengubah pool default (emojis[]).
+ * @returns {{ count: number, emojis: string[] }}
+ */
+function resetCustomEmojis() {
+    const data = loadEmojiData();
+    data.customEmojis = [...DEFAULT_SEED];
+    data.mode = 'custom';
+    saveEmojiData(data);
+    return {
+        count: data.customEmojis.length,
+        emojis: data.customEmojis
+    };
+}
+
+/**
+ * Ganti ke mode Default (pakai pool 1900 emoji).
+ * Tidak menghapus customEmojis — bisa kembali ke custom kapan saja.
+ * @returns {{ count: number }}
+ */
+function setDefaultMode() {
+    const data = loadEmojiData();
+    data.mode = 'default';
+    saveEmojiData(data);
+    return { count: (data.emojis || []).length };
+}
+
+// ── CORE FUNCTIONS ────────────────────────────────────────────
+
+/**
+ * Ambil emoji aktif sesuai mode.
+ * mode=custom → customEmojis, mode=default → emojis (pool 1900)
+ */
 function getStatusEmojis() {
     const data = loadEmojiData();
+    if (data.mode === 'custom') {
+        const custom = data.customEmojis || [];
+        return custom.length > 0 ? custom : DEFAULT_SEED;
+    }
     return data.emojis || [];
 }
 
+/**
+ * Tambah emoji ke set aktif sesuai mode:
+ * - mode=custom  → tambah ke customEmojis
+ * - mode=default → tambah ke emojis (pool default, akan sync ke jadibot)
+ */
 function addEmojis(emojisToAdd) {
     const data = loadEmojiData();
-    const currentEmojis = data.emojis || [];
-    
-    const results = {
-        added: [],
-        alreadyExists: []
-    };
+    const isCustom = data.mode === 'custom';
+    const currentEmojis = isCustom ? (data.customEmojis || []) : (data.emojis || []);
+
+    const results = { added: [], alreadyExists: [] };
 
     for (const emoji of emojisToAdd) {
         const trimmed = emoji.trim();
         if (!trimmed) continue;
-        
         if (currentEmojis.includes(trimmed)) {
             results.alreadyExists.push(trimmed);
         } else {
@@ -119,26 +196,30 @@ function addEmojis(emojisToAdd) {
     }
 
     if (results.added.length > 0) {
-        data.emojis = currentEmojis;
+        if (isCustom) {
+            data.customEmojis = currentEmojis;
+        } else {
+            data.emojis = currentEmojis;
+        }
         saveEmojiData(data);
     }
 
     return results;
 }
 
+/**
+ * Hapus emoji dari set aktif sesuai mode.
+ */
 function deleteEmojis(emojisToDelete) {
     const data = loadEmojiData();
-    let currentEmojis = data.emojis || [];
-    
-    const results = {
-        deleted: [],
-        notFound: []
-    };
+    const isCustom = data.mode === 'custom';
+    let currentEmojis = isCustom ? (data.customEmojis || []) : (data.emojis || []);
+
+    const results = { deleted: [], notFound: [] };
 
     for (const emoji of emojisToDelete) {
         const trimmed = emoji.trim();
         if (!trimmed) continue;
-        
         const index = currentEmojis.indexOf(trimmed);
         if (index > -1) {
             currentEmojis.splice(index, 1);
@@ -149,18 +230,28 @@ function deleteEmojis(emojisToDelete) {
     }
 
     if (results.deleted.length > 0) {
-        data.emojis = currentEmojis;
+        if (isCustom) {
+            data.customEmojis = currentEmojis;
+        } else {
+            data.emojis = currentEmojis;
+        }
         saveEmojiData(data);
     }
 
     return results;
 }
 
+/**
+ * List emoji aktif sesuai mode + info mode.
+ */
 function listEmojis() {
     const data = loadEmojiData();
+    const isCustom = data.mode === 'custom';
+    const activeEmojis = isCustom ? (data.customEmojis || []) : (data.emojis || []);
     return {
-        emojis: data.emojis || [],
-        count: (data.emojis || []).length
+        emojis: activeEmojis,
+        count: activeEmojis.length,
+        mode: data.mode || 'default'
     };
 }
 
@@ -175,7 +266,11 @@ export {
     addEmojis,
     deleteEmojis,
     listEmojis,
-    getRandomEmoji
+    getRandomEmoji,
+    getMode,
+    setCustomMode,
+    setDefaultMode,
+    resetCustomEmojis
 };
 
 export default {
@@ -183,5 +278,9 @@ export default {
     addEmojis,
     deleteEmojis,
     listEmojis,
-    getRandomEmoji
+    getRandomEmoji,
+    getMode,
+    setCustomMode,
+    setDefaultMode,
+    resetCustomEmojis
 };

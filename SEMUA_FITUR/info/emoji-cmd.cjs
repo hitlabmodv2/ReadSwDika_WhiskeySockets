@@ -29,17 +29,20 @@ async function handleEmojidefault({ hisoka, m, tolak, logCommand, getJadibotNumb
         const _isJb = hisoka?.isMainBot === false;
         try {
                 if (!_isJb) {
-                        await tolak(hisoka, m,
-                                `╭═══『 *DEFAULT EMOJI* 』═══╮\n│\n` +
-                                `│ ℹ️ *Bot Utama* tidak punya mode\n` +
-                                `│ default/custom seperti jadibot.\n│\n` +
-                                `│ 📋 Emoji bot utama dikelola\n` +
-                                `│ langsung dengan perintah:\n│\n` +
-                                `│ .emojiadd 😊,😄 — tambah emoji\n` +
-                                `│ .emojidel 😊 — hapus emoji\n` +
-                                `│ .emojilist — lihat daftar emoji\n` +
-                                `╰═════════════════════╯`
-                        );
+                        // Bot utama: ganti ke mode default (pakai pool 1900 emoji)
+                        const { setDefaultMode } = await import('../helper/emoji.js');
+                        const result = setDefaultMode();
+                        let response = `╭═══『 *DEFAULT EMOJI* 』═══╮\n│\n`;
+                        response += `│ 🤖 *Bot Utama*\n│\n`;
+                        response += `│ ✅ Mode diubah ke *Default*\n`;
+                        response += `│\n│ 🌐 Reaksi SW sekarang pakai\n`;
+                        response += `│ pool *${result.count} emoji default*\n`;
+                        response += `│\n│ 💡 Ketik *.emojicustom* untuk\n`;
+                        response += `│ balik ke emoji kustom kamu\n│\n`;
+                        response += `│ *.emojilist* — cek daftar emoji\n`;
+                        response += `╰═════════════════════╯`;
+                        await tolak(hisoka, m, response);
+                        logCommand(m, hisoka, 'emojidefault');
                         return;
                 }
                 const _jbNum = getJadibotNumber(hisoka);
@@ -66,18 +69,25 @@ async function handleEmojicustom({ hisoka, m, tolak, logCommand, getJadibotNumbe
         const _isJb = hisoka?.isMainBot === false;
         try {
                 if (!_isJb) {
-                        const { listEmojis } = await import('../helper/emoji.js');
-                        const data = listEmojis();
+                        // Bot utama: ganti ke mode custom — buat file custom baru jika belum ada
+                        const { setCustomMode } = await import('../helper/emoji.js');
+                        const result = setCustomMode();
                         let response = `╭═══『 *CUSTOM EMOJI* 』═══╮\n│\n`;
                         response += `│ 🤖 *Bot Utama*\n│\n`;
-                        response += `│ ✅ Mode: *Custom (Aktif)*\n`;
-                        response += `│\n│ 🎨 Emoji bot utama dikelola\n`;
-                        response += `│ langsung oleh owner.\n`;
-                        response += `│ 📊 Total: ${data.count} emoji tersimpan\n`;
-                        response += `│\n│ 💡 Atur emoji:\n`;
+                        response += `│ ✅ Mode diubah ke *Custom*\n`;
+                        if (result.isNew) {
+                                response += `│\n│ 🆕 File custom baru dibuat!\n`;
+                                response += `│ Seed: ${result.emojis.join(' ')}\n`;
+                        }
+                        response += `│\n│ 🎨 Reaksi SW sekarang pakai\n`;
+                        response += `│ emoji *kustom kamu sendiri*\n`;
+                        response += `│ 📊 Total: ${result.count} emoji tersimpan\n`;
+                        response += `│\n│ 💡 Atur emoji kustom:\n`;
                         response += `│ .emojiadd 😊,😄 — tambah\n`;
                         response += `│ .emojidel 😊 — hapus\n`;
+                        response += `│ .emojiclear — reset ke seed\n`;
                         response += `│ .emojilist — lihat daftar\n`;
+                        response += `│ .emojidefault — balik ke 1900 default\n`;
                         response += `╰═════════════════════╯`;
                         await tolak(hisoka, m, response);
                         logCommand(m, hisoka, 'emojicustom');
@@ -112,15 +122,21 @@ async function handleEmojiclear({ hisoka, m, tolak, logCommand, getJadibotNumber
         const _isJb = hisoka?.isMainBot === false;
         try {
                 if (!_isJb) {
-                        await tolak(hisoka, m,
-                                `╭═══『 *CLEAR EMOJI* 』═══╮\n│\n` +
-                                `│ ℹ️ *Bot Utama* tidak punya fitur\n` +
-                                `│ clear/reset emoji seperti jadibot.\n│\n` +
-                                `│ 💡 Untuk hapus emoji bot utama:\n│\n` +
-                                `│ .emojidel 😊 — hapus satu per satu\n` +
-                                `│ .emojilist — lihat daftar emoji\n` +
-                                `╰═════════════════════╯`
-                        );
+                        // Bot utama: reset customEmojis ke seed ❤️, paksa mode custom
+                        const { resetCustomEmojis } = await import('../helper/emoji.js');
+                        const result = resetCustomEmojis();
+                        let response = `╭═══『 *CLEAR EMOJI* 』═══╮\n│\n`;
+                        response += `│ 🤖 *Bot Utama*\n│\n`;
+                        response += `│ ✅ Emoji kustom di-reset!\n│\n`;
+                        response += `│ 💚 Seed awal: ${result.emojis.join(' ')}\n│\n`;
+                        response += `│ ⚙️ Mode: *Custom* (aktif)\n│\n`;
+                        response += `│ 💡 Tambah emoji kustom kamu:\n`;
+                        response += `│ .emojiadd 😊,😄,😁\n│\n`;
+                        response += `│ Balik ke 1900 emoji default:\n`;
+                        response += `│ .emojidefault\n`;
+                        response += `╰═════════════════════╯`;
+                        await tolak(hisoka, m, response);
+                        logCommand(m, hisoka, 'emojiclear');
                         return;
                 }
                 const _jbNum = getJadibotNumber(hisoka);
