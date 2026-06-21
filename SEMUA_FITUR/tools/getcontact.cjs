@@ -7,7 +7,7 @@ const path  = require('path');
 const FILE_CONFIG = path.join(process.cwd(), 'config.json');
 const BASE_URL    = 'https://web.getcontact.com';
 
-// Simpan sesi login sementara (nomor → { hash, cookie, timer })
+// Simpan sesi login sementara (jid → { hash, cookie, timer })
 const _pendingLogin = new Map();
 
 // ── CONFIG ────────────────────────────────────────────────────────────────────
@@ -36,6 +36,25 @@ function simpanSession(token, hash) {
     simpanConfig(cfg);
 }
 
+function getMonitorConfig() {
+    const cfg = bacaConfig();
+    const gc  = cfg?.getcontact || {};
+    return {
+        aktif         : gc.monitorAktif   === true,
+        tagTerakhir   : Array.isArray(gc.tagKuTerakhir) ? gc.tagKuTerakhir : [],
+        waktuTerakhir : gc.monitorWaktu   || null,
+    };
+}
+
+function simpanMonitor(aktif, tagArr) {
+    const cfg = bacaConfig();
+    if (!cfg.getcontact) cfg.getcontact = {};
+    if (aktif !== null)  cfg.getcontact.monitorAktif    = aktif;
+    if (tagArr !== null) cfg.getcontact.tagKuTerakhir   = tagArr;
+    cfg.getcontact.monitorWaktu = new Date().toISOString();
+    simpanConfig(cfg);
+}
+
 // ── HEADERS ───────────────────────────────────────────────────────────────────
 
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36';
@@ -61,7 +80,6 @@ function headersAjax(cookie = '') {
     };
 }
 
-// Ambil semua set-cookie jadi string cookie
 function parseCookies(setCookieArr = []) {
     return (setCookieArr || []).map(c => c.split(';')[0]).join('; ');
 }
@@ -73,15 +91,12 @@ async function initSession() {
     const html = typeof res.data === 'string' ? res.data : '';
     const cookies = parseCookies(res.headers['set-cookie']);
 
-    // Hash untuk user belum login
     const m1 = html.match(/hash:\s*'([a-fA-F0-9]+)'/);
-    // Hash untuk user sudah login
     const m2 = html.match(/<input[^>]+name="hash"[^>]+value="([^"]+)"/);
 
     const hash     = m1?.[1] || m2?.[1] || '';
     const isLogged = !!m2?.[1];
 
-    // Kalau sudah login, ambil accessToken dari cookie
     const tokenMatch = cookies.match(/accessToken=([^;]+)/);
     const token = isLogged && tokenMatch ? tokenMatch[1] : '';
 
@@ -96,7 +111,6 @@ async function getQrImage(cookies) {
         timeout      : 20000,
         headers      : { ...headersBrowser(cookies), 'Referer': BASE_URL + '/' },
     });
-    // Gabung cookie baru kalau ada
     const newCookies = parseCookies(res.headers['set-cookie']);
     const merged = mergeCookies(cookies, newCookies);
     return { buf: Buffer.from(res.data), cookies: merged };
@@ -141,7 +155,79 @@ function extractToken(cookies) {
     return m?.[1] || '';
 }
 
-// ── SEARCH + TAG ──────────────────────────────────────────────────────────────
+// ── AMBIL TAG MILIKKU (siapa yang simpan nomorku) ────────────────────────────
+
+async function ambilTagKu(token, hash) {
+    const cookie = `accessToken=${token}; lang=en;`;
+    const body   = `hash=${encodeURIComponent(hash)}`;
+
+    // Coba beberapa endpoint yang mungkin return JSON profil kita
+    const endpoints = [
+        `${BASE_URL}/my-tags`,
+        `${BASE_URL}/profile`,
+        `${BASE_URL}/profile-tags`,
+    ];
+
+    for (const url of endpoints) {
+        try {
+            const res = await axios.post(url, body, {
+                headers: headersAjax(cookie),
+                timeout: 15000,
+            });
+            const d = res.data;
+            // Kalau dapat JSON (bukan HTML)
+            if (d && typeof d === 'object' && !Array.isArray(d)) {
+                const tags = d.tags || d.result?.tags || d.data?.tags || d.tagList || d.list || [];
+                if (Array.isArray(tags) && tags.length >= 0) return { ok: true, tags, raw: d };
+            }
+        } catch (_) {}
+    }
+
+    // Fallback GET dengan cookie: parse JSON dari JS embed di HTML
+    try {
+        const res  = await axios.get(BASE_URL, { headers: headersBrowser(cookie), timeout: 20000 });
+        const html = typeof res.data === 'string' ? res.data : '';
+
+        // Ekstrak dari window.__data atau embed JSON
+        const m1 = html.match(/"tags"\s*:\s*(\[[^\]]*?\])/s);
+        const m2 = html.match(/tagList\s*:\s*(\[[^\]]*?\])/s);
+        const raw = m1?.[1] || m2?.[1];
+        if (raw) {
+            try {
+                const tags = JSON.parse(raw);
+                return { ok: true, tags, raw: {} };
+            } catch (_) {}
+        }
+    } catch (_) {}
+
+    return { ok: false, tags: [] };
+}
+
+// ── CEK TAG BARU (bandingkan dengan tersimpan) ───────────────────────────────
+
+async function cekTagBaru(token, hash) {
+    const { ok, tags } = await ambilTagKu(token, hash);
+    if (!ok) return { error: true, baru: [] };
+
+    const { tagTerakhir } = getMonitorConfig();
+
+    // Normalize tag jadi Set of string (label unik)
+    const norm = t => {
+        const label = t.tag || t.name || t.label || '';
+        const count = t.count || t.tagCount || 0;
+        return `${label}||${count}`;
+    };
+
+    const setLama  = new Set(tagTerakhir.map(norm));
+    const tagBaru  = tags.filter(t => !setLama.has(norm(t)));
+
+    // Simpan tag terbaru
+    simpanMonitor(null, tags);
+
+    return { error: false, baru: tagBaru, total: tags.length };
+}
+
+// ── SEARCH + TAG NOMOR ORANG LAIN ─────────────────────────────────────────────
 
 async function cariNomor(phoneNumber, token, hash) {
     const cookie = `accessToken=${token}; lang=en;`;
@@ -166,7 +252,7 @@ function formatNomor(input) {
     return '+' + n;
 }
 
-// ── FORMAT CAPTION ────────────────────────────────────────────────────────────
+// ── FORMAT CAPTION CARI NOMOR ─────────────────────────────────────────────────
 
 function buatCaption(nomor, searchData, tagData) {
     const SEP = '━━━━━━━━━━━━━━━━━━━';
@@ -201,15 +287,36 @@ function buatCaption(nomor, searchData, tagData) {
     );
 }
 
+// ── FORMAT NOTIF TAG BARU ─────────────────────────────────────────────────────
+
+function buatNotifTagBaru(tagBaru, totalTag) {
+    const waktu = new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' });
+    const list  = tagBaru.slice(0, 10).map((t, i) => {
+        const label = t.tag || t.name || t.label || String(t);
+        const count = t.count || t.tagCount || '';
+        return `│ ${String(i+1).padStart(2,' ')}. *${label}*${count ? ` _(${count}x)_` : ''}`;
+    }).join('\n');
+
+    return (
+        `🔔 *GETCONTACT — TAG BARU!*\n` +
+        `━━━━━━━━━━━━━━━━━━━\n` +
+        `📅 *Waktu*  : ${waktu}\n` +
+        `🏷️ *Tag baru ditemukan!*\n` +
+        `${list}\n` +
+        `━━━━━━━━━━━━━━━━━━━\n` +
+        `📊 _Total tag tersimpan: ${totalTag}_`
+    );
+}
+
 // ── POLLING QR (background) ───────────────────────────────────────────────────
 
 async function startPolling(jid, hisoka, m, hash, cookies, tolak, logCommand) {
-    const MAX    = 40;   // maks 40x poll = ~80 detik
-    const DELAY  = 2000; // tiap 2 detik
+    const MAX    = 40;
+    const DELAY  = 2000;
     let attempt  = 0;
 
     const poll = async () => {
-        if (!_pendingLogin.has(jid)) return; // dibatalkan
+        if (!_pendingLogin.has(jid)) return;
         attempt++;
         if (attempt > MAX) {
             _pendingLogin.delete(jid);
@@ -220,7 +327,6 @@ async function startPolling(jid, hisoka, m, hash, cookies, tolak, logCommand) {
             const { scanned, cookies: newCookies } = await checkQrScanned(hash, cookies);
             if (scanned) {
                 _pendingLogin.delete(jid);
-                // Ambil hash final setelah login
                 const { hash: finalHash, cookies: finalCookies } = await getHashAfterLogin(newCookies);
                 const finalToken = extractToken(finalCookies);
                 if (!finalToken || !finalHash) {
@@ -230,9 +336,11 @@ async function startPolling(jid, hisoka, m, hash, cookies, tolak, logCommand) {
                 simpanSession(finalToken, finalHash);
                 await tolak(hisoka, m,
                     `✅ *Login GetContact berhasil!*\n\n` +
-                    `Token & hash sudah tersimpan otomatis.\n` +
-                    `Sekarang bisa langsung cek nomor:\n` +
-                    `*${m.prefix || '.'}gtc 08xxxxxxxxx*`
+                    `Token & hash sudah tersimpan otomatis.\n\n` +
+                    `*Fitur tersedia:*\n` +
+                    `• ${m.prefix || '.'}gtc 08xxxxxxxxx — cek nomor\n` +
+                    `• ${m.prefix || '.'}getcontact mytags — lihat siapa simpan nomormu\n` +
+                    `• ${m.prefix || '.'}getcontact monitor on — notif realtime tag baru`
                 ).catch(() => {});
                 await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } }).catch(() => {});
                 logCommand(m, hisoka, 'getcontact-login');
@@ -257,7 +365,6 @@ async function handleGetcontact({ hisoka, m, query, tolak, logCommand }) {
     if (sub === 'login') {
         if (!m.isOwner) { await tolak(hisoka, m, '❌ Hanya owner yang bisa login.'); return; }
 
-        // Cegah login ganda
         if (_pendingLogin.has(m.from)) {
             await tolak(hisoka, m, `⏳ *Sedang menunggu scan QR!*\nScan dulu QR yang sudah dikirim, atau tunggu kadaluarsa.`);
             return;
@@ -266,7 +373,6 @@ async function handleGetcontact({ hisoka, m, query, tolak, logCommand }) {
         await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
 
         try {
-            // Ambil hash + cookie sesi
             const { hash, cookies, isLogged, token } = await initSession();
 
             if (isLogged && token && hash) {
@@ -281,27 +387,22 @@ async function handleGetcontact({ hisoka, m, query, tolak, logCommand }) {
                 return;
             }
 
-            // Ambil gambar QR
             const { buf: qrBuf, cookies: qrCookies } = await getQrImage(cookies);
-
-            // Simpan pending
             _pendingLogin.set(m.from, { hash, cookies: qrCookies });
 
-            // Kirim QR ke user
             await hisoka.sendMessage(m.from, {
                 image  : qrBuf,
                 caption:
-                    `📱 *LOGIN GETCONTACT*\n` +
+                    `📱 *LOGIN GETCONTACT VIA QR*\n` +
                     `━━━━━━━━━━━━━━━━━━━\n` +
-                    `Scan QR ini pakai *app GetContact* di HP kamu:\n\n` +
+                    `Scan QR ini pakai *app GetContact* di HP:\n\n` +
                     `1️⃣ Buka app *GetContact* di HP\n` +
-                    `2️⃣ Tap ikon ⚙️ (Pengaturan)\n` +
-                    `3️⃣ Pilih *"Perangkat Tertautan"*\n` +
-                    `4️⃣ Tap *"Tambah Perangkat"* → scan QR\n\n` +
-                    `⏰ QR berlaku ±80 detik. Bot akan otomatis konfirmasi setelah scan.`,
+                    `2️⃣ Tap ikon ⚙️ → *Perangkat Tertautan*\n` +
+                    `3️⃣ Tap *"Tambah Perangkat"* → scan QR\n\n` +
+                    `⏰ QR berlaku ±80 detik.\n` +
+                    `Bot otomatis konfirmasi setelah scan! ✅`,
             }, { quoted: m });
 
-            // Mulai polling background
             startPolling(m.from, hisoka, m, hash, qrCookies, tolak, logCommand);
 
         } catch (err) {
@@ -317,7 +418,7 @@ async function handleGetcontact({ hisoka, m, query, tolak, logCommand }) {
         const cfg = bacaConfig();
         if (cfg.getcontact) { delete cfg.getcontact; simpanConfig(cfg); }
         _pendingLogin.delete(m.from);
-        await tolak(hisoka, m, `✅ *Sesi GetContact dihapus.* Login lagi dengan *${pfx}getcontact login*`);
+        await tolak(hisoka, m, `✅ *Sesi GetContact dihapus.* Login lagi: *${pfx}getcontact login*`);
         return;
     }
 
@@ -325,31 +426,126 @@ async function handleGetcontact({ hisoka, m, query, tolak, logCommand }) {
     if (sub === 'status') {
         if (!m.isOwner) { await tolak(hisoka, m, '❌ Hanya owner.'); return; }
         const sess = getSession();
+        const mon  = getMonitorConfig();
         await tolak(hisoka, m,
             `╭─「 📋 *STATUS GETCONTACT* 」\n│\n` +
-            `│ Token : ${sess.token ? `✅ Tersimpan` : '❌ Belum login'}\n` +
-            `│ Hash  : ${sess.hash  ? `✅ Tersimpan` : '❌ Belum login'}\n│\n` +
-            `│ ${sess.token && sess.hash ? '🟢 Siap digunakan!' : `🔴 Belum login — ketik *${pfx}getcontact login*`}\n` +
+            `│ Token   : ${sess.token ? '✅ Tersimpan' : '❌ Belum login'}\n` +
+            `│ Hash    : ${sess.hash  ? '✅ Tersimpan' : '❌ Belum login'}\n` +
+            `│ Monitor : ${mon.aktif  ? '🟢 Aktif' : '🔴 Nonaktif'}\n` +
+            `│ Tag ter-: ${mon.tagTerakhir.length} tag\n` +
+            `│ Cek ter-: ${mon.waktuTerakhir ? new Date(mon.waktuTerakhir).toLocaleString('id-ID',{timeZone:'Asia/Jakarta'}) : '-'}\n│\n` +
+            `│ ${sess.token && sess.hash ? '🟢 Siap digunakan!' : `🔴 Belum login — *${pfx}getcontact login*`}\n` +
             `╰──────────────────────`
         );
+        return;
+    }
+
+    // ── MONITOR ON/OFF ────────────────────────────────────────────────────────
+    if (sub === 'monitor') {
+        if (!m.isOwner) { await tolak(hisoka, m, '❌ Hanya owner.'); return; }
+        const act = (args[1] || '').toLowerCase();
+        if (act === 'on') {
+            const sess = getSession();
+            if (!sess.token || !sess.hash) {
+                await tolak(hisoka, m, `❌ Belum login! Ketik *${pfx}getcontact login* dulu.`);
+                return;
+            }
+            simpanMonitor(true, null);
+            await tolak(hisoka, m,
+                `✅ *Monitor GetContact AKTIF!*\n\n` +
+                `🔔 Bot akan cek setiap *30 menit* — kalau ada orang baru simpan nomormu dengan nama baru, kamu langsung dapat notif di sini!\n\n` +
+                `Matikan: *${pfx}getcontact monitor off*`
+            );
+        } else if (act === 'off') {
+            simpanMonitor(false, null);
+            await tolak(hisoka, m, `🔕 *Monitor GetContact dimatikan.*\nAktifkan lagi: *${pfx}getcontact monitor on*`);
+        } else {
+            const mon = getMonitorConfig();
+            await tolak(hisoka, m,
+                `╭─「 🔔 *MONITOR GETCONTACT* 」\n│\n` +
+                `│ Status : ${mon.aktif ? '🟢 Aktif' : '🔴 Nonaktif'}\n│\n` +
+                `│ • *${pfx}getcontact monitor on*  — aktifkan\n` +
+                `│ • *${pfx}getcontact monitor off* — matikan\n│\n` +
+                `│ 💡 Notif dikirim ke chat owner\n` +
+                `│    setiap ada tag baru di nomormu.\n` +
+                `╰──────────────────────`
+            );
+        }
+        return;
+    }
+
+    // ── MY TAGS (lihat siapa yang simpan nomorku) ─────────────────────────────
+    if (sub === 'mytags' || sub === 'tagsaya' || sub === 'siapasimpan') {
+        if (!m.isOwner) { await tolak(hisoka, m, '❌ Hanya owner.'); return; }
+        const sess = getSession();
+        if (!sess.token || !sess.hash) {
+            await tolak(hisoka, m, `❌ Belum login! Ketik *${pfx}getcontact login* dulu.`);
+            return;
+        }
+
+        await hisoka.sendMessage(m.from, { react: { text: '🔍', key: m.key } });
+        const loading = await tolak(hisoka, m, `🔍 *Mengambil daftar siapa yang simpan nomormu...*`);
+
+        try {
+            const { ok, tags } = await ambilTagKu(sess.token, sess.hash);
+            await hisoka.sendMessage(m.from, { delete: loading.key }).catch(() => {});
+
+            if (!ok || !tags.length) {
+                await tolak(hisoka, m,
+                    `ℹ️ *Tidak ada data tag* yang bisa diambil.\n\n` +
+                    `Kemungkinan:\n` +
+                    `• Sesi sudah expired → login ulang: *${pfx}getcontact login*\n` +
+                    `• Belum ada yang simpan nomormu di GetContact`
+                );
+                return;
+            }
+
+            const list = tags.slice(0, 20).map((t, i) => {
+                const label = t.tag || t.name || t.label || String(t);
+                const count = t.count || t.tagCount || '';
+                return `│ ${String(i+1).padStart(2,' ')}. *${label}*${count ? ` _(${count}x)_` : ''}`;
+            }).join('\n');
+
+            await tolak(hisoka, m,
+                `╭─「 👤 *SIAPA YANG SIMPAN NOMORMU* 」\n│\n` +
+                `${list}\n│\n` +
+                `│ 📊 Total: *${tags.length} tag*\n` +
+                `╰──────────────────────\n` +
+                `🌐 _Sumber: web.getcontact.com_`
+            );
+            await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+            logCommand(m, hisoka, 'getcontact-mytags');
+
+            // Simpan snapshot tag terbaru
+            simpanMonitor(null, tags);
+
+        } catch (err) {
+            await hisoka.sendMessage(m.from, { delete: loading.key }).catch(() => {});
+            await tolak(hisoka, m, `❌ Gagal ambil data tag.\n_${err.message}_`);
+        }
         return;
     }
 
     // ── HELP / TIDAK ADA QUERY ────────────────────────────────────────────────
     if (!query || sub === 'help') {
         const sess = getSession();
+        const mon  = getMonitorConfig();
         await tolak(hisoka, m,
-            `╭─「 📋 *GETCONTACT — CEK NAMA DI HP ORANG* 」\n│\n` +
-            `│ Status: ${sess.token ? '🟢 Sudah login' : `🔴 Belum login — *${pfx}getcontact login*`}\n│\n` +
-            `│ *Cek nomor:*\n` +
+            `╭─「 📋 *GETCONTACT* 」\n│\n` +
+            `│ Login : ${sess.token ? '🟢 Sudah' : `🔴 Belum — *${pfx}getcontact login*`}\n` +
+            `│ Monitor: ${mon.aktif ? '🟢 Aktif' : '🔴 Nonaktif'}\n│\n` +
+            `│ *Cek nomor orang:*\n` +
             `│ • ${pfx}getcontact 08xxxxxxxxx\n` +
             `│ • ${pfx}gtc 628xxxxxxxxx\n│\n` +
-            `│ *Login/Logout (owner):*\n` +
-            `│ • ${pfx}getcontact login — scan QR pakai app\n` +
-            `│ • ${pfx}getcontact logout — hapus sesi\n` +
-            `│ • ${pfx}getcontact status — cek status login\n│\n` +
-            `│ 💡 Hasil: nama simpanan orang, provider,\n` +
-            `│    negara & semua label/tag nomor.\n` +
+            `│ *Siapa simpan nomormu:*\n` +
+            `│ • ${pfx}getcontact mytags\n│\n` +
+            `│ *Monitor realtime:*\n` +
+            `│ • ${pfx}getcontact monitor on\n` +
+            `│ • ${pfx}getcontact monitor off\n│\n` +
+            `│ *Lainnya (owner):*\n` +
+            `│ • ${pfx}getcontact login   — scan QR\n` +
+            `│ • ${pfx}getcontact logout  — hapus sesi\n` +
+            `│ • ${pfx}getcontact status  — cek status\n` +
             `╰──────────────────────`
         );
         return;
@@ -377,10 +573,8 @@ async function handleGetcontact({ hisoka, m, query, tolak, logCommand }) {
 
     try {
         const { search, tags } = await cariNomor(nomor, sess.token, sess.hash);
-
         await hisoka.sendMessage(m.from, { delete: loading.key }).catch(() => {});
 
-        // Sesi kadaluarsa
         if (search?.redirect === 'logout' || search?.status === 'error') {
             await tolak(hisoka, m, `❌ *Sesi kadaluarsa!* Login ulang: *${pfx}getcontact login*`);
             return;
@@ -401,4 +595,12 @@ async function handleGetcontact({ hisoka, m, query, tolak, logCommand }) {
     }
 }
 
-module.exports = { handleGetcontact, getSession, simpanSession };
+module.exports = {
+    handleGetcontact,
+    getSession,
+    simpanSession,
+    ambilTagKu,
+    cekTagBaru,
+    buatNotifTagBaru,
+    getMonitorConfig,
+};

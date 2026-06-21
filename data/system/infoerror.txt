@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 20/06/2026, 15.56.41  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 21/06/2026, 08.11.46  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -26,21 +26,21 @@
 │  #001  —  console.error
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [31m[HotReload] Tidak bisa watch 'scrape/menu/menu_jadibot.js':[39m ENOENT: no such file or directory, watch '/home/runner/workspace/scrape/menu/menu_jadibot.js'
+│  [31m[CrashGuard] Too many errors, forcing restart...[39m
 │
 │  DETAIL
 │  Sumber      : console.error
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 20/06/2026, 15.56.41
-│  Terakhir    : 20/06/2026, 15.56.41
+│  Pertama     : 21/06/2026, 08.11.46
+│  Terakhir    : 21/06/2026, 08.11.46
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [31m[HotReload] Tidak bisa watch 'scrape/menu/menu_jadibot.js':[39m ENOENT: no such file or directory, watch '/home/runner/workspace/scrape/menu/menu_jadibot.js'
+│  ▶  Error: [31m[CrashGuard] Too many errors, forcing restart...[39m
 │     at console.error (file:///home/runner/workspace/index.js:414:27)
-│     at watchFile (file:///home/runner/workspace/src/helper/hotReload.js:158:17)
+│     at process.<anonymous> (file:///home/runner/workspace/src/helper/crashGuard.js:115:21)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 20/06/2026, 15.56.41
+  Terakhir diperbarui: 21/06/2026, 08.11.46
 ════════════════════════════════════════════════════════════════════════
