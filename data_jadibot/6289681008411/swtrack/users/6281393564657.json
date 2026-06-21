@@ -49,9 +49,9 @@
     "name": "γυς ρου",
     "type": "imageMessage",
     "arrivedAt": "2026-06-21T13:41:43.807Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "🐙",
     "resolve": "Signal Lib ✓",
     "source": "status",
     "number": "6281393564657",
@@ -64,6 +64,25 @@
       "participant": "174577888038922@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-21T13:41:43.807Z"
+    "updatedAt": "2026-06-21T13:42:01.591Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281393564657@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACEA713605AC007AB6857019C0AFF637",
+        "participant": "174577888038922@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281393564657@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACEA713605AC007AB6857019C0AFF637",
+        "participant": "6281393564657@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-21T13:42:01.591Z"
   }
 }
