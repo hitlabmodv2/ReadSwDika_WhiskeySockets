@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 21/06/2026, 09.03.07  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 21/06/2026, 13.53.25  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,23 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  console.error
+│  #001  —  command:emoji
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [31m[EmojiList] Error:[39m Cannot find module '/home/runner/workspace/SEMUA_FITUR/helper/emoji.js' imported from /home/runner/workspace/SEMUA_FITUR/info/info.cjs
+│  handleEmoji is not a function
 │
 │  DETAIL
-│  Sumber      : console.error
+│  Sumber      : command:emoji
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 21/06/2026, 09.03.07
-│  Terakhir    : 21/06/2026, 09.03.07
+│  Pertama     : 21/06/2026, 13.53.25
+│  Terakhir    : 21/06/2026, 13.53.25
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [31m[EmojiList] Error:[39m Cannot find module '/home/runner/workspace/SEMUA_FITUR/helper/emoji.js' imported from /home/runner/workspace/SEMUA_FITUR/info/info.cjs
-│     at console.error (file:///home/runner/workspace/index.js:414:27)
-│     at handleEmojilist (/home/runner/workspace/SEMUA_FITUR/info/info.cjs:489:25)
+│  ▶  TypeError: handleEmoji is not a function
+│     at default (file:///home/runner/workspace/message.js?t=1782049947936:1148:39)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 21/06/2026, 09.03.07
+  Terakhir diperbarui: 21/06/2026, 13.53.25
 ════════════════════════════════════════════════════════════════════════
