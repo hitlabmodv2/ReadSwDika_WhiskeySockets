@@ -47,9 +47,9 @@
     "name": "Adrian",
     "type": "imageMessage",
     "arrivedAt": "2026-06-21T14:42:54.371Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "1️⃣2️⃣3️⃣",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "628995736876",
@@ -62,6 +62,8 @@
       "participant": "126942120571040@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-21T14:42:54.372Z"
+    "updatedAt": "2026-06-21T14:44:21.038Z",
+    "retriedOnStartup": true,
+    "retriedAt": "2026-06-21T14:44:21.038Z"
   }
 }
