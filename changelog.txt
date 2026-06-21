@@ -4,8 +4,8 @@ _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurn
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V23*
 ✨ *1 Fitur Baru*
-🔧 *1 Bug/Error Fix*
-🚀 *1 Improvement*
+🔧 *2 Bug/Error Fix*
+🚀 *3 Improvement*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -25,6 +25,15 @@ _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurn
 > NO.1 🕌 *Auto Sholat — Kini Sudah Work Normal*
 > Bug: fitur auto sholat sebelumnya tidak berjalan dengan benar
 > Fix: diperbaiki — auto sholat kini work dan berjalan normal sesuai jadwal
+
+> NO.2 😊 *Emoji Parsing — .emojiadd Kini Hitung Per Emoji dengan Benar*
+> Bug: .emojiadd 🫆👣👁️👀 sebelumnya dianggap 1 emoji (satu string gabungan)
+> Fix: diperbaiki pakai Intl.Segmenter — setiap emoji dihitung & disimpan sendiri-sendiri
+> Berlaku untuk: bot utama & userjadibot
+> Semua format input kini didukung:
+> ▸ .emojiadd 😊😄😁 (rapat tanpa pemisah)
+> ▸ .emojiadd 😊 😄 😁 (spasi)
+> ▸ .emojiadd 😊,😄,😁 (koma — cara lama)
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *IMPROVEMENT*
@@ -53,3 +62,22 @@ _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurn
 > ▸ system/ — fitur sistem & maintenance
 > ▸ tools/ — fitur umum & misc (sisa yang tidak masuk kategori di atas)
 > Dampak: struktur kode jauh lebih rapi, mudah dicari, dan mudah dikembangkan
+
+> NO.2 🎨 *Sistem Mode Emoji Bot Utama — Custom vs Default (Tidak Bentrok)*
+> Bot utama kini punya sistem mode emoji terpisah dari userjadibot
+> Mode Custom: pakai emoji kustom kamu sendiri (tersimpan di customEmojis[])
+> Mode Default: pakai pool 1900 emoji bawaan (tersimpan di emojis[])
+> Kedua mode disimpan di satu file (src/helper/emoji.json) di field terpisah — tidak saling overwrite
+> Data userjadibot tersimpan di folder masing-masing (data_jadibot/xxx/) — tidak bentrok sama sekali
+> Command yang tersedia:
+> ▸ .emojicustom → aktifkan mode custom
+> ▸ .emojidefault → balik ke pool 1900 default
+> ▸ .emojiclear → reset emoji kustom ke seed awal
+> ▸ .emojiadd / .emojidel → tambah/hapus emoji di mode aktif
+> ▸ .emojilist → lihat daftar & mode aktif sekarang
+
+> NO.3 📋 *Info Mode Aktif di Respons Emoji Command*
+> Seluruh respons command emoji kini tampilkan info mode aktif secara realtime
+> Berlaku di: .emojiadd, .emojidel, .emojilist — untuk bot utama & userjadibot
+> Contoh: ⚙️ Mode: 🎨 Custom (kustom kamu) atau 🌐 Default (pool 1900 emoji)
+> Tujuan: langsung tahu emoji masuk/dihapus dari laci mana tanpa perlu tebak-tebakan
