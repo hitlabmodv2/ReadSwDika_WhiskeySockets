@@ -911,6 +911,14 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 break;
                         }
 
+                        case 'getcontact':
+                        case 'gtc':
+                        case 'cekgc': {
+                                const { handleGetcontact } = _require(path.resolve('./SEMUA_FITUR/tools/getcontact.cjs'));
+                                await handleGetcontact({ hisoka, m, query, tolak, logCommand });
+                                break;
+                        }
+
                         case 'bluearchive':
                         case 'bachar':
                         case 'ba': {
