@@ -486,13 +486,11 @@ async function handleEmojilist({ hisoka, m, tolak, logCommand, getJadibotNumber,
 
                 const _modeLabel = _isJb
                         ? (data.mode === 'custom' ? '🎨 Custom (emoji kamu sendiri)' : '🌐 Default (ikut bot utama)')
-                        : null;
+                        : (data.mode === 'custom' ? '🎨 Custom (kustom kamu)' : '🌐 Default (pool 1900 emoji)');
 
                 let response = `╭═══『 *LIST EMOJI* 』═══╮\n│\n`;
-                if (_isJb) {
-                        response += `│ 👤 *Milik:* +${_jbNum}\n`;
-                        response += `│ ⚙️ *Mode:* ${_modeLabel}\n│\n`;
-                }
+                if (_isJb) response += `│ 👤 *Milik:* +${_jbNum}\n`;
+                response += `│ ⚙️ *Mode:* ${_modeLabel}\n`;
                 response += `│ 📊 *Total:* ${data.count} emoji\n│\n`;
                 if (data.emojis.length > 0) {
                         response += `│ *Daftar:* ${data.emojis.join(' ')}\n`;
@@ -500,11 +498,15 @@ async function handleEmojilist({ hisoka, m, tolak, logCommand, getJadibotNumber,
                         response += `│ ❌ Belum ada emoji tersimpan\n`;
                 }
                 response += `│\n│ *Command:*\n`;
-                response += `│ .emojiadd 😊,😄\n`;
-                response += `│ .emojidel 😊,😄\n`;
+                response += `│ .emojiadd 😊 😄\n`;
+                response += `│ .emojidel 😊 😄\n`;
                 if (_isJb) {
                         response += `│ .emojidefault → pakai emoji bot utama\n`;
                         response += `│ .emojicustom → pakai emoji kamu sendiri\n`;
+                } else {
+                        response += `│ .emojicustom → pakai emoji kustom\n`;
+                        response += `│ .emojidefault → balik ke 1900 default\n`;
+                        response += `│ .emojiclear → reset emoji kustom\n`;
                 }
                 response += `╰═════════════════╯`;
 
