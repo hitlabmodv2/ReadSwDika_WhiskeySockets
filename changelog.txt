@@ -3,129 +3,17 @@ _📅 Minggu, 21 Juni 2026 — WIB_ 🕐
 _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurna_ 🙏
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V22*
-✨ *5 Fitur Baru*
-🔧 *3 Bug Fix*
-🚀 *3 Improvement*
+✨ *0 Fitur Baru*
+🔧 *0 Bug Fix*
+🚀 *0 Improvement*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
-> NO.1 📤 *Upload Status Grup V2 — .upswgcv2 / .swgcv2 / .swgrupv2*
-> Versi baru kirim status ke grup pakai castleys-community (groupStatusV2)
-> Support konten: teks, gambar, video, audio (otomatis konversi ke OGG Opus)
-> Background color: pilih dari 100+ nama warna atau ketik hex manual (contoh: #FF0000)
-> Audience: semua kontak, close friends, atau custom list dengan nama & emoji sendiri
-> Format: _.swgcv2 [teks]|[warna]|[link/ID grup]|[audience]_
-> Contoh: _.swgcv2 Halo semua | hijau | cf_
-> Reply gambar/video + caption juga didukung
-> Deduplication otomatis — tidak akan kirim 2x meskipun ada WA sync
 
-> NO.2 🎮 *Auto Notif Game MOD — .anigame / .gamean1 / .an1game*
-> Bot otomatis kirim notif ke grup saat ada game MOD baru di AN1.COM
-> Cek setiap 10 menit secara otomatis sejak bot start
-> Sumber: an1.com/games/
-> *Perintah owner (di grup):*
-> .anigame on — aktifkan notif di grup ini
-> .anigame off — nonaktifkan notif di grup ini
-> .anigame test — kirim test notif ke grup ini
-> .anigame test grup — kirim test ke semua grup aktif
-> .anigame status — lihat daftar semua grup aktif/nonaktif
-> *Perintah semua user:*
-> .anigame list — lihat daftar game terbaru + thumbnail
-> .anigame [nama game] — cari game, contoh: .anigame minecraft
-> Setting tersimpan per-grup di config.json — tidak hilang saat restart
-
-> NO.3 🌐 *Ganti Browser/Perangkat Tertautan — .setbrowser / .aturbrowser*
-> Ganti identitas browser bot (nama perangkat tertautan di WA) tanpa restart manual
-> Konfirmasi sebelum ganti — pilih via reply atau ketik langsung
-> Shortcut tanpa konfirmasi: _.setbrowser v2 ya_
-> Konfirmasi kadaluarsa otomatis setelah 30 detik
-> Hanya owner, hanya bot utama
-> 🔗 *Metode koneksi ulang saat ganti browser (otomatis):*
-> ▸ _"botNumber"_ di config.json *diisi* → otomatis pakai *Pairing Code* (dikirim ke chat ini)
-> ▸ _"botNumber"_ di config.json *kosong / ""* → otomatis pakai *QR Code* (dikirim ke chat ini)
-> ⚙️ Buka config.json → bagian paling atas → isi atau kosongkan _"botNumber"_ sesuai kebutuhan
-> Contoh isi: _"botNumber": "628xxxxxxxxxxxx"_ → pakai Pairing Code
-> Contoh kosong: _"botNumber": ""_ → pakai QR Code
-> 💡 Bisa juga atur browser manual lewat config.json → _"browserDevice": { "selected": "v2" }_
-> 🖥️ *Daftar 12 Browser Tersedia:*
-> ▸ V1  — Ubuntu + Chrome (124.0.6367.82)
-> ▸ V2  — Windows + Chrome (125.0.6422.141)
-> ▸ V3  — MacOS + Chrome (126.0.6478.114)
-> ▸ V4  — Ubuntu + Firefox (125.0.1.20240501)
-> ▸ V5  — Windows + Firefox (126.0.0.20240603)
-> ▸ V6  — MacOS + Firefox (127.0.0.20240617)
-> ▸ V7  — Ubuntu + Safari (617.2.4.4.9.1)
-> ▸ V8  — MacOS + Safari (619.2.8.12.8.1)
-> ▸ V9  — Windows + Edge (124.0.2478.67)
-> ▸ V10 — Ubuntu + Edge (125.0.2535.51)
-> ▸ V11 — Android + Chrome Mobile (125.0.6422.165)
-> ▸ V12 — iPhone + Safari Mobile (619.2.8.12.8.1)
-
-> NO.4 📌 *Sematkan Pesan di Grup — .sematkan*
-> Sematkan (pin) pesan apapun di grup WhatsApp langsung lewat bot
-> Cara pakai: reply pesan yang mau disematkan → ketik .sematkan
-> Durasi pilihan:
-> ▸ _.sematkan_ → sematkan 24 jam (default)
-> ▸ _.sematkan 7_ → sematkan 7 hari
-> ▸ _.sematkan 30_ → sematkan 30 hari
-> Bot wajib menjadi admin di grup
-> Hanya bisa digunakan di dalam grup
-
-> NO.5 🎨 *Ganti Watermark Stiker — .wm / .swm [Pack|Author]*
-> Ganti nama Pack dan Author pada stiker langsung lewat bot
-> Cara pakai: reply stiker → ketik .wm NamaPack|NamaAuthor
-> Contoh: _.wm Wilybot|Owner_ atau _.swm Bang|Wily_
-> Pisahkan Pack & Author menggunakan tanda | (pipe)
-> ✅ Kini juga bisa diakses di *userjadibot* — tidak hanya bot utama
 ━━━━━━━━━━━━━━━━━━━━━━
 🔧 *BUG FIX*
 ━━━━━━━━━━━━━━━━━━━━━━
-> NO.1 ⚡ *Koneksi Bot Utama & Userjadibot — 2x Lebih Cepat dari Sebelumnya*
-> Bug: sesi menyimpan banyak file terpisah (useMultiFileAuthState) → baca/tulis lambat saat connect
-> Fix: migrasi ke useSingleFileAuthState — semua data (creds, keys, contacts, groups, settings)
->   dipadatkan jadi 1 file JSON per sesi (bot utama & setiap userjadibot)
-> Tulis file pakai pola atomic (.tmp → rename) — tidak corrupt meski bot crash di tengah tulis
-> Berlaku untuk: bot utama, userjadibot, dan proses browser switch
-> Hasil: koneksi terasa 2x lebih cepat, tidak ada lagi spam file di folder sessions
-
-> NO.2 ⚙️ *PM2 di Panel Pterodactyl — Tidak Bisa Jalan (ecosystem.config.cjs)*
-> Bug: PM2 gagal start di panel Pterodactyl karena config tidak kompatibel
-> Fix: ecosystem.config.cjs diperbaiki — path absolut, fork mode, heap size eksplisit
-> Logging lengkap: pm2-out.log, pm2-error.log, pm2-combined.log
-> Auto restart jika crash (max 10x), restart jika RAM > 500MB
-> *Cara pakai di panel Pterodactyl:*
-> 1️⃣ Jalankan npm i dulu untuk install semua modul
-> 2️⃣ Di panel → Startup → ubah Startup Command jadi:
->     pm2 delete wily-bot 2>/dev/null; pm2 start ecosystem.config.cjs && pm2 monit
-
-> NO.3 🎮 *Anigame — Tidak Merespons di Grup saat ON*
-> Bug: bot tidak merespons command anigame di grup meskipun fitur sudah diaktifkan (.anigame on)
-> Fix: pengecekan status grup diperbaiki — bot kini langsung merespons di grup saat fitur on
-> Berlaku untuk: semua command anigame (on, off, test, status, list, cari game)
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *IMPROVEMENT*
 ━━━━━━━━━━━━━━━━━━━━━━
-> NO.1 📋 *Info Tambahan di Menu — Browser, Total Command & Status Fitur Auto*
-> Menu bot utama (.menu) kini menampilkan info tambahan secara realtime:
-> 🖥️ » Browser/perangkat tertautan aktif — contoh: Ubuntu + Firefox (125.0.1.20240501)
-> 📜 » Total semua command yang tersedia
-> 🗂️ » Total fitur auto yang terdaftar
-> ✅ » Jumlah fitur auto yang sedang aktif
-> ❌ » Jumlah fitur auto yang tidak aktif
-> Browser label diambil langsung dari runtime (sesuai yang WA lihat di Perangkat Tertaut)
-> Menu jadibot (.menu) juga menampilkan total command, total fitur auto, aktif & tidak aktif
-> Jadibot tidak tampilkan browser (browser milik bot utama, bukan jadibot)
-
-> NO.2 🎮 *Anigame — Tampilan Respons dengan 2 Button*
-> Perintah .anigame on kini menampilkan respons interaktif dengan 2 button:
-> ▸ Button 1: ➕ Aktifkan Semua Grup — aktifkan notif di semua grup sekaligus
-> ▸ Button 2: aksi cepat tambahan untuk kemudahan penggunaan
-> Tampilan lebih rapi dengan info status sebelum dan sesudah perubahan
-
-> NO.3 📋 *Menu Utama & Menu Userbot — Dipindah ke src/scrape/menu*
-> Builder teks menu utama (.menu) dan menu userbot/jadibot dipindahkan ke folder tersendiri
-> ▸ Menu utama bot    → src/scrape/menu/menu_utama.js
-> ▸ Menu userbot      → src/scrape/menu/menu_jadibot.js
-> Struktur kode lebih rapi — mudah diedit tanpa harus buka file handler besar
-> Tampilan menu juga diperbarui mengikuti struktur baru
