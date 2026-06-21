@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 21/06/2026, 08.11.46  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 21/06/2026, 09.03.07  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -26,21 +26,21 @@
 │  #001  —  console.error
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [31m[CrashGuard] Too many errors, forcing restart...[39m
+│  [31m[EmojiList] Error:[39m Cannot find module '/home/runner/workspace/SEMUA_FITUR/helper/emoji.js' imported from /home/runner/workspace/SEMUA_FITUR/info/info.cjs
 │
 │  DETAIL
 │  Sumber      : console.error
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 21/06/2026, 08.11.46
-│  Terakhir    : 21/06/2026, 08.11.46
+│  Pertama     : 21/06/2026, 09.03.07
+│  Terakhir    : 21/06/2026, 09.03.07
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [31m[CrashGuard] Too many errors, forcing restart...[39m
+│  ▶  Error: [31m[EmojiList] Error:[39m Cannot find module '/home/runner/workspace/SEMUA_FITUR/helper/emoji.js' imported from /home/runner/workspace/SEMUA_FITUR/info/info.cjs
 │     at console.error (file:///home/runner/workspace/index.js:414:27)
-│     at process.<anonymous> (file:///home/runner/workspace/src/helper/crashGuard.js:115:21)
+│     at handleEmojilist (/home/runner/workspace/SEMUA_FITUR/info/info.cjs:489:25)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 21/06/2026, 08.11.46
+  Terakhir diperbarui: 21/06/2026, 09.03.07
 ════════════════════════════════════════════════════════════════════════
