@@ -26,18 +26,19 @@
 const nodePath = require('path');
 const nodeFs   = require('fs');
 
-// ── HELPER: parse emoji input (tanpa koma, dengan koma, atau spasi) ──────────
+// ── HELPER: parse emoji input (tanpa koma, dengan koma, +, atau spasi) ───────
 function parseEmojiInput(input) {
         if (!input) return [];
         try {
-                const normalized = input.replace(/,/g, ' ').replace(/\s+/g, ' ').trim();
+                // Support separator: koma (,), plus (+), atau spasi
+                const normalized = input.replace(/[,+]/g, ' ').replace(/\s+/g, ' ').trim();
                 if (!normalized) return [];
                 const segmenter = new Intl.Segmenter('en', { granularity: 'grapheme' });
                 return [...segmenter.segment(normalized)]
                         .map(s => s.segment)
                         .filter(s => s.trim().length > 0);
         } catch {
-                return input.replace(/,/g, ' ').split(/\s+/).map(e => e.trim()).filter(e => e);
+                return input.replace(/[,+]/g, ' ').split(/\s+/).map(e => e.trim()).filter(e => e);
         }
 }
 
@@ -210,8 +211,8 @@ async function handleAddEmoji({ hisoka, m, query, tolak, logCommand, isMainBot }
         try {
                 const { addEmojis, listEmojis } = await import('../helper/emoji.js');
                 const emojiInput = query.replace(/^emoji\s*/i, '').trim();
-                if (!emojiInput) { await tolak(hisoka, m, `❌ Format: add emoji 😊,😄,😁\n\nContoh:\nadd emoji 😊\nadd emoji 😊,😄,😁`); return; }
-                const emojisToAdd = emojiInput.split(',').map(e => e.trim()).filter(e => e);
+                if (!emojiInput) { await tolak(hisoka, m, `❌ Format: add emoji 😊,😄,😁\n\nContoh:\nadd emoji 😊\nadd emoji 😊,😄,😁\nadd emoji 👮+🧠+🦓`); return; }
+                const emojisToAdd = parseEmojiInput(emojiInput);
                 if (!emojisToAdd.length) { await tolak(hisoka, m, '❌ Tidak ada emoji yang valid untuk ditambahkan'); return; }
                 const results = addEmojis(emojisToAdd);
                 const newList = listEmojis();

@@ -129,7 +129,7 @@
       "participant": "90916371062907@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-21T09:36:01.832Z",
+    "updatedAt": "2026-06-21T13:15:16.476Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -148,6 +148,50 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-21T09:36:01.832Z"
+    "processedAt": "2026-06-21T09:36:01.832Z",
+    "deleted": true,
+    "deletedAt": "2026-06-21T13:15:16.476Z"
+  },
+  "AC42B33464A8517837E4F4DB47B95DFF": {
+    "id": "AC42B33464A8517837E4F4DB47B95DFF",
+    "sender": "6285136314199@s.whatsapp.net",
+    "name": "pngilaja_kyrull",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-21T13:15:49.542Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "👮",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285136314199",
+    "resolvedPn": "6285136314199@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285136314199@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC42B33464A8517837E4F4DB47B95DFF",
+      "participant": "90916371062907@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-21T13:16:09.653Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285136314199@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC42B33464A8517837E4F4DB47B95DFF",
+        "participant": "90916371062907@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285136314199@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC42B33464A8517837E4F4DB47B95DFF",
+        "participant": "6285136314199@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-21T13:16:09.653Z"
   }
 }

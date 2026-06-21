@@ -40,5 +40,47 @@
       }
     ],
     "processedAt": "2026-06-21T05:11:54.449Z"
+  },
+  "ACF9BB19A3743D63F2201FF9E861326E": {
+    "id": "ACF9BB19A3743D63F2201FF9E861326E",
+    "sender": "6285791556825@s.whatsapp.net",
+    "name": "Nur Muhammad Khoirul Anam",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-21T13:16:40.440Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🫚",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285791556825",
+    "resolvedPn": "6285791556825@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285791556825@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACF9BB19A3743D63F2201FF9E861326E",
+      "participant": "87552958685217@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-21T13:16:49.293Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285791556825@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACF9BB19A3743D63F2201FF9E861326E",
+        "participant": "87552958685217@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285791556825@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACF9BB19A3743D63F2201FF9E861326E",
+        "participant": "6285791556825@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-21T13:16:49.293Z"
   }
 }
