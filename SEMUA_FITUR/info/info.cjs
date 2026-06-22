@@ -40,14 +40,26 @@ const nodeFs   = require('fs');
 //   "😊.😄.😁"          → ["😊","😄","😁"]     (3 terpisah via titik)
 function parseEmojiInput(input) {
         if (!input) return [];
+        const _seg = new Intl.Segmenter('en', { granularity: 'grapheme' });
         // Split by koma atau titik
         const byDelim = input.split(/[,.]/).map(s => s.trim()).filter(Boolean);
         const result = [];
         for (const seg of byDelim) {
                 if (/\s/.test(seg)) {
-                        // Ada spasi dalam segmen → tiap kata jadi token tersendiri
                         const bySpace = seg.split(/\s+/).filter(Boolean);
-                        result.push(...bySpace);
+                        // Spasi jadi pemisah HANYA jika semua token adalah 1 grapheme cluster (emoji tunggal)
+                        // Jika ada token teks/text art (multi-karakter), seluruh segmen jadi 1 gabungan
+                        const allSingle = bySpace.every(token => {
+                                const clusters = [..._seg.segment(token)].filter(s => s.segment.trim());
+                                return clusters.length === 1;
+                        });
+                        if (allSingle) {
+                                // Contoh: .emojiadd 😊 😄 😁 → 3 emoji terpisah
+                                result.push(...bySpace);
+                        } else {
+                                // Contoh: .emojiadd SAYA AKAN LAWAN 🤬 → 1 gabungan utuh
+                                result.push(seg);
+                        }
                 } else {
                         // Tidak ada spasi → 1 token (bisa single atau gabungan)
                         result.push(seg);
