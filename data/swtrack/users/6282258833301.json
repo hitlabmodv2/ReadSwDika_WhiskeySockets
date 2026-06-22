@@ -90,5 +90,30 @@
     "updatedAt": "2026-06-22T04:28:50.318Z",
     "deleted": true,
     "deletedAt": "2026-06-22T04:28:50.318Z"
+  },
+  "AC8B3937AB5C6E785D8C54D524098177": {
+    "id": "AC8B3937AB5C6E785D8C54D524098177",
+    "sender": "6282258833301@s.whatsapp.net",
+    "name": "therese",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-22T04:43:22.495Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6282258833301",
+    "resolvedPn": "6282258833301@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6282258833301@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC8B3937AB5C6E785D8C54D524098177",
+      "participant": "244452643868853@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-22T04:43:25.230Z",
+    "deleted": true,
+    "deletedAt": "2026-06-22T04:43:25.230Z"
   }
 }
