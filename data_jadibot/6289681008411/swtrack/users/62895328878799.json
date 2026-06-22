@@ -5,9 +5,9 @@
     "name": "Erlic",
     "type": "videoMessage",
     "arrivedAt": "2026-06-22T04:48:10.438Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "🌨️🤖",
     "resolve": "Signal Lib ✓",
     "source": "status",
     "number": "62895328878799",
@@ -20,6 +20,25 @@
       "participant": "112348106854519@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-22T04:48:10.438Z"
+    "updatedAt": "2026-06-22T04:48:28.497Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62895328878799@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC5FFF0345F6E058997478E68AAD92BB",
+        "participant": "112348106854519@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62895328878799@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC5FFF0345F6E058997478E68AAD92BB",
+        "participant": "62895328878799@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-22T04:48:28.497Z"
   }
 }
