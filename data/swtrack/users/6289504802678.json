@@ -476,5 +476,28 @@
       }
     ],
     "processedAt": "2026-06-22T03:22:09.254Z"
+  },
+  "AC20C937BE6DA0693886695F15652C30": {
+    "id": "AC20C937BE6DA0693886695F15652C30",
+    "sender": "6289504802678@s.whatsapp.net",
+    "name": "lolipop",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-22T04:20:23.554Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6289504802678",
+    "resolvedPn": "6289504802678@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6289504802678@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC20C937BE6DA0693886695F15652C30",
+      "participant": "263445207371837@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-22T04:20:23.554Z"
   }
 }
