@@ -5,7 +5,7 @@ _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurn
 🤖 *WILY BOT — V23*
 ✨ *1 Fitur Baru*
 🔧 *2 Bug/Error Fix*
-🚀 *3 Improvement*
+🚀 *4 Improvement*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -81,3 +81,12 @@ _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurn
 > Berlaku di: .emojiadd, .emojidel, .emojilist — untuk bot utama & userjadibot
 > Contoh: ⚙️ Mode: 🎨 Custom (kustom kamu) atau 🌐 Default (pool 1900 emoji)
 > Tujuan: langsung tahu emoji masuk/dihapus dari laci mana tanpa perlu tebak-tebakan
+
+> NO.4 📋 *Panduan Command di Semua Respons Emoji*
+> Seluruh command emoji kini tampilkan section 📋 Command: di setiap respons (help & sukses)
+> .emoji selalu ada di posisi paling atas sebagai pintu masuk tutorial lengkap
+> Berlaku di: .emojiadd, .emojidel, .emojilist, .emojidefault, .emojicustom, .emojiclear
+> Berlaku untuk: bot utama & userjadibot
+> Tambahan di .emojiadd: ada section 🗑️ Hapus emoji (.emojidel) — biar lengkap dalam 1 tampilan
+> Tambahan di .emojidel: ada section ➕ Tambah emoji (.emojiadd) — saling melengkapi
+> Tujuan: user langsung tau semua command yang tersedia tanpa perlu hafal satu-satu
