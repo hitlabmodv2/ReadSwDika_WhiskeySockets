@@ -83,6 +83,7 @@ export function getMenuJadibotBody() {
 ╰➤ *.hd / .remini*
 
 ╭─「 😊 *EMOJI REAKSI SW* 」
+├➤ *.emoji*
 ├➤ *.emojiadd 😊,😄*
 ├➤ *.emojidel 😊*
 ├➤ *.emojiclear*

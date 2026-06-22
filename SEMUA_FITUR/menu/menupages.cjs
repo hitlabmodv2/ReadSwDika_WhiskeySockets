@@ -98,7 +98,7 @@ jadibot [nomor] [durasi] | stopbot | listbot | setpairing v1/v2
 listowner | addowner | delowner
 all | swgrup/statusgroup | infowibu | animasu | tvone | alqanimenotif | malnews | ceksw | cekauto | cekauto gc
 wily | simi | wilyai on/off | wilyai pm/gc/all | wilyai reset
-setreactapi | emojiadd | emojidel | emojilist
+setreactapi | emoji | emojiadd | emojidel | emojiclear | emojilist | emojidefault | emojicustom
 upbot | restart/rebot | backup | ceksesi | clearsesi/cs | eval | bash
 ram | ceksize/disksize | autosholat | credsjson
 dbstats | sessiondb | listcontact
@@ -186,14 +186,17 @@ async function handleOwnermenu({ hisoka, m, query, loadConfig, logCommand, fs, p
 ├➤ *.cekerror reset*  _→ Reset log error_
 ╰➤ *.contact*  _→ Info kontak bot_
 
-╭─「 🎨 *EMOJI CUSTOM* 」
+╭─「 🎨 *EMOJI REAKSI SW* 」
 │
-├➤ *.emojiadd [nama] [reply sticker]*
-│   _Tambah emoji custom_
-├➤ *.emojidel [nama]*
-│   _Hapus emoji custom_
-╰➤ *.emojilist*
-   _Daftar semua emoji custom_
+├➤ *.emoji*  _→ Tutorial lengkap emoji_
+├➤ *.emojiadd 😊,😄*  _→ Tambah emoji single_
+├➤ *.emojiadd 😊😄😁*  _→ Tambah emoji gabungan_
+├➤ *.emojidel 😊*  _→ Hapus emoji single_
+├➤ *.emojidel 1,2*  _→ Hapus emoji gabungan by nomor_
+├➤ *.emojilist*  _→ Daftar emoji aktif_
+├➤ *.emojidefault*  _→ Pakai emoji bot utama_
+├➤ *.emojicustom*  _→ Pakai emoji kamu sendiri_
+╰➤ *.emojiclear*  _→ Reset emoji ke awal_
 
 `;
         const imgPath = path.join(process.cwd(), 'image', 'menu1.jpg');
