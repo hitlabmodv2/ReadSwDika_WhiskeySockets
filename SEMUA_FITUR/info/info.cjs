@@ -426,12 +426,16 @@ async function handleEmojiadd({ hisoka, m, query, tolak, logCommand, getJadibotN
                         msg += renderEmojiList(_curList.emojis);
                         msg += `│\n│ 📋 *Cara pakai:*\n`;
                         msg += `│ .emoji — lihat tutorial lengkap\n`;
+                        msg += `│\n│ ➕ *Tambah emoji:*\n`;
                         msg += `│ .emojiadd 😊 — tambah 1 emoji\n`;
                         msg += `│ .emojiadd 😊,😄,😁 — pakai koma\n`;
                         msg += `│ .emojiadd 😊 😄 😁 — pakai spasi\n`;
                         msg += `│\n│ 🔗 *Gabung (tanpa koma/spasi = 1 gabungan):*\n`;
                         msg += `│ .emojiadd 😊😄😁 → tersimpan sbg 1\n`;
                         msg += `│ .emojiadd 😊😄😁,🍞🥯🥐 → 2 gabungan terpisah\n`;
+                        msg += `│\n│ 🗑️ *Hapus emoji:*\n`;
+                        msg += `│ .emojidel 😊 — hapus single\n`;
+                        msg += `│ .emojidel 1,2 — hapus gabung by nomor\n`;
                         msg += `╰═════════════════╯`;
                         await tolak(hisoka, m, msg);
                         return;
