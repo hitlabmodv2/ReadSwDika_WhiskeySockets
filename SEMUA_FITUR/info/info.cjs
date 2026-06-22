@@ -425,6 +425,7 @@ async function handleEmojiadd({ hisoka, m, query, tolak, logCommand, getJadibotN
                         msg += `│ 📊 *Emoji aktif:* ${_curList.count} emoji\n`;
                         msg += renderEmojiList(_curList.emojis);
                         msg += `│\n│ 📋 *Cara pakai:*\n`;
+                        msg += `│ .emoji — lihat tutorial lengkap\n`;
                         msg += `│ .emojiadd 😊 — tambah 1 emoji\n`;
                         msg += `│ .emojiadd 😊,😄,😁 — pakai koma\n`;
                         msg += `│ .emojiadd 😊 😄 😁 — pakai spasi\n`;
@@ -507,6 +508,7 @@ async function handleEmojidel({ hisoka, m, query, tolak, logCommand, getJadibotN
                         msg += `│ 📊 *Emoji aktif:* ${_curList.count} emoji\n`;
                         msg += renderEmojiList(_curList.emojis);
                         msg += `│\n│ 📋 *Cara pakai:*\n`;
+                        msg += `│ .emoji — lihat tutorial lengkap\n`;
                         msg += `│ *Single:*\n`;
                         msg += `│ .emojidel 😊 — hapus 1 emoji\n`;
                         msg += `│ .emojidel 😊,😄,😁 — pakai koma\n`;
