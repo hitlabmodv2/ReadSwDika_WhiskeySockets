@@ -471,6 +471,7 @@ async function handleEmojiadd({ hisoka, m, query, tolak, logCommand, getJadibotN
                         response += `│ Ketik *.emojicustom* untuk aktifkan.\n`;
                 }
                 response += `│\n│ 📋 *Command:*\n`;
+                response += `│ .emoji — lihat tutorial lengkap\n`;
                 response += `│ .emojiadd 😊,😄 — tambah single\n`;
                 response += `│ .emojiadd 😊😄😁 — tambah gabungan\n`;
                 response += `│ .emojidel 😊 — hapus single\n`;
@@ -597,6 +598,7 @@ async function handleEmojidel({ hisoka, m, query, tolak, logCommand, getJadibotN
                 response += `│\n│ 📊 *Sisa:* ${newList.count} emoji\n`;
                 response += renderEmojiList(newList.emojis);
                 response += `│\n│ 📋 *Command:*\n`;
+                response += `│ .emoji — lihat tutorial lengkap\n`;
                 response += `│ .emojiadd 😊,😄 — tambah single\n`;
                 response += `│ .emojiadd 😊😄😁 — tambah gabungan\n`;
                 response += `│ .emojidel 😊 — hapus single\n`;
