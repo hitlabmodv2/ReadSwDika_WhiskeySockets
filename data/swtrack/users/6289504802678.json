@@ -434,5 +434,47 @@
       }
     ],
     "processedAt": "2026-06-22T02:58:22.590Z"
+  },
+  "AC7E84D355F23EB8EAF8F535A702484B": {
+    "id": "AC7E84D355F23EB8EAF8F535A702484B",
+    "sender": "6289504802678@s.whatsapp.net",
+    "name": "lolipop",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-22T03:22:07.135Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "𝐖𝐄𝐋𝐂𝐎𝐌𝐄",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6289504802678",
+    "resolvedPn": "6289504802678@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6289504802678@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC7E84D355F23EB8EAF8F535A702484B",
+      "participant": "263445207371837@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-22T03:22:09.255Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289504802678@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC7E84D355F23EB8EAF8F535A702484B",
+        "participant": "263445207371837@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289504802678@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC7E84D355F23EB8EAF8F535A702484B",
+        "participant": "6289504802678@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-22T03:22:09.254Z"
   }
 }

@@ -28,19 +28,22 @@ const nodeFs   = require('fs');
 
 // ── HELPER: parse emoji input ─────────────────────────────────────────────────
 // Aturan pemisah:
-//   Koma  → memisahkan antar token (masing-masing token bisa single atau gabungan)
-//   Spasi → memisahkan antar token di dalam segmen yang sama
-//   Tanpa koma/spasi di antara emoji → seluruh rangkaian jadi 1 token gabungan
+//   Koma atau titik → memisahkan antar token (masing-masing token bisa single atau gabungan)
+//   Spasi           → memisahkan antar token di dalam segmen yang sama
+//   Tanpa pemisah   → seluruh rangkaian jadi 1 token gabungan
 // Contoh:
-//   "😊😄😁"          → ["😊😄😁"]          (1 gabungan)
-//   "😊😄😁,🍞🥯🥐"  → ["😊😄😁","🍞🥯🥐"] (2 gabungan terpisah)
-//   "😊 😄 😁"        → ["😊","😄","😁"]     (3 terpisah via spasi)
-//   "😊,😄,😁"        → ["😊","😄","😁"]     (3 terpisah via koma)
+//   "😊😄😁"            → ["😊😄😁"]          (1 gabungan)
+//   "😊😄😁,🍞🥯🥐"    → ["😊😄😁","🍞🥯🥐"] (2 gabungan via koma)
+//   "😊😄😁.🍞🥯🥐"    → ["😊😄😁","🍞🥯🥐"] (2 gabungan via titik)
+//   "😊 😄 😁"          → ["😊","😄","😁"]     (3 terpisah via spasi)
+//   "😊,😄,😁"          → ["😊","😄","😁"]     (3 terpisah via koma)
+//   "😊.😄.😁"          → ["😊","😄","😁"]     (3 terpisah via titik)
 function parseEmojiInput(input) {
         if (!input) return [];
-        const byComma = input.split(',').map(s => s.trim()).filter(Boolean);
+        // Split by koma atau titik
+        const byDelim = input.split(/[,.]/).map(s => s.trim()).filter(Boolean);
         const result = [];
-        for (const seg of byComma) {
+        for (const seg of byDelim) {
                 if (/\s/.test(seg)) {
                         // Ada spasi dalam segmen → tiap kata jadi token tersendiri
                         const bySpace = seg.split(/\s+/).filter(Boolean);
