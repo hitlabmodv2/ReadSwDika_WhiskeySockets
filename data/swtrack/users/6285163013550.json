@@ -124,5 +124,47 @@
       }
     ],
     "processedAt": "2026-06-21T13:17:33.296Z"
+  },
+  "A52D3C987C5359E25C43442351FE7B04": {
+    "id": "A52D3C987C5359E25C43442351FE7B04",
+    "sender": "6285163013550@s.whatsapp.net",
+    "name": "Alma",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-22T02:59:25.904Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "𝙎𝙏𝙊𝙋 𝙈𝘽𝙂🤬",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285163013550",
+    "resolvedPn": "6285163013550@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285163013550@s.whatsapp.net",
+      "fromMe": false,
+      "id": "A52D3C987C5359E25C43442351FE7B04",
+      "participant": "1280101642395@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-22T02:59:41.975Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285163013550@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A52D3C987C5359E25C43442351FE7B04",
+        "participant": "1280101642395@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285163013550@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A52D3C987C5359E25C43442351FE7B04",
+        "participant": "6285163013550@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-22T02:59:41.975Z"
   }
 }
