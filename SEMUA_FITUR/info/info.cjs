@@ -470,6 +470,13 @@ async function handleEmojiadd({ hisoka, m, query, tolak, logCommand, getJadibotN
                         response += `│ tapi belum aktif dipakai.\n`;
                         response += `│ Ketik *.emojicustom* untuk aktifkan.\n`;
                 }
+                response += `│\n│ 📋 *Command:*\n`;
+                response += `│ .emojiadd 😊,😄 — tambah single\n`;
+                response += `│ .emojiadd 😊😄😁 — tambah gabungan\n`;
+                response += `│ .emojidel 😊 — hapus single\n`;
+                response += `│ .emojidel 1,2 — hapus gabung by nomor\n`;
+                response += `│ .emojidefault → pakai emoji bot utama\n`;
+                response += `│ .emojicustom → pakai emoji kamu sendiri\n`;
                 response += `╰═════════════════╯`;
 
                 await tolak(hisoka, m, response);
@@ -589,6 +596,13 @@ async function handleEmojidel({ hisoka, m, query, tolak, logCommand, getJadibotN
                 if (results.notFound.length > 0) response += `│ ⚠️ *Tidak ditemukan (${results.notFound.length}):* ${results.notFound.join(' ')}\n`;
                 response += `│\n│ 📊 *Sisa:* ${newList.count} emoji\n`;
                 response += renderEmojiList(newList.emojis);
+                response += `│\n│ 📋 *Command:*\n`;
+                response += `│ .emojiadd 😊,😄 — tambah single\n`;
+                response += `│ .emojiadd 😊😄😁 — tambah gabungan\n`;
+                response += `│ .emojidel 😊 — hapus single\n`;
+                response += `│ .emojidel 1,2 — hapus gabung by nomor\n`;
+                response += `│ .emojidefault → pakai emoji bot utama\n`;
+                response += `│ .emojicustom → pakai emoji kamu sendiri\n`;
                 response += `╰═════════════════╯`;
 
                 await tolak(hisoka, m, response);
