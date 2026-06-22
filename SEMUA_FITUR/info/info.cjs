@@ -718,7 +718,8 @@ async function handleEmojilist({ hisoka, m, tolak, logCommand, getJadibotNumber,
                 response += `│ ⚙️ *Mode:* ${_modeLabel}\n`;
                 response += `│ 📊 *Total:* ${data.count} emoji\n│\n`;
                 response += renderEmojiList(data.emojis);
-                response += `│\n│ *Command:*\n`;
+                response += `│\n│ 📋 *Command:*\n`;
+                response += `│ .emoji — lihat tutorial lengkap\n`;
                 response += `│ .emojiadd 😊,😄 — tambah single\n`;
                 response += `│ .emojiadd 😊😄😁 — tambah gabungan\n`;
                 response += `│ .emojidel 😊 — hapus single\n`;
