@@ -105,7 +105,7 @@ export function getMenuJadibotBody() {
 ╰➤ *.play [judul]*
 
 ━━━━━━━━━━━━━━━━━━━━━━
-_📦 Powered by Wily Bot V22_ 🤖`;
+_📦 Powered by Wily Bot V23_ 🤖`;
 }
 
 function countMenuJadibotCmd() {
@@ -123,7 +123,7 @@ export const JADIBOT_CMD_COUNT = countMenuJadibotCmd();
 export function buildMenuJadibot({ pushName, jadibotNum, juh, jum, jus, masaAktifLine, tglFmt, jamFmt, totalAutoFitur, fiturCount, autoTidakAktif }) {
         const body = getMenuJadibotBody();
         return `╭═══════════════════════╮
-║   🤖 *WILY BOT V22*   
+║   🤖 *WILY BOT V23*   
 ├═══════════════════════╣
 ║   🤖  *MENU JADIBOT*   
 ├═══════════════════════╣
