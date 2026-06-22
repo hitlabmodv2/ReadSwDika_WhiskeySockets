@@ -513,13 +513,16 @@ async function handleEmojidel({ hisoka, m, query, tolak, logCommand, getJadibotN
                         msg += renderEmojiList(_curList.emojis);
                         msg += `│\n│ 📋 *Cara pakai:*\n`;
                         msg += `│ .emoji — lihat tutorial lengkap\n`;
-                        msg += `│ *Single:*\n`;
+                        msg += `│\n│ 🗑️ *Hapus emoji:*\n`;
                         msg += `│ .emojidel 😊 — hapus 1 emoji\n`;
                         msg += `│ .emojidel 😊,😄,😁 — pakai koma\n`;
                         msg += `│ .emojidel 😊 😄 😁 — pakai spasi\n`;
-                        msg += `│\n│ *Gabung (pakai nomor dari list):*\n`;
+                        msg += `│\n│ 🔗 *Gabung (pakai nomor dari list):*\n`;
                         msg += `│ .emojidel 1 — hapus gabung nomor 1\n`;
                         msg += `│ .emojidel 1,2 — hapus gabung nomor 1 dan 2\n`;
+                        msg += `│\n│ ➕ *Tambah emoji:*\n`;
+                        msg += `│ .emojiadd 😊,😄 — tambah single\n`;
+                        msg += `│ .emojiadd 😊😄😁 — tambah gabungan\n`;
                         msg += `╰═════════════════╯`;
                         await tolak(hisoka, m, msg);
                         return;
