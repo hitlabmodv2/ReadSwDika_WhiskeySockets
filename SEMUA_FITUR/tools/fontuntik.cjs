@@ -57,7 +57,13 @@ async function handleFontuntik(m, hisoka, {
   Button, logCommand, tolak, pendingFontuntikChoices, getJadibotChoiceKey,
 }) {
   const prefix = m.prefix || '.';
-  const teks   = (m.query || '').trim();
+  // Kalau user reply ke pesan orang dan tidak tulis teks manual → pakai teks kutipan
+  let teks = (m.query || '').trim();
+  let origQuotedKey = null;
+  if (!teks && m.isQuoted) {
+    teks = (m.quoted?.text || m.quoted?.caption || '').trim();
+    origQuotedKey = m.quoted?.key || null;
+  }
 
   const FONTS = _getFonts();
   if (!FONTS.length) {
@@ -143,9 +149,10 @@ async function handleFontuntik(m, hisoka, {
   }, _FONT_TTL);
 
   pendingFontuntikChoices.set(choiceKey, {
-    text:      teks,
+    text:         teks,
     botMsgId,
     botMsgKey,
+    origQuotedKey,
     expiresAt,
     timeout,
   });
@@ -210,10 +217,13 @@ async function handleFontuntikChoice({
   // Body HANYA teks hasil konversi — supaya yang ter-copy bersih tanpa nama font
   const bodyText = converted;
 
-  // Quoted ke pesan bot (font list), bukan ke pesan pilihan user
-  const botQuoted = pending.botMsgKey
-    ? { key: pending.botMsgKey, message: {} }
-    : m;
+  // Kalau dari reply pesan orang → balas ke pesan asli itu
+  // Kalau tidak → balas ke pesan font list bot
+  const replyTarget = pending.origQuotedKey
+    ? { key: pending.origQuotedKey, message: {} }
+    : pending.botMsgKey
+      ? { key: pending.botMsgKey, message: {} }
+      : m;
 
   const btn = new Button()
     .setBody(bodyText)
@@ -221,7 +231,7 @@ async function handleFontuntikChoice({
     .addCopy('📋 Salin Teks', converted, `fontcopy_${idx}`);
 
   try {
-    await btn.run(m.from, hisoka, botQuoted);
+    await btn.run(m.from, hisoka, replyTarget);
   } catch (_) {
     await tolak(hisoka, m, `🔤 *${font.name}*\n\n${converted}`);
   }
