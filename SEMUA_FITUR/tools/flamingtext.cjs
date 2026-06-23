@@ -145,11 +145,23 @@ async function generateLogo(style, text) {
     timeout: 20000
   });
 
-  const buffer = Buffer.from(imgData);
-  const isGif  = buffer.slice(0, 3).toString() === 'GIF';
-  const isPng  = buffer[0] === 0x89 && buffer[1] === 0x50;
+  let buffer = Buffer.from(imgData);
+  const isGif = buffer.slice(0, 3).toString() === 'GIF';
+  const isPng = buffer[0] === 0x89 && buffer[1] === 0x50;
 
   if (!isGif && !isPng) throw new Error('File hasil bukan gambar valid');
+
+  // PNG: tambahkan background hitam agar teks neon/transparan tetap terlihat
+  if (isPng) {
+    const sharp = require('sharp');
+    const { width, height } = await sharp(buffer).metadata();
+    buffer = await sharp({
+      create: { width, height, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 1 } }
+    })
+    .composite([{ input: buffer, blend: 'over' }])
+    .png()
+    .toBuffer();
+  }
 
   return { buffer, isGif };
 }
