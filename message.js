@@ -914,7 +914,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'font':
                         case 'fontgen': {
                                 const { handleFontgen } = _require(path.resolve('./SEMUA_FITUR/tools/fontgenerator.cjs'));
-                                await handleFontgen(m, hisoka, { getEmoji, logCommand });
+                                await handleFontgen(m, hisoka, { getEmoji: () => '🔤', logCommand });
                                 break;
                         }
 
