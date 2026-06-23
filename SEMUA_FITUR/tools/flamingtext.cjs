@@ -221,6 +221,25 @@ const STYLE_LIST = [
   { name: 'substance',     source: 'glowtxt', gtStyle: 'substance',     animType: 'pulse', isAnim: true },
   { name: 'warehouse',     source: 'glowtxt', gtStyle: 'warehouse',     animType: 'sweep', isAnim: true },
 
+  // ── GlowTxt batch-5 GLITTER BORDER (animasi ke-3 yg benar-benar berbeda) ────
+  //    glitterBorder:true → efek glitter mengelilingi teks beranimasi
+  //    semua ditest live 100% GIF
+  { name: 'snowflake',  source: 'glowtxt', gtStyle: 'mrfrosty',     animType: 'pulse', glitterBorder: true, isAnim: true },
+  { name: 'mermaid',    source: 'glowtxt', gtStyle: 'lavender',     animType: 'sweep', glitterBorder: true, isAnim: true },
+  { name: 'galaxy',     source: 'glowtxt', gtStyle: 'starlight',    animType: 'pulse', glitterBorder: true, isAnim: true },
+  { name: 'carnival',   source: 'glowtxt', gtStyle: 'discodiva',    animType: 'sweep', glitterBorder: true, isAnim: true },
+  { name: 'rainbow',    source: 'glowtxt', gtStyle: 'cottoncandy',  animType: 'pulse', glitterBorder: true, isAnim: true },
+  { name: 'princess',   source: 'glowtxt', gtStyle: 'sweetheart',   animType: 'sweep', glitterBorder: true, isAnim: true },
+  { name: 'toxic',      source: 'glowtxt', gtStyle: 'electricblue', animType: 'pulse', glitterBorder: true, isAnim: true },
+  { name: 'aurora',     source: 'glowtxt', gtStyle: 'neonlights',   animType: 'sweep', glitterBorder: true, isAnim: true },
+  { name: 'cosmic',     source: 'glowtxt', gtStyle: 'volcano',      animType: 'pulse', glitterBorder: true, isAnim: true },
+  { name: 'stardust',   source: 'glowtxt', gtStyle: 'magicdust',    animType: 'sweep', glitterBorder: true, isAnim: true },
+  { name: 'cupcakeg',   source: 'glowtxt', gtStyle: 'cupcake',      animType: 'pulse', glitterBorder: true, isAnim: true },
+  { name: 'lollipopg',  source: 'glowtxt', gtStyle: 'lollipop',     animType: 'sweep', glitterBorder: true, isAnim: true },
+  { name: 'dragong',    source: 'glowtxt', gtStyle: 'dragonscale',  animType: 'pulse', glitterBorder: true, isAnim: true },
+  { name: 'pirateg',    source: 'glowtxt', gtStyle: 'piratescove',  animType: 'sweep', glitterBorder: true, isAnim: true },
+  { name: 'heartglow',  source: 'glowtxt', gtStyle: 'heartbeat',    animType: 'pulse', glitterBorder: true, isAnim: true },
+
   // ── GlowTxt static PNG (anim_type=none, semua ditest live 100% PNG) ─────────
   { name: 'arthouse',      source: 'glowtxt', gtStyle: 'arthouse',      animType: 'none',  isAnim: false },
   { name: 'backstreet',    source: 'glowtxt', gtStyle: 'backstreet',    animType: 'none',  isAnim: false },
@@ -316,17 +335,19 @@ async function generateGlowtxt(style, text) {
   const GT_BASE = 'https://glowtxt.com';
   const GT_CDN  = 'https://static1.glowtxt.com';
 
+  const glitterParam = style.glitterBorder ? 'on' : '';
+
   const reqstring = GT_BASE + '/gentext2.php' +
-    '?text='         + encodeURIComponent(text) +
-    '&text2=&text3=' +
-    '&font_style='   + encodeURIComponent(style.gtStyle) +
-    '&font_size=x'   +
-    '&font_colour=0' +
-    '&bgcolour='     +
-    '&glow_halo=0'   +
-    '&non_trans='    +
-    '&glitter_border=' +
-    '&anim_type='    + style.animType +
+    '?text='           + encodeURIComponent(text) +
+    '&text2=&text3='   +
+    '&font_style='     + encodeURIComponent(style.gtStyle) +
+    '&font_size=x'     +
+    '&font_colour=0'   +
+    '&bgcolour='       +
+    '&glow_halo=0'     +
+    '&non_trans='      +
+    '&glitter_border=' + glitterParam +
+    '&anim_type='      + style.animType +
     '&submit_type=text';
 
   // Step 1: GET XML → dapat datadir + fullfilename
