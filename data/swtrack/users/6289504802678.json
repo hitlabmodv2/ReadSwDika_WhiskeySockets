@@ -278,7 +278,7 @@
       "participant": "263445207371837@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-23T04:40:46.124Z",
+    "updatedAt": "2026-06-23T15:38:34.184Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -297,7 +297,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-23T04:40:46.124Z"
+    "processedAt": "2026-06-23T04:40:46.124Z",
+    "deleted": true,
+    "deletedAt": "2026-06-23T15:38:34.184Z"
   },
   "AC18F91B6F98F5D229A9E1805B3304EA": {
     "id": "AC18F91B6F98F5D229A9E1805B3304EA",
@@ -320,7 +322,7 @@
       "participant": "263445207371837@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-23T04:40:29.701Z",
+    "updatedAt": "2026-06-23T15:38:34.227Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -339,7 +341,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-23T04:40:29.701Z"
+    "processedAt": "2026-06-23T04:40:29.701Z",
+    "deleted": true,
+    "deletedAt": "2026-06-23T15:38:34.227Z"
   },
   "ACB0574E8925268D7C480BF7655829DF": {
     "id": "ACB0574E8925268D7C480BF7655829DF",
@@ -448,7 +452,7 @@
       "participant": "263445207371837@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-23T12:31:13.428Z",
+    "updatedAt": "2026-06-23T15:38:34.346Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -467,7 +471,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-23T12:31:13.428Z"
+    "processedAt": "2026-06-23T12:31:13.428Z",
+    "deleted": true,
+    "deletedAt": "2026-06-23T15:38:34.346Z"
   },
   "AC53A3EDB017102612B625DF50B4EADC": {
     "id": "AC53A3EDB017102612B625DF50B4EADC",
@@ -490,7 +496,7 @@
       "participant": "263445207371837@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-23T13:28:28.096Z",
+    "updatedAt": "2026-06-23T15:38:34.209Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -509,6 +515,8 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-23T13:28:28.095Z"
+    "processedAt": "2026-06-23T13:28:28.095Z",
+    "deleted": true,
+    "deletedAt": "2026-06-23T15:38:34.209Z"
   }
 }

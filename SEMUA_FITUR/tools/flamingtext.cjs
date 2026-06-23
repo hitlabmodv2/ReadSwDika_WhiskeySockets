@@ -203,6 +203,39 @@ const STYLE_LIST = [
   { name: 'funhouse',      source: 'glowtxt', gtStyle: 'jumble',        animType: 'sweep', isAnim: true },
   { name: 'medieval',      source: 'glowtxt', gtStyle: 'medieval',      animType: 'pulse', isAnim: true },
   { name: 'starshine',     source: 'glowtxt', gtStyle: 'starshine',     animType: 'sweep', isAnim: true },
+
+  // ── GlowTxt batch-4 animasi GIF (semua ditest live 100% GIF) ───────────────
+  { name: 'alieninvasion', source: 'glowtxt', gtStyle: 'alieninvasion', animType: 'sweep', isAnim: true },
+  { name: 'allstars',      source: 'glowtxt', gtStyle: 'allstars',      animType: 'pulse', isAnim: true },
+  { name: 'beachfront',    source: 'glowtxt', gtStyle: 'beachfront',    animType: 'sweep', isAnim: true },
+  { name: 'bluegecko',     source: 'glowtxt', gtStyle: 'bluegecko',     animType: 'pulse', isAnim: true },
+  { name: 'ionize',        source: 'glowtxt', gtStyle: 'ionize',        animType: 'sweep', isAnim: true },
+  { name: 'mrfrosty',      source: 'glowtxt', gtStyle: 'mrfrosty',      animType: 'pulse', isAnim: true },
+  { name: 'orbitron',      source: 'glowtxt', gtStyle: 'orbitron',      animType: 'sweep', isAnim: true },
+  { name: 'tiptoe',        source: 'glowtxt', gtStyle: 'tiptoe',        animType: 'pulse', isAnim: true },
+  { name: 'valentine',     source: 'glowtxt', gtStyle: 'valentine',     animType: 'sweep', isAnim: true },
+  { name: 'zephyr',        source: 'glowtxt', gtStyle: 'zephyr',        animType: 'pulse', isAnim: true },
+  { name: 'fame',          source: 'glowtxt', gtStyle: 'fame',          animType: 'sweep', isAnim: true },
+  { name: 'foolsgold',     source: 'glowtxt', gtStyle: 'foolsgold',     animType: 'pulse', isAnim: true },
+  { name: 'ransom',        source: 'glowtxt', gtStyle: 'ransom',        animType: 'sweep', isAnim: true },
+  { name: 'substance',     source: 'glowtxt', gtStyle: 'substance',     animType: 'pulse', isAnim: true },
+  { name: 'warehouse',     source: 'glowtxt', gtStyle: 'warehouse',     animType: 'sweep', isAnim: true },
+
+  // ── GlowTxt static PNG (anim_type=none, semua ditest live 100% PNG) ─────────
+  { name: 'arthouse',      source: 'glowtxt', gtStyle: 'arthouse',      animType: 'none',  isAnim: false },
+  { name: 'backstreet',    source: 'glowtxt', gtStyle: 'backstreet',    animType: 'none',  isAnim: false },
+  { name: 'devana',        source: 'glowtxt', gtStyle: 'devana',        animType: 'none',  isAnim: false },
+  { name: 'fictional',     source: 'glowtxt', gtStyle: 'fictional',     animType: 'none',  isAnim: false },
+  { name: 'invitation',    source: 'glowtxt', gtStyle: 'invitation',    animType: 'none',  isAnim: false },
+  { name: 'jet',           source: 'glowtxt', gtStyle: 'jet',           animType: 'none',  isAnim: false },
+  { name: 'letterboard',   source: 'glowtxt', gtStyle: 'letterboard',   animType: 'none',  isAnim: false },
+  { name: 'moderno',       source: 'glowtxt', gtStyle: 'moderno',       animType: 'none',  isAnim: false },
+  { name: 'ohhai',         source: 'glowtxt', gtStyle: 'ohhai',         animType: 'none',  isAnim: false },
+  { name: 'orientexpress', source: 'glowtxt', gtStyle: 'orientexpress', animType: 'none',  isAnim: false },
+  { name: 'paintbrush',    source: 'glowtxt', gtStyle: 'paintbrush',    animType: 'none',  isAnim: false },
+  { name: 'signature',     source: 'glowtxt', gtStyle: 'signature',     animType: 'none',  isAnim: false },
+  { name: 'sketchy',       source: 'glowtxt', gtStyle: 'sketchy',       animType: 'none',  isAnim: false },
+  { name: 'yourstruly',    source: 'glowtxt', gtStyle: 'yourstruly',    animType: 'none',  isAnim: false },
 ];
 
 // ── Cari style ─────────────────────────────────────────────────────────────────
