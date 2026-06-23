@@ -57,11 +57,20 @@ const STYLE_LIST = [
   // ════════════════════════════════
   // 🎞️  ANIMASI GIF (bergerak di WA)
   // ════════════════════════════════
-  { name: 'flaming',   script: 'flaming-logo',         ref: 'logo/Design-Flaming-Text-Animation', isAnim: true  },
-  { name: 'innerfire', script: 'inner-fire-anim-logo', ref: 'logo/Design-Inner-Fire-Animation',   isAnim: true  },
-  { name: 'burning',   script: 'burning-logo',         ref: 'logo/Design-Burning',                isAnim: true  },
-  { name: 'alienglow', script: 'alien-glow-anim-logo', ref: 'logo/Design-Alien-Glow-Animation',   isAnim: true  },
-  { name: 'glitter',   script: 'glitter-anim-logo',    ref: 'logo/Design-Glitter-Animation',      isAnim: true  },
+  { name: 'flaming',      script: 'flaming-logo',         ref: 'logo/Design-Flaming-Text-Animation', isAnim: true },
+  { name: 'innerfire',    script: 'inner-fire-anim-logo', ref: 'logo/Design-Inner-Fire-Animation',   isAnim: true },
+  { name: 'burning',      script: 'burning-logo',         ref: 'logo/Design-Burning',                isAnim: true },
+  { name: 'alienglow',    script: 'alien-glow-anim-logo', ref: 'logo/Design-Alien-Glow-Animation',   isAnim: true },
+  { name: 'glitter',      script: 'glitter-anim-logo',    ref: 'logo/Design-Glitter-Animation',      isAnim: true },
+  { name: 'memories',     script: 'memories-anim-logo',   ref: 'logo/Design-Memories-Animation',     isAnim: true },
+  { name: 'burnin',       script: 'burn-in-anim-logo',    ref: 'logo/Design-Burn-In-Animation',      isAnim: true },
+  { name: 'whirl',        script: 'whirl-anim-logo',      ref: 'logo/Design-Whirl-Animation',        isAnim: true },
+  { name: 'highlight',    script: 'highlight-anim-logo',  ref: 'logo/Design-Highlight-Animation',    isAnim: true },
+  { name: 'jump',         script: 'jump-anim-logo',       ref: 'logo/Design-Jump-Animation',         isAnim: true },
+  { name: 'bluefire',     script: 'blue-fire',            ref: 'logo/Design-Blue-Flames-Animation',  isAnim: true },
+  { name: 'shake',        script: 'shake-anim-logo',      ref: 'logo/Design-Shake-Animation',        isAnim: true },
+  { name: 'flash',        script: 'flash-anim-logo',      ref: 'logo/Design-Flash-Animation',        isAnim: true },
+  { name: 'memoriesname', script: 'memories-name',        ref: 'logo/Design-Memories-Name-Animation',isAnim: true },
 
   // ════════════════════════════════
   // 🖼️  STATIC PNG (gambar diam)
