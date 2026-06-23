@@ -156,6 +156,7 @@ async function handleFontuntik(m, hisoka, {
     botMsgId,
     botMsgKey,
     origQuotedKey,
+    userMsgKey:   m.key || null,
     expiresAt,
     timeout,
   });
@@ -220,13 +221,17 @@ async function handleFontuntikChoice({
   // Body HANYA teks hasil konversi — supaya yang ter-copy bersih tanpa nama font
   const bodyText = converted;
 
-  // Kalau dari reply pesan orang → balas ke pesan asli itu
-  // Kalau tidak → balas ke pesan font list bot
+  // Prioritas reply:
+  // 1. Pesan orang yang di-quote (kalau fontuntik dipakai sebagai reply ke orang lain)
+  // 2. Pesan command user sendiri (.fontuntik tes)
+  // 3. Fallback ke pesan font-list bot
   const replyTarget = pending.origQuotedKey
     ? { key: pending.origQuotedKey, message: {} }
-    : pending.botMsgKey
-      ? { key: pending.botMsgKey, message: {} }
-      : m;
+    : pending.userMsgKey
+      ? { key: pending.userMsgKey, message: {} }
+      : pending.botMsgKey
+        ? { key: pending.botMsgKey, message: {} }
+        : m;
 
   const btn = new Button()
     .setBody(bodyText)
