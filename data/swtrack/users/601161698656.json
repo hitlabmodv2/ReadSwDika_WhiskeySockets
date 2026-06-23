@@ -1,0 +1,27 @@
+{
+  "ACC43CACBF58D464B367B09A2D4DB301": {
+    "id": "ACC43CACBF58D464B367B09A2D4DB301",
+    "sender": "601161698656@s.whatsapp.net",
+    "name": "Hau",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-23T15:52:13.279Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐩",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "601161698656",
+    "resolvedPn": "601161698656@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "601161698656@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACC43CACBF58D464B367B09A2D4DB301",
+      "participant": "198113990053953@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-23T15:53:23.945Z",
+    "retriedOnStartup": true,
+    "retriedAt": "2026-06-23T15:53:23.945Z"
+  }
+}
