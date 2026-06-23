@@ -57,7 +57,10 @@ function findStyle(keyword) {
     return STYLE_LIST[Math.floor(Math.random() * STYLE_LIST.length)];
   }
   const kw = keyword.toLowerCase().replace(/\s+/g, '');
-  return STYLE_LIST.find(s => s.name === kw || s.name.includes(kw))
+  // Prioritas: exact match dulu, baru partial match
+  return STYLE_LIST.find(s => s.name === kw)
+    || STYLE_LIST.find(s => s.name.startsWith(kw))
+    || STYLE_LIST.find(s => s.name.includes(kw))
     || STYLE_LIST[Math.floor(Math.random() * STYLE_LIST.length)];
 }
 
@@ -151,12 +154,12 @@ async function generateLogo(style, text) {
 
   if (!isGif && !isPng) throw new Error('File hasil bukan gambar valid');
 
-  // PNG: tambahkan background hitam agar teks neon/transparan tetap terlihat
+  // PNG: composite ke background putih agar teks apapun terlihat jelas
   if (isPng) {
     const sharp = require('sharp');
     const { width, height } = await sharp(buffer).metadata();
     buffer = await sharp({
-      create: { width, height, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 1 } }
+      create: { width, height, channels: 3, background: { r: 255, g: 255, b: 255 } }
     })
     .composite([{ input: buffer, blend: 'over' }])
     .png()
