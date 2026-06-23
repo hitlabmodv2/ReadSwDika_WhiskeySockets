@@ -1,13 +1,13 @@
 {
-  "AC5C489FE942B5AAA4EAEA392E979457": {
-    "id": "AC5C489FE942B5AAA4EAEA392E979457",
+  "ACA43EF5B98144513B3468876EAF0830": {
+    "id": "ACA43EF5B98144513B3468876EAF0830",
     "sender": "6289690733492@s.whatsapp.net",
     "name": "Neyo",
     "type": "videoMessage",
-    "arrivedAt": "2026-06-16T10:51:11.745Z",
+    "arrivedAt": "2026-06-23T12:24:06.642Z",
     "read": true,
     "reacted": true,
-    "emoji": "🇱🇧",
+    "emoji": "💚",
     "resolve": "Signal Lib ✓",
     "source": "status",
     "number": "6289690733492",
@@ -16,17 +16,17 @@
       "remoteJid": "status@broadcast",
       "remoteJidAlt": "6289690733492@s.whatsapp.net",
       "fromMe": false,
-      "id": "AC5C489FE942B5AAA4EAEA392E979457",
+      "id": "ACA43EF5B98144513B3468876EAF0830",
       "participant": "259442197143698@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-16T10:51:15.650Z",
+    "updatedAt": "2026-06-23T12:24:18.721Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6289690733492@s.whatsapp.net",
         "fromMe": false,
-        "id": "AC5C489FE942B5AAA4EAEA392E979457",
+        "id": "ACA43EF5B98144513B3468876EAF0830",
         "participant": "259442197143698@lid",
         "addressingMode": "lid"
       },
@@ -34,11 +34,11 @@
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6289690733492@s.whatsapp.net",
         "fromMe": false,
-        "id": "AC5C489FE942B5AAA4EAEA392E979457",
+        "id": "ACA43EF5B98144513B3468876EAF0830",
         "participant": "6289690733492@s.whatsapp.net",
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-16T10:51:15.650Z"
+    "processedAt": "2026-06-23T12:24:18.720Z"
   }
 }

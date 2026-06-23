@@ -376,5 +376,47 @@
       }
     ],
     "processedAt": "2026-06-23T12:18:30.290Z"
+  },
+  "AC555C04C0BE89074931038B5C4F8AD1": {
+    "id": "AC555C04C0BE89074931038B5C4F8AD1",
+    "sender": "6282252134009@s.whatsapp.net",
+    "name": "TIMELESS || SPIRITS",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-23T12:18:58.945Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "5️⃣➕3️⃣🟰8️⃣",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6282252134009",
+    "resolvedPn": "6282252134009@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6282252134009@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC555C04C0BE89074931038B5C4F8AD1",
+      "participant": "76790290767977@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-23T12:19:04.517Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282252134009@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC555C04C0BE89074931038B5C4F8AD1",
+        "participant": "76790290767977@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282252134009@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC555C04C0BE89074931038B5C4F8AD1",
+        "participant": "6282252134009@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-23T12:19:04.517Z"
   }
 }
