@@ -1,13 +1,13 @@
 {
-  "A59EBF9505A543E3E8FF1BE224C10E14": {
-    "id": "A59EBF9505A543E3E8FF1BE224C10E14",
+  "A5B3226E67C675C8229F3F6FB22FF3FE": {
+    "id": "A5B3226E67C675C8229F3F6FB22FF3FE",
     "sender": "6283866511317@s.whatsapp.net",
     "name": "𓍯    09;02—      Beauty Meets     “   神秘   ”     LuluㅤFt. Avant Garde",
-    "type": "videoMessage",
-    "arrivedAt": "2026-06-17T14:31:52.631Z",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-23T12:52:43.014Z",
     "read": true,
     "reacted": true,
-    "emoji": "🧓",
+    "emoji": "💚",
     "resolve": "Signal Lib ✓",
     "source": "status",
     "number": "6283866511317",
@@ -16,17 +16,17 @@
       "remoteJid": "status@broadcast",
       "remoteJidAlt": "6283866511317@s.whatsapp.net",
       "fromMe": false,
-      "id": "A59EBF9505A543E3E8FF1BE224C10E14",
+      "id": "A5B3226E67C675C8229F3F6FB22FF3FE",
       "participant": "56024157405184@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-17T14:32:03.338Z",
+    "updatedAt": "2026-06-23T12:52:51.379Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6283866511317@s.whatsapp.net",
         "fromMe": false,
-        "id": "A59EBF9505A543E3E8FF1BE224C10E14",
+        "id": "A5B3226E67C675C8229F3F6FB22FF3FE",
         "participant": "56024157405184@lid",
         "addressingMode": "lid"
       },
@@ -34,11 +34,78 @@
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6283866511317@s.whatsapp.net",
         "fromMe": false,
-        "id": "A59EBF9505A543E3E8FF1BE224C10E14",
+        "id": "A5B3226E67C675C8229F3F6FB22FF3FE",
         "participant": "6283866511317@s.whatsapp.net",
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-17T14:32:03.338Z"
+    "processedAt": "2026-06-23T12:52:51.379Z"
+  },
+  "A5C77D93F4819584C9A3471F8CEFB5BE": {
+    "id": "A5C77D93F4819584C9A3471F8CEFB5BE",
+    "sender": "6283866511317@s.whatsapp.net",
+    "name": "𓍯    09;02—      Beauty Meets     “   神秘   ”     LuluㅤFt. Avant Garde",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-23T12:54:35.449Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "Signal Lib ✓",
+    "source": "status",
+    "number": "6283866511317",
+    "resolvedPn": "6283866511317@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6283866511317@s.whatsapp.net",
+      "fromMe": false,
+      "id": "A5C77D93F4819584C9A3471F8CEFB5BE",
+      "participant": "56024157405184@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-23T12:54:37.005Z",
+    "deleted": true,
+    "deletedAt": "2026-06-23T12:54:37.005Z"
+  },
+  "A5FA32DEDBBABC280D3911C11D16CE01": {
+    "id": "A5FA32DEDBBABC280D3911C11D16CE01",
+    "sender": "6283866511317@s.whatsapp.net",
+    "name": "𓍯    09;02—      Beauty Meets     “   神秘   ”     LuluㅤFt. Avant Garde",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-23T12:56:11.169Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "5️⃣➕3️⃣🟰8️⃣",
+    "resolve": "Signal Lib ✓",
+    "source": "status",
+    "number": "6283866511317",
+    "resolvedPn": "6283866511317@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6283866511317@s.whatsapp.net",
+      "fromMe": false,
+      "id": "A5FA32DEDBBABC280D3911C11D16CE01",
+      "participant": "56024157405184@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-23T12:56:30.334Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283866511317@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A5FA32DEDBBABC280D3911C11D16CE01",
+        "participant": "56024157405184@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283866511317@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A5FA32DEDBBABC280D3911C11D16CE01",
+        "participant": "6283866511317@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-23T12:56:30.334Z"
   }
 }
