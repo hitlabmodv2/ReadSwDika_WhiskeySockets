@@ -50,34 +50,44 @@ const FT_BASE = 'https://www.flamingtext.com';
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
 
 // ── Daftar style ───────────────────────────────────────────────────────────────
+// isAnim: true  → hasil GIF animasi bergerak (dikonversi MP4 sebelum kirim WA)
+// isAnim: false → hasil PNG static (gambar diam)
 const STYLE_LIST = [
-  { name: 'fire',       script: 'fire-logo',            ref: 'logo/Design-Fire',                  isAnim: false },
-  { name: 'flaming',    script: 'flaming-logo',          ref: 'logo/Design-Flaming-Text-Animation', isAnim: true  },
-  { name: 'innerfire',  script: 'inner-fire-anim-logo',  ref: 'logo/Design-Inner-Fire-Animation',   isAnim: true  },
-  { name: 'burning',    script: 'burning-logo',          ref: 'logo/Design-Burning',               isAnim: true  },
-  { name: 'alienglow',  script: 'alien-glow-anim-logo',  ref: 'logo/Design-Alien-Glow-Animation',   isAnim: true  },
-  { name: 'alien',      script: 'alien-glow-logo',       ref: 'logo/Design-Alien-Glow',            isAnim: false },
-  { name: 'alienneon',  script: 'alien-neon-logo',       ref: 'logo/Design-Alien-Neon',            isAnim: false },
-  { name: 'chrome',     script: 'chrome-logo',           ref: 'logo/Design-Chrome',                isAnim: false },
-  { name: 'chrominium', script: 'chrominium-logo',       ref: 'logo/Design-Chrominium',            isAnim: false },
-  { name: 'neon',       script: 'neon-logo',             ref: 'logo/Design-Neon',                  isAnim: false },
-  { name: 'electric',   script: 'electric',              ref: 'logo/Design-Electric',              isAnim: false },
-  { name: 'ice',        script: 'ice-logo',              ref: 'logo/Design-Ice',                   isAnim: false },
-  { name: 'icefire',    script: 'ice-fire-logo',         ref: 'logo/Design-Ice-Fire',              isAnim: false },
-  { name: 'gold',       script: 'gold-logo',             ref: 'logo/Design-Gold',                  isAnim: false },
-  { name: 'gold3d',     script: 'gold-3d-logo',          ref: 'logo/Design-GOLD-3D',               isAnim: false },
-  { name: 'glow',       script: 'glow-logo',             ref: 'logo/Design-Glow',                  isAnim: false },
-  { name: '3d',         script: '3d-logo',               ref: 'logo/Design-3D-Text',               isAnim: false },
-  { name: 'shadow',     script: 'shadowplay-logo',       ref: 'logo/Design-Shadowplay',            isAnim: false },
-  { name: 'retro',      script: 'retro-logo',            ref: 'logo/Design-Retro',                 isAnim: false },
-  { name: 'cool',       script: 'cool-logo',             ref: 'logo/Design-Cool',                  isAnim: false },
-  { name: 'dracula',    script: 'dracula-logo',          ref: 'logo/Design-Dracula',               isAnim: false },
-  { name: 'clan',       script: 'clan-logo',             ref: 'logo/Design-Clan',                  isAnim: false },
-  { name: 'elegant',    script: 'elegant-logo',          ref: 'logo/Design-Elegant',               isAnim: false },
-  { name: 'winner',     script: 'winner-logo',           ref: 'logo/Design-Winner',                isAnim: false },
-  { name: 'splat',      script: 'splat-logo',            ref: 'logo/Design-Splat',                 isAnim: false },
-  { name: 'marbles',    script: 'marbles-logo',          ref: 'logo/Design-Marbles',               isAnim: false },
-  { name: 'blood',      script: 'blood-3d-logo',         ref: 'logo/Design-Blood-3D',              isAnim: false },
+
+  // ════════════════════════════════
+  // 🎞️  ANIMASI GIF (bergerak di WA)
+  // ════════════════════════════════
+  { name: 'flaming',   script: 'flaming-logo',         ref: 'logo/Design-Flaming-Text-Animation', isAnim: true  },
+  { name: 'innerfire', script: 'inner-fire-anim-logo', ref: 'logo/Design-Inner-Fire-Animation',   isAnim: true  },
+  { name: 'burning',   script: 'burning-logo',         ref: 'logo/Design-Burning',                isAnim: true  },
+  { name: 'alienglow', script: 'alien-glow-anim-logo', ref: 'logo/Design-Alien-Glow-Animation',   isAnim: true  },
+
+  // ════════════════════════════════
+  // 🖼️  STATIC PNG (gambar diam)
+  // ════════════════════════════════
+  { name: 'fire',       script: 'fire-logo',        ref: 'logo/Design-Fire',        isAnim: false },
+  { name: 'alien',      script: 'alien-glow-logo',  ref: 'logo/Design-Alien-Glow',  isAnim: false },
+  { name: 'alienneon',  script: 'alien-neon-logo',  ref: 'logo/Design-Alien-Neon',  isAnim: false },
+  { name: 'chrome',     script: 'chrome-logo',      ref: 'logo/Design-Chrome',      isAnim: false },
+  { name: 'chrominium', script: 'chrominium-logo',  ref: 'logo/Design-Chrominium',  isAnim: false },
+  { name: 'neon',       script: 'neon-logo',        ref: 'logo/Design-Neon',        isAnim: false },
+  { name: 'electric',   script: 'electric',         ref: 'logo/Design-Electric',    isAnim: false },
+  { name: 'ice',        script: 'ice-logo',         ref: 'logo/Design-Ice',         isAnim: false },
+  { name: 'icefire',    script: 'ice-fire-logo',    ref: 'logo/Design-Ice-Fire',    isAnim: false },
+  { name: 'gold',       script: 'gold-logo',        ref: 'logo/Design-Gold',        isAnim: false },
+  { name: 'gold3d',     script: 'gold-3d-logo',     ref: 'logo/Design-GOLD-3D',     isAnim: false },
+  { name: 'glow',       script: 'glow-logo',        ref: 'logo/Design-Glow',        isAnim: false },
+  { name: '3d',         script: '3d-logo',          ref: 'logo/Design-3D-Text',     isAnim: false },
+  { name: 'shadow',     script: 'shadowplay-logo',  ref: 'logo/Design-Shadowplay',  isAnim: false },
+  { name: 'retro',      script: 'retro-logo',       ref: 'logo/Design-Retro',       isAnim: false },
+  { name: 'cool',       script: 'cool-logo',        ref: 'logo/Design-Cool',        isAnim: false },
+  { name: 'dracula',    script: 'dracula-logo',     ref: 'logo/Design-Dracula',     isAnim: false },
+  { name: 'clan',       script: 'clan-logo',        ref: 'logo/Design-Clan',        isAnim: false },
+  { name: 'elegant',    script: 'elegant-logo',     ref: 'logo/Design-Elegant',     isAnim: false },
+  { name: 'winner',     script: 'winner-logo',      ref: 'logo/Design-Winner',      isAnim: false },
+  { name: 'splat',      script: 'splat-logo',       ref: 'logo/Design-Splat',       isAnim: false },
+  { name: 'marbles',    script: 'marbles-logo',     ref: 'logo/Design-Marbles',     isAnim: false },
+  { name: 'blood',      script: 'blood-3d-logo',    ref: 'logo/Design-Blood-3D',    isAnim: false },
 ];
 
 // ── Cari style ─────────────────────────────────────────────────────────────────
