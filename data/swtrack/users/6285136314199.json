@@ -329,5 +329,47 @@
       }
     ],
     "processedAt": "2026-06-23T15:05:37.216Z"
+  },
+  "ACAC191845268E1A7490BA22A3AD0B1A": {
+    "id": "ACAC191845268E1A7490BA22A3AD0B1A",
+    "sender": "6285136314199@s.whatsapp.net",
+    "name": "Nurull L ny 2",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-23T15:18:11.929Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "𝖲𝖠𝖸𝖠 𝖠𝖪𝖠𝖭 𝖫𝖠𝖶𝖠𝖭 🤬",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285136314199",
+    "resolvedPn": "6285136314199@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285136314199@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACAC191845268E1A7490BA22A3AD0B1A",
+      "participant": "90916371062907@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-23T15:18:18.516Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285136314199@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACAC191845268E1A7490BA22A3AD0B1A",
+        "participant": "90916371062907@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285136314199@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACAC191845268E1A7490BA22A3AD0B1A",
+        "participant": "6285136314199@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-23T15:18:18.516Z"
   }
 }
