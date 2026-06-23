@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 23/06/2026, 05.04.02  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 23/06/2026, 14.03.23  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,23 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  command:font
+│  #001  —  command:logo
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  getEmoji is not defined
+│  Gagal menemukan URL gambar di halaman hasil
 │
 │  DETAIL
-│  Sumber      : command:font
+│  Sumber      : command:logo
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 23/06/2026, 05.04.02
-│  Terakhir    : 23/06/2026, 05.04.02
+│  Pertama     : 23/06/2026, 14.03.23
+│  Terakhir    : 23/06/2026, 14.03.23
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  ReferenceError: getEmoji is not defined
-│     at default (file:///home/runner/workspace/message.js?t=1782191009489:917:66)
+│  ▶  Error: Gagal menemukan URL gambar di halaman hasil
+│     at generateLogo (/home/runner/workspace/SEMUA_FITUR/tools/flamingtext.cjs:171:22)
+│     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 23/06/2026, 05.04.02
+  Terakhir diperbarui: 23/06/2026, 14.03.23
 ════════════════════════════════════════════════════════════════════════
