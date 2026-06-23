@@ -122,8 +122,11 @@ async function handleFontuntik(m, hisoka, {
     const slice = FONTS.slice(s * _PER_SECT, (s + 1) * _PER_SECT);
     slice.forEach((f, i) => {
       let fontPreview = '';
-      try { fontPreview = f.fn(preview); } catch (_) { fontPreview = preview; }
-      btn.makeRow('', f.name, fontPreview, `${_ROW_PREFIX}${s * _PER_SECT + i}`);
+      let fullConverted = teks;
+      try { fullConverted = f.fn(teks); fontPreview = f.fn(preview); } catch (_) { fontPreview = preview; }
+      const charCount = [...fullConverted].length;
+      const rowDesc = `${fontPreview}  •  ${charCount} karakter`;
+      btn.makeRow('', f.name, rowDesc, `${_ROW_PREFIX}${s * _PER_SECT + i}`);
     });
   }
 
