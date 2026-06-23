@@ -276,3 +276,4 @@ async function handleFontgen(m, hisoka, { getEmoji, logCommand }) {
 }
 
 module.exports.handleFontgen = handleFontgen;
+module.exports.FONTS = FONTS;

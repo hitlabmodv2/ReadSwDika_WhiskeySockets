@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 23/06/2026, 01.47.25  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 23/06/2026, 04.56.36  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,23 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  console.error
+│  #001  —  command:font
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [31m[CekRAM] Error:[39m Cannot find module '/home/runner/workspace/SEMUA_FITUR/helper/memoryMonitor.js' imported from /home/runner/workspace/SEMUA_FITUR/jadibot/ceksesi.cjs
+│  getEmoji is not defined
 │
 │  DETAIL
-│  Sumber      : console.error
+│  Sumber      : command:font
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 23/06/2026, 01.47.25
-│  Terakhir    : 23/06/2026, 01.47.25
+│  Pertama     : 23/06/2026, 04.56.36
+│  Terakhir    : 23/06/2026, 04.56.36
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [31m[CekRAM] Error:[39m Cannot find module '/home/runner/workspace/SEMUA_FITUR/helper/memoryMonitor.js' imported from /home/runner/workspace/SEMUA_FITUR/jadibot/ceksesi.cjs
-│     at console.error (file:///home/runner/workspace/index.js:414:27)
-│     at handleRam (/home/runner/workspace/SEMUA_FITUR/jadibot/ceksesi.cjs:217:25)
+│  ▶  ReferenceError: getEmoji is not defined
+│     at default (file:///home/runner/workspace/message.js?t=1782190316213:910:66)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 23/06/2026, 01.47.25
+  Terakhir diperbarui: 23/06/2026, 04.56.36
 ════════════════════════════════════════════════════════════════════════
