@@ -1,13 +1,13 @@
 {
-  "AC1E26725D434EB2FC4F6162763D4BD8": {
-    "id": "AC1E26725D434EB2FC4F6162763D4BD8",
+  "AC93B27425BBE338135CFCB4F3F16ADB": {
+    "id": "AC93B27425BBE338135CFCB4F3F16ADB",
     "sender": "628995736876@s.whatsapp.net",
     "name": "Adrian",
-    "type": "imageMessage",
-    "arrivedAt": "2026-06-21T05:12:18.739Z",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-23T12:18:15.977Z",
     "read": true,
     "reacted": true,
-    "emoji": "🌇",
+    "emoji": "🐩",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "628995736876",
@@ -16,17 +16,17 @@
       "remoteJid": "status@broadcast",
       "remoteJidAlt": "628995736876@s.whatsapp.net",
       "fromMe": false,
-      "id": "AC1E26725D434EB2FC4F6162763D4BD8",
+      "id": "AC93B27425BBE338135CFCB4F3F16ADB",
       "participant": "126942120571040@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-21T05:12:36.785Z",
+    "updatedAt": "2026-06-23T12:18:32.739Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "628995736876@s.whatsapp.net",
         "fromMe": false,
-        "id": "AC1E26725D434EB2FC4F6162763D4BD8",
+        "id": "AC93B27425BBE338135CFCB4F3F16ADB",
         "participant": "126942120571040@lid",
         "addressingMode": "lid"
       },
@@ -34,36 +34,11 @@
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "628995736876@s.whatsapp.net",
         "fromMe": false,
-        "id": "AC1E26725D434EB2FC4F6162763D4BD8",
+        "id": "AC93B27425BBE338135CFCB4F3F16ADB",
         "participant": "628995736876@s.whatsapp.net",
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-21T05:12:36.785Z"
-  },
-  "3EB0C2EB77D07B8E844AD5": {
-    "id": "3EB0C2EB77D07B8E844AD5",
-    "sender": "628995736876@s.whatsapp.net",
-    "name": "Adrian",
-    "type": "imageMessage",
-    "arrivedAt": "2026-06-21T14:42:54.371Z",
-    "read": true,
-    "reacted": true,
-    "emoji": "1️⃣2️⃣3️⃣",
-    "resolve": "PN langsung ✓",
-    "source": "status",
-    "number": "628995736876",
-    "resolvedPn": "628995736876@s.whatsapp.net",
-    "messageKey": {
-      "remoteJid": "status@broadcast",
-      "remoteJidAlt": "628995736876@s.whatsapp.net",
-      "fromMe": false,
-      "id": "3EB0C2EB77D07B8E844AD5",
-      "participant": "126942120571040@lid",
-      "addressingMode": "lid"
-    },
-    "updatedAt": "2026-06-21T14:44:21.038Z",
-    "retriedOnStartup": true,
-    "retriedAt": "2026-06-21T14:44:21.038Z"
+    "processedAt": "2026-06-23T12:18:32.738Z"
   }
 }
