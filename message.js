@@ -127,6 +127,7 @@ const pendingAlqDlChoices = new Map();
 const pendingAlqUpdateChoices = new Map();
 const pendingCosplayChoices = new Map();
 const pendingKomikChoices = new Map();
+const pendingFontuntikChoices = new Map(); // key → { text, botMsgId, expiresAt, timeout }
 
 const aiReplyCooldown = new Map(); // sender → last reply timestamp
 const AI_COOLDOWN_MS = 3000; // 3 detik cooldown per user
@@ -608,6 +609,12 @@ export default async function ({ message, type: messagesType }, hisoka) {
                 // ── Handle reply ke pesan konfirmasi .setbrowser → setbrowser-cmd.cjs ──
                 if (await handleSetbrowserConfirmReply({ hisoka, m, pendingAturBrowser, isMainBot, loadConfig, getQuotedStanzaId, BROWSER_LIST, logCommand })) return;
 
+                // ── Handle pending fontuntik choice → fontuntik.cjs ──
+                {
+                        const { handleFontuntikChoice } = _require(path.resolve('./SEMUA_FITUR/tools/fontuntik.cjs'));
+                        if (await handleFontuntikChoice({ hisoka, m, pendingFontuntikChoices, getJadibotChoiceKey, getQuotedStanzaId, Button, tolak, logCommand })) return;
+                }
+
                 // ── Handle pending play choice → play-cmd.cjs ──
                 if (await handlePlayChoice({ hisoka, m, pendingPlayChoices, ensureYtdlp, parseYtdlpError, tolak, logCommand })) return;
 
@@ -908,6 +915,12 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'fontgen': {
                                 const { handleFontgen } = _require(path.resolve('./SEMUA_FITUR/tools/fontgenerator.cjs'));
                                 await handleFontgen(m, hisoka, { getEmoji, logCommand });
+                                break;
+                        }
+
+                        case 'fontuntik': {
+                                const { handleFontuntik } = _require(path.resolve('./SEMUA_FITUR/tools/fontuntik.cjs'));
+                                await handleFontuntik(m, hisoka, { Button, logCommand, tolak, pendingFontuntikChoices, getJadibotChoiceKey });
                                 break;
                         }
 

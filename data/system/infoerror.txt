@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 23/06/2026, 04.56.36  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 23/06/2026, 05.04.02  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -31,15 +31,15 @@
 │  DETAIL
 │  Sumber      : command:font
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 23/06/2026, 04.56.36
-│  Terakhir    : 23/06/2026, 04.56.36
+│  Pertama     : 23/06/2026, 05.04.02
+│  Terakhir    : 23/06/2026, 05.04.02
 │
 │  STACK TRACE (3 baris pertama)
 │  ▶  ReferenceError: getEmoji is not defined
-│     at default (file:///home/runner/workspace/message.js?t=1782190316213:910:66)
+│     at default (file:///home/runner/workspace/message.js?t=1782191009489:917:66)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 23/06/2026, 04.56.36
+  Terakhir diperbarui: 23/06/2026, 05.04.02
 ════════════════════════════════════════════════════════════════════════
