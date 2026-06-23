@@ -156,7 +156,7 @@ async function handleFontuntik(m, hisoka, {
     botMsgId,
     botMsgKey,
     origQuotedKey,
-    userMsgKey:   m.key || null,
+    userMsg: m.key ? { key: m.key, message: m.message || {} } : null,
     expiresAt,
     timeout,
   });
@@ -227,8 +227,8 @@ async function handleFontuntikChoice({
   // 3. Fallback ke pesan font-list bot
   const replyTarget = pending.origQuotedKey
     ? { key: pending.origQuotedKey, message: {} }
-    : pending.userMsgKey
-      ? { key: pending.userMsgKey, message: {} }
+    : pending.userMsg
+      ? pending.userMsg
       : pending.botMsgKey
         ? { key: pending.botMsgKey, message: {} }
         : m;
