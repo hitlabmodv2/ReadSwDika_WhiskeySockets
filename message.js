@@ -904,6 +904,13 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 await handleVsbandingkan({ hisoka, m, query, tolak, logCommand, logError, path, _require });
                                 break;
                         }
+                        case 'font':
+                        case 'fontgen': {
+                                const { handleFontgen } = _require(path.resolve('./SEMUA_FITUR/tools/fontgenerator.cjs'));
+                                await handleFontgen(m, hisoka, { getEmoji, logCommand });
+                                break;
+                        }
+
                         case 'anigame':
                         case 'gamean1':
                         case 'an1game': {
