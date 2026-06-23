@@ -1,6 +1,31 @@
+/**
+ * ───────────────────────────────
+ *  Base Script : Bang Dika Ardnt
+ *  Recode By   : Bang Wilykun
+ *  WhatsApp    : 6289688206739
+ *  Telegram    : @Wilykun1994
+ * ───────────────────────────────
+ *  Script ini khusus donasi/VIP
+ *  Support dari kalian bikin saya
+ *  makin semangat update fitur,
+ *  fix bug, dan rawat script ini.
+ *
+ *  Dilarang menjual ulang script ini
+ *  Tanpa izin resmi dari developer.
+ *  Jika ketahuan = NO UPDATE / NO FIX
+ *
+ *  Hargai karya, gunakan dengan bijak.
+ *  Terima kasih sudah support.
+ * ───────────────────────────────
+ *
+ *  fontgenerator.cjs — Font Generator (.font / .fontgen)
+ *  Konversi teks ke 37 gaya font keren dari fontgen.in
+ *  Font maps di-embed langsung (offline, tanpa scrape runtime)
+ * ───────────────────────────────
+ */
 'use strict';
 
-// ─── FONT MAPS (dari fontgen.in) ───────────────────────────────────────────
+// ─── FONT MAPS (sumber: fontgen.in/script.js) ──────────────────────────────
 
 const FONTS = [
   {
