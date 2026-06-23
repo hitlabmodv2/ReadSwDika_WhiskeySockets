@@ -20,7 +20,7 @@
       "participant": "47815887736878@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-21T13:55:31.427Z",
+    "updatedAt": "2026-06-23T01:34:09.366Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -39,6 +39,8 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-21T13:55:31.427Z"
+    "processedAt": "2026-06-21T13:55:31.427Z",
+    "deleted": true,
+    "deletedAt": "2026-06-23T01:34:09.366Z"
   }
 }

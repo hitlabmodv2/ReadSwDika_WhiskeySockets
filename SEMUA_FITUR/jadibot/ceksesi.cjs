@@ -204,7 +204,7 @@ module.exports.handleMemory = handleMemory;
 async function handleRam({ hisoka, m, tolak, logCommand }) {
         if (!m.prefix && m.query) return;
         try {
-                const { formatBytes, getCurrentMemoryUsage, getSystemMemoryInfo } = await import('../helper/memoryMonitor.js');
+                const { formatBytes, getCurrentMemoryUsage, getSystemMemoryInfo } = await import('../../src/helper/memoryMonitor.js');
                 const memUsage  = getCurrentMemoryUsage();
                 const systemMem = getSystemMemoryInfo();
                 const memLimit  = global.memoryMonitor?.memoryLimit || systemMem.total;

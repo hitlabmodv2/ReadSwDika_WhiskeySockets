@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 21/06/2026, 13.53.25  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 23/06/2026, 01.47.25  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,23 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  command:emoji
+│  #001  —  console.error
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  handleEmoji is not a function
+│  [31m[CekRAM] Error:[39m Cannot find module '/home/runner/workspace/SEMUA_FITUR/helper/memoryMonitor.js' imported from /home/runner/workspace/SEMUA_FITUR/jadibot/ceksesi.cjs
 │
 │  DETAIL
-│  Sumber      : command:emoji
+│  Sumber      : console.error
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 21/06/2026, 13.53.25
-│  Terakhir    : 21/06/2026, 13.53.25
+│  Pertama     : 23/06/2026, 01.47.25
+│  Terakhir    : 23/06/2026, 01.47.25
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  TypeError: handleEmoji is not a function
-│     at default (file:///home/runner/workspace/message.js?t=1782049947936:1148:39)
+│  ▶  Error: [31m[CekRAM] Error:[39m Cannot find module '/home/runner/workspace/SEMUA_FITUR/helper/memoryMonitor.js' imported from /home/runner/workspace/SEMUA_FITUR/jadibot/ceksesi.cjs
+│     at console.error (file:///home/runner/workspace/index.js:414:27)
+│     at handleRam (/home/runner/workspace/SEMUA_FITUR/jadibot/ceksesi.cjs:217:25)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 21/06/2026, 13.53.25
+  Terakhir diperbarui: 23/06/2026, 01.47.25
 ════════════════════════════════════════════════════════════════════════
