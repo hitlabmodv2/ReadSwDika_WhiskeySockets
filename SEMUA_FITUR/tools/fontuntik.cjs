@@ -59,8 +59,6 @@ async function handleFontuntik(m, hisoka, {
   const prefix = m.prefix || '.';
   const teks   = (m.query || '').trim();
 
-  if (!m.prefix) return;
-
   const FONTS = _getFonts();
   if (!FONTS.length) {
     return tolak(hisoka, m, '❌ Daftar font tidak tersedia saat ini.');
