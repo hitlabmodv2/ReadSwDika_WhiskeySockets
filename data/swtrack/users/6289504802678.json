@@ -756,7 +756,7 @@
       "participant": "263445207371837@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-23T01:46:53.111Z",
+    "updatedAt": "2026-06-23T04:40:27.586Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -775,6 +775,92 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-23T01:46:53.110Z"
+    "processedAt": "2026-06-23T01:46:53.110Z",
+    "deleted": true,
+    "deletedAt": "2026-06-23T04:40:27.586Z"
+  },
+  "ACE6D43A034DAA6E7017D830D0CF0B12": {
+    "id": "ACE6D43A034DAA6E7017D830D0CF0B12",
+    "sender": "6289504802678@s.whatsapp.net",
+    "name": "Dra pulang, ada lolipop",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-23T04:40:27.120Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "𝙎𝙏𝙊𝙋 𝙈𝘽𝙂🤬",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6289504802678",
+    "resolvedPn": "6289504802678@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6289504802678@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACE6D43A034DAA6E7017D830D0CF0B12",
+      "participant": "263445207371837@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-23T04:40:46.124Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289504802678@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACE6D43A034DAA6E7017D830D0CF0B12",
+        "participant": "263445207371837@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289504802678@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACE6D43A034DAA6E7017D830D0CF0B12",
+        "participant": "6289504802678@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-23T04:40:46.124Z"
+  },
+  "AC18F91B6F98F5D229A9E1805B3304EA": {
+    "id": "AC18F91B6F98F5D229A9E1805B3304EA",
+    "sender": "6289504802678@s.whatsapp.net",
+    "name": "Dra pulang, ada lolipop",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-23T04:40:27.592Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "𝐖𝐄𝐋𝐂𝐎𝐌𝐄",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6289504802678",
+    "resolvedPn": "6289504802678@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6289504802678@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC18F91B6F98F5D229A9E1805B3304EA",
+      "participant": "263445207371837@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-23T04:40:29.701Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289504802678@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC18F91B6F98F5D229A9E1805B3304EA",
+        "participant": "263445207371837@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289504802678@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC18F91B6F98F5D229A9E1805B3304EA",
+        "participant": "6289504802678@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-23T04:40:29.701Z"
   }
 }
