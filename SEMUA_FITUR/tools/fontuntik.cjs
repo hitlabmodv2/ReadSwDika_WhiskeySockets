@@ -57,7 +57,9 @@ async function handleFontuntik(m, hisoka, {
   Button, logCommand, tolak, pendingFontuntikChoices, getJadibotChoiceKey,
 }) {
   const prefix = m.prefix || '.';
-  const teks   = (m.text || '').trim();
+  const teks   = (m.query || '').trim();
+
+  if (!m.prefix) return;
 
   if (!teks) {
     return tolak(hisoka, m,
