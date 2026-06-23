@@ -16,12 +16,15 @@
 'use strict';
 
 const axios  = require('axios');
+const https  = require('https');
 const fs     = require('fs');
 const os     = require('os');
 const path   = require('path');
 const { execFile } = require('child_process');
 const { promisify } = require('util');
 const execFileAsync = promisify(execFile);
+
+const ctAgent = new https.Agent({ rejectUnauthorized: false });
 
 // ── Konversi GIF buffer → MP4 buffer (agar animasi jalan di WhatsApp) ─────────
 async function gifToMp4(gifBuffer) {
@@ -47,6 +50,7 @@ async function gifToMp4(gifBuffer) {
 }
 
 const FT_BASE = 'https://www.flamingtext.com';
+const CT_BASE = 'https://cooltext.com';
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
 
 // ── Daftar style ───────────────────────────────────────────────────────────────
@@ -131,6 +135,25 @@ const STYLE_LIST = [
   { name: 'glowing',    script: 'glowing-logo',          ref: 'logo/Design-Glowing',         isAnim: false },
   { name: 'ninja',      script: 'ninja-logo',            ref: 'logo/Design-Ninja',           isAnim: false },
   { name: 'country',    script: 'country-logo',          ref: 'logo/Design-Country',         isAnim: false },
+
+  // ════════════════════════════════
+  // ✨ ANIMASI GIF — CoolText.com
+  //    (source:'cooltext', tidak duplikat dengan FlamingText)
+  // ════════════════════════════════
+  { name: 'ctburning',  source: 'cooltext', logoId: 4,          ref: 'Logo-Design-Burning',      isAnim: true,
+    params: { Color1_color: 'FF0000', Integer1: '15', Boolean1: 'on', Integer13: 'on', Integer12: 'on' } },
+  { name: 'animglow',   source: 'cooltext', logoId: 26,         ref: 'Logo-Design-Animated-Glow', isAnim: true,
+    params: { BackgroundColor_color: '000000', Integer13: 'on', Integer12: 'on' } },
+  { name: 'molten',     source: 'cooltext', logoId: 43,         ref: 'Logo-Design-Molten-Core',  isAnim: true,
+    params: { Boolean1: 'on', Integer13: 'on', Integer12: 'on' } },
+  { name: 'ctglitter',  source: 'cooltext', logoId: 44,         ref: 'Logo-Design-Glitter',      isAnim: true,
+    params: { Integer13: 'on', Integer12: 'on' } },
+  { name: 'blinkie',    source: 'cooltext', logoId: 819515844,  ref: 'Logo-Design-Blinkie',      isAnim: true,
+    params: { Integer13: 'on', Integer12: 'on' } },
+  { name: 'love',       source: 'cooltext', logoId: 819721038,  ref: 'Logo-Design-Love',         isAnim: true,
+    params: { Integer13: 'on', Integer12: 'on' } },
+  { name: 'ctflaming',  source: 'cooltext', logoId: 1169711118, ref: 'Logo-Design-Flaming',      isAnim: true,
+    params: { Integer13: 'on', Integer12: 'on' } },
 ];
 
 // ── Cari style ─────────────────────────────────────────────────────────────────
@@ -146,8 +169,70 @@ function findStyle(keyword) {
     || STYLE_LIST[Math.floor(Math.random() * STYLE_LIST.length)];
 }
 
+// ── Generate logo via cooltext.com ────────────────────────────────────────────
+async function generateCooltext(style, text) {
+  const baseParams = {
+    LogoID: String(style.logoId),
+    Text:   text,
+    FontSize: '70',
+    ...(style.params || {})
+  };
+  const params = new URLSearchParams(baseParams);
+
+  // Step 1: POST → dapat RenderID
+  const renderResp = await axios.post(
+    CT_BASE + '/Render',
+    params.toString(),
+    {
+      headers: {
+        'User-Agent':   UA,
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Referer':      CT_BASE + '/' + style.ref,
+        'Origin':       CT_BASE
+      },
+      timeout: 20000
+    }
+  );
+
+  const redirectLoc = renderResp.data?.redirectLocation;
+  if (!redirectLoc) throw new Error('CoolText: Server tidak mengembalikan redirectLocation');
+
+  // Step 2: GET halaman render → parse URL gambar
+  const renderPageUrl = CT_BASE + '/' + redirectLoc;
+  const { data: html } = await axios.get(renderPageUrl, {
+    headers: { 'User-Agent': UA, 'Referer': CT_BASE + '/' + style.ref },
+    timeout: 20000
+  });
+
+  // Pattern: <img src="https://r77.cooltext.com/rendered/cooltext493287.gif">
+  const imgMatch = html.match(
+    /https:\/\/r\d+\.cooltext\.com\/rendered\/cooltext[\d]+\.(gif|png)/i
+  );
+  if (!imgMatch) throw new Error('CoolText: Gagal menemukan URL gambar hasil');
+
+  const imgUrl = imgMatch[0];
+
+  // Step 3: Download gambar
+  const { data: imgData } = await axios.get(imgUrl, {
+    responseType:  'arraybuffer',
+    headers: { 'User-Agent': UA, 'Referer': renderPageUrl },
+    httpsAgent:    ctAgent,
+    timeout:       20000
+  });
+
+  const buffer = Buffer.from(imgData);
+  const isGif  = buffer.slice(0, 3).toString() === 'GIF';
+  const isPng  = buffer[0] === 0x89 && buffer[1] === 0x50;
+
+  if (!isGif && !isPng) throw new Error('CoolText: File bukan gambar valid');
+
+  return { buffer, isGif };
+}
+
 // ── Generate logo via flamingtext.com ─────────────────────────────────────────
 async function generateLogo(style, text) {
+  // Routing: cooltext vs flamingtext
+  if (style.source === 'cooltext') return generateCooltext(style, text);
   // Base params global — di-override oleh style.params jika ada
   const baseParams = {
     '_comBuyRedirect':          'false',
