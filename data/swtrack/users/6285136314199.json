@@ -157,5 +157,47 @@
     "updatedAt": "2026-06-23T01:37:27.329Z",
     "deleted": true,
     "deletedAt": "2026-06-23T01:37:27.329Z"
+  },
+  "ACAEF33EB82B924A93AEB23F2511B1AB": {
+    "id": "ACAEF33EB82B924A93AEB23F2511B1AB",
+    "sender": "6285136314199@s.whatsapp.net",
+    "name": "Nurull L ny 2",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-23T06:50:32.739Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "𝖲𝖠𝖸𝖠 𝖠𝖪𝖠𝖭 𝖫𝖠𝖶𝖠𝖭 🤬",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285136314199",
+    "resolvedPn": "6285136314199@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285136314199@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACAEF33EB82B924A93AEB23F2511B1AB",
+      "participant": "90916371062907@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-23T06:50:48.857Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285136314199@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACAEF33EB82B924A93AEB23F2511B1AB",
+        "participant": "90916371062907@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285136314199@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACAEF33EB82B924A93AEB23F2511B1AB",
+        "participant": "6285136314199@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-23T06:50:48.857Z"
   }
 }
