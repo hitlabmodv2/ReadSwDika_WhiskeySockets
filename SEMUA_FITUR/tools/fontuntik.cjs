@@ -61,25 +61,37 @@ async function handleFontuntik(m, hisoka, {
 
   if (!m.prefix) return;
 
+  const FONTS = _getFonts();
+  if (!FONTS.length) {
+    return tolak(hisoka, m, '❌ Daftar font tidak tersedia saat ini.');
+  }
+
   if (!teks) {
+    const demoTeks = 'Wily Bot';
+    const demoFonts = FONTS.length >= 15
+      ? [FONTS[0], FONTS[2], FONTS[3], FONTS[5], FONTS[11], FONTS[14]]
+      : FONTS.slice(0, 6);
+    const demoLines = demoFonts.map(f => {
+      let out = demoTeks;
+      try { out = f.fn(demoTeks); } catch (_) {}
+      return `│ *${f.name}*\n│ ${out}`;
+    }).join('\n│\n');
+
     return tolak(hisoka, m,
       `╭─「 🔤 *FONT UNTIK* 」\n` +
-      `│\n` +
-      `│ ❌ Kirim teks yang ingin diubah!\n` +
       `│\n` +
       `│ 📌 *Cara pakai:*\n` +
       `│ ${prefix}fontuntik <teks>\n` +
       `│\n` +
-      `│ 📝 *Contoh:*\n` +
-      `│ ${prefix}fontuntik Wily Bot\n` +
+      `│ 📝 *Contoh ketik:*\n` +
+      `│ ${prefix}fontuntik ${demoTeks}\n` +
+      `│\n` +
+      `│ 🎨 *Simulasi hasil (${FONTS.length} font tersedia):*\n` +
+      `│\n` +
+      `${demoLines}\n` +
       `│\n` +
       `╰──────────────────────`
     );
-  }
-
-  const FONTS = _getFonts();
-  if (!FONTS.length) {
-    return tolak(hisoka, m, '❌ Daftar font tidak tersedia saat ini.');
   }
 
   const preview = teks.length > 18 ? teks.slice(0, 18) + '…' : teks;
