@@ -117,6 +117,7 @@ async function handleFontuntik(m, hisoka, {
   }
 
   const botMsgId  = sentMsg?.key?.id || null;
+  const botMsgKey = sentMsg?.key || null;
   const expiresAt = Date.now() + _FONT_TTL;
   const choiceKey = getJadibotChoiceKey(m);
 
@@ -132,6 +133,7 @@ async function handleFontuntik(m, hisoka, {
   pendingFontuntikChoices.set(choiceKey, {
     text:      teks,
     botMsgId,
+    botMsgKey,
     expiresAt,
     timeout,
   });
@@ -193,22 +195,21 @@ async function handleFontuntikChoice({
   let converted = pending.text;
   try { converted = font.fn(pending.text); } catch (_) {}
 
-  const bodyText =
-    `╭─「 🔤 *${font.name}* 」\n` +
-    `│\n` +
-    `│ ${converted}\n` +
-    `│\n` +
-    `│ ✏️ Asli: ${pending.text}\n` +
-    `╰──────────────────────\n\n` +
-    `👆 Tap *Salin Teks* untuk copy hasil`;
+  // Body HANYA teks hasil konversi — supaya yang ter-copy bersih tanpa nama font
+  const bodyText = converted;
+
+  // Quoted ke pesan bot (font list), bukan ke pesan pilihan user
+  const botQuoted = pending.botMsgKey
+    ? { key: pending.botMsgKey, message: {} }
+    : m;
 
   const btn = new Button()
     .setBody(bodyText)
-    .setFooter('🔤 Font Untik • WilyBot')
+    .setFooter(`🔤 ${font.name} • Font Untik • WilyBot`)
     .addCopy('📋 Salin Teks', converted, `fontcopy_${idx}`);
 
   try {
-    await btn.run(m.from, hisoka, m);
+    await btn.run(m.from, hisoka, botQuoted);
   } catch (_) {
     await tolak(hisoka, m, `🔤 *${font.name}*\n\n${converted}`);
   }
