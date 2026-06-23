@@ -57,20 +57,29 @@ const STYLE_LIST = [
   // ════════════════════════════════
   // 🎞️  ANIMASI GIF (bergerak di WA)
   // ════════════════════════════════
-  { name: 'flaming',      script: 'flaming-logo',         ref: 'logo/Design-Flaming-Text-Animation', isAnim: true },
-  { name: 'innerfire',    script: 'inner-fire-anim-logo', ref: 'logo/Design-Inner-Fire-Animation',   isAnim: true },
-  { name: 'burning',      script: 'burning-logo',         ref: 'logo/Design-Burning',                isAnim: true },
-  { name: 'alienglow',    script: 'alien-glow-anim-logo', ref: 'logo/Design-Alien-Glow-Animation',   isAnim: true },
-  { name: 'glitter',      script: 'glitter-anim-logo',    ref: 'logo/Design-Glitter-Animation',      isAnim: true },
-  { name: 'memories',     script: 'memories-anim-logo',   ref: 'logo/Design-Memories-Animation',     isAnim: true },
-  { name: 'burnin',       script: 'burn-in-anim-logo',    ref: 'logo/Design-Burn-In-Animation',      isAnim: true },
-  { name: 'whirl',        script: 'whirl-anim-logo',      ref: 'logo/Design-Whirl-Animation',        isAnim: true },
-  { name: 'highlight',    script: 'highlight-anim-logo',  ref: 'logo/Design-Highlight-Animation',    isAnim: true },
-  { name: 'jump',         script: 'jump-anim-logo',       ref: 'logo/Design-Jump-Animation',         isAnim: true },
-  { name: 'bluefire',     script: 'blue-fire',            ref: 'logo/Design-Blue-Flames-Animation',  isAnim: true },
-  { name: 'shake',        script: 'shake-anim-logo',      ref: 'logo/Design-Shake-Animation',        isAnim: true },
-  { name: 'flash',        script: 'flash-anim-logo',      ref: 'logo/Design-Flash-Animation',        isAnim: true },
-  { name: 'memoriesname', script: 'memories-name',        ref: 'logo/Design-Memories-Name-Animation',isAnim: true },
+  { name: 'flaming',   script: 'flaming-logo',         ref: 'logo/Design-Flaming-Text-Animation', isAnim: true },
+  { name: 'innerfire', script: 'inner-fire-anim-logo', ref: 'logo/Design-Inner-Fire-Animation',   isAnim: true },
+  { name: 'burning',   script: 'burning-logo',         ref: 'logo/Design-Burning',                isAnim: true },
+  { name: 'alienglow', script: 'alien-glow-anim-logo', ref: 'logo/Design-Alien-Glow-Animation',   isAnim: true,
+    params: { backgroundColor: '#000000', textBorder: '15' } },
+  { name: 'glitter',   script: 'glitter-anim-logo',    ref: 'logo/Design-Glitter-Animation',      isAnim: true,
+    params: { textBorder: '15' } },
+  { name: 'memories',  script: 'memories-anim-logo',   ref: 'logo/Design-Memories-Animation',     isAnim: true,
+    params: { textColor: '#BD0000', backgroundColor: '#FFFFFF', fontsize: '80', textBorder: '15' } },
+  { name: 'burnin',    script: 'burn-in-anim-logo',    ref: 'logo/Design-Burn-In-Animation',      isAnim: true,
+    params: { textColor: '#FFFF66', backgroundColor: '#000000', fontsize: '50', textBorder: '15' } },
+  { name: 'whirl',     script: 'whirl-anim-logo',      ref: 'logo/Design-Whirl-Animation',        isAnim: true,
+    params: { textColor: '#0000FF', fontsize: '50', textBorder: '20' } },
+  { name: 'highlight', script: 'highlight-anim-logo',  ref: 'logo/Design-Highlight-Animation',    isAnim: true,
+    params: { textColor: '#126CB4', backgroundColor: '#000000', fontsize: '50', textBorder: '12' } },
+  { name: 'jump',      script: 'jump-anim-logo',       ref: 'logo/Design-Jump-Animation',         isAnim: true,
+    params: { textColor: '#CD0000', backgroundColor: '#FFFFFF', fontsize: '70', textBorder: '15' } },
+  { name: 'bluefire',  script: 'blue-fire',            ref: 'logo/Design-Blue-Flames-Animation',  isAnim: true,
+    params: { textColor: '#0000CC', textBorder: '15' } },
+  { name: 'shake',     script: 'shake-anim-logo',      ref: 'logo/Design-Shake-Animation',        isAnim: true,
+    params: { textColor: '#CD0000', backgroundColor: '#FFFFFF', fontsize: '70', textBorder: '15' } },
+  { name: 'flash',     script: 'flash-anim-logo',      ref: 'logo/Design-Flash-Animation',        isAnim: true,
+    params: { textColor: '#BDBD00', backgroundColor: '#000000', fontsize: '100', textBorder: '15' } },
 
   // ════════════════════════════════
   // 🖼️  STATIC PNG (gambar diam)
@@ -139,32 +148,36 @@ function findStyle(keyword) {
 
 // ── Generate logo via flamingtext.com ─────────────────────────────────────────
 async function generateLogo(style, text) {
-  const params = new URLSearchParams({
-    '_comBuyRedirect':        'false',
-    'script':                 style.script,
-    'fontsize':               '70',
-    'textBorder':             '20',
-    'growSize':               '0',
-    'antialias':              'on',
-    'hinting':                'on',
-    'justify':                '1',
-    'letterSpacing':          '0',
-    'lineSpacing':            '0',
-    'textSlant':              '0',
-    'textVerticalSlant':      '0',
-    'textAngle':              '0',
-    'textOutline':            'false',
-    'textOutlineSize':        '2',
-    'textColor':              '#000000',
-    'fireSize':               '70',
+  // Base params global — di-override oleh style.params jika ada
+  const baseParams = {
+    '_comBuyRedirect':          'false',
+    'script':                   style.script,
+    'fontsize':                 '70',
+    'textBorder':               '20',
+    'growSize':                 '0',
+    'antialias':                'on',
+    'hinting':                  'on',
+    'justify':                  '1',
+    'letterSpacing':            '0',
+    'lineSpacing':              '0',
+    'textSlant':                '0',
+    'textVerticalSlant':        '0',
+    'textAngle':                '0',
+    'textOutline':              'false',
+    'textOutlineSize':          '2',
+    'textColor':                '#000000',
+    'fireSize':                 '70',
     'backgroundResizeToLayers': 'on',
-    'backgroundRadio':        '0',
-    'backgroundColor':        '#000000',
-    'watermark':              'none',
-    'jpgQuality':             '85',
-    'doScale':                'off',
-    'text':                   text
-  });
+    'backgroundRadio':          '0',
+    'backgroundColor':          '#000000',
+    'watermark':                'none',
+    'jpgQuality':               '85',
+    'doScale':                  'off',
+    'text':                     text,
+    // Override dengan params spesifik style (textColor, backgroundColor, fontsize, dll)
+    ...(style.params || {})
+  };
+  const params = new URLSearchParams(baseParams);
 
   // Step 1: POST → 302 → job URL
   const postResp = await axios.post(
@@ -187,29 +200,37 @@ async function generateLogo(style, text) {
   const jobUrl = postResp.headers['location'];
   if (!jobUrl) throw new Error('Server tidak mengembalikan job URL');
 
-  // Step 2: Fetch job page → cari URL gambar hasil
-  const { data: jobHtml } = await axios.get(jobUrl, {
-    headers: { 'User-Agent': UA, 'Referer': FT_BASE + '/' + style.ref },
-    timeout: 20000
-  });
+  // Helper: parse URL gambar dari HTML job page
+  function parseImgUrl(html) {
+    // 1) Tag <img class='logoImage'> atau <img class='ft-result-img'>
+    const logoTag = html.match(
+      /<img[^>]+class=[^>]*(?:logoImage|ft-result-img)[^>]*src=[\"']([^\"']+)[\"']/i
+    ) || html.match(
+      /<img[^>]+src=[\"']([^\"']+)[\"'][^>]+class=[^>]*(?:logoImage|ft-result-img)[^>]*/i
+    );
+    if (logoTag) return logoTag[1].split('&')[0]; // potong &_loc=... jika ada
 
-  // Cari dari tag <img class='logoImage'> — paling akurat
-  let imgUrl = null;
-  const logoTag = jobHtml.match(
-    /<img[^>]+class=[\"'][^\"']*logoImage[^\"']*[\"'][^>]+src=[\"']([^\"']+)[\"']/i
-  ) || jobHtml.match(
-    /<img[^>]+src=[\"']([^\"']+)[\"'][^>]+class=[\"'][^\"']*logoImage[^\"']*[\"']/i
-  );
-  if (logoTag) imgUrl = logoTag[1];
-
-  // Fallback: cari URL engine dari semua URL di halaman
-  if (!imgUrl) {
-    const engineMatch = jobHtml.match(
-      /https:\/\/de\d+-engine\.flamingtext\.com\/netfu\/[^"'&\s<>]+\.(png|gif)/i
-    ) || jobHtml.match(
+    // 2) URL engine flamingtext (de29-engine, ov12-engine, dll)
+    const engineMatch = html.match(
+      /https:\/\/[a-z0-9-]+-engine\.flamingtext\.com\/netfu\/[^"'&\s<>]+\.(png|gif)/i
+    ) || html.match(
       /https:\/\/[a-z0-9-]+\.flamingtext\.com\/netfu\/[^"'&\s<>]+\.(png|gif)/i
     );
-    if (engineMatch) imgUrl = engineMatch[0];
+    if (engineMatch) return engineMatch[0];
+
+    return null;
+  }
+
+  // Step 2: Fetch job page → cari URL gambar (retry 2x jika belum siap)
+  let imgUrl = null;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    const { data: jobHtml } = await axios.get(jobUrl, {
+      headers: { 'User-Agent': UA, 'Referer': FT_BASE + '/' + style.ref },
+      timeout: 20000
+    });
+    imgUrl = parseImgUrl(jobHtml);
+    if (imgUrl) break;
+    if (attempt < 3) await new Promise(r => setTimeout(r, 2000 * attempt));
   }
 
   if (!imgUrl) throw new Error('Gagal menemukan URL gambar di halaman hasil');
