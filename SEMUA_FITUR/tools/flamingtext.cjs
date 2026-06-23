@@ -187,6 +187,22 @@ const STYLE_LIST = [
   { name: 'oldenglish',  source: 'glowtxt', gtStyle: 'oldenglish',  animType: 'pulse', isAnim: true },
   { name: 'metropol',    source: 'glowtxt', gtStyle: 'metropol',    animType: 'sweep', isAnim: true },
   { name: 'airman',      source: 'glowtxt', gtStyle: 'airman',      animType: 'pulse', isAnim: true },
+
+  // ── GlowTxt batch-3 (semua ditest live, 100% GIF) ──────────────────────────
+  { name: 'fruityfresh',   source: 'glowtxt', gtStyle: 'fruityfresh',   animType: 'pulse', isAnim: true },
+  { name: 'cottoncandy',   source: 'glowtxt', gtStyle: 'cottoncandy',   animType: 'sweep', isAnim: true },
+  { name: 'sapphireheart', source: 'glowtxt', gtStyle: 'sapphireheart', animType: 'pulse', isAnim: true },
+  { name: 'sweetheart',    source: 'glowtxt', gtStyle: 'sweetheart',    animType: 'sweep', isAnim: true },
+  { name: 'cupcake',       source: 'glowtxt', gtStyle: 'cupcake',       animType: 'pulse', isAnim: true },
+  { name: 'firstedition',  source: 'glowtxt', gtStyle: 'firstedition',  animType: 'sweep', isAnim: true },
+  { name: 'flowerpower',   source: 'glowtxt', gtStyle: 'flowerpower',   animType: 'pulse', isAnim: true },
+  { name: 'dearest',       source: 'glowtxt', gtStyle: 'dearest',       animType: 'sweep', isAnim: true },
+  { name: 'broadway',      source: 'glowtxt', gtStyle: 'broadway',      animType: 'pulse', isAnim: true },
+  { name: 'frontier',      source: 'glowtxt', gtStyle: 'frontier',      animType: 'sweep', isAnim: true },
+  { name: 'bronze',        source: 'glowtxt', gtStyle: 'bronco',        animType: 'pulse', isAnim: true },
+  { name: 'funhouse',      source: 'glowtxt', gtStyle: 'jumble',        animType: 'sweep', isAnim: true },
+  { name: 'medieval',      source: 'glowtxt', gtStyle: 'medieval',      animType: 'pulse', isAnim: true },
+  { name: 'starshine',     source: 'glowtxt', gtStyle: 'starshine',     animType: 'sweep', isAnim: true },
 ];
 
 // ── Cari style ─────────────────────────────────────────────────────────────────
@@ -195,11 +211,11 @@ function findStyle(keyword) {
     return STYLE_LIST[Math.floor(Math.random() * STYLE_LIST.length)];
   }
   const kw = keyword.toLowerCase().replace(/\s+/g, '');
-  // Prioritas: exact match dulu, baru partial match
+  // Prioritas: exact match dulu, baru partial match — return null kalau tidak ketemu
   return STYLE_LIST.find(s => s.name === kw)
     || STYLE_LIST.find(s => s.name.startsWith(kw))
     || STYLE_LIST.find(s => s.name.includes(kw))
-    || STYLE_LIST[Math.floor(Math.random() * STYLE_LIST.length)];
+    || null;
 }
 
 // ── Generate logo via cooltext.com ────────────────────────────────────────────
@@ -498,6 +514,20 @@ async function handleFlamingtext({ hisoka, m, query, tolak, logCommand, logError
   }
 
   const style = findStyle(styleKey);
+
+  // ── Validasi: style tidak ditemukan ────────────────────────────────────────
+  if (!style) {
+    const animList  = STYLE_LIST.filter(s => s.isAnim).map(s => `\`${s.name}\``).join(', ');
+    const statList  = STYLE_LIST.filter(s => !s.isAnim).map(s => `\`${s.name}\``).join(', ');
+    return await tolak(hisoka, m,
+      `❌ *Style "${styleKey}" tidak ditemukan!*\n\n` +
+      `✨ *Style Animasi GIF:*\n${animList}\n\n` +
+      `🖼️ *Style Static PNG:*\n${statList}\n\n` +
+      `💡 Pakai: *.logo [style]|[teks]*\n` +
+      `Contoh: _.logo volcano|WilyBot_\n` +
+      `Atau: _.logo random|WilyBot_ untuk style acak`
+    );
+  }
 
   await hisoka.sendMessage(m.from, { react: { text: '🎨', key: m.key } });
 
