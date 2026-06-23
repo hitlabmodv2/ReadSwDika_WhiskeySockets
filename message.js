@@ -416,7 +416,9 @@ export default async function ({ message, type: messagesType }, hisoka) {
                             'emojidefault', 'emojicustom', 'emojiclear',
                             'ceksesi',
                             'clearsesi', 'cs',
-                            'del', 'd'
+                            'del', 'd',
+                            'font', 'fontgen',
+                            'fontuntik'
                         ]);
                         if (!jadibotAllowedCommands.has(m.command)) {
                             return;
