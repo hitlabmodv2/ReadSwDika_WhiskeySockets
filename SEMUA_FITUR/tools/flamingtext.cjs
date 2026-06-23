@@ -170,6 +170,23 @@ const STYLE_LIST = [
   { name: 'sparkle',      source: 'glowtxt', gtStyle: 'sprinklesparkle', animType: 'sweep', isAnim: true },
   { name: 'flutter',      source: 'glowtxt', gtStyle: 'flutter',         animType: 'pulse', isAnim: true },
   { name: 'bubbles',      source: 'glowtxt', gtStyle: 'bubbles',         animType: 'sweep', isAnim: true },
+
+  // ── GlowTxt batch-2 (semua ditest live, 100% GIF) ──────────────────────────
+  { name: 'heartbeat',   source: 'glowtxt', gtStyle: 'heartbeat',   animType: 'pulse', isAnim: true },
+  { name: 'lollipop',    source: 'glowtxt', gtStyle: 'lollipop',    animType: 'sweep', isAnim: true },
+  { name: 'jukebox',     source: 'glowtxt', gtStyle: 'jukebox',     animType: 'pulse', isAnim: true },
+  { name: 'pinkglow',    source: 'glowtxt', gtStyle: 'pinkglow',    animType: 'sweep', isAnim: true },
+  { name: 'piratescove', source: 'glowtxt', gtStyle: 'piratescove', animType: 'pulse', isAnim: true },
+  { name: 'dragonscale', source: 'glowtxt', gtStyle: 'dragonscale', animType: 'sweep', isAnim: true },
+  { name: 'ghostship',   source: 'glowtxt', gtStyle: 'ghostship',   animType: 'pulse', isAnim: true },
+  { name: 'glowstick',   source: 'glowtxt', gtStyle: 'glowstick',   animType: 'sweep', isAnim: true },
+  { name: 'fairygarden', source: 'glowtxt', gtStyle: 'fairygarden', animType: 'pulse', isAnim: true },
+  { name: 'gobstopper',  source: 'glowtxt', gtStyle: 'gobstopper',  animType: 'sweep', isAnim: true },
+  { name: 'funkyzeit',   source: 'glowtxt', gtStyle: 'funkyzeit',   animType: 'pulse', isAnim: true },
+  { name: 'lavender',    source: 'glowtxt', gtStyle: 'lavender',    animType: 'sweep', isAnim: true },
+  { name: 'oldenglish',  source: 'glowtxt', gtStyle: 'oldenglish',  animType: 'pulse', isAnim: true },
+  { name: 'metropol',    source: 'glowtxt', gtStyle: 'metropol',    animType: 'sweep', isAnim: true },
+  { name: 'airman',      source: 'glowtxt', gtStyle: 'airman',      animType: 'pulse', isAnim: true },
 ];
 
 // ── Cari style ─────────────────────────────────────────────────────────────────
