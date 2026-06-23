@@ -915,8 +915,6 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 await handleVsbandingkan({ hisoka, m, query, tolak, logCommand, logError, path, _require });
                                 break;
                         }
-                        case 'font':
-                        case 'fontgen':
                         case 'fontuntik': {
                                 const { handleFontuntik } = _require(path.resolve('./SEMUA_FITUR/tools/fontuntik.cjs'));
                                 await handleFontuntik(m, hisoka, { Button, logCommand, tolak, pendingFontuntikChoices, getJadibotChoiceKey });
