@@ -419,7 +419,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                             'del', 'd',
                             'font', 'fontgen',
                             'fontuntik',
-                            'flamingtext', 'ft', 'flaming'
+                            'logo'
                         ]);
                         const _rawText = (m.text || '').trim();
                         const _isFontuntikChoice = _rawText.startsWith('fu_');
@@ -924,9 +924,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 break;
                         }
 
-                        case 'flamingtext':
-                        case 'flaming':
-                        case 'ft': {
+                        case 'logo': {
                                 const { handleFlamingtext } = _require(path.resolve('./SEMUA_FITUR/tools/flamingtext.cjs'));
                                 await handleFlamingtext({ hisoka, m, query, tolak, logCommand, logError });
                                 break;
