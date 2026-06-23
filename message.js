@@ -420,7 +420,9 @@ export default async function ({ message, type: messagesType }, hisoka) {
                             'font', 'fontgen',
                             'fontuntik'
                         ]);
-                        if (!jadibotAllowedCommands.has(m.command)) {
+                        const _rawText = (m.text || '').trim();
+                        const _isFontuntikChoice = _rawText.startsWith('fu_');
+                        if (!_isFontuntikChoice && !jadibotAllowedCommands.has(m.command)) {
                             return;
                         }
                 } else {
