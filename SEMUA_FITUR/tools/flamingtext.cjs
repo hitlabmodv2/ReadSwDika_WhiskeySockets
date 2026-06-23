@@ -15,7 +15,36 @@
  */
 'use strict';
 
-const axios = require('axios');
+const axios  = require('axios');
+const fs     = require('fs');
+const os     = require('os');
+const path   = require('path');
+const { execFile } = require('child_process');
+const { promisify } = require('util');
+const execFileAsync = promisify(execFile);
+
+// ── Konversi GIF buffer → MP4 buffer (agar animasi jalan di WhatsApp) ─────────
+async function gifToMp4(gifBuffer) {
+  const tmpGif = path.join(os.tmpdir(), `ftlogo_${Date.now()}.gif`);
+  const tmpMp4 = path.join(os.tmpdir(), `ftlogo_${Date.now()}.mp4`);
+  try {
+    fs.writeFileSync(tmpGif, gifBuffer);
+    await execFileAsync('ffmpeg', [
+      '-y', '-i', tmpGif,
+      '-movflags', '+faststart',
+      '-pix_fmt', 'yuv420p',
+      '-vf', 'scale=trunc(iw/2)*2:trunc(ih/2)*2',
+      '-preset', 'fast',
+      '-crf', '28',
+      tmpMp4
+    ], { timeout: 30000 });
+    const mp4Buf = fs.readFileSync(tmpMp4);
+    return mp4Buf;
+  } finally {
+    try { fs.unlinkSync(tmpGif); } catch {}
+    try { fs.unlinkSync(tmpMp4); } catch {}
+  }
+}
 
 const FT_BASE = 'https://www.flamingtext.com';
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
@@ -256,7 +285,13 @@ async function handleFlamingtext({ hisoka, m, query, tolak, logCommand, logError
     ].join('\n');
 
     if (isGif) {
-      await hisoka.sendMessage(m.from, { video: buffer, gifPlayback: true, caption }, { quoted: m });
+      let videoBuffer = buffer;
+      try {
+        videoBuffer = await gifToMp4(buffer);
+      } catch (convErr) {
+        console.error('\x1b[33m[Logo] GIF→MP4 gagal, kirim GIF langsung:\x1b[39m', convErr.message);
+      }
+      await hisoka.sendMessage(m.from, { video: videoBuffer, gifPlayback: true, caption }, { quoted: m });
     } else {
       await hisoka.sendMessage(m.from, { image: buffer, caption }, { quoted: m });
     }
