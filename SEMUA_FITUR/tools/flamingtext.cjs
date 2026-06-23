@@ -154,6 +154,22 @@ const STYLE_LIST = [
     params: { Integer13: 'on', Integer12: 'on' } },
   { name: 'ctflaming',  source: 'cooltext', logoId: 1169711118, ref: 'Logo-Design-Flaming',      isAnim: true,
     params: { Integer13: 'on', Integer12: 'on' } },
+
+  // ════════════════════════════════
+  // ✨ ANIMASI GIF — GlowTxt.com
+  //    (source:'glowtxt', anim_type: pulse/sweep)
+  //    Tidak duplikat dengan FT/CT
+  // ════════════════════════════════
+  { name: 'glowpulse',    source: 'glowtxt', gtStyle: 'glowtxt',         animType: 'pulse', isAnim: true },
+  { name: 'neonsweep',    source: 'glowtxt', gtStyle: 'neonlights',      animType: 'sweep', isAnim: true },
+  { name: 'electricblue', source: 'glowtxt', gtStyle: 'electricblue',    animType: 'pulse', isAnim: true },
+  { name: 'volcano',      source: 'glowtxt', gtStyle: 'volcano',         animType: 'sweep', isAnim: true },
+  { name: 'starlight',    source: 'glowtxt', gtStyle: 'starlight',       animType: 'pulse', isAnim: true },
+  { name: 'magicdust',    source: 'glowtxt', gtStyle: 'magicdust',       animType: 'sweep', isAnim: true },
+  { name: 'disco',        source: 'glowtxt', gtStyle: 'discodiva',       animType: 'pulse', isAnim: true },
+  { name: 'sparkle',      source: 'glowtxt', gtStyle: 'sprinklesparkle', animType: 'sweep', isAnim: true },
+  { name: 'flutter',      source: 'glowtxt', gtStyle: 'flutter',         animType: 'pulse', isAnim: true },
+  { name: 'bubbles',      source: 'glowtxt', gtStyle: 'bubbles',         animType: 'sweep', isAnim: true },
 ];
 
 // ── Cari style ─────────────────────────────────────────────────────────────────
@@ -229,10 +245,57 @@ async function generateCooltext(style, text) {
   return { buffer, isGif };
 }
 
+// ── Generate logo via glowtxt.com ─────────────────────────────────────────────
+async function generateGlowtxt(style, text) {
+  const GT_BASE = 'https://glowtxt.com';
+  const GT_CDN  = 'https://static1.glowtxt.com';
+
+  const reqstring = GT_BASE + '/gentext2.php' +
+    '?text='         + encodeURIComponent(text) +
+    '&text2=&text3=' +
+    '&font_style='   + encodeURIComponent(style.gtStyle) +
+    '&font_size=x'   +
+    '&font_colour=0' +
+    '&bgcolour='     +
+    '&glow_halo=0'   +
+    '&non_trans='    +
+    '&glitter_border=' +
+    '&anim_type='    + style.animType +
+    '&submit_type=text';
+
+  // Step 1: GET XML → dapat datadir + fullfilename
+  const { data: xml } = await axios.get(reqstring, {
+    headers: { 'User-Agent': UA, 'Referer': GT_BASE + '/' },
+    timeout: 20000
+  });
+
+  const datadir  = xml.match(/<datadir>([^<]+)/)?.[1];
+  const fullname = xml.match(/<fullfilename>([^<]+)/)?.[1];
+
+  if (!datadir || !fullname) throw new Error('GlowTxt: Gagal parse XML response');
+
+  // Step 2: Download gambar
+  const imgUrl = `${GT_CDN}/${datadir}/${fullname}`;
+  const { data: imgData } = await axios.get(imgUrl, {
+    responseType: 'arraybuffer',
+    headers: { 'User-Agent': UA, 'Referer': GT_BASE + '/' },
+    timeout: 25000
+  });
+
+  const buffer = Buffer.from(imgData);
+  const isGif  = buffer.slice(0, 3).toString() === 'GIF';
+  const isPng  = buffer[0] === 0x89 && buffer[1] === 0x50;
+
+  if (!isGif && !isPng) throw new Error('GlowTxt: File bukan gambar valid');
+
+  return { buffer, isGif };
+}
+
 // ── Generate logo via flamingtext.com ─────────────────────────────────────────
 async function generateLogo(style, text) {
-  // Routing: cooltext vs flamingtext
+  // Routing berdasarkan source
   if (style.source === 'cooltext') return generateCooltext(style, text);
+  if (style.source === 'glowtxt')  return generateGlowtxt(style, text);
   // Base params global — di-override oleh style.params jika ada
   const baseParams = {
     '_comBuyRedirect':          'false',
