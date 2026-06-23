@@ -19,7 +19,7 @@
  * ───────────────────────────────
  *
  *  menu_jadibot.js — Builder teks menu sesi jadibot
- *  33 command tersedia, hitung & tampilkan per kategori
+ *  Hitung command otomatis via countMenuJadibotCmd()
  * ───────────────────────────────
  */
 export function getMenuJadibotBody() {
@@ -81,6 +81,12 @@ export function getMenuJadibotBody() {
 ├➤ *.wm / .swm [Pack|Author]*
 ├➤ *.toimg*
 ╰➤ *.hd / .remini*
+
+╭─「 🔤 *FONT & LOGO* 」
+├➤ *.font [teks]*
+├➤ *.fontuntik [teks]*
+├➤ *.logo [style]|[teks]*
+╰➤ *.logo list*
 
 ╭─「 😊 *EMOJI REAKSI SW* 」
 ├➤ *.emoji*
