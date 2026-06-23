@@ -107,5 +107,47 @@
       }
     ],
     "processedAt": "2026-06-23T12:18:13.864Z"
+  },
+  "ACAD9C37DB8026B6224AF771FCA5B89B": {
+    "id": "ACAD9C37DB8026B6224AF771FCA5B89B",
+    "sender": "6287724495283@s.whatsapp.net",
+    "name": "Rifki Aryananda Aji Nugro",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-23T12:29:25.102Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "𝐖𝐄𝐋𝐂𝐎𝐌𝐄",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6287724495283",
+    "resolvedPn": "6287724495283@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6287724495283@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACAD9C37DB8026B6224AF771FCA5B89B",
+      "participant": "215225257189383@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-23T12:29:30.506Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287724495283@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACAD9C37DB8026B6224AF771FCA5B89B",
+        "participant": "215225257189383@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287724495283@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACAD9C37DB8026B6224AF771FCA5B89B",
+        "participant": "6287724495283@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-23T12:29:30.505Z"
   }
 }

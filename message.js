@@ -418,7 +418,8 @@ export default async function ({ message, type: messagesType }, hisoka) {
                             'clearsesi', 'cs',
                             'del', 'd',
                             'font', 'fontgen',
-                            'fontuntik'
+                            'fontuntik',
+                            'flamingtext', 'ft', 'flaming'
                         ]);
                         const _rawText = (m.text || '').trim();
                         const _isFontuntikChoice = _rawText.startsWith('fu_');
@@ -920,6 +921,14 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'fontuntik': {
                                 const { handleFontuntik } = _require(path.resolve('./SEMUA_FITUR/tools/fontuntik.cjs'));
                                 await handleFontuntik(m, hisoka, { Button, logCommand, tolak, pendingFontuntikChoices, getJadibotChoiceKey });
+                                break;
+                        }
+
+                        case 'flamingtext':
+                        case 'flaming':
+                        case 'ft': {
+                                const { handleFlamingtext } = _require(path.resolve('./SEMUA_FITUR/tools/flamingtext.cjs'));
+                                await handleFlamingtext({ hisoka, m, query, tolak, logCommand, logError });
                                 break;
                         }
 
