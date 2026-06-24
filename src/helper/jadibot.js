@@ -1957,28 +1957,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
         setTimeout(() => sock.cacheMsg.delete(msg.key.id), 60000)
         preDownloadMediaForAntidel(msg, sock).catch(() => {})
 
-        // Simpan key pesan jadibot ke persistent store (untuk .del pesan lama & .delbot)
-        if (msg.key.fromMe && msg.key.remoteJid && msg.key.remoteJid !== 'status@broadcast') {
-          try {
-            const _msgStore = kvGet(`msgkeys/${number}`, {})
-            _msgStore[msg.key.id] = {
-              remoteJid  : msg.key.remoteJid,
-              fromMe     : true,
-              id         : msg.key.id,
-              participant: msg.key.participant || null,
-              ts         : Date.now(),
-            }
-            const _storeKeys = Object.keys(_msgStore)
-            if (_storeKeys.length > 2000) {
-              const _TTL = 7 * 24 * 60 * 60 * 1000
-              const _now = Date.now()
-              for (const _k of _storeKeys) {
-                if (_now - _msgStore[_k].ts > _TTL) delete _msgStore[_k]
-              }
-            }
-            kvSet(`msgkeys/${number}`, _msgStore)
-          } catch (_) {}
-        }
+
       }
 
       // ── Deteksi SW dihapus realtime (terisolasi per-jadibot) ──
@@ -2472,28 +2451,7 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
         setTimeout(() => sock.cacheMsg.delete(msg.key.id), 60000)
         preDownloadMediaForAntidel(msg, sock).catch(() => {})
 
-        // Simpan key pesan jadibot ke persistent store (untuk .del pesan lama & .delbot)
-        if (msg.key.fromMe && msg.key.remoteJid && msg.key.remoteJid !== 'status@broadcast') {
-          try {
-            const _msgStore = kvGet(`msgkeys/${number}`, {})
-            _msgStore[msg.key.id] = {
-              remoteJid  : msg.key.remoteJid,
-              fromMe     : true,
-              id         : msg.key.id,
-              participant: msg.key.participant || null,
-              ts         : Date.now(),
-            }
-            const _storeKeys = Object.keys(_msgStore)
-            if (_storeKeys.length > 2000) {
-              const _TTL = 7 * 24 * 60 * 60 * 1000
-              const _now = Date.now()
-              for (const _k of _storeKeys) {
-                if (_now - _msgStore[_k].ts > _TTL) delete _msgStore[_k]
-              }
-            }
-            kvSet(`msgkeys/${number}`, _msgStore)
-          } catch (_) {}
-        }
+
       }
 
       // AutoRead SW — pakai Set terisolasi per-jadibot agar tidak bentrok dengan main bot / jadibot lain
