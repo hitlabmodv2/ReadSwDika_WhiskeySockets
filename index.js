@@ -746,7 +746,7 @@ async function main() {
 
                         console.log(`${dim}•${reset} Pastikan HP online`);
                         if (isRefresh) {
-                                const sisaMenit = Math.ceil(PAIR_DURATION / 60);
+                                const sisaMenit = Math.floor(PAIR_DURATION / 60);
                                 const sisaDetik = PAIR_DURATION % 60;
                                 const sisaStr   = sisaMenit > 0
                                         ? `${sisaMenit} menit ${sisaDetik > 0 ? sisaDetik + ' detik' : ''}`.trim()
