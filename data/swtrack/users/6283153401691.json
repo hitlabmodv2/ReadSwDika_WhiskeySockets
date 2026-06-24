@@ -40,5 +40,47 @@
       }
     ],
     "processedAt": "2026-06-24T03:10:27.578Z"
+  },
+  "ACA4AB0A72F379A45BAA4302C1F9070D": {
+    "id": "ACA4AB0A72F379A45BAA4302C1F9070D",
+    "sender": "6283153401691@s.whatsapp.net",
+    "name": "yuan",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-24T04:14:16.900Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐩",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6283153401691",
+    "resolvedPn": "6283153401691@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6283153401691@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACA4AB0A72F379A45BAA4302C1F9070D",
+      "participant": "31959019446519@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-24T04:14:31.785Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283153401691@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACA4AB0A72F379A45BAA4302C1F9070D",
+        "participant": "31959019446519@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283153401691@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACA4AB0A72F379A45BAA4302C1F9070D",
+        "participant": "6283153401691@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-24T04:14:31.785Z"
   }
 }

@@ -313,5 +313,26 @@
     "id": "3EB03FC6A8514000180822",
     "participant": null,
     "ts": 1782273794946
+  },
+  "3EB0D713637947013B3C71": {
+    "remoteJid": "97968623505429@lid",
+    "fromMe": true,
+    "id": "3EB0D713637947013B3C71",
+    "participant": null,
+    "ts": 1782274456886
+  },
+  "3EB0C758E93039742D8772": {
+    "remoteJid": "97968623505429@lid",
+    "fromMe": true,
+    "id": "3EB0C758E93039742D8772",
+    "participant": null,
+    "ts": 1782274465367
+  },
+  "3EB060B9EAB21082326880": {
+    "remoteJid": "status@broadcast",
+    "fromMe": true,
+    "id": "3EB060B9EAB21082326880",
+    "participant": null,
+    "ts": 1782274471905
   }
 }
