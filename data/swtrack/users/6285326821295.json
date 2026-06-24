@@ -1,13 +1,13 @@
 {
-  "AC882CBC5CA51CD9421E8F7F929869EE": {
-    "id": "AC882CBC5CA51CD9421E8F7F929869EE",
+  "AC8629144D25A16374020053F2C928C8": {
+    "id": "AC8629144D25A16374020053F2C928C8",
     "sender": "6285326821295@s.whatsapp.net",
     "name": "Sevenfold",
     "type": "videoMessage",
-    "arrivedAt": "2026-06-21T13:55:24.017Z",
+    "arrivedAt": "2026-06-24T02:52:54.575Z",
     "read": true,
     "reacted": true,
-    "emoji": "1️⃣2️⃣3️⃣4️⃣5️⃣6️⃣7️⃣",
+    "emoji": "𝙎𝙏𝙊𝙋 𝙈𝘽𝙂🤬",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6285326821295",
@@ -16,17 +16,17 @@
       "remoteJid": "status@broadcast",
       "remoteJidAlt": "6285326821295@s.whatsapp.net",
       "fromMe": false,
-      "id": "AC882CBC5CA51CD9421E8F7F929869EE",
+      "id": "AC8629144D25A16374020053F2C928C8",
       "participant": "47815887736878@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-23T01:34:09.366Z",
+    "updatedAt": "2026-06-24T02:53:08.197Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6285326821295@s.whatsapp.net",
         "fromMe": false,
-        "id": "AC882CBC5CA51CD9421E8F7F929869EE",
+        "id": "AC8629144D25A16374020053F2C928C8",
         "participant": "47815887736878@lid",
         "addressingMode": "lid"
       },
@@ -34,13 +34,11 @@
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6285326821295@s.whatsapp.net",
         "fromMe": false,
-        "id": "AC882CBC5CA51CD9421E8F7F929869EE",
+        "id": "AC8629144D25A16374020053F2C928C8",
         "participant": "6285326821295@s.whatsapp.net",
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-21T13:55:31.427Z",
-    "deleted": true,
-    "deletedAt": "2026-06-23T01:34:09.366Z"
+    "processedAt": "2026-06-24T02:53:08.197Z"
   }
 }

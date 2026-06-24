@@ -1,13 +1,13 @@
 {
-  "AC12DE190762B6034E17059984949AF0": {
-    "id": "AC12DE190762B6034E17059984949AF0",
+  "AC1B6D600311DEB8FA1B17B732BDACCD": {
+    "id": "AC1B6D600311DEB8FA1B17B732BDACCD",
     "sender": "6281326870686@s.whatsapp.net",
-    "name": "reki fans nganjuk pipel",
+    "name": "rixztar",
     "type": "videoMessage",
-    "arrivedAt": "2026-06-20T13:35:04.294Z",
+    "arrivedAt": "2026-06-24T02:52:20.892Z",
     "read": true,
     "reacted": true,
-    "emoji": "🎆",
+    "emoji": "𝖲𝖠𝖸𝖠 𝖠𝖪𝖠𝖭 𝖫𝖠𝖶𝖠𝖭 🤬",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6281326870686",
@@ -16,17 +16,17 @@
       "remoteJid": "status@broadcast",
       "remoteJidAlt": "6281326870686@s.whatsapp.net",
       "fromMe": false,
-      "id": "AC12DE190762B6034E17059984949AF0",
+      "id": "AC1B6D600311DEB8FA1B17B732BDACCD",
       "participant": "191323814494236@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-20T13:35:24.096Z",
+    "updatedAt": "2026-06-24T02:55:54.937Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6281326870686@s.whatsapp.net",
         "fromMe": false,
-        "id": "AC12DE190762B6034E17059984949AF0",
+        "id": "AC1B6D600311DEB8FA1B17B732BDACCD",
         "participant": "191323814494236@lid",
         "addressingMode": "lid"
       },
@@ -34,11 +34,13 @@
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6281326870686@s.whatsapp.net",
         "fromMe": false,
-        "id": "AC12DE190762B6034E17059984949AF0",
+        "id": "AC1B6D600311DEB8FA1B17B732BDACCD",
         "participant": "6281326870686@s.whatsapp.net",
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-20T13:35:24.095Z"
+    "processedAt": "2026-06-24T02:52:25.783Z",
+    "deleted": true,
+    "deletedAt": "2026-06-24T02:55:54.937Z"
   }
 }

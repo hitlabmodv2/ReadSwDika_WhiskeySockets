@@ -309,7 +309,7 @@
       "participant": "90916371062907@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-23T15:05:37.217Z",
+    "updatedAt": "2026-06-24T02:52:30.600Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -328,7 +328,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-23T15:05:37.216Z"
+    "processedAt": "2026-06-23T15:05:37.216Z",
+    "deleted": true,
+    "deletedAt": "2026-06-24T02:52:30.600Z"
   },
   "ACAC191845268E1A7490BA22A3AD0B1A": {
     "id": "ACAC191845268E1A7490BA22A3AD0B1A",
@@ -351,7 +353,7 @@
       "participant": "90916371062907@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-23T15:18:18.516Z",
+    "updatedAt": "2026-06-24T02:52:30.612Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -370,6 +372,102 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-23T15:18:18.516Z"
+    "processedAt": "2026-06-23T15:18:18.516Z",
+    "deleted": true,
+    "deletedAt": "2026-06-24T02:52:30.612Z"
+  },
+  "AC05CF3613D02BB2114CA94C6AD0E711": {
+    "id": "AC05CF3613D02BB2114CA94C6AD0E711",
+    "sender": "6285136314199@s.whatsapp.net",
+    "name": "Nurull L ny 2",
+    "type": "extendedTextMessage",
+    "arrivedAt": "2026-06-24T02:52:33.090Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "𝖲𝖠𝖸𝖠 𝖠𝖪𝖠𝖭 𝖫𝖠𝖶𝖠𝖭 🤬",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285136314199",
+    "resolvedPn": "6285136314199@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285136314199@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC05CF3613D02BB2114CA94C6AD0E711",
+      "participant": "90916371062907@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-24T02:52:39.154Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285136314199@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC05CF3613D02BB2114CA94C6AD0E711",
+        "participant": "90916371062907@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285136314199@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC05CF3613D02BB2114CA94C6AD0E711",
+        "participant": "6285136314199@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-24T02:52:38.234Z",
+    "deleted": true,
+    "deletedAt": "2026-06-24T02:52:39.154Z"
+  },
+  "AC6FA79E2F054FC4BDB6FB4EF22D55D4": {
+    "id": "AC6FA79E2F054FC4BDB6FB4EF22D55D4",
+    "sender": "6285136314199@s.whatsapp.net",
+    "name": "Nurull L ny 2",
+    "type": "extendedTextMessage",
+    "arrivedAt": "2026-06-24T02:52:35.111Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285136314199",
+    "resolvedPn": "6285136314199@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285136314199@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC6FA79E2F054FC4BDB6FB4EF22D55D4",
+      "participant": "90916371062907@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-24T02:52:39.149Z",
+    "deleted": true,
+    "deletedAt": "2026-06-24T02:52:39.149Z"
+  },
+  "AC056B93DB2C05AFC1CC6C783CFB5B33": {
+    "id": "AC056B93DB2C05AFC1CC6C783CFB5B33",
+    "sender": "6285136314199@s.whatsapp.net",
+    "name": "Nurull L ny 2",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-24T02:52:37.125Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285136314199",
+    "resolvedPn": "6285136314199@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285136314199@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC056B93DB2C05AFC1CC6C783CFB5B33",
+      "participant": "90916371062907@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-24T02:52:39.147Z",
+    "deleted": true,
+    "deletedAt": "2026-06-24T02:52:39.147Z"
   }
 }

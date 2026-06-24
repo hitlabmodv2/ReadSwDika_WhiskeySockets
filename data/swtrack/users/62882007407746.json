@@ -64,7 +64,7 @@
       "participant": "69849254518919@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-23T01:38:19.787Z",
+    "updatedAt": "2026-06-24T02:52:54.572Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -83,7 +83,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-23T01:38:19.787Z"
+    "processedAt": "2026-06-23T01:38:19.787Z",
+    "deleted": true,
+    "deletedAt": "2026-06-24T02:52:54.572Z"
   },
   "AC747E36FF2011EE2521D254174E9148": {
     "id": "AC747E36FF2011EE2521D254174E9148",
@@ -128,5 +130,47 @@
     "processedAt": "2026-06-23T12:17:30.313Z",
     "deleted": true,
     "deletedAt": "2026-06-23T12:19:41.928Z"
+  },
+  "AC02281E7A534D06D45540042248A176": {
+    "id": "AC02281E7A534D06D45540042248A176",
+    "sender": "62882007407746@s.whatsapp.net",
+    "name": "𝘼𝙛𝙖𝙨𝙨",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-24T02:52:56.773Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "𝙎𝙏𝙊𝙋 𝙈𝘽𝙂🤬",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "62882007407746",
+    "resolvedPn": "62882007407746@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "62882007407746@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC02281E7A534D06D45540042248A176",
+      "participant": "69849254518919@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-24T02:53:06.836Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62882007407746@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC02281E7A534D06D45540042248A176",
+        "participant": "69849254518919@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62882007407746@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC02281E7A534D06D45540042248A176",
+        "participant": "62882007407746@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-24T02:53:06.836Z"
   }
 }

@@ -82,5 +82,47 @@
       }
     ],
     "processedAt": "2026-06-23T06:53:06.164Z"
+  },
+  "AC929571197C1A6DB7BD7E04B78ADACA": {
+    "id": "AC929571197C1A6DB7BD7E04B78ADACA",
+    "sender": "6281358899877@s.whatsapp.net",
+    "name": "Luwakzz",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-24T02:52:30.365Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "𝙎𝙏𝙊𝙋 𝙈𝘽𝙂🤬",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6281358899877",
+    "resolvedPn": "6281358899877@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6281358899877@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC929571197C1A6DB7BD7E04B78ADACA",
+      "participant": "149383375024230@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-24T02:52:47.785Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281358899877@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC929571197C1A6DB7BD7E04B78ADACA",
+        "participant": "149383375024230@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281358899877@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC929571197C1A6DB7BD7E04B78ADACA",
+        "participant": "6281358899877@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-24T02:52:47.785Z"
   }
 }

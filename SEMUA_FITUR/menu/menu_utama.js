@@ -70,6 +70,13 @@ export function buildMenuUtama({ pushName, isOwner, uptimeStr, tgl, jam, browser
 │ .quoted / .q
 │ .react / .reaksi
 ├═════════════════════┤
+║   🔤 *FONT & LOGO*   
+├═════════════════════┤
+│ .font [teks]
+│ .fontuntik [teks]
+│ .logo [style]|[teks]
+│ .logo list
+├═════════════════════┤
 ║   👥 *FITUR GRUP*   
 ├═════════════════════┤
 │ .hidetag / .ht
