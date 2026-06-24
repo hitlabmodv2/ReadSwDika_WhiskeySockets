@@ -40,5 +40,30 @@
       }
     ],
     "processedAt": "2026-06-24T03:20:59.722Z"
+  },
+  "AC9F8F4CFA400F25EEEF06FC3211929A": {
+    "id": "AC9F8F4CFA400F25EEEF06FC3211929A",
+    "sender": "6285394015819@s.whatsapp.net",
+    "name": "Farid",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-24T09:34:15.468Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "Signal Lib ✓",
+    "source": "status",
+    "number": "6285394015819",
+    "resolvedPn": "6285394015819@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285394015819@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC9F8F4CFA400F25EEEF06FC3211929A",
+      "participant": "37817572917353@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-24T09:34:16.149Z",
+    "deleted": true,
+    "deletedAt": "2026-06-24T09:34:16.149Z"
   }
 }
