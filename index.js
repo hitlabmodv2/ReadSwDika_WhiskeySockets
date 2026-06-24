@@ -776,11 +776,8 @@ async function main() {
                                 }, QR_MAX * 1000);
 
                         } else {
-                                // QR auto-refresh dari WhatsApp — cukup tampilkan QR baru, tanpa pesan ulang
-                                qrcode.generate(qr, { small: true }, code => {
-                                        originalConsoleLog('\x1b[36m[QR diperbarui] Scan QR baru:\x1b[39m\n');
-                                        originalConsoleLog(code);
-                                });
+                                // QR auto-refresh dari WhatsApp — tidak ditampilkan, diam saja
+                                // Timer 3 menit tetap berjalan dari awal, tidak direset
                         }
                 }
 
