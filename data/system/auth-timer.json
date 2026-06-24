@@ -4,19 +4,12 @@
       "type": "pairing",
       "code": "WILY-CODE",
       "number": "6281234567890",
-      "startAt": "2026-06-24T06:55:38.130Z",
-      "expireAt": "2026-06-24T07:00:38.130Z",
-      "durationSeconds": 300
-    },
-    {
-      "type": "pairing",
-      "code": "WILY-CODE",
-      "number": "6281234567890",
-      "startAt": "2026-06-24T06:52:46.985Z",
-      "expireAt": "2026-06-24T06:57:46.985Z",
-      "durationSeconds": 300
+      "startAt": "2026-06-24T06:58:25.182Z",
+      "expireAt": "2026-06-24T07:03:25.182Z",
+      "durationSeconds": 300,
+      "sessionExpireAt": "2026-06-24T07:03:25.182Z"
     }
   ],
-  "lastUpdated": "2026-06-24T06:55:38.133Z",
-  "sessionStart": null
+  "lastUpdated": "2026-06-24T06:58:25.196Z",
+  "sessionStart": "2026-06-24T06:58:25.196Z"
 }

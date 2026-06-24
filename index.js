@@ -818,45 +818,63 @@ async function main() {
                         // QR pertama: mulai sesi 3 menit, tampilkan pesan
                         // QR berikutnya (WhatsApp auto-refresh ~20 detik): tampil diam saja, JANGAN reset timer
                         if (!global.__qrSessionStarted) {
+                                // QR pertama dalam sesi ini — mulai timer sesi fresh
                                 global.__qrSessionStarted = true;
-                                const QR_MAX     = 300; // 5 menit
+                                const QR_TOTAL   = 300; // 5 menit total per sesi
                                 const qrStartAt  = Date.now();
-                                const qrExpireAt = new Date(qrStartAt + QR_MAX * 1000).toISOString();
+                                global.__qrSessionExpireAt = qrStartAt + QR_TOTAL * 1000;
+
+                                const qrExpireAt    = new Date(global.__qrSessionExpireAt).toISOString();
+                                const qrExpireJam   = new Date(global.__qrSessionExpireAt).toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta' });
 
                                 resetAuthTimerLog({
                                         type           : 'qr_session_start',
                                         startAt        : new Date(qrStartAt).toISOString(),
                                         expireAt       : qrExpireAt,
-                                        durationSeconds: QR_MAX,
+                                        durationSeconds: QR_TOTAL,
                                 });
 
                                 qrcode.generate(qr, { small: true }, code => {
                                         originalConsoleLog('\x1b[36mScan this QR code to connect:\x1b[39m\n');
                                         originalConsoleLog(code);
-                                        originalConsoleLog(`\x1b[33m⏳ QR Code berlaku 5 menit — expire jam ${new Date(qrExpireAt).toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta' })}\x1b[39m`);
+                                        originalConsoleLog(`\x1b[33m⏳ QR Code berlaku 5 menit — expire jam ${qrExpireJam}\x1b[39m`);
                                         originalConsoleLog(`\x1b[2m(QR otomatis diperbarui WhatsApp, scan kapan saja dalam 5 menit)\x1b[22m`);
                                 });
 
-                                // Satu timeout tepat 3 menit — expired sekali, langsung auto-reconnect
+                                // Timer tepat 5 menit dari sesi mulai — expired sekali, auto-reconnect
                                 global.__qrExpiredTimer = setTimeout(async () => {
-                                        global.__qrExpiredTimer = null;
-                                        global.__qrSessionStarted = false;
+                                        global.__qrExpiredTimer    = null;
+                                        global.__qrSessionStarted  = false;
+                                        global.__qrSessionExpireAt = null;
                                         global.__qrCount = 0;
                                         originalConsoleLog(`\x1b[31m⌛ Sesi QR 5 menit EXPIRED — minta QR baru otomatis...\x1b[39m`);
                                         saveAuthTimerLog({
                                                 type      : 'qr_session_expired',
                                                 expiredAt : new Date().toISOString(),
                                         });
-                                        // Bersihkan koneksi lama, minta QR baru tanpa restart manual
                                         cleanupSocket();
                                         reconnectCount++;
-                                        await new Promise(r => setTimeout(r, 3000)); // jeda 3 detik
+                                        await new Promise(r => setTimeout(r, 3000));
                                         await main();
-                                }, QR_MAX * 1000);
+                                }, QR_TOTAL * 1000);
 
                         } else {
-                                // QR auto-refresh dari WhatsApp — tidak ditampilkan, diam saja
-                                // Timer 3 menit tetap berjalan dari awal, tidak direset
+                                // QR auto-refresh dari WhatsApp (setiap ~20 dtk) — tampil diam saja
+                                // Timer 5 menit tetap berjalan dari awal sesi, TIDAK direset
+                                // Tapi tampilkan QR baru agar user bisa scan yang terbaru
+                                const sisaMs  = global.__qrSessionExpireAt ? Math.max(0, global.__qrSessionExpireAt - Date.now()) : 0;
+                                const sisaSec = Math.round(sisaMs / 1000);
+                                const sisaMin = Math.floor(sisaSec / 60);
+                                const sisaDet = sisaSec % 60;
+                                const sisaStr = sisaMin > 0 ? `${sisaMin}m ${sisaDet}s` : `${sisaDet}s`;
+                                const expJam  = global.__qrSessionExpireAt
+                                        ? new Date(global.__qrSessionExpireAt).toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta' })
+                                        : '-';
+                                qrcode.generate(qr, { small: true }, code => {
+                                        originalConsoleLog('\x1b[36m↻ QR diperbarui WhatsApp — scan kode terbaru:\x1b[39m\n');
+                                        originalConsoleLog(code);
+                                        originalConsoleLog(`\x1b[33m⏳ Sisa waktu: ${sisaStr} (expire jam ${expJam})\x1b[39m`);
+                                });
                         }
                 }
 
@@ -870,10 +888,10 @@ async function main() {
                                 clearTimeout(global.__pairingExpiredTimer);
                                 global.__pairingExpiredTimer = null;
                         }
-                        // Reset flag sesi QR agar sesi berikutnya bisa mulai fresh
-                        global.__qrSessionStarted = false;
-                        global.__qrCount = 0;
-                        // Reset sesi pairing agar sesi berikutnya mulai fresh
+                        // Reset semua flag sesi agar sesi berikutnya mulai fresh
+                        global.__qrSessionStarted  = false;
+                        global.__qrSessionExpireAt = null;
+                        global.__qrCount           = 0;
                         global.__pairSessionStartAt  = null;
                         global.__pairSessionExpireAt = null;
                         saveAuthTimerLog({
@@ -1903,30 +1921,46 @@ async function main() {
                                         await main();
                                         break;
 
-                                case 408:
+                                case 408: {
+                                        const _now408 = Date.now();
                                         if (hisoka.authState.creds?.registered) {
+                                                // Sudah terdaftar (koneksi normal) → reconnect biasa
                                                 console.info('\x1b[33mConnection timeout. Reconnecting in 5s...\x1b[39m');
                                                 await delay(5000);
-                                        } else if (global.__pairSessionExpireAt && Date.now() < global.__pairSessionExpireAt) {
-                                                // Masih dalam sesi pairing aktif (5 menit belum habis)
-                                                // → reconnect senyap, timer sesi TIDAK direset
-                                                const sisaSec = Math.round((global.__pairSessionExpireAt - Date.now()) / 1000);
+                                        } else if (global.__qrSessionExpireAt && _now408 < global.__qrSessionExpireAt) {
+                                                // Masih dalam sesi QR aktif — reconnect senyap, timer TIDAK direset
+                                                const sisaSec = Math.round((global.__qrSessionExpireAt - _now408) / 1000);
                                                 const sisaMin = Math.floor(sisaSec / 60);
                                                 const sisaDet = sisaSec % 60;
                                                 const sisaStr = sisaMin > 0 ? `${sisaMin}m ${sisaDet}s` : `${sisaDet}s`;
-                                                console.info(`\x1b[33m↻ WA disconnect (408) — reconnect otomatis... sisa waktu pairing: ${sisaStr}\x1b[39m`);
+                                                const expJam  = new Date(global.__qrSessionExpireAt).toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta' });
+                                                console.info(`\x1b[33m↻ WA disconnect (408) — reconnect otomatis... sisa QR: ${sisaStr} (expire jam ${expJam})\x1b[39m`);
+                                                await delay(3000);
+                                        } else if (global.__pairSessionExpireAt && _now408 < global.__pairSessionExpireAt) {
+                                                // Masih dalam sesi pairing aktif — reconnect senyap, timer TIDAK direset
+                                                const sisaSec = Math.round((global.__pairSessionExpireAt - _now408) / 1000);
+                                                const sisaMin = Math.floor(sisaSec / 60);
+                                                const sisaDet = sisaSec % 60;
+                                                const sisaStr = sisaMin > 0 ? `${sisaMin}m ${sisaDet}s` : `${sisaDet}s`;
+                                                const expJam  = new Date(global.__pairSessionExpireAt).toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta' });
+                                                console.info(`\x1b[33m↻ WA disconnect (408) — reconnect otomatis... sisa pairing: ${sisaStr} (expire jam ${expJam})\x1b[39m`);
                                                 await delay(3000);
                                         } else {
-                                                // Sesi sudah habis atau belum ada sesi → reset sesi & reconnect normal
+                                                // Tidak ada sesi aktif → reset semua & reconnect normal
                                                 global.__pairSessionStartAt  = null;
                                                 global.__pairSessionExpireAt = null;
+                                                global.__qrSessionStarted    = false;
+                                                global.__qrSessionExpireAt   = null;
+                                                global.__qrCount             = 0;
                                                 reconnectCount++;
-                                                console.info(`\x1b[33mPairing timeout. Reconnecting in ${Math.min(5 * reconnectCount, 60)}s... (Attempt ${reconnectCount})\x1b[39m`);
-                                                await delay(Math.min(5 * reconnectCount, 60) * 1000);
+                                                const waitSec = Math.min(5 * reconnectCount, 60);
+                                                console.info(`\x1b[33mConnection timeout. Reconnecting in ${waitSec}s... (Attempt ${reconnectCount})\x1b[39m`);
+                                                await delay(waitSec * 1000);
                                         }
                                         cleanupSocket();
                                         await main();
                                         break;
+                                }
 
                                 case 515:
                                         console.info('\x1b[33mStream error (515). Reconnecting in 5s...\x1b[39m');
