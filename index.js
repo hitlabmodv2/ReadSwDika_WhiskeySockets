@@ -444,6 +444,22 @@ process.stderr.write = (chunk, encoding, callback) => {
 let reconnectCount = 0;
 let memoryMonitor = null;
 
+/* ================= AUTH TIMER LOG ================= */
+function saveAuthTimerLog(entry) {
+        try {
+                const dir = path.join(process.cwd(), 'data', 'system');
+                if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+                const file = path.join(dir, 'auth-timer.json');
+                let db = { events: [] };
+                try { db = JSON.parse(fs.readFileSync(file, 'utf-8')); } catch {}
+                if (!Array.isArray(db.events)) db.events = [];
+                db.events.unshift(entry);
+                if (db.events.length > 100) db.events = db.events.slice(0, 100);
+                db.lastUpdated = new Date().toISOString();
+                fs.writeFileSync(file, JSON.stringify(db, null, 2), 'utf-8');
+        } catch (_) {}
+}
+
 async function main() {
         const sessionName = path.basename(sessionDir);
         console.log(`\x1b[36m→ Session  :\x1b[39m ${sessionName}`);
@@ -675,7 +691,7 @@ async function main() {
                         console.log(`${bold}${magenta}💡 TIPS${reset}`);
                         console.log(`${cyan}────────────────────────────────${reset}`);
                         console.log(`${dim}•${reset} Pastikan HP online`);
-                        console.log(`${dim}•${reset} Kode berlaku ${yellow}3 menit${reset}`);
+                        console.log(`${dim}•${reset} Kode berlaku ${yellow}3 menit (180 detik)${reset}`);
                         console.log(`${dim}•${reset} Restart bot jika expired / habis masa berlaku`);
                         console.log('');
                         console.log(`${cyan}────────────────────────────────${reset}`);
@@ -683,6 +699,44 @@ async function main() {
                         console.log(`${yellow}⏳ Menunggu konfirmasi WA...${reset}`);
                         console.log(`${cyan}────────────────────────────────${reset}`);
                         console.log('');
+
+                        // ── Countdown real-time 3 menit (180 detik) ──
+                        const PAIR_DURATION = 180;
+                        const pairStartAt   = Date.now();
+                        const pairExpireAt  = new Date(pairStartAt + PAIR_DURATION * 1000).toISOString();
+
+                        saveAuthTimerLog({
+                                type           : 'pairing',
+                                code           : formattedCode,
+                                number         : phoneNumber,
+                                startAt        : new Date(pairStartAt).toISOString(),
+                                expireAt       : pairExpireAt,
+                                durationSeconds: PAIR_DURATION,
+                        });
+
+                        if (global.__pairingTimerInterval) {
+                                clearInterval(global.__pairingTimerInterval);
+                                global.__pairingTimerInterval = null;
+                        }
+
+                        let pairRemaining = PAIR_DURATION;
+                        global.__pairingTimerInterval = setInterval(() => {
+                                pairRemaining--;
+                                if (pairRemaining > 0) {
+                                        const mins = Math.floor(pairRemaining / 60);
+                                        const secs = pairRemaining % 60;
+                                        originalStdoutWrite(`\r\x1b[33m⏳ Pairing berlaku: ${mins}m ${String(secs).padStart(2, '0')}s tersisa  \x1b[39m`);
+                                } else {
+                                        clearInterval(global.__pairingTimerInterval);
+                                        global.__pairingTimerInterval = null;
+                                        originalStdoutWrite('\r\x1b[31m⌛ Pairing code EXPIRED! Restart bot untuk kode baru.          \x1b[39m\n');
+                                        saveAuthTimerLog({
+                                                type      : 'pairing_expired',
+                                                code      : formattedCode,
+                                                expiredAt : new Date().toISOString(),
+                                        });
+                                }
+                        }, 1000);
                 } catch {
                         console.error('\x1b[31mFailed to request pairing code. Please check your pairing number.\x1b[39m');
                         process.exit(1);
@@ -693,13 +747,69 @@ async function main() {
 
         hisoka.ev.on('connection.update', async ({ connection, lastDisconnect, qr }) => {
                 if (qr && !pairingNumber) {
-                        qrcode.generate(qr, { small: true }, code => {
-                                console.log('\x1b[36mScan this QR code to connect:\x1b[39m\n');
-                                console.log(code);
+                        // Hentikan countdown QR sebelumnya jika ada
+                        if (global.__qrTimerInterval) {
+                                clearInterval(global.__qrTimerInterval);
+                                global.__qrTimerInterval = null;
+                        }
+                        global.__qrCount = (global.__qrCount || 0) + 1;
+
+                        // Durasi QR WhatsApp = 20 detik per kode
+                        const QR_DURATION = 20;
+                        const qrStartAt   = Date.now();
+                        const qrExpireAt  = new Date(qrStartAt + QR_DURATION * 1000).toISOString();
+
+                        // Simpan event ke data/system/auth-timer.json
+                        saveAuthTimerLog({
+                                type         : 'qr',
+                                attempt      : global.__qrCount,
+                                startAt      : new Date(qrStartAt).toISOString(),
+                                expireAt     : qrExpireAt,
+                                durationSeconds: QR_DURATION,
                         });
+
+                        qrcode.generate(qr, { small: true }, code => {
+                                originalConsoleLog('\x1b[36mScan this QR code to connect:\x1b[39m\n');
+                                originalConsoleLog(code);
+                                originalConsoleLog(`\x1b[33m⏳ QR #${global.__qrCount} berlaku ${QR_DURATION} detik (expire: ${new Date(qrExpireAt).toLocaleTimeString('id-ID')})\x1b[39m`);
+                        });
+
+                        // Countdown real-time tiap 1 detik
+                        let qrRemaining = QR_DURATION;
+                        global.__qrTimerInterval = setInterval(() => {
+                                qrRemaining--;
+                                if (qrRemaining > 0) {
+                                        originalStdoutWrite(`\r\x1b[33m⏳ QR berlaku: ${String(qrRemaining).padStart(2, '0')}s tersisa  \x1b[39m`);
+                                } else {
+                                        clearInterval(global.__qrTimerInterval);
+                                        global.__qrTimerInterval = null;
+                                        originalStdoutWrite('\r\x1b[31m⌛ QR expired — menunggu QR baru...                \x1b[39m\n');
+                                        saveAuthTimerLog({
+                                                type     : 'qr_expired',
+                                                attempt  : global.__qrCount,
+                                                expiredAt: new Date().toISOString(),
+                                        });
+                                }
+                        }, 1000);
                 }
 
                 if (connection === 'open') {
+                        // Hentikan semua countdown timer (QR / pairing) saat bot berhasil konek
+                        if (global.__qrTimerInterval) {
+                                clearInterval(global.__qrTimerInterval);
+                                global.__qrTimerInterval = null;
+                                originalStdoutWrite('\r\x1b[32m✅ Terhubung! QR berhasil discan.                    \x1b[39m\n');
+                        }
+                        if (global.__pairingTimerInterval) {
+                                clearInterval(global.__pairingTimerInterval);
+                                global.__pairingTimerInterval = null;
+                                originalStdoutWrite('\r\x1b[32m✅ Terhubung! Pairing code berhasil dikonfirmasi.    \x1b[39m\n');
+                        }
+                        saveAuthTimerLog({
+                                type       : 'connected',
+                                connectedAt: new Date().toISOString(),
+                        });
+
                         lastDisconnect = 0;
                         reconnectCount = 0;
                         const userId = hisoka.user?.id?.split(':')[0] || '-';
