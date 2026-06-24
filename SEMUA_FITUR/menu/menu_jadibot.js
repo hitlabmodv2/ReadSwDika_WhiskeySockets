@@ -76,6 +76,10 @@ export function getMenuJadibotBody() {
 ╭─「 👁️ *VIEW ONCE* 」
 ╰➤ *.rvo / .viewonce / .vo*
 
+╭─「 🗑️ *HAPUS PESAN* 」
+├➤ *.del / .d*
+╰➤ *.delbot*
+
 ╭─「 🎨 *STICKER & GAMBAR* 」
 ├➤ *.sticker / .s*
 ├➤ *.wm / .swm [Pack|Author]*

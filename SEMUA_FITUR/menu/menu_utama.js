@@ -59,6 +59,7 @@ export function buildMenuUtama({ pushName, isOwner, uptimeStr, tgl, jam, browser
 ║  💬 *PESAN & STICKER*  
 ├═════════════════════┤
 │ .del / .d
+│ .delbot
 │ .s / .sticker
 │ .wm / .swm
 │ .toimg
