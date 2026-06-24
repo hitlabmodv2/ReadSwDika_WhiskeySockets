@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 23/06/2026, 14.03.23  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 24/06/2026, 03.48.01  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  command:logo
+│  #001  —  console.error
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  Gagal menemukan URL gambar di halaman hasil
+│  [31m[CrashGuard] Too many errors, forcing restart...[39m
 │
 │  DETAIL
-│  Sumber      : command:logo
+│  Sumber      : console.error
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 23/06/2026, 14.03.23
-│  Terakhir    : 23/06/2026, 14.03.23
+│  Pertama     : 24/06/2026, 03.48.01
+│  Terakhir    : 24/06/2026, 03.48.01
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: Gagal menemukan URL gambar di halaman hasil
-│     at generateLogo (/home/runner/workspace/SEMUA_FITUR/tools/flamingtext.cjs:171:22)
-│     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+│  ▶  Error: [31m[CrashGuard] Too many errors, forcing restart...[39m
+│     at console.error (file:///home/runner/workspace/index.js:414:27)
+│     at process.<anonymous> (file:///home/runner/workspace/src/helper/crashGuard.js:115:21)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 23/06/2026, 14.03.23
+  Terakhir diperbarui: 24/06/2026, 03.48.01
 ════════════════════════════════════════════════════════════════════════

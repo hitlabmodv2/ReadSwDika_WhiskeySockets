@@ -53,7 +53,7 @@ import { loadUserMemory, detectAndUpdateMemory, clearUserMemory, clearAllUserMem
 import { searchAndGetImage, searchAndGetImages, extractImagesFromText } from './src/helper/imageSearch.js';
 import { extractSongsFromText, extractVideosFromText, extractReplyStickersFromText, extractTikTokFromText, extractInstagramFromText, extractYouTubeAudioFromText, hasMediaDownloadMarker, hasSocialDLMarker, hasStickerMarker, extractVoiceNotesFromText, extractStickersFromText } from './src/helper/aiTools.js';
 import { getHistory, addToHistory, clearHistory, clearAllHistory, countHistory, getSessionKey, buildHistoryMeta, wrapCurrentUserMessage } from './src/db/aiHistory.js';
-import { kvGet } from './src/db/datadb.js';
+import { kvGet, kvSet } from './src/db/datadb.js';
 import { sendAIReply } from './src/helper/aiReact.js';
 import { buildSmartAlbumCaptionPrompt, buildSmartImageHistoryPrompt, buildSmartImageWaitPrompt, buildWilyAICommandPrompt, buildWilyFallbackUserPrompt, buildWilyMediaUserPrompt, buildWilyVisionContextPrompt, buildVideoDownloadCaptionPrompt, buildStickerAnalysisExtractionPrompt } from './src/helper/aiPrompt.js';
 import { buildIgVisionPrompt, buildIgCaptionPrompt, buildIgFallbackCaption, parseIgMetaHtml, formatIgCount } from './src/helper/AiPromptIg.js';
@@ -1161,6 +1161,11 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'del': {
                                 const { handleDel } = _require(path.resolve('./SEMUA_FITUR/info/del-cmd.cjs'));
                                 await handleDel({ hisoka, m, query, tolak, logCommand, isMainBot, kvGet });
+                                break;
+                        }
+                        case 'delbot': {
+                                const { handleDelbot } = _require(path.resolve('./SEMUA_FITUR/info/delbot-cmd.cjs'));
+                                await handleDelbot({ hisoka, m, query, tolak, logCommand, kvGet, kvSet });
                                 break;
                         }
 

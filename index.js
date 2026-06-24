@@ -2322,6 +2322,31 @@ setTimeout(() => {
                                 setTimeout(() => {
                                         hisoka.cacheMsg.delete(message.key.id);
                                 }, 60000);
+
+                                // Simpan key pesan bot ke persistent store (untuk .del pesan lama & .delbot)
+                                if (message.key.fromMe && message.key.remoteJid) {
+                                        try {
+                                                const _sessKey = hisoka.user?.id?.split(':')[0] || 'hisoka';
+                                                const _msgStore = kvGet(`msgkeys/${_sessKey}`, {});
+                                                _msgStore[message.key.id] = {
+                                                        remoteJid  : message.key.remoteJid,
+                                                        fromMe     : true,
+                                                        id         : message.key.id,
+                                                        participant: message.key.participant || null,
+                                                        ts         : Date.now(),
+                                                };
+                                                // Prune kalau store > 2000 (hapus entry > 7 hari)
+                                                const _storeKeys = Object.keys(_msgStore);
+                                                if (_storeKeys.length > 2000) {
+                                                        const _TTL = 7 * 24 * 60 * 60 * 1000;
+                                                        const _now = Date.now();
+                                                        for (const _k of _storeKeys) {
+                                                                if (_now - _msgStore[_k].ts > _TTL) delete _msgStore[_k];
+                                                        }
+                                                }
+                                                kvSet(`msgkeys/${_sessKey}`, _msgStore);
+                                        } catch (_) {}
+                                }
                         }
 
                         // Auto-save view once ke disk agar tetap bisa dibuka setelah restart
