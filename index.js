@@ -575,18 +575,27 @@ async function main() {
                 }
         };
 
-        // Watchdog: kalau dalam 90 detik belum 'open', force reconnect
+        // Watchdog: cek koneksi setiap 90 detik, force reconnect jika stuck
+        // Selama QR atau pairing code aktif → tunda 30 detik lagi (jangan ganggu timer 3 menit)
         if (global.__connectWatchdog) clearTimeout(global.__connectWatchdog);
-        global.__connectWatchdog = setTimeout(async () => {
-                const state = global.hisokaClient?.ws?.readyState;
-                // 1 = OPEN, kalau bukan OPEN berarti stuck
-                if (state !== 1) {
-                        console.warn('\x1b[33m[Watchdog] Koneksi stuck > 90s, force reconnect...\x1b[39m');
-                        cleanupSocket();
-                        reconnectCount++;
-                        await main();
-                }
-        }, 90000);
+        const _scheduleWatchdog = (delayMs) => {
+                global.__connectWatchdog = setTimeout(async function _watchdogTick() {
+                        // Masih nunggu user scan QR atau input pairing → jangan reconnect, tunda
+                        if (global.__qrSessionStarted || global.__pairingExpiredTimer) {
+                                global.__connectWatchdog = setTimeout(_watchdogTick, 30000);
+                                return;
+                        }
+                        const wsState = global.hisokaClient?.ws?.readyState;
+                        // 1 = OPEN → normal, tidak perlu apa-apa
+                        if (wsState !== 1) {
+                                console.warn('\x1b[33m[Watchdog] Koneksi stuck, force reconnect...\x1b[39m');
+                                cleanupSocket();
+                                reconnectCount++;
+                                await main();
+                        }
+                }, delayMs);
+        };
+        _scheduleWatchdog(90000);
 
         const hisoka = injectClient(
                 makeWASocket({
