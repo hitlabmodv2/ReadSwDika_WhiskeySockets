@@ -4,57 +4,39 @@
       "type": "pairing",
       "code": "WILY-CODE",
       "number": "6281234567890",
-      "startAt": "2026-06-24T07:18:05.802Z",
-      "expireAt": "2026-06-24T07:19:37.380Z",
-      "durationSeconds": 92,
-      "sessionExpireAt": "2026-06-24T07:19:37.380Z"
-    },
-    {
-      "type": "pairing",
-      "code": "WILY-CODE",
-      "number": "6281234567890",
-      "startAt": "2026-06-24T07:17:43.947Z",
-      "expireAt": "2026-06-24T07:19:37.380Z",
-      "durationSeconds": 113,
-      "sessionExpireAt": "2026-06-24T07:19:37.380Z"
-    },
-    {
-      "type": "pairing",
-      "code": "WILY-CODE",
-      "number": "6281234567890",
-      "startAt": "2026-06-24T07:17:21.615Z",
-      "expireAt": "2026-06-24T07:19:37.380Z",
+      "startAt": "2026-06-24T07:32:54.280Z",
+      "expireAt": "2026-06-24T07:35:10.242Z",
       "durationSeconds": 136,
-      "sessionExpireAt": "2026-06-24T07:19:37.380Z"
+      "sessionExpireAt": "2026-06-24T07:35:10.242Z"
     },
     {
       "type": "pairing",
       "code": "WILY-CODE",
       "number": "6281234567890",
-      "startAt": "2026-06-24T07:15:21.728Z",
-      "expireAt": "2026-06-24T07:19:37.380Z",
-      "durationSeconds": 256,
-      "sessionExpireAt": "2026-06-24T07:19:37.380Z"
+      "startAt": "2026-06-24T07:30:54.993Z",
+      "expireAt": "2026-06-24T07:35:10.242Z",
+      "durationSeconds": 255,
+      "sessionExpireAt": "2026-06-24T07:35:10.242Z"
     },
     {
       "type": "pairing",
       "code": "WILY-CODE",
       "number": "6281234567890",
-      "startAt": "2026-06-24T07:14:59.501Z",
-      "expireAt": "2026-06-24T07:19:37.380Z",
+      "startAt": "2026-06-24T07:30:32.618Z",
+      "expireAt": "2026-06-24T07:35:10.242Z",
       "durationSeconds": 278,
-      "sessionExpireAt": "2026-06-24T07:19:37.380Z"
+      "sessionExpireAt": "2026-06-24T07:35:10.242Z"
     },
     {
       "type": "pairing",
       "code": "WILY-CODE",
       "number": "6281234567890",
-      "startAt": "2026-06-24T07:14:37.380Z",
-      "expireAt": "2026-06-24T07:19:37.380Z",
+      "startAt": "2026-06-24T07:30:10.242Z",
+      "expireAt": "2026-06-24T07:35:10.242Z",
       "durationSeconds": 300,
-      "sessionExpireAt": "2026-06-24T07:19:37.380Z"
+      "sessionExpireAt": "2026-06-24T07:35:10.242Z"
     }
   ],
-  "lastUpdated": "2026-06-24T07:18:05.802Z",
-  "sessionStart": "2026-06-24T07:14:37.381Z"
+  "lastUpdated": "2026-06-24T07:32:54.282Z",
+  "sessionStart": "2026-06-24T07:30:10.244Z"
 }

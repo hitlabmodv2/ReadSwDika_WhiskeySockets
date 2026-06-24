@@ -714,49 +714,21 @@ async function main() {
                         console.log(`${cyan}────────────────────────────────${reset}`);
                         console.log(`${bold}${magenta}💡 TIPS${reset}`);
                         console.log(`${cyan}────────────────────────────────${reset}`);
-                        // ── Hitung expire time — gunakan sisa waktu sesi aktif jika ada ──
-                        const PAIR_TOTAL    = 300; // 5 menit total per sesi
+                        // ── Setiap kode baru = selalu fresh 5 menit (tidak pakai sisa sesi lama) ──
+                        const PAIR_TOTAL    = 300; // 5 menit per kode
                         const now           = Date.now();
 
-                        // Cek apakah ini pairing pertama atau refresh dalam sesi yang sama
-                        const isFirstPairing = !global.__pairSessionStartAt;
+                        // Selalu reset ke fresh 5 menit — tiap kode baru punya jatah 5 menit penuh
+                        global.__pairSessionStartAt  = now;
+                        global.__pairSessionExpireAt = now + PAIR_TOTAL * 1000;
 
-                        if (isFirstPairing) {
-                                // Sesi baru: simpan waktu mulai & expire sesi
-                                global.__pairSessionStartAt  = now;
-                                global.__pairSessionExpireAt = now + PAIR_TOTAL * 1000;
-                        }
-
-                        // Hitung sisa waktu dari sesi asli
-                        let remainingMs = Math.max(0, global.__pairSessionExpireAt - now);
-
-                        // Jika sisa waktu terlalu sedikit (<15 detik), reset sesi fresh
-                        if (remainingMs < 15000) {
-                                global.__pairSessionStartAt  = now;
-                                global.__pairSessionExpireAt = now + PAIR_TOTAL * 1000;
-                                remainingMs = PAIR_TOTAL * 1000;
-                        }
-
-                        const PAIR_DURATION = Math.round(remainingMs / 1000);
                         const pairStartAt   = now;
                         const pairExpireAt  = new Date(global.__pairSessionExpireAt);
                         const pairExpireJam = pairExpireAt.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta' });
 
-                        const isRefresh = !isFirstPairing; // true = reconnect dalam sesi yang sama
-
                         console.log(`${dim}•${reset} Pastikan HP online`);
-                        if (isRefresh) {
-                                const sisaMenit = Math.floor(PAIR_DURATION / 60);
-                                const sisaDetik = PAIR_DURATION % 60;
-                                const sisaStr   = sisaMenit > 0
-                                        ? `${sisaMenit} menit ${sisaDetik > 0 ? sisaDetik + ' detik' : ''}`.trim()
-                                        : `${sisaDetik} detik`;
-                                console.log(`${dim}•${reset} ${yellow}⚠️ Kode diperbarui${reset} — sisa waktu: ${yellow}${sisaStr}${reset} (expire jam ${yellow}${pairExpireJam}${reset})`);
-                                console.log(`${dim}•${reset} Gunakan kode BARU di atas`);
-                        } else {
-                                console.log(`${dim}•${reset} Kode berlaku ${yellow}5 menit${reset} — expire jam ${yellow}${pairExpireJam}${reset}`);
-                                console.log(`${dim}•${reset} Restart bot jika expired / habis masa berlaku`);
-                        }
+                        console.log(`${dim}•${reset} Kode berlaku ${yellow}5 menit${reset} — expire jam ${yellow}${pairExpireJam}${reset}`);
+                        console.log(`${dim}•${reset} Restart bot jika expired / habis masa berlaku`);
                         console.log('');
                         console.log(`${cyan}────────────────────────────────${reset}`);
                         console.log(`${bold}${green}✅ KODE BERHASIL DIBUAT!${reset}`);
@@ -764,30 +736,25 @@ async function main() {
                         console.log(`${cyan}────────────────────────────────${reset}`);
                         console.log('');
 
-                        // ── Reset/append ke data/system/auth-timer.json ──
-                        const timerEntry = {
+                        // ── Selalu tulis ulang auth-timer.json (sesi baru = file bersih) ──
+                        resetAuthTimerLog({
                                 type           : 'pairing',
                                 code           : formattedCode,
                                 number         : phoneNumber,
                                 startAt        : new Date(pairStartAt).toISOString(),
                                 expireAt       : pairExpireAt.toISOString(),
-                                durationSeconds: PAIR_DURATION,
+                                durationSeconds: PAIR_TOTAL,
                                 sessionExpireAt: new Date(global.__pairSessionExpireAt).toISOString(),
-                        };
-                        if (isRefresh) {
-                                saveAuthTimerLog(timerEntry);     // tambahkan ke sesi yang sama
-                        } else {
-                                resetAuthTimerLog(timerEntry);    // sesi baru = file bersih
-                        }
+                        });
 
-                        // Batalkan timer lama jika ada
+                        // Batalkan timer lama jika ada (dari sesi sebelumnya)
                         if (global.__pairingExpiredTimer) {
                                 clearTimeout(global.__pairingExpiredTimer);
                                 global.__pairingExpiredTimer = null;
                         }
 
-                        // Timer akurat — hanya sisa waktu dari sesi asli
-                        const timerMs = Math.max(remainingMs, 15000); // minimal 15 detik
+                        // Timer tepat 5 menit dari sekarang
+                        const timerMs = PAIR_TOTAL * 1000;
                         global.__pairingExpiredTimer = setTimeout(async () => {
                                 global.__pairingExpiredTimer = null;
                                 global.__pairSessionStartAt  = null;
@@ -1977,22 +1944,17 @@ async function main() {
                                                 console.info('\x1b[33mConnection timeout. Reconnecting in 5s...\x1b[39m');
                                                 await delay(5000);
                                         } else if (global.__qrSessionExpireAt && _now408 < global.__qrSessionExpireAt) {
-                                                // Masih dalam sesi QR aktif — reconnect senyap, timer TIDAK direset
-                                                const sisaSec = Math.round((global.__qrSessionExpireAt - _now408) / 1000);
-                                                const sisaMin = Math.floor(sisaSec / 60);
-                                                const sisaDet = sisaSec % 60;
-                                                const sisaStr = sisaMin > 0 ? `${sisaMin}m ${sisaDet}s` : `${sisaDet}s`;
-                                                const expJam  = new Date(global.__qrSessionExpireAt).toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta' });
-                                                console.info(`\x1b[33m↻ WA disconnect (408) — reconnect otomatis... sisa QR: ${sisaStr} (expire jam ${expJam})\x1b[39m`);
+                                                // Masih dalam sesi QR — reset ke fresh 5 menit saat reconnect
+                                                console.info(`\x1b[33m↻ WA disconnect (408) — reconnect QR otomatis... (QR baru = 5 menit)\x1b[39m`);
+                                                global.__qrSessionStarted  = false;
+                                                global.__qrSessionExpireAt = null;
+                                                global.__qrCount           = 0;
                                                 await delay(3000);
                                         } else if (global.__pairSessionExpireAt && _now408 < global.__pairSessionExpireAt) {
-                                                // Masih dalam sesi pairing aktif — reconnect senyap, timer TIDAK direset
-                                                const sisaSec = Math.round((global.__pairSessionExpireAt - _now408) / 1000);
-                                                const sisaMin = Math.floor(sisaSec / 60);
-                                                const sisaDet = sisaSec % 60;
-                                                const sisaStr = sisaMin > 0 ? `${sisaMin}m ${sisaDet}s` : `${sisaDet}s`;
-                                                const expJam  = new Date(global.__pairSessionExpireAt).toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta' });
-                                                console.info(`\x1b[33m↻ WA disconnect (408) — reconnect otomatis... sisa pairing: ${sisaStr} (expire jam ${expJam})\x1b[39m`);
+                                                // Masih dalam sesi pairing — reset ke fresh 5 menit saat reconnect
+                                                console.info(`\x1b[33m↻ WA disconnect (408) — reconnect pairing otomatis... (kode baru = 5 menit)\x1b[39m`);
+                                                global.__pairSessionStartAt  = null;
+                                                global.__pairSessionExpireAt = null;
                                                 await delay(3000);
                                         } else {
                                                 // Tidak ada sesi aktif → reset semua & reconnect normal
