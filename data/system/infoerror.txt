@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 24/06/2026, 04.47.46  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 24/06/2026, 09.05.13  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  SingleFile
+│  #001  —  YTS-AKURA DL
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [SingleFile] Gagal tulis /home/runner/workspace/sessions/hisoka.json: ENOENT: no such file or directory, open '/home/runner/workspace/sessions/hisoka.json.tmp'
+│  [YTS-AKURA DL] Sign in to confirm you’re not a bot. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting YouTube cookies
 │
 │  DETAIL
-│  Sumber      : SingleFile
+│  Sumber      : YTS-AKURA DL
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 24/06/2026, 04.47.46
-│  Terakhir    : 24/06/2026, 04.47.46
+│  Pertama     : 24/06/2026, 09.05.13
+│  Terakhir    : 24/06/2026, 09.05.13
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [SingleFile] Gagal tulis /home/runner/workspace/sessions/hisoka.json: ENOENT: no such file or directory, open '/home/runner/workspace/sessions/hisoka.json.tmp'
+│  ▶  Error: [YTS-AKURA DL] Sign in to confirm you’re not a bot. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting YouTube cookies
 │     at console.error (file:///home/runner/workspace/index.js:414:27)
-│     at flushNow (file:///home/runner/workspace/src/helper/authState.js:365:33)
+│     at handleYtDlCh (/home/runner/workspace/SEMUA_FITUR/download/yts-akura.cjs:428:17)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 24/06/2026, 04.47.46
+  Terakhir diperbarui: 24/06/2026, 09.05.13
 ════════════════════════════════════════════════════════════════════════

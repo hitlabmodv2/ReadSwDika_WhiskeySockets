@@ -215,17 +215,41 @@ async function handleYtQualityCh(hisoka, m, query, ctx) {
 }
 
 /* ─── Allowed quality tokens (cegah injection) ─── */
-const ALLOWED_QUALITIES = new Set(['mp3', '140', '360', '480', '720', '1080']);
+const ALLOWED_QUALITIES = new Set(['mp3', '360', '480', '720', '1080']);
 
-/* ─── Cari file hasil output yt-dlp berdasarkan prefix timestamp ─── */
-function findOutputFile(dir, prefix) {
-    try {
-        const files = fs.readdirSync(dir);
-        const match = files.find(f => f.startsWith(prefix));
-        return match ? path.join(dir, match) : null;
-    } catch (_) {
-        return null;
-    }
+/* ─── Ambil direct URL dari yt-dlp tanpa download (bypass bot detection) ─── */
+function getDirectUrls(ytdlpBin, videoUrl, formatStr, parseYtdlpError) {
+    const { execFile } = require('child_process');
+    return new Promise((resolve, reject) => {
+        execFile(
+            ytdlpBin,
+            ['--no-playlist',
+             '--extractor-args', 'youtube:player_client=android_vr',
+             '--get-url', '-f', formatStr, videoUrl],
+            { timeout: 30000 },
+            (err, stdout, stderr) => {
+                if (err) return reject(new Error(parseYtdlpError(stderr, err.message)));
+                const urls = stdout.trim().split('\n').filter(u => u.startsWith('http'));
+                if (!urls.length) return reject(new Error('URL tidak ditemukan dari yt-dlp.'));
+                resolve(urls);
+            }
+        );
+    });
+}
+
+/* ─── Download file dari direct URL pakai axios (tidak kena bot detection) ─── */
+async function downloadToFile(url, destPath) {
+    const axios = require('axios');
+    const response = await axios({
+        method: 'get',
+        url,
+        responseType: 'arraybuffer',
+        timeout: 120000,
+        headers: {
+            'User-Agent': 'Mozilla/5.0 (Linux; Android 9; Pixel 2) AppleWebKit/537.36',
+        },
+    });
+    fs.writeFileSync(destPath, Buffer.from(response.data));
 }
 
 /* ─── Handler .ytdlch — download audio/video dengan kualitas terpilih ─── */
@@ -244,128 +268,170 @@ async function handleYtDlCh(hisoka, m, query, ctx) {
     const type     = query.slice(0, sepIdx).trim().toLowerCase();
     const videoUrl = query.slice(sepIdx + 1).trim();
 
-    /* ── Validasi ketat: type harus dari set yang diizinkan ── */
     if (!ALLOWED_QUALITIES.has(type)) {
         await tolak(hisoka, m, '❌ Kualitas tidak diizinkan. Gunakan tombol resmi dari hasil pencarian.');
         return;
     }
 
-    /* ── Validasi URL: harus youtube/youtu.be ── */
     const isYtUrl = /^https?:\/\/(www\.)?(youtube\.com|youtu\.be)\//i.test(videoUrl);
     if (!isYtUrl) {
         await tolak(hisoka, m, '❌ Link tidak valid. Hanya link YouTube yang diterima.');
         return;
     }
 
+    const isAudio = type === 'mp3';
+    const height  = isAudio ? null : parseInt(type, 10);
+
     await hisoka.sendMessage(m.from, { react: { text: '📥', key: m.key } });
 
-    const tmpDir   = path.join(process.cwd(), 'tmp');
+    const loadingMsg = await tolak(hisoka, m,
+        isAudio ? '⏳ _Mempersiapkan download audio MP3..._'
+                : `⏳ _Mempersiapkan download video ${height}p..._`
+    );
+
+    const editStep = async (text) => {
+        try { await m.reply({ edit: loadingMsg.key, text }); } catch (_) {}
+    };
+
+    /* tolakEdit: ensureYtdlp kirim pesan via edit, bukan kirim baru */
+    const tolakEdit = async (_h, _m, text) => editStep(text);
+
+    const tmpDir = path.join(process.cwd(), 'tmp');
     if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
 
-    const timestamp = Date.now();
-    const isAudio   = type === 'mp3';
-    const prefix    = `ytakura_${timestamp}`;
-    const fixedFile = path.join(tmpDir, `${prefix}_fix.mp4`);
-    let   rawFile   = null;
+    const timestamp   = Date.now();
+    const rawAudio    = path.join(tmpDir, `ytakura_${timestamp}_audio.m4a`);
+    const rawVideo    = path.join(tmpDir, `ytakura_${timestamp}_video.mp4`);
+    const fixedFile   = path.join(tmpDir, `ytakura_${timestamp}_fixed.mp4`);
+    const outMp3      = path.join(tmpDir, `ytakura_${timestamp}.mp3`);
+    const toClean     = [];
 
     try {
-        const ytdlpBin = await ensureYtdlp(hisoka, m, tolak);
-        const { execFile } = require('child_process');
+        const ytdlpBin = await ensureYtdlp(hisoka, m, tolakEdit);
 
         if (isAudio) {
-            /* ── Download Audio MP3 — pakai execFile (aman dari injection) ── */
-            const loadingMsg = await tolak(hisoka, m, '⏳ _Mengunduh audio MP3..._');
-            const outTemplate = path.join(tmpDir, `${prefix}.%(ext)s`);
+            /* ── STEP 1: ambil direct URL audio (m4a) ── */
+            await editStep('🔍 _Mengambil link audio..._');
+            const [audioUrl] = await getDirectUrls(
+                ytdlpBin, videoUrl,
+                'bestaudio[ext=m4a]/bestaudio',
+                parseYtdlpError
+            );
 
+            /* ── STEP 2: download m4a via axios (no bot detection) ── */
+            await editStep('⏳ _Mengunduh audio..._');
+            toClean.push(rawAudio);
+            await downloadToFile(audioUrl, rawAudio);
+
+            /* ── STEP 3: convert m4a → mp3 via ffmpeg ── */
+            await editStep('🔧 _Mengkonversi ke MP3..._');
+            toClean.push(outMp3);
             await new Promise((resolve, reject) => {
-                execFile(
-                    ytdlpBin,
-                    ['--js-runtimes', 'node', '--no-playlist', '-x',
-                     '--audio-format', 'mp3', '--audio-quality', '5',
-                     '-o', outTemplate, videoUrl],
-                    { timeout: 120000 },
-                    (err, _stdout, stderr) => {
-                        if (err) return reject(new Error(parseYtdlpError(stderr, err.message)));
-                        resolve();
-                    }
+                const { spawn } = require('child_process');
+                const ff = spawn('ffmpeg', [
+                    '-y', '-i', rawAudio,
+                    '-codec:a', 'libmp3lame', '-qscale:a', '4',
+                    outMp3,
+                ]);
+                ff.on('close', code =>
+                    code === 0 ? resolve() : reject(new Error('FFmpeg gagal konversi MP3.'))
                 );
             });
 
-            /* Temukan file output yang sebenarnya, apapun ekstensinya */
-            rawFile = findOutputFile(tmpDir, prefix);
-            if (!rawFile || !fs.existsSync(rawFile)) throw new Error('File audio tidak ditemukan setelah download.');
-
-            const audioBuffer = fs.readFileSync(rawFile);
+            /* ── STEP 4: kirim ── */
+            await editStep('📤 _Mengirim audio MP3..._');
             await hisoka.sendMessage(m.from, {
-                audio:    audioBuffer,
+                audio:    fs.readFileSync(outMp3),
                 mimetype: 'audio/mpeg',
                 fileName: `audio_${timestamp}.mp3`,
                 ptt:      false,
             }, { quoted: m });
 
             await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
-            await m.reply({ edit: loadingMsg.key, text: '✅ *Audio MP3 berhasil dikirim!*' });
+            await editStep('✅ *Audio MP3 berhasil dikirim!*');
             logCommand(m, hisoka, 'ytdlch-mp3');
 
         } else {
-            /* ── Download Video — pakai execFile (aman dari injection) ── */
-            const height     = parseInt(type, 10);
-            const loadingMsg = await tolak(hisoka, m, `⏳ _Mengunduh video ${height}p..._`);
-            const outTemplate = path.join(tmpDir, `${prefix}.%(ext)s`);
+            /* ── VIDEO ──
+               Strategi: coba format combined (satu URL) dulu,
+               kalau tidak ada fallback ke video+audio terpisah lalu mux ffmpeg. ── */
+            await editStep(`🔍 _Mengambil link video ${height}p..._`);
 
-            await new Promise((resolve, reject) => {
-                execFile(
-                    ytdlpBin,
-                    ['--js-runtimes', 'node', '--no-playlist',
-                     '-f', `bestvideo[height<=${height}]+bestaudio/best[height<=${height}]`,
-                     '--merge-output-format', 'mp4',
-                     '-o', outTemplate, videoUrl],
-                    { timeout: 240000 },
-                    (err, _stdout, stderr) => {
-                        if (err) return reject(new Error(parseYtdlpError(stderr, err.message)));
-                        resolve();
-                    }
+            let videoFileToSend = null;
+
+            try {
+                /* Coba combined mp4 (ada audio bawaan, cocok untuk ≤360p) */
+                const [combinedUrl] = await getDirectUrls(
+                    ytdlpBin, videoUrl,
+                    `best[height<=${height}][ext=mp4]/best[height<=${height}]`,
+                    parseYtdlpError
                 );
-            });
+                await editStep(`⏳ _Mengunduh video ${height}p..._`);
+                toClean.push(rawVideo);
+                await downloadToFile(combinedUrl, rawVideo);
+                videoFileToSend = rawVideo;
 
-            /* Temukan file output yang sebenarnya */
-            rawFile = findOutputFile(tmpDir, prefix);
-            if (!rawFile || !fs.existsSync(rawFile)) throw new Error('File video tidak ditemukan setelah download.');
+            } catch (_combinedErr) {
+                /* Fallback: download video-only + audio-only, mux dengan ffmpeg */
+                await editStep(`⏳ _Mengunduh stream video ${height}p..._`);
 
-            /* FFmpeg re-mux supaya bisa langsung diputar di WhatsApp */
-            await new Promise((resolve, reject) => {
-                const { spawn } = require('child_process');
-                const ff = spawn('ffmpeg', [
-                    '-y', '-i', rawFile,
-                    '-c:v', 'copy',
-                    '-c:a', 'aac',
-                    '-movflags', '+faststart',
-                    fixedFile,
+                const vidUrl = (await getDirectUrls(
+                    ytdlpBin, videoUrl,
+                    `bestvideo[height<=${height}][ext=mp4]/bestvideo[height<=${height}]`,
+                    parseYtdlpError
+                ))[0];
+
+                const audUrl = (await getDirectUrls(
+                    ytdlpBin, videoUrl,
+                    'bestaudio[ext=m4a]/bestaudio',
+                    parseYtdlpError
+                ))[0];
+
+                const rawVideoOnly = path.join(tmpDir, `ytakura_${timestamp}_vonly.mp4`);
+                toClean.push(rawVideoOnly, rawAudio);
+                await Promise.all([
+                    downloadToFile(vidUrl, rawVideoOnly),
+                    downloadToFile(audUrl, rawAudio),
                 ]);
-                ff.on('close', (code) => {
-                    if (code === 0) resolve();
-                    else reject(new Error('FFmpeg gagal menstabilkan container video.'));
-                });
-            });
 
-            const videoBuffer = fs.readFileSync(fixedFile);
+                await editStep('🔧 _Mux video + audio..._');
+                toClean.push(fixedFile);
+                await new Promise((resolve, reject) => {
+                    const { spawn } = require('child_process');
+                    const ff = spawn('ffmpeg', [
+                        '-y',
+                        '-i', rawVideoOnly,
+                        '-i', rawAudio,
+                        '-c:v', 'copy', '-c:a', 'aac',
+                        '-movflags', '+faststart',
+                        fixedFile,
+                    ]);
+                    ff.on('close', code =>
+                        code === 0 ? resolve() : reject(new Error('FFmpeg mux gagal.'))
+                    );
+                });
+                videoFileToSend = fixedFile;
+            }
+
+            await editStep(`📤 _Mengirim video ${height}p..._`);
             await hisoka.sendMessage(m.from, {
-                video:   videoBuffer,
+                video:   fs.readFileSync(videoFileToSend),
                 caption: `🎬 *${height}p* — WilyBot YTS Akura`,
                 mimetype:'video/mp4',
             }, { quoted: m });
 
             await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
-            await m.reply({ edit: loadingMsg.key, text: `✅ *Video ${height}p berhasil dikirim!*` });
+            await editStep(`✅ *Video ${height}p berhasil dikirim!*`);
             logCommand(m, hisoka, `ytdlch-${height}p`);
         }
     } catch (err) {
         console.error('[YTS-AKURA DL]', err);
         await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
-        m.reply(`❌ *Download Gagal:* ${err.message}`);
+        await editStep(`❌ *Download Gagal:* ${err.message}`);
     } finally {
-        try { if (rawFile   && fs.existsSync(rawFile))   fs.unlinkSync(rawFile);   } catch (_) {}
-        try { if (fixedFile && fs.existsSync(fixedFile)) fs.unlinkSync(fixedFile); } catch (_) {}
+        for (const f of toClean) {
+            try { if (f && fs.existsSync(f)) fs.unlinkSync(f); } catch (_) {}
+        }
     }
 }
 

@@ -1471,22 +1471,20 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         }
 
                         case 'yts':
-                        case 'ytsearch': {
-                                const { handleYtsSearch } = _require(path.resolve('./SEMUA_FITUR/download/yts-akura.cjs'));
-                                await handleYtsSearch(hisoka, m, query, { tolak, logCommand });
-                                break;
-                        }
-
-                        case 'ytqualitych': {
-                                const { handleYtQualityCh } = _require(path.resolve('./SEMUA_FITUR/download/yts-akura.cjs'));
-                                await handleYtQualityCh(hisoka, m, query, { tolak });
-                                break;
-                        }
-
+                        case 'ytsearch':
+                        case 'ytqualitych':
                         case 'ytdlch': {
-                                const { handleYtDlCh } = _require(path.resolve('./SEMUA_FITUR/download/yts-akura.cjs'));
-                                const { ensureYtdlp, parseYtdlpError } = _require(path.resolve('./SEMUA_FITUR/download/youtube-dl.cjs'));
-                                await handleYtDlCh(hisoka, m, query, { tolak, logCommand, ensureYtdlp, parseYtdlpError });
+                                const _ytsPath = path.resolve('./SEMUA_FITUR/download/yts-akura.cjs');
+                                delete _require.cache[_ytsPath];
+                                const { handleYtsSearch, handleYtQualityCh, handleYtDlCh } = _require(_ytsPath);
+                                if (m.command === 'yts' || m.command === 'ytsearch') {
+                                        await handleYtsSearch(hisoka, m, query, { tolak, logCommand });
+                                } else if (m.command === 'ytqualitych') {
+                                        await handleYtQualityCh(hisoka, m, query, { tolak });
+                                } else if (m.command === 'ytdlch') {
+                                        const { ensureYtdlp, parseYtdlpError } = _require(path.resolve('./SEMUA_FITUR/download/youtube-dl.cjs'));
+                                        await handleYtDlCh(hisoka, m, query, { tolak, logCommand, ensureYtdlp, parseYtdlpError });
+                                }
                                 break;
                         }
 
