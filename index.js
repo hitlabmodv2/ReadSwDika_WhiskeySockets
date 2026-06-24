@@ -720,16 +720,23 @@ async function main() {
                         }
 
                         let pairRemaining = PAIR_DURATION;
+                        // Tampilkan tiap 30 detik, lalu 20, 10, 5, 4, 3, 2, 1 (tidak flood log)
+                        const PAIR_SHOW_AT = new Set([150, 120, 90, 60, 30, 20, 10, 5, 4, 3, 2, 1]);
                         global.__pairingTimerInterval = setInterval(() => {
                                 pairRemaining--;
                                 if (pairRemaining > 0) {
-                                        const mins = Math.floor(pairRemaining / 60);
-                                        const secs = pairRemaining % 60;
-                                        originalStdoutWrite(`\r\x1b[33m⏳ Pairing berlaku: ${mins}m ${String(secs).padStart(2, '0')}s tersisa  \x1b[39m`);
+                                        if (PAIR_SHOW_AT.has(pairRemaining)) {
+                                                const mins = Math.floor(pairRemaining / 60);
+                                                const secs = pairRemaining % 60;
+                                                const label = mins > 0
+                                                        ? `${mins}m ${String(secs).padStart(2, '0')}s`
+                                                        : `${secs}s`;
+                                                originalConsoleLog(`\x1b[33m⏳ Pairing — sisa ${label}\x1b[39m`);
+                                        }
                                 } else {
                                         clearInterval(global.__pairingTimerInterval);
                                         global.__pairingTimerInterval = null;
-                                        originalStdoutWrite('\r\x1b[31m⌛ Pairing code EXPIRED! Restart bot untuk kode baru.          \x1b[39m\n');
+                                        originalConsoleLog(`\x1b[31m⌛ Pairing code EXPIRED! Silakan restart bot untuk mendapatkan kode baru.\x1b[39m`);
                                         saveAuthTimerLog({
                                                 type      : 'pairing_expired',
                                                 code      : formattedCode,
@@ -754,36 +761,41 @@ async function main() {
                         }
                         global.__qrCount = (global.__qrCount || 0) + 1;
 
-                        // Durasi QR WhatsApp = 20 detik per kode
-                        const QR_DURATION = 20;
+                        // Durasi QR WhatsApp = 60 detik per kode
+                        const QR_DURATION = 60;
                         const qrStartAt   = Date.now();
                         const qrExpireAt  = new Date(qrStartAt + QR_DURATION * 1000).toISOString();
 
                         // Simpan event ke data/system/auth-timer.json
                         saveAuthTimerLog({
-                                type         : 'qr',
-                                attempt      : global.__qrCount,
-                                startAt      : new Date(qrStartAt).toISOString(),
-                                expireAt     : qrExpireAt,
+                                type           : 'qr',
+                                attempt        : global.__qrCount,
+                                startAt        : new Date(qrStartAt).toISOString(),
+                                expireAt       : qrExpireAt,
                                 durationSeconds: QR_DURATION,
                         });
 
                         qrcode.generate(qr, { small: true }, code => {
                                 originalConsoleLog('\x1b[36mScan this QR code to connect:\x1b[39m\n');
                                 originalConsoleLog(code);
-                                originalConsoleLog(`\x1b[33m⏳ QR #${global.__qrCount} berlaku ${QR_DURATION} detik (expire: ${new Date(qrExpireAt).toLocaleTimeString('id-ID')})\x1b[39m`);
+                                originalConsoleLog(`\x1b[33m⏳ QR #${global.__qrCount} berlaku ${QR_DURATION} detik — expire jam ${new Date(qrExpireAt).toLocaleTimeString('id-ID')}\x1b[39m`);
                         });
 
-                        // Countdown real-time tiap 1 detik
+                        // Countdown real-time tiap 1 detik menggunakan console.log biasa
+                        // agar tidak bentrok dengan log lain (hindari \r yang kacau)
                         let qrRemaining = QR_DURATION;
+                        // Tampilkan di momen penting: setiap 10 detik, lalu 5,4,3,2,1
+                        const QR_SHOW_AT = new Set([50, 40, 30, 20, 10, 5, 4, 3, 2, 1]);
                         global.__qrTimerInterval = setInterval(() => {
                                 qrRemaining--;
                                 if (qrRemaining > 0) {
-                                        originalStdoutWrite(`\r\x1b[33m⏳ QR berlaku: ${String(qrRemaining).padStart(2, '0')}s tersisa  \x1b[39m`);
+                                        if (QR_SHOW_AT.has(qrRemaining)) {
+                                                originalConsoleLog(`\x1b[33m⏳ QR #${global.__qrCount} — sisa ${qrRemaining}s\x1b[39m`);
+                                        }
                                 } else {
                                         clearInterval(global.__qrTimerInterval);
                                         global.__qrTimerInterval = null;
-                                        originalStdoutWrite('\r\x1b[31m⌛ QR expired — menunggu QR baru...                \x1b[39m\n');
+                                        originalConsoleLog(`\x1b[31m⌛ QR #${global.__qrCount} EXPIRED — menunggu QR baru dari WhatsApp...\x1b[39m`);
                                         saveAuthTimerLog({
                                                 type     : 'qr_expired',
                                                 attempt  : global.__qrCount,
@@ -798,12 +810,12 @@ async function main() {
                         if (global.__qrTimerInterval) {
                                 clearInterval(global.__qrTimerInterval);
                                 global.__qrTimerInterval = null;
-                                originalStdoutWrite('\r\x1b[32m✅ Terhubung! QR berhasil discan.                    \x1b[39m\n');
+                                originalConsoleLog('\x1b[32m✅ Terhubung! QR berhasil discan.\x1b[39m');
                         }
                         if (global.__pairingTimerInterval) {
                                 clearInterval(global.__pairingTimerInterval);
                                 global.__pairingTimerInterval = null;
-                                originalStdoutWrite('\r\x1b[32m✅ Terhubung! Pairing code berhasil dikonfirmasi.    \x1b[39m\n');
+                                originalConsoleLog('\x1b[32m✅ Terhubung! Pairing code berhasil dikonfirmasi.\x1b[39m');
                         }
                         saveAuthTimerLog({
                                 type       : 'connected',
