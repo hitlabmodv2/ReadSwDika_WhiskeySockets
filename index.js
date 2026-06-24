@@ -454,8 +454,23 @@ function saveAuthTimerLog(entry) {
                 try { db = JSON.parse(fs.readFileSync(file, 'utf-8')); } catch {}
                 if (!Array.isArray(db.events)) db.events = [];
                 db.events.unshift(entry);
-                if (db.events.length > 100) db.events = db.events.slice(0, 100);
+                if (db.events.length > 50) db.events = db.events.slice(0, 50);
                 db.lastUpdated = new Date().toISOString();
+                fs.writeFileSync(file, JSON.stringify(db, null, 2), 'utf-8');
+        } catch (_) {}
+}
+
+// Reset file saat sesi baru dimulai — hapus semua event lama, mulai fresh
+function resetAuthTimerLog(entry) {
+        try {
+                const dir = path.join(process.cwd(), 'data', 'system');
+                if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+                const file = path.join(dir, 'auth-timer.json');
+                const db = {
+                        events     : [entry],
+                        lastUpdated: new Date().toISOString(),
+                        sessionStart: new Date().toISOString(),
+                };
                 fs.writeFileSync(file, JSON.stringify(db, null, 2), 'utf-8');
         } catch (_) {}
 }
@@ -715,8 +730,8 @@ async function main() {
                         console.log(`${cyan}────────────────────────────────${reset}`);
                         console.log('');
 
-                        // ── Simpan ke data/system/auth-timer.json ──
-                        saveAuthTimerLog({
+                        // ── Reset & simpan ke data/system/auth-timer.json (sesi baru = file bersih) ──
+                        resetAuthTimerLog({
                                 type           : 'pairing',
                                 code           : formattedCode,
                                 number         : phoneNumber,
@@ -766,7 +781,7 @@ async function main() {
                                 const qrStartAt  = Date.now();
                                 const qrExpireAt = new Date(qrStartAt + QR_MAX * 1000).toISOString();
 
-                                saveAuthTimerLog({
+                                resetAuthTimerLog({
                                         type           : 'qr_session_start',
                                         startAt        : new Date(qrStartAt).toISOString(),
                                         expireAt       : qrExpireAt,
