@@ -466,6 +466,12 @@ async function injectStartMessage(hisoka, WAMessage) {
                         const group = hisoka.groups.read(from);
                         const admins = group?.participants?.filter(v => v.admin) || [];
 
+                        // Cari nama grup: cache lokal → cache bot utama → getName
+                        const _groupSubject = group?.subject
+                                || global.__mainBotGroups?.read?.(from)?.subject
+                                || (typeof hisoka.getName === 'function' ? hisoka.getName(from) : null)
+                                || null;
+
                         Object.defineProperties(WAMessage, {
                                 isGroupAdmin: {
                                         value: admins.some(v => areJidsSameUser(v.phoneNumber || v.id, sender)),
@@ -481,6 +487,11 @@ async function injectStartMessage(hisoka, WAMessage) {
                                         value: admins.some(v => v.admin === 'superadmin' && areJidsSameUser(v.phoneNumber || v.id, sender)),
                                         enumerable: false,
                                         writable: false,
+                                },
+                                groupSubject: {
+                                        value: _groupSubject,
+                                        enumerable: false,
+                                        writable: true,
                                 },
                         });
                 }

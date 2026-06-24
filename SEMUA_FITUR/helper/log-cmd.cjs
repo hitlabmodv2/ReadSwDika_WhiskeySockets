@@ -40,9 +40,8 @@ function makeLogCmd({ maskNumber }) {
                         ? 'Jadibot'
                         : (m.isRealOwner ? 'Owner' : m.isBot ? 'Bot' : 'User');
                 const _tujuan = m.isGroup ? 'Grup' : 'Private';
-                const _grupCache = m.isGroup ? (hisoka.groups?.read ? hisoka.groups.read(m.from) : null) : null;
                 const _namaGrup = m.isGroup
-                        ? (_grupCache?.subject || hisoka.getName?.(m.from) || m.from?.split('@')[0] || '-')
+                        ? (m.groupSubject || hisoka.getName?.(m.from) || m.from?.split('@')[0] || '-')
                         : '-';
 
                 const _numToShow = _isJadibot
