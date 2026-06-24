@@ -1,0 +1,414 @@
+{
+  "events": [
+    {
+      "type": "pairing",
+      "code": "WILY-CODE",
+      "number": "6281234567890",
+      "startAt": "2026-06-24T06:36:36.182Z",
+      "expireAt": "2026-06-24T06:41:36.182Z",
+      "durationSeconds": 300
+    },
+    {
+      "type": "pairing",
+      "code": "WILY-CODE",
+      "number": "6281234567890",
+      "startAt": "2026-06-24T06:34:08.721Z",
+      "expireAt": "2026-06-24T06:39:08.721Z",
+      "durationSeconds": 300
+    },
+    {
+      "type": "pairing",
+      "code": "WILY-CODE",
+      "number": "6281234567890",
+      "startAt": "2026-06-24T06:30:32.275Z",
+      "expireAt": "2026-06-24T06:35:32.275Z",
+      "durationSeconds": 300
+    },
+    {
+      "type": "pairing",
+      "code": "WILY-CODE",
+      "number": "6281234567890",
+      "startAt": "2026-06-24T06:27:01.177Z",
+      "expireAt": "2026-06-24T06:32:01.177Z",
+      "durationSeconds": 300
+    },
+    {
+      "type": "pairing",
+      "code": "WILY-CODE",
+      "number": "6281234567890",
+      "startAt": "2026-06-24T06:23:34.932Z",
+      "expireAt": "2026-06-24T06:28:34.932Z",
+      "durationSeconds": 300
+    },
+    {
+      "type": "pairing",
+      "code": "WILY-CODE",
+      "number": "6281234567890",
+      "startAt": "2026-06-24T06:20:13.340Z",
+      "expireAt": "2026-06-24T06:25:13.340Z",
+      "durationSeconds": 300
+    },
+    {
+      "type": "pairing",
+      "code": "WILY-CODE",
+      "number": "6281234567890",
+      "startAt": "2026-06-24T06:16:56.900Z",
+      "expireAt": "2026-06-24T06:21:56.900Z",
+      "durationSeconds": 300
+    },
+    {
+      "type": "pairing",
+      "code": "WILY-CODE",
+      "number": "6281234567890",
+      "startAt": "2026-06-24T06:13:45.485Z",
+      "expireAt": "2026-06-24T06:18:45.485Z",
+      "durationSeconds": 300
+    },
+    {
+      "type": "pairing",
+      "code": "WILY-CODE",
+      "number": "6281234567890",
+      "startAt": "2026-06-24T06:10:39.382Z",
+      "expireAt": "2026-06-24T06:15:39.382Z",
+      "durationSeconds": 300
+    },
+    {
+      "type": "pairing",
+      "code": "WILY-CODE",
+      "number": "6281234567890",
+      "startAt": "2026-06-24T06:07:38.252Z",
+      "expireAt": "2026-06-24T06:12:38.252Z",
+      "durationSeconds": 300
+    },
+    {
+      "type": "pairing",
+      "code": "WILY-CODE",
+      "number": "6281234567890",
+      "startAt": "2026-06-24T06:04:42.209Z",
+      "expireAt": "2026-06-24T06:09:42.209Z",
+      "durationSeconds": 300
+    },
+    {
+      "type": "pairing",
+      "code": "WILY-CODE",
+      "number": "6281234567890",
+      "startAt": "2026-06-24T06:01:50.906Z",
+      "expireAt": "2026-06-24T06:06:50.906Z",
+      "durationSeconds": 300
+    },
+    {
+      "type": "pairing",
+      "code": "WILY-CODE",
+      "number": "6281234567890",
+      "startAt": "2026-06-24T05:59:04.665Z",
+      "expireAt": "2026-06-24T06:04:04.665Z",
+      "durationSeconds": 300
+    },
+    {
+      "type": "pairing",
+      "code": "WILY-CODE",
+      "number": "6281234567890",
+      "startAt": "2026-06-24T05:58:19.007Z",
+      "expireAt": "2026-06-24T06:00:59.007Z",
+      "durationSeconds": 160
+    },
+    {
+      "type": "pairing",
+      "code": "WILY-CODE",
+      "number": "6281234567890",
+      "startAt": "2026-06-24T05:58:18.936Z",
+      "expireAt": "2026-06-24T06:00:58.936Z",
+      "durationSeconds": 160
+    },
+    {
+      "type": "pairing_expired",
+      "code": "WILY-CODE",
+      "expiredAt": "2026-06-24T05:58:12.824Z"
+    },
+    {
+      "type": "pairing",
+      "code": "WILY-CODE",
+      "number": "6281234567890",
+      "startAt": "2026-06-24T05:55:32.803Z",
+      "expireAt": "2026-06-24T05:58:12.803Z",
+      "durationSeconds": 160
+    },
+    {
+      "type": "pairing",
+      "code": "WILY-CODE",
+      "number": "6281234567890",
+      "startAt": "2026-06-24T05:54:02.430Z",
+      "expireAt": "2026-06-24T05:59:02.430Z",
+      "durationSeconds": 300
+    },
+    {
+      "type": "pairing",
+      "code": "WILY-CODE",
+      "number": "6281234567890",
+      "startAt": "2026-06-24T05:51:15.770Z",
+      "expireAt": "2026-06-24T05:56:15.770Z",
+      "durationSeconds": 300
+    },
+    {
+      "type": "pairing",
+      "code": "WILY-CODE",
+      "number": "6281234567890",
+      "startAt": "2026-06-24T05:48:14.663Z",
+      "expireAt": "2026-06-24T05:51:14.663Z",
+      "durationSeconds": 180
+    },
+    {
+      "type": "pairing",
+      "code": "WILY-CODE",
+      "number": "6281234567890",
+      "startAt": "2026-06-24T05:45:17.875Z",
+      "expireAt": "2026-06-24T05:48:17.875Z",
+      "durationSeconds": 180
+    },
+    {
+      "type": "pairing",
+      "code": "WILY-CODE",
+      "number": "6281234567890",
+      "startAt": "2026-06-24T05:42:26.639Z",
+      "expireAt": "2026-06-24T05:45:26.639Z",
+      "durationSeconds": 180
+    },
+    {
+      "type": "pairing",
+      "code": "WILY-CODE",
+      "number": "6281234567890",
+      "startAt": "2026-06-24T05:39:40.362Z",
+      "expireAt": "2026-06-24T05:42:40.362Z",
+      "durationSeconds": 180
+    },
+    {
+      "type": "qr_session_start",
+      "startAt": "2026-06-24T05:39:11.902Z",
+      "expireAt": "2026-06-24T05:42:11.902Z",
+      "durationSeconds": 180
+    },
+    {
+      "type": "qr_session_start",
+      "startAt": "2026-06-24T05:37:33.129Z",
+      "expireAt": "2026-06-24T05:40:33.129Z",
+      "durationSeconds": 180
+    },
+    {
+      "type": "qr_session_start",
+      "startAt": "2026-06-24T05:35:52.979Z",
+      "expireAt": "2026-06-24T05:38:52.979Z",
+      "durationSeconds": 180
+    },
+    {
+      "type": "qr_session_expired",
+      "expiredAt": "2026-06-24T05:35:49.110Z"
+    },
+    {
+      "type": "qr_session_start",
+      "startAt": "2026-06-24T05:32:49.052Z",
+      "expireAt": "2026-06-24T05:35:49.052Z",
+      "durationSeconds": 180
+    },
+    {
+      "type": "qr_session_start",
+      "startAt": "2026-06-24T05:31:37.648Z",
+      "expireAt": "2026-06-24T05:34:37.648Z",
+      "durationSeconds": 180
+    },
+    {
+      "type": "qr_session_expired",
+      "expiredAt": "2026-06-24T05:30:51.353Z"
+    },
+    {
+      "type": "qr_session_start",
+      "startAt": "2026-06-24T05:27:51.303Z",
+      "expireAt": "2026-06-24T05:30:51.303Z",
+      "durationSeconds": 180
+    },
+    {
+      "type": "qr_session_expired",
+      "expiredAt": "2026-06-24T05:27:44.081Z"
+    },
+    {
+      "type": "qr_session_start",
+      "startAt": "2026-06-24T05:24:43.995Z",
+      "expireAt": "2026-06-24T05:27:43.995Z",
+      "durationSeconds": 180
+    },
+    {
+      "type": "qr_session_start",
+      "startAt": "2026-06-24T05:23:12.910Z",
+      "expireAt": "2026-06-24T05:26:12.910Z",
+      "durationSeconds": 180
+    },
+    {
+      "type": "qr_session_expired",
+      "expiredAt": "2026-06-24T05:23:02.697Z"
+    },
+    {
+      "type": "qr_session_start",
+      "startAt": "2026-06-24T05:20:02.638Z",
+      "expireAt": "2026-06-24T05:23:02.638Z",
+      "durationSeconds": 180
+    },
+    {
+      "type": "qr_session_start",
+      "startAt": "2026-06-24T05:17:50.472Z",
+      "expireAt": "2026-06-24T05:20:50.472Z",
+      "durationSeconds": 180
+    },
+    {
+      "type": "qr",
+      "attempt": 3,
+      "startAt": "2026-06-24T05:16:10.282Z",
+      "expireAt": "2026-06-24T05:19:10.282Z",
+      "durationSeconds": 180
+    },
+    {
+      "type": "qr",
+      "attempt": 2,
+      "startAt": "2026-06-24T05:15:50.231Z",
+      "expireAt": "2026-06-24T05:18:50.231Z",
+      "durationSeconds": 180
+    },
+    {
+      "type": "qr",
+      "attempt": 1,
+      "startAt": "2026-06-24T05:14:50.161Z",
+      "expireAt": "2026-06-24T05:17:50.161Z",
+      "durationSeconds": 180
+    },
+    {
+      "type": "qr",
+      "attempt": 7,
+      "startAt": "2026-06-24T05:14:43.661Z",
+      "expireAt": "2026-06-24T05:15:43.661Z",
+      "durationSeconds": 60
+    },
+    {
+      "type": "qr",
+      "attempt": 6,
+      "startAt": "2026-06-24T05:14:23.648Z",
+      "expireAt": "2026-06-24T05:15:23.648Z",
+      "durationSeconds": 60
+    },
+    {
+      "type": "qr",
+      "attempt": 5,
+      "startAt": "2026-06-24T05:14:03.635Z",
+      "expireAt": "2026-06-24T05:15:03.635Z",
+      "durationSeconds": 60
+    },
+    {
+      "type": "qr",
+      "attempt": 4,
+      "startAt": "2026-06-24T05:13:53.977Z",
+      "expireAt": "2026-06-24T05:14:53.977Z",
+      "durationSeconds": 60
+    },
+    {
+      "type": "qr",
+      "attempt": 3,
+      "startAt": "2026-06-24T05:13:43.627Z",
+      "expireAt": "2026-06-24T05:14:43.627Z",
+      "durationSeconds": 60
+    },
+    {
+      "type": "qr",
+      "attempt": 2,
+      "startAt": "2026-06-24T05:13:23.582Z",
+      "expireAt": "2026-06-24T05:14:23.582Z",
+      "durationSeconds": 60
+    },
+    {
+      "type": "qr",
+      "attempt": 1,
+      "startAt": "2026-06-24T05:12:23.521Z",
+      "expireAt": "2026-06-24T05:13:23.521Z",
+      "durationSeconds": 60
+    },
+    {
+      "type": "qr",
+      "attempt": 11,
+      "startAt": "2026-06-24T05:12:14.928Z",
+      "expireAt": "2026-06-24T05:12:34.928Z",
+      "durationSeconds": 20
+    },
+    {
+      "type": "qr",
+      "attempt": 10,
+      "startAt": "2026-06-24T05:11:56.165Z",
+      "expireAt": "2026-06-24T05:12:16.165Z",
+      "durationSeconds": 20
+    },
+    {
+      "type": "qr",
+      "attempt": 9,
+      "startAt": "2026-06-24T05:11:54.918Z",
+      "expireAt": "2026-06-24T05:12:14.918Z",
+      "durationSeconds": 20
+    },
+    {
+      "type": "qr",
+      "attempt": 8,
+      "startAt": "2026-06-24T05:11:34.909Z",
+      "expireAt": "2026-06-24T05:11:54.909Z",
+      "durationSeconds": 20
+    },
+    {
+      "type": "qr",
+      "attempt": 7,
+      "startAt": "2026-06-24T05:11:24.808Z",
+      "expireAt": "2026-06-24T05:11:44.808Z",
+      "durationSeconds": 20
+    },
+    {
+      "type": "qr",
+      "attempt": 6,
+      "startAt": "2026-06-24T05:11:04.779Z",
+      "expireAt": "2026-06-24T05:11:24.779Z",
+      "durationSeconds": 20
+    },
+    {
+      "type": "qr",
+      "attempt": 5,
+      "startAt": "2026-06-24T05:10:44.771Z",
+      "expireAt": "2026-06-24T05:11:04.771Z",
+      "durationSeconds": 20
+    },
+    {
+      "type": "qr",
+      "attempt": 4,
+      "startAt": "2026-06-24T05:10:34.902Z",
+      "expireAt": "2026-06-24T05:10:54.902Z",
+      "durationSeconds": 20
+    },
+    {
+      "type": "qr",
+      "attempt": 3,
+      "startAt": "2026-06-24T05:10:24.756Z",
+      "expireAt": "2026-06-24T05:10:44.756Z",
+      "durationSeconds": 20
+    },
+    {
+      "type": "qr",
+      "attempt": 2,
+      "startAt": "2026-06-24T05:10:04.719Z",
+      "expireAt": "2026-06-24T05:10:24.719Z",
+      "durationSeconds": 20
+    },
+    {
+      "type": "qr_expired",
+      "attempt": 1,
+      "expiredAt": "2026-06-24T05:09:24.747Z"
+    },
+    {
+      "type": "qr",
+      "attempt": 1,
+      "startAt": "2026-06-24T05:09:04.669Z",
+      "expireAt": "2026-06-24T05:09:24.669Z",
+      "durationSeconds": 20
+    }
+  ],
+  "lastUpdated": "2026-06-24T06:36:36.196Z"
+}
