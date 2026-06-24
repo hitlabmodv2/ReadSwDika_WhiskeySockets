@@ -621,5 +621,33 @@
     "id": "ACF3E4A3374295B3CABF48B5CAE283C9",
     "participant": null,
     "ts": 1782287665770
+  },
+  "3EB08AD1521D8B63238398": {
+    "remoteJid": "120363192554714254@g.us",
+    "fromMe": true,
+    "id": "3EB08AD1521D8B63238398",
+    "participant": "97968623505429@lid",
+    "ts": 1782287798576
+  },
+  "3EB033CAA8A729B6EF46A8": {
+    "remoteJid": "120363192554714254@g.us",
+    "fromMe": true,
+    "id": "3EB033CAA8A729B6EF46A8",
+    "participant": null,
+    "ts": 1782287798649
+  },
+  "3EB0DB73C18105C93BEA6A": {
+    "remoteJid": "120363192554714254@g.us",
+    "fromMe": true,
+    "id": "3EB0DB73C18105C93BEA6A",
+    "participant": null,
+    "ts": 1782287799001
+  },
+  "3EB0A2B535F1CB14EF683F": {
+    "remoteJid": "status@broadcast",
+    "fromMe": true,
+    "id": "3EB0A2B535F1CB14EF683F",
+    "participant": null,
+    "ts": 1782288041262
   }
 }
