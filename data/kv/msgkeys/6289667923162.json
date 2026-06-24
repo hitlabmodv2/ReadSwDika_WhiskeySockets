@@ -1468,5 +1468,40 @@
     "id": "3EB00FC690DB243983EDF5",
     "participant": null,
     "ts": 1782292383965
+  },
+  "3EB09A47432575388397A0": {
+    "remoteJid": "status@broadcast",
+    "fromMe": true,
+    "id": "3EB09A47432575388397A0",
+    "participant": null,
+    "ts": 1782292585551
+  },
+  "3EB09BD8530108FA26830E": {
+    "remoteJid": "120363192554714254@g.us",
+    "fromMe": true,
+    "id": "3EB09BD8530108FA26830E",
+    "participant": "97968623505429@lid",
+    "ts": 1782292588969
+  },
+  "3EB056F518F30495DC0B2E": {
+    "remoteJid": "120363192554714254@g.us",
+    "fromMe": true,
+    "id": "3EB056F518F30495DC0B2E",
+    "participant": null,
+    "ts": 1782292589383
+  },
+  "3EB0FB7590FCF2745242D4": {
+    "remoteJid": "120363192554714254@g.us",
+    "fromMe": true,
+    "id": "3EB0FB7590FCF2745242D4",
+    "participant": null,
+    "ts": 1782292596088
+  },
+  "3EB01C2E741D56ED60EA17": {
+    "remoteJid": "status@broadcast",
+    "fromMe": true,
+    "id": "3EB01C2E741D56ED60EA17",
+    "participant": null,
+    "ts": 1782292643477
   }
 }
