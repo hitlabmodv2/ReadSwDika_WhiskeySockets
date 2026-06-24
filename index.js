@@ -809,7 +809,11 @@ async function main() {
                         // QR pertama: mulai sesi 3 menit, tampilkan pesan
                         // QR berikutnya (WhatsApp auto-refresh ~20 detik): tampil diam saja, JANGAN reset timer
                         if (!global.__qrSessionStarted) {
-                                // QR pertama dalam sesi ini — mulai timer sesi fresh
+                                // QR pertama dalam sesi ini — batalkan timer lama dulu, lalu mulai fresh
+                                if (global.__qrExpiredTimer) {
+                                        clearTimeout(global.__qrExpiredTimer);
+                                        global.__qrExpiredTimer = null;
+                                }
                                 global.__qrSessionStarted = true;
                                 const QR_TOTAL   = 300; // 5 menit total per sesi
                                 const qrStartAt  = Date.now();

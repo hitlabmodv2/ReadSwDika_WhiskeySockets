@@ -1,42 +1,12 @@
 {
   "events": [
     {
-      "type": "pairing",
-      "code": "WILY-CODE",
-      "number": "6281234567890",
-      "startAt": "2026-06-24T07:32:54.280Z",
-      "expireAt": "2026-06-24T07:35:10.242Z",
-      "durationSeconds": 136,
-      "sessionExpireAt": "2026-06-24T07:35:10.242Z"
-    },
-    {
-      "type": "pairing",
-      "code": "WILY-CODE",
-      "number": "6281234567890",
-      "startAt": "2026-06-24T07:30:54.993Z",
-      "expireAt": "2026-06-24T07:35:10.242Z",
-      "durationSeconds": 255,
-      "sessionExpireAt": "2026-06-24T07:35:10.242Z"
-    },
-    {
-      "type": "pairing",
-      "code": "WILY-CODE",
-      "number": "6281234567890",
-      "startAt": "2026-06-24T07:30:32.618Z",
-      "expireAt": "2026-06-24T07:35:10.242Z",
-      "durationSeconds": 278,
-      "sessionExpireAt": "2026-06-24T07:35:10.242Z"
-    },
-    {
-      "type": "pairing",
-      "code": "WILY-CODE",
-      "number": "6281234567890",
-      "startAt": "2026-06-24T07:30:10.242Z",
-      "expireAt": "2026-06-24T07:35:10.242Z",
-      "durationSeconds": 300,
-      "sessionExpireAt": "2026-06-24T07:35:10.242Z"
+      "type": "qr_session_start",
+      "startAt": "2026-06-24T07:41:22.765Z",
+      "expireAt": "2026-06-24T07:46:22.765Z",
+      "durationSeconds": 300
     }
   ],
-  "lastUpdated": "2026-06-24T07:32:54.282Z",
-  "sessionStart": "2026-06-24T07:30:10.244Z"
+  "lastUpdated": "2026-06-24T07:41:22.777Z",
+  "sessionStart": "2026-06-24T07:41:22.777Z"
 }
