@@ -68,6 +68,14 @@ import { kvGet, kvSet } from '../db/datadb.js'
 /* ================= LOGGER ================= */
 const silentLogger = pino({ level: 'silent' })
 
+/* ─── HELPER: dapatkan socket bot utama yang aktif/terbaru ─── */
+// mainBotSock bisa stale (socket lama) setelah bot utama reconnect.
+// global.hisokaClient selalu diupdate ke socket terbaru di index.js.
+// Fungsi ini memastikan kita selalu pakai socket bot utama yang masih hidup.
+function getActiveMainSock(fallback = null) {
+  return global.hisokaClient || fallback || null
+}
+
 /* ================= ANTIDEL MEDIA PRE-CACHE ================= */
 const _ANTIDEL_MEDIA_TYPES = new Set(['imageMessage', 'videoMessage', 'audioMessage', 'stickerMessage', 'documentMessage'])
 const _ANTIDEL_MAX_BYTES   = 15 * 1024 * 1024 // 15 MB — skip video besar
@@ -1385,7 +1393,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
   })
 
   sock.isMainBot = false
-  sock.mainBotNumber = mainBotNumber
+  sock.mainBotNumber = global.__mainBotNumber || mainBotNumber || ''
   sock.jadibotUserNumber = requesterNumber || null
 
   injectClient(
@@ -1475,7 +1483,8 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
 
             let directPairingSent = false
 
-            if (pairingMode === 'v2' && mainBotSock) {
+            const _pairSock = getActiveMainSock(mainBotSock)
+            if (pairingMode === 'v2' && _pairSock) {
               // ── V2: Kirim kode langsung ke nomor tujuan ──
               try {
                 const fmt = formatPairingCode(code)
@@ -1483,7 +1492,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
                 // Resolve JID yang benar dulu (support LID/linked device)
                 let targetJid = `${number}@s.whatsapp.net`
                 try {
-                  const [waResult] = await mainBotSock.onWhatsApp(`${number}@s.whatsapp.net`)
+                  const [waResult] = await _pairSock.onWhatsApp(`${number}@s.whatsapp.net`)
                   if (waResult?.exists && waResult?.jid) {
                     targetJid = waResult.jid
                   }
@@ -1506,7 +1515,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
                   `⏳ *Kode berlaku 3 menit*\n\n` +
                   `\`\`\`${fmt}\`\`\``
 
-                await mainBotSock.sendMessage(targetJid, { text: pairingText })
+                await _pairSock.sendMessage(targetJid, { text: pairingText })
                 directPairingSent = true
                 console.log(`[JADIBOT][V2] ✅ Pairing code terkirim realtime ke +${number} (jid: ${targetJid})`)
 
@@ -1693,18 +1702,19 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
         if (connPairingMode === 'v2') {
           // Kirim notifikasi langsung ke nomor jadibot via main bot
           let directNotifSent = false
-          if (mainBotSock) {
+          const _welcomeSock = getActiveMainSock(mainBotSock)
+          if (_welcomeSock) {
             try {
               await delay(800)
 
               // Resolve JID yang benar dulu (support LID/linked device)
               let welcomeTargetJid = `${number}@s.whatsapp.net`
               try {
-                const [waRes] = await mainBotSock.onWhatsApp(`${number}@s.whatsapp.net`)
+                const [waRes] = await _welcomeSock.onWhatsApp(`${number}@s.whatsapp.net`)
                 if (waRes?.exists && waRes?.jid) welcomeTargetJid = waRes.jid
               } catch (_) {}
 
-              await mainBotSock.sendMessage(welcomeTargetJid, {
+              await _welcomeSock.sendMessage(welcomeTargetJid, {
                 text: msgDirectWelcome(number)
               })
               directNotifSent = true
@@ -1784,9 +1794,10 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
 
         if (logoutMode === 'v2') {
           // V2: kirim notif langsung ke nomor tujuan via main bot
-          if (mainBotSock) {
+          const _logoutSock = getActiveMainSock(mainBotSock)
+          if (_logoutSock) {
             try {
-              await mainBotSock.sendMessage(`${number}@s.whatsapp.net`, {
+              await _logoutSock.sendMessage(`${number}@s.whatsapp.net`, {
                 text: msgLoggedOutDirect(number)
               })
               console.log(`[JADIBOT][V2] ✅ Notif logout terkirim ke +${number}`)
@@ -1855,7 +1866,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
       setTimeout(() => {
         reconnectingJadibot.delete(number)
         activeOrStartingJadibot.delete(number)
-        startJadibot(number, sendReply, mainBotNumber, editMsg, sendPairingMsg, hasConnectedOnce ? undefined : durationMs, mainBotSock, null, requesterNumber)
+        startJadibot(number, sendReply, mainBotNumber, editMsg, sendPairingMsg, hasConnectedOnce ? undefined : durationMs, getActiveMainSock(mainBotSock), null, requesterNumber)
       }, 3000)
     }
   })
@@ -2105,7 +2116,7 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
   })
 
   sock.isMainBot = false
-  sock.mainBotNumber = mainBotNumber
+  sock.mainBotNumber = global.__mainBotNumber || mainBotNumber || ''
   sock.jadibotUserNumber = requesterNumber || null
 
   injectClient(
@@ -2228,10 +2239,11 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
       if (connPairingModeQR === 'v2') {
         // Kirim notifikasi langsung ke nomor jadibot via main bot
         let directNotifSentQR = false
-        if (mainBotSock) {
+        const _welcomeSockQR = getActiveMainSock(mainBotSock)
+        if (_welcomeSockQR) {
           try {
             await delay(800)
-            await mainBotSock.sendMessage(`${number}@s.whatsapp.net`, {
+            await _welcomeSockQR.sendMessage(`${number}@s.whatsapp.net`, {
               text: msgDirectWelcome(number)
             })
             directNotifSentQR = true
@@ -2298,9 +2310,10 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
 
         if (logoutModeQR === 'v2') {
           // V2: kirim notif langsung ke nomor tujuan via main bot
-          if (mainBotSock) {
+          const _logoutSockQR = getActiveMainSock(mainBotSock)
+          if (_logoutSockQR) {
             try {
-              await mainBotSock.sendMessage(`${number}@s.whatsapp.net`, {
+              await _logoutSockQR.sendMessage(`${number}@s.whatsapp.net`, {
                 text: msgLoggedOutDirect(number)
               })
               console.log(`[JADIBOT QR][V2] ✅ Notif logout terkirim ke +${number}`)
@@ -2359,7 +2372,7 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
         setTimeout(() => {
           reconnectingJadibot.delete(number)
           activeOrStartingJadibot.delete(number)
-          startJadibotQR(number, sendReply, sendImage, mainBotNumber, hasConnected ? undefined : durationMs, mainBotSock, null, requesterNumber)
+          startJadibotQR(number, sendReply, sendImage, mainBotNumber, hasConnected ? undefined : durationMs, getActiveMainSock(mainBotSock), null, requesterNumber)
         }, 3000)
         return
       }

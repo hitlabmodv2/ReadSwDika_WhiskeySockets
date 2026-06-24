@@ -705,6 +705,14 @@ async function main() {
                         const userId = hisoka.user?.id?.split(':')[0] || '-';
                         const userName = hisoka.user?.name || '-';
                         hisoka.mainBotNumber = userId; // wajib untuk jadibot
+                        // Simpan ke global agar jadibot yang start sebelum bot utama konek bisa pakai
+                        global.__mainBotNumber = userId;
+                        // Update semua jadibot yang sudah jalan agar tahu nomor bot utama terbaru
+                        try {
+                                for (const [, jsock] of jadibotMap) {
+                                        if (jsock && !jsock.mainBotNumber) jsock.mainBotNumber = userId;
+                                }
+                        } catch {}
                         const privacySettings = await hisoka.fetchPrivacySettings();
                         settings.write('privacy', privacySettings);
 
@@ -1620,104 +1628,9 @@ async function main() {
                         }
                         /* =================== END AUTO SHOLAT SCHEDULER =================== */
 
-                        /* ===================== AUTO START SEMUA JADIBOT (STABIL) ===================== */
-const jadibotDir = path.join(process.cwd(), 'jadibot');
-
-setTimeout(() => {
-  if (!fs.existsSync(jadibotDir)) return;
-
-  resumeAllJadibotTimers();
-  restoreConnectedAtMap();
-  const expiredBots = purgeExpiredJadibotSessions();
-
-  const _seen = new Set();
-  const bots = fs.readdirSync(jadibotDir).reduce((acc, name) => {
-    const fullPath = path.join(jadibotDir, name);
-    const stat = fs.statSync(fullPath);
-    let number = null;
-    if (stat.isFile() && name.endsWith('.json') && /^\d+\.json$/.test(name)) {
-      number = name.replace('.json', '');
-    } else if (stat.isDirectory() && /^\d+$/.test(name)) {
-      number = name;
-    }
-    if (number && !_seen.has(number)) {
-      _seen.add(number);
-      acc.push(number);
-    }
-    return acc;
-  }, []);
-
-  if (!bots.length) return;
-
-  const C = '\x1b[36m', G = '\x1b[32m', Y = '\x1b[33m', R = '\x1b[0m', B = '\x1b[1m';
-  const RED = '\x1b[31m', DIM = '\x1b[2m';
-
-  const validBots = [];
-  const invalidBots = [];
-  for (const number of bots) {
-    // Guard real-time: skip jika bot sudah benar-benar terhubung ATAU sedang dalam proses start/reconnect
-    // Berbeda dari global.autoStartedJadibot yang tidak di-reset saat main() reconnect tanpa process exit
-    if (jadibotMap.has(number) || activeOrStartingJadibot.has(number)) continue;
-    if (!isJadibotSessionValid(number)) {
-      invalidBots.push(number);
-    } else {
-      validBots.push(number);
-    }
-  }
-
-  if (!validBots.length && !invalidBots.length && !expiredBots.length) return;
-
-  const totalSesi = validBots.length + invalidBots.length + expiredBots.length;
-  console.log(`${C}╔══════════════════════════════════╗${R}`);
-  console.log(`${C}║${R}   ${B}${Y}🤖  A U T O  J A D I B O T${R}         ${C}║${R}`);
-  console.log(`${C}╠══════════════════════════════════╣${R}`);
-  console.log(`${C}║${R} ${Y}📦${R} Total  : ${B}${totalSesi} sesi tersimpan${R}`);
-  if (expiredBots.length) {
-    for (const number of expiredBots) {
-      console.log(`${C}║${R} ${Y}⏰${R}  ${DIM}${number}${R} — expired, dihapus`);
-    }
-  }
-  if (invalidBots.length) {
-    for (const number of invalidBots) {
-      console.log(`${C}║${R} ${Y}⚠️${R}  ${DIM}${number}${R} — tidak valid`);
-    }
-  }
-  for (const number of validBots) {
-    const meta = getJadibotExpiry(number);
-    let sisaLabel, sisaColor, icon;
-    if (!meta) {
-      sisaColor = DIM; icon = '❓'; sisaLabel = 'tidak ada data';
-    } else if (meta.permanent === true) {
-      sisaColor = C; icon = '♾️ '; sisaLabel = 'Permanent';
-    } else {
-      const remainingMs = Number(meta.expiresAt) - Date.now();
-      if (remainingMs <= 0) {
-        sisaColor = RED; icon = '💀'; sisaLabel = 'kedaluwarsa';
-      } else if (remainingMs < 60 * 60 * 1000) {
-        sisaColor = RED; icon = '🔴'; sisaLabel = formatRemainingTime(remainingMs);
-      } else if (remainingMs < 24 * 60 * 60 * 1000) {
-        sisaColor = Y;   icon = '🟡'; sisaLabel = formatRemainingTime(remainingMs);
-      } else {
-        sisaColor = G;   icon = '🟢'; sisaLabel = formatRemainingTime(remainingMs);
-      }
-    }
-    console.log(`${C}║${R} ${G}▶${R}  ${B}${number}${R} ${icon} ${sisaColor}${sisaLabel}${R} ${DIM}→ 🔄 menghubungkan...${R}`);
-  }
-  console.log(`${C}╚══════════════════════════════════╝${R}`);
-
-  for (const number of validBots) {
-    startJadibot(
-      number,
-      () => {},
-      hisoka.user.id.split(':')[0].split('@')[0],
-      null,
-      null,
-      undefined,
-      hisoka
-    );
-  }
-}, 3000); // delay agar socket utama stabil
-}
+                        // Auto-start jadibot sekarang dilakukan di level startup proses (lihat bawah)
+                        // agar jadibot jalan SEGERA tanpa menunggu bot utama selesai pairing
+                } // tutup if (connection === 'open') [auto-start block]
 
                 if (connection === 'open') {
                         if (global.__connectWatchdog) {
@@ -2568,3 +2481,87 @@ process.on('exit', () => {
 });
 
 startWithGuard();
+
+/* =====================================================================
+ * AUTO START SEMUA JADIBOT — TOP LEVEL (TERPISAH DARI BOT UTAMA)
+ * Jadibot harus jalan SEGERA saat proses start, tidak perlu menunggu
+ * bot utama selesai pairing/scan QR. Kalau bot utama sedang re-pairing
+ * selama 10 menit, jadibot tetap online selama 10 menit itu.
+ * mainBotNumber: pakai BOT_NUMBER_PAIR env (selalu tersedia) sebagai
+ * fallback, diganti ke userId asli saat bot utama konek via global.__mainBotNumber
+ * ===================================================================== */
+const jadibotDir = path.join(process.cwd(), 'jadibot');
+setTimeout(async () => {
+  if (!fs.existsSync(jadibotDir)) return;
+
+  resumeAllJadibotTimers();
+  restoreConnectedAtMap();
+  const expiredBots = purgeExpiredJadibotSessions();
+
+  const _seen = new Set();
+  const bots = fs.readdirSync(jadibotDir).reduce((acc, name) => {
+    const fullPath = path.join(jadibotDir, name);
+    try {
+      const stat = fs.statSync(fullPath);
+      let number = null;
+      if (stat.isFile() && name.endsWith('.json') && /^\d+\.json$/.test(name)) {
+        number = name.replace('.json', '');
+      } else if (stat.isDirectory() && /^\d+$/.test(name)) {
+        number = name;
+      }
+      if (number && !_seen.has(number)) { _seen.add(number); acc.push(number); }
+    } catch {}
+    return acc;
+  }, []);
+
+  if (!bots.length && !expiredBots.length) return;
+
+  const C = '\x1b[36m', G = '\x1b[32m', Y = '\x1b[33m', R = '\x1b[0m', B = '\x1b[1m';
+  const RED = '\x1b[31m', DIM = '\x1b[2m';
+
+  const validBots = [], invalidBots = [];
+  for (const number of bots) {
+    if (jadibotMap.has(number) || activeOrStartingJadibot.has(number)) continue;
+    if (!isJadibotSessionValid(number)) { invalidBots.push(number); } else { validBots.push(number); }
+  }
+
+  if (!validBots.length && !invalidBots.length && !expiredBots.length) return;
+
+  const totalSesi = validBots.length + invalidBots.length + expiredBots.length;
+  console.log(`${C}╔══════════════════════════════════╗${R}`);
+  console.log(`${C}║${R}   ${B}${Y}🤖  A U T O  J A D I B O T${R}         ${C}║${R}`);
+  console.log(`${C}╠══════════════════════════════════╣${R}`);
+  console.log(`${C}║${R} ${Y}📦${R} Total  : ${B}${totalSesi} sesi tersimpan${R}`);
+  if (expiredBots.length) for (const n of expiredBots) console.log(`${C}║${R} ${Y}⏰${R}  ${DIM}${n}${R} — expired, dihapus`);
+  if (invalidBots.length) for (const n of invalidBots) console.log(`${C}║${R} ${Y}⚠️${R}  ${DIM}${n}${R} — tidak valid`);
+  for (const number of validBots) {
+    const meta = getJadibotExpiry(number);
+    let sisaLabel, sisaColor, icon;
+    if (!meta) { sisaColor = DIM; icon = '❓'; sisaLabel = 'tidak ada data'; }
+    else if (meta.permanent === true) { sisaColor = C; icon = '♾️ '; sisaLabel = 'Permanent'; }
+    else {
+      const rem = Number(meta.expiresAt) - Date.now();
+      if (rem <= 0) { sisaColor = RED; icon = '💀'; sisaLabel = 'kedaluwarsa'; }
+      else if (rem < 60 * 60 * 1000) { sisaColor = RED; icon = '🔴'; sisaLabel = formatRemainingTime(rem); }
+      else if (rem < 24 * 60 * 60 * 1000) { sisaColor = Y; icon = '🟡'; sisaLabel = formatRemainingTime(rem); }
+      else { sisaColor = G; icon = '🟢'; sisaLabel = formatRemainingTime(rem); }
+    }
+    console.log(`${C}║${R} ${G}▶${R}  ${B}${number}${R} ${icon} ${sisaColor}${sisaLabel}${R} ${DIM}→ 🔄 menghubungkan...${R}`);
+  }
+  console.log(`${C}╚══════════════════════════════════╝${R}`);
+
+  // Pakai BOT_NUMBER_PAIR sebagai fallback mainBotNumber —
+  // akan di-override via global.__mainBotNumber saat bot utama konek
+  const fallbackMainBotNum = (process.env.BOT_NUMBER_PAIR || '').replace(/[^0-9]/g, '');
+  for (const number of validBots) {
+    startJadibot(
+      number,
+      () => {},
+      global.__mainBotNumber || fallbackMainBotNum || '',
+      null,
+      null,
+      undefined,
+      null  // mainBotSock null — akan pakai global.hisokaClient via getActiveMainSock()
+    );
+  }
+}, 5000); // delay 5s agar state jadibot terbaca dengan benar
