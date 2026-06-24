@@ -33,6 +33,7 @@ async function handleDel({ hisoka, m, query, tolak, logCommand, isMainBot, kvGet
                         const isOwnMessage = quotedKey.fromMe === true;
 
                         if (m.isGroup) {
+                                // Grup: boleh hapus kalau pesan bot sendiri ATAU bot adalah admin grup
                                 const botAdminData = kvGet('botadmin/botadmin', {});
                                 const isBotGroupAdmin = botAdminData[m.from] === true;
 
@@ -40,21 +41,30 @@ async function handleDel({ hisoka, m, query, tolak, logCommand, isMainBot, kvGet
                                         await tolak(hisoka, m, '❌ Bot bukan admin di grup ini!\nHanya bisa hapus pesan bot sendiri.');
                                         return;
                                 }
+
+                                const deleteKey = {
+                                        remoteJid: m.from,
+                                        fromMe: quotedKey.fromMe,
+                                        id: quotedKey.id,
+                                        ...(quotedKey.participant ? { participant: quotedKey.participant } : {}),
+                                };
+                                await hisoka.sendMessage(m.from, { delete: deleteKey });
+
                         } else {
-                                if (!isOwnMessage) {
-                                        await tolak(hisoka, m, '❌ Hanya bisa hapus pesan bot sendiri di chat pribadi.');
-                                        return;
-                                }
+                                // Private chat: TIDAK cek isOwnMessage dulu karena fromMe bisa salah
+                                // ketika pesan lama (tidak di cache) & contextInfo.participant kosong.
+                                // Paksa fromMe:true → WA server yang reject kalau bukan pesan bot.
+                                const deleteKey = {
+                                        remoteJid: m.from,
+                                        fromMe: true,
+                                        id: quotedKey.id,
+                                };
+                                await hisoka.sendMessage(m.from, { delete: deleteKey });
                         }
 
-                        const deleteKey = {
-                                remoteJid: m.from,
-                                fromMe: quotedKey.fromMe,
-                                id: quotedKey.id,
-                                ...(m.isGroup && quotedKey.participant ? { participant: quotedKey.participant } : {}),
-                        };
-                        await hisoka.sendMessage(m.from, { delete: deleteKey });
+                        // Hapus juga pesan .del milik user (silent, tidak apa-apa kalau gagal)
                         try { await hisoka.sendMessage(m.from, { delete: m.key }); } catch (_) {}
+
                 } catch (error) {
                         await tolak(hisoka, m, `❌ Gagal menghapus pesan: ${error.message}`);
                 }

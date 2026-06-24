@@ -47,9 +47,9 @@
     "name": "TIMELESS || SPIRITS",
     "type": "extendedTextMessage",
     "arrivedAt": "2026-06-24T03:28:03.940Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "💚",
     "resolve": "Signal Lib ✓",
     "source": "status",
     "number": "6282252134009",
@@ -62,6 +62,25 @@
       "participant": "76790290767977@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-24T03:28:03.940Z"
+    "updatedAt": "2026-06-24T03:28:15.955Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282252134009@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC53C954B087225748577455AA4AB847",
+        "participant": "76790290767977@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282252134009@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC53C954B087225748577455AA4AB847",
+        "participant": "6282252134009@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-24T03:28:15.955Z"
   }
 }
