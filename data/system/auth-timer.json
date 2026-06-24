@@ -2,11 +2,11 @@
   "events": [
     {
       "type": "qr_session_start",
-      "startAt": "2026-06-24T07:50:01.302Z",
-      "expireAt": "2026-06-24T07:55:01.302Z",
-      "durationSeconds": 300
+      "startAt": "2026-06-24T07:52:30.480Z",
+      "expireAt": "2026-06-24T07:55:30.480Z",
+      "durationSeconds": 180
     }
   ],
-  "lastUpdated": "2026-06-24T07:50:01.314Z",
-  "sessionStart": "2026-06-24T07:50:01.314Z"
+  "lastUpdated": "2026-06-24T07:52:30.494Z",
+  "sessionStart": "2026-06-24T07:52:30.494Z"
 }
