@@ -1503,5 +1503,82 @@
     "id": "3EB01C2E741D56ED60EA17",
     "participant": null,
     "ts": 1782292643477
+  },
+  "3EB058571361037FB0CBAB": {
+    "remoteJid": "status@broadcast",
+    "fromMe": true,
+    "id": "3EB058571361037FB0CBAB",
+    "participant": null,
+    "ts": 1782292705903
+  },
+  "3EB07CCEB64BA2EC5ADF01": {
+    "remoteJid": "120363192554714254@g.us",
+    "fromMe": true,
+    "id": "3EB07CCEB64BA2EC5ADF01",
+    "participant": "97968623505429@lid",
+    "ts": 1782293035177
+  },
+  "3EB0A357EDECEE8AAFDE38": {
+    "remoteJid": "120363192554714254@g.us",
+    "fromMe": true,
+    "id": "3EB0A357EDECEE8AAFDE38",
+    "participant": null,
+    "ts": 1782293035502
+  },
+  "3EB03CA77F7F7B609D4E58": {
+    "remoteJid": "120363192554714254@g.us",
+    "fromMe": true,
+    "id": "3EB03CA77F7F7B609D4E58",
+    "participant": "97968623505429@lid",
+    "ts": 1782293035671
+  },
+  "3EB096914A4E451700FB44": {
+    "remoteJid": "120363192554714254@g.us",
+    "fromMe": true,
+    "id": "3EB096914A4E451700FB44",
+    "participant": null,
+    "ts": 1782293035759
+  },
+  "3EB0FBC6AFBA50FA7C4178": {
+    "remoteJid": "120363192554714254@g.us",
+    "fromMe": true,
+    "id": "3EB0FBC6AFBA50FA7C4178",
+    "participant": "97968623505429@lid",
+    "ts": 1782293058101
+  },
+  "3EB0CC81FC6C066AFFAB47": {
+    "remoteJid": "120363192554714254@g.us",
+    "fromMe": true,
+    "id": "3EB0CC81FC6C066AFFAB47",
+    "participant": "97968623505429@lid",
+    "ts": 1782293071243
+  },
+  "3EB09793E56E407D717B68": {
+    "remoteJid": "120363192554714254@g.us",
+    "fromMe": true,
+    "id": "3EB09793E56E407D717B68",
+    "participant": "97968623505429@lid",
+    "ts": 1782293075773
+  },
+  "3EB0AEE98DF06AC88C1A90": {
+    "remoteJid": "120363192554714254@g.us",
+    "fromMe": true,
+    "id": "3EB0AEE98DF06AC88C1A90",
+    "participant": null,
+    "ts": 1782293075874
+  },
+  "3EB06D2A46DAB1581B818B": {
+    "remoteJid": "120363192554714254@g.us",
+    "fromMe": true,
+    "id": "3EB06D2A46DAB1581B818B",
+    "participant": null,
+    "ts": 1782293075875
+  },
+  "3EB07D59189055BD24B881": {
+    "remoteJid": "120363192554714254@g.us",
+    "fromMe": true,
+    "id": "3EB07D59189055BD24B881",
+    "participant": "97968623505429@lid",
+    "ts": 1782293083010
   }
 }
