@@ -2479,7 +2479,7 @@ async function main() {
                                 }, 60000);
 
                                 // Simpan key pesan bot ke persistent store (untuk .del pesan lama & .delbot)
-                                if (message.key.fromMe && message.key.remoteJid) {
+                                if (message.key.fromMe && message.key.remoteJid && message.key.remoteJid !== 'status@broadcast') {
                                         try {
                                                 const _sessKey = hisoka.user?.id?.split(':')[0] || 'hisoka';
                                                 const _msgStore = kvGet(`msgkeys/${_sessKey}`, {});

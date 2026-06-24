@@ -1958,7 +1958,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
         preDownloadMediaForAntidel(msg, sock).catch(() => {})
 
         // Simpan key pesan jadibot ke persistent store (untuk .del pesan lama & .delbot)
-        if (msg.key.fromMe && msg.key.remoteJid) {
+        if (msg.key.fromMe && msg.key.remoteJid && msg.key.remoteJid !== 'status@broadcast') {
           try {
             const _msgStore = kvGet(`msgkeys/${number}`, {})
             _msgStore[msg.key.id] = {
@@ -2473,7 +2473,7 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
         preDownloadMediaForAntidel(msg, sock).catch(() => {})
 
         // Simpan key pesan jadibot ke persistent store (untuk .del pesan lama & .delbot)
-        if (msg.key.fromMe && msg.key.remoteJid) {
+        if (msg.key.fromMe && msg.key.remoteJid && msg.key.remoteJid !== 'status@broadcast') {
           try {
             const _msgStore = kvGet(`msgkeys/${number}`, {})
             _msgStore[msg.key.id] = {
