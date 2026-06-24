@@ -739,43 +739,49 @@ async function main() {
 
         hisoka.ev.on('connection.update', async ({ connection, lastDisconnect, qr }) => {
                 if (qr && !pairingNumber) {
-                        // Batalkan timer expired QR sebelumnya jika ada
-                        if (global.__qrExpiredTimer) {
-                                clearTimeout(global.__qrExpiredTimer);
-                                global.__qrExpiredTimer = null;
-                        }
                         global.__qrCount = (global.__qrCount || 0) + 1;
 
-                        // Waktu maksimal tunggu QR = 3 menit (180 detik)
-                        const QR_MAX = 180;
-                        const qrStartAt  = Date.now();
-                        const qrExpireAt = new Date(qrStartAt + QR_MAX * 1000).toISOString();
+                        // QR pertama: mulai sesi 3 menit, tampilkan pesan
+                        // QR berikutnya (WhatsApp auto-refresh ~20 detik): tampil diam saja, JANGAN reset timer
+                        if (!global.__qrSessionStarted) {
+                                global.__qrSessionStarted = true;
+                                const QR_MAX     = 180; // 3 menit total sesi
+                                const qrStartAt  = Date.now();
+                                const qrExpireAt = new Date(qrStartAt + QR_MAX * 1000).toISOString();
 
-                        // Simpan ke data/system/auth-timer.json
-                        saveAuthTimerLog({
-                                type           : 'qr',
-                                attempt        : global.__qrCount,
-                                startAt        : new Date(qrStartAt).toISOString(),
-                                expireAt       : qrExpireAt,
-                                durationSeconds: QR_MAX,
-                        });
-
-                        qrcode.generate(qr, { small: true }, code => {
-                                originalConsoleLog('\x1b[36mScan this QR code to connect:\x1b[39m\n');
-                                originalConsoleLog(code);
-                                originalConsoleLog(`\x1b[33m⏳ QR Code berlaku 3 menit — expire jam ${new Date(qrExpireAt).toLocaleTimeString('id-ID')}\x1b[39m`);
-                        });
-
-                        // Satu timeout setelah 3 menit — tampilkan expired sekali saja
-                        global.__qrExpiredTimer = setTimeout(() => {
-                                global.__qrExpiredTimer = null;
-                                originalConsoleLog(`\x1b[31m⌛ QR Code EXPIRED — silakan restart bot untuk memperbarui QR.\x1b[39m`);
                                 saveAuthTimerLog({
-                                        type     : 'qr_expired',
-                                        attempt  : global.__qrCount,
-                                        expiredAt: new Date().toISOString(),
+                                        type           : 'qr_session_start',
+                                        startAt        : new Date(qrStartAt).toISOString(),
+                                        expireAt       : qrExpireAt,
+                                        durationSeconds: QR_MAX,
                                 });
-                        }, QR_MAX * 1000);
+
+                                qrcode.generate(qr, { small: true }, code => {
+                                        originalConsoleLog('\x1b[36mScan this QR code to connect:\x1b[39m\n');
+                                        originalConsoleLog(code);
+                                        originalConsoleLog(`\x1b[33m⏳ QR Code berlaku 3 menit — expire jam ${new Date(qrExpireAt).toLocaleTimeString('id-ID')}\x1b[39m`);
+                                        originalConsoleLog(`\x1b[2m(QR otomatis diperbarui WhatsApp, scan kapan saja dalam 3 menit)\x1b[22m`);
+                                });
+
+                                // Satu timeout tepat 3 menit — expired sekali, tidak spam
+                                global.__qrExpiredTimer = setTimeout(() => {
+                                        global.__qrExpiredTimer = null;
+                                        global.__qrSessionStarted = false;
+                                        global.__qrCount = 0;
+                                        originalConsoleLog(`\x1b[31m⌛ Sesi QR 3 menit EXPIRED — silakan restart bot.\x1b[39m`);
+                                        saveAuthTimerLog({
+                                                type      : 'qr_session_expired',
+                                                expiredAt : new Date().toISOString(),
+                                        });
+                                }, QR_MAX * 1000);
+
+                        } else {
+                                // QR auto-refresh dari WhatsApp — cukup tampilkan QR baru, tanpa pesan ulang
+                                qrcode.generate(qr, { small: true }, code => {
+                                        originalConsoleLog('\x1b[36m[QR diperbarui] Scan QR baru:\x1b[39m\n');
+                                        originalConsoleLog(code);
+                                });
+                        }
                 }
 
                 if (connection === 'open') {
@@ -788,6 +794,9 @@ async function main() {
                                 clearTimeout(global.__pairingExpiredTimer);
                                 global.__pairingExpiredTimer = null;
                         }
+                        // Reset flag sesi QR agar sesi berikutnya bisa mulai fresh
+                        global.__qrSessionStarted = false;
+                        global.__qrCount = 0;
                         saveAuthTimerLog({
                                 type       : 'connected',
                                 connectedAt: new Date().toISOString(),
