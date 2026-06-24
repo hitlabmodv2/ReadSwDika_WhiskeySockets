@@ -403,6 +403,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                             'typing', 'typ',
                             'recording', 'record',
                             'allunduh', 'tt', 'ig', 'fb', 'twdl', 'ytmp3', 'ytmp4', 'play',
+                            'yts', 'ytsearch', 'ytqualitych', 'ytdlch',
                             'sticker', 's',
                             'wm', 'swm',
                             'toimg',
@@ -1468,6 +1469,27 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 await handleYtmp4(hisoka, m, query, { gemini, tolak, logCommand, buildVideoDownloadCaptionPrompt });
                                 break;
                         }
+
+                        case 'yts':
+                        case 'ytsearch': {
+                                const { handleYtsSearch } = _require(path.resolve('./SEMUA_FITUR/download/yts-akura.cjs'));
+                                await handleYtsSearch(hisoka, m, query, { tolak, logCommand });
+                                break;
+                        }
+
+                        case 'ytqualitych': {
+                                const { handleYtQualityCh } = _require(path.resolve('./SEMUA_FITUR/download/yts-akura.cjs'));
+                                await handleYtQualityCh(hisoka, m, query, { tolak });
+                                break;
+                        }
+
+                        case 'ytdlch': {
+                                const { handleYtDlCh } = _require(path.resolve('./SEMUA_FITUR/download/yts-akura.cjs'));
+                                const { ensureYtdlp, parseYtdlpError } = _require(path.resolve('./SEMUA_FITUR/download/youtube-dl.cjs'));
+                                await handleYtDlCh(hisoka, m, query, { tolak, logCommand, ensureYtdlp, parseYtdlpError });
+                                break;
+                        }
+
                         case 'antitagsw': {
                                 await _handleAntitagswFn({ hisoka, m, query, tolak, logCommand, isMainBot, loadConfig, saveConfig, getJadibotNumber, jadibotMap, sendConfirmWithButtons });
                                 break;
