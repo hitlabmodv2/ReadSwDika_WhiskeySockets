@@ -690,39 +690,42 @@ async function main() {
                         console.log(`${cyan}────────────────────────────────${reset}`);
                         console.log(`${bold}${magenta}💡 TIPS${reset}`);
                         console.log(`${cyan}────────────────────────────────${reset}`);
+                        // ── Hitung expire time sebelum render ──
+                        const PAIR_DURATION = 180; // 3 menit, sama persis dengan WhatsApp
+                        const pairStartAt   = Date.now();
+                        const pairExpireAt  = new Date(pairStartAt + PAIR_DURATION * 1000);
+                        const pairExpireJam = pairExpireAt.toLocaleTimeString('id-ID');
+
                         console.log(`${dim}•${reset} Pastikan HP online`);
-                        console.log(`${dim}•${reset} Kode berlaku ${yellow}3 menit (180 detik)${reset}`);
+                        console.log(`${dim}•${reset} Kode berlaku ${yellow}3 menit${reset} — expire jam ${yellow}${pairExpireJam}${reset}`);
                         console.log(`${dim}•${reset} Restart bot jika expired / habis masa berlaku`);
                         console.log('');
                         console.log(`${cyan}────────────────────────────────${reset}`);
                         console.log(`${bold}${green}✅ KODE BERHASIL DIBUAT!${reset}`);
-                        console.log(`${yellow}⏳ Menunggu konfirmasi WA...${reset}`);
+                        console.log(`${yellow}⏳ Menunggu konfirmasi WA... (expire jam ${pairExpireJam})${reset}`);
                         console.log(`${cyan}────────────────────────────────${reset}`);
                         console.log('');
 
-                        // ── Timer pairing code 3 menit — satu pesan muncul + satu expired ──
-                        const PAIR_DURATION = 180;
-                        const pairStartAt   = Date.now();
-                        const pairExpireAt  = new Date(pairStartAt + PAIR_DURATION * 1000).toISOString();
-
+                        // ── Simpan ke data/system/auth-timer.json ──
                         saveAuthTimerLog({
                                 type           : 'pairing',
                                 code           : formattedCode,
                                 number         : phoneNumber,
                                 startAt        : new Date(pairStartAt).toISOString(),
-                                expireAt       : pairExpireAt,
+                                expireAt       : pairExpireAt.toISOString(),
                                 durationSeconds: PAIR_DURATION,
                         });
 
+                        // Batalkan timer lama jika ada (misal bot restart)
                         if (global.__pairingExpiredTimer) {
                                 clearTimeout(global.__pairingExpiredTimer);
                                 global.__pairingExpiredTimer = null;
                         }
 
-                        // Satu timeout setelah 3 menit — tampilkan expired sekali saja, tidak ada spam
+                        // Satu setTimeout tepat 3 menit — expired muncul sekali, tidak ada spam
                         global.__pairingExpiredTimer = setTimeout(() => {
                                 global.__pairingExpiredTimer = null;
-                                originalConsoleLog(`\x1b[31m⌛ Pairing code EXPIRED — silakan restart bot untuk kode baru.\x1b[39m`);
+                                originalConsoleLog(`\x1b[31m⌛ Pairing code ${formattedCode} EXPIRED — silakan restart bot untuk kode baru.\x1b[39m`);
                                 saveAuthTimerLog({
                                         type      : 'pairing_expired',
                                         code      : formattedCode,
