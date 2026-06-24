@@ -700,13 +700,13 @@ async function main() {
                         console.log(`${bold}${magenta}💡 TIPS${reset}`);
                         console.log(`${cyan}────────────────────────────────${reset}`);
                         // ── Hitung expire time sebelum render ──
-                        const PAIR_DURATION = 300; // TEST 5 menit
+                        const PAIR_DURATION = 160; // Batas WA: pairing code mati di ~160 detik
                         const pairStartAt   = Date.now();
                         const pairExpireAt  = new Date(pairStartAt + PAIR_DURATION * 1000);
                         const pairExpireJam = pairExpireAt.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta' });
 
                         console.log(`${dim}•${reset} Pastikan HP online`);
-                        console.log(`${dim}•${reset} Kode berlaku ${yellow}5 menit${reset} — expire jam ${yellow}${pairExpireJam}${reset}`);
+                        console.log(`${dim}•${reset} Kode berlaku ${yellow}±2 menit 40 detik${reset} — expire jam ${yellow}${pairExpireJam}${reset}`);
                         console.log(`${dim}•${reset} Restart bot jika expired / habis masa berlaku`);
                         console.log('');
                         console.log(`${cyan}────────────────────────────────${reset}`);
@@ -762,7 +762,7 @@ async function main() {
                         // QR berikutnya (WhatsApp auto-refresh ~20 detik): tampil diam saja, JANGAN reset timer
                         if (!global.__qrSessionStarted) {
                                 global.__qrSessionStarted = true;
-                                const QR_MAX     = 300; // TEST 5 menit
+                                const QR_MAX     = 180; // Batas WA: sesi QR ~3 menit
                                 const qrStartAt  = Date.now();
                                 const qrExpireAt = new Date(qrStartAt + QR_MAX * 1000).toISOString();
 
@@ -776,8 +776,8 @@ async function main() {
                                 qrcode.generate(qr, { small: true }, code => {
                                         originalConsoleLog('\x1b[36mScan this QR code to connect:\x1b[39m\n');
                                         originalConsoleLog(code);
-                                        originalConsoleLog(`\x1b[33m⏳ QR Code berlaku 5 menit — expire jam ${new Date(qrExpireAt).toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta' })}\x1b[39m`);
-                                        originalConsoleLog(`\x1b[2m(QR otomatis diperbarui WhatsApp, scan kapan saja dalam 5 menit)\x1b[22m`);
+                                        originalConsoleLog(`\x1b[33m⏳ QR Code berlaku 3 menit — expire jam ${new Date(qrExpireAt).toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta' })}\x1b[39m`);
+                                        originalConsoleLog(`\x1b[2m(QR otomatis diperbarui WhatsApp, scan kapan saja dalam 3 menit)\x1b[22m`);
                                 });
 
                                 // Satu timeout tepat 3 menit — expired sekali, langsung auto-reconnect
@@ -785,7 +785,7 @@ async function main() {
                                         global.__qrExpiredTimer = null;
                                         global.__qrSessionStarted = false;
                                         global.__qrCount = 0;
-                                        originalConsoleLog(`\x1b[31m⌛ Sesi QR 5 menit EXPIRED — minta QR baru otomatis...\x1b[39m`);
+                                        originalConsoleLog(`\x1b[31m⌛ Sesi QR 3 menit EXPIRED — minta QR baru otomatis...\x1b[39m`);
                                         saveAuthTimerLog({
                                                 type      : 'qr_session_expired',
                                                 expiredAt : new Date().toISOString(),
