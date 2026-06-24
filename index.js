@@ -792,12 +792,36 @@ async function main() {
                                 global.__pairingExpiredTimer = null;
                                 global.__pairSessionStartAt  = null;
                                 global.__pairSessionExpireAt = null;
-                                originalConsoleLog(`\x1b[31m⌛ Pairing code ${formattedCode} EXPIRED — minta kode baru otomatis...\x1b[39m`);
+
+                                global.__authExpiredCount = (global.__authExpiredCount || 0) + 1;
+                                const maxRetries = Number(process.env.BOT_MAX_RETRIES) || 0;
+
+                                originalConsoleLog(`\x1b[31m⌛ Pairing code ${formattedCode} EXPIRED (sesi ke-${global.__authExpiredCount})\x1b[39m`);
                                 saveAuthTimerLog({
                                         type      : 'pairing_expired',
                                         code      : formattedCode,
                                         expiredAt : new Date().toISOString(),
+                                        attempt   : global.__authExpiredCount,
                                 });
+
+                                if (maxRetries > 0 && global.__authExpiredCount >= maxRetries) {
+                                        // Batas retry tercapai — berhenti, tunggu restart manual
+                                        originalConsoleLog('');
+                                        originalConsoleLog(`\x1b[31m╔══════════════════════════════════════╗\x1b[39m`);
+                                        originalConsoleLog(`\x1b[31m║  ❌ PAIRING GAGAL — BATAS TERCAPAI   ║\x1b[39m`);
+                                        originalConsoleLog(`\x1b[31m╚══════════════════════════════════════╝\x1b[39m`);
+                                        originalConsoleLog(`\x1b[33m• Sudah ${global.__authExpiredCount}x sesi expired tanpa berhasil pairing\x1b[39m`);
+                                        originalConsoleLog(`\x1b[33m• BOT_MAX_RETRIES = ${maxRetries} → bot berhenti otomatis\x1b[39m`);
+                                        originalConsoleLog(`\x1b[33m• Silakan restart bot secara manual\x1b[39m`);
+                                        originalConsoleLog('');
+                                        saveAuthTimerLog({ type: 'pairing_stopped', reason: 'max_retries_reached', attempts: global.__authExpiredCount });
+                                        cleanupSocket();
+                                        process.exit(1);
+                                        return;
+                                }
+
+                                // Belum mencapai batas — coba lagi sesi baru
+                                originalConsoleLog(`\x1b[33m↻ Mencoba sesi baru... (${global.__authExpiredCount}/${maxRetries > 0 ? maxRetries : '∞'})\x1b[39m`);
                                 cleanupSocket();
                                 reconnectCount++;
                                 await new Promise(r => setTimeout(r, 3000));
@@ -841,17 +865,41 @@ async function main() {
                                         originalConsoleLog(`\x1b[2m(QR otomatis diperbarui WhatsApp, scan kapan saja dalam 5 menit)\x1b[22m`);
                                 });
 
-                                // Timer tepat 5 menit dari sesi mulai — expired sekali, auto-reconnect
+                                // Timer tepat 5 menit dari sesi mulai — expired sekali, cek batas retry
                                 global.__qrExpiredTimer = setTimeout(async () => {
                                         global.__qrExpiredTimer    = null;
                                         global.__qrSessionStarted  = false;
                                         global.__qrSessionExpireAt = null;
-                                        global.__qrCount = 0;
-                                        originalConsoleLog(`\x1b[31m⌛ Sesi QR 5 menit EXPIRED — minta QR baru otomatis...\x1b[39m`);
+                                        global.__qrCount           = 0;
+
+                                        global.__authExpiredCount = (global.__authExpiredCount || 0) + 1;
+                                        const maxRetries = Number(process.env.BOT_MAX_RETRIES) || 0;
+
+                                        originalConsoleLog(`\x1b[31m⌛ Sesi QR 5 menit EXPIRED (sesi ke-${global.__authExpiredCount})\x1b[39m`);
                                         saveAuthTimerLog({
                                                 type      : 'qr_session_expired',
                                                 expiredAt : new Date().toISOString(),
+                                                attempt   : global.__authExpiredCount,
                                         });
+
+                                        if (maxRetries > 0 && global.__authExpiredCount >= maxRetries) {
+                                                // Batas retry tercapai — berhenti, tunggu restart manual
+                                                originalConsoleLog('');
+                                                originalConsoleLog(`\x1b[31m╔══════════════════════════════════════╗\x1b[39m`);
+                                                originalConsoleLog(`\x1b[31m║   ❌ SCAN QR GAGAL — BATAS TERCAPAI  ║\x1b[39m`);
+                                                originalConsoleLog(`\x1b[31m╚══════════════════════════════════════╝\x1b[39m`);
+                                                originalConsoleLog(`\x1b[33m• Sudah ${global.__authExpiredCount}x sesi expired tanpa berhasil scan\x1b[39m`);
+                                                originalConsoleLog(`\x1b[33m• BOT_MAX_RETRIES = ${maxRetries} → bot berhenti otomatis\x1b[39m`);
+                                                originalConsoleLog(`\x1b[33m• Silakan restart bot secara manual\x1b[39m`);
+                                                originalConsoleLog('');
+                                                saveAuthTimerLog({ type: 'qr_stopped', reason: 'max_retries_reached', attempts: global.__authExpiredCount });
+                                                cleanupSocket();
+                                                process.exit(1);
+                                                return;
+                                        }
+
+                                        // Belum mencapai batas — coba sesi QR baru
+                                        originalConsoleLog(`\x1b[33m↻ Mencoba sesi QR baru... (${global.__authExpiredCount}/${maxRetries > 0 ? maxRetries : '∞'})\x1b[39m`);
                                         cleanupSocket();
                                         reconnectCount++;
                                         await new Promise(r => setTimeout(r, 3000));
@@ -889,11 +937,12 @@ async function main() {
                                 global.__pairingExpiredTimer = null;
                         }
                         // Reset semua flag sesi agar sesi berikutnya mulai fresh
-                        global.__qrSessionStarted  = false;
-                        global.__qrSessionExpireAt = null;
-                        global.__qrCount           = 0;
+                        global.__qrSessionStarted   = false;
+                        global.__qrSessionExpireAt  = null;
+                        global.__qrCount            = 0;
                         global.__pairSessionStartAt  = null;
                         global.__pairSessionExpireAt = null;
+                        global.__authExpiredCount    = 0; // reset counter gagal saat berhasil connect
                         saveAuthTimerLog({
                                 type       : 'connected',
                                 connectedAt: new Date().toISOString(),
