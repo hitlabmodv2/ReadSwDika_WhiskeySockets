@@ -714,11 +714,11 @@ async function main() {
                         console.log(`${cyan}────────────────────────────────${reset}`);
                         console.log(`${bold}${magenta}💡 TIPS${reset}`);
                         console.log(`${cyan}────────────────────────────────${reset}`);
-                        // ── Setiap kode baru = selalu fresh 5 menit (tidak pakai sisa sesi lama) ──
-                        const PAIR_TOTAL    = 300; // 5 menit per kode
+                        // ── Setiap kode baru = selalu fresh 3 menit (sesuai aturan WhatsApp) ──
+                        const PAIR_TOTAL    = 180; // 3 menit per kode
                         const now           = Date.now();
 
-                        // Selalu reset ke fresh 5 menit — tiap kode baru punya jatah 5 menit penuh
+                        // Selalu reset ke fresh 3 menit — tiap kode baru punya jatah 3 menit penuh
                         global.__pairSessionStartAt  = now;
                         global.__pairSessionExpireAt = now + PAIR_TOTAL * 1000;
 
@@ -727,7 +727,7 @@ async function main() {
                         const pairExpireJam = pairExpireAt.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta' });
 
                         console.log(`${dim}•${reset} Pastikan HP online`);
-                        console.log(`${dim}•${reset} Kode berlaku ${yellow}5 menit${reset} — expire jam ${yellow}${pairExpireJam}${reset}`);
+                        console.log(`${dim}•${reset} Kode berlaku ${yellow}3 menit${reset} — expire jam ${yellow}${pairExpireJam}${reset}`);
                         console.log(`${dim}•${reset} Restart bot jika expired / habis masa berlaku`);
                         console.log('');
                         console.log(`${cyan}────────────────────────────────${reset}`);
@@ -753,7 +753,7 @@ async function main() {
                                 global.__pairingExpiredTimer = null;
                         }
 
-                        // Timer tepat 5 menit dari sekarang
+                        // Timer tepat 3 menit dari sekarang
                         const timerMs = PAIR_TOTAL * 1000;
                         global.__pairingExpiredTimer = setTimeout(async () => {
                                 global.__pairingExpiredTimer = null;
@@ -815,7 +815,7 @@ async function main() {
                                         global.__qrExpiredTimer = null;
                                 }
                                 global.__qrSessionStarted = true;
-                                const QR_TOTAL   = 300; // 5 menit total per sesi
+                                const QR_TOTAL   = 180; // 3 menit total per sesi (sesuai aturan WhatsApp)
                                 const qrStartAt  = Date.now();
                                 global.__qrSessionExpireAt = qrStartAt + QR_TOTAL * 1000;
 
@@ -832,11 +832,11 @@ async function main() {
                                 qrcode.generate(qr, { small: true }, code => {
                                         originalConsoleLog('\x1b[36mScan this QR code to connect:\x1b[39m\n');
                                         originalConsoleLog(code);
-                                        originalConsoleLog(`\x1b[33m⏳ QR Code berlaku 5 menit — expire jam ${qrExpireJam}\x1b[39m`);
-                                        originalConsoleLog(`\x1b[2m(QR otomatis diperbarui WhatsApp, scan kapan saja dalam 5 menit)\x1b[22m`);
+                                        originalConsoleLog(`\x1b[33m⏳ QR Code berlaku 3 menit — expire jam ${qrExpireJam}\x1b[39m`);
+                                        originalConsoleLog(`\x1b[2m(QR otomatis diperbarui WhatsApp, scan kapan saja dalam 3 menit)\x1b[22m`);
                                 });
 
-                                // Timer tepat 5 menit dari sesi mulai — expired sekali, cek batas retry
+                                // Timer tepat 3 menit dari sesi mulai — expired sekali, cek batas retry
                                 global.__qrExpiredTimer = setTimeout(async () => {
                                         global.__qrExpiredTimer    = null;
                                         global.__qrSessionStarted  = false;
@@ -846,7 +846,7 @@ async function main() {
                                         global.__authExpiredCount = (global.__authExpiredCount || 0) + 1;
                                         const maxRetries = Number(process.env.BOT_MAX_RETRIES) || 0;
 
-                                        originalConsoleLog(`\x1b[31m⌛ Sesi QR 5 menit EXPIRED (sesi ke-${global.__authExpiredCount})\x1b[39m`);
+                                        originalConsoleLog(`\x1b[31m⌛ Sesi QR 3 menit EXPIRED (sesi ke-${global.__authExpiredCount})\x1b[39m`);
                                         saveAuthTimerLog({
                                                 type      : 'qr_session_expired',
                                                 expiredAt : new Date().toISOString(),
@@ -1948,15 +1948,15 @@ async function main() {
                                                 console.info('\x1b[33mConnection timeout. Reconnecting in 5s...\x1b[39m');
                                                 await delay(5000);
                                         } else if (global.__qrSessionExpireAt && _now408 < global.__qrSessionExpireAt) {
-                                                // Masih dalam sesi QR — reset ke fresh 5 menit saat reconnect
-                                                console.info(`\x1b[33m↻ WA disconnect (408) — reconnect QR otomatis... (QR baru = 5 menit)\x1b[39m`);
+                                                // Masih dalam sesi QR — reset ke fresh 3 menit saat reconnect
+                                                console.info(`\x1b[33m↻ WA disconnect (408) — reconnect QR otomatis... (QR baru = 3 menit)\x1b[39m`);
                                                 global.__qrSessionStarted  = false;
                                                 global.__qrSessionExpireAt = null;
                                                 global.__qrCount           = 0;
                                                 await delay(3000);
                                         } else if (global.__pairSessionExpireAt && _now408 < global.__pairSessionExpireAt) {
-                                                // Masih dalam sesi pairing — reset ke fresh 5 menit saat reconnect
-                                                console.info(`\x1b[33m↻ WA disconnect (408) — reconnect pairing otomatis... (kode baru = 5 menit)\x1b[39m`);
+                                                // Masih dalam sesi pairing — reset ke fresh 3 menit saat reconnect
+                                                console.info(`\x1b[33m↻ WA disconnect (408) — reconnect pairing otomatis... (kode baru = 3 menit)\x1b[39m`);
                                                 global.__pairSessionStartAt  = null;
                                                 global.__pairSessionExpireAt = null;
                                                 await delay(3000);
