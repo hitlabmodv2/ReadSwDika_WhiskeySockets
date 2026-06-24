@@ -742,7 +742,7 @@ async function main() {
                         const pairExpireAt  = new Date(global.__pairSessionExpireAt);
                         const pairExpireJam = pairExpireAt.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta' });
 
-                        const isRefresh = !isFirstPairing && reconnectCount > 0;
+                        const isRefresh = !isFirstPairing; // true = reconnect dalam sesi yang sama
 
                         console.log(`${dim}•${reset} Pastikan HP online`);
                         if (isRefresh) {
