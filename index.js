@@ -731,15 +731,20 @@ async function main() {
                                 global.__pairingExpiredTimer = null;
                         }
 
-                        // Satu setTimeout tepat 3 menit — expired muncul sekali, tidak ada spam
-                        global.__pairingExpiredTimer = setTimeout(() => {
+                        // Satu setTimeout tepat 3 menit — expired muncul sekali, langsung auto-reconnect
+                        global.__pairingExpiredTimer = setTimeout(async () => {
                                 global.__pairingExpiredTimer = null;
-                                originalConsoleLog(`\x1b[31m⌛ Pairing code ${formattedCode} EXPIRED — silakan restart bot untuk kode baru.\x1b[39m`);
+                                originalConsoleLog(`\x1b[31m⌛ Pairing code ${formattedCode} EXPIRED — minta kode baru otomatis...\x1b[39m`);
                                 saveAuthTimerLog({
                                         type      : 'pairing_expired',
                                         code      : formattedCode,
                                         expiredAt : new Date().toISOString(),
                                 });
+                                // Bersihkan koneksi lama, minta pairing code baru tanpa restart manual
+                                cleanupSocket();
+                                reconnectCount++;
+                                await new Promise(r => setTimeout(r, 3000)); // jeda 3 detik sebelum reconnect
+                                await main();
                         }, PAIR_DURATION * 1000);
                 } catch {
                         console.error('\x1b[31mFailed to request pairing code. Please check your pairing number.\x1b[39m');
@@ -775,16 +780,21 @@ async function main() {
                                         originalConsoleLog(`\x1b[2m(QR otomatis diperbarui WhatsApp, scan kapan saja dalam 3 menit)\x1b[22m`);
                                 });
 
-                                // Satu timeout tepat 3 menit — expired sekali, tidak spam
-                                global.__qrExpiredTimer = setTimeout(() => {
+                                // Satu timeout tepat 3 menit — expired sekali, langsung auto-reconnect
+                                global.__qrExpiredTimer = setTimeout(async () => {
                                         global.__qrExpiredTimer = null;
                                         global.__qrSessionStarted = false;
                                         global.__qrCount = 0;
-                                        originalConsoleLog(`\x1b[31m⌛ Sesi QR 3 menit EXPIRED — silakan restart bot.\x1b[39m`);
+                                        originalConsoleLog(`\x1b[31m⌛ Sesi QR 3 menit EXPIRED — minta QR baru otomatis...\x1b[39m`);
                                         saveAuthTimerLog({
                                                 type      : 'qr_session_expired',
                                                 expiredAt : new Date().toISOString(),
                                         });
+                                        // Bersihkan koneksi lama, minta QR baru tanpa restart manual
+                                        cleanupSocket();
+                                        reconnectCount++;
+                                        await new Promise(r => setTimeout(r, 3000)); // jeda 3 detik
+                                        await main();
                                 }, QR_MAX * 1000);
 
                         } else {
