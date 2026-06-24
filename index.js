@@ -703,7 +703,7 @@ async function main() {
                         const PAIR_DURATION = 180; // 3 menit, sama persis dengan WhatsApp
                         const pairStartAt   = Date.now();
                         const pairExpireAt  = new Date(pairStartAt + PAIR_DURATION * 1000);
-                        const pairExpireJam = pairExpireAt.toLocaleTimeString('id-ID');
+                        const pairExpireJam = pairExpireAt.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta' });
 
                         console.log(`${dim}•${reset} Pastikan HP online`);
                         console.log(`${dim}•${reset} Kode berlaku ${yellow}3 menit${reset} — expire jam ${yellow}${pairExpireJam}${reset}`);
@@ -776,7 +776,7 @@ async function main() {
                                 qrcode.generate(qr, { small: true }, code => {
                                         originalConsoleLog('\x1b[36mScan this QR code to connect:\x1b[39m\n');
                                         originalConsoleLog(code);
-                                        originalConsoleLog(`\x1b[33m⏳ QR Code berlaku 3 menit — expire jam ${new Date(qrExpireAt).toLocaleTimeString('id-ID')}\x1b[39m`);
+                                        originalConsoleLog(`\x1b[33m⏳ QR Code berlaku 3 menit — expire jam ${new Date(qrExpireAt).toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta' })}\x1b[39m`);
                                         originalConsoleLog(`\x1b[2m(QR otomatis diperbarui WhatsApp, scan kapan saja dalam 3 menit)\x1b[22m`);
                                 });
 
