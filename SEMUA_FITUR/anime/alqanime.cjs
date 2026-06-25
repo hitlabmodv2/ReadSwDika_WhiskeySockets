@@ -222,17 +222,9 @@ async function handleAlq({ hisoka, m, query, tolak, logCommand, logError, path, 
                 const { searchAlqanime, getDetailAlqanime } = module.exports;
 
                 await hisoka.sendMessage(m.from, { react: { text: '🔍', key: m.key } });
-                await tolak(hisoka, m, `🔍 Mencari *${input}* di Alqanime...`);
 
                 const results = await searchAlqanime(input);
                 if (!results.length) { await tolak(hisoka, m, `❌ Tidak ada hasil untuk *${input}*.\nCoba kata kunci lain.`); return; }
-
-                if (results.length > 1) {
-                        let listText = `🎌 *Hasil Pencarian: "${input}"*\n━━━━━━━━━━━━━━━━━━━\n`;
-                        results.slice(0, 8).forEach((r, i) => { listText += `${i + 1}. ${r.title}\n`; });
-                        listText += `\n_Menampilkan detail: *${results[0].title}*..._`;
-                        await tolak(hisoka, m, listText);
-                }
 
                 const detail = await getDetailAlqanime(results[0].url);
                 const info   = detail.info || {};
