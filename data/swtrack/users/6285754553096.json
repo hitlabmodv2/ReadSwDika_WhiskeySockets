@@ -156,9 +156,9 @@
     "name": "Maury.Denver ƒт『𝐇𝐗』",
     "type": "videoMessage",
     "arrivedAt": "2026-06-25T06:43:40.545Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "🎳",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6285754553096",
@@ -171,6 +171,25 @@
       "participant": "169797337784433@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-25T06:43:40.545Z"
+    "updatedAt": "2026-06-25T06:43:50.804Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285754553096@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACD3F61870D225D2C2E7EC9E76BB08F2",
+        "participant": "169797337784433@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285754553096@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACD3F61870D225D2C2E7EC9E76BB08F2",
+        "participant": "6285754553096@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-25T06:43:50.803Z"
   }
 }

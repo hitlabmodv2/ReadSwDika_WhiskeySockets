@@ -887,9 +887,9 @@
     "name": "Finn么",
     "type": "videoMessage",
     "arrivedAt": "2026-06-25T06:43:40.698Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "🐩",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6285222772192",
@@ -902,6 +902,25 @@
       "participant": "12661630705832@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-25T06:43:40.698Z"
+    "updatedAt": "2026-06-25T06:43:48.412Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285222772192@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACB787F8D8AC0C15B6C1DD908A84EB1D",
+        "participant": "12661630705832@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285222772192@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACB787F8D8AC0C15B6C1DD908A84EB1D",
+        "participant": "6285222772192@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-25T06:43:48.412Z"
   }
 }
