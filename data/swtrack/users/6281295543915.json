@@ -694,5 +694,28 @@
       }
     ],
     "processedAt": "2026-06-25T06:06:07.234Z"
+  },
+  "A5D326D713675ED27AE11B1486F4C0FD": {
+    "id": "A5D326D713675ED27AE11B1486F4C0FD",
+    "sender": "6281295543915@s.whatsapp.net",
+    "name": "Arthur.remi_kan",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-25T06:59:48.607Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6281295543915",
+    "resolvedPn": "6281295543915@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6281295543915@s.whatsapp.net",
+      "fromMe": false,
+      "id": "A5D326D713675ED27AE11B1486F4C0FD",
+      "participant": "26547712958494@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-25T06:59:48.607Z"
   }
 }
