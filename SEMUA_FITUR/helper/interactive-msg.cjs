@@ -83,47 +83,43 @@ function makeInteractiveMsg({ loadConfig, tolak }) {
                         : {};
 
                 const msg = generateWAMessageFromContent(jid, {
-                        viewOnceMessage: {
-                                message: {
-                                        messageContextInfo: {
-                                                deviceListMetadata: {},
-                                                deviceListMetadataVersion: 2
-                                        },
-                                        interactiveMessage: proto.Message.InteractiveMessage.create({
-                                                contextInfo: {
-                                                        mentionedJid: [m.sender],
-                                                        forwardingScore: 999,
-                                                        isForwarded: true,
-                                                        forwardedNewsletterMessageInfo: {
-                                                                newsletterJid,
-                                                                newsletterName,
-                                                                serverMessageId: Math.floor(Math.random() * 9999) + 1
-                                                        }
-                                                },
-                                                body: proto.Message.InteractiveMessage.Body.create({
-                                                        text: teks
-                                                }),
-                                                footer: proto.Message.InteractiveMessage.Footer.create({
-                                                        text: `✨ Powered By ${botName}`
-                                                }),
-                                                header: proto.Message.InteractiveMessage.Header.create({
-                                                        title: ``,
-                                                        subtitle: ``,
-                                                        gifPlayback: true,
-                                                        hasMediaAttachment: !!thumbnailMedia,
-                                                        ...headerMedia
-                                                }),
-                                                nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.create({
-                                                        buttons: [
-                                                                {
-                                                                        name: 'single_select',
-                                                                        buttonParamsJson: JSON.stringify(listnye)
-                                                                }
-                                                        ]
-                                                })
-                                        })
-                                }
-                        }
+                        messageContextInfo: {
+                                deviceListMetadata: {},
+                                deviceListMetadataVersion: 2
+                        },
+                        interactiveMessage: proto.Message.InteractiveMessage.create({
+                                contextInfo: {
+                                        mentionedJid: [m.sender],
+                                        forwardingScore: 999,
+                                        isForwarded: true,
+                                        forwardedNewsletterMessageInfo: {
+                                                newsletterJid,
+                                                newsletterName,
+                                                serverMessageId: Math.floor(Math.random() * 9999) + 1
+                                        }
+                                },
+                                body: proto.Message.InteractiveMessage.Body.create({
+                                        text: teks
+                                }),
+                                footer: proto.Message.InteractiveMessage.Footer.create({
+                                        text: `✨ Powered By ${botName}`
+                                }),
+                                header: proto.Message.InteractiveMessage.Header.create({
+                                        title: ``,
+                                        subtitle: ``,
+                                        gifPlayback: true,
+                                        hasMediaAttachment: !!thumbnailMedia,
+                                        ...headerMedia
+                                }),
+                                nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.create({
+                                        buttons: [
+                                                {
+                                                        name: 'single_select',
+                                                        buttonParamsJson: JSON.stringify(listnye)
+                                                }
+                                        ]
+                                })
+                        })
                 }, { quoted: m });
 
                 await hisoka.relayMessage(msg.key.remoteJid, msg.message, {
@@ -143,19 +139,15 @@ function makeInteractiveMsg({ loadConfig, tolak }) {
                         const msg = generateWAMessageFromContent(
                                 m.from,
                                 {
-                                        viewOnceMessage: {
-                                                message: {
-                                                        messageContextInfo: { deviceListMetadata: {}, deviceListMetadataVersion: 2 },
-                                                        interactiveMessage: {
-                                                                contextInfo,
-                                                                body: { text: txt },
-                                                                nativeFlowMessage: {
-                                                                        buttons: buttons.map(b => ({
-                                                                                name: 'quick_reply',
-                                                                                buttonParamsJson: JSON.stringify({ display_text: b.text, id: b.id })
-                                                                        }))
-                                                                }
-                                                        }
+                                        messageContextInfo: { deviceListMetadata: {}, deviceListMetadataVersion: 2 },
+                                        interactiveMessage: {
+                                                contextInfo,
+                                                body: { text: txt },
+                                                nativeFlowMessage: {
+                                                        buttons: buttons.map(b => ({
+                                                                name: 'quick_reply',
+                                                                buttonParamsJson: JSON.stringify({ display_text: b.text, id: b.id })
+                                                        }))
                                                 }
                                         }
                                 },
@@ -199,22 +191,18 @@ function makeInteractiveMsg({ loadConfig, tolak }) {
                         const msg = generateWAMessageFromContent(
                                 m.from,
                                 {
-                                        viewOnceMessage: {
-                                                message: {
-                                                        messageContextInfo: { deviceListMetadata: {}, deviceListMetadataVersion: 2 },
-                                                        interactiveMessage: {
-                                                                contextInfo,
-                                                                ...(headerMedia ? { header: { hasMediaAttachment: true, ...headerMedia } } : {}),
-                                                                body: { text: bodyTxt },
-                                                                nativeFlowMessage: {
-                                                                        buttons: [
-                                                                                {
-                                                                                        name: 'single_select',
-                                                                                        buttonParamsJson: JSON.stringify({ title: listTitle, sections })
-                                                                                }
-                                                                        ]
+                                        messageContextInfo: { deviceListMetadata: {}, deviceListMetadataVersion: 2 },
+                                        interactiveMessage: {
+                                                contextInfo,
+                                                ...(headerMedia ? { header: { hasMediaAttachment: true, ...headerMedia } } : {}),
+                                                body: { text: bodyTxt },
+                                                nativeFlowMessage: {
+                                                        buttons: [
+                                                                {
+                                                                        name: 'single_select',
+                                                                        buttonParamsJson: JSON.stringify({ title: listTitle, sections })
                                                                 }
-                                                        }
+                                                        ]
                                                 }
                                         }
                                 },

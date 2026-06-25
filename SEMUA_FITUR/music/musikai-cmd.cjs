@@ -243,40 +243,36 @@ function _makeShowGenreSelect({ hisoka, m, generateWAMessageFromContent }) {
                 const msg = generateWAMessageFromContent(
                         m.from,
                         {
-                                viewOnceMessage: {
-                                        message: {
-                                                messageContextInfo: { deviceListMetadata: {}, deviceListMetadataVersion: 2 },
-                                                interactiveMessage: {
-                                                        contextInfo: m.key?.id ? {
-                                                                stanzaId: m.key.id,
-                                                                participant: m.sender || m.key?.participant || m.key?.remoteJid || '',
-                                                                quotedMessage: m.raw || m.message || {},
-                                                        } : {},
-                                                        body: {
-                                                                text:
-                                                                        `╭──『 🎨 *MUSIK AI — PILIH GENRE MANUAL* 』\n` +
-                                                                        `│\n` +
-                                                                        `│ Pilih genre musiknya.\n` +
-                                                                        `│ 🤖 AI akan otomatis buatkan:\n` +
-                                                                        `│  • Judul yang sesuai genre\n` +
-                                                                        `│  • Lirik lengkap (50+ baris)\n` +
-                                                                        `│\n` +
-                                                                        `│ 💡 Mau AI pilih semua? Tekan\n` +
-                                                                        `│    *✨ AI Random Sekarang* di menu!\n` +
-                                                                        `╰──────────────────────────────`,
+                                messageContextInfo: { deviceListMetadata: {}, deviceListMetadataVersion: 2 },
+                                interactiveMessage: {
+                                        contextInfo: m.key?.id ? {
+                                                stanzaId: m.key.id,
+                                                participant: m.sender || m.key?.participant || m.key?.remoteJid || '',
+                                                quotedMessage: m.raw || m.message || {},
+                                        } : {},
+                                        body: {
+                                                text:
+                                                        `╭──『 🎨 *MUSIK AI — PILIH GENRE MANUAL* 』\n` +
+                                                        `│\n` +
+                                                        `│ Pilih genre musiknya.\n` +
+                                                        `│ 🤖 AI akan otomatis buatkan:\n` +
+                                                        `│  • Judul yang sesuai genre\n` +
+                                                        `│  • Lirik lengkap (50+ baris)\n` +
+                                                        `│\n` +
+                                                        `│ 💡 Mau AI pilih semua? Tekan\n` +
+                                                        `│    *✨ AI Random Sekarang* di menu!\n` +
+                                                        `╰──────────────────────────────`,
+                                        },
+                                        nativeFlowMessage: {
+                                                buttons: [
+                                                        {
+                                                                name: 'single_select',
+                                                                buttonParamsJson: JSON.stringify({
+                                                                        title: '🎵 Pilih Genre',
+                                                                        sections: genreSections,
+                                                                }),
                                                         },
-                                                        nativeFlowMessage: {
-                                                                buttons: [
-                                                                        {
-                                                                                name: 'single_select',
-                                                                                buttonParamsJson: JSON.stringify({
-                                                                                        title: '🎵 Pilih Genre',
-                                                                                        sections: genreSections,
-                                                                                }),
-                                                                        },
-                                                                ],
-                                                        },
-                                                },
+                                                ],
                                         },
                                 },
                         },
@@ -406,56 +402,52 @@ async function handleMusicAICallbacks({
                 const langMsg = generateWAMessageFromContent(
                         m.from,
                         {
-                                viewOnceMessage: {
-                                        message: {
-                                                messageContextInfo: { deviceListMetadata: {}, deviceListMetadataVersion: 2 },
-                                                interactiveMessage: {
-                                                        contextInfo: m.key?.id ? {
-                                                                stanzaId: m.key.id,
-                                                                participant: m.sender || m.key?.participant || m.key?.remoteJid || '',
-                                                                quotedMessage: m.raw || m.message || {},
-                                                        } : {},
-                                                        body: {
-                                                                text:
-                                                                        `╭──『 🤖 *AI RANDOM MUSIK* 』\n` +
-                                                                        `│\n` +
-                                                                        `│ AI acak genre, judul & lirik otomatis.\n` +
-                                                                        `│\n` +
-                                                                        `│ 🌏 Pilih gaya/bahasa musik:\n` +
-                                                                        `╰──────────────────────────────`,
-                                                        },
-                                                        nativeFlowMessage: {
-                                                                buttons: [{
-                                                                        name: 'single_select',
-                                                                        buttonParamsJson: JSON.stringify({
-                                                                                title: '🌏 Pilih Gaya Musik',
-                                                                                sections: [{
-                                                                                        title: '🎵 Gaya / Bahasa',
-                                                                                        rows: [
-                                                                                                {
-                                                                                                        header: '🇮🇩 ── Musik Indonesia ──────────',
-                                                                                                        title: '🇮🇩 Indonesia',
-                                                                                                        description: 'Pop, Indie, Ballad, Folk, Jazz — lirik bahasa Indonesia',
-                                                                                                        id: '__musikai_rlang__id',
-                                                                                                },
-                                                                                                {
-                                                                                                        header: '🇯🇵 ── Musik Jepang ─────────────',
-                                                                                                        title: '🇯🇵 Jepang',
-                                                                                                        description: 'City Pop, J-Pop, Anime OST, J-Folk — lirik bahasa Jepang',
-                                                                                                        id: '__musikai_rlang__jp',
-                                                                                                },
-                                                                                                {
-                                                                                                        header: '🇬🇧 ── Musik English ───────────',
-                                                                                                        title: '🇬🇧 English',
-                                                                                                        description: 'Indie Pop, R&B, Folk, Dream Pop — lyrics in English',
-                                                                                                        id: '__musikai_rlang__en',
-                                                                                                },
-                                                                                        ],
-                                                                                }],
-                                                                        }),
+                                messageContextInfo: { deviceListMetadata: {}, deviceListMetadataVersion: 2 },
+                                interactiveMessage: {
+                                        contextInfo: m.key?.id ? {
+                                                stanzaId: m.key.id,
+                                                participant: m.sender || m.key?.participant || m.key?.remoteJid || '',
+                                                quotedMessage: m.raw || m.message || {},
+                                        } : {},
+                                        body: {
+                                                text:
+                                                        `╭──『 🤖 *AI RANDOM MUSIK* 』\n` +
+                                                        `│\n` +
+                                                        `│ AI acak genre, judul & lirik otomatis.\n` +
+                                                        `│\n` +
+                                                        `│ 🌏 Pilih gaya/bahasa musik:\n` +
+                                                        `╰──────────────────────────────`,
+                                        },
+                                        nativeFlowMessage: {
+                                                buttons: [{
+                                                        name: 'single_select',
+                                                        buttonParamsJson: JSON.stringify({
+                                                                title: '🌏 Pilih Gaya Musik',
+                                                                sections: [{
+                                                                        title: '🎵 Gaya / Bahasa',
+                                                                        rows: [
+                                                                                {
+                                                                                        header: '🇮🇩 ── Musik Indonesia ──────────',
+                                                                                        title: '🇮🇩 Indonesia',
+                                                                                        description: 'Pop, Indie, Ballad, Folk, Jazz — lirik bahasa Indonesia',
+                                                                                        id: '__musikai_rlang__id',
+                                                                                },
+                                                                                {
+                                                                                        header: '🇯🇵 ── Musik Jepang ─────────────',
+                                                                                        title: '🇯🇵 Jepang',
+                                                                                        description: 'City Pop, J-Pop, Anime OST, J-Folk — lirik bahasa Jepang',
+                                                                                        id: '__musikai_rlang__jp',
+                                                                                },
+                                                                                {
+                                                                                        header: '🇬🇧 ── Musik English ───────────',
+                                                                                        title: '🇬🇧 English',
+                                                                                        description: 'Indie Pop, R&B, Folk, Dream Pop — lyrics in English',
+                                                                                        id: '__musikai_rlang__en',
+                                                                                },
+                                                                        ],
                                                                 }],
-                                                        },
-                                                },
+                                                        }),
+                                                }],
                                         },
                                 },
                         },
@@ -475,51 +467,47 @@ async function handleMusicAICallbacks({
                 const modeMsg = generateWAMessageFromContent(
                         m.from,
                         {
-                                viewOnceMessage: {
-                                        message: {
-                                                messageContextInfo: { deviceListMetadata: {}, deviceListMetadataVersion: 2 },
-                                                interactiveMessage: {
-                                                        contextInfo: m.key?.id ? {
-                                                                stanzaId: m.key.id,
-                                                                participant: m.sender || m.key?.participant || m.key?.remoteJid || '',
-                                                                quotedMessage: m.raw || m.message || {},
-                                                        } : {},
-                                                        body: {
-                                                                text:
-                                                                        `╭──『 ${langLabel} *MUSIK AI* 』\n` +
-                                                                        `│\n` +
-                                                                        `│ AI acak dari pool genre:\n` +
-                                                                        `│ contoh: *${sampleGenre}*, dll\n` +
-                                                                        `│\n` +
-                                                                        `│ Pilih mode lagu:\n` +
-                                                                        `╰──────────────────────────────`,
-                                                        },
-                                                        nativeFlowMessage: {
-                                                                buttons: [{
-                                                                        name: 'single_select',
-                                                                        buttonParamsJson: JSON.stringify({
-                                                                                title: '🎵 Pilih Mode Lagu',
-                                                                                sections: [{
-                                                                                        title: '🎙️ Mode',
-                                                                                        rows: [
-                                                                                                {
-                                                                                                        header: '🎤 ─── Dengan Vokal ───────────',
-                                                                                                        title: '🎤 Vokal',
-                                                                                                        description: `Lirik ${langLabel} — AI pilih genre & tulis lirik otomatis`,
-                                                                                                        id: `__musikai_rlang__${lang}__vocal__`,
-                                                                                                },
-                                                                                                {
-                                                                                                        header: '🎹 ─── Instrumental ──────────',
-                                                                                                        title: '🎹 Instrumental',
-                                                                                                        description: `Musik tanpa vokal gaya ${langLabel}`,
-                                                                                                        id: `__musikai_rlang__${lang}__instrumental__`,
-                                                                                                },
-                                                                                        ],
-                                                                                }],
-                                                                        }),
+                                messageContextInfo: { deviceListMetadata: {}, deviceListMetadataVersion: 2 },
+                                interactiveMessage: {
+                                        contextInfo: m.key?.id ? {
+                                                stanzaId: m.key.id,
+                                                participant: m.sender || m.key?.participant || m.key?.remoteJid || '',
+                                                quotedMessage: m.raw || m.message || {},
+                                        } : {},
+                                        body: {
+                                                text:
+                                                        `╭──『 ${langLabel} *MUSIK AI* 』\n` +
+                                                        `│\n` +
+                                                        `│ AI acak dari pool genre:\n` +
+                                                        `│ contoh: *${sampleGenre}*, dll\n` +
+                                                        `│\n` +
+                                                        `│ Pilih mode lagu:\n` +
+                                                        `╰──────────────────────────────`,
+                                        },
+                                        nativeFlowMessage: {
+                                                buttons: [{
+                                                        name: 'single_select',
+                                                        buttonParamsJson: JSON.stringify({
+                                                                title: '🎵 Pilih Mode Lagu',
+                                                                sections: [{
+                                                                        title: '🎙️ Mode',
+                                                                        rows: [
+                                                                                {
+                                                                                        header: '🎤 ─── Dengan Vokal ───────────',
+                                                                                        title: '🎤 Vokal',
+                                                                                        description: `Lirik ${langLabel} — AI pilih genre & tulis lirik otomatis`,
+                                                                                        id: `__musikai_rlang__${lang}__vocal__`,
+                                                                                },
+                                                                                {
+                                                                                        header: '🎹 ─── Instrumental ──────────',
+                                                                                        title: '🎹 Instrumental',
+                                                                                        description: `Musik tanpa vokal gaya ${langLabel}`,
+                                                                                        id: `__musikai_rlang__${lang}__instrumental__`,
+                                                                                },
+                                                                        ],
                                                                 }],
-                                                        },
-                                                },
+                                                        }),
+                                                }],
                                         },
                                 },
                         },
