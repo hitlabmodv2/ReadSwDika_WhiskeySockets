@@ -210,8 +210,11 @@ async function handleAlq({ hisoka, m, query, tolak, logCommand, logError, path, 
                 const input = (query || '').trim();
                 const pfx   = m.prefix || '.';
 
-                if (!input) {
-                        /* Tanpa query → tampilkan rilisan terbaru realtime */
+                /* .alqanime (dengan atau tanpa query) → selalu tampilkan rilisan terbaru realtime */
+                /* .alq [judul] → untuk pencarian spesifik */
+                const isAlqanimeCmd = (m.command || '').toLowerCase() === 'alqanime';
+
+                if (!input || isAlqanimeCmd) {
                         await hisoka.sendMessage(m.from, { react: { text: '📺', key: m.key } });
                         const { getRilisanTerbaru } = module.exports;
                         const latest = await getRilisanTerbaru();
@@ -222,7 +225,7 @@ async function handleAlq({ hisoka, m, query, tolak, logCommand, logError, path, 
                         let latestText = `🎌 *Rilisan Terbaru — Alqanime*\n━━━━━━━━━━━━━━━━━━━\n`;
                         latest.slice(0, 15).forEach((a, i) => { latestText += `${i + 1}. ${a.title}\n`; });
                         latestText += `━━━━━━━━━━━━━━━━━━━\n🌐 alqanime.net\n\n`;
-                        latestText += `📌 *Cari anime:* ${pfx}alq <judul>`;
+                        latestText += `📌 *Cari anime spesifik:* ${pfx}alq <judul>`;
                         await tolak(hisoka, m, latestText);
                         await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
                         logCommand(m, hisoka, 'alqanime');
@@ -264,12 +267,22 @@ async function handleAlq({ hisoka, m, query, tolak, logCommand, logError, path, 
                 text += `━━━━━━━━━━━━━━━━━━━\n🌐 ${results[0].url}`;
 
                 if (detail.thumbnail) {
-                        /* Download gambar pakai header browser — alqanime.net blokir fetch tanpa UA */
+                        /* Download gambar — butuh Referer + UA untuk bypass hotlink alqanime.net */
                         const thumbBuf = await axios.get(detail.thumbnail, {
-                                headers: HEADERS,
+                                headers: {
+                                        ...HEADERS,
+                                        'Referer': 'https://alqanime.net/',
+                                        'Accept': 'image/avif,image/webp,image/apng,image/*,*/*;q=0.8',
+                                },
                                 responseType: 'arraybuffer',
                                 timeout: 15000,
-                        }).then(r => Buffer.from(r.data)).catch(() => null);
+                        }).then(r => {
+                                console.log('[ALQANIME] Thumbnail OK:', detail.thumbnail, 'size:', r.data.byteLength);
+                                return Buffer.from(r.data);
+                        }).catch(e => {
+                                console.warn('[ALQANIME] Thumbnail gagal:', e?.message);
+                                return null;
+                        });
 
                         if (thumbBuf) {
                                 await hisoka.sendMessage(m.from, { image: thumbBuf, caption: text }, { quoted: m });
