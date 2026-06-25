@@ -81,35 +81,36 @@ function formatDate(unixTs) {
     return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}, ${pad(d.getHours())}.${pad(d.getMinutes())}.${pad(d.getSeconds())}`;
 }
 
-/* ── Frame animasi loading (berputar agar tidak spam) ── */
-const LOAD_FRAMES_SEARCH = [
-    '🔍 _Mencari GIF di Tenor..._',
-    '🌐 _Menghubungi server Tenor..._',
-    '📡 _Mengambil data GIF..._',
-    '🎴 _Memproses hasil pencarian..._',
-];
+/* ── Spinner sederhana untuk animasi loading ── */
+const SPINNER = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
 
-const LOAD_FRAMES_DOWNLOAD = [
-    '📥 _Mengunduh GIF... (0%)_',
-    '📥 _Mengunduh GIF... (25%)_',
-    '📥 _Mengunduh GIF... (50%)_',
-    '📥 _Mengunduh GIF... (75%)_',
-    '📥 _Mengunduh GIF... (99%)_',
-];
-
-/* ── Animasi edit berputar selama proses berlangsung ── */
-async function animateLoading(editFn, frames, intervalMs = 900) {
+/**
+ * Jalankan animasi loading sambil menunggu promise selesai.
+ * Edit pesan berputar setiap intervalMs, berhenti otomatis saat promise resolve/reject.
+ */
+async function withLoadingAnim(editFn, label, promise, intervalMs = 1200) {
     let i = 0;
-    let running = true;
-    const tick = async () => {
-        while (running) {
-            await editFn(frames[i % frames.length]).catch(() => {});
+    let done = false;
+
+    const loop = (async () => {
+        while (!done) {
+            const sp = SPINNER[i % SPINNER.length];
+            await editFn(`${sp} _${label}_`).catch(() => {});
             i++;
             await new Promise(r => setTimeout(r, intervalMs));
         }
-    };
-    tick();
-    return () => { running = false; };
+    })();
+
+    try {
+        const result = await promise;
+        done = true;
+        await loop.catch(() => {});
+        return result;
+    } catch (err) {
+        done = true;
+        await loop.catch(() => {});
+        throw err;
+    }
 }
 
 /* ── Ambil random GIF dari Tenor ── */
@@ -234,26 +235,33 @@ async function handleAnimgif(hisoka, m, query, ctx) {
     }
 
     await hisoka.sendMessage(m.from, { react: { text: '🎴', key: m.key } });
-    const loadMsg = await tolak(hisoka, m, '🎴 _Mengambil GIF anime..._');
+    const loadMsg = await tolak(hisoka, m, '⠋ _Mengambil GIF anime..._');
 
     const editStep = async (text) => {
         try { await m.reply({ edit: loadMsg.key, text }); } catch (_) {}
     };
 
-    let stopAnim = null;
+    /* Hapus loading message dari chat (biar tidak duplikat dengan caption GIF) */
+    const deleteLoad = async () => {
+        try { await hisoka.sendMessage(m.from, { delete: loadMsg.key }); } catch (_) {}
+    };
 
     try {
-        /* ── Animasi tahap 1: cari ── */
-        stopAnim = await animateLoading(editStep, LOAD_FRAMES_SEARCH, 900);
-        const gif = await fetchRandomTenorGif(resolvedQuery);
+        /* ── Tahap 1: cari GIF (animasi spinner sambil nunggu API) ── */
+        const gif = await withLoadingAnim(
+            editStep,
+            'Mencari GIF di Tenor...',
+            fetchRandomTenorGif(resolvedQuery),
+            1200,
+        );
 
-        /* ── Animasi tahap 2: download ── */
-        if (stopAnim) { stopAnim(); stopAnim = null; }
-        stopAnim = await animateLoading(editStep, LOAD_FRAMES_DOWNLOAD, 700);
-        const buffer = await downloadGif(gif.url);
-
-        /* ── Stop animasi ── */
-        if (stopAnim) { stopAnim(); stopAnim = null; }
+        /* ── Tahap 2: unduh buffer (animasi spinner sambil nunggu download) ── */
+        const buffer = await withLoadingAnim(
+            editStep,
+            'Mengunduh GIF...',
+            downloadGif(gif.url),
+            1000,
+        );
 
         /* ── Info ukuran aktual dari buffer ── */
         const actualSize = formatSize(gif.fileSize || buffer.byteLength);
@@ -264,17 +272,16 @@ async function handleAnimgif(hisoka, m, query, ctx) {
             `🎴 *Anime GIF Random*`,
             ``,
             `🔍 *Query    :* ${gif.query}`,
-            usedLabel             ? `🏷️ *Kategori :* ${usedLabel}`            : null,
-            gif.title             ? `📝 *Judul    :* ${gif.title}`            : null,
-            gif.tags.length > 0  ? `🔖 *Tags     :* ${gif.tags.join(', ')}`  : null,
+            usedLabel            ? `🏷️ *Kategori :* ${usedLabel}`           : null,
+            gif.title            ? `📝 *Judul    :* ${gif.title}`           : null,
+            gif.tags.length > 0 ? `🔖 *Tags     :* ${gif.tags.join(', ')}` : null,
             ``,
             `╭──『 📋 *Detail* 』──`,
-            gif.description       ? `│ 📄 *Deskripsi Konten:*`               : null,
-            gif.description       ? `│     ${gif.description}`               : null,
-            `│ 📦 *Ukuran File    :* ${actualSize}`,
-            `│ ⏱️ *Durasi         :* ${formatDuration(gif.duration)}`,
-            `│ 📐 *Dimensi        :* ${dimsStr}`,
-            `│ 📅 *Dibuat         :* ${formatDate(gif.created)}`,
+            gif.description      ? `│ 📄 *Deskripsi :* ${gif.description}`  : null,
+            `│ 📦 *Ukuran    :* ${actualSize}`,
+            `│ ⏱️ *Durasi    :* ${formatDuration(gif.duration)}`,
+            `│ 📐 *Dimensi   :* ${dimsStr}`,
+            `│ 📅 *Dibuat    :* ${formatDate(gif.created)}`,
             `╰───────────────────`,
             ``,
             `_💡 Ketik ${pfx}animgif list untuk lihat kategori_`,
@@ -292,12 +299,12 @@ async function handleAnimgif(hisoka, m, query, ctx) {
             mimetype   : 'video/mp4',
         }, { quoted: m });
 
+        /* Hapus loading message agar tidak duplikat di chat */
+        await deleteLoad();
         await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
-        await editStep('✅ *GIF berhasil dikirim!*');
         logCommand(m, hisoka, 'animgif');
 
     } catch (err) {
-        if (stopAnim) { stopAnim(); stopAnim = null; }
         console.error('[TenorGif]', err.message);
         await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
         await editStep(`❌ *Gagal:* ${err.message}`);
