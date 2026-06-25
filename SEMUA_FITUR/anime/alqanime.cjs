@@ -310,7 +310,6 @@ async function handleAlq({ hisoka, m, query, tolak, logCommand, logError, path, 
 module.exports.handleAlq = handleAlq;
 
 async function handleAlqupdate({ hisoka, m, tolak, logCommand, logError, _require, path, getJadibotChoiceKey, pendingAlqUpdateChoices }) {
-        if (!m.prefix && m.query) return;
         try {
                 const items = await getLatestAlqanime();
 

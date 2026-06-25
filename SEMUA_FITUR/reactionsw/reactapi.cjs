@@ -27,7 +27,6 @@
 // ── HANDLER: cekreact & setreactapi ──────────────────────────────────────────
 
 async function handleReactinfo({ hisoka, m, tolak, logCommand, loadConfig }) {
-        if (!m.prefix && m.query) return;
         try {
                 const config      = loadConfig();
                 const reactConfig = config.reactApi || {};

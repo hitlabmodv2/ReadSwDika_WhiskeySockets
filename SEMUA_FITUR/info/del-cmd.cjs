@@ -25,7 +25,6 @@
 'use strict';
 
 async function handleDel({ hisoka, m, query, tolak, logCommand, isMainBot, kvGet }) {
-        if (!m.prefix && m.query) return;
 
         if (m.isQuoted && !query) {
                 try {

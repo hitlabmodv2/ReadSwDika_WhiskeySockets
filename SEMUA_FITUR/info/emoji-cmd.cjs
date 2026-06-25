@@ -25,7 +25,6 @@
 'use strict';
 
 async function handleEmojidefault({ hisoka, m, tolak, logCommand, getJadibotNumber, resetToDefaultEmojis }) {
-        if (!m.prefix && m.query) return;
         const _isJb = hisoka?.isMainBot === false;
         try {
                 if (!_isJb) {
@@ -73,7 +72,6 @@ async function handleEmojidefault({ hisoka, m, tolak, logCommand, getJadibotNumb
 }
 
 async function handleEmojicustom({ hisoka, m, tolak, logCommand, getJadibotNumber, setCustomEmojiMode, listJadibotEmojis }) {
-        if (!m.prefix && m.query) return;
         const _isJb = hisoka?.isMainBot === false;
         try {
                 if (!_isJb) {
@@ -128,7 +126,6 @@ async function handleEmojicustom({ hisoka, m, tolak, logCommand, getJadibotNumbe
 }
 
 async function handleEmojiclear({ hisoka, m, tolak, logCommand, getJadibotNumber, clearJadibotEmojis }) {
-        if (!m.prefix && m.query) return;
         const _isJb = hisoka?.isMainBot === false;
         try {
                 if (!_isJb) {

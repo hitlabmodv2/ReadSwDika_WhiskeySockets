@@ -480,7 +480,6 @@ async function handleKomikdl({ hisoka, m, query, tolak, logCommand, logError }) 
 // ── COMMAND HANDLER: KOMIKUPDATE ──────────────────────────────────────────────
 
 async function handleKomikup({ hisoka, m, tolak, logError }) {
-        if (!m.prefix && m.query) return;
         try {
                 await hisoka.sendMessage(m.from, { react: { text: '🔄', key: m.key } });
                 await tolak(hisoka, m, `🔄 Mengambil update terbaru dari Komiktap...`);

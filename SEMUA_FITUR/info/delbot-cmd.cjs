@@ -54,7 +54,6 @@ async function _fetchHistoryFromWA(hisoka, chatJid, referenceKey, count = 100) {
 }
 
 async function handleDelbot({ hisoka, m, query, tolak, logCommand }) {
-        if (!m.prefix && m.query) return;
 
         const _chatJid = m.from;
 

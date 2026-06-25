@@ -44,7 +44,6 @@ async function _sendMenuMsg(hisoka, m, teks) {
 }
 
 async function handleGroupmenu({ hisoka, m, tolak, logCommand, loadConfig }) {
-        if (!m.prefix && m.query) return;
         hisoka.sendMessage(m.from, { react: { text: `👥`, key: m.key } });
         const teks =
 `╭─「 👥 *FITUR GRUP* 」
@@ -90,7 +89,6 @@ async function handleGroupmenu({ hisoka, m, tolak, logCommand, loadConfig }) {
 }
 
 async function handleDownloadmenu({ hisoka, m, tolak, logCommand, loadConfig }) {
-        if (!m.prefix && m.query) return;
         hisoka.sendMessage(m.from, { react: { text: `📥`, key: m.key } });
         const teks =
 `╭─「 📥 *SOSMED & MUSIK* 」
@@ -147,7 +145,6 @@ async function handleDownloadmenu({ hisoka, m, tolak, logCommand, loadConfig }) 
 }
 
 async function handleSettingmenu({ hisoka, m, tolak, logCommand, loadConfig }) {
-        if (!m.prefix && m.query) return;
         hisoka.sendMessage(m.from, { react: { text: `⚙️`, key: m.key } });
         const teks =
 `╭─「 🤖 *AUTO FITUR* 」
@@ -201,7 +198,6 @@ async function handleSettingmenu({ hisoka, m, tolak, logCommand, loadConfig }) {
 }
 
 async function handleStatusmenu({ hisoka, m, tolak, logCommand, loadConfig }) {
-        if (!m.prefix && m.query) return;
         hisoka.sendMessage(m.from, { react: { text: `📡`, key: m.key } });
         const teks =
 `╭─「 📡 *STATUS & STORY* 」

@@ -92,7 +92,6 @@ function renderEmojiList(emojis) {
 }
 
 async function handleInfo({ hisoka, m, query, tolak, logCommand, loadConfig, fs, path }) {
-        if (!m.prefix && m.query) return;
         try {
                 const config        = loadConfig();
                 const autoTyping    = config.autoTyping    || {};
@@ -150,7 +149,6 @@ module.exports = { handleInfo };
 // ── GROUP HANDLER ─────────────────────────────────────────────────────────────
 
 async function handleListgroup({ hisoka, m, tolak, logCommand }) {
-        if (!m.prefix && m.query) return;
         const groups = Object.values(await hisoka.groupFetchAllParticipating());
         groups.map(g => hisoka.groups.write(g.id, g));
         const { isJidGroup } = await import('@whiskeysockets/baileys');
@@ -164,7 +162,6 @@ async function handleListgroup({ hisoka, m, tolak, logCommand }) {
 }
 
 async function handleListcontact({ hisoka, m, tolak, logCommand }) {
-        if (!m.prefix && m.query) return;
         const contacts = Array.from(hisoka.contacts.values()).filter(c => c.id);
         let text = '*Total:*\n\n';
         text += `- All Contacts: ${contacts.length}\n`;
@@ -230,7 +227,6 @@ async function handleSetpairing({ hisoka, m, query, tolak, logCommand, loadConfi
 }
 
 async function handleJadibotmenu({ hisoka, m, tolak, logCommand, loadConfig }) {
-        if (!m.prefix && m.query) return;
         hisoka.sendMessage(m.from, { react: { text: `🤖`, key: m.key } });
         const jadibotTeks =
 `╭─「 🤖 *JADIBOT* 」
@@ -355,7 +351,6 @@ async function handleDelowner({ hisoka, m, query, tolak, logCommand, loadConfig,
 }
 
 async function handleOwn({ hisoka, m, tolak, logCommand, loadConfig }) {
-        if (!m.prefix && m.query) return;
         try {
                 const config = loadConfig();
                 const owners = config.owners || [];
@@ -641,7 +636,6 @@ module.exports.handleEmojidel = handleEmojidel;
 // ── HANDLER: emoji (panduan lengkap) ──────────────────────────────────────────
 
 async function handleEmoji({ hisoka, m, tolak, logCommand, getJadibotNumber, listJadibotEmojis }) {
-        if (!m.prefix && m.query) return;
         if (!m.isOwner && hisoka?.isMainBot !== false) return;
         try {
                 const _isJb = hisoka?.isMainBot === false;
@@ -707,7 +701,6 @@ module.exports.handleEmoji = handleEmoji;
 // ── HANDLER: emojilist ────────────────────────────────────────────────────────
 
 async function handleEmojilist({ hisoka, m, tolak, logCommand, getJadibotNumber, listJadibotEmojis }) {
-        if (!m.prefix && m.query) return;
         if (!m.isOwner && hisoka?.isMainBot !== false) return;
         try {
                 const _isJb = hisoka?.isMainBot === false;

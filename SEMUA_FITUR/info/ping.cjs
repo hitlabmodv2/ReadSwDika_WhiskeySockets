@@ -25,7 +25,6 @@
 'use strict';
 
 async function handlePing({ hisoka, m, tolak, logCommand, getBotStats, os }) {
-	if (!m.prefix && m.query) return;
 	try {
 		const msg = await tolak(hisoka, m, '⏳ _Checking..._');
 		const latency = Math.abs(Date.now() - m.messageTimestamp * 1000);

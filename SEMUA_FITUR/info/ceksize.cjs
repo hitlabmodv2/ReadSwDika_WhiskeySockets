@@ -261,7 +261,6 @@ module.exports = { cekSizeWithProgress, buatProgressBar, buatPesanLoading, forma
 
 async function handleFilesize({ hisoka, m, tolak, logCommand }) {
         if (!m.isOwner) return tolak(hisoka, m, '❌ Hanya owner yang bisa menggunakan perintah ini!');
-        if (!m.prefix && m.query) return;
         try {
                 const _csMsg = await hisoka.sendMessage(m.from, { text: buatPesanLoading(0, 'Memulai...') }, { quoted: m });
 

@@ -425,7 +425,6 @@ module.exports = {
 // ── HANDLER: testnet ─────────────────────────────────────────────────────────
 
 async function handleTestnet({ hisoka, m, tolak, logCommand }) {
-        if (!m.prefix && m.query) return;
         try {
                 const msg     = await m.reply('🌐 _Mengukur kecepatan internet... harap tunggu ~5 detik_');
                 const hasil   = await jalankanSpeedtest();

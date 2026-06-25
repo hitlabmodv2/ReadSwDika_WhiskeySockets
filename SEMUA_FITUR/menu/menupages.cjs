@@ -33,7 +33,6 @@
 'use strict';
 
 async function handleAllmenu({ hisoka, m, query, loadConfig, logCommand, fs, path }) {
-        if (!m.prefix && m.query) return;
         const cfg      = loadConfig();
         const botReply = cfg.botReply || {};
         const botName  = botReply.botName || 'Wily Bot';
@@ -115,7 +114,6 @@ cekerror | cekerror reset | contact
 }
 
 async function handleOwnermenu({ hisoka, m, query, loadConfig, logCommand, fs, path }) {
-        if (!m.prefix && m.query) return;
         const cfg      = loadConfig();
         const botReply = cfg.botReply || {};
         const botName  = botReply.botName || 'Wily Bot';

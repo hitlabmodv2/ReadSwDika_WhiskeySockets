@@ -68,7 +68,6 @@ module.exports = { shutdownBot, restartBot };
 
 async function handleRb({ hisoka, m, tolak, logCommand }) {
         if (!m.isOwner) return tolak(hisoka, m, '❌ Hanya owner yang bisa merestart bot!');
-        if (!m.prefix && m.query) return;
         const _rstSent = await hisoka.sendMessage(m.from, {
                 text:
                         `╔══════════════════════╗\n║  🔄  *R E S T A R T*  ║\n╚══════════════════════╝\n\n` +

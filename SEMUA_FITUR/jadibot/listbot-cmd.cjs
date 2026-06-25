@@ -33,7 +33,6 @@
 'use strict';
 
 async function handleListbot({ hisoka, m, tolak, logCommand, isMainBot, jadibotMap, getJadibotExpiry, getJadibotExpirySummary, cleanupExpiredJadibots, pendingJadibotChoices, getJadibotChoiceKey, jadibotConnectedAt, getUserName }) {
-        if (!m.prefix && m.query) return;
         if (!isMainBot(hisoka)) return;
         if (!m.isOwner) return;
 

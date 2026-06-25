@@ -537,7 +537,6 @@ module.exports.handleAnime = handleAnime;
 // ── HANDLER: animeupdate ──────────────────────────────────────────────────────
 
 async function handleAnimeupdate({ hisoka, m, tolak, logCommand, logError }) {
-        if (!m.prefix && m.query) return;
         try {
                 await hisoka.sendMessage(m.from, { react: { text: '📺', key: m.key } });
                 await tolak(hisoka, m, `📺 Mengambil update terbaru Kusonime...`);

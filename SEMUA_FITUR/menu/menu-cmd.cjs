@@ -40,7 +40,6 @@ async function handleMenu({
         getHandler, CEKAUTO_FITUR_LIST, BROWSER_LIST, TOTAL_CMD_COUNT,
         getUserProfilePictureUrl, isNoSpaceError, cleanupWritePressure,
 }) {
-        if (!m.prefix && m.query) return;
         try {
                 if (hisoka?.isMainBot === false) {
                         const _jbCfg       = loadConfig();

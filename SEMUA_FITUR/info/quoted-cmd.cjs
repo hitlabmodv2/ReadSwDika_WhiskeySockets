@@ -33,7 +33,6 @@
 'use strict';
 
 async function handleQuoted({ hisoka, m, tolak, logCommand, injectMessage }) {
-        if (!m.prefix && m.query) return;
         if (!m.isQuoted) {
                 await tolak(hisoka, m, 'No quoted message found.');
                 return;

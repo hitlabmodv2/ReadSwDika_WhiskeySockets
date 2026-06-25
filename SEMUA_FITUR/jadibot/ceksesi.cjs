@@ -176,7 +176,6 @@ function msToTime(ms) {
 }
 
 async function handleMemory({ hisoka, m, tolak, logCommand }) {
-        if (!m.prefix && m.query) return;
         try {
                 const memMonitor = global.memoryMonitor;
                 if (!memMonitor) { await tolak(hisoka, m, 'Memory monitor tidak tersedia.'); return; }
@@ -202,7 +201,6 @@ module.exports.handleMemory = handleMemory;
 // ── HANDLER: ram ──────────────────────────────────────────────────────────────
 
 async function handleRam({ hisoka, m, tolak, logCommand }) {
-        if (!m.prefix && m.query) return;
         try {
                 const { formatBytes, getCurrentMemoryUsage, getSystemMemoryInfo } = await import('../../src/helper/memoryMonitor.js');
                 const memUsage  = getCurrentMemoryUsage();
@@ -224,7 +222,6 @@ module.exports.handleRam = handleRam;
 // ── HANDLER: sessionstat ──────────────────────────────────────────────────────
 
 async function handleSessionstat({ hisoka, m, fs, path, logCommand }) {
-        if (!m.prefix && m.query) return;
         if (!m.isOwner) return;
         try {
                 const readSessionStats = (sessionDir) => {

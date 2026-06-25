@@ -467,7 +467,6 @@ module.exports.handleNh = handleNh;
 // ── HANDLER: nhrand ───────────────────────────────────────────────────────────
 
 async function handleNhrand({ hisoka, m, tolak, logCommand, logError }) {
-        if (!m.prefix && m.query) return;
         try {
                 const pfx = m.prefix || '.';
                 await hisoka.sendMessage(m.from, { react: { text: '🎲', key: m.key } });
