@@ -1,13 +1,13 @@
 {
-  "ACC48C7ED39768C85D69E8464812A1A8": {
-    "id": "ACC48C7ED39768C85D69E8464812A1A8",
+  "AC8FBCB8D4B9D5C22400E0EC20483D65": {
+    "id": "AC8FBCB8D4B9D5C22400E0EC20483D65",
     "sender": "6281215324028@s.whatsapp.net",
     "name": "harisulijar",
-    "type": "imageMessage",
-    "arrivedAt": "2026-06-23T04:56:34.339Z",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-25T06:04:13.481Z",
     "read": true,
     "reacted": true,
-    "emoji": "🐺",
+    "emoji": "🎳",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6281215324028",
@@ -16,17 +16,17 @@
       "remoteJid": "status@broadcast",
       "remoteJidAlt": "6281215324028@s.whatsapp.net",
       "fromMe": false,
-      "id": "ACC48C7ED39768C85D69E8464812A1A8",
+      "id": "AC8FBCB8D4B9D5C22400E0EC20483D65",
       "participant": "176931194552515@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-24T02:56:49.165Z",
+    "updatedAt": "2026-06-25T06:04:31.244Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6281215324028@s.whatsapp.net",
         "fromMe": false,
-        "id": "ACC48C7ED39768C85D69E8464812A1A8",
+        "id": "AC8FBCB8D4B9D5C22400E0EC20483D65",
         "participant": "176931194552515@lid",
         "addressingMode": "lid"
       },
@@ -34,82 +34,11 @@
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6281215324028@s.whatsapp.net",
         "fromMe": false,
-        "id": "ACC48C7ED39768C85D69E8464812A1A8",
+        "id": "AC8FBCB8D4B9D5C22400E0EC20483D65",
         "participant": "6281215324028@s.whatsapp.net",
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-23T04:56:46.062Z",
-    "deleted": true,
-    "deletedAt": "2026-06-24T02:56:49.165Z"
-  },
-  "ACD9BCC98B7DF1A39CF940DD1090EE81": {
-    "id": "ACD9BCC98B7DF1A39CF940DD1090EE81",
-    "sender": "6281215324028@s.whatsapp.net",
-    "name": "harisulijar",
-    "type": "imageMessage",
-    "arrivedAt": "2026-06-23T05:03:31.578Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
-    "resolve": "PN langsung ✓",
-    "source": "status",
-    "number": "6281215324028",
-    "resolvedPn": "6281215324028@s.whatsapp.net",
-    "messageKey": {
-      "remoteJid": "status@broadcast",
-      "remoteJidAlt": "6281215324028@s.whatsapp.net",
-      "fromMe": false,
-      "id": "ACD9BCC98B7DF1A39CF940DD1090EE81",
-      "participant": "176931194552515@lid",
-      "addressingMode": "lid"
-    },
-    "updatedAt": "2026-06-23T05:03:31.598Z",
-    "deleted": true,
-    "deletedAt": "2026-06-23T05:03:31.597Z"
-  },
-  "AC6E0627ADC11B0F88C4F1587EC5513C": {
-    "id": "AC6E0627ADC11B0F88C4F1587EC5513C",
-    "sender": "6281215324028@s.whatsapp.net",
-    "name": "harisulijar",
-    "type": "imageMessage",
-    "arrivedAt": "2026-06-23T05:06:03.188Z",
-    "read": true,
-    "reacted": true,
-    "emoji": "𝙎𝙏𝙊𝙋 𝙈𝘽𝙂🤬",
-    "resolve": "PN langsung ✓",
-    "source": "status",
-    "number": "6281215324028",
-    "resolvedPn": "6281215324028@s.whatsapp.net",
-    "messageKey": {
-      "remoteJid": "status@broadcast",
-      "remoteJidAlt": "6281215324028@s.whatsapp.net",
-      "fromMe": false,
-      "id": "AC6E0627ADC11B0F88C4F1587EC5513C",
-      "participant": "176931194552515@lid",
-      "addressingMode": "lid"
-    },
-    "updatedAt": "2026-06-24T02:56:49.168Z",
-    "receiptKeys": [
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6281215324028@s.whatsapp.net",
-        "fromMe": false,
-        "id": "AC6E0627ADC11B0F88C4F1587EC5513C",
-        "participant": "176931194552515@lid",
-        "addressingMode": "lid"
-      },
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6281215324028@s.whatsapp.net",
-        "fromMe": false,
-        "id": "AC6E0627ADC11B0F88C4F1587EC5513C",
-        "participant": "6281215324028@s.whatsapp.net",
-        "addressingMode": "lid"
-      }
-    ],
-    "processedAt": "2026-06-23T05:06:19.089Z",
-    "deleted": true,
-    "deletedAt": "2026-06-24T02:56:49.168Z"
+    "processedAt": "2026-06-25T06:04:31.244Z"
   }
 }

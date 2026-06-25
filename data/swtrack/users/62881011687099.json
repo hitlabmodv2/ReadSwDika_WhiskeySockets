@@ -1,13 +1,13 @@
 {
-  "ACA7C4AB997E5CEB01ED5F2EB515BEEA": {
-    "id": "ACA7C4AB997E5CEB01ED5F2EB515BEEA",
+  "ACCAE8C974C47B24AD132C86613195E6": {
+    "id": "ACCAE8C974C47B24AD132C86613195E6",
     "sender": "62881011687099@s.whatsapp.net",
     "name": "HERU KURNIAWAN",
     "type": "imageMessage",
-    "arrivedAt": "2026-06-24T02:57:01.921Z",
+    "arrivedAt": "2026-06-25T06:04:58.416Z",
     "read": true,
     "reacted": true,
-    "emoji": "🐺",
+    "emoji": "🎲",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "62881011687099",
@@ -16,17 +16,17 @@
       "remoteJid": "status@broadcast",
       "remoteJidAlt": "62881011687099@s.whatsapp.net",
       "fromMe": false,
-      "id": "ACA7C4AB997E5CEB01ED5F2EB515BEEA",
+      "id": "ACCAE8C974C47B24AD132C86613195E6",
       "participant": "206918907871331@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-24T10:32:39.335Z",
+    "updatedAt": "2026-06-25T06:05:02.680Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "62881011687099@s.whatsapp.net",
         "fromMe": false,
-        "id": "ACA7C4AB997E5CEB01ED5F2EB515BEEA",
+        "id": "ACCAE8C974C47B24AD132C86613195E6",
         "participant": "206918907871331@lid",
         "addressingMode": "lid"
       },
@@ -34,13 +34,11 @@
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "62881011687099@s.whatsapp.net",
         "fromMe": false,
-        "id": "ACA7C4AB997E5CEB01ED5F2EB515BEEA",
+        "id": "ACCAE8C974C47B24AD132C86613195E6",
         "participant": "62881011687099@s.whatsapp.net",
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-24T02:57:17.928Z",
-    "deleted": true,
-    "deletedAt": "2026-06-24T10:32:39.335Z"
+    "processedAt": "2026-06-25T06:05:02.680Z"
   }
 }

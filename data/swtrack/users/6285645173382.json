@@ -1,36 +1,13 @@
 {
-  "A54DE869D2C90CCFA3FE8AFAC610001E": {
-    "id": "A54DE869D2C90CCFA3FE8AFAC610001E",
-    "sender": "6285645173382@s.whatsapp.net",
-    "name": "佐野万次郎",
-    "type": "protocolMessage",
-    "arrivedAt": "2026-06-21T13:15:06.184Z",
-    "read": true,
-    "reacted": true,
-    "emoji": "❤️",
-    "source": "group",
-    "number": "6285645173382",
-    "messageKey": {
-      "remoteJid": "120363424557936431@g.us",
-      "fromMe": false,
-      "id": "A54DE869D2C90CCFA3FE8AFAC610001E",
-      "participant": "79642299998382@lid",
-      "participantAlt": "6285645173382@s.whatsapp.net",
-      "addressingMode": "lid"
-    },
-    "resolvedPn": "6285645173382@s.whatsapp.net",
-    "updatedAt": "2026-06-21T13:15:25.789Z",
-    "processedAt": "2026-06-21T13:15:25.789Z"
-  },
-  "A5F3220F6293DF4BC560A8222F9CF8C2": {
-    "id": "A5F3220F6293DF4BC560A8222F9CF8C2",
+  "A59C81FF5C073287894E0013806544AA": {
+    "id": "A59C81FF5C073287894E0013806544AA",
     "sender": "6285645173382@s.whatsapp.net",
     "name": "佐野万次郎",
     "type": "videoMessage",
-    "arrivedAt": "2026-06-21T13:15:06.227Z",
+    "arrivedAt": "2026-06-25T06:05:23.974Z",
     "read": true,
     "reacted": true,
-    "emoji": "🧄",
+    "emoji": "🧸",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6285645173382",
@@ -39,17 +16,17 @@
       "remoteJid": "status@broadcast",
       "remoteJidAlt": "6285645173382@s.whatsapp.net",
       "fromMe": false,
-      "id": "A5F3220F6293DF4BC560A8222F9CF8C2",
+      "id": "A59C81FF5C073287894E0013806544AA",
       "participant": "79642299998382@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-21T13:15:24.184Z",
+    "updatedAt": "2026-06-25T06:05:27.452Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6285645173382@s.whatsapp.net",
         "fromMe": false,
-        "id": "A5F3220F6293DF4BC560A8222F9CF8C2",
+        "id": "A59C81FF5C073287894E0013806544AA",
         "participant": "79642299998382@lid",
         "addressingMode": "lid"
       },
@@ -57,11 +34,34 @@
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6285645173382@s.whatsapp.net",
         "fromMe": false,
-        "id": "A5F3220F6293DF4BC560A8222F9CF8C2",
+        "id": "A59C81FF5C073287894E0013806544AA",
         "participant": "6285645173382@s.whatsapp.net",
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-21T13:15:24.184Z"
+    "processedAt": "2026-06-25T06:05:27.452Z"
+  },
+  "A53B669EF4523157B8606764A03D0EB0": {
+    "id": "A53B669EF4523157B8606764A03D0EB0",
+    "sender": "6285645173382@s.whatsapp.net",
+    "name": "佐野万次郎",
+    "type": "protocolMessage",
+    "arrivedAt": "2026-06-25T06:05:26.919Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🏀",
+    "source": "group",
+    "number": "6285645173382",
+    "messageKey": {
+      "remoteJid": "120363424557936431@g.us",
+      "fromMe": false,
+      "id": "A53B669EF4523157B8606764A03D0EB0",
+      "participant": "79642299998382@lid",
+      "participantAlt": "6285645173382@s.whatsapp.net",
+      "addressingMode": "lid"
+    },
+    "resolvedPn": "6285645173382@s.whatsapp.net",
+    "updatedAt": "2026-06-25T06:05:41.643Z",
+    "processedAt": "2026-06-25T06:05:41.643Z"
   }
 }

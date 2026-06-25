@@ -84,5 +84,30 @@
       }
     ],
     "processedAt": "2026-06-24T10:27:10.432Z"
+  },
+  "AC1B44099A7503C82F10B6B7D4725F36": {
+    "id": "AC1B44099A7503C82F10B6B7D4725F36",
+    "sender": "6285728458204@s.whatsapp.net",
+    "name": "Tea.. Time",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-25T06:04:29.854Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285728458204",
+    "resolvedPn": "6285728458204@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285728458204@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC1B44099A7503C82F10B6B7D4725F36",
+      "participant": "49997814964231@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-25T06:04:30.016Z",
+    "deleted": true,
+    "deletedAt": "2026-06-25T06:04:30.016Z"
   }
 }

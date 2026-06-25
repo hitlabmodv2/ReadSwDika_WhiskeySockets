@@ -40,5 +40,47 @@
       }
     ],
     "processedAt": "2026-06-25T06:00:40.090Z"
+  },
+  "AC3604F4983ABDA8EF6B8E3EB43E7F08": {
+    "id": "AC3604F4983ABDA8EF6B8E3EB43E7F08",
+    "sender": "6281358899877@s.whatsapp.net",
+    "name": "Luwakzz",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-25T06:03:58.615Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "𝖲𝖠𝖸𝖠 𝖠𝖪𝖠𝖭 𝖫𝖠𝖶𝖠𝖭 🤬",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6281358899877",
+    "resolvedPn": "6281358899877@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6281358899877@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC3604F4983ABDA8EF6B8E3EB43E7F08",
+      "participant": "149383375024230@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-25T06:04:07.057Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281358899877@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC3604F4983ABDA8EF6B8E3EB43E7F08",
+        "participant": "149383375024230@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281358899877@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC3604F4983ABDA8EF6B8E3EB43E7F08",
+        "participant": "6281358899877@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-25T06:04:07.057Z"
   }
 }

@@ -395,7 +395,7 @@ function padEnd(str, targetWidth) {
 }
 
 export function logStoryView(data) {
-        const { botId, mediaType, greeting, dayName, date, time, name, number, success, reaction, delaySeconds, mode, resolve, storyCount, idStory } = data;
+        const { botId, mediaType, greeting, dayName, date, time, name, number, success, reaction, delaySeconds, mode, resolve, storyCount, idStory, emojiMode } = data;
         const cyan = '\x1b[36m';
         const white = '\x1b[37m';
         const yellow = '\x1b[33m';
@@ -436,6 +436,12 @@ export function logStoryView(data) {
         console.log(`${cyan}│${reset} ${white}⭔ Nomor       : ${white}${padEnd(number, contentWidth)}${reset}${cyan}${reset}`);
         if (storyCount != null) {
                 console.log(`${cyan}│${reset} ${white}⭔ TotalStory  : ${orange}${padEnd(String(storyCount), contentWidth)}${reset}${cyan}${reset}`);
+        }
+        if (emojiMode != null) {
+                const _isCustom = String(emojiMode).toLowerCase() === 'custom';
+                const _modeColor = _isCustom ? green : blue;
+                const _modeStr = _isCustom ? 'Custom 🟢' : 'Default 🔵';
+                console.log(`${cyan}│${reset} ${white}⭔ EmojiMode   : ${_modeColor}${padEnd(_modeStr, contentWidth)}${reset}${cyan}${reset}`);
         }
         console.log(`${cyan}│${reset} ${white}⭔ Berhasil    : ${green}${padEnd(success, contentWidth)}${reset}${cyan}${reset}`);
         console.log(`${cyan}│${reset} ${white}⭔ Reaksi      : ${padEnd(reaction, contentWidth)}${reset}${cyan}${reset}`);

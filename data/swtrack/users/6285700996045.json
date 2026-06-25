@@ -128,5 +128,72 @@
       }
     ],
     "processedAt": "2026-06-25T06:01:08.178Z"
+  },
+  "AC03BFD45702B6878B1A40F75590F344": {
+    "id": "AC03BFD45702B6878B1A40F75590F344",
+    "sender": "6285700996045@s.whatsapp.net",
+    "name": "yae",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-25T06:05:19.935Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🏀",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285700996045",
+    "resolvedPn": "6285700996045@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285700996045@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC03BFD45702B6878B1A40F75590F344",
+      "participant": "10436871233676@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-25T06:05:38.057Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285700996045@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC03BFD45702B6878B1A40F75590F344",
+        "participant": "10436871233676@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285700996045@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC03BFD45702B6878B1A40F75590F344",
+        "participant": "6285700996045@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-25T06:05:38.057Z"
+  },
+  "AC00BECE916E41C9F42D0CD1F46A3B63": {
+    "id": "AC00BECE916E41C9F42D0CD1F46A3B63",
+    "sender": "6285700996045@s.whatsapp.net",
+    "name": "yae",
+    "type": "extendedTextMessage",
+    "arrivedAt": "2026-06-25T06:05:26.921Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285700996045",
+    "resolvedPn": "6285700996045@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285700996045@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC00BECE916E41C9F42D0CD1F46A3B63",
+      "participant": "10436871233676@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-25T06:05:29.584Z",
+    "deleted": true,
+    "deletedAt": "2026-06-25T06:05:29.584Z"
   }
 }
