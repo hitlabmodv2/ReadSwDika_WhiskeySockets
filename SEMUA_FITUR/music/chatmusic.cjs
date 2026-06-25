@@ -422,8 +422,8 @@ class ChatMusicAPI {
                         `${noun1} di ${noun2}`,        // 5: noun + di + noun (Rindu di Lautan)
                 ][titlePattern];
 
-                // Mode: 55% instrumental, 45% vokal
-                const isInstrumental = r() < 0.55 ? 1 : 0;
+                // Mode: 10% instrumental, 90% vokal
+                const isInstrumental = r() < 0.10 ? 1 : 0;
 
                 const prompt = `${genre} indonesia, ${moods}, ${vibes}, ${instrs}`;
 
@@ -554,7 +554,7 @@ LIRIK:
 
                 const isInstrumental = forceMode === 'instrumental' ? 1
                         : forceMode === 'vocal' ? 0
-                        : (r() < 0.35 ? 1 : 0);
+                        : (r() < 0.10 ? 1 : 0);
 
                 const langSuffix = lang === 'jp' ? 'japanese style'
                         : lang === 'en' ? 'english style'
