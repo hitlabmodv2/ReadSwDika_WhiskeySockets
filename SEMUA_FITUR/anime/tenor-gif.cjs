@@ -398,7 +398,7 @@ async function handleAnimgif(hisoka, m, query, ctx) {
 
         /* ── Caption bersih, tanpa duplikat ── */
         const caption = [
-            `🎴 *Anime GIF Random*`,
+            `🎴 *Anime MP4 Random*`,
             ``,
             `🔍 *Query    :* ${gif.query}`,
             usedLabel            ? `🏷️ *Kategori :* ${usedLabel}`           : null,
@@ -414,14 +414,13 @@ async function handleAnimgif(hisoka, m, query, ctx) {
             `_Powered by Tenor • WilyBot_`,
         ].filter(v => v !== null).join('\n');
 
-        /* ── Hapus loading message, kirim GIF (1 pesan saja) ── */
+        /* ── Hapus loading message, kirim sebagai MP4 video ── */
         await deleteLoad();
 
         const sendPayload = {
-            video      : buffer,
+            video    : buffer,
             caption,
-            gifPlayback: true,
-            mimetype   : 'video/mp4',
+            mimetype : 'video/mp4',
         };
         if (thumbBuf) sendPayload.jpegThumbnail = thumbBuf;
 
