@@ -30,7 +30,6 @@ const { execFile } = require('child_process');
 const fs           = require('fs');
 const os           = require('os');
 const path         = require('path');
-const sharp        = require('sharp');
 
 /* ── Re-encode mp4 ke format yang kompatibel WhatsApp GIF ── */
 function reencodeForWhatsApp(inputBuf) {
@@ -73,27 +72,52 @@ function reencodeForWhatsApp(inputBuf) {
     });
 }
 
-/* ── Ekstrak frame pertama sebagai JPEG thumbnail ── */
-/* Dibutuhkan WA Mobile (Business & Messenger) agar media bisa di-render */
-function extractThumbnail(mp4Buf) {
+/* ── Ekstrak frame pertama + blur langsung via ffmpeg ── */
+/* Hasilnya: thumbnail buram (mosaic) yang tampil di WA sebelum user download */
+function extractBlurredThumbnail(mp4Buf) {
     return new Promise((resolve) => {
-        const tmpIn  = path.join(os.tmpdir(), `tg_th_in_${Date.now()}.mp4`);
-        const tmpOut = path.join(os.tmpdir(), `tg_th_out_${Date.now()}.jpg`);
+        const ts     = Date.now();
+        const tmpIn  = path.join(os.tmpdir(), `tg_th_in_${ts}.mp4`);
+        const tmpOut = path.join(os.tmpdir(), `tg_th_out_${ts}.jpg`);
         try { fs.writeFileSync(tmpIn, mp4Buf); } catch (_) { return resolve(null); }
 
+        /*
+         * gblur=sigma=20  → blur kuat (Gaussian blur radius 20px)
+         * scale=320:-1    → resize lebar 320px, tinggi proporsional
+         * Tambah pixelize=width=16:height=16 sebagai fallback jika gblur tidak ada
+         */
         execFile('ffmpeg', [
             '-y',
             '-i', tmpIn,
-            '-vframes', '1',       // ambil 1 frame saja
-            '-q:v', '5',           // kualitas JPEG cukup (1-31, kecil = bagus)
-            '-vf', 'scale=320:-1', // resize ke lebar 320px untuk thumbnail
+            '-vframes', '1',
+            '-vf', 'scale=320:-1,gblur=sigma=20',
+            '-q:v', '8',
             tmpOut,
-        ], { timeout: 15000 }, (err) => {
-            try { fs.unlinkSync(tmpIn); } catch (_) {}
-            if (err) {
-                try { fs.unlinkSync(tmpOut); } catch (_) {}
-                return resolve(null); // gagal thumbnail tidak masalah, tetap kirim
+        ], { timeout: 15000 }, (errBlur) => {
+            if (errBlur) {
+                /* Fallback: coba pixelize jika gblur tidak tersedia */
+                execFile('ffmpeg', [
+                    '-y',
+                    '-i', tmpIn,
+                    '-vframes', '1',
+                    '-vf', 'scale=32:-1,scale=320:-1:flags=neighbor',
+                    '-q:v', '8',
+                    tmpOut,
+                ], { timeout: 15000 }, (errPx) => {
+                    try { fs.unlinkSync(tmpIn); } catch (_) {}
+                    if (errPx) {
+                        try { fs.unlinkSync(tmpOut); } catch (_) {}
+                        return resolve(null);
+                    }
+                    try {
+                        const thumb = fs.readFileSync(tmpOut);
+                        fs.unlinkSync(tmpOut);
+                        resolve(thumb);
+                    } catch (_) { resolve(null); }
+                });
+                return;
             }
+            try { fs.unlinkSync(tmpIn); } catch (_) {}
             try {
                 const thumb = fs.readFileSync(tmpOut);
                 fs.unlinkSync(tmpOut);
@@ -101,19 +125,6 @@ function extractThumbnail(mp4Buf) {
             } catch (_) { resolve(null); }
         });
     });
-}
-
-/* ── Blur thumbnail agar tampil buram sebelum download di WA ── */
-async function blurThumbnail(thumbBuf) {
-    if (!thumbBuf) return null;
-    try {
-        return await sharp(thumbBuf)
-            .blur(18)          // radius blur — semakin besar semakin buram
-            .jpeg({ quality: 60 })
-            .toBuffer();
-    } catch (_) {
-        return thumbBuf;       // kalau sharp gagal, pakai thumbnail asli
-    }
 }
 
 /* ── Tenor API config ── */
@@ -378,9 +389,8 @@ async function handleAnimgif(hisoka, m, query, ctx) {
             1000,
         );
 
-        /* ── Tahap 4: ekstrak thumbnail + blur agar tampil buram sebelum download ── */
-        const rawThumb = await extractThumbnail(buffer);
-        const thumbBuf = await blurThumbnail(rawThumb);
+        /* ── Tahap 4: ekstrak frame + blur via ffmpeg (tampil buram sebelum download) ── */
+        const thumbBuf = await extractBlurredThumbnail(buffer);
 
         /* ── Info ukuran dari buffer asli ── */
         const actualSize = formatSize(gif.fileSize || rawBuffer.byteLength);
