@@ -25,7 +25,48 @@
  */
 'use strict';
 
-const axios = require('axios');
+const axios        = require('axios');
+const { execFile } = require('child_process');
+const fs           = require('fs');
+const os           = require('os');
+const path         = require('path');
+
+/* ── Re-encode mp4 ke format yang kompatibel WhatsApp GIF ── */
+function reencodeForWhatsApp(inputBuf) {
+    return new Promise((resolve, reject) => {
+        const tmpIn  = path.join(os.tmpdir(), `tg_in_${Date.now()}.mp4`);
+        const tmpOut = path.join(os.tmpdir(), `tg_out_${Date.now()}.mp4`);
+        fs.writeFileSync(tmpIn, inputBuf);
+
+        /*
+         * Flag ffmpeg untuk WhatsApp GIF playback:
+         * -vf scale  → paksa dimensi genap (WhatsApp butuh ini)
+         * -c:v libx264 -pix_fmt yuv420p → H.264 + pixel format yang WA terima
+         * -an        → hapus audio
+         * -movflags faststart → bisa distream langsung
+         */
+        execFile('ffmpeg', [
+            '-y',
+            '-i', tmpIn,
+            '-vf', 'scale=trunc(iw/2)*2:trunc(ih/2)*2',
+            '-c:v', 'libx264',
+            '-pix_fmt', 'yuv420p',
+            '-an',
+            '-movflags', '+faststart',
+            '-preset', 'fast',
+            tmpOut,
+        ], { timeout: 60000 }, (err) => {
+            try { fs.unlinkSync(tmpIn); } catch (_) {}
+            if (err) {
+                try { fs.unlinkSync(tmpOut); } catch (_) {}
+                return reject(new Error('ffmpeg gagal: ' + err.message));
+            }
+            const out = fs.readFileSync(tmpOut);
+            try { fs.unlinkSync(tmpOut); } catch (_) {}
+            resolve(out);
+        });
+    });
+}
 
 /* ── Tenor API config ── */
 const TENOR_KEY    = 'LIVDSRZULELA';
@@ -255,16 +296,24 @@ async function handleAnimgif(hisoka, m, query, ctx) {
             1200,
         );
 
-        /* ── Tahap 2: unduh buffer (animasi spinner sambil nunggu download) ── */
-        const buffer = await withLoadingAnim(
+        /* ── Tahap 2: unduh buffer ── */
+        const rawBuffer = await withLoadingAnim(
             editStep,
             'Mengunduh GIF...',
             downloadGif(gif.url),
             1000,
         );
 
-        /* ── Info ukuran aktual dari buffer ── */
-        const actualSize = formatSize(gif.fileSize || buffer.byteLength);
+        /* ── Tahap 3: re-encode ke H.264/yuv420p agar bisa dibaca WA ── */
+        const buffer = await withLoadingAnim(
+            editStep,
+            'Memproses GIF...',
+            reencodeForWhatsApp(rawBuffer),
+            1000,
+        );
+
+        /* ── Info ukuran aktual dari buffer asli (sebelum encode) ── */
+        const actualSize = formatSize(gif.fileSize || rawBuffer.byteLength);
         const dimsStr    = gif.dims ? `${gif.dims[0]}x${gif.dims[1]}` : 'N/A';
 
         /* ── Caption detail lengkap ── */
