@@ -217,9 +217,9 @@
     "name": "AE MyRep",
     "type": "imageMessage",
     "arrivedAt": "2026-06-25T07:38:04.846Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "⚽",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6285150762138",
@@ -232,6 +232,8 @@
       "participant": "12442939724000@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-25T07:38:04.847Z"
+    "updatedAt": "2026-06-25T07:39:24.708Z",
+    "retriedOnStartup": true,
+    "retriedAt": "2026-06-25T07:39:24.708Z"
   }
 }

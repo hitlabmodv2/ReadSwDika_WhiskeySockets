@@ -365,21 +365,12 @@ async function handleAnimgif(hisoka, m, query, ctx) {
             } catch (_) {}
         }
 
-        /* ── Tahap 2: unduh buffer ── */
+        /* ── Tahap 2: unduh buffer (preview image sudah tampil, tidak perlu spinner) ── */
         const rawBuffer = await downloadGif(gif.url);
 
         /* ── Tahap 3: re-encode ke H.264 Baseline agar bisa dibaca WA mobile ── */
-        const buffer = await withLoadingAnim(
-            async (txt) => {
-                // edit preview caption kalau ada, fallback ke no-op
-                if (previewMsgKey) {
-                    try { await hisoka.sendMessage(m.from, { edit: previewMsgKey, text: txt }); } catch (_) {}
-                }
-            },
-            'Memproses GIF...',
-            reencodeForWhatsApp(rawBuffer),
-            1000,
-        );
+        /* Tidak pakai withLoadingAnim di sini — edit text pada image key = kirim pesan baru (bug!) */
+        const buffer = await reencodeForWhatsApp(rawBuffer);
 
         /* ── Tahap 4: ekstrak thumbnail untuk WA mobile ── */
         const thumbBuf = await extractThumbnail(buffer);
