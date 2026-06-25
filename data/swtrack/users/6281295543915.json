@@ -701,9 +701,9 @@
     "name": "Arthur.remi_kan",
     "type": "imageMessage",
     "arrivedAt": "2026-06-25T06:59:48.607Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "🐩",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6281295543915",
@@ -716,6 +716,8 @@
       "participant": "26547712958494@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-25T06:59:48.607Z"
+    "updatedAt": "2026-06-25T07:00:55.289Z",
+    "retriedOnStartup": true,
+    "retriedAt": "2026-06-25T07:00:55.288Z"
   }
 }

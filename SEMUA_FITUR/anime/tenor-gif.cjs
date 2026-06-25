@@ -60,6 +60,58 @@ const PRESET_CATEGORIES = {
 /* ── Default kalau tidak ada query ── */
 const DEFAULT_QUERIES = Object.values(PRESET_CATEGORIES).map(c => c.query);
 
+/* ── Format bytes ke KB/MB ── */
+function formatSize(bytes) {
+    if (!bytes || bytes <= 0) return 'N/A';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / 1024 / 1024).toFixed(2) + ' MB';
+}
+
+/* ── Format durasi detik ── */
+function formatDuration(secs) {
+    if (!secs || secs <= 0) return 'N/A';
+    return parseFloat(secs).toFixed(3) + ' sec';
+}
+
+/* ── Format tanggal dari Unix timestamp ── */
+function formatDate(unixTs) {
+    if (!unixTs) return 'N/A';
+    const d = new Date(unixTs * 1000);
+    const pad = n => String(n).padStart(2, '0');
+    return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}, ${pad(d.getHours())}.${pad(d.getMinutes())}.${pad(d.getSeconds())}`;
+}
+
+/* ── Frame animasi loading (berputar agar tidak spam) ── */
+const LOAD_FRAMES_SEARCH = [
+    '🔍 _Mencari GIF di Tenor..._',
+    '🌐 _Menghubungi server Tenor..._',
+    '📡 _Mengambil data GIF..._',
+    '🎴 _Memproses hasil pencarian..._',
+];
+
+const LOAD_FRAMES_DOWNLOAD = [
+    '📥 _Mengunduh GIF... (0%)_',
+    '📥 _Mengunduh GIF... (25%)_',
+    '📥 _Mengunduh GIF... (50%)_',
+    '📥 _Mengunduh GIF... (75%)_',
+    '📥 _Mengunduh GIF... (99%)_',
+];
+
+/* ── Animasi edit berputar selama proses berlangsung ── */
+async function animateLoading(editFn, frames, intervalMs = 900) {
+    let i = 0;
+    let running = true;
+    const tick = async () => {
+        while (running) {
+            await editFn(frames[i % frames.length]).catch(() => {});
+            i++;
+            await new Promise(r => setTimeout(r, intervalMs));
+        }
+    };
+    tick(); // jalankan di background, tidak di-await
+    return () => { running = false; };
+}
+
 /* ── Ambil random GIF dari Tenor ── */
 async function fetchRandomTenorGif(query) {
     const q   = (query || DEFAULT_QUERIES[Math.floor(Math.random() * DEFAULT_QUERIES.length)]).trim();
@@ -84,15 +136,26 @@ async function fetchRandomTenorGif(query) {
     const med    = pick.media?.[0] || {};
 
     /* Prioritas: loopedmp4 (loop native) → mp4 → tinymp4 */
-    const mp4Url = med.loopedmp4?.url || med.mp4?.url || med.tinymp4?.url;
+    const mp4Meta = med.loopedmp4 || med.mp4 || med.tinymp4 || {};
+    const mp4Url  = mp4Meta.url;
     if (!mp4Url) throw new Error('URL MP4 tidak ditemukan dari Tenor.');
 
+    /* Ambil dimensi & durasi dari media */
+    const dims     = mp4Meta.dims  || med.gif?.dims  || null;   // [width, height]
+    const duration = mp4Meta.duration ?? med.mp4?.duration ?? null;
+    const fileSize = mp4Meta.size  || null;
+
     return {
-        url    : mp4Url,
-        title  : pick.title || pick.content_description || q,
-        tags   : (pick.tags || []).slice(0, 5),
-        query  : q,
+        url        : mp4Url,
+        title      : pick.title || pick.content_description || q,
+        description: pick.content_description || pick.title || '',
+        tags       : (pick.tags || []).slice(0, 5),
+        query      : q,
         pos,
+        created    : pick.created  || null,
+        dims,
+        duration,
+        fileSize,
     };
 }
 
@@ -157,25 +220,48 @@ async function handleAnimgif(hisoka, m, query, ctx) {
         try { await m.reply({ edit: loadMsg.key, text }); } catch (_) {}
     };
 
+    let stopAnim = null;
+
     try {
-        await editStep('🔍 _Mencari GIF di Tenor..._');
+        /* ── Animasi tahap 1: cari ── */
+        stopAnim = await animateLoading(editStep, LOAD_FRAMES_SEARCH, 900);
 
         const gif = await fetchRandomTenorGif(resolvedQuery);
 
-        await editStep('📥 _Mengunduh GIF..._');
-        const buffer = await downloadGif(gif.url);
+        /* ── Animasi tahap 2: download ── */
+        if (stopAnim) { stopAnim(); stopAnim = null; }
+        stopAnim = await animateLoading(editStep, LOAD_FRAMES_DOWNLOAD, 700);
 
+        const buffer = await downloadGif(gif.url);
+        const actualSize = formatSize(gif.fileSize || buffer.byteLength);
+
+        /* ── Stop animasi ── */
+        if (stopAnim) { stopAnim(); stopAnim = null; }
+
+        /* ── Susun dimensi ── */
+        const dimsStr = gif.dims ? `${gif.dims[0]}x${gif.dims[1]}` : 'N/A';
+
+        /* ── Caption dengan detail lengkap ── */
         const caption = [
             `🎴 *Anime GIF Random*`,
             ``,
-            `🔍 *Query   :* ${gif.query}`,
-            usedLabel              ? `🏷️ *Kategori:* ${usedLabel}`            : null,
-            gif.title              ? `📝 *Judul   :* ${gif.title}`            : null,
-            gif.tags.length > 0    ? `🔖 *Tags    :* ${gif.tags.join(', ')}` : null,
+            `🔍 *Query    :* ${gif.query}`,
+            usedLabel              ? `🏷️ *Kategori :* ${usedLabel}`           : null,
+            gif.title              ? `📝 *Judul    :* ${gif.title}`            : null,
+            gif.tags.length > 0   ? `🔖 *Tags     :* ${gif.tags.join(', ')}` : null,
+            ``,
+            `╭──『 📋 *Detail* 』──`,
+            gif.description        ? `│ 📄 *Deskripsi Konten:*`               : null,
+            gif.description        ? `│     ${gif.description}`               : null,
+            `│ 📦 *Ukuran File    :* ${actualSize}`,
+            `│ ⏱️ *Durasi         :* ${formatDuration(gif.duration)}`,
+            `│ 📐 *Dimensi        :* ${dimsStr}`,
+            `│ 📅 *Dibuat         :* ${formatDate(gif.created)}`,
+            `╰───────────────────`,
             ``,
             `_💡 Ketik ${pfx}animgif list untuk lihat kategori_`,
             `_Powered by Tenor • WilyBot_`,
-        ].filter(Boolean).join('\n');
+        ].filter(v => v !== null).join('\n');
 
         await hisoka.sendMessage(m.from, {
             video      : buffer,
@@ -189,6 +275,7 @@ async function handleAnimgif(hisoka, m, query, ctx) {
         logCommand(m, hisoka, 'animgif');
 
     } catch (err) {
+        if (stopAnim) { stopAnim(); stopAnim = null; }
         console.error('[TenorGif]', err.message);
         await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
         await editStep(`❌ *Gagal:* ${err.message}`);
