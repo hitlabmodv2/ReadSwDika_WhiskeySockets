@@ -58,7 +58,6 @@ async function fetchRandomTenorGif(query) {
             key           : TENOR_KEY,
             limit         : LIMIT,
             pos,
-            media_filter  : 'minimal',
             contentfilter : 'off',
             locale        : 'id_ID',
         },
@@ -70,13 +69,16 @@ async function fetchRandomTenorGif(query) {
         throw new Error(`Tidak ada GIF ditemukan untuk: "${q}"`);
     }
 
-    const pick   = results[Math.floor(Math.random() * results.length)];
-    const gifUrl = pick.media?.[0]?.gif?.url || pick.media?.[0]?.tinygif?.url;
+    const pick = results[Math.floor(Math.random() * results.length)];
+    const med  = pick.media?.[0] || {};
 
-    if (!gifUrl) throw new Error('URL GIF tidak ditemukan dari response Tenor.');
+    /* Prioritas: loopedmp4 (loop native) → mp4 → tinymp4 */
+    const mp4Url = med.loopedmp4?.url || med.mp4?.url || med.tinymp4?.url;
+
+    if (!mp4Url) throw new Error('URL MP4 tidak ditemukan dari response Tenor.');
 
     return {
-        url        : gifUrl,
+        url        : mp4Url,
         title      : pick.title || pick.content_description || q,
         itemUrl    : pick.itemurl || `https://tenor.com/view/${pick.id}`,
         tags       : (pick.tags || []).slice(0, 5),

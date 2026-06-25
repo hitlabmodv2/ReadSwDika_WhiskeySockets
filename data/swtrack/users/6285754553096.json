@@ -149,5 +149,28 @@
       }
     ],
     "processedAt": "2026-06-25T06:04:35.669Z"
+  },
+  "ACD3F61870D225D2C2E7EC9E76BB08F2": {
+    "id": "ACD3F61870D225D2C2E7EC9E76BB08F2",
+    "sender": "6285754553096@s.whatsapp.net",
+    "name": "Maury.Denver ƒт『𝐇𝐗』",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-25T06:43:40.545Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285754553096",
+    "resolvedPn": "6285754553096@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285754553096@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACD3F61870D225D2C2E7EC9E76BB08F2",
+      "participant": "169797337784433@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-25T06:43:40.545Z"
   }
 }
