@@ -328,10 +328,8 @@ async function handleAnimgif(hisoka, m, query, ctx) {
         try { await hisoka.sendMessage(m.from, { delete: loadMsg.key }); } catch (_) {}
     };
 
-    let previewMsgKey = null;
-
     try {
-        /* ── Tahap 1: cari GIF ── */
+        /* ── Tahap 1: cari GIF — spinner edit loadMsg ── */
         const gif = await withLoadingAnim(
             editStep,
             'Mencari GIF di Tenor...',
@@ -339,38 +337,21 @@ async function handleAnimgif(hisoka, m, query, ctx) {
             1200,
         );
 
-        /*
-         * ── Buffer Image: hapus loading text, kirim preview GIF kecil sebagai gambar ──
-         * User langsung bisa lihat GIF apa yang datang sebelum full download selesai.
-         * Menggunakan URL tinygif (kecil, cepat) dari Tenor langsung.
-         */
-        await deleteLoad();
-        if (gif.previewUrl) {
-            try {
-                const previewCaption = [
-                    `🎴 *Anime GIF Random*`,
-                    ``,
-                    `🔍 *Query    :* ${gif.query}`,
-                    usedLabel ? `🏷️ *Kategori :* ${usedLabel}` : null,
-                    gif.title ? `📝 *Judul    :* ${gif.title}` : null,
-                    ``,
-                    `⏳ _Memproses GIF, mohon tunggu..._`,
-                ].filter(Boolean).join('\n');
+        /* ── Tahap 2: unduh buffer — spinner edit loadMsg ── */
+        const rawBuffer = await withLoadingAnim(
+            editStep,
+            'Mengunduh GIF...',
+            downloadGif(gif.url),
+            1000,
+        );
 
-                const prevMsg = await hisoka.sendMessage(m.from, {
-                    image  : { url: gif.previewUrl },
-                    caption: previewCaption,
-                }, { quoted: m });
-                previewMsgKey = prevMsg?.key || null;
-            } catch (_) {}
-        }
-
-        /* ── Tahap 2: unduh buffer (preview image sudah tampil, tidak perlu spinner) ── */
-        const rawBuffer = await downloadGif(gif.url);
-
-        /* ── Tahap 3: re-encode ke H.264 Baseline agar bisa dibaca WA mobile ── */
-        /* Tidak pakai withLoadingAnim di sini — edit text pada image key = kirim pesan baru (bug!) */
-        const buffer = await reencodeForWhatsApp(rawBuffer);
+        /* ── Tahap 3: re-encode ke H.264 Baseline ── spinner edit loadMsg ── */
+        const buffer = await withLoadingAnim(
+            editStep,
+            'Memproses GIF...',
+            reencodeForWhatsApp(rawBuffer),
+            1000,
+        );
 
         /* ── Tahap 4: ekstrak thumbnail untuk WA mobile ── */
         const thumbBuf = await extractThumbnail(buffer);
@@ -397,13 +378,9 @@ async function handleAnimgif(hisoka, m, query, ctx) {
             `_Powered by Tenor • WilyBot_`,
         ].filter(v => v !== null).join('\n');
 
-        /* ── Hapus preview image sebelum kirim GIF asli ── */
-        if (previewMsgKey) {
-            try { await hisoka.sendMessage(m.from, { delete: previewMsgKey }); } catch (_) {}
-            previewMsgKey = null;
-        }
+        /* ── Hapus loading message, kirim GIF (1 pesan saja) ── */
+        await deleteLoad();
 
-        /* Kirim GIF: video/mp4 + gifPlayback:true = badge GIF di semua platform WA */
         const sendPayload = {
             video      : buffer,
             caption,
@@ -418,9 +395,6 @@ async function handleAnimgif(hisoka, m, query, ctx) {
 
     } catch (err) {
         console.error('[TenorGif]', err.message);
-        if (previewMsgKey) {
-            try { await hisoka.sendMessage(m.from, { delete: previewMsgKey }); } catch (_) {}
-        }
         await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
         await editStep(`❌ *Gagal:* ${err.message}`);
     }
