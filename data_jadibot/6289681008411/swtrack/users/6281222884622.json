@@ -1,13 +1,13 @@
 {
-  "AC80294FF62C1677618B55648FF36BCC": {
-    "id": "AC80294FF62C1677618B55648FF36BCC",
+  "AC8FADDC106B24C2659D203BC3A6D07C": {
+    "id": "AC8FADDC106B24C2659D203BC3A6D07C",
     "sender": "6281222884622@s.whatsapp.net",
     "name": "~ Alfian",
     "type": "imageMessage",
-    "arrivedAt": "2026-06-23T12:55:37.922Z",
+    "arrivedAt": "2026-06-25T09:00:45.419Z",
     "read": true,
     "reacted": true,
-    "emoji": "5️⃣➕3️⃣🟰8️⃣",
+    "emoji": "🎃",
     "resolve": "Signal Lib ✓",
     "source": "status",
     "number": "6281222884622",
@@ -16,17 +16,17 @@
       "remoteJid": "status@broadcast",
       "remoteJidAlt": "6281222884622@s.whatsapp.net",
       "fromMe": false,
-      "id": "AC80294FF62C1677618B55648FF36BCC",
+      "id": "AC8FADDC106B24C2659D203BC3A6D07C",
       "participant": "23274595578098@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-23T12:55:43.233Z",
+    "updatedAt": "2026-06-25T09:00:50.727Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6281222884622@s.whatsapp.net",
         "fromMe": false,
-        "id": "AC80294FF62C1677618B55648FF36BCC",
+        "id": "AC8FADDC106B24C2659D203BC3A6D07C",
         "participant": "23274595578098@lid",
         "addressingMode": "lid"
       },
@@ -34,53 +34,11 @@
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6281222884622@s.whatsapp.net",
         "fromMe": false,
-        "id": "AC80294FF62C1677618B55648FF36BCC",
+        "id": "AC8FADDC106B24C2659D203BC3A6D07C",
         "participant": "6281222884622@s.whatsapp.net",
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-23T12:55:43.233Z"
-  },
-  "ACA0E6C02891B0EA39489A88C1935CA0": {
-    "id": "ACA0E6C02891B0EA39489A88C1935CA0",
-    "sender": "6281222884622@s.whatsapp.net",
-    "name": "~ Alfian",
-    "type": "imageMessage",
-    "arrivedAt": "2026-06-24T03:14:25.654Z",
-    "read": true,
-    "reacted": true,
-    "emoji": "🌨️🤖",
-    "resolve": "Signal Lib ✓",
-    "source": "status",
-    "number": "6281222884622",
-    "resolvedPn": "6281222884622@s.whatsapp.net",
-    "messageKey": {
-      "remoteJid": "status@broadcast",
-      "remoteJidAlt": "6281222884622@s.whatsapp.net",
-      "fromMe": false,
-      "id": "ACA0E6C02891B0EA39489A88C1935CA0",
-      "participant": "23274595578098@lid",
-      "addressingMode": "lid"
-    },
-    "updatedAt": "2026-06-24T03:14:39.024Z",
-    "receiptKeys": [
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6281222884622@s.whatsapp.net",
-        "fromMe": false,
-        "id": "ACA0E6C02891B0EA39489A88C1935CA0",
-        "participant": "23274595578098@lid",
-        "addressingMode": "lid"
-      },
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6281222884622@s.whatsapp.net",
-        "fromMe": false,
-        "id": "ACA0E6C02891B0EA39489A88C1935CA0",
-        "participant": "6281222884622@s.whatsapp.net",
-        "addressingMode": "lid"
-      }
-    ],
-    "processedAt": "2026-06-24T03:14:39.024Z"
+    "processedAt": "2026-06-25T09:00:50.727Z"
   }
 }
