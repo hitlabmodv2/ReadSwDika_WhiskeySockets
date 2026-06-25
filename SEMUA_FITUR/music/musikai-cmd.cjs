@@ -345,7 +345,23 @@ async function handleMusikaiCmd({
 
         try {
                 if (input.toLowerCase() === 'random') {
-                        await _showGenreSelect();
+                        // Langsung generate random tanpa interactive picker — kompatibel WA Mobile
+                        const { ChatMusicAPI } = require(path.resolve('./SEMUA_FITUR/music/chatmusic.cjs'));
+                        const api = new ChatMusicAPI();
+                        const randomPreset = api.getRandomPreset();
+                        await hisoka.sendMessage(m.from, { react: { text: '🎲', key: m.key } }).catch(() => {});
+                        await hisoka.sendMessage(m.from,
+                                { text: `🎲 *Generate Musik Random...*\n│ Judul : *${randomPreset.title}*\n│ Genre : *${randomPreset.musicStyle}*\n│ Mode  : *${randomPreset.isInstrumental ? 'Instrumental' : 'Dengan Vokal'}*\n│\n│ ⏳ Proses ~20-40 detik...` },
+                                { quoted: m }
+                        ).catch(() => null);
+                        await api.login();
+                        await _generateMusik({
+                                title: randomPreset.title,
+                                lyrics: randomPreset.lyrics || '',
+                                musicStyle: randomPreset.musicStyle,
+                                prompt: randomPreset.prompt,
+                                isInstrumental: randomPreset.isInstrumental,
+                        });
                         return;
                 }
 
@@ -364,7 +380,20 @@ async function handleMusikaiCmd({
                         const { ChatMusicAPI } = require(path.resolve('./SEMUA_FITUR/music/chatmusic.cjs'));
                         const api = new ChatMusicAPI();
                         await api.login();
-                        const preset = await api.aiThemePreset(tema, 'vocal');
+
+                        // Coba aiThemePreset max 20 detik, kalau Gemini timeout/gagal → pakai random preset
+                        let preset;
+                        try {
+                                preset = await Promise.race([
+                                        api.aiThemePreset(tema, 'vocal'),
+                                        new Promise((_, rej) => setTimeout(() => rej(new Error('Gemini timeout')), 20000)),
+                                ]);
+                        } catch (_geminiErr) {
+                                const rnd = api.getRandomPreset();
+                                preset = { ...rnd, title: tema.slice(0, 80), genreLabel: rnd.musicStyle };
+                                console.warn('\x1b[33m[MusicAI/Tema]\x1b[0m Gemini gagal → pakai random preset, tema sebagai judul');
+                        }
+
                         await _edit(
                                 `🎵 *AI selesai meracik!*\n` +
                                 `│ Tema  : *${tema}*\n` +
@@ -397,12 +426,16 @@ async function handleMusikaiCmd({
                 const isSensitive = /sensitive words|prohibited/i.test(error.message);
                 const errMsg = isSensitive
                         ? `╭──『 ⚠️ *LIRIK DIBLOKIR* 』\n│\n│ API mendeteksi *kata sensitif* dalam lirik.\n│\n│ 💡 *Solusi:*\n│ Hindari kata-kata terkait narkoba,\n│ SARA, kekerasan, atau konten dewasa.\n│\n│ Coba ganti lirikmu & kirim ulang ↓\n╰──────────────────────────────`
-                        : `╭──『 ❌ *GAGAL GENERATE* 』\n│\n│ ${error.message}\n│\n│ Coba lagi atau pilih genre random ↓\n╰──────────────────────────────`;
-                await sendConfirmWithButtons(hisoka, m, errMsg,
-                        isSensitive
-                                ? [{ text: '📖 Lihat Contoh Format', id: '__musikai_help__' }]
-                                : [{ text: '🔁 Coba Random Lagi', id: '__musikai_random__' }]
-                );
+                        : `╭──『 ❌ *GAGAL GENERATE* 』\n│\n│ ${error.message}\n│\n│ Coba lagi atau coba:\n│ _${m.prefix || '.'}musikai [judul] | [lirik] | [genre]_\n╰──────────────────────────────`;
+                // Selalu kirim plain text dulu — muncul di semua WA client
+                await hisoka.sendMessage(m.from, { text: errMsg }, { quoted: m }).catch(() => {});
+                try {
+                        await sendConfirmWithButtons(hisoka, m, errMsg,
+                                isSensitive
+                                        ? [{ text: '📖 Lihat Contoh Format', id: '__musikai_help__' }]
+                                        : [{ text: '🔁 Coba Random Lagi', id: '__musikai_random__' }]
+                        );
+                } catch (_) {}
         }
 }
 

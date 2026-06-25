@@ -261,14 +261,25 @@ async function handleMusikai2Cmd({
 
         try {
                 if (input.toLowerCase() === 'random') {
-                        await sendConfirmWithButtons(hisoka, m,
-                                `╭──『 🎲 *MUSIK AI 2 — RANDOM* 』\n│\n│ AI akan memilih genre, judul & lirik\n│ secara otomatis sesuai bahasa pilihan.\n│\n│ Pilih bahasa lirik di bawah ↓\n╰──────────────────────────────`,
-                                [
-                                        { text: '🇮🇩 Indonesia', id: '__musikai2_rlang__id' },
-                                        { text: '🇯🇵 Jepang',   id: '__musikai2_rlang__jp' },
-                                        { text: '🇬🇧 English',  id: '__musikai2_rlang__en' },
-                                ]
-                        );
+                        // Langsung generate random tanpa interactive picker — kompatibel WA Mobile
+                        // Pakai getRandomPreset dari ChatMusicAPI (v1) — lokal, tidak butuh Gemini
+                        const { ChatMusicAPI2 } = require(path.resolve('./SEMUA_FITUR/music/chatmusic2.cjs'));
+                        const { ChatMusicAPI: ChatMusicAPIv1 } = require(path.resolve('./SEMUA_FITUR/music/chatmusic.cjs'));
+                        const api = new ChatMusicAPI2();
+                        const randomPreset = new ChatMusicAPIv1().getRandomPreset();
+                        await hisoka.sendMessage(m.from, { react: { text: '🎲', key: m.key } }).catch(() => {});
+                        await hisoka.sendMessage(m.from,
+                                { text: `🎲 *Generate Musik Random AI 2...*\n│ Judul : *${randomPreset.title}*\n│ Genre : *${randomPreset.musicStyle}*\n│ Mode  : *${randomPreset.isInstrumental ? 'Instrumental' : 'Dengan Vokal'}*\n│\n│ ⏳ Proses ~20-40 detik...` },
+                                { quoted: m }
+                        ).catch(() => null);
+                        await api.login();
+                        await _generateMusik2({
+                                title: randomPreset.title,
+                                lyrics: randomPreset.lyrics || '',
+                                musicStyle: randomPreset.musicStyle,
+                                prompt: randomPreset.prompt,
+                                isInstrumental: randomPreset.isInstrumental,
+                        });
                         return;
                 }
 
@@ -288,7 +299,22 @@ async function handleMusikai2Cmd({
 
                         const api = new ChatMusicAPI2();
                         await api.login();
-                        const preset = await api.aiThemePreset(tema, 'vocal');
+
+                        // Coba aiThemePreset max 20 detik, kalau Gemini timeout/gagal → pakai random preset lokal
+                        let preset;
+                        try {
+                                preset = await Promise.race([
+                                        api.aiThemePreset(tema, 'vocal'),
+                                        new Promise((_, rej) => setTimeout(() => rej(new Error('Gemini timeout')), 20000)),
+                                ]);
+                        } catch (_geminiErr) {
+                                // aiThemePreset musikai2 tidak punya getRandomPreset, pakai v1 sebagai fallback
+                                const { ChatMusicAPI: _ChatMusicAPIv1 } = require(path.resolve('./SEMUA_FITUR/music/chatmusic.cjs'));
+                                const rnd = new _ChatMusicAPIv1().getRandomPreset();
+                                preset = { ...rnd, title: tema.slice(0, 80), genreLabel: rnd.musicStyle };
+                                console.warn('\x1b[33m[MusicAI2/Tema]\x1b[0m Gemini gagal → pakai random preset, tema sebagai judul');
+                        }
+
                         await _edit(
                                 `🎵 *AI 2 selesai meracik!*\n` +
                                 `│ Tema  : *${tema}*\n` +
@@ -321,12 +347,16 @@ async function handleMusikai2Cmd({
                 const isSensitive = /sensitive words|prohibited/i.test(error.message);
                 const errMsg = isSensitive
                         ? `╭──『 ⚠️ *LIRIK DIBLOKIR* 』\n│\n│ API mendeteksi *kata sensitif* dalam lirik.\n│\n│ 💡 *Solusi:*\n│ Hindari kata-kata terkait narkoba,\n│ SARA, kekerasan, atau konten dewasa.\n│\n│ Coba ganti lirikmu & kirim ulang ↓\n╰──────────────────────────────`
-                        : `╭──『 ❌ *GAGAL GENERATE* 』\n│\n│ ${error.message}\n│\n│ Coba lagi atau pilih genre random ↓\n╰──────────────────────────────`;
-                await sendConfirmWithButtons(hisoka, m, errMsg,
-                        isSensitive
-                                ? [{ text: '📖 Lihat Contoh Format', id: '__musikai2_help__' }]
-                                : [{ text: '🔁 Coba Random Lagi', id: '__musikai2_random__' }]
-                );
+                        : `╭──『 ❌ *GAGAL GENERATE* 』\n│\n│ ${error.message}\n│\n│ Coba lagi atau coba:\n│ _${m.prefix || '.'}musikai2 [judul] | [lirik] | [genre]_\n╰──────────────────────────────`;
+                // Selalu kirim plain text dulu — muncul di semua WA client
+                await hisoka.sendMessage(m.from, { text: errMsg }, { quoted: m }).catch(() => {});
+                try {
+                        await sendConfirmWithButtons(hisoka, m, errMsg,
+                                isSensitive
+                                        ? [{ text: '📖 Lihat Contoh Format', id: '__musikai2_help__' }]
+                                        : [{ text: '🔁 Coba Random Lagi', id: '__musikai2_random__' }]
+                        );
+                } catch (_) {}
         }
 }
 
