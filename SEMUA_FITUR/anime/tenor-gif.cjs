@@ -239,10 +239,17 @@ async function fetchRandomTenorGif(query) {
     /* Ukuran file: dari mp4 yang dipilih */
     const fileSize = mp4Meta.size     || null;
 
+    /* URL preview kecil (tinygif/nanogif) untuk ditampilkan sebagai buffer image */
+    const previewUrl =
+        med.tinygif?.url  ||
+        med.nanogif?.url  ||
+        med.gif?.url      ||
+        null;
+
     return {
         url        : mp4Meta.url,
+        previewUrl,                                          // ← buffer image sebelum download
         title      : pick.title || pick.content_description || q,
-        description: pick.content_description || pick.title || '',
         tags       : (pick.tags || []).slice(0, 5),
         query      : q,
         pos,
@@ -321,8 +328,10 @@ async function handleAnimgif(hisoka, m, query, ctx) {
         try { await hisoka.sendMessage(m.from, { delete: loadMsg.key }); } catch (_) {}
     };
 
+    let previewMsgKey = null;
+
     try {
-        /* ── Tahap 1: cari GIF (animasi spinner sambil nunggu API) ── */
+        /* ── Tahap 1: cari GIF ── */
         const gif = await withLoadingAnim(
             editStep,
             'Mencari GIF di Tenor...',
@@ -330,31 +339,56 @@ async function handleAnimgif(hisoka, m, query, ctx) {
             1200,
         );
 
-        /* ── Tahap 2: unduh buffer ── */
-        const rawBuffer = await withLoadingAnim(
-            editStep,
-            'Mengunduh GIF...',
-            downloadGif(gif.url),
-            1000,
-        );
+        /*
+         * ── Buffer Image: hapus loading text, kirim preview GIF kecil sebagai gambar ──
+         * User langsung bisa lihat GIF apa yang datang sebelum full download selesai.
+         * Menggunakan URL tinygif (kecil, cepat) dari Tenor langsung.
+         */
+        await deleteLoad();
+        if (gif.previewUrl) {
+            try {
+                const previewCaption = [
+                    `🎴 *Anime GIF Random*`,
+                    ``,
+                    `🔍 *Query    :* ${gif.query}`,
+                    usedLabel ? `🏷️ *Kategori :* ${usedLabel}` : null,
+                    gif.title ? `📝 *Judul    :* ${gif.title}` : null,
+                    ``,
+                    `⏳ _Memproses GIF, mohon tunggu..._`,
+                ].filter(Boolean).join('\n');
 
-        /* ── Tahap 3: re-encode ke H.264/yuv420p agar bisa dibaca WA ── */
+                const prevMsg = await hisoka.sendMessage(m.from, {
+                    image  : { url: gif.previewUrl },
+                    caption: previewCaption,
+                }, { quoted: m });
+                previewMsgKey = prevMsg?.key || null;
+            } catch (_) {}
+        }
+
+        /* ── Tahap 2: unduh buffer ── */
+        const rawBuffer = await downloadGif(gif.url);
+
+        /* ── Tahap 3: re-encode ke H.264 Baseline agar bisa dibaca WA mobile ── */
         const buffer = await withLoadingAnim(
-            editStep,
+            async (txt) => {
+                // edit preview caption kalau ada, fallback ke no-op
+                if (previewMsgKey) {
+                    try { await hisoka.sendMessage(m.from, { edit: previewMsgKey, text: txt }); } catch (_) {}
+                }
+            },
             'Memproses GIF...',
             reencodeForWhatsApp(rawBuffer),
             1000,
         );
 
-        /* ── Tahap 4: buat thumbnail (paralel, tidak perlu nunggu lama) ── */
-        /* Thumbnail wajib ada agar WA Mobile (Business & Messenger) bisa render GIF */
+        /* ── Tahap 4: ekstrak thumbnail untuk WA mobile ── */
         const thumbBuf = await extractThumbnail(buffer);
 
-        /* ── Info ukuran aktual dari buffer asli (sebelum encode) ── */
+        /* ── Info ukuran dari buffer asli ── */
         const actualSize = formatSize(gif.fileSize || rawBuffer.byteLength);
         const dimsStr    = gif.dims ? `${gif.dims[0]}x${gif.dims[1]}` : 'N/A';
 
-        /* ── Caption detail lengkap ── */
+        /* ── Caption bersih, tanpa duplikat ── */
         const caption = [
             `🎴 *Anime GIF Random*`,
             ``,
@@ -363,40 +397,39 @@ async function handleAnimgif(hisoka, m, query, ctx) {
             gif.title            ? `📝 *Judul    :* ${gif.title}`           : null,
             gif.tags.length > 0 ? `🔖 *Tags     :* ${gif.tags.join(', ')}` : null,
             ``,
-            `╭──『 📋 *Detail* 』──`,
-            gif.description      ? `│ 📄 *Deskripsi :* ${gif.description}`  : null,
-            `│ 📦 *Ukuran    :* ${actualSize}`,
-            `│ ⏱️ *Durasi    :* ${formatDuration(gif.duration)}`,
-            `│ 📐 *Dimensi   :* ${dimsStr}`,
-            `│ 📅 *Dibuat    :* ${formatDate(gif.created)}`,
-            `╰───────────────────`,
-            ``,
-            `_💡 Ketik ${pfx}animgif list untuk lihat kategori_`,
+            `╭──── 📋 *Detail* ────╮`,
+            `│ 📦 Ukuran  : ${actualSize}`,
+            `│ ⏱️ Durasi  : ${formatDuration(gif.duration)}`,
+            `│ 📐 Dimensi : ${dimsStr}`,
+            `│ 📅 Dibuat  : ${formatDate(gif.created)}`,
+            `╰─────────────────────╯`,
             `_Powered by Tenor • WilyBot_`,
         ].filter(v => v !== null).join('\n');
 
-        /*
-         * Kirim sebagai VIDEO dengan gifPlayback:true
-         * → WA Web    : tampil sebagai GIF auto-play dengan badge GIF
-         * → WA Mobile : jpegThumbnail wajib agar mobile bisa render media
-         */
+        /* ── Hapus preview image sebelum kirim GIF asli ── */
+        if (previewMsgKey) {
+            try { await hisoka.sendMessage(m.from, { delete: previewMsgKey }); } catch (_) {}
+            previewMsgKey = null;
+        }
+
+        /* Kirim GIF: video/mp4 + gifPlayback:true = badge GIF di semua platform WA */
         const sendPayload = {
-            video        : buffer,
+            video      : buffer,
             caption,
-            gifPlayback  : true,
-            mimetype     : 'video/mp4',
+            gifPlayback: true,
+            mimetype   : 'video/mp4',
         };
         if (thumbBuf) sendPayload.jpegThumbnail = thumbBuf;
 
         await hisoka.sendMessage(m.from, sendPayload, { quoted: m });
-
-        /* Hapus loading message agar tidak duplikat di chat */
-        await deleteLoad();
         await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
         logCommand(m, hisoka, 'animgif');
 
     } catch (err) {
         console.error('[TenorGif]', err.message);
+        if (previewMsgKey) {
+            try { await hisoka.sendMessage(m.from, { delete: previewMsgKey }); } catch (_) {}
+        }
         await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
         await editStep(`❌ *Gagal:* ${err.message}`);
     }
