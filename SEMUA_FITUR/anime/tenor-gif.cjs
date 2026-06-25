@@ -409,9 +409,10 @@ async function handleAnimgif(hisoka, m, query, ctx) {
         await deleteLoad();
 
         const sendPayload = {
-            video    : buffer,
+            video      : buffer,
             caption,
-            mimetype : 'video/mp4',
+            gifPlayback: true,
+            mimetype   : 'video/mp4',
         };
         if (thumbBuf) sendPayload.jpegThumbnail = thumbBuf;
 
