@@ -877,8 +877,14 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         }
                         case 'alqanime':
                         case 'alq': {
-                                const { handleAlq } = _require(path.resolve('./SEMUA_FITUR/anime/alqanime.cjs'));
-                                await handleAlq({ hisoka, m, query, tolak, logCommand, logError, path, pendingAlqDlChoices, getJadibotChoiceKey });
+                                const _alqSub = (query || '').trim().toLowerCase();
+                                if (['on', 'off', 'status', 'test', 'help', 'test grup'].includes(_alqSub)) {
+                                        const { handleAlqanimeNotif } = _require(path.resolve('./SEMUA_FITUR/anime/alqanime-monitor.cjs'));
+                                        await handleAlqanimeNotif({ hisoka, m, query, tolak, logCommand, sendConfirmWithButtons, fs, path, loadConfig });
+                                } else {
+                                        const { handleAlq } = _require(path.resolve('./SEMUA_FITUR/anime/alqanime.cjs'));
+                                        await handleAlq({ hisoka, m, query, tolak, logCommand, logError, path, pendingAlqDlChoices, getJadibotChoiceKey });
+                                }
                                 break;
                         }
 
