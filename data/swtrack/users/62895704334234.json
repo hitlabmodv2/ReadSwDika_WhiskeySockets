@@ -196,7 +196,7 @@
       "participant": "142696211599405@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-25T06:06:08.631Z",
+    "updatedAt": "2026-06-25T06:18:08.275Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -215,7 +215,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-25T06:06:08.631Z"
+    "processedAt": "2026-06-25T06:06:08.631Z",
+    "deleted": true,
+    "deletedAt": "2026-06-25T06:18:08.275Z"
   },
   "AC45A4A348BBC72219D8823CC2FFF3BB": {
     "id": "AC45A4A348BBC72219D8823CC2FFF3BB",
@@ -258,5 +260,47 @@
       }
     ],
     "processedAt": "2026-06-25T06:14:24.875Z"
+  },
+  "AC4DFD0F8D338C9D4B0387A15A23E768": {
+    "id": "AC4DFD0F8D338C9D4B0387A15A23E768",
+    "sender": "62895704334234@s.whatsapp.net",
+    "name": ".",
+    "type": "extendedTextMessage",
+    "arrivedAt": "2026-06-25T06:20:15.811Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐩",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "62895704334234",
+    "resolvedPn": "62895704334234@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "62895704334234@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC4DFD0F8D338C9D4B0387A15A23E768",
+      "participant": "142696211599405@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-25T06:20:36.355Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62895704334234@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC4DFD0F8D338C9D4B0387A15A23E768",
+        "participant": "142696211599405@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62895704334234@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC4DFD0F8D338C9D4B0387A15A23E768",
+        "participant": "62895704334234@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-25T06:20:36.355Z"
   }
 }

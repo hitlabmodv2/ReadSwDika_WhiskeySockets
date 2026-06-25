@@ -27,7 +27,6 @@
 // ── COMMAND HANDLER ───────────────────────────────────────────────────────────
 
 async function handleCeksw({ hisoka, m, query, tolak, logCommand, fs, path, loadConfig, saveConfig, getJadibotNumber, pruneSwStatsAt, countActiveSW, getJadibotEmojiMode }) {
-        if (!m.prefix && m.query) return;
         if (!m.isOwner) return;
         try {
                 const isJadibot    = hisoka?.isMainBot === false;
