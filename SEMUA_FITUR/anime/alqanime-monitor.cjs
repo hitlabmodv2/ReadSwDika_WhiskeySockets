@@ -625,8 +625,15 @@ function buatCaptionLanjutan(data) {
     );
 }
 
+// ── Deteksi status ongoing/tamat dari info.Status ────────────────────────────
+function deteksiStatusSeri(statusRaw) {
+    const s = (statusRaw || '').toLowerCase();
+    if (/ongoing|berlangsung|airing|tayang/i.test(s))  return 'ongoing';
+    if (/completed|complete|tamat|selesai|finished/i.test(s)) return 'tamat';
+    return 'unknown';
+}
+
 // ── Caption GABUNGAN — gambar + sinopsis + download dalam 1 pesan ─────────────
-// Total dijaga ≤ 950 char agar aman di limit caption WhatsApp (1024 char).
 function buatCaptionGabung(data) {
     const {
         judul, epNum, title,
@@ -643,19 +650,43 @@ function buatCaptionGabung(data) {
     const headerWaktu = `${namaHari}, ${tglLengkap} · ${jamMenit} WIB`;
 
     const { tipe, epHeader, isBD, batchTotal } = deteksiTipeEp(title || judul, episodes, epNum);
-    const totalSeri = info.Episode ? parseInt(info.Episode) || 0 : 0;
-    const genreStr  = genres.length ? genres.join(', ') : null;
+    const statusSeri = deteksiStatusSeri(info.Status);
+    const totalSeri  = info.Episode ? parseInt(info.Episode) || 0 : 0;
+    const genreStr   = genres.length ? genres.join(', ') : null;
 
-    // Judul alt — plain text (bukan italic), langsung di bawah judul utama
-    const judulAlt  = info.judulAlt ? `${info.judulAlt}\n` : '';
+    // ── Header utama — beda tiap tipe ────────────────────────────────────────
+    let headerUtama, badgeTipe, badgeStatus;
 
-    // Sinopsis — PENUH, tidak dipotong. Baris kosong antar paragraf tidak diberi prefix >.
+    if (tipe === 'batch') {
+        headerUtama = `📦 *BATCH RELEASE — ALQANIME!*`;
+        badgeTipe   = `📦 *Batch* ${isBD ? '| 💿 BD/Bluray' : ''}`.trim();
+        badgeStatus = `⚫ *Tamat/Complete*`;
+    } else if (tipe === 'movie') {
+        const isOVA = /\bOVA\b/i.test(title || judul);
+        headerUtama = isOVA ? `🎞️ *OVA BARU — ALQANIME!*` : `🎬 *MOVIE BARU — ALQANIME!*`;
+        badgeTipe   = isOVA ? `🎞️ *OVA*` : `🎬 *Movie*`;
+        badgeStatus = `⚫ *Tamat/Complete*`;
+    } else {
+        // Episode ongoing
+        headerUtama = `🔴 *EPISODE BARU — ALQANIME!*`;
+        badgeTipe   = `📺 *Episode Baru*`;
+        badgeStatus = statusSeri === 'tamat'
+            ? `⚫ *Tamat* _(ep terakhir)_`
+            : statusSeri === 'ongoing'
+            ? `🟢 *Ongoing* _(masih tayang)_`
+            : null;
+    }
+
+    // Judul alt — plain text di bawah judul utama
+    const judulAlt = info.judulAlt ? `${info.judulAlt}\n` : '';
+
+    // Sinopsis
     const sinopsisText = (sinopsis || '-').trim();
     const sinopsisBlok = sinopsisText.split('\n').map(b => b.trim() ? `> ${b}` : '').join('\n');
 
-    // Info batch tambahan — hanya muncul kalau tipe batch
-    const batchIsiStr  = (tipe === 'batch' && batchTotal) ? `${batchTotal} Episode` : null;
-    const formatStr    = isBD ? 'BD / Bluray' : null;
+    // Info batch: jumlah episode
+    const batchIsiStr = (tipe === 'batch' && batchTotal) ? `${batchTotal} Episode` : null;
+    const formatStr   = isBD ? 'BD / Bluray' : null;
 
     // ── Info Grup 1: metadata utama ──
     const seksi1 = buatBarisInfo([
@@ -663,8 +694,8 @@ function buatCaptionGabung(data) {
         ['📦 Episode   ', tipe === 'batch'
             ? (batchIsiStr || (totalSeri ? String(totalSeri) : null))
             : tipe === 'movie'
-            ? null   // movie/OVA sembunyikan "Episode: 1" — tidak relevan
-            : (totalSeri ? String(totalSeri) : null)],
+            ? null
+            : (totalSeri ? `${epNum || '?'}/${totalSeri}` : null)],
         ['💿 Format    ', formatStr],
         ['🗓️ Dirilis   ', info.Dirilis                           || null],
         ['🌸 Musim     ', info.Musim                             || null],
@@ -688,24 +719,22 @@ function buatCaptionGabung(data) {
         ['🔄 Diperbarui   ', info['Diperbarui pada']             || null],
     ]);
 
-    // Gabung blok info (hanya seksi yang ada isinya)
     const infoAnime = [
         seksi1 ? `${SEP2}\n${seksi1}` : '',
         seksi2 ? `\n${SEP2}\n${seksi2}` : '',
         seksi3 ? `\n${SEP2}\n${seksi3}` : '',
     ].filter(Boolean).join('');
 
-    // ── Download — semua resolusi, semua host ──
-    // episodes[0] = episode terbaru (urutan terbaru dulu dari parseDownloadLinks)
+    // ── Download ──
     let dlBlok = '';
     if (episodes.length) {
         const epTerbaru    = episodes[0];
         const resolusiList = Object.entries(epTerbaru.links || {});
         if (resolusiList.length) {
-            dlBlok =
-                `${SEP}\n` +
-                `📥 *DOWNLOAD EP ${epTerbaru.episode}*\n` +
-                `${SEP2}\n`;
+            const dlLabel = tipe === 'batch'
+                ? `📥 *DOWNLOAD BATCH*`
+                : `📥 *DOWNLOAD EP ${epTerbaru.episode}*`;
+            dlBlok = `${SEP}\n${dlLabel}\n${SEP2}\n`;
             for (const [res, hosts] of resolusiList) {
                 const hostStr = hosts.map(h => `[${h.host}](${h.url})`).join('  ');
                 dlBlok += `├ ${res.toUpperCase()} → ${hostStr}\n`;
@@ -714,24 +743,32 @@ function buatCaptionGabung(data) {
         }
     }
 
-    return (
-        `🔴 *RILISAN BARU ALQANIME!*\n` +
-        `${SEP}\n` +
-        `📅 _${headerWaktu}_\n` +
-        `${SEP}\n` +
-        `🎌 *${judul}*\n` +
-        judulAlt +
-        `\n📺 *${epHeader || (tipe === 'movie' ? 'Movie / OVA' : 'Episode ?')}*\n\n` +
-        `📖 *Sinopsis*\n` +
-        `${sinopsisBlok}\n\n` +
-        `${SEP}\n` +
-        `📋 *Info Anime*\n` +
-        infoAnime + '\n' +
-        `${SEP}\n` +
-        `▶️ *Tonton* : ${url}\n` +
-        `🔗 *Source* : alqanime.net\n` +
-        (dlBlok ? `${dlBlok}` : '')
-    );
+    // ── Rakitan caption ──
+    const baris = [
+        headerUtama,
+        `${SEP}`,
+        `📅 _${headerWaktu}_`,
+        `${SEP}`,
+        `🎌 *${judul}*`,
+        judulAlt ? judulAlt.trimEnd() : null,
+        ``,
+        badgeTipe,
+        badgeStatus || null,
+        `📺 *${epHeader || 'Episode ?'}*`,
+        ``,
+        `📖 *Sinopsis*`,
+        sinopsisBlok,
+        ``,
+        `${SEP}`,
+        `📋 *Info Anime*`,
+        infoAnime,
+        `${SEP}`,
+        `▶️ *Tonton* : ${url}`,
+        `🔗 *Source* : alqanime.net`,
+        dlBlok ? dlBlok : null,
+    ];
+
+    return baris.filter(b => b !== null).join('\n');
 }
 
 function ambilUrlGambar(data) {
