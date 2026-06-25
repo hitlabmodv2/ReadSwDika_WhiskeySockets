@@ -30,6 +30,7 @@ const { execFile } = require('child_process');
 const fs           = require('fs');
 const os           = require('os');
 const path         = require('path');
+const sharp        = require('sharp');
 
 /* ── Re-encode mp4 ke format yang kompatibel WhatsApp GIF ── */
 function reencodeForWhatsApp(inputBuf) {
@@ -100,6 +101,19 @@ function extractThumbnail(mp4Buf) {
             } catch (_) { resolve(null); }
         });
     });
+}
+
+/* ── Blur thumbnail agar tampil buram sebelum download di WA ── */
+async function blurThumbnail(thumbBuf) {
+    if (!thumbBuf) return null;
+    try {
+        return await sharp(thumbBuf)
+            .blur(18)          // radius blur — semakin besar semakin buram
+            .jpeg({ quality: 60 })
+            .toBuffer();
+    } catch (_) {
+        return thumbBuf;       // kalau sharp gagal, pakai thumbnail asli
+    }
 }
 
 /* ── Tenor API config ── */
@@ -364,8 +378,9 @@ async function handleAnimgif(hisoka, m, query, ctx) {
             1000,
         );
 
-        /* ── Tahap 4: ekstrak thumbnail untuk WA mobile ── */
-        const thumbBuf = await extractThumbnail(buffer);
+        /* ── Tahap 4: ekstrak thumbnail + blur agar tampil buram sebelum download ── */
+        const rawThumb = await extractThumbnail(buffer);
+        const thumbBuf = await blurThumbnail(rawThumb);
 
         /* ── Info ukuran dari buffer asli ── */
         const actualSize = formatSize(gif.fileSize || rawBuffer.byteLength);
