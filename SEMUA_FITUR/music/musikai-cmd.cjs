@@ -180,14 +180,34 @@ function _makeGenerateMusik({ hisoka, m, pendingMusikaiCache, sendAudioWithButto
 
                         const titleLabel = params.title || 'Hasil Musik';
                         const firstCover = results.find(r => r.coverBuf)?.coverBuf || null;
-                        await sendAudioWithButtons(hisoka, m, null, bodyTxt, [],
-                                {
-                                        listTitle: `🎧 Dengarkan — ${titleLabel}`,
-                                        sections: multiSections,
-                                        coverBuf: firstCover,
-                                        noAudio: true,
+
+                        // Kirim ringkasan teks dulu — selalu kelihatan di WA Mobile & WA Business
+                        await hisoka.sendMessage(m.from, { text: bodyTxt }, { quoted: m }).catch(() => {});
+
+                        // Kirim semua audio langsung tanpa tunggu pilihan — kompatibel WA Mobile
+                        for (const r of results) {
+                                if (r.audioBuf) {
+                                        const trackTitle = (r.track?.title || params.title || 'musik').slice(0, 50);
+                                        await hisoka.sendMessage(m.from, {
+                                                audio: r.audioBuf,
+                                                mimetype: 'audio/mpeg',
+                                                ptt: false,
+                                                fileName: `${trackTitle}_v${r.index}.mp3`,
+                                        }).catch(() => {});
                                 }
-                        );
+                        }
+
+                        // Coba kirim interactive list (bonus untuk WA Web)
+                        try {
+                                await sendAudioWithButtons(hisoka, m, null, bodyTxt, [],
+                                        {
+                                                listTitle: `🎧 Dengarkan — ${titleLabel}`,
+                                                sections: multiSections,
+                                                coverBuf: firstCover,
+                                                noAudio: true,
+                                        }
+                                );
+                        } catch (_) {}
 
                         logCommand(m, hisoka, 'musikai');
                 } catch (err) {
@@ -296,7 +316,7 @@ async function handleMusikaiCmd({
         const input = (query || '').trim();
 
         if (!input) {
-                await sendConfirmWithButtons(hisoka, m,
+                const menuTxt =
                         `╭──『 🎵 *MUSIK AI* 』\n` +
                         `│\n` +
                         `│ Generate lagu original pakai AI.\n` +
@@ -308,12 +328,18 @@ async function handleMusikaiCmd({
                         `│ • _${pfx}musikai judul | lirik | genre_ — manual\n` +
                         `│\n` +
                         `│ ✨ AI pilih genre + judul + lirik otomatis!\n` +
-                        `╰──────────────────────────────`,
-                        [
-                                { text: '🎲 Generate Random', id: '__musikai_random__' },
-                                { text: '📖 Cara Pakai Custom', id: '__musikai_help__' },
-                        ]
-                );
+                        `╰──────────────────────────────`;
+                // Kirim plain text dulu — selalu kelihatan di WA Mobile & WA Business
+                await hisoka.sendMessage(m.from, { text: menuTxt }, { quoted: m }).catch(() => {});
+                // Coba interactive (bonus untuk WA Web)
+                try {
+                        await sendConfirmWithButtons(hisoka, m, menuTxt,
+                                [
+                                        { text: '🎲 Generate Random', id: '__musikai_random__' },
+                                        { text: '📖 Cara Pakai Custom', id: '__musikai_help__' },
+                                ]
+                        );
+                } catch (_) {}
                 return;
         }
 
