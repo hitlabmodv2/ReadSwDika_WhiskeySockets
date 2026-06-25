@@ -389,7 +389,7 @@ async function handleAnimgif(hisoka, m, query, ctx) {
 
         /* ── Caption bersih, tanpa duplikat ── */
         const caption = [
-            `🎴 *Anime MP4 Random*`,
+            `🎴 *Anime GIF Random*`,
             ``,
             `🔍 *Query    :* ${gif.query}`,
             usedLabel            ? `🏷️ *Kategori :* ${usedLabel}`           : null,
