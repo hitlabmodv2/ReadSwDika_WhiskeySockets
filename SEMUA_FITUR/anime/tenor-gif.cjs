@@ -30,6 +30,7 @@ const { execFile } = require('child_process');
 const fs           = require('fs');
 const os           = require('os');
 const path         = require('path');
+const sharp        = require('sharp');
 
 /* ── Re-encode mp4 ke format yang kompatibel WhatsApp GIF ── */
 function reencodeForWhatsApp(inputBuf) {
@@ -72,59 +73,49 @@ function reencodeForWhatsApp(inputBuf) {
     });
 }
 
-/* ── Ekstrak frame pertama + blur langsung via ffmpeg ── */
-/* Hasilnya: thumbnail buram (mosaic) yang tampil di WA sebelum user download */
-function extractBlurredThumbnail(mp4Buf) {
+/* ── Ekstrak frame pertama dari mp4 via ffmpeg (bersih, tanpa blur) ── */
+function extractRawFrame(mp4Buf) {
     return new Promise((resolve) => {
         const ts     = Date.now();
         const tmpIn  = path.join(os.tmpdir(), `tg_th_in_${ts}.mp4`);
         const tmpOut = path.join(os.tmpdir(), `tg_th_out_${ts}.jpg`);
         try { fs.writeFileSync(tmpIn, mp4Buf); } catch (_) { return resolve(null); }
 
-        /*
-         * gblur=sigma=20  → blur kuat (Gaussian blur radius 20px)
-         * scale=320:-1    → resize lebar 320px, tinggi proporsional
-         * Tambah pixelize=width=16:height=16 sebagai fallback jika gblur tidak ada
-         */
         execFile('ffmpeg', [
             '-y',
             '-i', tmpIn,
             '-vframes', '1',
-            '-vf', 'scale=320:-1,gblur=sigma=20',
-            '-q:v', '8',
+            '-vf', 'scale=320:-1',
+            '-q:v', '3',
             tmpOut,
-        ], { timeout: 15000 }, (errBlur) => {
-            if (errBlur) {
-                /* Fallback: coba pixelize jika gblur tidak tersedia */
-                execFile('ffmpeg', [
-                    '-y',
-                    '-i', tmpIn,
-                    '-vframes', '1',
-                    '-vf', 'scale=32:-1,scale=320:-1:flags=neighbor',
-                    '-q:v', '8',
-                    tmpOut,
-                ], { timeout: 15000 }, (errPx) => {
-                    try { fs.unlinkSync(tmpIn); } catch (_) {}
-                    if (errPx) {
-                        try { fs.unlinkSync(tmpOut); } catch (_) {}
-                        return resolve(null);
-                    }
-                    try {
-                        const thumb = fs.readFileSync(tmpOut);
-                        fs.unlinkSync(tmpOut);
-                        resolve(thumb);
-                    } catch (_) { resolve(null); }
-                });
-                return;
-            }
+        ], { timeout: 15000 }, (err) => {
             try { fs.unlinkSync(tmpIn); } catch (_) {}
+            if (err) {
+                try { fs.unlinkSync(tmpOut); } catch (_) {}
+                return resolve(null);
+            }
             try {
-                const thumb = fs.readFileSync(tmpOut);
+                const buf = fs.readFileSync(tmpOut);
                 fs.unlinkSync(tmpOut);
-                resolve(thumb);
+                resolve(buf);
             } catch (_) { resolve(null); }
         });
     });
+}
+
+/* ── Blur frame pakai sharp → hasilnya buram sebelum download di WA ── */
+async function extractBlurredThumbnail(mp4Buf) {
+    const frame = await extractRawFrame(mp4Buf);
+    if (!frame) return null;
+    try {
+        /* sigma 25 = buram kuat, masih kelihatan "ada gambar" tapi tidak jelas */
+        return await sharp(frame)
+            .blur(25)
+            .jpeg({ quality: 70 })
+            .toBuffer();
+    } catch (_) {
+        return frame; /* fallback: kirim thumbnail asli kalau sharp gagal */
+    }
 }
 
 /* ── Tenor API config ── */
