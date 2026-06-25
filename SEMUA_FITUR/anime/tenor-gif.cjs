@@ -108,7 +108,7 @@ async function animateLoading(editFn, frames, intervalMs = 900) {
             await new Promise(r => setTimeout(r, intervalMs));
         }
     };
-    tick(); // jalankan di background, tidak di-await
+    tick();
     return () => { running = false; };
 }
 
@@ -132,46 +132,64 @@ async function fetchRandomTenorGif(query) {
     const results = res.data?.results;
     if (!results || results.length === 0) throw new Error(`Tidak ada GIF untuk: "${q}"`);
 
-    const pick   = results[Math.floor(Math.random() * results.length)];
-    const med    = pick.media?.[0] || {};
+    const pick = results[Math.floor(Math.random() * results.length)];
+    const med  = pick.media?.[0] || {};
 
-    /* Prioritas: loopedmp4 (loop native) → mp4 → tinymp4 */
-    const mp4Meta = med.loopedmp4 || med.mp4 || med.tinymp4 || {};
-    const mp4Url  = mp4Meta.url;
-    if (!mp4Url) throw new Error('URL MP4 tidak ditemukan dari Tenor.');
+    /*
+     * Prioritas format MP4 ukuran KECIL dulu agar tidak gagal muat:
+     * nanomp4 → tinymp4 → mp4 (hindari loopedmp4 karena terlalu besar)
+     * gifPlayback:true di Baileys menjadikannya tampil sebagai GIF di WhatsApp
+     */
+    const mp4Meta =
+        med.nanomp4  ||
+        med.tinymp4  ||
+        med.mp4      ||
+        {};
 
-    /* Ambil dimensi & durasi dari media */
-    const dims     = mp4Meta.dims  || med.gif?.dims  || null;   // [width, height]
-    const duration = mp4Meta.duration ?? med.mp4?.duration ?? null;
-    const fileSize = mp4Meta.size  || null;
+    if (!mp4Meta.url) throw new Error('URL MP4 tidak ditemukan dari Tenor.');
+
+    /* Meta dari format GIF (untuk info ukuran/dimensi yang lebih akurat) */
+    const gifMeta =
+        med.tinygif  ||
+        med.nanogif  ||
+        med.gif      ||
+        {};
+
+    /* Dimensi: coba dari gif → mp4 → null */
+    const dims     = gifMeta.dims     || mp4Meta.dims     || null;
+    const duration = gifMeta.duration ?? mp4Meta.duration ?? null;
+    /* Ukuran file: ambil dari mp4 yang dipilih */
+    const fileSize = mp4Meta.size     || null;
 
     return {
-        url        : mp4Url,
+        url        : mp4Meta.url,
         title      : pick.title || pick.content_description || q,
         description: pick.content_description || pick.title || '',
         tags       : (pick.tags || []).slice(0, 5),
         query      : q,
         pos,
-        created    : pick.created  || null,
+        created    : pick.created || null,
         dims,
         duration,
         fileSize,
     };
 }
 
-/* ── Download MP4 sebagai Buffer ── */
+/* ── Download buffer ── */
 async function downloadGif(url) {
     const res = await axios.get(url, {
         responseType : 'arraybuffer',
         timeout      : 30000,
-        headers      : { 'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36' },
+        headers      : {
+            'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36',
+        },
     });
     return Buffer.from(res.data);
 }
 
 /* ── Teks list kategori ── */
 function buildListText(pfx) {
-    const cmd = `${pfx}animgif`;
+    const cmd  = `${pfx}animgif`;
     const rows = Object.entries(PRESET_CATEGORIES)
         .map(([key, c]) => `│ ${c.emoji} *${key}* — ${c.label}`)
         .join('\n');
@@ -225,34 +243,32 @@ async function handleAnimgif(hisoka, m, query, ctx) {
     try {
         /* ── Animasi tahap 1: cari ── */
         stopAnim = await animateLoading(editStep, LOAD_FRAMES_SEARCH, 900);
-
         const gif = await fetchRandomTenorGif(resolvedQuery);
 
         /* ── Animasi tahap 2: download ── */
         if (stopAnim) { stopAnim(); stopAnim = null; }
         stopAnim = await animateLoading(editStep, LOAD_FRAMES_DOWNLOAD, 700);
-
         const buffer = await downloadGif(gif.url);
-        const actualSize = formatSize(gif.fileSize || buffer.byteLength);
 
         /* ── Stop animasi ── */
         if (stopAnim) { stopAnim(); stopAnim = null; }
 
-        /* ── Susun dimensi ── */
-        const dimsStr = gif.dims ? `${gif.dims[0]}x${gif.dims[1]}` : 'N/A';
+        /* ── Info ukuran aktual dari buffer ── */
+        const actualSize = formatSize(gif.fileSize || buffer.byteLength);
+        const dimsStr    = gif.dims ? `${gif.dims[0]}x${gif.dims[1]}` : 'N/A';
 
-        /* ── Caption dengan detail lengkap ── */
+        /* ── Caption detail lengkap ── */
         const caption = [
             `🎴 *Anime GIF Random*`,
             ``,
             `🔍 *Query    :* ${gif.query}`,
-            usedLabel              ? `🏷️ *Kategori :* ${usedLabel}`           : null,
-            gif.title              ? `📝 *Judul    :* ${gif.title}`            : null,
-            gif.tags.length > 0   ? `🔖 *Tags     :* ${gif.tags.join(', ')}` : null,
+            usedLabel             ? `🏷️ *Kategori :* ${usedLabel}`            : null,
+            gif.title             ? `📝 *Judul    :* ${gif.title}`            : null,
+            gif.tags.length > 0  ? `🔖 *Tags     :* ${gif.tags.join(', ')}`  : null,
             ``,
             `╭──『 📋 *Detail* 』──`,
-            gif.description        ? `│ 📄 *Deskripsi Konten:*`               : null,
-            gif.description        ? `│     ${gif.description}`               : null,
+            gif.description       ? `│ 📄 *Deskripsi Konten:*`               : null,
+            gif.description       ? `│     ${gif.description}`               : null,
             `│ 📦 *Ukuran File    :* ${actualSize}`,
             `│ ⏱️ *Durasi         :* ${formatDuration(gif.duration)}`,
             `│ 📐 *Dimensi        :* ${dimsStr}`,
@@ -263,6 +279,10 @@ async function handleAnimgif(hisoka, m, query, ctx) {
             `_Powered by Tenor • WilyBot_`,
         ].filter(v => v !== null).join('\n');
 
+        /*
+         * Kirim sebagai VIDEO dengan gifPlayback:true
+         * → WhatsApp menampilkan badge GIF + auto-play tanpa suara (persis seperti GIF)
+         */
         await hisoka.sendMessage(m.from, {
             video      : buffer,
             caption,
