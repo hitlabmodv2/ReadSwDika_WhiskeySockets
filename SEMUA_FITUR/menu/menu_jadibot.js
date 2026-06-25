@@ -105,6 +105,11 @@ export function getMenuJadibotBody() {
 ├➤ *.upswgc [caption]*
 ╰➤ *.swgcv2 [teks]|[warna]|[grup]*
 
+╭─「 🎌 *ANIME GIF* 」
+├➤ *.animgif*
+├➤ *.animgif [kategori]*
+╰➤ *.animgif list*
+
 ╭─「 📥 *DOWNLOAD* 」
 ├➤ *.allunduh [link]*
 ├➤ *.tt [link]*

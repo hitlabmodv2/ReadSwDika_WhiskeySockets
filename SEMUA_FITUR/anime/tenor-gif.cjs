@@ -286,8 +286,7 @@ function buildListText(pfx) {
         `├── *Cara Pakai:*`,
         `│ • ${cmd} dance`,
         `│ • ${cmd} blush`,
-        `│ • ${cmd} <query bebas>`,
-        `│ • ${cmd} ← tanpa query = random`,
+        `│ • ${cmd} ← tanpa keyword = random`,
         `╰══════════════════════════╯`,
     ].join('\n');
 }
@@ -305,16 +304,28 @@ async function handleAnimgif(hisoka, m, query, ctx) {
         return;
     }
 
-    /* ── Resolve query: preset keyword → query Tenor ── */
+    /* ── Resolve query: hanya dari preset, kalau tidak ada tampilkan pesan ramah ── */
     let resolvedQuery = null;
     let usedLabel     = null;
 
     if (qLower && PRESET_CATEGORIES[qLower]) {
+        /* Keyword ada di daftar kategori */
         resolvedQuery = PRESET_CATEGORIES[qLower].query;
         usedLabel     = `${PRESET_CATEGORIES[qLower].emoji} ${PRESET_CATEGORIES[qLower].label}`;
-    } else if (query && query.trim()) {
-        resolvedQuery = query.trim();
+    } else if (qLower) {
+        /* Keyword diketik tapi tidak ada di kategori → tampilkan pesan ramah, tidak jadi search */
+        const keys = Object.keys(PRESET_CATEGORIES).join(', ');
+        await tolak(hisoka, m, [
+            `❌ *"${query.trim()}"* belum ada di daftar kategori.`,
+            ``,
+            `📋 Silakan lihat daftar lengkap dengan:`,
+            `› *${pfx}animgif list*`,
+            ``,
+            `_Contoh yang benar: ${pfx}animgif dance_`,
+        ].join('\n'));
+        return;
     }
+    /* Jika tidak ada query sama sekali → resolvedQuery = null = random */
 
     await hisoka.sendMessage(m.from, { react: { text: '🎴', key: m.key } });
     const loadMsg = await tolak(hisoka, m, '⠋ _Mengambil GIF anime..._');

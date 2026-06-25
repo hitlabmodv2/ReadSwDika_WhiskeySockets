@@ -134,6 +134,8 @@ export function buildMenuUtama({ pushName, isOwner, uptimeStr, tgl, jam, browser
 ├═════════════════════┤
 ║  🎌 *ANIME & MANGA*  
 ├═════════════════════┤
+│ .animgif
+│ .animgif list
 │ .kusonime / .anime
 │ .kusonimeupdate
 │ .alq / .alqanime
