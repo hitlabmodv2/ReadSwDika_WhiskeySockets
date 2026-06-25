@@ -144,7 +144,7 @@ export function updateSwStats(number, name, reacted, emoji, msgId) {
 }
 
 // ─── SwStats: pruning activeSW yang expired — generik, bisa dipakai bot utama & jadibot ──
-export function pruneSwStatsAt(statsPath) {
+export function pruneSwStatsAt(statsPath, label) {
         if (!statsPath) return;
         try {
                 if (!fs.existsSync(statsPath)) return;
@@ -173,14 +173,15 @@ export function pruneSwStatsAt(statsPath) {
                 fs.writeFileSync(statsPath, JSON.stringify(sorted, null, 2), 'utf-8');
 
                 if (pruned > 0) {
-                        console.log(`\x1b[32m[SwStats]\x1b[39m Pruned ${pruned} activeSW expired → data sekarang akurat realtime`);
+                        const _tag = label ? ` \x1b[36m[${label}]\x1b[39m` : '';
+                        console.log(`\x1b[32m[SwStats]\x1b[39m${_tag} Pruned ${pruned} activeSW expired → data sekarang akurat realtime`);
                 }
         } catch {}
 }
 
 // Shortcut untuk bot utama (path default)
 export function pruneSwStats() {
-        pruneSwStatsAt(SW_STATS_PATH);
+        pruneSwStatsAt(SW_STATS_PATH, 'Bot Utama');
 }
 
 // ─── SwTrack: per-user tracking di data/swtrack/users/ ───────────────────────

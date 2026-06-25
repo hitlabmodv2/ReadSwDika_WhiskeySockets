@@ -185,7 +185,7 @@ function startJadibotSwPrune(jadibotNum) {
   }
   const statsPath = path.join(process.cwd(), 'data_jadibot', jadibotNum, 'ceksw', 'swstats.json')
   const iv = setInterval(() => {
-    try { pruneSwStatsAt(statsPath) } catch {}
+    try { pruneSwStatsAt(statsPath, jadibotNum) } catch {}
   }, _SW_PRUNE_INTERVAL_MS)
   swPruneIntervalMap.set(jadibotNum, iv)
 }
@@ -1648,7 +1648,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
       try { getJadibotEmojis(number) } catch {}
 
       // SwStats: prune activeSW expired supaya data jadibot realtime & akurat
-      try { pruneSwStatsAt(path.join(process.cwd(), 'data_jadibot', number, 'ceksw', 'swstats.json')) } catch {}
+      try { pruneSwStatsAt(path.join(process.cwd(), 'data_jadibot', number, 'ceksw', 'swstats.json'), number) } catch {}
 
       // Pastikan registered = true tersimpan agar reconnect tidak trigger pairing ulang
       if (!state.creds.registered) {
@@ -2188,7 +2188,7 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
       try { getJadibotEmojis(number) } catch {}
 
       // SwStats: prune activeSW expired supaya data jadibot realtime & akurat
-      try { pruneSwStatsAt(path.join(process.cwd(), 'data_jadibot', number, 'ceksw', 'swstats.json')) } catch {}
+      try { pruneSwStatsAt(path.join(process.cwd(), 'data_jadibot', number, 'ceksw', 'swstats.json'), number) } catch {}
 
       // Pastikan registered = true tersimpan agar reconnect tidak trigger QR ulang
       if (!state.creds.registered) {

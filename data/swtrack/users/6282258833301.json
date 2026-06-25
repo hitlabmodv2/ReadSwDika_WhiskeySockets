@@ -40,5 +40,47 @@
       }
     ],
     "processedAt": "2026-06-24T08:36:30.799Z"
+  },
+  "AC97F2D7675764A9FA4A06C6619DBC86": {
+    "id": "AC97F2D7675764A9FA4A06C6619DBC86",
+    "sender": "6282258833301@s.whatsapp.net",
+    "name": "therese",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-25T05:59:11.686Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🎭",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6282258833301",
+    "resolvedPn": "6282258833301@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6282258833301@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC97F2D7675764A9FA4A06C6619DBC86",
+      "participant": "244452643868853@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-25T05:59:16.127Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282258833301@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC97F2D7675764A9FA4A06C6619DBC86",
+        "participant": "244452643868853@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282258833301@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC97F2D7675764A9FA4A06C6619DBC86",
+        "participant": "6282258833301@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-25T05:59:16.127Z"
   }
 }
