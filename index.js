@@ -232,8 +232,6 @@ function saveBotAdminStatus(hisoka, allGroups) {
     }
 
     saveBotAdminData(data);
-    const adminGroups = Object.values(data).filter(Boolean).length;
-    console.info(`\x1b[32m→ Admin    :\x1b[39m ${Object.keys(data).length} grup, admin di ${adminGroups}`);
   } catch (err) {
     console.error('\x1b[31m[BotAdmin] Gagal simpan:\x1b[39m', err?.message);
   }
