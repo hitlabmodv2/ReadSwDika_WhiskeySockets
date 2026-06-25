@@ -136,29 +136,31 @@ async function fetchRandomTenorGif(query) {
     const med  = pick.media?.[0] || {};
 
     /*
-     * Prioritas format MP4 ukuran KECIL dulu agar tidak gagal muat:
-     * nanomp4 → tinymp4 → mp4 (hindari loopedmp4 karena terlalu besar)
+     * Prioritas format MP4 kualitas TERBAIK dulu:
+     * mp4 (HD, kualitas standar Tenor) → tinymp4 → nanomp4
+     * Hindari loopedmp4 (file terlalu besar, sering gagal muat di WA)
      * gifPlayback:true di Baileys menjadikannya tampil sebagai GIF di WhatsApp
      */
     const mp4Meta =
-        med.nanomp4  ||
-        med.tinymp4  ||
         med.mp4      ||
+        med.tinymp4  ||
+        med.nanomp4  ||
         {};
 
     if (!mp4Meta.url) throw new Error('URL MP4 tidak ditemukan dari Tenor.');
 
-    /* Meta dari format GIF (untuk info ukuran/dimensi yang lebih akurat) */
+    /* Meta dari format GIF asli (untuk info dimensi/durasi yang lebih akurat) */
     const gifMeta =
+        med.gif      ||
+        med.mediumgif ||
         med.tinygif  ||
         med.nanogif  ||
-        med.gif      ||
         {};
 
-    /* Dimensi: coba dari gif → mp4 → null */
+    /* Dimensi: coba dari gif asli → mp4 → null */
     const dims     = gifMeta.dims     || mp4Meta.dims     || null;
     const duration = gifMeta.duration ?? mp4Meta.duration ?? null;
-    /* Ukuran file: ambil dari mp4 yang dipilih */
+    /* Ukuran file: dari mp4 yang dipilih */
     const fileSize = mp4Meta.size     || null;
 
     return {
