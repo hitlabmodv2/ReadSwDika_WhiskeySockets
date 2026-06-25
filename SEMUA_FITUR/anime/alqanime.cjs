@@ -264,7 +264,18 @@ async function handleAlq({ hisoka, m, query, tolak, logCommand, logError, path, 
                 text += `━━━━━━━━━━━━━━━━━━━\n🌐 ${results[0].url}`;
 
                 if (detail.thumbnail) {
-                        await hisoka.sendMessage(m.from, { image: { url: detail.thumbnail }, caption: text }, { quoted: m });
+                        /* Download gambar pakai header browser — alqanime.net blokir fetch tanpa UA */
+                        const thumbBuf = await axios.get(detail.thumbnail, {
+                                headers: HEADERS,
+                                responseType: 'arraybuffer',
+                                timeout: 15000,
+                        }).then(r => Buffer.from(r.data)).catch(() => null);
+
+                        if (thumbBuf) {
+                                await hisoka.sendMessage(m.from, { image: thumbBuf, caption: text }, { quoted: m });
+                        } else {
+                                await tolak(hisoka, m, text);
+                        }
                 } else {
                         await tolak(hisoka, m, text);
                 }
