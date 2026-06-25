@@ -230,11 +230,10 @@ async function handleAlq({ hisoka, m, query, tolak, logCommand, logError, path, 
                 if (results.length > 1) {
                         let listText = `🎌 *Hasil Pencarian: "${input}"*\n━━━━━━━━━━━━━━━━━━━\n`;
                         results.slice(0, 8).forEach((r, i) => { listText += `${i + 1}. ${r.title}\n`; });
-                        listText += `\n_Menampilkan detail hasil pertama..._`;
+                        listText += `\n_Menampilkan detail: *${results[0].title}*..._`;
                         await tolak(hisoka, m, listText);
                 }
 
-                await tolak(hisoka, m, `📡 Mengambil detail *${results[0].title}*...`);
                 const detail = await getDetailAlqanime(results[0].url);
                 const info   = detail.info || {};
                 const eps    = detail.episodes || [];
