@@ -211,11 +211,21 @@ async function handleAlq({ hisoka, m, query, tolak, logCommand, logError, path, 
                 const pfx   = m.prefix || '.';
 
                 if (!input) {
-                        await tolak(hisoka, m,
-                                `╭─「 🎌 *ALQANIME* 」\n│\n│ *Cari anime sub indo (batch/episode):*\n│ ${pfx}alq <judul>\n│\n` +
-                                `│ *Contoh:*\n│ ${pfx}alq one piece\n│ ${pfx}alq naruto\n│ ${pfx}alq attack on titan\n│\n` +
-                                `│ 📺 Info + link download per resolusi\n│ 🌐 Source: alqanime.net\n╰──────────────────────`
-                        );
+                        /* Tanpa query → tampilkan rilisan terbaru realtime */
+                        await hisoka.sendMessage(m.from, { react: { text: '📺', key: m.key } });
+                        const { getRilisanTerbaru } = module.exports;
+                        const latest = await getRilisanTerbaru();
+                        if (!latest.length) {
+                                await tolak(hisoka, m, `❌ Gagal ambil rilisan terbaru. Coba lagi.`);
+                                return;
+                        }
+                        let latestText = `🎌 *Rilisan Terbaru — Alqanime*\n━━━━━━━━━━━━━━━━━━━\n`;
+                        latest.slice(0, 15).forEach((a, i) => { latestText += `${i + 1}. ${a.title}\n`; });
+                        latestText += `━━━━━━━━━━━━━━━━━━━\n🌐 alqanime.net\n\n`;
+                        latestText += `📌 *Cari anime:* ${pfx}alq <judul>`;
+                        await tolak(hisoka, m, latestText);
+                        await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+                        logCommand(m, hisoka, 'alqanime');
                         return;
                 }
 
@@ -254,9 +264,7 @@ async function handleAlq({ hisoka, m, query, tolak, logCommand, logError, path, 
                 text += `━━━━━━━━━━━━━━━━━━━\n🌐 ${results[0].url}`;
 
                 if (detail.thumbnail) {
-                        const thumbBuf = await require('axios').get(detail.thumbnail, { responseType: 'arraybuffer', timeout: 15000 }).then(r => Buffer.from(r.data)).catch(() => null);
-                        if (thumbBuf) await hisoka.sendMessage(m.from, { image: thumbBuf, caption: text }, { quoted: m });
-                        else          await tolak(hisoka, m, text);
+                        await hisoka.sendMessage(m.from, { image: { url: detail.thumbnail }, caption: text }, { quoted: m });
                 } else {
                         await tolak(hisoka, m, text);
                 }

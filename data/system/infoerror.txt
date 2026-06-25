@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 24/06/2026, 09.05.13  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 25/06/2026, 08.48.58  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  YTS-AKURA DL
+│  #001  —  alqanime
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [YTS-AKURA DL] Sign in to confirm you’re not a bot. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting YouTube cookies
+│  Failed to fetch stream from https://alqanime.net/wp-content/uploads/2023/08/Hibike-Euphonium-Ensemble-Contest-hen-200x300.jpg
 │
 │  DETAIL
-│  Sumber      : YTS-AKURA DL
+│  Sumber      : alqanime
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 24/06/2026, 09.05.13
-│  Terakhir    : 24/06/2026, 09.05.13
+│  Pertama     : 25/06/2026, 08.48.58
+│  Terakhir    : 25/06/2026, 08.48.58
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [YTS-AKURA DL] Sign in to confirm you’re not a bot. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting YouTube cookies
-│     at console.error (file:///home/runner/workspace/index.js:414:27)
-│     at handleYtDlCh (/home/runner/workspace/SEMUA_FITUR/download/yts-akura.cjs:428:17)
+│  ▶  Error: Failed to fetch stream from https://alqanime.net/wp-content/uploads/2023/08/Hibike-Euphonium-Ensemble-Contest-hen-200x300.jpg
+│     at getHttpStream (file:///home/runner/workspace/node_modules/@whiskeysockets/baileys/lib/Utils/messages-media.js:304:15)
+│     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 24/06/2026, 09.05.13
+  Terakhir diperbarui: 25/06/2026, 08.48.58
 ════════════════════════════════════════════════════════════════════════
