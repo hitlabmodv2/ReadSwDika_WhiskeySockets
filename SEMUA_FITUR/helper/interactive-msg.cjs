@@ -68,111 +68,109 @@ function startTyping(hisoka, m) {
         return stop;
 }
 
+/**
+ * Kirim listMessage (format resmi Baileys) — bekerja di WA Mobile & WA Web.
+ * Respons masuk sebagai listResponseMessage.singleSelectReply.selectedRowId
+ * yang sudah dipetakan ke m.text oleh inject.js.
+ *
+ * @param {object} hisoka  - Baileys socket
+ * @param {string} jid     - remoteJid tujuan
+ * @param {object} m       - pesan asal (untuk quoted)
+ * @param {object} opts
+ *   @param {string}   opts.title       - judul header (opsional)
+ *   @param {string}   opts.body        - teks utama pesan
+ *   @param {string}   opts.buttonText  - label tombol yang membuka list
+ *   @param {string}   opts.footer      - footer teks (opsional)
+ *   @param {Array}    opts.sections    - [{title, rows:[{rowId,title,description}]}]
+ */
+async function sendListMessage(hisoka, jid, m, opts = {}) {
+        const {
+                title      = '',
+                body       = '',
+                buttonText = '📋 Pilih',
+                footer     = '',
+                sections   = [],
+        } = opts;
+
+        const msg = generateWAMessageFromContent(jid, {
+                listMessage: proto.Message.ListMessage.create({
+                        title,
+                        description: body,
+                        buttonText,
+                        listType: proto.Message.ListMessage.ListType.SINGLE_SELECT,
+                        sections: sections.map(sec => ({
+                                title: sec.title || '',
+                                rows: (sec.rows || []).map(r => ({
+                                        rowId:       r.rowId || r.id || '',
+                                        title:       r.title || '',
+                                        description: r.description || '',
+                                })),
+                        })),
+                        footerText: footer,
+                }),
+        }, { quoted: m });
+
+        await hisoka.relayMessage(msg.key.remoteJid, msg.message, { messageId: msg.key.id });
+}
+
 function makeInteractiveMsg({ loadConfig, tolak }) {
+
+        /**
+         * listbut2 — kirim menu list pilihan (dipakai di fitur menu, dsb.)
+         * listnye format: { title, sections: [{title, rows:[{id,title,description}]}] }
+         */
         async function listbut2(jid, teks, listnye, m, hisoka) {
-                const cfg = loadConfig();
-                const botReply      = cfg.botReply || {};
-                const thumbnailUrl  = botReply.thumbnailUrl  || '';
-                const botName       = botReply.botName       || 'Wily Bot';
-                const newsletterJid = botReply.newsletterJid || '';
-                const newsletterName= botReply.newsletterName|| '';
+                const cfg     = loadConfig();
+                const botName = (cfg.botReply || {}).botName || 'Wily Bot';
 
-                const thumbnailMedia = resolveThumbnailMedia(thumbnailUrl);
-                const headerMedia = thumbnailMedia
-                        ? await prepareWAMessageMedia({ image: thumbnailMedia }, { upload: hisoka.waUploadToServer })
-                        : {};
-
-                const msg = generateWAMessageFromContent(jid, {
-                        messageContextInfo: {
-                                deviceListMetadata: {},
-                                deviceListMetadataVersion: 2
-                        },
-                        interactiveMessage: proto.Message.InteractiveMessage.create({
-                                contextInfo: {
-                                        mentionedJid: [m.sender],
-                                        forwardingScore: 999,
-                                        isForwarded: true,
-                                        forwardedNewsletterMessageInfo: {
-                                                newsletterJid,
-                                                newsletterName,
-                                                serverMessageId: Math.floor(Math.random() * 9999) + 1
-                                        }
-                                },
-                                body: proto.Message.InteractiveMessage.Body.create({
-                                        text: teks
-                                }),
-                                footer: proto.Message.InteractiveMessage.Footer.create({
-                                        text: `✨ Powered By ${botName}`
-                                }),
-                                header: proto.Message.InteractiveMessage.Header.create({
-                                        title: ``,
-                                        subtitle: ``,
-                                        gifPlayback: true,
-                                        hasMediaAttachment: !!thumbnailMedia,
-                                        ...headerMedia
-                                }),
-                                nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.create({
-                                        buttons: [
-                                                {
-                                                        name: 'single_select',
-                                                        buttonParamsJson: JSON.stringify(listnye)
-                                                }
-                                        ]
-                                })
-                        })
-                }, { quoted: m });
-
-                await hisoka.relayMessage(msg.key.remoteJid, msg.message, {
-                        messageId: msg.key.id
+                await sendListMessage(hisoka, jid, m, {
+                        body:       teks,
+                        buttonText: listnye.title || '📋 Pilih',
+                        footer:     `✨ Powered By ${botName}`,
+                        sections:   listnye.sections || [],
                 });
         }
 
+        /**
+         * sendConfirmWithButtons — kirim pesan konfirmasi dengan pilihan tombol.
+         * buttons: [{ text, id }]
+         * Menggunakan listMessage agar muncul di WA Mobile & WA Web.
+         * Respons: m.text === button.id
+         */
         async function sendConfirmWithButtons(hisoka, m, txt, buttons, opts = {}) {
-                const quoteSource = (opts.quoteBot && m.quoted?.key?.id) ? m.quoted : m;
-                const contextInfo = quoteSource.key?.id ? {
-                        stanzaId: quoteSource.key.id,
-                        participant: quoteSource.sender || quoteSource.key?.participant || quoteSource.key?.remoteJid || '',
-                        quotedMessage: quoteSource.raw || quoteSource.message || {},
-                } : {};
                 let sent = false;
                 try {
-                        const msg = generateWAMessageFromContent(
-                                m.from,
-                                {
-                                        messageContextInfo: { deviceListMetadata: {}, deviceListMetadataVersion: 2 },
-                                        interactiveMessage: {
-                                                contextInfo,
-                                                body: { text: txt },
-                                                nativeFlowMessage: {
-                                                        buttons: buttons.map(b => ({
-                                                                name: 'quick_reply',
-                                                                buttonParamsJson: JSON.stringify({ display_text: b.text, id: b.id })
-                                                        }))
-                                                }
-                                        }
-                                },
-                                {},
-                                {}
-                        );
-                        await hisoka.relayMessage(msg.key.remoteJid, msg.message, { messageId: msg.key.id });
+                        await sendListMessage(hisoka, m.from, m, {
+                                body:       txt,
+                                buttonText: '📋 Pilih',
+                                footer:     opts.footer || '',
+                                sections: [{
+                                        title: opts.sectionTitle || 'Pilihan',
+                                        rows: buttons.map(b => ({
+                                                rowId:       b.id,
+                                                title:       b.text,
+                                                description: b.description || '',
+                                        })),
+                                }],
+                        });
                         sent = true;
                 } catch (_) {}
                 if (!sent) await tolak(hisoka, m, txt);
         }
 
+        /**
+         * sendAudioWithButtons — kirim audio lalu list pilihan aksi.
+         * rows: [{ id, title, description }]
+         * opts.sections override rows jika ada.
+         * Menggunakan listMessage agar muncul di WA Mobile & WA Web.
+         * Respons: m.text === row.id
+         */
         async function sendAudioWithButtons(hisoka, m, audioBuf, bodyTxt, rows, opts = {}) {
-                const quoteSource = (opts.quoteBot && m.quoted?.key?.id) ? m.quoted : m;
-                const contextInfo = quoteSource.key?.id ? {
-                        stanzaId: quoteSource.key.id,
-                        participant: quoteSource.sender || quoteSource.key?.participant || quoteSource.key?.remoteJid || '',
-                        quotedMessage: quoteSource.raw || quoteSource.message || {},
-                } : {};
-                const fileName = opts.fileName || 'audio.mp3';
-                const listTitle = opts.listTitle || '🎵 Pilih Aksi';
-                const sectionTitle = opts.sectionTitle || 'Opsi';
-                const sections = opts.sections || [{ title: sectionTitle, rows }];
-                const coverBuf = opts.coverBuf || null;
-                const noAudio = opts.noAudio || false;
+                const fileName    = opts.fileName    || 'audio.mp3';
+                const listTitle   = opts.listTitle   || '🎵 Pilih Aksi';
+                const sectionTitle= opts.sectionTitle|| 'Opsi';
+                const sections    = opts.sections    || [{ title: sectionTitle, rows }];
+                const noAudio     = opts.noAudio     || false;
 
                 if (!noAudio && audioBuf) {
                         await hisoka.sendMessage(m.from, {
@@ -185,31 +183,12 @@ function makeInteractiveMsg({ loadConfig, tolak }) {
 
                 let sent = false;
                 try {
-                        const headerMedia = coverBuf
-                                ? await prepareWAMessageMedia({ image: coverBuf }, { upload: hisoka.waUploadToServer })
-                                : null;
-                        const msg = generateWAMessageFromContent(
-                                m.from,
-                                {
-                                        messageContextInfo: { deviceListMetadata: {}, deviceListMetadataVersion: 2 },
-                                        interactiveMessage: {
-                                                contextInfo,
-                                                ...(headerMedia ? { header: { hasMediaAttachment: true, ...headerMedia } } : {}),
-                                                body: { text: bodyTxt },
-                                                nativeFlowMessage: {
-                                                        buttons: [
-                                                                {
-                                                                        name: 'single_select',
-                                                                        buttonParamsJson: JSON.stringify({ title: listTitle, sections })
-                                                                }
-                                                        ]
-                                                }
-                                        }
-                                },
-                                {},
-                                {}
-                        );
-                        await hisoka.relayMessage(msg.key.remoteJid, msg.message, { messageId: msg.key.id });
+                        await sendListMessage(hisoka, m.from, m, {
+                                body:       bodyTxt,
+                                buttonText: listTitle,
+                                footer:     opts.footer || '',
+                                sections,
+                        });
                         sent = true;
                 } catch (_) {}
                 if (!sent) await tolak(hisoka, m, bodyTxt);
@@ -218,4 +197,4 @@ function makeInteractiveMsg({ loadConfig, tolak }) {
         return { listbut2, sendConfirmWithButtons, sendAudioWithButtons };
 }
 
-module.exports = { resolveThumbnailMedia, startTyping, makeInteractiveMsg };
+module.exports = { resolveThumbnailMedia, startTyping, makeInteractiveMsg, sendListMessage };
