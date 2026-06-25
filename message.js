@@ -403,6 +403,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                             'typing', 'typ',
                             'recording', 'record',
                             'allunduh', 'tt', 'ig', 'fb', 'twdl', 'ytmp3', 'ytmp4', 'play',
+                            'animgif', 'animegif', 'gifanime',
                             'sticker', 's',
                             'wm', 'swm',
                             'toimg',
@@ -801,6 +802,14 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'tmdel': {
                                 const { handleTempmail } = _require(path.resolve('./SEMUA_FITUR/tools/tempmail.cjs'));
                                 await handleTempmail({ hisoka, m, query, tolak, logCommand, logError, path, _require });
+                                break;
+                        }
+
+                        case 'animgif':
+                        case 'animegif':
+                        case 'gifanime': {
+                                const { handleAnimgif } = _require(path.resolve('./SEMUA_FITUR/anime/tenor-gif.cjs'));
+                                await handleAnimgif(hisoka, m, query, { tolak, logCommand });
                                 break;
                         }
 
