@@ -39,21 +39,25 @@ function reencodeForWhatsApp(inputBuf) {
         fs.writeFileSync(tmpIn, inputBuf);
 
         /*
-         * Flag ffmpeg untuk WhatsApp GIF playback:
-         * -vf scale  → paksa dimensi genap (WhatsApp butuh ini)
-         * -c:v libx264 -pix_fmt yuv420p → H.264 + pixel format yang WA terima
-         * -an        → hapus audio
-         * -movflags faststart → bisa distream langsung
+         * Flag ffmpeg untuk WhatsApp GIF playback (mobile-compatible):
+         * -profile:v baseline -level 3.0 → H.264 Baseline, WAJIB untuk WA mobile
+         * -vf scale + fps=15             → dimensi genap + fps dibatasi agar kecil
+         * -pix_fmt yuv420p               → pixel format universal WA
+         * -an                            → hapus audio
+         * -movflags +faststart           → stream langsung tanpa download penuh
          */
         execFile('ffmpeg', [
             '-y',
             '-i', tmpIn,
-            '-vf', 'scale=trunc(iw/2)*2:trunc(ih/2)*2',
+            '-vf', 'scale=trunc(iw/2)*2:trunc(ih/2)*2,fps=15',
             '-c:v', 'libx264',
+            '-profile:v', 'baseline',
+            '-level', '3.0',
             '-pix_fmt', 'yuv420p',
             '-an',
             '-movflags', '+faststart',
             '-preset', 'fast',
+            '-crf', '28',
             tmpOut,
         ], { timeout: 60000 }, (err) => {
             try { fs.unlinkSync(tmpIn); } catch (_) {}
