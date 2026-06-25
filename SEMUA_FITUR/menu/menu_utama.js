@@ -141,6 +141,7 @@ export function buildMenuUtama({ pushName, isOwner, uptimeStr, tgl, jam, browser
 │ .alq / .alqanime
 │ .alqupdate
 │ .alqdl
+│ .alqanimenotif on/off
 │ .komik / .komiktap
 │ .komikinfo
 │ .komikget / .komikdl
