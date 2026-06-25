@@ -68,6 +68,36 @@ function reencodeForWhatsApp(inputBuf) {
     });
 }
 
+/* ── Ekstrak frame pertama sebagai JPEG thumbnail ── */
+/* Dibutuhkan WA Mobile (Business & Messenger) agar media bisa di-render */
+function extractThumbnail(mp4Buf) {
+    return new Promise((resolve) => {
+        const tmpIn  = path.join(os.tmpdir(), `tg_th_in_${Date.now()}.mp4`);
+        const tmpOut = path.join(os.tmpdir(), `tg_th_out_${Date.now()}.jpg`);
+        try { fs.writeFileSync(tmpIn, mp4Buf); } catch (_) { return resolve(null); }
+
+        execFile('ffmpeg', [
+            '-y',
+            '-i', tmpIn,
+            '-vframes', '1',       // ambil 1 frame saja
+            '-q:v', '5',           // kualitas JPEG cukup (1-31, kecil = bagus)
+            '-vf', 'scale=320:-1', // resize ke lebar 320px untuk thumbnail
+            tmpOut,
+        ], { timeout: 15000 }, (err) => {
+            try { fs.unlinkSync(tmpIn); } catch (_) {}
+            if (err) {
+                try { fs.unlinkSync(tmpOut); } catch (_) {}
+                return resolve(null); // gagal thumbnail tidak masalah, tetap kirim
+            }
+            try {
+                const thumb = fs.readFileSync(tmpOut);
+                fs.unlinkSync(tmpOut);
+                resolve(thumb);
+            } catch (_) { resolve(null); }
+        });
+    });
+}
+
 /* ── Tenor API config ── */
 const TENOR_KEY    = 'LIVDSRZULELA';
 const TENOR_BASE   = 'https://g.tenor.com/v1/search';
@@ -312,6 +342,10 @@ async function handleAnimgif(hisoka, m, query, ctx) {
             1000,
         );
 
+        /* ── Tahap 4: buat thumbnail (paralel, tidak perlu nunggu lama) ── */
+        /* Thumbnail wajib ada agar WA Mobile (Business & Messenger) bisa render GIF */
+        const thumbBuf = await extractThumbnail(buffer);
+
         /* ── Info ukuran aktual dari buffer asli (sebelum encode) ── */
         const actualSize = formatSize(gif.fileSize || rawBuffer.byteLength);
         const dimsStr    = gif.dims ? `${gif.dims[0]}x${gif.dims[1]}` : 'N/A';
@@ -339,14 +373,18 @@ async function handleAnimgif(hisoka, m, query, ctx) {
 
         /*
          * Kirim sebagai VIDEO dengan gifPlayback:true
-         * → WhatsApp menampilkan badge GIF + auto-play tanpa suara (persis seperti GIF)
+         * → WA Web    : tampil sebagai GIF auto-play dengan badge GIF
+         * → WA Mobile : jpegThumbnail wajib agar mobile bisa render media
          */
-        await hisoka.sendMessage(m.from, {
-            video      : buffer,
+        const sendPayload = {
+            video        : buffer,
             caption,
-            gifPlayback: true,
-            mimetype   : 'video/mp4',
-        }, { quoted: m });
+            gifPlayback  : true,
+            mimetype     : 'video/mp4',
+        };
+        if (thumbBuf) sendPayload.jpegThumbnail = thumbBuf;
+
+        await hisoka.sendMessage(m.from, sendPayload, { quoted: m });
 
         /* Hapus loading message agar tidak duplikat di chat */
         await deleteLoad();
