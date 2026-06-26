@@ -6,20 +6,10 @@
  *  Telegram    : @Wilykun1994
  * ───────────────────────────────
  *  Script ini khusus donasi/VIP
- *  Support dari kalian bikin saya
- *  makin semangat update fitur,
- *  fix bug, dan rawat script ini.
- *
- *  Dilarang menjual ulang script ini
- *  Tanpa izin resmi dari developer.
- *  Jika ketahuan = NO UPDATE / NO FIX
- *
- *  Hargai karya, gunakan dengan bijak.
- *  Terima kasih sudah support.
- * ───────────────────────────────
  *
  *  interactive-msg.cjs — Interactive message helper
- *  Fungsi pembantu kirim pesan interaktif: button, list, dan poll WhatsApp
+ *  Kirim pesan interaktif: list (single_select via nativeFlowMessage)
+ *  Kompatibel dengan WA Mobile, WA Business, WA Messenger.
  * ───────────────────────────────
  */
 'use strict';
@@ -60,9 +50,11 @@ function startTyping(hisoka, m) {
 }
 
 /**
- * sendListMessage — kirim list message interaktif via proto (Baileys resmi).
- * Menggunakan generateWAMessageFromContent + relayMessage agar tombol list
- * muncul dengan benar di WA Mobile maupun WA Web.
+ * sendListMessage — kirim interactive single_select via nativeFlowMessage.
+ *
+ * Format ini kompatibel di WA Mobile, WA Business, dan WA Messenger.
+ * Response diterima sebagai nativeFlowResponseMessage.paramsJson { id }
+ * yang sudah dipetakan ke m.text oleh inject.js.
  *
  * @param {object} hisoka  - Baileys socket
  * @param {string} jid     - remoteJid tujuan
@@ -83,32 +75,87 @@ async function sendListMessage(hisoka, jid, m, opts = {}) {
                 sections   = [],
         } = opts;
 
-        const msg = generateWAMessageFromContent(jid, {
-                listMessage: proto.Message.ListMessage.create({
-                        title,
-                        description: body,
-                        buttonText,
-                        listType: proto.Message.ListMessage.ListType.SINGLE_SELECT,
-                        sections: sections.map(sec => ({
-                                title: sec.title || '',
-                                rows: (sec.rows || []).map(r => ({
-                                        rowId:       r.rowId || r.id || '',
-                                        title:       r.title || '',
-                                        description: r.description || '',
-                                })),
-                        })),
-                        footerText: footer,
-                }),
-        }, { quoted: m });
+        // Konversi sections ke format nativeFlow single_select
+        const nativeSections = sections.map(sec => ({
+                title: sec.title || '',
+                rows: (sec.rows || []).map(r => ({
+                        header:      r.title || '',
+                        title:       r.title || '',
+                        description: r.description || '',
+                        id:          r.rowId || r.id || '',
+                })),
+        }));
 
-        await hisoka.relayMessage(msg.key.remoteJid, msg.message, { messageId: msg.key.id });
+        const buttonParamsJson = JSON.stringify({
+                title: buttonText,
+                sections: nativeSections,
+        });
+
+        try {
+                // ── Format utama: interactiveMessage + nativeFlowMessage ──────────────
+                // Bekerja di WA Business, WA Messenger, WA Mobile terbaru.
+                // Response: nativeFlowResponseMessage.paramsJson.id → m.text (via inject.js)
+                const msg = generateWAMessageFromContent(jid, {
+                        interactiveMessage: proto.Message.InteractiveMessage.create({
+                                body: proto.Message.InteractiveMessage.Body.create({
+                                        text: body,
+                                }),
+                                footer: proto.Message.InteractiveMessage.Footer.create({
+                                        text: footer || '',
+                                }),
+                                header: proto.Message.InteractiveMessage.Header.create({
+                                        title: title || '',
+                                        hasMediaAttachment: false,
+                                }),
+                                nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.create({
+                                        buttons: [
+                                                proto.Message.InteractiveMessage.NativeFlowMessage.NativeFlowButton.create({
+                                                        name: 'single_select',
+                                                        buttonParamsJson,
+                                                }),
+                                        ],
+                                }),
+                        }),
+                }, { quoted: m });
+
+                await hisoka.relayMessage(msg.key.remoteJid, msg.message, { messageId: msg.key.id });
+
+        } catch (errInteractive) {
+                // ── Fallback: listMessage proto (WA Mobile lama) ──────────────────────
+                // Kalau interactiveMessage gagal, coba listMessage biasa.
+                try {
+                        const msgList = generateWAMessageFromContent(jid, {
+                                listMessage: proto.Message.ListMessage.create({
+                                        title,
+                                        description: body,
+                                        buttonText,
+                                        listType: proto.Message.ListMessage.ListType.SINGLE_SELECT,
+                                        sections: sections.map(sec => ({
+                                                title: sec.title || '',
+                                                rows: (sec.rows || []).map(r => ({
+                                                        rowId:       r.rowId || r.id || '',
+                                                        title:       r.title || '',
+                                                        description: r.description || '',
+                                                })),
+                                        })),
+                                        footerText: footer,
+                                }),
+                        }, { quoted: m });
+                        await hisoka.relayMessage(msgList.key.remoteJid, msgList.message, { messageId: msgList.key.id });
+                } catch (errList) {
+                        // ── Fallback terakhir: plain text ────────────────────────────────
+                        const rowLines = sections.flatMap(sec =>
+                                (sec.rows || []).map(r => `• ${r.title || r.rowId || r.id}`)
+                        ).join('\n');
+                        await hisoka.sendMessage(jid, {
+                                text: `${body}\n\n${rowLines}`,
+                        }, { quoted: m }).catch(() => {});
+                }
+        }
 }
 
 function makeInteractiveMsg({ loadConfig, tolak }) {
 
-        /**
-         * listbut2 — kirim menu list pilihan (dipakai di fitur menu, dsb.)
-         */
         async function listbut2(jid, teks, listnye, m, hisoka) {
                 const cfg     = loadConfig();
                 const botName = (cfg.botReply || {}).botName || 'Wily Bot';
@@ -121,10 +168,6 @@ function makeInteractiveMsg({ loadConfig, tolak }) {
                 });
         }
 
-        /**
-         * sendConfirmWithButtons — kirim pesan konfirmasi dengan pilihan tombol.
-         * buttons: [{ text, id }]
-         */
         async function sendConfirmWithButtons(hisoka, m, txt, buttons, opts = {}) {
                 let sent = false;
                 try {
@@ -146,9 +189,6 @@ function makeInteractiveMsg({ loadConfig, tolak }) {
                 if (!sent) await tolak(hisoka, m, txt);
         }
 
-        /**
-         * sendAudioWithButtons — kirim audio lalu list pilihan aksi.
-         */
         async function sendAudioWithButtons(hisoka, m, audioBuf, bodyTxt, rows, opts = {}) {
                 const fileName    = opts.fileName    || 'audio.mp3';
                 const listTitle   = opts.listTitle   || '🎵 Pilih Aksi';
