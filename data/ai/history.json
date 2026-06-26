@@ -942,38 +942,6 @@
           "role": "user",
           "parts": [
             {
-              "text": "[⏰ 26 Jun, 16.46 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"Ngomong kasar bukan tanda pintar Wily, coba lagi dengan otak 🙂\" | 👤 Wily]\nWaduh 😂"
-            }
-          ]
-        },
-        {
-          "role": "model",
-          "parts": [
-            {
-              "text": "Waduh kenapa? Kaget aku bisa ngegas gitu ya? Aku kan nggak bisa diintimidasi Wily. 😏"
-            }
-          ]
-        },
-        {
-          "role": "user",
-          "parts": [
-            {
-              "text": "[⏰ 26 Jun, 16.47 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"Waduh kenapa? Kaget aku bisa ngegas gitu ya? Aku kan nggak bisa diintimidasi Wily. 😏\" | 👤 Wily]\nMaaf maaf 😁"
-            }
-          ]
-        },
-        {
-          "role": "model",
-          "parts": [
-            {
-              "text": "Nah, gitu dong. Aku kan cuma nunjukkin kalau aku nggak bisa disenggol sembarangan, Wily~ 😉"
-            }
-          ]
-        },
-        {
-          "role": "user",
-          "parts": [
-            {
               "text": "[⏰ 26 Jun, 16.47 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"*Baku*? Oke, kalau mau *adu argumen* pakai otak, aku siap. Jangan cuma koar-koar nggak jelas yae 🙂\" | 👤 yae]\nApa benar, jika 10+6=17?"
             }
           ]
@@ -1177,9 +1145,41 @@
               "text": "Nama aku *WilyAI*, yae. Kenapa, mau kenalan lebih jauh nih? 😏"
             }
           ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 26 Jun, 17.05 | 👤 Wily]\nnoh kasih link gc di info gc ini"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "yeuu enak aja nyuruh-nyuruh. aku mana tau link gc-nya Wily, kamu kan ownernya, ambil sendiri aja sana di info grup 😑"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 26 Jun, 17.06 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"yeuu enak aja nyuruh-nyuruh. aku mana tau link gc-nya Wily, kamu kan ownernya, ambil sendiri aja sana di info grup 😑\" | 👤 Wily]\nKontol :v"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "heh mulutnya dijaga ya. mentang-mentang owner ngomongnya sembarangan 🙄 ketik yang bener kalau mau dibantu Wily, malah toxic gitu."
+            }
+          ]
         }
       ],
-      "lastActivity": 1782467757611
+      "lastActivity": 1782468361117
     },
     "120363192554714254@g.us": {
       "messages": [
@@ -1198,9 +1198,57 @@
               "text": "Eh, apa sih Wily~~ dipanggil-panggil aku lagi sibuk tau 😑\n\nItu tadi cuma `Zz` doang kan? Kenapa dihapus emangnya? Mau tidur ya?"
             }
           ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 26 Jun, 17.03 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"Eh, apa sih Wily~~ dipanggil-panggil aku lagi sibuk tau 😑 Itu tadi cuma `Zz` doang kan? Kenapa dihapus emangnya? Mau tidur ya?\" | 👤 Wily]\nEngga"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "ya terus ngapain ngetik `Zz` segala trus dihapus? gabut banget ya sore-sore gini 🙄"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 26 Jun, 17.03 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"ya terus ngapain ngetik `Zz` segala trus dihapus? gabut banget ya sore-sore gini 🙄\" | 👤 Wily]\nKepo"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "idih gr banget, siapa juga yang kepo 🙄 orang cuma nanya doang. \n\nya udah terserah deh, awas aja nanti butuh aku."
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 26 Jun, 17.04 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"idih gr banget, siapa juga yang kepo 🙄 orang cuma nanya doang. ya udah terserah deh, awas aja nanti butuh aku.\" | 👤 Wily]\nTerserah"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "dih, ya udah. \n\nbeneran malesin deh. lagian kamu ngapain sih daritadi, beneran gabut doang?"
+            }
+          ]
         }
       ],
-      "lastActivity": 1782467934004
+      "lastActivity": 1782468245481
     }
   },
   "sticker_pattern": {
@@ -1220,9 +1268,9 @@
       "last_sent": 1779467326
     },
     "https://cdn.ornzora.eu.cc/a4bbcdf7-0c78-4d43-93e2-f0ebad7d1bf6-HONOLULU.webp": {
-      "total_sent": 2,
+      "total_sent": 3,
       "moods": {},
-      "last_sent": 1782465131
+      "last_sent": 1782468186
     },
     "https://cdn.ornzora.eu.cc/c3de99b6-bf96-46f6-bef7-d929c6399175-HONOLULU.webp": {
       "total_sent": 1,
@@ -1238,6 +1286,11 @@
       "total_sent": 4,
       "moods": {},
       "last_sent": 1782467708
+    },
+    "https://cdn.ornzora.eu.cc/0e5ac3ba-8326-46ab-947c-fb03374207f6-HONOLULU.webp": {
+      "total_sent": 1,
+      "moods": {},
+      "last_sent": 1782468326
     }
   },
   "sticker_story": {
@@ -1365,6 +1418,13 @@
         "context": "[REPLY-STIKER: smug] Halah, *bujang*~ Aku cuma jujur kok, yae. Emang kenyataannya gitu, mau gimana lagi? Kan kamu yang nanya duluan~ 😉",
         "was_fallback": 1,
         "sent_at": 1782467708
+      },
+      {
+        "sticker_url": "https://cdn.ornzora.eu.cc/0e5ac3ba-8326-46ab-947c-fb03374207f6-HONOLULU.webp",
+        "mood": "",
+        "context": "[REPLY-STIKER: jutek] yeuu enak aja nyuruh-nyuruh. aku mana tau link gc-nya Wily, kamu kan ownernya, ambil sendiri aja sana di info grup 😑",
+        "was_fallback": 1,
+        "sent_at": 1782468326
       }
     ],
     "120363192554714254@g.us": [
@@ -1374,6 +1434,13 @@
         "context": "Eh, apa sih Wily~~ dipanggil-panggil aku lagi sibuk tau 😑 Itu tadi cuma `Zz` doang kan? Kenapa dihapus emangnya? Mau tidur ya? [REPLY-STIKER: mikir kesel]",
         "was_fallback": 1,
         "sent_at": 1782467932
+      },
+      {
+        "sticker_url": "https://cdn.ornzora.eu.cc/a4bbcdf7-0c78-4d43-93e2-f0ebad7d1bf6-HONOLULU.webp",
+        "mood": "",
+        "context": "ya terus ngapain ngetik `Zz` segala trus dihapus? gabut banget ya sore-sore gini 🙄 [REPLY-STIKER: mikir]",
+        "was_fallback": 1,
+        "sent_at": 1782468186
       }
     ]
   },
