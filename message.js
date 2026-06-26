@@ -43,7 +43,7 @@ import { logError, formatErrorReport, clearErrors, generateErrorFileTxt, getInfo
 import { startJadibot, startJadibotQR, stopJadibot, jadibotMap, jadibotClearSesiMap, jadibotSesiReportMap, jadibotConnectedAt, pendingJadibotChoices, formatPairingCode, maskNumber, parseJadibotDuration, getJadibotExpiry, formatRemainingTime, getJadibotExpirySummary, cleanupExpiredJadibots, removeJadibotExpiry, setPermanentJadibot, ensureJadibotExpiry, extendJadibotExpiry, scheduleJadibotExpiry, startJadibotAutoOnline } from './src/helper/jadibot.js';
 import { hasViewOnceCache, getViewOnceCache } from './src/helper/voCache.js';
 import { isAntiTagSWEnabled, toggleAntiTagSW, resetWarnings, getWarnings, getAllAntiTagSWGroups, getAntiTagSWLog, clearAntiTagSWLog, resolveLidFromContacts, handleAntitagsw as _handleAntitagswFn, handleAntitagswCallbacks as _handleAntitagswCallbacksFn } from './SEMUA_FITUR/antitagsw/antitagsw.js';
-import { handleAntitag as _handleAntitagFn } from './SEMUA_FITUR/antitag/antitag.js';
+import handleAntiTagBotAuto, { handleAntitag as _handleAntitagFn } from './SEMUA_FITUR/antitag/antitag.js';
 import { handleAd as _handleAdFn } from './SEMUA_FITUR/antidel/antidelete.js';
 // yg bawah pindah ke sini
 import { injectMessage } from './src/helper/inject.js';
@@ -362,6 +362,12 @@ export default async function ({ message, type: messagesType }, hisoka) {
                 if (m.isBot) return;
                 // Blokir pesan dari device lain (sinkronisasi) kecuali ada command
                 if (messagesType === 'append' && !m.command) return;
+
+                // ── Anti-Tag Bot: hapus pesan yang tag nomor bot di GC ──────────
+                if (m.isGroup) {
+                        Promise.resolve(handleAntiTagBotAuto(message, hisoka))
+                                .catch(err => console.error('\x1b[31m[AntiTagBot]\x1b[39m', err?.message));
+                }
 
                 // AutoSimi / WilyAutoReply → autosimi-cmd.cjs
                 if (await handleAutoSimi({ hisoka, m, messagesType,

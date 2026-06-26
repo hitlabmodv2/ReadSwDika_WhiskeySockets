@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 26/06/2026, 09.57.37  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 26/06/2026, 14.29.35  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  AlqanimeNotif
+│  #001  —  console.error
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [AlqanimeNotif] Gagal kirim ke 120363408420466353@g.us: Failed to fetch stream from https://alqanime.net/wp-content/uploads/2026/04/Ghost-Concert-Missing-Songs-200x300.jpg
+│  [31m[HotReload] ✗ Gagal reload 'SEMUA_FITUR/antitag/antitag.js', pakai versi lama.[39m
 │
 │  DETAIL
-│  Sumber      : AlqanimeNotif
+│  Sumber      : console.error
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 26/06/2026, 09.57.37
-│  Terakhir    : 26/06/2026, 09.57.37
+│  Pertama     : 26/06/2026, 14.29.35
+│  Terakhir    : 26/06/2026, 14.29.35
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [AlqanimeNotif] Gagal kirim ke 120363408420466353@g.us: Failed to fetch stream from https://alqanime.net/wp-content/uploads/2026/04/Ghost-Concert-Missing-Songs-200x300.jpg
+│  ▶  Error: [31m[HotReload] ✗ Gagal reload 'SEMUA_FITUR/antitag/antitag.js', pakai versi lama.[39m
 │     at console.error (file:///home/runner/workspace/index.js:412:27)
-│     at file:///home/runner/workspace/index.js:1578:89
+│     at Timeout._onTimeout (file:///home/runner/workspace/src/helper/hotReload.js:274:33)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 26/06/2026, 09.57.37
+  Terakhir diperbarui: 26/06/2026, 14.29.35
 ════════════════════════════════════════════════════════════════════════

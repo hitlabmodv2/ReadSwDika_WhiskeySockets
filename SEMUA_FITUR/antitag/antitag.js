@@ -143,7 +143,7 @@ function isBotMentioned(message, botJid, botNumber) {
     return false;
 }
 
-// ── Auto-handler: dipanggil dari index.js di messages.upsert ──────────────────
+// ── Auto-handler: dipanggil dari message.js ──────────────────────────────────
 export default async function handleAntiTagBot(message, hisoka) {
     try {
         if (!message?.key?.remoteJid) return;
@@ -161,6 +161,8 @@ export default async function handleAntiTagBot(message, hisoka) {
 
         // Apakah pesan ini tag nomor bot?
         if (!isBotMentioned(message, botJid, botNumber)) return;
+
+        console.log(`\x1b[36m[AntiTagBot] Tag terdeteksi di grup ${remoteJid.split('@')[0]}\x1b[39m`);
 
         // Ambil sender
         const senderJid    = getSenderJid(message);
