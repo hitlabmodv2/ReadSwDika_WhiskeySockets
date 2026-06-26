@@ -20,7 +20,7 @@
       "participant": "129334601846925@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-25T14:03:00.516Z",
+    "updatedAt": "2026-06-26T08:02:15.553Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -39,7 +39,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-25T14:03:00.516Z"
+    "processedAt": "2026-06-25T14:03:00.516Z",
+    "deleted": true,
+    "deletedAt": "2026-06-26T08:02:15.553Z"
   },
   "ACD48A46C08F15499BB1088EB349BD05": {
     "id": "ACD48A46C08F15499BB1088EB349BD05",
@@ -62,7 +64,7 @@
       "participant": "129334601846925@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-25T14:03:11.591Z",
+    "updatedAt": "2026-06-26T08:02:22.497Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -81,7 +83,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-25T14:03:11.591Z"
+    "processedAt": "2026-06-25T14:03:11.591Z",
+    "deleted": true,
+    "deletedAt": "2026-06-26T08:02:22.497Z"
   },
   "ACBCCBEAA2799FC70AF44E332709F6AD": {
     "id": "ACBCCBEAA2799FC70AF44E332709F6AD",
@@ -146,7 +150,7 @@
       "participant": "129334601846925@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-25T14:03:49.946Z",
+    "updatedAt": "2026-06-26T08:02:13.807Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -165,7 +169,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-25T14:03:49.946Z"
+    "processedAt": "2026-06-25T14:03:49.946Z",
+    "deleted": true,
+    "deletedAt": "2026-06-26T08:02:13.807Z"
   },
   "AC95EAE7553DAE9156240D9D74FD0ADE": {
     "id": "AC95EAE7553DAE9156240D9D74FD0ADE",
@@ -232,7 +238,7 @@
       "participant": "129334601846925@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-25T14:29:40.571Z",
+    "updatedAt": "2026-06-26T08:02:19.129Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -251,7 +257,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-25T14:29:40.571Z"
+    "processedAt": "2026-06-25T14:29:40.571Z",
+    "deleted": true,
+    "deletedAt": "2026-06-26T08:02:19.129Z"
   },
   "AC3BEEA8B2CA5217018B766ED0D42F3E": {
     "id": "AC3BEEA8B2CA5217018B766ED0D42F3E",
@@ -274,7 +282,7 @@
       "participant": "129334601846925@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-26T05:44:07.489Z",
+    "updatedAt": "2026-06-26T08:02:18.657Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -293,7 +301,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-26T05:44:07.488Z"
+    "processedAt": "2026-06-26T05:44:07.488Z",
+    "deleted": true,
+    "deletedAt": "2026-06-26T08:02:18.657Z"
   },
   "AC25A65E205A47B5C274969DBBA2698C": {
     "id": "AC25A65E205A47B5C274969DBBA2698C",
@@ -316,7 +326,7 @@
       "participant": "129334601846925@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-26T05:49:57.473Z",
+    "updatedAt": "2026-06-26T08:02:16.097Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -335,7 +345,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-26T05:49:57.473Z"
+    "processedAt": "2026-06-26T05:49:57.473Z",
+    "deleted": true,
+    "deletedAt": "2026-06-26T08:02:16.097Z"
   },
   "ACDA773CEFF0F343468ED097FA79479E": {
     "id": "ACDA773CEFF0F343468ED097FA79479E",
@@ -358,7 +370,7 @@
       "participant": "129334601846925@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-26T06:18:55.095Z",
+    "updatedAt": "2026-06-26T08:02:18.663Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -377,7 +389,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-26T06:18:55.095Z"
+    "processedAt": "2026-06-26T06:18:55.095Z",
+    "deleted": true,
+    "deletedAt": "2026-06-26T08:02:18.663Z"
   },
   "AC0FA4FFC39076A68B7F31EF936D8886": {
     "id": "AC0FA4FFC39076A68B7F31EF936D8886",
@@ -400,7 +414,7 @@
       "participant": "129334601846925@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-26T06:19:20.847Z",
+    "updatedAt": "2026-06-26T08:02:16.485Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -419,7 +433,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-26T06:19:20.847Z"
+    "processedAt": "2026-06-26T06:19:20.847Z",
+    "deleted": true,
+    "deletedAt": "2026-06-26T08:02:16.485Z"
   },
   "ACD78A662B3CF218CCD65C6F7F4C999D": {
     "id": "ACD78A662B3CF218CCD65C6F7F4C999D",
@@ -588,5 +604,47 @@
       }
     ],
     "processedAt": "2026-06-26T07:55:24.150Z"
+  },
+  "AC9A48C698BD6F9B00DF70139210F031": {
+    "id": "AC9A48C698BD6F9B00DF70139210F031",
+    "sender": "6285695777114@s.whatsapp.net",
+    "name": "╰っホム┌Ryuuka┐/⁠ᐠ⁠｡⁠ꞈ⁠｡⁠ᐟ⁠\\",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-26T08:01:27.712Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🎳",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285695777114",
+    "resolvedPn": "6285695777114@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285695777114@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC9A48C698BD6F9B00DF70139210F031",
+      "participant": "129334601846925@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-26T08:01:30.518Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285695777114@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC9A48C698BD6F9B00DF70139210F031",
+        "participant": "129334601846925@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285695777114@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC9A48C698BD6F9B00DF70139210F031",
+        "participant": "6285695777114@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-26T08:01:30.517Z"
   }
 }
