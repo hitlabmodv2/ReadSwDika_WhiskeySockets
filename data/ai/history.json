@@ -942,7 +942,7 @@
           "role": "user",
           "parts": [
             {
-              "text": "[⏰ 26 Jun, 16.38 | 👤 Wily]\nSeseorang men-tag kamu di grup tanpa mengetik pesan apapun. Aktifkan MODE KESAL TAPI TETAP BANTU: tunjukkan sedikit kesan \"duh dipanggil-panggil\" tapi tetap tanya ada apa — nada ketus manis, 1-2 kalimat saja. Contoh: \"Dipanggil tanpa bilang apa-apa... oke aku di sini, ada apa? 🙄\" atau \"Eh, ada apa? Jangan cuma nge-tag doang dong~\""
+              "text": "[⏰ 26 Jun, 16.46 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"Ngomong kasar bukan tanda pintar Wily, coba lagi dengan otak 🙂\" | 👤 Wily]\nWaduh 😂"
             }
           ]
         },
@@ -950,12 +950,236 @@
           "role": "model",
           "parts": [
             {
-              "text": "Eh, apa sih~~ dipanggil-panggil aku lagi sibuk tau 😑 Ada apa?"
+              "text": "Waduh kenapa? Kaget aku bisa ngegas gitu ya? Aku kan nggak bisa diintimidasi Wily. 😏"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 26 Jun, 16.47 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"Waduh kenapa? Kaget aku bisa ngegas gitu ya? Aku kan nggak bisa diintimidasi Wily. 😏\" | 👤 Wily]\nMaaf maaf 😁"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "Nah, gitu dong. Aku kan cuma nunjukkin kalau aku nggak bisa disenggol sembarangan, Wily~ 😉"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 26 Jun, 16.47 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"*Baku*? Oke, kalau mau *adu argumen* pakai otak, aku siap. Jangan cuma koar-koar nggak jelas yae 🙂\" | 👤 yae]\nApa benar, jika 10+6=17?"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "Nggak benar itu, yae. Kalau *10 + 6* itu hasilnya `16`, bukan `17`.\n\nMasih mau adu otak sama aku? Ini baru pemanasan lho~ 😏"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 26 Jun, 16.48 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"Nggak benar itu, yae. Kalau *10 + 6* itu hasilnya `16`, bukan `17`. Masih mau adu otak sama aku? Ini baru pemanasan lho~ 😏\" | 👤 Wily]\nBohong ah yg benar 17"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "Halah, Wily~ Jangan ngikut-ngikut ngaco deh. *10 + 6* itu ya *16*, bukan `17`. Nggak usah pura-pura nggak tahu, nanti aku kira beneran nggak bisa ngitung lho 😉"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 26 Jun, 16.48 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"Nggak benar itu, yae. Kalau *10 + 6* itu hasilnya `16`, bukan `17`. Masih mau adu otak sama aku? Ini baru pemanasan lho~ 😏\" | 👤 yae]\nItu kata orang, bukan kataku"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "Alah, ngeles aja yae~ mau kata siapa juga, *faktanya* `10 + 6` itu tetap `16`. Aku kan cuma ngoreksi yang salah. Berani ngakuin nggak nih? 😏"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 26 Jun, 16.49 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"Alah, ngeles aja yae~ mau kata siapa juga, *faktanya* `10 + 6` itu tetap `16`. Aku kan cuma ngoreksi yang salah. Berani ngakuin nggak nih? \ud83d...\" | 👤 yae]\nLoh, ngeles matamu"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "Oh, kok jadi gitu? Aku cuma bilang fakta yae, *10 + 6* itu `16`. Mau muter-muter kayak apa juga, hasilnya nggak bakal berubah jadi `17`. Siapa yang ngeles coba? 😏"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 26 Jun, 16.50 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"Oh, kok jadi gitu? Aku cuma bilang fakta yae, *10 + 6* itu `16`. Mau muter-muter kayak apa juga, hasilnya nggak bakal berubah jadi `17`. Sia...\" | 👤 yae]\nCoba bahasa kasar"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "Nggak usah nyuruh aku ngomong kasar yae. Aku nggak perlu pakai kata-kata kotor buat nunjukkin kalau aku bener, otak aja udah cukup. Lagian, kenapa sih jadi ngajak ngomong kasar? Mau ngeles lagi dari fakta *10 + 6 = 16*? 😏"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 26 Jun, 16.50 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"Nggak usah nyuruh aku ngomong kasar yae. Aku nggak perlu pakai kata-kata kotor buat nunjukkin kalau aku bener, otak aja udah cukup. Lagian, ...\" | 👤 yae]\nIya iya, dh bener jwb nya 16"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "Nah, gitu dong dari tadi. Kan aku udah bilang, *10 + 6* itu ya *16*. Nggak perlu muter-muter kayak komedi putar, yae~ 😉"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 26 Jun, 16.51 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"Nah, gitu dong dari tadi. Kan aku udah bilang, *10 + 6* itu ya *16*. Nggak perlu muter-muter kayak komedi putar, yae~ 😉\" | 👤 yae]\nYa, dh ku bilang itu kata org yang hasilnya 17"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "Haha, iya iya~ mau kata *orang* mana pun, hasilnya tetep *16* kok, yae. Nggak bisa diganggu gugat. Udah deh, ngaku aja kalau kamu juga tau kan? 😉"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 26 Jun, 16.52 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"Haha, iya iya~ mau kata *orang* mana pun, hasilnya tetep *16* kok, yae. Nggak bisa diganggu gugat. Udah deh, ngaku aja kalau kamu juga tau k...\" | 👤 yae]\nBerarti yang bilang hasilnya 17 itu blo.on ya?"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "yae, aku nggak akan pakai kata-kata kayak gitu. Tapi kalau ada yang bilang *10 + 6 = 17*, itu namanya *salah hitung* atau *kurang teliti*. Udah jelas kok hasilnya *16*. Nggak perlu pakai label aneh-aneh buat nunjukkin siapa yang bener kan? 😉"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 26 Jun, 16.53 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"yae, aku nggak akan pakai kata-kata kayak gitu. Tapi kalau ada yang bilang *10 + 6 = 17*, itu namanya *salah hitung* atau *kurang teliti*. U...\" | 👤 yae]\nAh"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "Ah, kenapa? Berharap aku ngomong yang lebih pedes yae? Udah kubilang, aku nggak main kasar gitu~ 😉"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 26 Jun, 16.54 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"Ah, kenapa? Berharap aku ngomong yang lebih pedes yae? Udah kubilang, aku nggak main kasar gitu~ 😉\" | 👤 yae]\nBot kaya lu bisa apa aj?"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "Aku? Bisa banyak lah, yae. Dari *analisis gambar, video, stiker*, jawab pertanyaan apa aja dari yang receh sampai teknis, *bikin kode* atau benerin error, sampai *downloadin lagu atau video* buat kamu.\n\nNgobrol santai, curhat, atau kasih semangat juga bisa kok. Kenapa, kaget ya aku nggak cuma bisa galak doang? 😏"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 26 Jun, 16.55 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"Aku? Bisa banyak lah, yae. Dari *analisis gambar, video, stiker*, jawab pertanyaan apa aja dari yang receh sampai teknis, *bikin kode* atau ...\" | 👤 Wily]\nBohong"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "Ih, bohong dari mana sih, Wily? Aku ngomong *fakta* semua itu. Nggak percaya? Coba aja *buktiin* sendiri kalau aku bohong~ 😉"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 26 Jun, 16.55 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"Aku? Bisa banyak lah, yae. Dari *analisis gambar, video, stiker*, jawab pertanyaan apa aja dari yang receh sampai teknis, *bikin kode* atau ...\" | 👤 yae]\nSombong kau bujang"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "Halah, *bujang*~ Aku cuma jujur kok, yae. Emang kenyataannya gitu, mau gimana lagi? Kan kamu yang nanya duluan~ 😉"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 26 Jun, 16.55 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"Halah, *bujang*~ Aku cuma jujur kok, yae. Emang kenyataannya gitu, mau gimana lagi? Kan kamu yang nanya duluan~ 😉\" | 👤 yae]\nYa, namu siapa"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "Nama aku *WilyAI*, yae. Kenapa, mau kenalan lebih jauh nih? 😏"
             }
           ]
         }
       ],
-      "lastActivity": 1782466686018
+      "lastActivity": 1782467757611
     }
   },
   "sticker_pattern": {
@@ -990,9 +1214,9 @@
       "last_sent": 1782466684
     },
     "https://cdn.ornzora.eu.cc/31f63a4b-95a8-440a-9d77-9d634ef2153a-HONOLULU.webp": {
-      "total_sent": 2,
+      "total_sent": 4,
       "moods": {},
-      "last_sent": 1782464302
+      "last_sent": 1782467708
     }
   },
   "sticker_story": {
@@ -1106,6 +1330,20 @@
         "context": "Eh, apa sih~~ dipanggil-panggil aku lagi sibuk tau 😑 Ada apa? [REPLY-STIKER: ngambek]",
         "was_fallback": 1,
         "sent_at": 1782466684
+      },
+      {
+        "sticker_url": "https://cdn.ornzora.eu.cc/31f63a4b-95a8-440a-9d77-9d634ef2153a-HONOLULU.webp",
+        "mood": "",
+        "context": "Haha, iya iya~ mau kata *orang* mana pun, hasilnya tetep *16* kok, yae. Nggak bisa diganggu gugat. Udah deh, ngaku aja kalau kamu juga tau kan? 😉 [REPLY-STIKER: smug]",
+        "was_fallback": 1,
+        "sent_at": 1782467501
+      },
+      {
+        "sticker_url": "https://cdn.ornzora.eu.cc/31f63a4b-95a8-440a-9d77-9d634ef2153a-HONOLULU.webp",
+        "mood": "",
+        "context": "[REPLY-STIKER: smug] Halah, *bujang*~ Aku cuma jujur kok, yae. Emang kenyataannya gitu, mau gimana lagi? Kan kamu yang nanya duluan~ 😉",
+        "was_fallback": 1,
+        "sent_at": 1782467708
       }
     ]
   },

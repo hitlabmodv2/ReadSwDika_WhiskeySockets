@@ -450,6 +450,8 @@ const MOOD_KEYWORD_MAP = [
     { mood: 'jutek',      keywords: ['jutek', 'ya terus', 'so what', 'gue pikirin', 'terus kenapa', 'emangnya', 'nggak penting', 'biarin', 'ya bodo'] },
     { mood: 'tenang',     keywords: ['tenang', 'fine', 'santai', 'relax', 'cool', 'biasa aja', 'nggak masalah', 'nggak apa-apa', 'calm', 'damai'] },
     { mood: 'facepalm',   keywords: ['facepalm', 'kenapa sih', 'dunia apa', 'ya ampun', 'duh', 'oh no', 'payah', 'aduh', 'astaga', 'tobat'] },
+    { mood: 'panik',      keywords: ['panik', 'keteteran', 'kewalahan', 'overwhelmed', 'hampir nangis stres', 'stres berat', 'gimana ini', 'mati kutu', 'nggak bisa handle', 'semuanya'] },
+    { mood: 'mikir kesel', keywords: ['side-eye', 'annoyed diam', 'serius ini', 'yakin sih', 'nggak yakin tapi kesel', 'hmm annoyed', 'skeptis jutek', 'males tapi kepo'] },
 ];
 
 // Mood → stiker index mapping (stiker paling cocok untuk tiap mood)
@@ -478,6 +480,8 @@ const MOOD_TO_STIKER = {
     jutek:      { list: 'honolulu', idx: 12 },  // datar / males respon
     tenang:     { list: 'honolulu', idx: 35 },  // stoic / tenang total
     facepalm:   { list: 'honolulu', idx: 40 },  // facepalm / hopeless
+    panik:      { list: 'fiora',    idx: 17 },  // panik / keteteran (stres ringan, hampir nangis)
+    'mikir kesel': { list: 'fiora', idx: 14 },  // mikir + sedikit kesel (side-eye, skeptis jutek)
 };
 
 /**

@@ -47,9 +47,9 @@
     "name": "Wans Store",
     "type": "imageMessage",
     "arrivedAt": "2026-06-26T09:45:44.189Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "🎃",
     "resolve": "Signal Lib ✓",
     "source": "status",
     "number": "6283897069764",
@@ -62,6 +62,25 @@
       "participant": "59236289622095@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-26T09:45:44.189Z"
+    "updatedAt": "2026-06-26T09:46:04.336Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283897069764@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A56E85F9E7CE2072299D4ECFE70F0169",
+        "participant": "59236289622095@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283897069764@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A56E85F9E7CE2072299D4ECFE70F0169",
+        "participant": "6283897069764@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-26T09:46:04.336Z"
   }
 }

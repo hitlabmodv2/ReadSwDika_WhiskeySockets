@@ -355,9 +355,9 @@
     "name": "Nurull L ny 2",
     "type": "videoMessage",
     "arrivedAt": "2026-06-26T09:45:38.924Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "🐺",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6285136314199",
@@ -370,6 +370,25 @@
       "participant": "90916371062907@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-26T09:45:38.924Z"
+    "updatedAt": "2026-06-26T09:45:52.866Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285136314199@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC9C196706F06B29527E94B9E40A0429",
+        "participant": "90916371062907@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285136314199@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC9C196706F06B29527E94B9E40A0429",
+        "participant": "6285136314199@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-26T09:45:52.866Z"
   }
 }
