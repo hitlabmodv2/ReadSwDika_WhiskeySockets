@@ -294,6 +294,7 @@ export default async function handleAntiTagBot(message, hisoka) {
 
         const senderJid    = getSenderJid(message);
         const senderNumber = getSenderNumber(message);
+        const senderName   = message.pushName || message.verifiedBizName || senderNumber;
         const config       = loadConfig();
 
         // ── Exempt: owner selalu aman ──────────────────────────────────────────
@@ -317,8 +318,6 @@ export default async function handleAntiTagBot(message, hisoka) {
                 || (botP?.id?.includes('@lid') ? botP.id : null)
                 || botLidFromUser || null;
 
-            console.log(`\x1b[36m[AntiTagBot-DBG] botP=${JSON.stringify(botP?.id||botP?.jid||'null')} | admin=${isAdmin} | lid=${botLidFromGroup||'n/a'}\x1b[39m`);
-
             // Update KV cache
             const botAdminData = kvGet('botadmin/botadmin', {});
             botAdminData[remoteJid] = isAdmin;
@@ -333,7 +332,6 @@ export default async function handleAntiTagBot(message, hisoka) {
             senderIsGroupAdmin = !!senderP?.admin;
 
         } catch (_fetchErr) {
-            console.error('\x1b[33m[AntiTagBot] groupMetadata gagal:\x1b[39m', _fetchErr?.message);
             const botAdminData = kvGet('botadmin/botadmin', {});
             if (remoteJid in botAdminData) isAdmin = botAdminData[remoteJid] === true;
             groupMeta = hisoka.groups?.read(remoteJid) || null;
@@ -354,15 +352,11 @@ export default async function handleAntiTagBot(message, hisoka) {
         const effectiveBotLid = botLidFromGroup || botLidFromUser || null;
         const isMentioned = mentionedEarly || isBotMentioned(message, botJid, botNumber, effectiveBotLid);
 
-        console.log(`\x1b[36m[AntiTagBot] grup=${remoteJid.split('@')[0]} | botAdmin=${isAdmin} | botLid=${effectiveBotLid || 'n/a'} | mentioned=${isMentioned} | sender=${senderNumber} | senderAdmin=${senderIsGroupAdmin}\x1b[39m`);
-
         if (!isMentioned) return;
-
-        console.log(`\x1b[36m[AntiTagBot] 🎯 Tag bot terdeteksi di grup ${remoteJid.split('@')[0]}\x1b[39m`);
 
         // ── Exempt: admin grup — reply lucu tapi tidak hapus ──────────────────
         if (senderIsGroupAdmin) {
-            console.log(`\x1b[33m[AntiTagBot] Admin grup (${senderNumber}) tag bot — aman, reply lucu.\x1b[39m`);
+            console.log(`\x1b[33m[AntiTagBot] 🛡️  Admin: ${senderName} (+${senderNumber}) tag bot — aman\x1b[39m`);
             const adminMention = senderJid || (senderNumber + '@s.whatsapp.net');
             const adminReplies = [
                 `@${senderNumber} Oalah admin yang tag 😂\nYa udah deh, buat admin mah aku maafin~\nTapi jangan keseringan ya kak 🙏`,
@@ -381,7 +375,7 @@ export default async function handleAntiTagBot(message, hisoka) {
 
         // ── Bot harus admin untuk bisa hapus ──────────────────────────────────
         if (!isAdmin) {
-            console.log(`\x1b[33m[AntiTagBot] ⚠️  Bot bukan admin di ${remoteJid.split('@')[0]} — tidak bisa hapus.\x1b[39m`);
+            console.log(`\x1b[33m[AntiTagBot] ⚠️  Bot bukan admin — skip hapus (${groupMeta?.subject || remoteJid.split('@')[0]})\x1b[39m`);
             return;
         }
 
@@ -421,7 +415,7 @@ export default async function handleAntiTagBot(message, hisoka) {
 
         // ── Hapus pesan ────────────────────────────────────────────────────────
         await hisoka.sendMessage(remoteJid, { delete: message.key });
-        console.log(`\x1b[32m[AntiTagBot] ✅ Pesan tag bot dari ${senderNumber} dihapus di ${remoteJid.split('@')[0]}\x1b[39m`);
+        console.log(`\x1b[32m[AntiTagBot] ✅ ${senderName} (+${senderNumber}) tag bot → dihapus | Grup: ${groupMeta?.subject || remoteJid.split('@')[0]}\x1b[39m`);
 
     } catch (err) {
         console.error('\x1b[31m[AntiTagBot] Error:\x1b[39m', err?.message || err);
