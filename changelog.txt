@@ -3,17 +3,46 @@ _📅 Masih dipikirkan_ 🕐
 _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurna_ 🙏
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V24*
-✨ *0 Fitur Baru*
-🔧 *0 Bug/Error Fix*
-🚀 *0 Improvement*
+✨ *2 Fitur Baru*
+🔧 *2 Bug/Error Fix*
+🚀 *1 Improvement*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
+> NO.1 🔤 *Font Untik — .font*
+> Ubah teks biasa jadi berbagai gaya font unik via tombol pilihan interaktif
+> Cara pakai: .font [teks]
+> Bot kirim button single select → pilih gaya font yang diinginkan → hasil langsung dikirim
+> Tersedia banyak gaya: bold, italic, gothic, bubble, dan lainnya
+
+> NO.2 🎞️ *Anime GIF — .animegif / .animgif / .gifanime*
+> Cari dan kirim GIF anime dari Tenor langsung ke chat
+> Cara pakai: .animegif [kata kunci]
+> Contoh: .animegif naruto, .animegif one piece fight
+> Hasil: GIF anime sesuai kata kunci dikirim langsung ke chat
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🔧 *BUG/ERROR FIX*
 ━━━━━━━━━━━━━━━━━━━━━━
+> NO.1 🎵 *Musikai/Musikai2 — Mode Instrumental Sering Muncul*
+> Bug: mode Instrumental muncul terlalu sering padahal user tidak memilihnya
+> Penyebab: getRandomPreset() punya probabilitas 55% Instrumental, aiRandomPreset() 35%
+> Fix: probabilitas diturunkan ke 10% — kini 90% Vokal secara default
+> Berlaku untuk: .musikai random & .musikai2 random
+
+> NO.2 👋 *Welcome/Goodbye — Spam Pesan Error ke Grup*
+> Bug: bot spam kirim "❌ Fitur Welcome/Goodbye dinonaktifkan secara global" ke grup
+> Penyebab: mode allowNoPrefix aktif → pesan bot lain/sistem seperti "welcome to the group"
+>           terbaca sebagai command .welcome → handler jalan → error dikirim ke grup
+> Fix: guard ditambahkan — jika tidak ada prefix (.) dan arg bukan on/off → diam saja
+> Berlaku untuk: .welcome, .goodbye, .welgod
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *IMPROVEMENT*
 ━━━━━━━━━━━━━━━━━━━━━━
+> NO.1 🎲 *Musikai/Musikai2 Random — Kini Ada Picker Bahasa & Mode*
+> Sebelumnya: ketik .musikai random / .musikai2 random → langsung generate tanpa pilihan
+> Sesudahnya: muncul button single select pilih bahasa dulu (🇮🇩 / 🇯🇵 / 🇬🇧)
+>             lalu pilih mode (🎤 Vokal / 🎹 Instrumental) → baru generate
+> Konsisten dengan tap button "AI Random" dari menu hasil lagu
+> Berlaku untuk: .musikai random & .musikai2 random
