@@ -1418,78 +1418,145 @@ _do_check_update &
 
 # ===== Auto-classify commit (Conventional Commits) =====
 classify_commit() {
-  local files status_lines
-  status_lines=$(git diff --cached --name-status)
-  files=$(echo "$status_lines" | awk '{print $2}')
+  local files status_lines added modified deleted total
+  status_lines=$(git diff --cached --name-status 2>/dev/null)
+  [ -z "$status_lines" ] && { echo "chore: update files"; return; }
 
-  local added modified deleted
-  added=$(echo "$status_lines"   | awk '$1=="A"' | wc -l | tr -d ' ')
-  modified=$(echo "$status_lines" | awk '$1=="M"' | wc -l | tr -d ' ')
-  deleted=$(echo "$status_lines"  | awk '$1=="D"' | wc -l | tr -d ' ')
+  files=$(echo "$status_lines" | awk '{print $NF}')
+  total=$(echo "$files" | grep -c '.' 2>/dev/null || echo 1)
+  added=$(echo "$status_lines"    | awk '$1~/^A/' | wc -l | tr -d ' ')
+  modified=$(echo "$status_lines" | awk '$1~/^M/' | wc -l | tr -d ' ')
+  deleted=$(echo "$status_lines"  | awk '$1~/^D/' | wc -l | tr -d ' ')
 
+  # ── Scope detection (folder dominan) ────────────────────────────────────────
   local scope="" scope_count=0
-  declare -A scope_map=(
-    [scrape/]="scrape"
-    [src/handler/]="handler"
-    [src/helper/]="helper"
-    [src/db/]="db"
-    [src/lib/]="lib"
-    [data/]="data"
-    [sessions/]="session"
-    [attached_assets/]="assets"
-    [.agents/]="agents"
-    [jadibot/]="jadibot"
-  )
-
-  for prefix in "${!scope_map[@]}"; do
-    local cnt
-    cnt=$(echo "$files" | grep -c "^${prefix}" || true)
-    if [ "$cnt" -gt "$scope_count" ]; then
-      scope_count=$cnt
-      scope="${scope_map[$prefix]}"
+  for _pfx in "src/handler/" "src/helper/" "src/lib/" "src/db/" \
+              "data/" "sessions/" "attached_assets/" ".agents/" \
+              "jadibot/" "scrape/"; do
+    local _cnt
+    _cnt=$(echo "$files" | grep -c "^${_pfx}" 2>/dev/null || echo 0)
+    if [ "$_cnt" -gt "$scope_count" ]; then
+      scope_count=$_cnt
+      case "$_pfx" in
+        src/handler/)     scope="handler" ;;
+        src/helper/)      scope="helper"  ;;
+        src/lib/)         scope="lib"     ;;
+        src/db/)          scope="db"      ;;
+        data/)            scope="data"    ;;
+        sessions/)        scope="session" ;;
+        attached_assets/) scope="assets"  ;;
+        .agents/)         scope="agents"  ;;
+        jadibot/)         scope="jadibot" ;;
+        scrape/)          scope="scrape"  ;;
+      esac
     fi
   done
-
-  if echo "$files" | grep -qE '^(package\.json|package-lock\.json)$'; then
+  if echo "$files" | grep -qE '(package\.json|package-lock\.json)'; then
     [ -z "$scope" ] && scope="deps"
   fi
-  if echo "$files" | grep -qE '^(\.gitignore|push\.sh|index\.js|config\.json|Dockerfile|fly\.toml|\.npmrc)$'; then
+  if echo "$files" | grep -qE '(\.gitignore|push\.sh|index\.js|config\.json|\.npmrc|\.replit)'; then
     [ -z "$scope" ] && scope="config"
   fi
 
+  # ── Theme / subject detection dari nama file ──────────────────────────────
+  # Gabungkan semua basename jadi satu string lowercase untuk pencocokan kata kunci
+  local _names _all
+  _names=$(echo "$files" | xargs -n1 basename 2>/dev/null | tr '[:upper:]' '[:lower:]' | tr '_.-' '   ')
+  _all=$(echo "$files" | tr '[:upper:]' '[:lower:]' | tr '_.-' '   ')
+
+  local subject=""
+  if   echo "$_all $_names" | grep -qiE 'prayer|sholat|salat|jadwal|waktu'; then subject="prayer time"
+  elif echo "$_all $_names" | grep -qiE 'image|gambar|foto|photo|resolusi|resolution|thumbnail|quality'; then subject="image quality"
+  elif echo "$_all $_names" | grep -qiE 'notif|notification|caption'; then subject="notification"
+  elif echo "$_all $_names" | grep -qiE 'stat|statistik|statistic'; then subject="bot statistics"
+  elif echo "$_all $_names" | grep -qiE 'contact|kontak|sender'; then subject="contact"
+  elif echo "$_all $_names" | grep -qiE 'session|sesi'; then subject="session"
+  elif echo "$_all $_names" | grep -qiE 'menu|command|cmd'; then subject="command menu"
+  elif echo "$_all $_names" | grep -qiE 'auth|token|login'; then subject="authentication"
+  elif echo "$_all $_names" | grep -qiE 'db|database|sqlite|mongo'; then subject="database"
+  elif echo "$_all $_names" | grep -qiE 'log|logger|debug'; then subject="logger"
+  elif echo "$_all $_names" | grep -qiE 'handler'; then subject="message handler"
+  elif echo "$_all $_names" | grep -qiE 'helper|util'; then subject="utility helpers"
+  elif echo "$_all $_names" | grep -qiE 'scrape|scrap'; then subject="scraper"
+  elif echo "$_all $_names" | grep -qiE 'bot|wa|whatsapp|whiskey|socket'; then subject="bot"
+  fi
+
+  # ── Verb detection: dari nama file & jenis perubahan ────────────────────────
+  local verb=""
+  if   echo "$_all $_names" | grep -qiE 'fix|perbaik|repair|resolve|correct'; then verb="Fix"
+  elif echo "$_all $_names" | grep -qiE 'restore|revert|rollback|kembalikan'; then verb="Restore"
+  elif echo "$_all $_names" | grep -qiE 'remove|hapus|delete|eliminat|temporary'; then verb="Remove"
+  elif echo "$_all $_names" | grep -qiE 'enhance|improve|better|optimis|higher|increas'; then verb="Enhance"
+  elif echo "$_all $_names" | grep -qiE 'refactor|restructur|reorganiz|migrat'; then verb="Refactor"
+  elif echo "$_all $_names" | grep -qiE 'update|upgrade|bump|sync|refresh'; then verb="Update"
+  elif [ "$deleted" -gt 0 ] && [ "$added" -eq 0 ]; then verb="Remove"
+  elif [ "$added" -gt "$modified" ] && [ "$added" -gt 0 ]; then verb="Add"
+  elif [ "$modified" -gt 0 ]; then verb="Update"
+  else verb="Update"
+  fi
+
+  # ── Conventional commit type ─────────────────────────────────────────────────
   local type=""
-  if echo "$files" | grep -qE '^(package\.json|package-lock\.json)$' && [ "$scope_count" -le 1 ]; then
-    type="deps"
-  elif [ "$added" -ge "$modified" ] && [ "$added" -gt 0 ] && \
-       echo "$files" | grep -qE '^src/(scrape|handler|helper|lib)/'; then
-    type="feat"
-  elif [ "$scope" = "data" ] || [ "$scope" = "session" ]; then
-    type="chore"
-  elif [ "$scope" = "config" ]; then
-    type="chore"
-  elif [ "$scope" = "assets" ] || [ "$scope" = "agents" ]; then
-    type="chore"
-  elif [ "$modified" -gt 0 ] && echo "$files" | grep -qE '^src/'; then
-    type="fix"
-  else
-    type="chore"
+  case "$verb" in
+    Add|Feat)             type="feat"     ;;
+    Fix|Restore)          type="fix"      ;;
+    Enhance|Refactor)     type="refactor" ;;
+    Remove)               type="refactor" ;;
+    *)                    type="chore"    ;;
+  esac
+  # data / session / assets / config → selalu chore
+  case "$scope" in data|session|config|assets|agents) type="chore" ;; esac
+
+  # ── Context qualifier (tambahan deskripsi) ───────────────────────────────────
+  local context=""
+  if   echo "$_all $_names" | grep -qiE 'display|tampil|show|view'; then context=" display and functionality"
+  elif echo "$_all $_names" | grep -qiE 'caption|teks|text'; then context=" captions"
+  elif echo "$_all $_names" | grep -qiE 'notif|notification'; then context=" notifications"
+  elif echo "$_all $_names" | grep -qiE 'option|setting'; then context=" options"
+  elif echo "$_all $_names" | grep -qiE 'function|fitur|feature'; then context=" functionality"
+  elif echo "$_all $_names" | grep -qiE 'midnight|tengah malam|00:00'; then context=" and midnight display"
   fi
 
-  local sample summary total
-  total=$(echo "$files" | wc -l | tr -d ' ')
-  sample=$(echo "$files" | head -3 | xargs -n1 basename 2>/dev/null | tr '\n' ', ' | sed 's/, $//')
-
-  if [ "$total" -le 3 ]; then
-    summary="$sample"
-  else
-    summary="$sample +$((total - 3)) file lain"
+  # ── Multi-area qualifier ──────────────────────────────────────────────────────
+  local extra=""
+  if [ -n "$subject" ]; then
+    # Kalau ada stat/session juga di batch yang sama, mention
+    if echo "$_all $_names" | grep -qiE 'stat|statistik' && \
+       [ "$subject" != "bot statistics" ]; then
+      extra=" and bot statistics"
+    elif echo "$_all $_names" | grep -qiE 'session|sesi' && \
+         [ "$subject" != "session" ]; then
+      extra=" and session data"
+    fi
   fi
 
-  if [ -n "$scope" ]; then
-    echo "${type}(${scope}): ${summary}"
+  # ── Bangun pesan akhir ────────────────────────────────────────────────────────
+  local body="" _verb_lc
+  _verb_lc=$(echo "$verb" | tr '[:upper:]' '[:lower:]')
+  if [ -n "$subject" ]; then
+    body="${verb} ${subject}${context}${extra}"
   else
-    echo "${type}: ${summary}"
+    # Fallback: nama file (max 2) + jumlah sisa
+    local _sample
+    _sample=$(echo "$files" | head -2 | xargs -n1 basename 2>/dev/null | tr '\n' ', ' | sed 's/, $//')
+    if [ "$total" -le 2 ]; then
+      body="${_verb_lc}: ${_sample}"
+    else
+      body="${_verb_lc}: ${_sample} +$((total - 2)) file lain"
+    fi
   fi
+
+  # ── Output final ─────────────────────────────────────────────────────────────
+  if [ -n "$scope" ] && [ "$scope_count" -ge 2 ]; then
+    echo "${type}(${scope}): ${body}"
+  else
+    echo "${type}: ${body}"
+  fi
+}
+
+# Alias untuk kompatibilitas (dipanggil di beberapa tempat sebagai generate_commit_msg)
+generate_commit_msg() {
+  classify_commit "$@"
 }
 
 # ===== Bersihkan stale index.lock (sisa run sebelumnya yang ke-interrupt) =====
