@@ -300,5 +300,28 @@
       }
     ],
     "processedAt": "2026-06-26T13:58:39.814Z"
+  },
+  "AC4D067978971A56958545A294B20AE2": {
+    "id": "AC4D067978971A56958545A294B20AE2",
+    "sender": "6281393564657@s.whatsapp.net",
+    "name": "γυς ρου",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-26T14:23:47.508Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6281393564657",
+    "resolvedPn": "6281393564657@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6281393564657@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC4D067978971A56958545A294B20AE2",
+      "participant": "174577888038922@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-26T14:23:47.508Z"
   }
 }

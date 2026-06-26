@@ -19,8 +19,9 @@
  * ───────────────────────────────
  *
  *  antitag.js — Anti-Tag Nomor Bot di Grup
- *  Hapus otomatis pesan yang men-tag nomor bot sendiri di GC
- *  (hanya aktif jika bot admin di grup tersebut)
+ *  Hapus otomatis pesan yang men-tag nomor bot sendiri di GC.
+ *  Aman untuk: owner, admin grup.
+ *  Syarat hapus: bot harus admin di grup.
  * ───────────────────────────────
  */
 
@@ -32,7 +33,7 @@ import { createRequire } from 'module';
 const _require = createRequire(import.meta.url);
 const { isJidGroup, jidNormalizedUser, areJidsSameUser, getContentType } = _require('@whiskeysockets/baileys');
 
-import { kvGet } from '../../src/db/datadb.js';
+import { kvGet, kvSet } from '../../src/db/datadb.js';
 
 const CONFIG_PATH = path.join(process.cwd(), 'config.json');
 
@@ -65,34 +66,77 @@ function getBotNumber(hisoka) {
     return (hisoka.user?.id || '').split('@')[0].split(':')[0];
 }
 
-function isBotAdminInGroup(groupJid) {
-    try {
-        const data = kvGet('botadmin/botadmin', {});
-        return data[groupJid] === true;
-    } catch (_) {
-        return false;
-    }
+function getSenderNumber(message) {
+    const raw = message.key?.participant || message.participant || message.key?.remoteJid || '';
+    return raw.split('@')[0].split(':')[0];
 }
 
+function getSenderJid(message) {
+    const raw = message.key?.participant || message.participant || '';
+    if (!raw) return null;
+    return jidNormalizedUser(raw);
+}
+
+function isOwnerNumber(num, config) {
+    const owners = config.owners || [];
+    return owners.some(o => String(o) === String(num));
+}
+
+function findParticipant(participants, targetNumber) {
+    return (participants || []).find(p => {
+        const pNum = (p.jid || p.phoneNumber || p.id || '').split('@')[0].split(':')[0];
+        return pNum === targetNumber;
+    });
+}
+
+/**
+ * Deteksi apakah pesan ini men-tag nomor bot.
+ * Cek 1: mentionedJid array di contextInfo (semua tipe pesan)
+ * Cek 2: teks @nomor secara harfiah
+ */
 function isBotMentioned(message, botJid, botNumber) {
     try {
-        const msg = message?.message || {};
+        const msg = message?.message;
+        if (!msg) return false;
+
+        // Cari contextInfo di semua lapisan pesan yang mungkin ada mentionedJid
         const msgType = getContentType(msg);
-        if (!msgType) return false;
 
-        const inner = msg[msgType] || {};
-        const ctx = inner?.contextInfo || {};
+        // Daftar objek yang mungkin punya contextInfo
+        const candidates = [
+            msg[msgType],
+            msg.extendedTextMessage,
+            msg.imageMessage,
+            msg.videoMessage,
+            msg.audioMessage,
+            msg.documentMessage,
+            msg.stickerMessage,
+            msg.buttonsMessage,
+            msg.listMessage,
+            msg.templateMessage?.hydratedTemplate,
+        ].filter(Boolean);
 
-        if (Array.isArray(ctx?.mentionedJid)) {
-            for (const jid of ctx.mentionedJid) {
-                if (!jid) continue;
-                if (areJidsSameUser(jid, botJid)) return true;
-                const jidNum = jid.split('@')[0].split(':')[0];
-                if (botNumber && jidNum === botNumber) return true;
+        for (const obj of candidates) {
+            const mentioned = obj?.contextInfo?.mentionedJid;
+            if (Array.isArray(mentioned)) {
+                for (const jid of mentioned) {
+                    if (!jid) continue;
+                    if (areJidsSameUser(jid, botJid)) return true;
+                    const jidNum = jid.split('@')[0].split(':')[0];
+                    if (botNumber && jidNum === botNumber) return true;
+                }
             }
         }
 
-        const textContent = inner?.text || inner?.caption || msg?.conversation || '';
+        // Fallback: cek teks harfiah @nomor
+        const textContent =
+            msg?.conversation ||
+            msg?.extendedTextMessage?.text ||
+            msg?.imageMessage?.caption ||
+            msg?.videoMessage?.caption ||
+            msg?.documentMessage?.caption ||
+            '';
+
         if (textContent && botNumber && textContent.includes(`@${botNumber}`)) return true;
 
     } catch (_) {}
@@ -109,21 +153,88 @@ export default async function handleAntiTagBot(message, hisoka) {
         if (!isJidGroup(remoteJid)) return;
         if (message.key?.fromMe) return;
 
+        // Cek config aktif
         if (!isAntiTagBotEnabled()) return;
 
         const botJid    = getBotJid(hisoka);
         const botNumber = getBotNumber(hisoka);
 
+        // Apakah pesan ini tag nomor bot?
         if (!isBotMentioned(message, botJid, botNumber)) return;
 
-        const isAdmin = isBotAdminInGroup(remoteJid);
-        if (!isAdmin) {
-            console.log(`\x1b[33m[AntiTagBot] Di-tag di ${remoteJid.split('@')[0]} tapi bot bukan admin — skip.\x1b[39m`);
+        // Ambil sender
+        const senderJid    = getSenderJid(message);
+        const senderNumber = getSenderNumber(message);
+
+        const config = loadConfig();
+
+        // ── Exempt: owner selalu aman ──────────────────────────────────────────
+        if (isOwnerNumber(senderNumber, config)) {
+            console.log(`\x1b[33m[AntiTagBot] Owner (${senderNumber}) tag bot — aman, skip.\x1b[39m`);
             return;
         }
 
+        // ── Cek apakah bot admin di grup ini (live fetch dulu, fallback KV) ────
+        let isAdmin = false;
+        let groupMeta = null;
+        let senderIsGroupAdmin = false;
+
+        try {
+            // Live fetch — paling akurat
+            groupMeta = await hisoka.groupMetadata(remoteJid);
+            if (groupMeta) hisoka.groups?.write(remoteJid, groupMeta);
+
+            const botP    = findParticipant(groupMeta?.participants, botNumber);
+            isAdmin       = !!botP?.admin;
+
+            // Update KV cache
+            const botAdminData = kvGet('botadmin/botadmin', {});
+            botAdminData[remoteJid] = isAdmin;
+            kvSet('botadmin/botadmin', botAdminData);
+
+            // Cek apakah sender adalah admin grup
+            const senderP = senderJid
+                ? groupMeta?.participants?.find(p => areJidsSameUser(p.id || p.jid || '', senderJid))
+                : findParticipant(groupMeta?.participants, senderNumber);
+            senderIsGroupAdmin = !!senderP?.admin;
+
+        } catch (_fetchErr) {
+            // Fallback: KV cache
+            const botAdminData = kvGet('botadmin/botadmin', {});
+            if (remoteJid in botAdminData) {
+                isAdmin = botAdminData[remoteJid] === true;
+            }
+            // Fallback: memory cache
+            if (!groupMeta) {
+                groupMeta = hisoka.groups?.read(remoteJid) || null;
+                if (groupMeta) {
+                    const botP = findParticipant(groupMeta?.participants, botNumber);
+                    isAdmin    = !!botP?.admin;
+                    const senderP = senderJid
+                        ? groupMeta?.participants?.find(p => areJidsSameUser(p.id || p.jid || '', senderJid))
+                        : findParticipant(groupMeta?.participants, senderNumber);
+                    senderIsGroupAdmin = !!senderP?.admin;
+                }
+            }
+        }
+
+        console.log(`\x1b[36m[AntiTagBot] grup=${remoteJid.split('@')[0]} | botAdmin=${isAdmin} | sender=${senderNumber} | senderAdmin=${senderIsGroupAdmin}\x1b[39m`);
+
+        // ── Exempt: admin grup aman ────────────────────────────────────────────
+        if (senderIsGroupAdmin) {
+            console.log(`\x1b[33m[AntiTagBot] Admin grup (${senderNumber}) tag bot — aman, skip.\x1b[39m`);
+            return;
+        }
+
+        // ── Bot harus admin untuk bisa hapus ──────────────────────────────────
+        if (!isAdmin) {
+            console.log(`\x1b[33m[AntiTagBot] Bot bukan admin di ${remoteJid.split('@')[0]} — tidak bisa hapus.\x1b[39m`);
+            return;
+        }
+
+        // ── Hapus pesan ────────────────────────────────────────────────────────
         await hisoka.sendMessage(remoteJid, { delete: message.key });
-        console.log(`\x1b[32m[AntiTagBot] ✅ Pesan tag bot dihapus di ${remoteJid.split('@')[0]}\x1b[39m`);
+        console.log(`\x1b[32m[AntiTagBot] ✅ Pesan tag bot dari ${senderNumber} dihapus di ${remoteJid.split('@')[0]}\x1b[39m`);
 
     } catch (err) {
         console.error('\x1b[31m[AntiTagBot] Error:\x1b[39m', err?.message || err);
@@ -158,6 +269,10 @@ export async function handleAntitag({ hisoka, m, query, tolak, logCommand }) {
             `│  • Bot harus *admin* di grup\n` +
             `│  • Fitur ini *ON*\n` +
             `│\n` +
+            `│ 🛡️ *Yang aman (tidak dihapus):*\n` +
+            `│  • Owner bot\n` +
+            `│  • Admin grup\n` +
+            `│\n` +
             `│ 📝 *Penggunaan:*\n` +
             `│  .antitag on  → Aktifkan\n` +
             `│  .antitag off → Matikan\n` +
@@ -181,9 +296,10 @@ export async function handleAntitag({ hisoka, m, query, tolak, logCommand }) {
             `│\n` +
             `│ ✅ Anti-Tag Bot *AKTIF*\n` +
             `│\n` +
-            `│ Siapapun yang tag nomor bot\n` +
-            `│ di GC akan dihapus pesannya\n` +
-            `│ (jika bot admin di grup).\n` +
+            `│ Member yang tag nomor bot\n` +
+            `│ di GC akan dihapus pesannya.\n` +
+            `│\n` +
+            `│ 🛡️ Owner & admin grup aman.\n` +
             `│\n` +
             `${BOX_BTM}`
         );

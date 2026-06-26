@@ -1265,6 +1265,59 @@
         }
       ],
       "lastActivity": 1782468927680
+    },
+    "120363408420466353@g.us": {
+      "messages": [
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 26 Jun, 21.10 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"s\" | 👤 Wily]\n╭═══『 🎭 *STICKER MAKER* 』═══╮\n│\n│ 📦 *Pack   :* Alamak\n│ ✍️ *Author :* Anda Siapa?\n│\n│ 📋 *Cara Pakai:*\n│ • Kirim/reply 🖼️ *gambar* + .s\n│ • Kirim/reply 🎥 *video* + .s\n│   _(video otomatis jadi animated sticker)_\n│\n│ ⚙️ *Pengaturan:*\n│ • .s author <nama>\n│ • .s pack <nama>\n│\n│ 🏷️ *Alias:* .s · .stiker · .sticker\n╰══════════════════════╯"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "ngapain tiba-tiba ngirim menu *Sticker Maker* ke sini? lagi ngetest fitur atau pamer nih Wily? 👀\n\nrapi sih formatnya, tapi itu bagian author kenapa nulis *Anda Siapa?* wkwk. mau nyoba bikin stiker sekarang apa gimana nih?"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 26 Jun, 21.10 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"s\" | 👤 Wily]\n╭═══『 🎭 *STICKER MAKER* 』═══╮\n│\n│ 📦 *Pack   :* Alamak\n│ ✍️ *Author :* Anda Siapa?\n│\n│ 📋 *Cara Pakai:*\n│ • Kirim/reply 🖼️ *gambar* + .s\n│ • Kirim/reply 🎥 *video* + .s\n│   _(video otomatis jadi animated sticker)_\n│\n│ ⚙️ *Pengaturan:*\n│ • .s author <nama>\n│ • .s pack <nama>\n│\n│ 🏷️ *Alias:* .s · .stiker · .sticker\n╰══════════════════════╯"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "tiba-tiba ngirim menu *Sticker Maker*... ngapain nih Wily? 👀 \n\nlagi ngetes fitur ya? rapi sih formatnya. terus ini aku disuruh ngapain? mau bikin stiker beneran, ada error yang mau dicek, atau cuma mau pamer doang ke aku? 😏"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 26 Jun, 21.15 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"s\" | 👤 Wily]\n╭═══『 🎭 *STICKER MAKER* 』═══╮\n│\n│ 📦 *Pack   :* Alamak\n│ ✍️ *Author :* Anda Siapa?\n│\n│ 📋 *Cara Pakai:*\n│ • Kirim/reply 🖼️ *gambar* + .s\n│ • Kirim/reply 🎥 *video* + .s\n│   _(video otomatis jadi animated sticker)_\n│\n│ ⚙️ *Pengaturan:*\n│ • .s author <nama>\n│ • .s pack <nama>\n│\n│ 🏷️ *Alias:* .s · .stiker · .sticker\n╰══════════════════════╯"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "iyaaa wily, aku udah baca daritadi 🙄\n\nngapain sih di-spam berkali-kali menu *Sticker Maker*-nya? ini fiturnya lagi error nge-loop, ngetes respon, atau emang sengaja isengin aku doang? \n\n> menunya udah rapi kok. sekarang mending kasih tau, aku harus ngapain sama teks ini 😑"
+            }
+          ]
+        }
+      ],
+      "lastActivity": 1782483324960
     }
   },
   "sticker_pattern": {
@@ -1284,9 +1337,9 @@
       "last_sent": 1779467326
     },
     "https://cdn.ornzora.eu.cc/a4bbcdf7-0c78-4d43-93e2-f0ebad7d1bf6-HONOLULU.webp": {
-      "total_sent": 3,
+      "total_sent": 4,
       "moods": {},
-      "last_sent": 1782468186
+      "last_sent": 1782483015
     },
     "https://cdn.ornzora.eu.cc/c3de99b6-bf96-46f6-bef7-d929c6399175-HONOLULU.webp": {
       "total_sent": 1,
@@ -1307,6 +1360,11 @@
       "total_sent": 1,
       "moods": {},
       "last_sent": 1782468326
+    },
+    "https://cdn.ornzora.eu.cc/c06ae88e-858b-4a22-af58-52091d095b94-HONOLULU.webp": {
+      "total_sent": 1,
+      "moods": {},
+      "last_sent": 1782483324
     }
   },
   "sticker_story": {
@@ -1464,6 +1522,22 @@
         "context": "Tumben nanya karakter 2D, Wily 👀 Itu *Alisa Mikhailovna Kujou*, atau yang biasa dipanggil *Alya*. Dia karakter utama dari anime/light novel _Alya Sometimes Hides Her Feelings in Russian_ (biasa disi",
         "was_fallback": 1,
         "sent_at": 1782468873
+      }
+    ],
+    "120363408420466353@g.us": [
+      {
+        "sticker_url": "https://cdn.ornzora.eu.cc/a4bbcdf7-0c78-4d43-93e2-f0ebad7d1bf6-HONOLULU.webp",
+        "mood": "",
+        "context": "ngapain tiba-tiba ngirim menu *Sticker Maker* ke sini? lagi ngetest fitur atau pamer nih Wily? 👀 rapi sih formatnya, tapi itu bagian author kenapa nulis *Anda Siapa?* wkwk. mau nyoba bikin stiker se",
+        "was_fallback": 1,
+        "sent_at": 1782483015
+      },
+      {
+        "sticker_url": "https://cdn.ornzora.eu.cc/c06ae88e-858b-4a22-af58-52091d095b94-HONOLULU.webp",
+        "mood": "",
+        "context": "[REPLY-STIKER: facepalm] iyaaa wily, aku udah baca daritadi 🙄 ngapain sih di-spam berkali-kali menu *Sticker Maker*-nya? ini fiturnya lagi error nge-loop, ngetes respon, atau emang sengaja isengin a",
+        "was_fallback": 1,
+        "sent_at": 1782483324
       }
     ]
   },
