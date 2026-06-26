@@ -942,38 +942,6 @@
           "role": "user",
           "parts": [
             {
-              "text": "[⏰ 26 Jun, 16.47 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"*Baku*? Oke, kalau mau *adu argumen* pakai otak, aku siap. Jangan cuma koar-koar nggak jelas yae 🙂\" | 👤 yae]\nApa benar, jika 10+6=17?"
-            }
-          ]
-        },
-        {
-          "role": "model",
-          "parts": [
-            {
-              "text": "Nggak benar itu, yae. Kalau *10 + 6* itu hasilnya `16`, bukan `17`.\n\nMasih mau adu otak sama aku? Ini baru pemanasan lho~ 😏"
-            }
-          ]
-        },
-        {
-          "role": "user",
-          "parts": [
-            {
-              "text": "[⏰ 26 Jun, 16.48 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"Nggak benar itu, yae. Kalau *10 + 6* itu hasilnya `16`, bukan `17`. Masih mau adu otak sama aku? Ini baru pemanasan lho~ 😏\" | 👤 Wily]\nBohong ah yg benar 17"
-            }
-          ]
-        },
-        {
-          "role": "model",
-          "parts": [
-            {
-              "text": "Halah, Wily~ Jangan ngikut-ngikut ngaco deh. *10 + 6* itu ya *16*, bukan `17`. Nggak usah pura-pura nggak tahu, nanti aku kira beneran nggak bisa ngitung lho 😉"
-            }
-          ]
-        },
-        {
-          "role": "user",
-          "parts": [
-            {
               "text": "[⏰ 26 Jun, 16.48 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"Nggak benar itu, yae. Kalau *10 + 6* itu hasilnya `16`, bukan `17`. Masih mau adu otak sama aku? Ini baru pemanasan lho~ 😏\" | 👤 yae]\nItu kata orang, bukan kataku"
             }
           ]
@@ -1177,9 +1145,41 @@
               "text": "heh mulutnya dijaga ya. mentang-mentang owner ngomongnya sembarangan 🙄 ketik yang bener kalau mau dibantu Wily, malah toxic gitu."
             }
           ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 26 Jun, 17.16 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"📢 *INFORMASI RILIS* _📅 Masih dipikirkan_ 🕐 _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurna_ 🙏 ━━━━━━━━━━━━...\" | 👤 Wily]\nitu tumbail siapa sih imut banget 😁"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "Tadi ngomongnya kasar, sekarang tiba-tiba muji imut... dasar Wily labil 🙄\n\nItu *Kanna Kamui* dari anime _Miss Kobayashi's Dragon Maid_. Aslinya dia itu karakter naga listrik tau 🐉 emang gemesin sih pipinya, wajar banyak yang suka."
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 26 Jun, 17.19 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"Tadi ngomongnya kasar, sekarang tiba-tiba muji imut... dasar Wily labil 🙄 Itu *Kanna Kamui* dari anime _Miss Kobayashi's Dragon Maid_. Asli...\" | 👤 Wily]\nItu anime total brpa eps saat ini dan ada berapa session?"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "Kepincut Kanna nih ceritanya sampai nanya detail gitu? 😏\n\nSaat ini anime _Miss Kobayashi's Dragon Maid_ itu punya *2 season* utama Wily:\n• *Season 1* (2017) → `13 episode` + 1 OVA\n• *Season 2* (_Dragon Maid S_, 2021) → `12 episode` + 1 OVA\n\n> Jadi totalnya ada *25 episode* utama (atau 27 kalau dihitung sama OVA-nya). \n\nFyi aja, kabarnya mereka juga bakal rilis *Movie* ke depannya. Gimana, mau maraton nonton naga loli sekarang? 🐉"
+            }
+          ]
         }
       ],
-      "lastActivity": 1782468361117
+      "lastActivity": 1782469177658
     },
     "120363192554714254@g.us": {
       "messages": [
@@ -1246,9 +1246,25 @@
               "text": "dih, ya udah. \n\nbeneran malesin deh. lagian kamu ngapain sih daritadi, beneran gabut doang?"
             }
           ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 26 Jun, 17.15 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"Tumben nanya karakter 2D, Wily 👀 Itu *Alisa Mikhailovna Kujou*, atau yang biasa dipanggil *Alya*. Dia karakter utama dari anime/light novel...\" | 👤 Wily]\nIya nya waifu baru kenapa cemburu? 😁"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "dih— apaan. siapa juga yang cemburu. \n\nhalu banget sore-sore. lagian ngapain cemburu sama gambar 2D 🙄 \nya udah terserah. ada hal lain nggak yang mau diurusin."
+            }
+          ]
         }
       ],
-      "lastActivity": 1782468245481
+      "lastActivity": 1782468927680
     }
   },
   "sticker_pattern": {
@@ -1278,9 +1294,9 @@
       "last_sent": 1780237811
     },
     "https://cdn.ornzora.eu.cc/41f054d0-55e9-4d1a-abb7-6a49ac74769b-HONOLULU.webp": {
-      "total_sent": 3,
+      "total_sent": 4,
       "moods": {},
-      "last_sent": 1782467932
+      "last_sent": 1782468873
     },
     "https://cdn.ornzora.eu.cc/31f63a4b-95a8-440a-9d77-9d634ef2153a-HONOLULU.webp": {
       "total_sent": 4,
@@ -1441,6 +1457,13 @@
         "context": "ya terus ngapain ngetik `Zz` segala trus dihapus? gabut banget ya sore-sore gini 🙄 [REPLY-STIKER: mikir]",
         "was_fallback": 1,
         "sent_at": 1782468186
+      },
+      {
+        "sticker_url": "https://cdn.ornzora.eu.cc/41f054d0-55e9-4d1a-abb7-6a49ac74769b-HONOLULU.webp",
+        "mood": "",
+        "context": "Tumben nanya karakter 2D, Wily 👀 Itu *Alisa Mikhailovna Kujou*, atau yang biasa dipanggil *Alya*. Dia karakter utama dari anime/light novel _Alya Sometimes Hides Her Feelings in Russian_ (biasa disi",
+        "was_fallback": 1,
+        "sent_at": 1782468873
       }
     ]
   },
