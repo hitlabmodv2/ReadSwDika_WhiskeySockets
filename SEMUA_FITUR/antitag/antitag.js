@@ -256,6 +256,9 @@ const _processedMsgIds = new Set();
 // ── Auto-handler: dipanggil dari message.js ──────────────────────────────────
 export default async function handleAntiTagBot(message, hisoka) {
     try {
+        // Hanya bot utama yang boleh jalankan antitag — jadibot skip
+        if (hisoka?.isMainBot === false) return;
+
         if (!message?.key?.remoteJid) return;
         if (!message?.message) return;
 

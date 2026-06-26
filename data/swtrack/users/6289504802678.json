@@ -889,5 +889,28 @@
       }
     ],
     "processedAt": "2026-06-26T14:52:57.085Z"
+  },
+  "ACF3665D2234F49D4600D3356CEE06FB": {
+    "id": "ACF3665D2234F49D4600D3356CEE06FB",
+    "sender": "6289504802678@s.whatsapp.net",
+    "name": "Rendra pulang, ada gulali",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-26T15:07:37.669Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6289504802678",
+    "resolvedPn": "6289504802678@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6289504802678@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACF3665D2234F49D4600D3356CEE06FB",
+      "participant": "263445207371837@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-26T15:07:37.670Z"
   }
 }
