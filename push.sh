@@ -1458,37 +1458,60 @@ classify_commit() {
     [ -z "$scope" ] && scope="config"
   fi
 
-  # ── Theme / subject detection dari nama file ──────────────────────────────
-  # Gabungkan semua basename jadi satu string lowercase untuk pencocokan kata kunci
-  local _names _all
+  # ── Theme / subject detection — sesuai struktur project nyata ───────────────
+  # Pakai full path (files) + basename (names) lowercase
+  local _names _all _fpath
   _names=$(echo "$files" | xargs -n1 basename 2>/dev/null | tr '[:upper:]' '[:lower:]' | tr '_.-' '   ')
   _all=$(echo "$files" | tr '[:upper:]' '[:lower:]' | tr '_.-' '   ')
+  _fpath=$(echo "$files" | tr '[:upper:]' '[:lower:]')  # full path tanpa strip karakter
 
   local subject=""
-  if   echo "$_all $_names" | grep -qiE 'prayer|sholat|salat|jadwal|waktu'; then subject="prayer time"
-  elif echo "$_all $_names" | grep -qiE 'image|gambar|foto|photo|resolusi|resolution|thumbnail|quality'; then subject="image quality"
-  elif echo "$_all $_names" | grep -qiE 'notif|notification|caption'; then subject="notification"
-  elif echo "$_all $_names" | grep -qiE 'stat|statistik|statistic'; then subject="bot statistics"
-  elif echo "$_all $_names" | grep -qiE 'contact|kontak|sender'; then subject="contact"
-  elif echo "$_all $_names" | grep -qiE 'session|sesi'; then subject="session"
-  elif echo "$_all $_names" | grep -qiE 'menu|command|cmd'; then subject="command menu"
-  elif echo "$_all $_names" | grep -qiE 'auth|token|login'; then subject="authentication"
-  elif echo "$_all $_names" | grep -qiE 'db|database|sqlite|mongo'; then subject="database"
-  elif echo "$_all $_names" | grep -qiE 'log|logger|debug'; then subject="logger"
-  elif echo "$_all $_names" | grep -qiE 'handler'; then subject="message handler"
-  elif echo "$_all $_names" | grep -qiE 'helper|util'; then subject="utility helpers"
-  elif echo "$_all $_names" | grep -qiE 'scrape|scrap'; then subject="scraper"
-  elif echo "$_all $_names" | grep -qiE 'bot|wa|whatsapp|whiskey|socket'; then subject="bot"
+  # ── Deteksi dari path folder data/ (paling spesifik dulu) ──
+  if   echo "$_fpath" | grep -qE 'data/alqanimenotif|alqanimenotif'; then subject="Al-Quran anime notification"
+  elif echo "$_fpath" | grep -qE 'data/animasu|animasu'; then subject="anime streaming"
+  elif echo "$_fpath" | grep -qE 'data/an1game|an1game'; then subject="game features"
+  elif echo "$_fpath" | grep -qE 'data/infowibu|infowibu'; then subject="weeb info"
+  elif echo "$_fpath" | grep -qE 'data/malnews|malnews'; then subject="MAL news"
+  elif echo "$_fpath" | grep -qE 'data/swtrack|swtrack'; then subject="SW tracker"
+  elif echo "$_fpath" | grep -qE 'data/tmail|tmail'; then subject="temporary mail"
+  elif echo "$_fpath" | grep -qE 'data/tvonenews|tvonenews'; then subject="TVONE news"
+  elif echo "$_fpath" | grep -qE 'data/ceksw|ceksw'; then subject="SW checker"
+  elif echo "$_fpath" | grep -qE 'data/kv|/kv'; then subject="key-value store"
+  elif echo "$_fpath" | grep -qE 'data/users|userdb'; then subject="user data"
+  elif echo "$_fpath" | grep -qE 'data/system|data/ai|aihistory'; then subject="system data"
+  # ── Deteksi dari src/helper/ ──
+  elif echo "$_fpath $_names" | grep -qiE 'aipromptfb|aipromptfacebook'; then subject="Facebook AI prompt"
+  elif echo "$_fpath $_names" | grep -qiE 'aipromptinstagram|aipromptif|aipromptfb|aiprompt|aireact|aistickerstory|aitools'; then subject="AI prompt feature"
+  elif echo "$_fpath $_names" | grep -qiE 'gemini'; then subject="Gemini AI"
+  elif echo "$_fpath $_names" | grep -qiE 'imagesearch|image search'; then subject="image search"
+  elif echo "$_fpath $_names" | grep -qiE 'jadibot|jadibotSettings'; then subject="jadibot"
+  elif echo "$_fpath $_names" | grep -qiE 'crashguard|crash guard'; then subject="crash guard"
+  elif echo "$_fpath $_names" | grep -qiE 'authstate|auth state'; then subject="auth state"
+  elif echo "$_fpath $_names" | grep -qiE 'memorymonitor|memory monitor'; then subject="memory monitor"
+  elif echo "$_fpath $_names" | grep -qiE 'browserswitch|browser switch'; then subject="browser switcher"
+  elif echo "$_fpath $_names" | grep -qiE 'hotreload|hot reload'; then subject="hot reload"
+  elif echo "$_fpath $_names" | grep -qiE 'cleaner|injector|inject'; then subject="bot utility"
+  elif echo "$_fpath $_names" | grep -qiE 'botstats|bot statistics|botstat'; then subject="bot statistics"
+  elif echo "$_fpath $_names" | grep -qiE 'errorlog|error log'; then subject="error logger"
+  elif echo "$_fpath $_names" | grep -qiE 'datadb|json db|userdb'; then subject="database"
+  # ── Deteksi dari attached_assets ──
+  elif echo "$_fpath" | grep -qE 'attached_assets'; then subject="bot media assets"
+  # ── Deteksi generik ──
+  elif echo "$_all $_names" | grep -qiE 'session|sesi'; then subject="session data"
+  elif echo "$_all $_names" | grep -qiE 'swstats|swstat'; then subject="bot statistics"
+  elif echo "$_all $_names" | grep -qiE 'stat|statistik'; then subject="statistics"
+  elif echo "$_all $_names" | grep -qiE 'contact|kontak|sender'; then subject="contact list"
   fi
 
-  # ── Verb detection: dari nama file & jenis perubahan ────────────────────────
+  # ── Verb detection: dari nama file & perubahan git ──────────────────────────
   local verb=""
   if   echo "$_all $_names" | grep -qiE 'fix|perbaik|repair|resolve|correct'; then verb="Fix"
   elif echo "$_all $_names" | grep -qiE 'restore|revert|rollback|kembalikan'; then verb="Restore"
-  elif echo "$_all $_names" | grep -qiE 'remove|hapus|delete|eliminat|temporary'; then verb="Remove"
-  elif echo "$_all $_names" | grep -qiE 'enhance|improve|better|optimis|higher|increas'; then verb="Enhance"
-  elif echo "$_all $_names" | grep -qiE 'refactor|restructur|reorganiz|migrat'; then verb="Refactor"
-  elif echo "$_all $_names" | grep -qiE 'update|upgrade|bump|sync|refresh'; then verb="Update"
+  elif echo "$_all $_names" | grep -qiE 'remove|hapus|delete|eliminat|temporary|temp'; then verb="Remove"
+  elif echo "$_all $_names" | grep -qiE 'enhance|improve|better|optimis|higher|increas|upgrade'; then verb="Enhance"
+  elif echo "$_all $_names" | grep -qiE 'refactor|restructur|reorganiz|migrat|cleanup|cleaner'; then verb="Refactor"
+  elif echo "$_all $_names" | grep -qiE 'update|sync|refresh|bump'; then verb="Update"
+  elif echo "$_all $_names" | grep -qiE 'add|tambah|new|baru|init'; then verb="Add"
   elif [ "$deleted" -gt 0 ] && [ "$added" -eq 0 ]; then verb="Remove"
   elif [ "$added" -gt "$modified" ] && [ "$added" -gt 0 ]; then verb="Add"
   elif [ "$modified" -gt 0 ]; then verb="Update"
@@ -1498,34 +1521,36 @@ classify_commit() {
   # ── Conventional commit type ─────────────────────────────────────────────────
   local type=""
   case "$verb" in
-    Add|Feat)             type="feat"     ;;
-    Fix|Restore)          type="fix"      ;;
-    Enhance|Refactor)     type="refactor" ;;
-    Remove)               type="refactor" ;;
-    *)                    type="chore"    ;;
+    Add)               type="feat"     ;;
+    Fix|Restore)       type="fix"      ;;
+    Enhance)           type="perf"     ;;
+    Remove|Refactor)   type="refactor" ;;
+    *)                 type="chore"    ;;
   esac
   # data / session / assets / config → selalu chore
   case "$scope" in data|session|config|assets|agents) type="chore" ;; esac
 
-  # ── Context qualifier (tambahan deskripsi) ───────────────────────────────────
+  # ── Context qualifier (detail tambahan sesuai isi file) ──────────────────────
   local context=""
   if   echo "$_all $_names" | grep -qiE 'display|tampil|show|view'; then context=" display and functionality"
   elif echo "$_all $_names" | grep -qiE 'caption|teks|text'; then context=" captions"
-  elif echo "$_all $_names" | grep -qiE 'notif|notification'; then context=" notifications"
-  elif echo "$_all $_names" | grep -qiE 'option|setting'; then context=" options"
-  elif echo "$_all $_names" | grep -qiE 'function|fitur|feature'; then context=" functionality"
-  elif echo "$_all $_names" | grep -qiE 'midnight|tengah malam|00:00'; then context=" and midnight display"
+  elif echo "$_all $_names" | grep -qiE 'notif|notification'; then context=" notification"
+  elif echo "$_all $_names" | grep -qiE 'option|setting|resolution|resolusi'; then context=" options"
+  elif echo "$_all $_names" | grep -qiE 'function|fitur|feature|functionality'; then context=" functionality"
+  elif echo "$_all $_names" | grep -qiE 'midnight|tengah malam'; then context=" and midnight display"
+  elif echo "$_all $_names" | grep -qiE 'accuracy|akurasi'; then context=" accuracy"
+  elif echo "$_all $_names" | grep -qiE 'sticker|story|react'; then context=" reactions and stickers"
+  elif echo "$_all $_names" | grep -qiE 'history|riwayat'; then context=" history"
   fi
 
   # ── Multi-area qualifier ──────────────────────────────────────────────────────
   local extra=""
   if [ -n "$subject" ]; then
-    # Kalau ada stat/session juga di batch yang sama, mention
-    if echo "$_all $_names" | grep -qiE 'stat|statistik' && \
-       [ "$subject" != "bot statistics" ]; then
+    if echo "$_fpath $_names" | grep -qiE 'botstats|swstats|statistik' && \
+       [ "$subject" != "bot statistics" ] && [ "$subject" != "statistics" ]; then
       extra=" and bot statistics"
     elif echo "$_all $_names" | grep -qiE 'session|sesi' && \
-         [ "$subject" != "session" ]; then
+         [ "$subject" != "session data" ]; then
       extra=" and session data"
     fi
   fi
