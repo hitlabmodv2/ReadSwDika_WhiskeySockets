@@ -1,13 +1,13 @@
 {
-  "ACE52826DBC52AAC455DEA5DEFFDD20F": {
-    "id": "ACE52826DBC52AAC455DEA5DEFFDD20F",
+  "ACE80E915BB6EAF56DF25ED77A3E2D20": {
+    "id": "ACE80E915BB6EAF56DF25ED77A3E2D20",
     "sender": "6285791556825@s.whatsapp.net",
-    "name": "Nur Muhammad Khoirul Anam",
-    "type": "videoMessage",
-    "arrivedAt": "2026-06-23T01:34:09.348Z",
+    "name": "saya Anam, Kamu siapa?",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-26T05:45:07.769Z",
     "read": true,
     "reacted": true,
-    "emoji": "𝖲𝖠𝖸𝖠 𝖠𝖪𝖠𝖭 𝖫𝖠𝖶𝖠𝖭 🤬",
+    "emoji": "⚽",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6285791556825",
@@ -16,17 +16,17 @@
       "remoteJid": "status@broadcast",
       "remoteJidAlt": "6285791556825@s.whatsapp.net",
       "fromMe": false,
-      "id": "ACE52826DBC52AAC455DEA5DEFFDD20F",
+      "id": "ACE80E915BB6EAF56DF25ED77A3E2D20",
       "participant": "87552958685217@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-23T01:34:22.741Z",
+    "updatedAt": "2026-06-26T05:45:26.747Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6285791556825@s.whatsapp.net",
         "fromMe": false,
-        "id": "ACE52826DBC52AAC455DEA5DEFFDD20F",
+        "id": "ACE80E915BB6EAF56DF25ED77A3E2D20",
         "participant": "87552958685217@lid",
         "addressingMode": "lid"
       },
@@ -34,11 +34,11 @@
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6285791556825@s.whatsapp.net",
         "fromMe": false,
-        "id": "ACE52826DBC52AAC455DEA5DEFFDD20F",
+        "id": "ACE80E915BB6EAF56DF25ED77A3E2D20",
         "participant": "6285791556825@s.whatsapp.net",
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-23T01:34:22.741Z"
+    "processedAt": "2026-06-26T05:45:26.747Z"
   }
 }

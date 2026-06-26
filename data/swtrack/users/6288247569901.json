@@ -82,5 +82,72 @@
       }
     ],
     "processedAt": "2026-06-25T06:05:02.694Z"
+  },
+  "AC614764BDDB6353C15024D2D6F16266": {
+    "id": "AC614764BDDB6353C15024D2D6F16266",
+    "sender": "6288247569901@s.whatsapp.net",
+    "name": "Aii Gntng😎",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-26T05:43:58.877Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6288247569901",
+    "resolvedPn": "6288247569901@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6288247569901@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC614764BDDB6353C15024D2D6F16266",
+      "participant": "4213446820079@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-26T05:43:59.000Z",
+    "deleted": true,
+    "deletedAt": "2026-06-26T05:43:59.000Z"
+  },
+  "AC2CD4346769BEA77E773C2357DD4E26": {
+    "id": "AC2CD4346769BEA77E773C2357DD4E26",
+    "sender": "6288247569901@s.whatsapp.net",
+    "name": "Aii Gntng😎",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-26T05:43:59.001Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐺",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6288247569901",
+    "resolvedPn": "6288247569901@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6288247569901@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC2CD4346769BEA77E773C2357DD4E26",
+      "participant": "4213446820079@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-26T05:44:13.026Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6288247569901@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC2CD4346769BEA77E773C2357DD4E26",
+        "participant": "4213446820079@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6288247569901@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC2CD4346769BEA77E773C2357DD4E26",
+        "participant": "6288247569901@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-26T05:44:13.026Z"
   }
 }

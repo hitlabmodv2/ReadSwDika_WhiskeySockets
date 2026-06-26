@@ -64,7 +64,7 @@
       "participant": "200897581863137@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-25T14:02:20.365Z",
+    "updatedAt": "2026-06-26T05:44:48.705Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -83,6 +83,73 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-25T14:02:20.365Z"
+    "processedAt": "2026-06-25T14:02:20.365Z",
+    "deleted": true,
+    "deletedAt": "2026-06-26T05:44:48.705Z"
+  },
+  "A574D4E4BC5AF93054BB38560FFC1FDE": {
+    "id": "A574D4E4BC5AF93054BB38560FFC1FDE",
+    "sender": "6288705922833@s.whatsapp.net",
+    "name": "alala",
+    "type": "protocolMessage",
+    "arrivedAt": "2026-06-26T05:42:40.166Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🎲",
+    "source": "group",
+    "number": "6288705922833",
+    "messageKey": {
+      "remoteJid": "120363363036005418@g.us",
+      "fromMe": false,
+      "id": "A574D4E4BC5AF93054BB38560FFC1FDE",
+      "participant": "200897581863137@lid",
+      "participantAlt": "6288705922833@s.whatsapp.net",
+      "addressingMode": "lid"
+    },
+    "resolvedPn": "6288705922833@s.whatsapp.net",
+    "updatedAt": "2026-06-26T05:42:56.347Z",
+    "processedAt": "2026-06-26T05:42:56.347Z"
+  },
+  "A5A7FE21D9998B877617BB69BBD98A3B": {
+    "id": "A5A7FE21D9998B877617BB69BBD98A3B",
+    "sender": "6288705922833@s.whatsapp.net",
+    "name": "alala",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-26T05:42:40.196Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "⚽",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6288705922833",
+    "resolvedPn": "6288705922833@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6288705922833@s.whatsapp.net",
+      "fromMe": false,
+      "id": "A5A7FE21D9998B877617BB69BBD98A3B",
+      "participant": "200897581863137@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-26T05:42:53.676Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6288705922833@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A5A7FE21D9998B877617BB69BBD98A3B",
+        "participant": "200897581863137@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6288705922833@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A5A7FE21D9998B877617BB69BBD98A3B",
+        "participant": "6288705922833@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-26T05:42:53.676Z"
   }
 }

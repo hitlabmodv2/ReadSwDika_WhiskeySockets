@@ -262,24 +262,24 @@ async function handleMusikai2Cmd({
 
         try {
                 if (input.toLowerCase() === 'random') {
-                        // Langsung generate random tanpa interactive picker — kompatibel WA Mobile
-                        // Pakai getRandomPreset dari ChatMusicAPI (v1) — lokal, tidak butuh Gemini
-                        const { ChatMusicAPI2 } = require(path.resolve('./SEMUA_FITUR/music/chatmusic2.cjs'));
-                        const { ChatMusicAPI: ChatMusicAPIv1 } = require(path.resolve('./SEMUA_FITUR/music/chatmusic.cjs'));
-                        const api = new ChatMusicAPI2();
-                        const randomPreset = new ChatMusicAPIv1().getRandomPreset();
-                        await hisoka.sendMessage(m.from, { react: { text: '🎲', key: m.key } }).catch(() => {});
-                        await hisoka.sendMessage(m.from,
-                                { text: `🎲 *Generate Musik Random AI 2...*\n│ Judul : *${randomPreset.title}*\n│ Genre : *${randomPreset.musicStyle}*\n│ Mode  : *${randomPreset.isInstrumental ? 'Instrumental' : 'Dengan Vokal'}*\n│\n│ ⏳ Proses ~20-40 detik...` },
-                                { quoted: m }
-                        ).catch(() => null);
-                        await api.login();
-                        await _generateMusik2({
-                                title: randomPreset.title,
-                                lyrics: randomPreset.lyrics || '',
-                                musicStyle: randomPreset.musicStyle,
-                                prompt: randomPreset.prompt,
-                                isInstrumental: randomPreset.isInstrumental,
+                        // Tampilkan picker bahasa dulu (sama seperti tap button __musikai2_random__)
+                        await sendListMessage(hisoka, m.from, m, {
+                                body:
+                                        `╭──『 🤖 *AI RANDOM MUSIK 2* 』\n` +
+                                        `│\n` +
+                                        `│ AI acak genre, judul & lirik otomatis.\n` +
+                                        `│\n` +
+                                        `│ 🌏 Pilih gaya/bahasa musik:\n` +
+                                        `╰──────────────────────────────`,
+                                buttonText: '🌏 Pilih Gaya Musik',
+                                sections: [{
+                                        title: '🎵 Gaya / Bahasa',
+                                        rows: [
+                                                { id: '__musikai2_rlang__id', title: '🇮🇩 Indonesia', description: 'Pop, Indie, Ballad, Folk, Jazz — lirik bahasa Indonesia' },
+                                                { id: '__musikai2_rlang__jp', title: '🇯🇵 Jepang',    description: 'City Pop, J-Pop, Anime OST, J-Folk — lirik bahasa Jepang' },
+                                                { id: '__musikai2_rlang__en', title: '🇬🇧 English',   description: 'Indie Pop, R&B, Folk, Dream Pop — lyrics in English' },
+                                        ],
+                                }],
                         });
                         return;
                 }

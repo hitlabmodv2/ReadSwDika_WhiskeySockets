@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 25/06/2026, 08.49.11  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 26/06/2026, 05.44.39  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  alqanime
+│  #001  —  AlqanimeNotif
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  Failed to fetch stream from https://alqanime.net/wp-content/uploads/2023/08/Hibike-Euphonium-Ensemble-Contest-hen-200x300.jpg
+│  [AlqanimeNotif] Gagal kirim ke 120363408420466353@g.us: Failed to fetch stream from https://alqanime.net/wp-content/uploads/2026/04/Koori-no-Jouheki-200x300.jpg
 │
 │  DETAIL
-│  Sumber      : alqanime
+│  Sumber      : AlqanimeNotif
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 25/06/2026, 08.49.11
-│  Terakhir    : 25/06/2026, 08.49.11
+│  Pertama     : 26/06/2026, 05.44.39
+│  Terakhir    : 26/06/2026, 05.44.39
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: Failed to fetch stream from https://alqanime.net/wp-content/uploads/2023/08/Hibike-Euphonium-Ensemble-Contest-hen-200x300.jpg
-│     at getHttpStream (file:///home/runner/workspace/node_modules/@whiskeysockets/baileys/lib/Utils/messages-media.js:304:15)
-│     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+│  ▶  Error: [AlqanimeNotif] Gagal kirim ke 120363408420466353@g.us: Failed to fetch stream from https://alqanime.net/wp-content/uploads/2026/04/Koori-no-Jouheki-200x300.jpg
+│     at console.error (file:///home/runner/workspace/index.js:412:27)
+│     at file:///home/runner/workspace/index.js:1578:89
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 25/06/2026, 08.49.11
+  Terakhir diperbarui: 26/06/2026, 05.44.39
 ════════════════════════════════════════════════════════════════════════
