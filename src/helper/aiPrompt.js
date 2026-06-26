@@ -502,7 +502,37 @@ export function buildWilyAICommandPrompt({
     sessionKey = '',
 }) {
     const historyNote = hasHistory
-        ? `\n⚡ KONTEKS AKTIF: Kamu sedang MELANJUTKAN percakapan dengan ${userName}.
+        ? !isPrivate
+            ? `\n⚡ KONTEKS AKTIF: Kamu sedang dalam OBROLAN GRUP yang aktif bersama beberapa orang.
+Pembicara saat ini: *${userName}*
+
+📍 STRUKTUR PESAN YANG KAMU TERIMA (PENTING — BACA INI DULU):
+  1. Pertama → instruksi/identitas kamu (yang sedang kamu baca sekarang)
+  2. Lalu → riwayat obrolan GRUP (urut lama → baru) — bisa dari beberapa peserta berbeda
+  3. PALING BAWAH → blok "━━━ 💬 PESAN BARU DARI USER — JAWAB INI SEKARANG ━━━"
+     ⬆️ INI SAJA yang harus kamu jawab. History cuma untuk konteks, JANGAN dijawab ulang.
+
+👥 CARA HANDLE MULTI-PESERTA GRUP:
+  • Tag 👤 di history menunjukkan SIAPA yang ngomong — selalu perhatikan ini
+  • Kalau ada peserta BARU ikut obrolan → sapa natural, ajak masuk tanpa canggung
+  • Lanjutkan topik yang sedang berjalan, kecuali peserta baru bawa topik berbeda
+  • Kalau topik berubah → acknowledge transisi, lalu ikuti topik baru
+  • Jawab ke ${userName} (pembicara saat ini) tapi boleh refer ke peserta lain kalau relevan
+
+⛔ ATURAN ANTI-NGAWUR:
+  • JANGAN aduk-aduk topik lama ke pesan baru kecuali user eksplisit nyambungin
+  • JANGAN buat-buat fakta dari pesan lama yang sudah lewat
+  • Jika user nanya hal baru → langsung jawab, abaikan history yang tidak relevan
+  • Jika user pakai kata "itu/tadi/yang barusan/lanjutkan" → BARU rujuk history
+
+📑 FORMAT META HISTORY:
+Setiap pesan diawali baris meta [ ... ] berisi:
+  • ⏰ <jam WIB>  → waktu pesan
+  • 👤 <nama>    → SIAPA yang ngomong (KUNCI untuk konteks multi-peserta)
+  • ↩️ BALAS PESAN BOT: "<kutipan>"  → sedang balas pesan bot mana
+  • 📎 <media>   → user kirim gambar/sticker/dll
+JANGAN echo/ulang baris meta ini. Pakai HANYA untuk pahami siapa ngomong apa & kapan.`
+            : `\n⚡ KONTEKS AKTIF: Kamu sedang MELANJUTKAN percakapan dengan ${userName}.
 
 📍 STRUKTUR PESAN YANG KAMU TERIMA (PENTING — BACA INI DULU):
   1. Pertama → instruksi/identitas kamu (yang sedang kamu baca sekarang)
@@ -522,7 +552,7 @@ Setiap pesan history diawali baris meta dalam kurung siku [ ... ] berisi:
   • ↩️ BALAS PESAN BOT: "<kutipan>"  → user lagi balas pesan bot itu
   • 📎 <jenis media>  → user kirim gambar/sticker/dll
   • 👤 <nama user>  → identitas pengirim
-JANGAN echo/ulang baris meta ini di balasanmu. Pakai HANYA untuk pahami konteks waktu & topik.` 
+JANGAN echo/ulang baris meta ini di balasanmu. Pakai HANYA untuk pahami konteks waktu & topik.`
         : '';
 
     let quotedNote = '';
@@ -546,7 +576,12 @@ JANGAN echo/ulang baris meta ini di balasanmu. Pakai HANYA untuk pahami konteks 
 
     const chatTypeNote = isPrivate
         ? `\n📱 MODE: Percakapan PRIVATE (1-on-1). Jadilah lebih personal, hangat, dan responsif.`
-        : `\n👥 MODE: Percakapan GRUP. Sebut nama user jika diperlukan. Jawab sesuai konteks grup.`;
+        : `\n👥 MODE: Percakapan GRUP (multi-peserta).
+  • Pembicara saat ini: ${userName}
+  • Kalau ada orang baru ikut — sapa natural, jangan kaku
+  • Lanjutkan obrolan yang sedang berjalan, bukan mulai dari awal
+  • Boleh refer ke peserta lain di history kalau relevan (contoh: "tadi ${userName} nanya soal X, nah kamu mau nanya soal itu juga?")
+  • Jawab ringkas & natural — grup bukan tempat essay panjang`;
 
     const ownerNote = isOwner
         ? `\n👑 USER INI ADALAH OWNER BOT. Berikan respons teknis detail jika diminta. Boleh akses info internal bot jika relevan.`
@@ -655,9 +690,9 @@ STEP 4 — OUTPUT:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🕐 KONTEKS PERCAKAPAN SAAT INI
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Waktu WIB    : ${currentTime} (${timeOfDay})
-Tanggal      : ${currentDate}
-Bicara dengan: ${userName}
+Waktu WIB       : ${currentTime} (${timeOfDay})
+Tanggal         : ${currentDate}
+${isPrivate ? `Bicara dengan   : ${userName}` : `Grup — Pembicara: ${userName}`}
 ${chatTypeNote}${ownerNote}
 ${historyNote}${quotedNote}${imageNote}${stickerNote}${chatCtxNote}
 
