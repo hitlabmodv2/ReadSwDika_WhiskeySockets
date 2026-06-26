@@ -178,6 +178,12 @@ async function handleAutoSimi({
                                 const isImageReply = isReplyToBot && hasMedia && mediaLabel !== 'video';
                                 const isStickerReply = isReplyToBot && hasSticker;
 
+                                // Sticker tanpa teks & bukan reply ke pesan bot → jangan kirim image ke vision API
+                                // Biarkan AI balas natural tanpa analisis visual
+                                if (hasSticker && !userMessage && !isStickerReply) {
+                                        imageBuffer = null;
+                                }
+
                                 if (!userMessage && !hasMedia) {
                                         userMessage = buildWilyFallbackUserPrompt(currentType);
                                 }
@@ -461,6 +467,12 @@ async function handleAutoSimi({
                                 const isImageReply = isReplyToBotMsg && hasMedia && mediaLabel !== 'video';
                                 const hasSticker = mediaLabel === 'sticker';
                                 const isStickerReply = isReplyToBotMsg && hasSticker;
+
+                                // Sticker tanpa teks & bukan reply ke pesan bot → jangan kirim image ke vision API
+                                // Biarkan AI balas natural tanpa analisis visual
+                                if (hasSticker && !userMessage && !isStickerReply) {
+                                        imageBuffer = null;
+                                }
 
                                 if (!userMessage && !hasMedia) {
                                         const _wilyFallbackType = _wilyTagAll ? 'tagall'

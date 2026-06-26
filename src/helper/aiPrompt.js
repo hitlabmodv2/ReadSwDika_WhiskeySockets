@@ -54,7 +54,7 @@ Aturan WAJIB:
 export function buildWilyFallbackUserPrompt(mediaType = '') {
     if (mediaType === 'tagall') return 'Seseorang menggunakan @semua / @everyone di grup sehingga kamu ikut di-tag. Aktifkan MODE KESAL TAPI TETAP BANTU: protes sedikit dengan nada ketus-gemes (1 kalimat), lalu tanya ada apa — singkat, santai, tidak lebih dari 2 kalimat total. Contoh: "@semua gitu, aku juga dong~ iya iya aku di sini 😤 ada apa emangnya?" atau "Woi di-tag rame-rame nih, ada yang perlu aku bantu?"';
     if (mediaType === 'mention-only') return 'Seseorang men-tag kamu di grup tanpa mengetik pesan apapun. Aktifkan MODE KESAL TAPI TETAP BANTU: tunjukkan sedikit kesan "duh dipanggil-panggil" tapi tetap tanya ada apa — nada ketus manis, 1-2 kalimat saja. Contoh: "Dipanggil tanpa bilang apa-apa... oke aku di sini, ada apa? 🙄" atau "Eh, ada apa? Jangan cuma nge-tag doang dong~"';
-    if (mediaType.includes('sticker')) return 'Pengguna mengirim sticker. Analisis ekspresi, emosi, gestur, dan maksud sticker ini, lalu balas dengan santai dan natural seperti merespons reaksi sticker tersebut.';
+    if (mediaType.includes('sticker')) return 'Pengguna mengirim sticker sebagai reaksi. Balas 1-2 kalimat santai dan natural — seperti orang ngobrol biasa merespons ekspresi teman. DILARANG: analisis visual, deskripsi gambar, heading, atau bullet point.';
     if (mediaType.includes('video')) return 'Pengguna mengirim video. Berikan respons yang natural, minta mereka menjelaskan isi videonya atau tanyakan konteksnya dengan ramah.';
     if (mediaType.includes('audio')) return 'Pengguna mengirim voice note';
     if (mediaType.includes('document')) return 'Pengguna mengirim dokumen';
@@ -111,10 +111,10 @@ export function buildWilyMediaUserPrompt({
         }
 
         if (mode === 'short') {
-            return 'Tangkap emosi/vibe sticker ini dan balas 1-2 kalimat santai yang nyambung. JANGAN buat analisis panjang.';
+            return 'User kirim sticker. Balas 1-2 kalimat santai dan natural — seperti orang ngobrol biasa. DILARANG KERAS: analisis visual, deskripsi gambar, heading, bullet point.';
         }
 
-        return 'User kirim sticker ini. Tangkap emosi/vibe-nya dan balas dengan 1-3 kalimat natural yang nyambung seperti orang ngobrol biasa. JANGAN buat analisis formal, heading, atau bullet point.';
+        return 'User kirim sticker sebagai reaksi. Balas 1-2 kalimat santai dan natural — seperti orang ngobrol biasa merespons ekspresi teman. DILARANG KERAS: analisis visual/formal, deskripsi isi gambar, heading/judul, sub-judul, atau bullet point apapun.';
     }
 
     if (isImageReply) {
