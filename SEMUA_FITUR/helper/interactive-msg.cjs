@@ -34,11 +34,6 @@
 
 const path = require('path');
 const fs   = require('fs');
-const {
-        generateWAMessageFromContent,
-        prepareWAMessageMedia,
-        proto,
-} = require('@whiskeysockets/baileys');
 
 function resolveThumbnailMedia(thumbnailUrl) {
         if (!thumbnailUrl) return null;
@@ -69,7 +64,8 @@ function startTyping(hisoka, m) {
 }
 
 /**
- * Kirim listMessage (format resmi Baileys) — bekerja di WA Mobile & WA Web.
+ * Kirim listMessage (format resmi Baileys terbaru) — bekerja di WA Mobile & WA Web.
+ * Menggunakan hisoka.sendMessage() langsung sesuai official @whiskeysockets/baileys API.
  * Respons masuk sebagai listResponseMessage.singleSelectReply.selectedRowId
  * yang sudah dipetakan ke m.text oleh inject.js.
  *
@@ -92,25 +88,29 @@ async function sendListMessage(hisoka, jid, m, opts = {}) {
                 sections   = [],
         } = opts;
 
-        const msg = generateWAMessageFromContent(jid, {
-                listMessage: proto.Message.ListMessage.create({
-                        title,
-                        description: body,
-                        buttonText,
-                        listType: proto.Message.ListMessage.ListType.SINGLE_SELECT,
-                        sections: sections.map(sec => ({
-                                title: sec.title || '',
-                                rows: (sec.rows || []).map(r => ({
-                                        rowId:       r.rowId || r.id || '',
-                                        title:       r.title || '',
-                                        description: r.description || '',
-                                })),
+        // Format resmi official Baileys latest (@whiskeysockets/baileys)
+        // Ref: https://www.npmjs.com/package/@whiskeysockets/baileys
+        const listPayload = {
+                text:       body,
+                title:      title || undefined,
+                footer:     footer || undefined,
+                buttonText,
+                listType:   1, // ListType.SINGLE_SELECT
+                sections:   sections.map(sec => ({
+                        title: sec.title || '',
+                        rows: (sec.rows || []).map(r => ({
+                                rowId:       r.rowId || r.id || '',
+                                title:       r.title || '',
+                                description: r.description || '',
                         })),
-                        footerText: footer,
-                }),
-        }, { quoted: m });
+                })),
+        };
 
-        await hisoka.relayMessage(msg.key.remoteJid, msg.message, { messageId: msg.key.id });
+        // Hapus field undefined agar tidak error di proto
+        if (!listPayload.title)  delete listPayload.title;
+        if (!listPayload.footer) delete listPayload.footer;
+
+        await hisoka.sendMessage(jid, listPayload, { quoted: m });
 }
 
 function makeInteractiveMsg({ loadConfig, tolak }) {
