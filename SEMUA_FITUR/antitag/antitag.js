@@ -106,6 +106,44 @@ function findParticipant(participants, targetNumber) {
     });
 }
 
+/**
+ * Cari bot di list participants — gabungan 4 strategi:
+ * 1. phoneNumber field
+ * 2. id/jid non-@lid (phone JID)
+ * 3. LID via botLidFromUser
+ * 4. Resolve setiap @lid participant via contacts → cocokkan nomor
+ */
+function findBotParticipant(participants, botNumber, botLidFromUser) {
+    const parts = participants || [];
+
+    // Strategi 1 & 2: cari via nomor telepon (non-LID)
+    const byPhone = findParticipant(parts, botNumber);
+    if (byPhone) return byPhone;
+
+    // Strategi 3: cari via botLid yang diketahui
+    if (botLidFromUser) {
+        const byLid = findParticipantByLid(parts, botLidFromUser);
+        if (byLid) return byLid;
+    }
+
+    // Strategi 4: semua participant @lid → resolve satu-satu → cocokkan botNumber
+    for (const p of parts) {
+        const idStr = p.id || p.jid || '';
+        if (!idStr.includes('@lid')) continue;
+        try {
+            const resolved = resolveLidFromContacts(idStr);
+            if (resolved?.number && resolved.number === botNumber) return p;
+            if (resolved?.jid) {
+                try {
+                    if (areJidsSameUser(resolved.jid, botNumber + '@s.whatsapp.net')) return p;
+                } catch (_) {}
+            }
+        } catch (_) {}
+        // Coba via hisoka.contacts jika tersedia (injeksi global tidak ada, skip)
+    }
+    return null;
+}
+
 function findParticipantByLid(participants, botLid) {
     if (!botLid) return null;
     const lidNum = botLid.split('@')[0].split(':')[0];
@@ -255,17 +293,14 @@ export default async function handleAntiTagBot(message, hisoka) {
             if (groupMeta) hisoka.groups?.write(remoteJid, groupMeta);
 
             const parts = groupMeta?.participants || [];
+            const botP  = findBotParticipant(parts, botNumber, botLidFromUser);
 
-            // Cari bot: coba via nomor telepon, fallback via LID dari hisoka.user
-            let botP = findParticipant(parts, botNumber);
-            if (!botP && botLidFromUser) botP = findParticipantByLid(parts, botLidFromUser);
-
-            isAdmin        = !!botP?.admin;
-            // Kumpulkan semua bentuk LID bot: dari botP.lid, botP.id (@lid), atau hisoka.user.lid
+            isAdmin         = !!botP?.admin;
             botLidFromGroup = botP?.lid
                 || (botP?.id?.includes('@lid') ? botP.id : null)
-                || botLidFromUser
-                || null;
+                || botLidFromUser || null;
+
+            console.log(`\x1b[36m[AntiTagBot-DBG] botP=${JSON.stringify(botP?.id||botP?.jid||'null')} | admin=${isAdmin} | lid=${botLidFromGroup||'n/a'}\x1b[39m`);
 
             // Update KV cache
             const botAdminData = kvGet('botadmin/botadmin', {});
@@ -281,13 +316,13 @@ export default async function handleAntiTagBot(message, hisoka) {
             senderIsGroupAdmin = !!senderP?.admin;
 
         } catch (_fetchErr) {
+            console.error('\x1b[33m[AntiTagBot] groupMetadata gagal:\x1b[39m', _fetchErr?.message);
             const botAdminData = kvGet('botadmin/botadmin', {});
             if (remoteJid in botAdminData) isAdmin = botAdminData[remoteJid] === true;
             groupMeta = hisoka.groups?.read(remoteJid) || null;
             if (groupMeta) {
-                const parts = groupMeta?.participants || [];
-                let botP = findParticipant(parts, botNumber);
-                if (!botP && botLidFromUser) botP = findParticipantByLid(parts, botLidFromUser);
+                const parts  = groupMeta?.participants || [];
+                const botP   = findBotParticipant(parts, botNumber, botLidFromUser);
                 isAdmin          = !!botP?.admin;
                 botLidFromGroup  = botP?.lid || (botP?.id?.includes('@lid') ? botP.id : null) || botLidFromUser || null;
                 const senderP    = senderJid
