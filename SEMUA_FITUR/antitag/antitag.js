@@ -34,6 +34,7 @@ const _require = createRequire(import.meta.url);
 const { isJidGroup, jidNormalizedUser, areJidsSameUser, getContentType } = _require('@whiskeysockets/baileys');
 
 import { kvGet, kvSet } from '../../src/db/datadb.js';
+import { resolveLidFromContacts } from '../antitagsw/antitagsw.js';
 
 const CONFIG_PATH = path.join(process.cwd(), 'config.json');
 
@@ -121,9 +122,28 @@ function isBotMentioned(message, botJid, botNumber) {
             if (Array.isArray(mentioned)) {
                 for (const jid of mentioned) {
                     if (!jid) continue;
-                    if (areJidsSameUser(jid, botJid)) return true;
+
+                    // Cek 1: areJidsSameUser (pakai try sendiri agar error @lid tidak skip cek berikutnya)
+                    try {
+                        if (areJidsSameUser(jid, botJid)) return true;
+                    } catch (_) {}
+
+                    // Cek 2: bandingkan nomor mentah (works untuk @s.whatsapp.net)
                     const jidNum = jid.split('@')[0].split(':')[0];
                     if (botNumber && jidNum === botNumber) return true;
+
+                    // Cek 3: jika format @lid, resolve ke nomor telepon lalu bandingkan
+                    if (jid.includes('@lid')) {
+                        try {
+                            const resolved = resolveLidFromContacts(jid);
+                            if (resolved?.number && botNumber && resolved.number === botNumber) return true;
+                            if (resolved?.jid) {
+                                try {
+                                    if (areJidsSameUser(resolved.jid, botJid)) return true;
+                                } catch (_) {}
+                            }
+                        } catch (_) {}
+                    }
                 }
             }
         }
@@ -139,6 +159,45 @@ function isBotMentioned(message, botJid, botNumber) {
 
         if (textContent && botNumber && textContent.includes(`@${botNumber}`)) return true;
 
+    } catch (_) {}
+    return false;
+}
+
+/**
+ * Secondary check: apakah mentionedJid mengandung botLid (@lid milik bot)?
+ * Dipanggil setelah groupMeta didapat dan botLid diketahui.
+ */
+function isBotMentionedByLid(message, botLid) {
+    if (!botLid) return false;
+    try {
+        const msg = message?.message;
+        if (!msg) return false;
+        const msgType = getContentType(msg);
+        const candidates = [
+            msg[msgType],
+            msg.extendedTextMessage,
+            msg.imageMessage,
+            msg.videoMessage,
+            msg.audioMessage,
+            msg.documentMessage,
+            msg.stickerMessage,
+        ].filter(Boolean);
+
+        for (const obj of candidates) {
+            const mentioned = obj?.contextInfo?.mentionedJid;
+            if (Array.isArray(mentioned)) {
+                for (const jid of mentioned) {
+                    if (!jid) continue;
+                    try {
+                        if (areJidsSameUser(jid, botLid)) return true;
+                    } catch (_) {}
+                    // Bandingkan nomor mentah (LID number vs LID number)
+                    const jidNum = jid.split('@')[0].split(':')[0];
+                    const lidNum = botLid.split('@')[0].split(':')[0];
+                    if (jidNum && lidNum && jidNum === lidNum) return true;
+                }
+            }
+        }
     } catch (_) {}
     return false;
 }
@@ -159,10 +218,8 @@ export default async function handleAntiTagBot(message, hisoka) {
         const botJid    = getBotJid(hisoka);
         const botNumber = getBotNumber(hisoka);
 
-        // Apakah pesan ini tag nomor bot?
-        if (!isBotMentioned(message, botJid, botNumber)) return;
-
-        console.log(`\x1b[36m[AntiTagBot] Tag terdeteksi di grup ${remoteJid.split('@')[0]}\x1b[39m`);
+        // Apakah pesan ini tag nomor bot? (cek awal tanpa LID)
+        const mentionedEarly = isBotMentioned(message, botJid, botNumber);
 
         // Ambil sender
         const senderJid    = getSenderJid(message);
@@ -172,7 +229,7 @@ export default async function handleAntiTagBot(message, hisoka) {
 
         // ── Exempt: owner selalu aman ──────────────────────────────────────────
         if (isOwnerNumber(senderNumber, config)) {
-            console.log(`\x1b[33m[AntiTagBot] Owner (${senderNumber}) tag bot — aman, skip.\x1b[39m`);
+            if (mentionedEarly) console.log(`\x1b[33m[AntiTagBot] Owner (${senderNumber}) tag bot — aman, skip.\x1b[39m`);
             return;
         }
 
@@ -180,6 +237,7 @@ export default async function handleAntiTagBot(message, hisoka) {
         let isAdmin = false;
         let groupMeta = null;
         let senderIsGroupAdmin = false;
+        let botLid = null;
 
         try {
             // Live fetch — paling akurat
@@ -188,6 +246,7 @@ export default async function handleAntiTagBot(message, hisoka) {
 
             const botP    = findParticipant(groupMeta?.participants, botNumber);
             isAdmin       = !!botP?.admin;
+            botLid        = botP?.lid || null;
 
             // Update KV cache
             const botAdminData = kvGet('botadmin/botadmin', {});
@@ -212,6 +271,7 @@ export default async function handleAntiTagBot(message, hisoka) {
                 if (groupMeta) {
                     const botP = findParticipant(groupMeta?.participants, botNumber);
                     isAdmin    = !!botP?.admin;
+                    botLid     = botP?.lid || null;
                     const senderP = senderJid
                         ? groupMeta?.participants?.find(p => areJidsSameUser(p.id || p.jid || '', senderJid))
                         : findParticipant(groupMeta?.participants, senderNumber);
@@ -220,7 +280,17 @@ export default async function handleAntiTagBot(message, hisoka) {
             }
         }
 
-        console.log(`\x1b[36m[AntiTagBot] grup=${remoteJid.split('@')[0]} | botAdmin=${isAdmin} | sender=${senderNumber} | senderAdmin=${senderIsGroupAdmin}\x1b[39m`);
+        // ── Secondary mention check: pakai botLid dari groupMeta (handle @lid WhatsApp baru) ──
+        let isMentioned = mentionedEarly;
+        if (!isMentioned && botLid) {
+            isMentioned = isBotMentionedByLid(message, botLid);
+        }
+
+        console.log(`\x1b[36m[AntiTagBot] grup=${remoteJid.split('@')[0]} | botAdmin=${isAdmin} | botLid=${botLid || 'n/a'} | mentioned=${isMentioned} | sender=${senderNumber} | senderAdmin=${senderIsGroupAdmin}\x1b[39m`);
+
+        if (!isMentioned) return;
+
+        console.log(`\x1b[36m[AntiTagBot] Tag terdeteksi di grup ${remoteJid.split('@')[0]}\x1b[39m`);
 
         // ── Exempt: admin grup aman ────────────────────────────────────────────
         if (senderIsGroupAdmin) {
