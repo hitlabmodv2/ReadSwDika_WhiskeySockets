@@ -69,7 +69,7 @@ const SIGNUP_HEADERS = {
     'x-firebase-gmpid': '1:652803432695:android:c4341db6033e62814f33f2',
 };
 
-const FALLBACK_MODELS = ['gemini-flash-latest', 'gemini-2.5-flash', 'gemini-pro-latest'];
+const FALLBACK_MODELS = ['gemini-2.5-pro', 'gemini-pro-latest', 'gemini-flash-latest'];
 const MAX_TOKEN_ROTATIONS = 2;
 const POOL_SIZE = 3;
 const REQUEST_TIMEOUT_MS = 25000;
@@ -192,7 +192,7 @@ class Gemini {
         return text;
     }
 
-    async chat({ contents, model = 'gemini-flash-latest', ...config }) {
+    async chat({ contents, model = 'gemini-2.5-pro', ...config }) {
         if (!Array.isArray(contents)) throw new Error('Contents must be an array.');
 
         const requestedModel = model;
@@ -271,7 +271,7 @@ class Gemini {
     async ask(prompt) {
         return this.chat({
             contents: [{ role: 'user', parts: [{ text: prompt }] }],
-            model: 'gemini-flash-latest',
+            model: 'gemini-2.5-pro',
         });
     }
 

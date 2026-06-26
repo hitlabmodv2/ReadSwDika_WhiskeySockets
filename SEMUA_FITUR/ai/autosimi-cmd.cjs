@@ -285,7 +285,7 @@ async function handleAutoSimi({
                                                         { text: userMessage || 'Analisis gambar/sticker ini.' },
                                                 ]},
                                         ];
-                                        const autoVModels = ['gemini-flash-latest', 'gemini-2.5-flash', 'gemini-pro-latest'];
+                                        const autoVModels = ['gemini-2.5-pro', 'gemini-pro-latest', 'gemini-flash-latest'];
                                         for (const model of autoVModels) {
                                                 try { response = await gemini.chat({ model, contents: autoVContents }); break; } catch (_) {}
                                         }
@@ -659,7 +659,7 @@ async function handleAutoSimi({
                                                                 finalMime = 'image/jpeg';
                                                         } catch (_) {}
                                                 }
-                                                const vModels = ['gemini-flash-latest', 'gemini-2.5-flash', 'gemini-pro-latest'];
+                                                const vModels = ['gemini-2.5-pro', 'gemini-pro-latest', 'gemini-flash-latest'];
                                                 if (histMsgs.length > 0) {
                                                         const vContents = [
                                                                 { role: 'user', parts: [{ text: systemPrompt }] },

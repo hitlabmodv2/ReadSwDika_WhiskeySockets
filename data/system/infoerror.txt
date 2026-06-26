@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 26/06/2026, 08.57.20  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 26/06/2026, 09.57.37  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -26,21 +26,21 @@
 │  #001  —  AlqanimeNotif
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [AlqanimeNotif] Gagal kirim ke 120363408420466353@g.us: Failed to fetch stream from https://alqanime.net/wp-content/uploads/2026/04/Kanan-sama-wa-Akumade-Choroi-200x300.jpg
+│  [AlqanimeNotif] Gagal kirim ke 120363408420466353@g.us: Failed to fetch stream from https://alqanime.net/wp-content/uploads/2026/04/Ghost-Concert-Missing-Songs-200x300.jpg
 │
 │  DETAIL
 │  Sumber      : AlqanimeNotif
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 26/06/2026, 08.57.20
-│  Terakhir    : 26/06/2026, 08.57.20
+│  Pertama     : 26/06/2026, 09.57.37
+│  Terakhir    : 26/06/2026, 09.57.37
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [AlqanimeNotif] Gagal kirim ke 120363408420466353@g.us: Failed to fetch stream from https://alqanime.net/wp-content/uploads/2026/04/Kanan-sama-wa-Akumade-Choroi-200x300.jpg
+│  ▶  Error: [AlqanimeNotif] Gagal kirim ke 120363408420466353@g.us: Failed to fetch stream from https://alqanime.net/wp-content/uploads/2026/04/Ghost-Concert-Missing-Songs-200x300.jpg
 │     at console.error (file:///home/runner/workspace/index.js:412:27)
 │     at file:///home/runner/workspace/index.js:1578:89
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 26/06/2026, 08.57.20
+  Terakhir diperbarui: 26/06/2026, 09.57.37
 ════════════════════════════════════════════════════════════════════════

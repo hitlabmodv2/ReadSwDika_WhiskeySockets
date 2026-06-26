@@ -1180,6 +1180,27 @@
         }
       ],
       "lastActivity": 1782467757611
+    },
+    "120363192554714254@g.us": {
+      "messages": [
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 26 Jun, 16.58 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"╔══════════════════════════╗ ║ 🗑️ *PESAN DIHAPUS* 🗑️ ║ ╚══════════════════════════╝ 📍 *Lokasi:* Grup \"Private Botz Tempat uji coba fitur\"...\" | 👤 Wily]\nApa ini?"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "Eh, apa sih Wily~~ dipanggil-panggil aku lagi sibuk tau 😑\n\nItu tadi cuma `Zz` doang kan? Kenapa dihapus emangnya? Mau tidur ya?"
+            }
+          ]
+        }
+      ],
+      "lastActivity": 1782467934004
     }
   },
   "sticker_pattern": {
@@ -1209,9 +1230,9 @@
       "last_sent": 1780237811
     },
     "https://cdn.ornzora.eu.cc/41f054d0-55e9-4d1a-abb7-6a49ac74769b-HONOLULU.webp": {
-      "total_sent": 2,
+      "total_sent": 3,
       "moods": {},
-      "last_sent": 1782466684
+      "last_sent": 1782467932
     },
     "https://cdn.ornzora.eu.cc/31f63a4b-95a8-440a-9d77-9d634ef2153a-HONOLULU.webp": {
       "total_sent": 4,
@@ -1344,6 +1365,15 @@
         "context": "[REPLY-STIKER: smug] Halah, *bujang*~ Aku cuma jujur kok, yae. Emang kenyataannya gitu, mau gimana lagi? Kan kamu yang nanya duluan~ 😉",
         "was_fallback": 1,
         "sent_at": 1782467708
+      }
+    ],
+    "120363192554714254@g.us": [
+      {
+        "sticker_url": "https://cdn.ornzora.eu.cc/41f054d0-55e9-4d1a-abb7-6a49ac74769b-HONOLULU.webp",
+        "mood": "",
+        "context": "Eh, apa sih Wily~~ dipanggil-panggil aku lagi sibuk tau 😑 Itu tadi cuma `Zz` doang kan? Kenapa dihapus emangnya? Mau tidur ya? [REPLY-STIKER: mikir kesel]",
+        "was_fallback": 1,
+        "sent_at": 1782467932
       }
     ]
   },
