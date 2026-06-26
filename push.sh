@@ -1465,42 +1465,87 @@ classify_commit() {
   _all=$(echo "$files" | tr '[:upper:]' '[:lower:]' | tr '_.-' '   ')
   _fpath=$(echo "$files" | tr '[:upper:]' '[:lower:]')  # full path tanpa strip karakter
 
+  # ── Label map untuk folder data/ — tambah entry baru kapanpun tanpa ubah logic ──
+  # Format: "nama_folder=Label Tampil"
+  # Folder baru yang TIDAK ada di sini → nama folder aslinya langsung dipakai (dinamis)
+  local -A _DATA_LABEL=(
+    [alqanimenotif]="Al-Quran anime notification"
+    [animasu]="anime streaming"
+    [an1game]="game features"
+    [infowibu]="weeb info"
+    [malnews]="MAL news"
+    [swtrack]="SW tracker"
+    [tmail]="temporary mail"
+    [tvonenews]="TVONE news"
+    [ceksw]="SW checker"
+    [kv]="key-value store"
+    [users]="user data"
+    [system]="system config"
+    [ai]="AI history data"
+    [gemini]="Gemini AI data"
+  )
+
   local subject=""
-  # ── Deteksi dari path folder data/ (paling spesifik dulu) ──
-  if   echo "$_fpath" | grep -qE 'data/alqanimenotif|alqanimenotif'; then subject="Al-Quran anime notification"
-  elif echo "$_fpath" | grep -qE 'data/animasu|animasu'; then subject="anime streaming"
-  elif echo "$_fpath" | grep -qE 'data/an1game|an1game'; then subject="game features"
-  elif echo "$_fpath" | grep -qE 'data/infowibu|infowibu'; then subject="weeb info"
-  elif echo "$_fpath" | grep -qE 'data/malnews|malnews'; then subject="MAL news"
-  elif echo "$_fpath" | grep -qE 'data/swtrack|swtrack'; then subject="SW tracker"
-  elif echo "$_fpath" | grep -qE 'data/tmail|tmail'; then subject="temporary mail"
-  elif echo "$_fpath" | grep -qE 'data/tvonenews|tvonenews'; then subject="TVONE news"
-  elif echo "$_fpath" | grep -qE 'data/ceksw|ceksw'; then subject="SW checker"
-  elif echo "$_fpath" | grep -qE 'data/kv|/kv'; then subject="key-value store"
-  elif echo "$_fpath" | grep -qE 'data/users|userdb'; then subject="user data"
-  elif echo "$_fpath" | grep -qE 'data/system|data/ai|aihistory'; then subject="system data"
-  # ── Deteksi dari src/helper/ ──
-  elif echo "$_fpath $_names" | grep -qiE 'aipromptfb|aipromptfacebook'; then subject="Facebook AI prompt"
-  elif echo "$_fpath $_names" | grep -qiE 'aipromptinstagram|aipromptif|aipromptfb|aiprompt|aireact|aistickerstory|aitools'; then subject="AI prompt feature"
-  elif echo "$_fpath $_names" | grep -qiE 'gemini'; then subject="Gemini AI"
-  elif echo "$_fpath $_names" | grep -qiE 'imagesearch|image search'; then subject="image search"
-  elif echo "$_fpath $_names" | grep -qiE 'jadibot|jadibotSettings'; then subject="jadibot"
-  elif echo "$_fpath $_names" | grep -qiE 'crashguard|crash guard'; then subject="crash guard"
-  elif echo "$_fpath $_names" | grep -qiE 'authstate|auth state'; then subject="auth state"
-  elif echo "$_fpath $_names" | grep -qiE 'memorymonitor|memory monitor'; then subject="memory monitor"
-  elif echo "$_fpath $_names" | grep -qiE 'browserswitch|browser switch'; then subject="browser switcher"
-  elif echo "$_fpath $_names" | grep -qiE 'hotreload|hot reload'; then subject="hot reload"
-  elif echo "$_fpath $_names" | grep -qiE 'cleaner|injector|inject'; then subject="bot utility"
-  elif echo "$_fpath $_names" | grep -qiE 'botstats|bot statistics|botstat'; then subject="bot statistics"
-  elif echo "$_fpath $_names" | grep -qiE 'errorlog|error log'; then subject="error logger"
-  elif echo "$_fpath $_names" | grep -qiE 'datadb|json db|userdb'; then subject="database"
-  # ── Deteksi dari attached_assets ──
-  elif echo "$_fpath" | grep -qE 'attached_assets'; then subject="bot media assets"
-  # ── Deteksi generik ──
-  elif echo "$_all $_names" | grep -qiE 'session|sesi'; then subject="session data"
-  elif echo "$_all $_names" | grep -qiE 'swstats|swstat'; then subject="bot statistics"
-  elif echo "$_all $_names" | grep -qiE 'stat|statistik'; then subject="statistics"
-  elif echo "$_all $_names" | grep -qiE 'contact|kontak|sender'; then subject="contact list"
+
+  # ── Deteksi data/ subfolder — OTOMATIS untuk folder lama & baru ──────────────
+  # Ambil semua subfolder data/ yang ada di staged files, pilih yang paling banyak filenya
+  local _data_sub="" _data_sub_cnt=0
+  local _tmp_sub
+  while IFS= read -r _tmp_sub; do
+    [ -z "$_tmp_sub" ] && continue
+    local _c
+    _c=$(echo "$_fpath" | grep -c "^data/${_tmp_sub}/" 2>/dev/null || echo 0)
+    if [ "$_c" -gt "$_data_sub_cnt" ]; then
+      _data_sub_cnt=$_c
+      _data_sub="$_tmp_sub"
+    fi
+  done < <(echo "$_fpath" | grep -oE '^data/[^/]+' | sed 's|^data/||' | sort -u 2>/dev/null)
+
+  if [ -n "$_data_sub" ]; then
+    # Cek dulu di label map; kalau tidak ada, pakai nama folder asli (auto-detect)
+    if [ -n "${_DATA_LABEL[$_data_sub]+x}" ]; then
+      subject="${_DATA_LABEL[$_data_sub]}"
+    else
+      # Nama folder baru: ubah - dan _ jadi spasi, capitalize tiap kata
+      subject=$(echo "$_data_sub" | tr '_-' '  ' | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2)); print}')
+    fi
+  fi
+
+  # ── Deteksi src/helper & src/db (berbasis nama file, keyword-based) ──────────
+  if [ -z "$subject" ]; then
+    if   echo "$_fpath $_names" | grep -qiE 'aipromptfb|aipromptfacebook';                   then subject="Facebook AI prompt"
+    elif echo "$_fpath $_names" | grep -qiE 'aiprompt|aireact|aistickerstory|aitools';        then subject="AI prompt feature"
+    elif echo "$_fpath $_names" | grep -qiE 'gemini';                                         then subject="Gemini AI"
+    elif echo "$_fpath $_names" | grep -qiE 'imagesearch|imagesear';                          then subject="image search"
+    elif echo "$_fpath $_names" | grep -qiE 'jadibotSettings|jadibots';                       then subject="jadibot settings"
+    elif echo "$_fpath $_names" | grep -qiE 'jadibot';                                        then subject="jadibot"
+    elif echo "$_fpath $_names" | grep -qiE 'crashguard';                                     then subject="crash guard"
+    elif echo "$_fpath $_names" | grep -qiE 'authstate';                                      then subject="auth state"
+    elif echo "$_fpath $_names" | grep -qiE 'memorymonitor';                                  then subject="memory monitor"
+    elif echo "$_fpath $_names" | grep -qiE 'browserswitch';                                  then subject="browser switcher"
+    elif echo "$_fpath $_names" | grep -qiE 'hotreload';                                      then subject="hot reload"
+    elif echo "$_fpath $_names" | grep -qiE 'cleaner|injector|inject';                        then subject="bot utility"
+    elif echo "$_fpath $_names" | grep -qiE 'botstats|botstat';                               then subject="bot statistics"
+    elif echo "$_fpath $_names" | grep -qiE 'errorlog';                                       then subject="error logger"
+    elif echo "$_fpath $_names" | grep -qiE 'datadb|userdb';                                  then subject="database"
+    # ── src/helper lain yang belum ada di atas: ambil nama file tanpa ekstensi ──
+    elif echo "$_fpath" | grep -qE 'src/(helper|db|lib)/'; then
+      local _src_name
+      _src_name=$(echo "$_fpath" | grep -oE 'src/(helper|db|lib)/[^/]+' | \
+                  head -1 | xargs -n1 basename 2>/dev/null | sed 's/\.[^.]*$//' | \
+                  sed 's/\([A-Z]\)/ \1/g' | tr '[:upper:]' '[:lower:]' | sed 's/^ //')
+      [ -n "$_src_name" ] && subject="$_src_name"
+    fi
+  fi
+
+  # ── Deteksi attached_assets & session (generik) ───────────────────────────────
+  if [ -z "$subject" ]; then
+    if   echo "$_fpath" | grep -qE 'attached_assets';                          then subject="bot media assets"
+    elif echo "$_all $_names" | grep -qiE 'session|sesi';                      then subject="session data"
+    elif echo "$_all $_names" | grep -qiE 'swstats|swstat';                    then subject="bot statistics"
+    elif echo "$_all $_names" | grep -qiE 'stat|statistik';                    then subject="statistics"
+    elif echo "$_all $_names" | grep -qiE 'contact|kontak|sender';             then subject="contact list"
+    fi
   fi
 
   # ── Verb detection: dari nama file & perubahan git ──────────────────────────
