@@ -363,11 +363,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                 // Blokir pesan dari device lain (sinkronisasi) kecuali ada command
                 if (messagesType === 'append' && !m.command) return;
 
-                // ── Anti-Tag Bot: hapus pesan yang tag nomor bot di GC ──────────
-                if (m.isGroup) {
-                        Promise.resolve(handleAntiTagBotAuto(message, hisoka))
-                                .catch(err => console.error('\x1b[31m[AntiTagBot]\x1b[39m', err?.message));
-                }
+                // Anti-Tag Bot sudah dihandle via dedicated listener di index.js
 
                 // AutoSimi / WilyAutoReply → autosimi-cmd.cjs
                 if (await handleAutoSimi({ hisoka, m, messagesType,
