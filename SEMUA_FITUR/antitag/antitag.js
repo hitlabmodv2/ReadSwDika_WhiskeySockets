@@ -355,6 +355,39 @@ export default async function handleAntiTagBot(message, hisoka) {
             return;
         }
 
+        // ── Reply sebelum hapus — isi beda tergantung owner atau bukan ────────
+        const isOwner = isOwnerNumber(senderNumber, config);
+        const mention  = senderJid || (senderNumber + '@s.whatsapp.net');
+
+        let replyText;
+        if (isOwner) {
+            replyText =
+                `╭══『 🚫 *ANTI-TAG BOT* 』══╮\n` +
+                `│\n` +
+                `│ Hei @${senderNumber} 👑\n` +
+                `│ Kamu owner, tapi pesan\n` +
+                `│ yang men-tag bot tetap\n` +
+                `│ akan dihapus ya 🙏\n` +
+                `│\n` +
+                `╰══════════════════════════╯`;
+        } else {
+            replyText =
+                `╭══『 🚫 *ANTI-TAG BOT* 』══╮\n` +
+                `│\n` +
+                `│ Hei @${senderNumber} ⚠️\n` +
+                `│ Dilarang men-tag nomor\n` +
+                `│ bot di grup ini!\n` +
+                `│\n` +
+                `│ Pesanmu otomatis dihapus.\n` +
+                `│\n` +
+                `╰══════════════════════════╯`;
+        }
+
+        await hisoka.sendMessage(remoteJid, {
+            text: replyText,
+            mentions: [mention],
+        });
+
         // ── Hapus pesan ────────────────────────────────────────────────────────
         await hisoka.sendMessage(remoteJid, { delete: message.key });
         console.log(`\x1b[32m[AntiTagBot] ✅ Pesan tag bot dari ${senderNumber} dihapus di ${remoteJid.split('@')[0]}\x1b[39m`);
