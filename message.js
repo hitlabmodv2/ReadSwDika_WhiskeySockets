@@ -365,6 +365,16 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                 // ── Anti-Tag Bot: hapus pesan yang tag nomor bot di GC ──────────
                 if (m.isGroup) {
+                        // Temp debug: dump raw mentionedJid untuk setiap pesan grup
+                        try {
+                                const _require2 = (await import('@whiskeysockets/baileys')).default || (await import('@whiskeysockets/baileys'));
+                                const _gc = (typeof getContentType !== 'undefined') ? getContentType : _require2.getContentType;
+                                const _mt = _gc(message.message || {});
+                                const _inner = (message.message || {})[_mt] || {};
+                                const _mj = _inner?.contextInfo?.mentionedJid;
+                                const _txt = (_inner?.text || _inner?.caption || message.message?.conversation || '').slice(0, 60);
+                                console.log(`\x1b[35m[AntiTagBot-RAW] type=${_mt} | mJid=${JSON.stringify(_mj)} | txt="${_txt}"\x1b[39m`);
+                        } catch (_de) {}
                         Promise.resolve(handleAntiTagBotAuto(message, hisoka))
                                 .catch(err => console.error('\x1b[31m[AntiTagBot]\x1b[39m', err?.message));
                 }
