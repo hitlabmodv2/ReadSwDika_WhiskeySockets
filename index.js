@@ -2529,6 +2529,13 @@ async function main() {
                                         antiTagSWHandler(message, hisoka)
                                 ).catch(err => console.error('[AntiTagSW]', err.message));
                         }
+                        // ── Anti-Tag Bot: hapus pesan yang tag nomor bot sendiri di GC ──
+                        const antiTagBotHandler = getHandler('antitagbot');
+                        if (typeof antiTagBotHandler === 'function') {
+                                Promise.resolve(
+                                        antiTagBotHandler(message, hisoka)
+                                ).catch(err => console.error('[AntiTagBot]', err.message));
+                        }
                 }
         }); // sampe sini
 

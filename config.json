@@ -206,5 +206,8 @@
   },
   "readChat": {
     "enabled": false
+  },
+  "antiTagBot": {
+    "enabled": false
   }
 }

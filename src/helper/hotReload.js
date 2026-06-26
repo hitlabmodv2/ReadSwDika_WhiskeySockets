@@ -56,6 +56,7 @@ const WATCHED_FILES = [
     { key: 'message',      rel: 'message.js' },
     { key: 'antidelete',   rel: 'SEMUA_FITUR/antidel/antidelete.js' },
     { key: 'antitagsw',    rel: 'SEMUA_FITUR/antitagsw/antitagsw.js' },
+    { key: 'antitagbot',   rel: 'SEMUA_FITUR/antitag/antitag.js' },
 
     // ── Helper ESM (aman di-reload) ───────────────
     { key: 'utils',        rel: 'src/helper/utils.js' },
