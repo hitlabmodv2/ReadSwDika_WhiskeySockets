@@ -250,11 +250,25 @@ function isBotMentioned(message, botJid, botNumber, botLid) {
     return false;
 }
 
+// ── Dedup cache: cegah proses pesan yang sama 2x ─────────────────────────────
+const _processedMsgIds = new Set();
+
 // ── Auto-handler: dipanggil dari message.js ──────────────────────────────────
 export default async function handleAntiTagBot(message, hisoka) {
     try {
         if (!message?.key?.remoteJid) return;
         if (!message?.message) return;
+
+        // Dedup: skip jika message ID ini sudah diproses
+        const msgId = message.key?.id;
+        if (msgId) {
+            if (_processedMsgIds.has(msgId)) return;
+            _processedMsgIds.add(msgId);
+            if (_processedMsgIds.size > 500) {
+                const first = _processedMsgIds.values().next().value;
+                _processedMsgIds.delete(first);
+            }
+        }
 
         const remoteJid = message.key.remoteJid;
         if (!isJidGroup(remoteJid)) return;
@@ -364,21 +378,22 @@ export default async function handleAntiTagBot(message, hisoka) {
             replyText =
                 `╭══『 🚫 *ANTI-TAG BOT* 』══╮\n` +
                 `│\n` +
-                `│ Hei @${senderNumber} 👑\n` +
-                `│ Kamu owner, tapi pesan\n` +
-                `│ yang men-tag bot tetap\n` +
-                `│ akan dihapus ya 🙏\n` +
+                `│ @${senderNumber} 👑\n` +
+                `│ Kamu owner sih, tapi\n` +
+                `│ tolong jangan tag saya\n` +
+                `│ di grup ya 🙏\n` +
                 `│\n` +
                 `╰══════════════════════════╯`;
         } else {
             replyText =
                 `╭══『 🚫 *ANTI-TAG BOT* 』══╮\n` +
                 `│\n` +
-                `│ Hei @${senderNumber} ⚠️\n` +
-                `│ Dilarang men-tag nomor\n` +
-                `│ bot di grup ini!\n` +
+                `│ @${senderNumber} ⚠️\n` +
+                `│ Jangan tag saya di sini!\n` +
+                `│ Saya bukan untuk di-tag\n` +
+                `│ di grup 😤\n` +
                 `│\n` +
-                `│ Pesanmu otomatis dihapus.\n` +
+                `│ Pesanmu sudah dihapus.\n` +
                 `│\n` +
                 `╰══════════════════════════╯`;
         }
