@@ -4,8 +4,8 @@ _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurn
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V24*
 ✨ *2 Fitur Baru*
-🔧 *3 Bug/Error Fix*
-🚀 *3 Perubahan*
+🔧 *5 Bug/Error Fix*
+🚀 *6 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -41,6 +41,18 @@ _Cari dan kirim GIF anime dari Tenor langsung ke chat_
 - Fungsi: cari game Android modded/premium gratis dari an1.com
 > Cara pakai: `.an1game [nama game]`
 
+*4. 🤖 WilyAI — Bug Analisis Stiker/Gambar*
+- ~Bug: WilyAI error / tidak merespons saat user kirim stiker atau gambar~
+- Penyebab: buffer stiker tidak diproses dengan benar sebelum dikirim ke Gemini Vision
+- Fix: konversi buffer & mime type diperbaiki di autosimi + prompt stiker diperbarui
+> Berlaku untuk auto-reply stiker maupun command `.wily` dengan attachment
+
+*5. 🤖 WilyAI Grup — Memori Tercampur Antar Peserta*
+- ~Bug: di grup, history chat WilyAI tercampur antara satu user dengan user lain~
+- Penyebab: session key pakai `sender_groupJid` (unik per user) bukan JID grup
+- Fix: session key diubah ke `m.from` (JID grup) → semua peserta grup berbagi satu sesi
+> WilyAI di grup kini sadar percakapan multi-peserta secara benar
+
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *PERUBAHAN*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -66,3 +78,24 @@ _Cari dan kirim GIF anime dari Tenor langsung ke chat_
 - AI acak bahasa, mode & genre sendiri
 - Hasil lagu: teks ringkasan + semua audio langsung dikirim ke chat
 > Alasan: button `listMessage` tidak muncul di WA Business & WA Messenger
+
+*4. 🤖 WilyAI — Karakter Tsundere Diperbarui*
+- ~Sebelumnya: kepribadian AI terasa generik, kurang konsisten nuansa tsundere-nya~
+- Sesudahnya: prompt karakter diperbarui dari file karakter asli
+- Ditambahkan 2 section baru: _💡 Nuansa Ekspresi & Perilaku Emosi_ dan _📱 Gaya Chat Messy Human Mode_
+- Tagline kepribadian diperbarui agar lebih genuine & tidak over-act
+
+*5. 🎭 WilyAI Stiker — Daftar Emosi Lebih Spesifik*
+- ~Sebelumnya: daftar kata emosi stiker terlalu umum, AI sering salah pilih ekspresi~
+- Sesudahnya: 24 kata emosi dengan penjelasan konteks & ekspresi masing-masing
+- Perbedaan kini jelas, misal: `malu` vs `flustered` vs `malu gugup`, atau `mikir` vs `mikir kesel`
+- Ditambahkan 2 mood baru: `panik` (keteteran/overwhelmed) & `mikir kesel` (side-eye skeptis)
+- Contoh PAKAI di prompt juga diperbarui sesuai konteks tiap stiker
+
+*6. 🤖 WilyAI — Default Model Gemini Diupgrade*
+- ~Sebelumnya: default model `gemini-flash-latest` → sering jatuh ke `gemini-2.5-flash`~
+- Sesudahnya: urutan prioritas model diubah ke Pro
+  1. `gemini-pro-latest` ← utama (default)
+  2. `gemini-2.5-pro` ← cadangan kedua
+  3. `gemini-flash-latest` ← terakhir jika keduanya tidak tersedia
+> Berlaku untuk semua call WilyAI: text, vision, auto-reply, command `.wily`
