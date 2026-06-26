@@ -4,7 +4,7 @@ _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurn
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V24*
 ✨ *2 Fitur Baru*
-🔧 *2 Bug/Error Fix*
+🔧 *3 Bug/Error Fix*
 🚀 *2 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
@@ -36,6 +36,12 @@ _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurn
 >           terbaca sebagai command .welcome → handler jalan → error dikirim ke grup
 > Fix: guard ditambahkan — jika tidak ada prefix (.) dan arg bukan on/off → diam saja
 > Berlaku untuk: .welcome, .goodbye, .welgod
+
+> NO.3 🎮 *AN1 Game — .an1game Kini Work di Grup*
+> Bug: fitur .an1game sebelumnya error / tidak berfungsi saat dipakai di grup
+> Fix: diperbaiki — .an1game kini work normal di grup maupun private chat
+> Fungsi: cari game Android modded/premium gratis dari an1.com
+> Cara pakai: .an1game [nama game]
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *PERUBAHAN*
