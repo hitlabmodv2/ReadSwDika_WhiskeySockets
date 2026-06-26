@@ -5,7 +5,7 @@ _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurn
 🤖 *WILY BOT — V24*
 ✨ *2 Fitur Baru*
 🔧 *3 Bug/Error Fix*
-🚀 *2 Perubahan*
+🚀 *3 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -57,3 +57,12 @@ _Cari dan kirim GIF anime dari Tenor langsung ke chat_
 - Sesudahnya: kini juga work di private chat
 - Di grup: _bot tetap wajib jadi admin_
 - Di private: _langsung bisa disematkan, tanpa syarat apapun_
+
+*3. 🎵 Musikai & Musikai2 — Hapus Semua Button/Picker*
+- ~Sebelumnya: random flow → picker bahasa → picker mode → picker genre → generate~
+- ~Sebelumnya: hasil lagu tampil dengan tombol pilih variasi & list aksi~
+- Sesudahnya: *tidak ada button sama sekali* — semua plain text
+- `.musikai random` & `.musikai2 random` → langsung generate otomatis tanpa tanya apapun
+- AI acak bahasa, mode & genre sendiri
+- Hasil lagu: teks ringkasan + semua audio langsung dikirim ke chat
+> Alasan: button `listMessage` tidak muncul di WA Business & WA Messenger
