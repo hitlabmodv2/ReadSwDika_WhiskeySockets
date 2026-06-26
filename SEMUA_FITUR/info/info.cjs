@@ -377,6 +377,10 @@ async function handleSetwelgod({ hisoka, m, query, tolak, logCommand, loadConfig
         if (!m.isAdmin && !m.isOwner) return tolak(hisoka, m, '❌ Hanya admin grup atau owner bot yang bisa menggunakan perintah ini!');
 
         const argWg    = (query || '').trim().toLowerCase();
+
+        // Guard: jika tidak ada prefix dan arg bukan perintah valid → accidental match → diam
+        if (!m.prefix && !['on', 'off'].includes(argWg)) return;
+
         const cfgPathWg = nodePath.join(process.cwd(), 'config.json');
         const cfgWg    = loadConfig();
         if (!cfgWg.welcomeGoodbye) cfgWg.welcomeGoodbye = { enabled: true, groups: {} };

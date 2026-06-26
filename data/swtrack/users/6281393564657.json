@@ -416,7 +416,7 @@
       "participant": "174577888038922@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-25T14:03:38.139Z",
+    "updatedAt": "2026-06-26T05:50:03.425Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -435,7 +435,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-25T14:03:38.139Z"
+    "processedAt": "2026-06-25T14:03:38.139Z",
+    "deleted": true,
+    "deletedAt": "2026-06-26T05:50:03.425Z"
   },
   "AC3BCFBD472567C0E1F0C968C98586D3": {
     "id": "AC3BCFBD472567C0E1F0C968C98586D3",
@@ -478,5 +480,47 @@
       }
     ],
     "processedAt": "2026-06-26T05:42:51.959Z"
+  },
+  "AC44470003B4A5BD8BB27663AF979E33": {
+    "id": "AC44470003B4A5BD8BB27663AF979E33",
+    "sender": "6281393564657@s.whatsapp.net",
+    "name": "γυς ρου",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-26T05:48:17.525Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🏀",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6281393564657",
+    "resolvedPn": "6281393564657@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6281393564657@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC44470003B4A5BD8BB27663AF979E33",
+      "participant": "174577888038922@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-26T05:48:33.532Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281393564657@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC44470003B4A5BD8BB27663AF979E33",
+        "participant": "174577888038922@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281393564657@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC44470003B4A5BD8BB27663AF979E33",
+        "participant": "6281393564657@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-26T05:48:33.531Z"
   }
 }

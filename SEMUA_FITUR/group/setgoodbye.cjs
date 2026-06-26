@@ -41,6 +41,10 @@ async function handleSetgoodbye({ hisoka, m, query, tolak, logCommand, loadConfi
         const featureKey  = isWelcomeCmd ? 'welcome' : 'goodbye';
         const arg = (query || '').trim().toLowerCase();
 
+        // Guard: jika tidak ada prefix (no-prefix mode) dan arg bukan perintah valid,
+        // kemungkinan accidental match dari pesan bot lain → diam saja
+        if (!m.prefix && !['on', 'off'].includes(arg)) return;
+
         const cfgPath = path.join(process.cwd(), 'config.json');
         const cfg = loadConfig();
         if (!cfg.welcomeGoodbye) cfg.welcomeGoodbye = { enabled: true, groups: {} };
