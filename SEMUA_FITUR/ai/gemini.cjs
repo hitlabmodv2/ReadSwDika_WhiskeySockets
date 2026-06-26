@@ -56,7 +56,7 @@ const SIGNUP_HEADERS = {
     'x-firebase-gmpid':    '1:652803432695:android:c4341db6033e62814f33f2',
 };
 
-const FALLBACK_MODELS    = ['gemini-2.5-pro', 'gemini-pro-latest', 'gemini-flash-latest'];
+const FALLBACK_MODELS    = ['gemini-pro-latest', 'gemini-2.5-pro', 'gemini-flash-latest'];
 const MAX_TOKEN_ROTATIONS = 5;
 const POOL_SIZE           = 3;
 
@@ -201,7 +201,7 @@ class Gemini {
         return this._formatForWhatsApp(text);
     }
 
-    async chat({ contents, model = 'gemini-2.5-pro', ...config }) {
+    async chat({ contents, model = 'gemini-pro-latest', ...config }) {
         if (!Array.isArray(contents)) throw new Error('Contents must be an array.');
 
         const requestedModel = model;
@@ -281,7 +281,7 @@ class Gemini {
         throw new Error(lastErr?.message || 'Gemini request failed after all retries.');
     }
 
-    async analyzeImage(imageBuffer, prompt, { mimeType = 'image/jpeg', model = 'gemini-2.5-pro' } = {}) {
+    async analyzeImage(imageBuffer, prompt, { mimeType = 'image/jpeg', model = 'gemini-pro-latest' } = {}) {
         const base64 = Buffer.isBuffer(imageBuffer) ? imageBuffer.toString('base64') : imageBuffer;
         return this.chat({
             model,
@@ -296,7 +296,7 @@ class Gemini {
         });
     }
 
-    async ask(prompt, { model = 'gemini-2.5-pro' } = {}) {
+    async ask(prompt, { model = 'gemini-pro-latest' } = {}) {
         return this.chat({
             model,
             contents: [{ role: 'user', parts: [{ text: prompt }] }],
