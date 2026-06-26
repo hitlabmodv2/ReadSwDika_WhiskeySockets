@@ -22,18 +22,14 @@
  *  Fungsi pembantu kirim pesan interaktif: button, list, dan poll WhatsApp
  * ───────────────────────────────
  */
-/**
- * ═══════════════════════════════════════════════════════════════
- *  Interactive Message Helper
- *  Fungsi pembantu untuk membuat & mengirim pesan interaktif
- *  WhatsApp: button (tombol aksi), list (daftar pilihan),
- *  dan poll — digunakan di seluruh fitur bot.
- * ═══════════════════════════════════════════════════════════════
- */
 'use strict';
 
 const path = require('path');
 const fs   = require('fs');
+const {
+        generateWAMessageFromContent,
+        proto,
+} = require('@whiskeysockets/baileys');
 
 function resolveThumbnailMedia(thumbnailUrl) {
         if (!thumbnailUrl) return null;
@@ -64,10 +60,9 @@ function startTyping(hisoka, m) {
 }
 
 /**
- * Kirim listMessage (format resmi Baileys terbaru) — bekerja di WA Mobile & WA Web.
- * Menggunakan hisoka.sendMessage() langsung sesuai official @whiskeysockets/baileys API.
- * Respons masuk sebagai listResponseMessage.singleSelectReply.selectedRowId
- * yang sudah dipetakan ke m.text oleh inject.js.
+ * sendListMessage — kirim list message interaktif via proto (Baileys resmi).
+ * Menggunakan generateWAMessageFromContent + relayMessage agar tombol list
+ * muncul dengan benar di WA Mobile maupun WA Web.
  *
  * @param {object} hisoka  - Baileys socket
  * @param {string} jid     - remoteJid tujuan
@@ -77,7 +72,7 @@ function startTyping(hisoka, m) {
  *   @param {string}   opts.body        - teks utama pesan
  *   @param {string}   opts.buttonText  - label tombol yang membuka list
  *   @param {string}   opts.footer      - footer teks (opsional)
- *   @param {Array}    opts.sections    - [{title, rows:[{rowId,title,description}]}]
+ *   @param {Array}    opts.sections    - [{title, rows:[{rowId|id, title, description}]}]
  */
 async function sendListMessage(hisoka, jid, m, opts = {}) {
         const {
@@ -88,36 +83,31 @@ async function sendListMessage(hisoka, jid, m, opts = {}) {
                 sections   = [],
         } = opts;
 
-        // Format resmi official Baileys latest (@whiskeysockets/baileys)
-        // Ref: https://www.npmjs.com/package/@whiskeysockets/baileys
-        const listPayload = {
-                text:       body,
-                title:      title || undefined,
-                footer:     footer || undefined,
-                buttonText,
-                listType:   1, // ListType.SINGLE_SELECT
-                sections:   sections.map(sec => ({
-                        title: sec.title || '',
-                        rows: (sec.rows || []).map(r => ({
-                                rowId:       r.rowId || r.id || '',
-                                title:       r.title || '',
-                                description: r.description || '',
+        const msg = generateWAMessageFromContent(jid, {
+                listMessage: proto.Message.ListMessage.create({
+                        title,
+                        description: body,
+                        buttonText,
+                        listType: proto.Message.ListMessage.ListType.SINGLE_SELECT,
+                        sections: sections.map(sec => ({
+                                title: sec.title || '',
+                                rows: (sec.rows || []).map(r => ({
+                                        rowId:       r.rowId || r.id || '',
+                                        title:       r.title || '',
+                                        description: r.description || '',
+                                })),
                         })),
-                })),
-        };
+                        footerText: footer,
+                }),
+        }, { quoted: m });
 
-        // Hapus field undefined agar tidak error di proto
-        if (!listPayload.title)  delete listPayload.title;
-        if (!listPayload.footer) delete listPayload.footer;
-
-        await hisoka.sendMessage(jid, listPayload, { quoted: m });
+        await hisoka.relayMessage(msg.key.remoteJid, msg.message, { messageId: msg.key.id });
 }
 
 function makeInteractiveMsg({ loadConfig, tolak }) {
 
         /**
          * listbut2 — kirim menu list pilihan (dipakai di fitur menu, dsb.)
-         * listnye format: { title, sections: [{title, rows:[{id,title,description}]}] }
          */
         async function listbut2(jid, teks, listnye, m, hisoka) {
                 const cfg     = loadConfig();
@@ -134,8 +124,6 @@ function makeInteractiveMsg({ loadConfig, tolak }) {
         /**
          * sendConfirmWithButtons — kirim pesan konfirmasi dengan pilihan tombol.
          * buttons: [{ text, id }]
-         * Menggunakan listMessage agar muncul di WA Mobile & WA Web.
-         * Respons: m.text === button.id
          */
         async function sendConfirmWithButtons(hisoka, m, txt, buttons, opts = {}) {
                 let sent = false;
@@ -160,10 +148,6 @@ function makeInteractiveMsg({ loadConfig, tolak }) {
 
         /**
          * sendAudioWithButtons — kirim audio lalu list pilihan aksi.
-         * rows: [{ id, title, description }]
-         * opts.sections override rows jika ada.
-         * Menggunakan listMessage agar muncul di WA Mobile & WA Web.
-         * Respons: m.text === row.id
          */
         async function sendAudioWithButtons(hisoka, m, audioBuf, bodyTxt, rows, opts = {}) {
                 const fileName    = opts.fileName    || 'audio.mp3';

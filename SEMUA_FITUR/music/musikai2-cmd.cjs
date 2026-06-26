@@ -428,36 +428,111 @@ async function handleMusicAI2Callbacks({
                 return true;
         }
 
-        // Callback: vokal/instrumental terpilih → generate AI random musikai2
+        // Callback: vokal/instrumental terpilih → tampilkan GENRE PICKER dulu
         if (/^__musikai2_rlang__(id|jp|en)__(vocal|instrumental)__$/.test(txt)) {
                 const match2 = txt.match(/^__musikai2_rlang__(id|jp|en)__(vocal|instrumental)__$/);
                 const lang2 = match2[1];
                 const forceMode2 = match2[2];
                 const langLabel2 = lang2 === 'jp' ? '🇯🇵 Jepang' : lang2 === 'en' ? '🇬🇧 English' : '🇮🇩 Indonesia';
+                const modeEmoji2 = forceMode2 === 'vocal' ? '🎤' : '🎹';
+                const modeLabel2 = forceMode2 === 'vocal' ? 'Vokal' : 'Instrumental';
+
+                // Genre pool per bahasa
+                const genreRows2 = {
+                        id: [
+                                { rowId: `__musikai2_rgenre__${lang2}__${forceMode2}__pop`,          title: 'Pop',           description: 'Musik pop Indonesia ringan & catchy' },
+                                { rowId: `__musikai2_rgenre__${lang2}__${forceMode2}__indie pop`,    title: 'Indie Pop',     description: 'Vibes indie dreamy & mellow' },
+                                { rowId: `__musikai2_rgenre__${lang2}__${forceMode2}__ballad`,       title: 'Ballad',        description: 'Slow ballad penuh perasaan' },
+                                { rowId: `__musikai2_rgenre__${lang2}__${forceMode2}__acoustic`,     title: 'Acoustic',      description: 'Gitar akustik hangat & intim' },
+                                { rowId: `__musikai2_rgenre__${lang2}__${forceMode2}__folk`,         title: 'Folk',          description: 'Folk Indonesia yang earthy' },
+                                { rowId: `__musikai2_rgenre__${lang2}__${forceMode2}__rnb`,          title: 'R&B',           description: 'R&B modern Indonesia' },
+                                { rowId: `__musikai2_rgenre__${lang2}__${forceMode2}__lofi hiphop`,  title: 'Lo-Fi Hip Hop', description: 'Beats lofi santai buat fokus' },
+                                { rowId: `__musikai2_rgenre__${lang2}__${forceMode2}__indie rock`,   title: 'Indie Rock',    description: 'Rock alternatif indie vibes' },
+                                { rowId: `__musikai2_rgenre__${lang2}__${forceMode2}__AI_RANDOM`,    title: '🎲 AI Pilih Genre', description: 'Biarkan AI memilih genre terbaik secara acak' },
+                        ],
+                        jp: [
+                                { rowId: `__musikai2_rgenre__${lang2}__${forceMode2}__j-pop`,        title: 'J-Pop',         description: 'Pop Jepang modern yang catchy' },
+                                { rowId: `__musikai2_rgenre__${lang2}__${forceMode2}__city pop`,     title: 'City Pop',      description: 'City pop 80s yang nostalgic' },
+                                { rowId: `__musikai2_rgenre__${lang2}__${forceMode2}__j-rock`,       title: 'J-Rock',        description: 'Rock Jepang energik' },
+                                { rowId: `__musikai2_rgenre__${lang2}__${forceMode2}__j-folk`,       title: 'J-Folk',        description: 'Folk Jepang yang hangat & natural' },
+                                { rowId: `__musikai2_rgenre__${lang2}__${forceMode2}__anime ost`,    title: 'Anime OST',     description: 'Nuansa soundtrack anime epik' },
+                                { rowId: `__musikai2_rgenre__${lang2}__${forceMode2}__j-ballad`,     title: 'J-Ballad',      description: 'Ballad Jepang yang emosional' },
+                                { rowId: `__musikai2_rgenre__${lang2}__${forceMode2}__AI_RANDOM`,    title: '🎲 AI Pilih Genre', description: 'Biarkan AI memilih genre terbaik secara acak' },
+                        ],
+                        en: [
+                                { rowId: `__musikai2_rgenre__${lang2}__${forceMode2}__indie pop`,    title: 'Indie Pop',     description: 'Dreamy indie pop vibes' },
+                                { rowId: `__musikai2_rgenre__${lang2}__${forceMode2}__rnb`,          title: 'R&B',           description: 'Modern English R&B' },
+                                { rowId: `__musikai2_rgenre__${lang2}__${forceMode2}__folk`,         title: 'Folk',          description: 'Earthy English folk' },
+                                { rowId: `__musikai2_rgenre__${lang2}__${forceMode2}__dream pop`,    title: 'Dream Pop',     description: 'Ethereal dreamy soundscapes' },
+                                { rowId: `__musikai2_rgenre__${lang2}__${forceMode2}__alternative`,  title: 'Alternative',   description: 'English alternative rock vibes' },
+                                { rowId: `__musikai2_rgenre__${lang2}__${forceMode2}__bedroom pop`,  title: 'Bedroom Pop',   description: 'Cozy late-night bedroom pop' },
+                                { rowId: `__musikai2_rgenre__${lang2}__${forceMode2}__AI_RANDOM`,    title: '🎲 AI Pilih Genre', description: 'Let AI choose the best genre randomly' },
+                        ],
+                };
+
+                await sendListMessage(hisoka, m.from, m, {
+                        body:
+                                `╭──『 🎵 *MUSIK AI 2 — PILIH GENRE* 』\n` +
+                                `│\n` +
+                                `│ ${modeEmoji2} Mode   : *${modeLabel2}*\n` +
+                                `│ 🌏 Bahasa : *${langLabel2}*\n` +
+                                `│\n` +
+                                `│ 🎸 Pilih genre musiknya:\n` +
+                                `│ (atau biarkan AI pilih acak)\n` +
+                                `╰──────────────────────────────`,
+                        buttonText: '🎸 Pilih Genre',
+                        sections: [{
+                                title: `🎵 Genre — ${langLabel2}`,
+                                rows: genreRows2[lang2] || genreRows2.id,
+                        }],
+                });
+                return true;
+        }
+
+        // Callback: genre terpilih → generate AI random musikai2
+        if (/^__musikai2_rgenre__(id|jp|en)__(vocal|instrumental)__(.+)$/.test(txt)) {
+                const match2g = txt.match(/^__musikai2_rgenre__(id|jp|en)__(vocal|instrumental)__(.+)$/);
+                const lang2 = match2g[1];
+                const forceMode2 = match2g[2];
+                const selectedGenre2 = match2g[3]; // "AI_RANDOM" atau nama genre
+                const langLabel2 = lang2 === 'jp' ? '🇯🇵 Jepang' : lang2 === 'en' ? '🇬🇧 English' : '🇮🇩 Indonesia';
                 const modeLabel2 = forceMode2 === 'vocal' ? '🎤 Vokal' : '🎹 Instrumental';
+                const isAiRandom2 = selectedGenre2 === 'AI_RANDOM';
+
                 try {
                         const _cm2Path = path.resolve('./SEMUA_FITUR/music/chatmusic2.cjs');
                         delete require.cache[_cm2Path];
                         const { ChatMusicAPI2, _GENRES: G2, _GENRES_JP: GJP2, _GENRES_EN: GEN2 } = require(_cm2Path);
                         const api2 = new ChatMusicAPI2();
+
+                        // Kalau AI Random, acak dari pool bahasa yang dipilih
                         const pool2 = lang2 === 'jp' ? GJP2 : lang2 === 'en' ? GEN2 : G2;
-                        const randomGenre2 = pool2[Math.floor(Math.random() * pool2.length)];
+                        const displayGenre2 = isAiRandom2
+                                ? pool2[Math.floor(Math.random() * pool2.length)]
+                                : selectedGenre2;
 
                         const aiLoadMsg2 = await hisoka.sendMessage(m.from, {
-                                text: `🤖 *AI meracik lagu ${langLabel2} ${modeLabel2}...*\n│ 🎲 Genre: *${randomGenre2}*\n│ ✍️ ${forceMode2 === 'vocal' ? 'Menulis lirik' : 'Menyusun komposisi instrumental'}\n│ ⏳ Tunggu ~10-15 detik...`
+                                text: `🤖 *AI meracik lagu ${langLabel2} ${modeLabel2}...*\n│ 🎸 Genre: *${displayGenre2}${isAiRandom2 ? ' (AI Random)' : ''}*\n│ ✍️ ${forceMode2 === 'vocal' ? 'Menulis lirik' : 'Menyusun komposisi instrumental'}\n│ ⏳ Tunggu ~10-15 detik...`
                         }, { quoted: m }).catch(() => null);
 
                         const preset2 = await api2.aiRandomPreset(forceMode2, lang2);
+
+                        // Override genre kalau user pilih manual (bukan AI Random)
+                        if (!isAiRandom2) {
+                                preset2.musicStyle = selectedGenre2;
+                                preset2.genreLabel = selectedGenre2;
+                                preset2.prompt = `${selectedGenre2}, ${preset2.prompt?.split(',').slice(1).join(',') || ''}`.trim();
+                        }
 
                         if (aiLoadMsg2?.key) {
                                 try { await hisoka.sendMessage(m.from, { delete: aiLoadMsg2.key }); } catch (_) {}
                         }
 
                         await _generateMusik2(preset2);
-                        console.log(`\x1b[35m[MusicAI2 Random]\x1b[0m ✅ lang=${lang2} mode=${forceMode2} genre="${preset2.musicStyle}"`);
+                        console.log(`\x1b[35m[MusicAI2 Random]\x1b[0m ✅ lang=${lang2} mode=${forceMode2} genre="${preset2.musicStyle}" aiRandom=${isAiRandom2}`);
                 } catch (err) {
                         console.error(`\x1b[31m[MusicAI2 ${langLabel2} ${modeLabel2}] Error:\x1b[39m`, err.message);
-                        logError(err, 'callback:musikai2_random_mode');
+                        logError(err, 'callback:musikai2_random_genre');
                         await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } }).catch(() => {});
                         await sendConfirmWithButtons(hisoka, m,
                                 `❌ *Gagal generate musik*\n\n_${err.message}_\n\n_Coba lagi dalam beberapa saat_`,
