@@ -369,7 +369,7 @@ export default async function handleAntiTagBot(message, hisoka) {
             await hisoka.sendMessage(remoteJid, {
                 text: picked,
                 mentions: [adminMention],
-            }).catch(() => {});
+            }, { quoted: message }).catch(() => {});
             return;
         }
 
@@ -411,7 +411,7 @@ export default async function handleAntiTagBot(message, hisoka) {
         await hisoka.sendMessage(remoteJid, {
             text: replyText,
             mentions: [mention],
-        });
+        }, { quoted: message });
 
         // ── Hapus pesan ────────────────────────────────────────────────────────
         await hisoka.sendMessage(remoteJid, { delete: message.key });
