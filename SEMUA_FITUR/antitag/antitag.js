@@ -67,6 +67,11 @@ function getBotNumber(hisoka) {
     return (hisoka.user?.id || '').split('@')[0].split(':')[0];
 }
 
+function getBotLid(hisoka) {
+    // Baileys stores bot's own LID in hisoka.user.lid
+    return hisoka.user?.lid || hisoka.user?.lidJid || null;
+}
+
 function getSenderNumber(message) {
     const raw = message.key?.participant || message.participant || message.key?.remoteJid || '';
     return raw.split('@')[0].split(':')[0];
@@ -84,26 +89,52 @@ function isOwnerNumber(num, config) {
 }
 
 function findParticipant(participants, targetNumber) {
+    // Cari berdasarkan nomor telepon — cek semua field yang mungkin ada
     return (participants || []).find(p => {
-        const pNum = (p.jid || p.phoneNumber || p.id || '').split('@')[0].split(':')[0];
-        return pNum === targetNumber;
+        // phoneNumber field (explicit phone number, reliable)
+        if (p.phoneNumber) {
+            const pn = String(p.phoneNumber).split('@')[0].split(':')[0];
+            if (pn === targetNumber) return true;
+        }
+        // id/jid field — hanya valid jika bukan @lid
+        const idStr = p.id || p.jid || '';
+        if (!idStr.includes('@lid')) {
+            const pNum = idStr.split('@')[0].split(':')[0];
+            if (pNum === targetNumber) return true;
+        }
+        return false;
+    });
+}
+
+function findParticipantByLid(participants, botLid) {
+    if (!botLid) return null;
+    const lidNum = botLid.split('@')[0].split(':')[0];
+    return (participants || []).find(p => {
+        // Cek via id jika format @lid
+        const idStr = p.id || p.jid || '';
+        if (idStr.includes('@lid')) {
+            try { if (areJidsSameUser(idStr, botLid)) return true; } catch (_) {}
+            const pNum = idStr.split('@')[0].split(':')[0];
+            if (pNum === lidNum) return true;
+        }
+        // Cek via field lid
+        if (p.lid) {
+            try { if (areJidsSameUser(p.lid, botLid)) return true; } catch (_) {}
+            const pNum = p.lid.split('@')[0].split(':')[0];
+            if (pNum === lidNum) return true;
+        }
+        return false;
     });
 }
 
 /**
- * Deteksi apakah pesan ini men-tag nomor bot.
- * Cek 1: mentionedJid array di contextInfo (semua tipe pesan)
- * Cek 2: teks @nomor secara harfiah
+ * Ambil semua mentionedJid dari pesan (semua lapisan contextInfo).
  */
-function isBotMentioned(message, botJid, botNumber) {
+function getMentionedJids(message) {
     try {
         const msg = message?.message;
-        if (!msg) return false;
-
-        // Cari contextInfo di semua lapisan pesan yang mungkin ada mentionedJid
+        if (!msg) return [];
         const msgType = getContentType(msg);
-
-        // Daftar objek yang mungkin punya contextInfo
         const candidates = [
             msg[msgType],
             msg.extendedTextMessage,
@@ -116,39 +147,58 @@ function isBotMentioned(message, botJid, botNumber) {
             msg.listMessage,
             msg.templateMessage?.hydratedTemplate,
         ].filter(Boolean);
-
+        const all = new Set();
         for (const obj of candidates) {
             const mentioned = obj?.contextInfo?.mentionedJid;
             if (Array.isArray(mentioned)) {
-                for (const jid of mentioned) {
-                    if (!jid) continue;
+                for (const j of mentioned) { if (j) all.add(j); }
+            }
+        }
+        return [...all];
+    } catch (_) { return []; }
+}
 
-                    // Cek 1: areJidsSameUser (pakai try sendiri agar error @lid tidak skip cek berikutnya)
-                    try {
-                        if (areJidsSameUser(jid, botJid)) return true;
-                    } catch (_) {}
+/**
+ * Deteksi apakah pesan ini men-tag nomor bot.
+ * Mendukung: @s.whatsapp.net, @lid (via botLid dan contacts), dan teks harfiah @nomor.
+ * botLid: hisoka.user.lid — ambil SEBELUM memanggil fungsi ini.
+ */
+function isBotMentioned(message, botJid, botNumber, botLid) {
+    try {
+        const msg = message?.message;
+        if (!msg) return false;
 
-                    // Cek 2: bandingkan nomor mentah (works untuk @s.whatsapp.net)
-                    const jidNum = jid.split('@')[0].split(':')[0];
-                    if (botNumber && jidNum === botNumber) return true;
+        const jids = getMentionedJids(message);
+        const botLidNum = botLid ? botLid.split('@')[0].split(':')[0] : null;
 
-                    // Cek 3: jika format @lid, resolve ke nomor telepon lalu bandingkan
-                    if (jid.includes('@lid')) {
-                        try {
-                            const resolved = resolveLidFromContacts(jid);
-                            if (resolved?.number && botNumber && resolved.number === botNumber) return true;
-                            if (resolved?.jid) {
-                                try {
-                                    if (areJidsSameUser(resolved.jid, botJid)) return true;
-                                } catch (_) {}
-                            }
-                        } catch (_) {}
+        for (const jid of jids) {
+            const jidNum = jid.split('@')[0].split(':')[0];
+
+            // Cek via areJidsSameUser (phone JID)
+            try { if (areJidsSameUser(jid, botJid)) return true; } catch (_) {}
+
+            // Cek nomor telepon mentah (untuk @s.whatsapp.net)
+            if (botNumber && !jid.includes('@lid') && jidNum === botNumber) return true;
+
+            // Cek via botLid langsung (paling akurat untuk @lid)
+            if (botLid && jid.includes('@lid')) {
+                try { if (areJidsSameUser(jid, botLid)) return true; } catch (_) {}
+                if (botLidNum && jidNum === botLidNum) return true;
+            }
+
+            // Cek resolve @lid → nomor telepon via contacts
+            if (jid.includes('@lid')) {
+                try {
+                    const resolved = resolveLidFromContacts(jid);
+                    if (resolved?.number && botNumber && resolved.number === botNumber) return true;
+                    if (resolved?.jid) {
+                        try { if (areJidsSameUser(resolved.jid, botJid)) return true; } catch (_) {}
                     }
-                }
+                } catch (_) {}
             }
         }
 
-        // Fallback: cek teks harfiah @nomor
+        // Fallback: cek teks harfiah @nomor (untuk @s.whatsapp.net mentions)
         const textContent =
             msg?.conversation ||
             msg?.extendedTextMessage?.text ||
@@ -156,48 +206,8 @@ function isBotMentioned(message, botJid, botNumber) {
             msg?.videoMessage?.caption ||
             msg?.documentMessage?.caption ||
             '';
-
         if (textContent && botNumber && textContent.includes(`@${botNumber}`)) return true;
 
-    } catch (_) {}
-    return false;
-}
-
-/**
- * Secondary check: apakah mentionedJid mengandung botLid (@lid milik bot)?
- * Dipanggil setelah groupMeta didapat dan botLid diketahui.
- */
-function isBotMentionedByLid(message, botLid) {
-    if (!botLid) return false;
-    try {
-        const msg = message?.message;
-        if (!msg) return false;
-        const msgType = getContentType(msg);
-        const candidates = [
-            msg[msgType],
-            msg.extendedTextMessage,
-            msg.imageMessage,
-            msg.videoMessage,
-            msg.audioMessage,
-            msg.documentMessage,
-            msg.stickerMessage,
-        ].filter(Boolean);
-
-        for (const obj of candidates) {
-            const mentioned = obj?.contextInfo?.mentionedJid;
-            if (Array.isArray(mentioned)) {
-                for (const jid of mentioned) {
-                    if (!jid) continue;
-                    try {
-                        if (areJidsSameUser(jid, botLid)) return true;
-                    } catch (_) {}
-                    // Bandingkan nomor mentah (LID number vs LID number)
-                    const jidNum = jid.split('@')[0].split(':')[0];
-                    const lidNum = botLid.split('@')[0].split(':')[0];
-                    if (jidNum && lidNum && jidNum === lidNum) return true;
-                }
-            }
-        }
     } catch (_) {}
     return false;
 }
@@ -215,82 +225,88 @@ export default async function handleAntiTagBot(message, hisoka) {
         // Cek config aktif
         if (!isAntiTagBotEnabled()) return;
 
+        // ── Early-exit: jika tidak ada mentionedJid sama sekali, skip ────────
+        const allMentioned = getMentionedJids(message);
+        if (allMentioned.length === 0) return;
+
         const botJid    = getBotJid(hisoka);
         const botNumber = getBotNumber(hisoka);
+        // Ambil botLid dari hisoka.user.lid (tersedia di Baileys untuk @lid system)
+        const botLidFromUser = getBotLid(hisoka);
 
-        // Apakah pesan ini tag nomor bot? (cek awal tanpa LID)
-        const mentionedEarly = isBotMentioned(message, botJid, botNumber);
+        // Cek awal dengan botLid dari hisoka.user (paling akurat untuk @lid)
+        const mentionedEarly = isBotMentioned(message, botJid, botNumber, botLidFromUser);
 
-        // Ambil sender
         const senderJid    = getSenderJid(message);
         const senderNumber = getSenderNumber(message);
-
-        const config = loadConfig();
+        const config       = loadConfig();
 
         // ── Exempt: owner selalu aman ──────────────────────────────────────────
-        if (isOwnerNumber(senderNumber, config)) {
-            if (mentionedEarly) console.log(`\x1b[33m[AntiTagBot] Owner (${senderNumber}) tag bot — aman, skip.\x1b[39m`);
-            return;
-        }
+        if (isOwnerNumber(senderNumber, config)) return;
 
-        // ── Cek apakah bot admin di grup ini (live fetch dulu, fallback KV) ────
+        // ── Fetch groupMeta untuk cek admin dan dapatkan botLid dari peserta ──
         let isAdmin = false;
         let groupMeta = null;
         let senderIsGroupAdmin = false;
-        let botLid = null;
+        let botLidFromGroup = null;
 
         try {
-            // Live fetch — paling akurat
             groupMeta = await hisoka.groupMetadata(remoteJid);
             if (groupMeta) hisoka.groups?.write(remoteJid, groupMeta);
 
-            const botP    = findParticipant(groupMeta?.participants, botNumber);
-            isAdmin       = !!botP?.admin;
-            botLid        = botP?.lid || null;
+            const parts = groupMeta?.participants || [];
+
+            // Cari bot: coba via nomor telepon, fallback via LID dari hisoka.user
+            let botP = findParticipant(parts, botNumber);
+            if (!botP && botLidFromUser) botP = findParticipantByLid(parts, botLidFromUser);
+
+            isAdmin        = !!botP?.admin;
+            // Kumpulkan semua bentuk LID bot: dari botP.lid, botP.id (@lid), atau hisoka.user.lid
+            botLidFromGroup = botP?.lid
+                || (botP?.id?.includes('@lid') ? botP.id : null)
+                || botLidFromUser
+                || null;
 
             // Update KV cache
             const botAdminData = kvGet('botadmin/botadmin', {});
             botAdminData[remoteJid] = isAdmin;
             kvSet('botadmin/botadmin', botAdminData);
 
-            // Cek apakah sender adalah admin grup
+            // Cari sender
             const senderP = senderJid
-                ? groupMeta?.participants?.find(p => areJidsSameUser(p.id || p.jid || '', senderJid))
-                : findParticipant(groupMeta?.participants, senderNumber);
+                ? parts.find(p => {
+                    try { return areJidsSameUser(p.id || p.jid || '', senderJid); } catch (_) { return false; }
+                  }) || findParticipant(parts, senderNumber)
+                : findParticipant(parts, senderNumber);
             senderIsGroupAdmin = !!senderP?.admin;
 
         } catch (_fetchErr) {
-            // Fallback: KV cache
             const botAdminData = kvGet('botadmin/botadmin', {});
-            if (remoteJid in botAdminData) {
-                isAdmin = botAdminData[remoteJid] === true;
-            }
-            // Fallback: memory cache
-            if (!groupMeta) {
-                groupMeta = hisoka.groups?.read(remoteJid) || null;
-                if (groupMeta) {
-                    const botP = findParticipant(groupMeta?.participants, botNumber);
-                    isAdmin    = !!botP?.admin;
-                    botLid     = botP?.lid || null;
-                    const senderP = senderJid
-                        ? groupMeta?.participants?.find(p => areJidsSameUser(p.id || p.jid || '', senderJid))
-                        : findParticipant(groupMeta?.participants, senderNumber);
-                    senderIsGroupAdmin = !!senderP?.admin;
-                }
+            if (remoteJid in botAdminData) isAdmin = botAdminData[remoteJid] === true;
+            groupMeta = hisoka.groups?.read(remoteJid) || null;
+            if (groupMeta) {
+                const parts = groupMeta?.participants || [];
+                let botP = findParticipant(parts, botNumber);
+                if (!botP && botLidFromUser) botP = findParticipantByLid(parts, botLidFromUser);
+                isAdmin          = !!botP?.admin;
+                botLidFromGroup  = botP?.lid || (botP?.id?.includes('@lid') ? botP.id : null) || botLidFromUser || null;
+                const senderP    = senderJid
+                    ? parts.find(p => { try { return areJidsSameUser(p.id || p.jid || '', senderJid); } catch (_) { return false; } })
+                        || findParticipant(parts, senderNumber)
+                    : findParticipant(parts, senderNumber);
+                senderIsGroupAdmin = !!senderP?.admin;
             }
         }
 
-        // ── Secondary mention check: pakai botLid dari groupMeta (handle @lid WhatsApp baru) ──
-        let isMentioned = mentionedEarly;
-        if (!isMentioned && botLid) {
-            isMentioned = isBotMentionedByLid(message, botLid);
-        }
+        // ── Final mention check: gabung semua sumber botLid ───────────────────
+        const effectiveBotLid = botLidFromGroup || botLidFromUser || null;
+        const isMentioned = mentionedEarly || isBotMentioned(message, botJid, botNumber, effectiveBotLid);
 
-        console.log(`\x1b[36m[AntiTagBot] grup=${remoteJid.split('@')[0]} | botAdmin=${isAdmin} | botLid=${botLid || 'n/a'} | mentioned=${isMentioned} | sender=${senderNumber} | senderAdmin=${senderIsGroupAdmin}\x1b[39m`);
+        console.log(`\x1b[36m[AntiTagBot] grup=${remoteJid.split('@')[0]} | botAdmin=${isAdmin} | botLid=${effectiveBotLid || 'n/a'} | mentioned=${isMentioned} | sender=${senderNumber} | senderAdmin=${senderIsGroupAdmin}\x1b[39m`);
 
         if (!isMentioned) return;
 
-        console.log(`\x1b[36m[AntiTagBot] Tag terdeteksi di grup ${remoteJid.split('@')[0]}\x1b[39m`);
+        console.log(`\x1b[36m[AntiTagBot] 🎯 Tag bot terdeteksi di grup ${remoteJid.split('@')[0]}\x1b[39m`);
 
         // ── Exempt: admin grup aman ────────────────────────────────────────────
         if (senderIsGroupAdmin) {
@@ -300,7 +316,7 @@ export default async function handleAntiTagBot(message, hisoka) {
 
         // ── Bot harus admin untuk bisa hapus ──────────────────────────────────
         if (!isAdmin) {
-            console.log(`\x1b[33m[AntiTagBot] Bot bukan admin di ${remoteJid.split('@')[0]} — tidak bisa hapus.\x1b[39m`);
+            console.log(`\x1b[33m[AntiTagBot] ⚠️  Bot bukan admin di ${remoteJid.split('@')[0]} — tidak bisa hapus.\x1b[39m`);
             return;
         }
 
