@@ -360,9 +360,22 @@ export default async function handleAntiTagBot(message, hisoka) {
 
         console.log(`\x1b[36m[AntiTagBot] 🎯 Tag bot terdeteksi di grup ${remoteJid.split('@')[0]}\x1b[39m`);
 
-        // ── Exempt: admin grup aman ────────────────────────────────────────────
+        // ── Exempt: admin grup — reply lucu tapi tidak hapus ──────────────────
         if (senderIsGroupAdmin) {
-            console.log(`\x1b[33m[AntiTagBot] Admin grup (${senderNumber}) tag bot — aman, skip.\x1b[39m`);
+            console.log(`\x1b[33m[AntiTagBot] Admin grup (${senderNumber}) tag bot — aman, reply lucu.\x1b[39m`);
+            const adminMention = senderJid || (senderNumber + '@s.whatsapp.net');
+            const adminReplies = [
+                `@${senderNumber} Oalah admin yang tag 😂\nYa udah deh, buat admin mah aku maafin~\nTapi jangan keseringan ya kak 🙏`,
+                `@${senderNumber} Heh admin ngapain tag aku 💀\nGak akan aku hapus sih, tapi tetep ngakak 🤣`,
+                `@${senderNumber} Admin tag bot? Baru kali ini aku liat 😭\nOke fine, aman buat kamu... kali ini 😏`,
+                `@${senderNumber} Wkwkwk admin kok tag bot sih 😆\nYa udah aman lah, gak aku apa-apain 🫡`,
+                `@${senderNumber} Aduh admin tercyduk tag aku 😅\nUntung kamu admin, kalau enggak... 😈`,
+            ];
+            const picked = adminReplies[Math.floor(Math.random() * adminReplies.length)];
+            await hisoka.sendMessage(remoteJid, {
+                text: picked,
+                mentions: [adminMention],
+            }).catch(() => {});
             return;
         }
 
