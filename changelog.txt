@@ -5,7 +5,7 @@ _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurn
 🤖 *WILY BOT — V24*
 ✨ *2 Fitur Baru*
 🔧 *2 Bug/Error Fix*
-🚀 *1 Improvement*
+🚀 *2 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -38,7 +38,7 @@ _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurn
 > Berlaku untuk: .welcome, .goodbye, .welgod
 
 ━━━━━━━━━━━━━━━━━━━━━━
-🚀 *IMPROVEMENT*
+🚀 *PERUBAHAN*
 ━━━━━━━━━━━━━━━━━━━━━━
 > NO.1 🎲 *Musikai/Musikai2 Random — Kini Ada Picker Bahasa & Mode*
 > Sebelumnya: ketik .musikai random / .musikai2 random → langsung generate tanpa pilihan
@@ -46,3 +46,9 @@ _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurn
 >             lalu pilih mode (🎤 Vokal / 🎹 Instrumental) → baru generate
 > Konsisten dengan tap button "AI Random" dari menu hasil lagu
 > Berlaku untuk: .musikai random & .musikai2 random
+
+> NO.2 📌 *Sematkan Pesan — .sematkan Kini Work di Private Chat*
+> Sebelumnya: fitur .sematkan hanya bisa dipakai di grup (GC)
+> Sesudahnya: kini juga work di private chat — langsung jalan tanpa syarat apapun
+> Di grup: bot tetap wajib jadi admin
+> Di private: tidak perlu admin, langsung bisa disematkan
