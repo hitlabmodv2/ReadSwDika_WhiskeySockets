@@ -1329,8 +1329,8 @@ _sbar_sweep 1 8 0.03 "Inisialisasi ..."
   _log_total=0; _log_ok=0; _log_fail=0
   if [ -f "${PUSH_LOG_FILE}" ] && [ -s "${PUSH_LOG_FILE}" ]; then
     _log_total=$(wc -l < "${PUSH_LOG_FILE}" | tr -d ' ')
-    _log_ok=$(grep -c '| OK ' "${PUSH_LOG_FILE}" 2>/dev/null || echo 0)
-    _log_fail=$(grep -c '| FAIL ' "${PUSH_LOG_FILE}" 2>/dev/null || echo 0)
+    _log_ok=$(grep -c '| OK ' "${PUSH_LOG_FILE}" 2>/dev/null; true)
+    _log_fail=$(grep -c '| FAIL ' "${PUSH_LOG_FILE}" 2>/dev/null; true)
   fi
 
   _btn_login='{"inline_keyboard":[[{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"},{"text":"🌿 Branches","url":"https://github.com/'"${USER}"'/'"${REPO}"'/branches"}],[{"text":"📊 Commits","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commits"},{"text":"🚀 Releases","url":"https://github.com/'"${USER}"'/'"${REPO}"'/releases"}],[{"text":"⚙️ Settings","url":"https://github.com/'"${USER}"'/'"${REPO}"'/settings"},{"text":"📈 Insights","url":"https://github.com/'"${USER}"'/'"${REPO}"'/pulse"}]]}'
@@ -1423,7 +1423,7 @@ classify_commit() {
   [ -z "$status_lines" ] && { echo "chore: update files"; return; }
 
   files=$(echo "$status_lines" | awk '{print $NF}')
-  total=$(echo "$files" | grep -c '.' 2>/dev/null || echo 1)
+  total=$(echo "$files" | grep -c '.' 2>/dev/null; true)
   added=$(echo "$status_lines"    | awk '$1~/^A/' | wc -l | tr -d ' ')
   modified=$(echo "$status_lines" | awk '$1~/^M/' | wc -l | tr -d ' ')
   deleted=$(echo "$status_lines"  | awk '$1~/^D/' | wc -l | tr -d ' ')
@@ -1434,7 +1434,7 @@ classify_commit() {
               "data/" "sessions/" "attached_assets/" ".agents/" \
               "jadibot/" "scrape/"; do
     local _cnt
-    _cnt=$(echo "$files" | grep -c "^${_pfx}" 2>/dev/null || echo 0)
+    _cnt=$(echo "$files" | grep -c "^${_pfx}" 2>/dev/null; true)
     if [ "$_cnt" -gt "$scope_count" ]; then
       scope_count=$_cnt
       case "$_pfx" in
@@ -1494,7 +1494,7 @@ classify_commit() {
   while IFS= read -r _tmp_sub; do
     [ -z "$_tmp_sub" ] && continue
     local _c
-    _c=$(echo "$_fpath" | grep -c "^data/${_tmp_sub}/" 2>/dev/null || echo 0)
+    _c=$(echo "$_fpath" | grep -c "^data/${_tmp_sub}/" 2>/dev/null; true)
     if [ "$_c" -gt "$_data_sub_cnt" ]; then
       _data_sub_cnt=$_c
       _data_sub="$_tmp_sub"
@@ -1783,10 +1783,10 @@ preview_staged_confirm() {
 
   local _tot _add _mod _del _ren
   _tot=$(echo "$_staged_list" | wc -l | tr -d ' ')
-  _add=$(echo "$_staged_list" | grep -c '^A' 2>/dev/null || echo 0)
-  _mod=$(echo "$_staged_list" | grep -c '^M' 2>/dev/null || echo 0)
-  _del=$(echo "$_staged_list" | grep -c '^D' 2>/dev/null || echo 0)
-  _ren=$(echo "$_staged_list" | grep -c '^R' 2>/dev/null || echo 0)
+  _add=$(echo "$_staged_list" | grep -c '^A' 2>/dev/null; true)
+  _mod=$(echo "$_staged_list" | grep -c '^M' 2>/dev/null; true)
+  _del=$(echo "$_staged_list" | grep -c '^D' 2>/dev/null; true)
+  _ren=$(echo "$_staged_list" | grep -c '^R' 2>/dev/null; true)
 
   echo ""
   # Header ringkas — baris ini TETAP ada (tidak di-clear)
@@ -1938,7 +1938,7 @@ prepare_stage() {
 
   # Hitung berapa session file baru yang berhasil di-stage
   local _new_count
-  _new_count=$(git diff --cached --name-only 2>/dev/null | grep -c '^sessions/' || echo 0)
+  _new_count=$(git diff --cached --name-only 2>/dev/null | grep -c '^sessions/'; true)
   _PUSH_SESSION_NEW="$_new_count"
 
   # node_modules TIDAK di-upload — sudah di-exclude penuh via .gitignore.
@@ -1997,7 +1997,7 @@ fetch_branches() {
 
       # Kalau hasil < per_page, berarti halaman terakhir
       local count
-      count=$(echo "$chunk" | grep -c '"name":' 2>/dev/null || echo "0")
+      count=$(echo "$chunk" | grep -c '"name":' 2>/dev/null; true"0")
       [ "$count" -lt "$per_page" ] && break
       page=$((page + 1))
     else
@@ -2325,7 +2325,7 @@ const fs=require('fs');
 try{const pj=JSON.parse(fs.readFileSync('package.json','utf8'));
 console.log(Object.keys(pj.dependencies||{}).length);}catch(e){console.log(0);}
 " 2>/dev/null)
-    [ -n "$_ver_missing" ] && _ver_missing_count=$(echo "$_ver_missing" | grep -c '.' || echo 0)
+    [ -n "$_ver_missing" ] && _ver_missing_count=$(echo "$_ver_missing" | grep -c '.'; true)
     _ver_ok=$(( _ver_total - _ver_missing_count ))
   fi
   if [ "$_nm_exit" = "0" ]; then
@@ -2753,9 +2753,9 @@ action_view_push_log() {
 
   # ── Statistik ringkas ─────────────────────────────────────────────────────
   local _ok _force _fail
-  _ok=$(grep -c    ' OK |OK ' "$PUSH_LOG_FILE" 2>/dev/null || echo 0)
-  _force=$(grep -c 'OK(force)' "$PUSH_LOG_FILE" 2>/dev/null || echo 0)
-  _fail=$(grep -c  ' FAIL '    "$PUSH_LOG_FILE" 2>/dev/null || echo 0)
+  _ok=$(grep -c    ' OK |OK ' "$PUSH_LOG_FILE" 2>/dev/null; true)
+  _force=$(grep -c 'OK(force)' "$PUSH_LOG_FILE" 2>/dev/null; true)
+  _fail=$(grep -c  ' FAIL '    "$PUSH_LOG_FILE" 2>/dev/null; true)
 
   clear >/dev/tty 2>/dev/null || true
   echo -e "${C_BOLD}╭──────────────────────────────────╮${C_RESET}"
@@ -4860,7 +4860,7 @@ action_list_repos() {
     if [ "$total_count" = "0" ] || [ -z "$total_count" ]; then
       # Fallback: hitung baris yang kembali
       local cur_count
-      cur_count=$(printf '%s' "$repo_lines" | grep -c '|' 2>/dev/null || echo 0)
+      cur_count=$(printf '%s' "$repo_lines" | grep -c '|' 2>/dev/null; true)
       total_count="$cur_count"
     fi
 
