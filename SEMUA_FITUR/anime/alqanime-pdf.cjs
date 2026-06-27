@@ -100,11 +100,11 @@ async function generateAlqSeasonPdf(season, year, animes) {
     });
     const valid = animes.filter(Boolean);
 
-    // Pre-fetch banners (5 at a time)
+    // Pre-fetch banners (5 at a time) — pakai gambar landscape (banner) bukan portrait
     const banners = [];
     for (let i = 0; i < valid.length; i += 5) {
         const batch = await Promise.all(
-            valid.slice(i, i + 5).map(a => fetchBanner(a.thumbnail))
+            valid.slice(i, i + 5).map(a => fetchBanner(a.banner || a.thumbnail))
         );
         banners.push(...batch);
     }

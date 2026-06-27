@@ -73,24 +73,18 @@ function parseAnimeCards(md) {
 }
 
 function parseDownloadLinks(md) {
-    const episodes = [];
+    const episodes  = [];
     const dlSection = md.match(/## Download [^\n]+\n([\s\S]*?)(?:### Series Terkait|### Komentar|### Rekomendasi|$)/);
     if (!dlSection) return episodes;
 
     const dlContent = dlSection[1];
-    const epBlocks  = dlContent.split(/(?=### Episode )/);
 
-    for (const block of epBlocks) {
-        const epMatch = block.match(/### Episode\s+([^\n]+)/);
-        if (!epMatch) continue;
+    // Split by ### Episode ATAU ### Batch
+    const epBlocks = dlContent.split(/(?=###\s+(?:Episode|Batch))/i);
 
-        const epLabel = epMatch[1].trim();
-        const links   = {};
-
-        // Parse per-resolution links: 360p[Host](url)[Host2](url2)
-        const resRegex = /(360p|480p|720p|1080p)/gi;
-        const lines    = block.split('\n').filter(l => /360p|480p|720p|1080p/i.test(l));
-
+    function parseLinks(block) {
+        const links = {};
+        const lines = block.split('\n').filter(l => /360p|480p|720p|1080p/i.test(l));
         for (const line of lines) {
             const resM = line.match(/^(360p|480p|720p|1080p)/i);
             if (!resM) continue;
@@ -103,13 +97,25 @@ function parseDownloadLinks(md) {
             }
             if (hosts.length) links[res] = hosts;
         }
+        return links;
+    }
 
-        // Batch link (episode sebelumnya)
-        const batchM = block.match(/360p.*1080p\[([^\]]+)\]\((https?:\/\/[^)]+)\)/);
-        if (batchM) links['batch'] = [{ host: batchM[1], url: batchM[2] }];
+    for (const block of epBlocks) {
+        // Tangkap Episode
+        const epMatch = block.match(/###\s+Episode\s+([^\n]+)/i);
+        if (epMatch) {
+            const epLabel = epMatch[1].trim();
+            const links   = parseLinks(block);
+            if (Object.keys(links).length) episodes.push({ episode: epLabel, links });
+            continue;
+        }
 
-        if (Object.keys(links).length) {
-            episodes.push({ episode: epLabel, links });
+        // Tangkap Batch (label "Batch" atau "Complete" dll)
+        const batchMatch = block.match(/###\s+(Batch[^\n]*|Complete[^\n]*|BD[^\n]*)/i);
+        if (batchMatch) {
+            const epLabel = batchMatch[1].trim();
+            const links   = parseLinks(block);
+            if (Object.keys(links).length) episodes.push({ episode: epLabel, links });
         }
     }
 
@@ -120,11 +126,21 @@ function parseDetail(md) {
     const titleM  = md.match(/^# ([^\n]+)/m);
     const title   = titleM ? titleM[1].replace(/ - Alqanime$/, '').trim() : '';
 
-    // Poster 200x300 (bukan logo header)
-    const thumbM  = md.match(/!\[Image \d+[^\]]*\]\((https:\/\/alqanime\.net\/wp-content\/uploads\/[^)]*-200x300[^)]*)\)/);
-    // Fallback ke gambar besar pertama jika tidak ada 200x300
-    const thumbFB = md.match(/!\[Image \d+[^\]]*\]\((https:\/\/alqanime\.net\/wp-content\/uploads\/(?!.*Header)[^)]+\.(?:jpg|png|webp))\)/);
-    const thumbnail = thumbM ? thumbM[1] : (thumbFB ? thumbFB[1] : '');
+    // Scan semua gambar wp-content → pisahkan landscape banner vs portrait 200x300
+    const imgRe = /!\[Image \d+[^\]]*\]\((https:\/\/alqanime\.net\/wp-content\/uploads\/[^)]+\.(?:jpg|jpeg|png|webp))\)/gi;
+    let bannerUrl = '', portraitUrl = '', imgM;
+    while ((imgM = imgRe.exec(md)) !== null) {
+        const imgUrl = imgM[1];
+        if (/Header|logo|favicon/i.test(imgUrl)) continue;
+        if (/[_-]200x300|[_-]150x225/i.test(imgUrl)) {
+            if (!portraitUrl) portraitUrl = imgUrl; // poster kecil
+        } else {
+            if (!bannerUrl) bannerUrl = imgUrl;     // gambar besar/landscape pertama
+        }
+    }
+    // thumbnail = portrait untuk chat; banner = landscape untuk PDF
+    const thumbnail = portraitUrl || bannerUrl;
+    const banner    = bannerUrl || portraitUrl;
 
     const info = {};
     for (const field of [
@@ -174,7 +190,7 @@ function parseDetail(md) {
 
     const episodes = parseDownloadLinks(md);
 
-    return { title, thumbnail, info, sinopsis, genres, episodes };
+    return { title, thumbnail, banner, info, sinopsis, genres, episodes };
 }
 
 async function searchAlqanime(query) {
@@ -232,25 +248,27 @@ function parseAlqSeasonInput(input) {
 }
 
 async function getAlqSeasonAnimeList(season, year) {
-    const slug = `${season.toLowerCase()}-${year}`;
-    const urlCandidates = [
-        `${BASE}/season/${slug}/`,
-        `${BASE}/musim/${slug}/`,
-        `${BASE}/seasons/${slug}/`,
-        `${BASE}/tag/${slug}/`,
-    ];
-    for (const url of urlCandidates) {
+    const slug    = `${season.toLowerCase()}-${year}`;
+    const baseUrl = `${BASE}/advanced-search/?season%5B%5D=${slug}&order=update`;
+    const all     = [];
+    let page = 1;
+
+    while (true) {
+        const url = page === 1 ? baseUrl : `${baseUrl}&page=${page}`;
         try {
             const md = await fetchMarkdown(url);
-            const results = parseAnimeCards(md);
-            if (results.length > 0) return results;
-        } catch (_) {}
+            const items = parseAnimeCards(md);
+            if (!items.length) break;
+            all.push(...items);
+            // Jika halaman ini penuh (biasanya 12 atau 24 per page), coba halaman berikutnya
+            if (items.length < 12) break;
+            page++;
+            if (page > 10) break; // safety limit
+            await new Promise(r => setTimeout(r, 500));
+        } catch (_) { break; }
     }
-    // Fallback: search keyword
-    try {
-        const md = await fetchMarkdown(`${BASE}/?s=${encodeURIComponent(slug)}`);
-        return parseAnimeCards(md);
-    } catch (_) { return []; }
+
+    return all;
 }
 
 async function batchFetchAlqDetails(animeList, onProgress) {
@@ -258,7 +276,13 @@ async function batchFetchAlqDetails(animeList, onProgress) {
     const results = [];
     for (let i = 0; i < animeList.length; i += BATCH) {
         const chunk = animeList.slice(i, i + BATCH);
-        const settled = await Promise.allSettled(chunk.map(a => getDetailAlqanime(a.url)));
+        const settled = await Promise.allSettled(chunk.map(a =>
+            getDetailAlqanime(a.url).then(d => ({
+                ...d,
+                url      : a.url,
+                thumbnail: d.thumbnail || a.thumbnail || '',
+            }))
+        ));
         for (const s of settled) {
             results.push(s.status === 'fulfilled' ? s.value : null);
         }
@@ -316,7 +340,7 @@ function formatAlqSeasonTxt(season, year, animes) {
         if (anime.url) out += ` URL      : ${anime.url}\n`;
         if (anime.episodes?.length) {
             out += `\n Download Links:\n`;
-            for (const ep of anime.episodes.slice(0, 5)) {
+            for (const ep of anime.episodes) {
                 out += `\n  >> Episode ${ep.episode}\n`;
                 for (const [res, hosts] of Object.entries(ep.links || {})) {
                     out += `     [${res.toUpperCase()}]\n`;
@@ -325,7 +349,6 @@ function formatAlqSeasonTxt(season, year, animes) {
                     }
                 }
             }
-            if (anime.episodes.length > 5) out += `\n  ...dan ${anime.episodes.length - 5} episode lainnya\n`;
         }
         out += `\n${SEP}\n`;
     }
