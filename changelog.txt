@@ -4,8 +4,8 @@ _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurn
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V24*
 ✨ *3 Fitur Baru*
-🔧 *5 Bug/Error Fix*
-🚀 *10 Perubahan*
+🔧 *7 Bug/Error Fix*
+🚀 *12 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -59,6 +59,18 @@ _Bot kini pantau section "Lagi Hangat Saat Ini" di alqanime.net secara realtime_
 - Penyebab: session key pakai `sender_groupJid` (unik per user) bukan JID grup
 - Fix: session key diubah ke `m.from` (JID grup) → semua peserta grup berbagi satu sesi
 > WilyAI di grup kini sadar percakapan multi-peserta secara benar
+
+*6. 🔗 Anti-Link — Bot Diam Saat Bukan Admin*
+- ~Bug: saat bot bukan admin di grup, bot sama sekali tidak merespons ketika ada link masuk~
+- Penyebab: kode langsung `return` (silent skip) tanpa kirim notif apapun
+- Fix: bot kini tetap kirim peringatan di grup meskipun bukan admin
+> Admin grup langsung tahu ada link masuk & bot perlu dijadikan admin
+
+*7. 🔗 Anti-Link — Nama Pengirim Tidak Tampil (Akun Privat)*
+- ~Bug: akun privat (LID) tampil sebagai "(akun privat)" — nama asli tidak terlihat~
+- Penyebab: kode tidak mengambil `pushName` dari objek pesan
+- Fix: sekarang pakai `message.pushName` → nama display tampil realtime
+> Jika pushName tidak tersedia, fallback ke _akun privat_
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *PERUBAHAN*
@@ -136,3 +148,21 @@ _Bot kini pantau section "Lagi Hangat Saat Ini" di alqanime.net secara realtime_
   • Section "Lagi Hangat Saat Ini"
   • Section "Rilisan Terbaru"
 - Lebih hemat request, lebih cepat, tidak ada request ganda ke alqanime.net
+
+*11. 🔗 Anti-Link — Format Pesan Diperbarui dengan WA Formatting*
+- ~Sebelumnya: pesan antilink polos, tidak pakai format WhatsApp sama sekali~
+- Sesudahnya: semua pesan kini pakai format WA sesuai konteks:
+  • `*tebal*` — judul, nilai penting, nama
+  • `_miring_` — keterangan, catatan tambahan
+  • `~coret~` — nilai lama (contoh: batas warn sebelumnya)
+  • `` `kode` `` — perintah bot
+  • `• poin` — daftar aksi/info
+- Garis `│` konsisten dari atas sampai bawah (tidak campur dengan `> kutipan`)
+- Box `╭─〔 〕 ╰────` lebih rapi & seragam di semua pesan antilink
+
+*12. 🔗 Anti-Link — Pesan Warn/Kick Selalu Reply ke Pesan Link*
+- ~Sebelumnya: beberapa kondisi bot kirim pesan baru tanpa reply/quote~
+- Sesudahnya: bot *selalu* reply/quote ke pesan orang yang kirim link di semua kondisi:
+  • Bot admin → hapus pesan dulu → reply (tampil sebagai pesan terhapus di quote)
+  • Bot bukan admin → langsung reply ke pesan link
+> Admin grup langsung tahu pesan mana yang bermasalah
