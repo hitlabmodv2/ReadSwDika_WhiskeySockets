@@ -382,7 +382,7 @@ export default async function handleAntiLink(message, hisoka) {
                     `> Anti-Link bisa berjalan penuh!\n│\n` +
                     `╰────────────────────`,
                 contextInfo: { mentionedJid: _mention2 }
-            });
+            }, { quoted: message });
             return;
         }
 
