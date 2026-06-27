@@ -62,7 +62,7 @@
   },
   "antiLink": {
     "enabled": true,
-    "maxWarnings": 3
+    "maxWarnings": 10
   },
   "autoCleaner": {
     "enabled": false,

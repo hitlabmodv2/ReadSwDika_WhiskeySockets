@@ -363,9 +363,26 @@ export default async function handleAntiLink(message, hisoka) {
 
         console.log(`\x1b[33m[AntiLink] Link terdeteksi! Sender: ${senderNumber} | BotAdmin: ${botIsAdmin} | Link: ${linkPreview}\x1b[39m`);
 
-        // ── Bot bukan admin → silent skip, tidak warn, tidak bisa enforce ──────
+        // ── Bot bukan admin → kirim peringatan tapi tidak bisa hapus/kick ──────
         if (!botIsAdmin) {
-            console.log('\x1b[33m[AntiLink] Bot bukan admin — silent skip.\x1b[39m');
+            console.log('\x1b[33m[AntiLink] Bot bukan admin — kirim notif peringatan.\x1b[39m');
+            const { dateStr, timeStr } = getWaktuStr();
+            const isLid2 = senderJid.includes('@lid');
+            const _mention2 = isLid2 ? [] : [senderJid];
+            const _user2 = isLid2 ? '_(akun privat)_' : `@${senderNumber}`;
+            await hisoka.sendMessage(remoteJid, {
+                text:
+                    `╭─〔 ⚠️ *Anti-Link* 〕\n│\n` +
+                    `│ 👤 ${_user2} mengirim link!\n` +
+                    `│ 🔗 ${linkPreview}\n` +
+                    `│ 🕐 ${timeStr} • ${dateStr}\n│\n` +
+                    `│ ❌ Bot *bukan admin*, tidak bisa\n` +
+                    `│    hapus pesan atau kick member.\n│\n` +
+                    `│ ℹ️ Jadikan bot *admin grup* agar\n` +
+                    `│    Anti-Link bisa berjalan penuh!\n` +
+                    `╰────────────────────`,
+                contextInfo: { mentionedJid: _mention2 }
+            }, { quoted: message });
             return;
         }
 
