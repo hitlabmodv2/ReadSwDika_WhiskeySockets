@@ -67,7 +67,11 @@ function saveConfig(cfg) {
 }
 
 function loadData() {
-    return kvGet('security/antilink', { groups: [], warnings: {} });
+    const d = kvGet('security/antilink', { groups: [], disabledGroups: [], warnings: {} });
+    if (!Array.isArray(d.groups)) d.groups = [];
+    if (!Array.isArray(d.disabledGroups)) d.disabledGroups = [];
+    if (!d.warnings) d.warnings = {};
+    return d;
 }
 
 function saveData(d) {
@@ -79,17 +83,25 @@ function saveData(d) {
 
 export function isAntiLinkEnabled(groupId) {
     const d = loadData();
-    return Array.isArray(d.groups) && d.groups.includes(groupId);
+    return d.groups.includes(groupId);
+}
+
+export function isAntiLinkDisabled(groupId) {
+    const d = loadData();
+    return d.disabledGroups.includes(groupId);
 }
 
 export function toggleAntiLink(groupId, enable) {
     const d = loadData();
-    if (!Array.isArray(d.groups)) d.groups = [];
-    if (!d.warnings) d.warnings = {};
     if (enable) {
+        // Aktifkan: masuk groups, keluar disabledGroups
         if (!d.groups.includes(groupId)) d.groups.push(groupId);
+        d.disabledGroups = d.disabledGroups.filter(g => g !== groupId);
     } else {
+        // Nonaktifkan: keluar groups, masuk disabledGroups
         d.groups = d.groups.filter(g => g !== groupId);
+        if (!d.disabledGroups.includes(groupId)) d.disabledGroups.push(groupId);
+        // Reset warnings saat dinonaktifkan
         if (d.warnings[groupId]) delete d.warnings[groupId];
     }
     saveData(d);
@@ -97,12 +109,11 @@ export function toggleAntiLink(groupId, enable) {
 
 export function getAntiLinkWarnings(groupId) {
     const d = loadData();
-    return (d.warnings || {})[groupId] || {};
+    return d.warnings[groupId] || {};
 }
 
 export function resetAntiLinkWarnings(groupId) {
     const d = loadData();
-    if (!d.warnings) d.warnings = {};
     if (groupId) delete d.warnings[groupId];
     else d.warnings = {};
     saveData(d);
@@ -110,7 +121,12 @@ export function resetAntiLinkWarnings(groupId) {
 
 export function getAllAntiLinkGroups() {
     const d = loadData();
-    return Array.isArray(d.groups) ? [...d.groups] : [];
+    return [...d.groups];
+}
+
+export function getDisabledAntiLinkGroups() {
+    const d = loadData();
+    return [...d.disabledGroups];
 }
 
 // ─── Log ──────────────────────────────────────────────────────────────────────
@@ -732,21 +748,18 @@ export async function handleAntilink({ hisoka, m, query, tolak, logCommand, load
         const allGroupsRaw = await hisoka.groupFetchAllParticipating();
         const allGroups    = Object.values(allGroupsRaw || {});
 
-        const aktifGroups  = getAllAntiLinkGroups();
-        const aktifSet     = new Set(aktifGroups);
-        const data         = loadData();
-        const warnings     = data.warnings || {};
+        const aktifGroups    = getAllAntiLinkGroups();
+        const disabledGroups = getDisabledAntiLinkGroups();
+        const aktifSet       = new Set(aktifGroups);
+        const disabledSet    = new Set(disabledGroups);
 
         const totalAktif = aktifGroups.length;
+        const totalNon_  = disabledGroups.length;
 
-        // Hitung nonaktif = grup yang pernah didaftarkan tapi bukan di aktifSet
-        // (tidak ada state nonaktif terpisah, skip: ❌ hanya untuk yang di-off setelah on)
-        // Pola alqanime: ✅ = aktif, ❌ = (tidak ada di antilink), ➕ = belum pernah
-
-        // ── Urutkan: ✅ Aktif → ❌ Nonaktif (punya warning) → ➕ Belum daftar ──
+        // ── Urutkan: ✅ Aktif → ❌ Nonaktif (pernah on, lalu di-off) → ➕ Belum daftar ──
         const _urutan = (g) => {
-            if (aktifSet.has(g.id)) return 0;
-            if (warnings[g.id] && Object.keys(warnings[g.id]).length) return 1;
+            if (aktifSet.has(g.id))    return 0;
+            if (disabledSet.has(g.id)) return 1;
             return 2;
         };
         allGroups.sort((a, b) => {
@@ -759,9 +772,9 @@ export async function handleAntilink({ hisoka, m, query, tolak, logCommand, load
             const jid  = g.id;
             const nama = (g.subject || 'Tanpa Nama').slice(0, 30);
             let ikon;
-            if (aktifSet.has(jid))                                          ikon = '✅';
-            else if (warnings[jid] && Object.keys(warnings[jid]).length)   ikon = '❌';
-            else                                                             ikon = '➕';
+            if (aktifSet.has(jid))    ikon = '✅';
+            else if (disabledSet.has(jid)) ikon = '❌';
+            else                      ikon = '➕';
             return { no: i + 1, jid, nama, ikon };
         });
 

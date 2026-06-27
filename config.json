@@ -61,7 +61,7 @@
     "maxWarnings": 10
   },
   "antiLink": {
-    "enabled": false,
+    "enabled": true,
     "maxWarnings": 3
   },
   "autoCleaner": {
