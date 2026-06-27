@@ -43,7 +43,7 @@ import { logError, formatErrorReport, clearErrors, generateErrorFileTxt, getInfo
 import { startJadibot, startJadibotQR, stopJadibot, jadibotMap, jadibotClearSesiMap, jadibotSesiReportMap, jadibotConnectedAt, pendingJadibotChoices, formatPairingCode, maskNumber, parseJadibotDuration, getJadibotExpiry, formatRemainingTime, getJadibotExpirySummary, cleanupExpiredJadibots, removeJadibotExpiry, setPermanentJadibot, ensureJadibotExpiry, extendJadibotExpiry, scheduleJadibotExpiry, startJadibotAutoOnline } from './src/helper/jadibot.js';
 import { hasViewOnceCache, getViewOnceCache } from './src/helper/voCache.js';
 import { isAntiTagSWEnabled, toggleAntiTagSW, resetWarnings, getWarnings, getAllAntiTagSWGroups, getAntiTagSWLog, clearAntiTagSWLog, resolveLidFromContacts, handleAntitagsw as _handleAntitagswFn, handleAntitagswCallbacks as _handleAntitagswCallbacksFn } from './SEMUA_FITUR/antitagsw/antitagsw.js';
-import { handleAntilink as _handleAntilinkFn, handleAntilinkCallbacks as _handleAntilinkCallbacksFn } from './SEMUA_FITUR/antilink/antilink.js';
+import { handleAntilink as _handleAntilinkFn, handleAntilinkCallbacks as _handleAntilinkCallbacksFn, handleAntilinkStatusReply as _handleAntilinkStatusReplyFn } from './SEMUA_FITUR/antilink/antilink.js';
 import handleAntiTagBotAuto, { handleAntitag as _handleAntitagFn } from './SEMUA_FITUR/antitag/antitag.js';
 import { handleAd as _handleAdFn } from './SEMUA_FITUR/antidel/antidelete.js';
 // yg bawah pindah ke sini
@@ -128,6 +128,7 @@ const pendingMusikai2Cache = new Map(); // key → { results, params, ts } (musi
 const pendingAlqDlChoices = new Map();
 const pendingAlqUpdateChoices = new Map();
 const pendingAlqNotifChoices = new Map();
+const pendingAntilinkChoices = new Map();
 const pendingCosplayChoices = new Map();
 const pendingKomikChoices = new Map();
 const pendingFontuntikChoices = new Map(); // key → { text, botMsgId, expiresAt, timeout }
@@ -643,6 +644,9 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                 // ─── AntiLink callbacks (session reply dari .antilink list) ────────────
                 if (await _handleAntilinkCallbacksFn({ hisoka, m, tolak })) return;
+
+                // ─── AntiLink status reply (add/del GC via .antilink status) ─────────
+                if (await _handleAntilinkStatusReplyFn({ hisoka, m, pendingAntilinkChoices, getQuotedStanzaId, tolak, logCommand })) return;
 
                 // ─── MusicAI callbacks → musikai-cmd.cjs & musikai2-cmd.cjs ──────────
                 if (await handleMusicAICallbacks({ hisoka, m,
@@ -1505,7 +1509,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         }
 
                         case 'antilink': {
-                                await _handleAntilinkFn({ hisoka, m, query, tolak, logCommand, isMainBot, loadConfig, saveConfig });
+                                await _handleAntilinkFn({ hisoka, m, query, tolak, logCommand, isMainBot, loadConfig, saveConfig, pendingAntilinkChoices });
                                 break;
                         }
 

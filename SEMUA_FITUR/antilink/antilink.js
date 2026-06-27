@@ -436,7 +436,7 @@ export default async function handleAntiLink(message, hisoka) {
 //  Command Handler — .antilink [sub-perintah]
 //  HANYA bot utama
 // ═══════════════════════════════════════════════════════════════
-export async function handleAntilink({ hisoka, m, query, tolak, logCommand, loadConfig: _lc, saveConfig: _sc }) {
+export async function handleAntilink({ hisoka, m, query, tolak, logCommand, loadConfig: _lc, saveConfig: _sc, pendingAntilinkChoices }) {
     if (hisoka?.isMainBot === false) return;
     if (!m.isGroup) return tolak(hisoka, m, '❌ Fitur ini hanya bisa digunakan di grup!');
     if (!m.isAdmin && !m.isOwner) return tolak(hisoka, m, '❌ Hanya admin grup atau owner bot yang bisa menggunakan perintah ini!');
@@ -721,49 +721,171 @@ export async function handleAntilink({ hisoka, m, query, tolak, logCommand, load
         return;
     }
 
-    // ── status (default) ──────────────────────────────────────────────────────
-    const config       = lc();
-    const globalEnabled = config.antiLink?.enabled ?? false;
-    const maxWarnings   = config.antiLink?.maxWarnings ?? 3;
-    const isEnabled     = isAntiLinkEnabled(m.from);
-    const warns         = getAntiLinkWarnings(m.from);
-    const totalWarned   = Object.keys(warns).length;
+    // ── status — list semua GC bot dengan ✅/❌/➕ + session add/del ────────────
+    await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
+    try {
+        const config = lc();
+        const globalEnabled = config.antiLink?.enabled ?? false;
+        const maxWarnings   = config.antiLink?.maxWarnings ?? 3;
 
-    // Cek bot admin realtime
-    const botJid = jidNormalizedUser(hisoka.user?.id || '');
-    const { isAdmin: botIsAdmin } = await getBotAdminStatus(m.from, botJid.split('@')[0], hisoka);
+        // Ambil semua GC yang bot ikuti sekarang
+        const allGroupsRaw = await hisoka.groupFetchAllParticipating();
+        const allGroups    = Object.values(allGroupsRaw || {});
 
-    let grupStatus;
-    if (isEnabled) grupStatus = '🟢 Aktif';
-    else if (globalEnabled) grupStatus = '🔴 Nonaktif *(belum ditambahkan)*';
-    else grupStatus = '🔴 Nonaktif';
+        const aktifGroups  = getAllAntiLinkGroups();
+        const aktifSet     = new Set(aktifGroups);
+        const data         = loadData();
+        const warnings     = data.warnings || {};
 
-    const hintAdd = globalEnabled && !isEnabled
-        ? `│ 💡 Ketik *.antilink add* untuk\n│    mengaktifkan di grup ini!\n│\n` : '';
+        const totalAktif = aktifGroups.length;
 
-    return tolak(hisoka, m,
-        `╭───〔 *ℹ️ ANTI-LINK* 〕───╮\n│\n` +
-        `│ 🌐 Global   : ${globalEnabled ? '🟢 Aktif' : '🔴 Nonaktif'}\n` +
-        `│ 📌 Grup ini : ${grupStatus}\n` +
-        `│ 🤖 Bot Admin: ${botIsAdmin ? '✅ Ya (hapus & kick)' : '❌ Tidak (hanya warn)'}\n│\n` +
-        `│ ⚙️ Konfigurasi:\n│ • Maks. warning: *${maxWarnings}x*\n│ • Member warned: *${totalWarned} orang*\n│\n` +
-        `│ ℹ️ Mendeteksi semua jenis link\n│    (http, www, wa.me, dll)\n│ 👑 Owner & Admin GC bebas kirim link\n│\n` +
-        hintAdd +
-        `│ 📋 Cara penggunaan:\n` +
-        `│ • *.antilink add*       → Tambah grup ini\n` +
-        `│ • *.antilink on*        → Aktifkan\n` +
-        `│ • *.antilink off*       → Nonaktifkan\n` +
-        `│ • *.antilink reset*     → Reset warning\n` +
-        `│ • *.antilink status*    → Info ini\n` +
-        `│ • *.antilink log*       → Riwayat\n` +
-        (m.isOwner
-            ? `│ • *.antilink list*      → Daftar grup\n` +
-              `│ • *.antilink warn <n>*  → Set maks warn\n` +
-              `│ • *.antilink global on*  → Aktifkan global\n` +
-              `│ • *.antilink global off* → Nonaktifkan\n`
-            : '') +
-        `│\n╰────────────────────────────────────╯`
-    );
+        // Hitung nonaktif = grup yang pernah didaftarkan tapi bukan di aktifSet
+        // (tidak ada state nonaktif terpisah, skip: ❌ hanya untuk yang di-off setelah on)
+        // Pola alqanime: ✅ = aktif, ❌ = (tidak ada di antilink), ➕ = belum pernah
+
+        // ── Urutkan: ✅ Aktif → ❌ Nonaktif (punya warning) → ➕ Belum daftar ──
+        const _urutan = (g) => {
+            if (aktifSet.has(g.id)) return 0;
+            if (warnings[g.id] && Object.keys(warnings[g.id]).length) return 1;
+            return 2;
+        };
+        allGroups.sort((a, b) => {
+            const uA = _urutan(a), uB = _urutan(b);
+            if (uA !== uB) return uA - uB;
+            return (a.subject || '').localeCompare(b.subject || '', 'id');
+        });
+
+        const gcList = allGroups.map((g, i) => {
+            const jid  = g.id;
+            const nama = (g.subject || 'Tanpa Nama').slice(0, 30);
+            let ikon;
+            if (aktifSet.has(jid))                                          ikon = '✅';
+            else if (warnings[jid] && Object.keys(warnings[jid]).length)   ikon = '❌';
+            else                                                             ikon = '➕';
+            return { no: i + 1, jid, nama, ikon };
+        });
+
+        const totalNon = gcList.filter(g => g.ikon === '❌').length;
+
+        let txt = `╭─「 📋 *STATUS ANTI-LINK* 」\n│\n`;
+        txt += `│ Total GC bot   : *${allGroups.length} grup*\n`;
+        txt += `│ Terdaftar aktif: *${totalAktif} grup*\n`;
+        if (totalNon) txt += `│ Nonaktif       : *${totalNon} grup*\n`;
+        txt += `│ 🌐 Global      : ${globalEnabled ? '🟢 Aktif' : '🔴 Nonaktif'}\n`;
+        txt += `│ ⚙️ Maks. warn  : *${maxWarnings}x*\n`;
+        txt += `│\n`;
+        txt += `│ Ket: ✅ Aktif  ❌ Nonaktif  ➕ Belum daftar\n`;
+        txt += `│━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+
+        // Sisipkan pemisah antar kelompok
+        let lastIkon = '';
+        gcList.forEach(({ no, nama, ikon }) => {
+            if (ikon !== lastIkon) {
+                const label = ikon === '✅' ? 'Aktif' : ikon === '❌' ? 'Nonaktif' : 'Belum daftar';
+                txt += `│ ┄ ${label} ┄\n`;
+                lastIkon = ikon;
+            }
+            const noStr = String(no).padStart(2, ' ');
+            txt += `│ ${noStr}. ${ikon} ${nama}\n`;
+        });
+
+        txt += `│\n`;
+        txt += `│ 📌 *Reply pesan ini:*\n`;
+        txt += `│ • *add 1,2,3* — aktifkan GC nomor tsb\n`;
+        txt += `│ • *del 2,4* — nonaktifkan GC nomor tsb\n`;
+        txt += `│ ⏳ Menu berlaku *5 menit*\n`;
+        txt += `╰──────────────────────`;
+
+        const statusMsg = await hisoka.sendMessage(m.from, { text: txt }, { quoted: m });
+        await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+
+        // Simpan session untuk reply handler
+        if (pendingAntilinkChoices) {
+            const choiceKey = `${m.from}::${m.sender || m.key?.participant || ''}`;
+            const old = pendingAntilinkChoices.get(choiceKey);
+            if (old?.timeout) clearTimeout(old.timeout);
+            const t = setTimeout(() => pendingAntilinkChoices?.delete(choiceKey), 5 * 60 * 1000);
+            pendingAntilinkChoices.set(choiceKey, {
+                gcList,
+                botMsgId : statusMsg?.key?.id || '',
+                expiresAt: Date.now() + 5 * 60 * 1000,
+                timeout  : t,
+            });
+        }
+        logCommand(m, hisoka, 'antilink status');
+    } catch (err) {
+        console.error('[AntiLink] status error:', err?.message);
+        await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
+        await tolak(hisoka, m, `❌ Gagal ambil list grup: ${err?.message || err}`);
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  Reply Handler — Tangani reply ke .antilink status (add/del)
+// ═══════════════════════════════════════════════════════════════
+export async function handleAntilinkStatusReply({ hisoka, m, pendingAntilinkChoices, getQuotedStanzaId, tolak, logCommand }) {
+    if (!pendingAntilinkChoices?.size) return false;
+    if (!m.isOwner && !m.isAdmin) return false;
+
+    const quotedId = getQuotedStanzaId(m);
+    if (!quotedId) return false;
+
+    const choiceKey = `${m.from}::${m.sender || m.key?.participant || ''}`;
+    const pending   = pendingAntilinkChoices.get(choiceKey);
+    if (!pending || pending.botMsgId !== quotedId) return false;
+    if (Date.now() > pending.expiresAt) {
+        pendingAntilinkChoices.delete(choiceKey);
+        return false;
+    }
+
+    const teks  = (m.body || m.text || '').trim().toLowerCase();
+    const match = teks.match(/^(add|del)\s+([\d,\s]+)$/i);
+    if (!match) return false;
+
+    const aksi    = match[1].toLowerCase();
+    const nomor   = [...new Set(
+        match[2].split(/[,\s]+/).map(n => parseInt(n.trim())).filter(n => !isNaN(n) && n >= 1)
+    )];
+    if (!nomor.length) return false;
+
+    const { gcList } = pending;
+    const dipilih   = nomor.map(n => gcList[n - 1]).filter(Boolean);
+    if (!dipilih.length) {
+        await tolak(hisoka, m, `❌ Nomor tidak valid. Pilih antara 1–${gcList.length}.`);
+        return true;
+    }
+
+    const config = loadConfig();
+    if (!config.antiLink?.enabled && aksi === 'add') {
+        if (!m.isOwner) {
+            await tolak(hisoka, m, '❌ Fitur AntiLink dinonaktifkan secara global.\nMinta owner aktifkan dulu: *.antilink global on*');
+            return true;
+        }
+        if (!config.antiLink) config.antiLink = {};
+        config.antiLink.enabled = true;
+        saveConfig(config);
+    }
+
+    const namaList = [];
+    for (const { jid, nama } of dipilih) {
+        toggleAntiLink(jid, aksi === 'add');
+        namaList.push(nama);
+    }
+
+    const ikon   = aksi === 'add' ? '✅' : '❌';
+    const action = aksi === 'add' ? 'Diaktifkan' : 'Dinonaktifkan';
+
+    let txt = `${ikon} *AntiLink ${action} (${dipilih.length} GC):*\n`;
+    namaList.forEach((n, i) => { txt += `${i + 1}. ${n}\n`; });
+    txt += `\n💡 Ketik *.antilink status* untuk cek ulang.`;
+
+    await hisoka.sendMessage(m.from, { react: { text: ikon, key: m.key } });
+    await tolak(hisoka, m, txt);
+    logCommand(m, hisoka, `antilink-${aksi}`);
+
+    clearTimeout(pending.timeout);
+    pendingAntilinkChoices.delete(choiceKey);
+    return true;
 }
 
 // ═══════════════════════════════════════════════════════════════
