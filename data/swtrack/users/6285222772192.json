@@ -1031,5 +1031,28 @@
       }
     ],
     "processedAt": "2026-06-27T08:58:14.585Z"
+  },
+  "AC2BE7F777C2977CE5CD580FE617F916": {
+    "id": "AC2BE7F777C2977CE5CD580FE617F916",
+    "sender": "6285222772192@s.whatsapp.net",
+    "name": "Finn么",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-27T09:48:08.365Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285222772192",
+    "resolvedPn": "6285222772192@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285222772192@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC2BE7F777C2977CE5CD580FE617F916",
+      "participant": "12661630705832@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-27T09:48:08.366Z"
   }
 }
