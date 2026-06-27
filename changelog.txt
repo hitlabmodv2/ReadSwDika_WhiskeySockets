@@ -3,58 +3,9 @@ _📅 27 Juni 2026_ 🕐
 _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurna_ 🙏
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V25*
-✨ *1 Fitur Baru*
-🔧 *0 Bug/Error Fix*
-🚀 *4 Perubahan*
-━━━━━━━━━━━━━━━━━━━━━━
-✨ *FITUR BARU*
-━━━━━━━━━━━━━━━━━━━━━━
-*1. 🔥 Alqanime — Monitor "Lagi Hangat Saat Ini"*
-_Bot kini pantau section "Lagi Hangat Saat Ini" di alqanime.net secara realtime_
-- Saat ada anime baru masuk hot list → bot otomatis kirim notif *terpisah* ke semua GC aktif
-- Format notif: `🔥 LAGI HANGAT — ALQANIME!` + daftar baru masuk + semua hot list saat ini
-- Tidak ada request ganda — data diambil dari 1x fetch homepage bersamaan cek episode baru
-> Aktif otomatis jika `.alqanimenotif on` sudah diaktifkan di GC
-
-━━━━━━━━━━━━━━━━━━━━━━
-🚀 *PERUBAHAN*
-━━━━━━━━━━━━━━━━━━━━━━
-*1. 📺 Alqanime Notif — Notif Terpisah Per Tipe*
-- ~Sebelumnya: semua rilisan digabung dalam 1 format notif~
-- Sesudahnya: masing-masing tipe punya pesan notif *sendiri-sendiri*:
-  • `📦 BATCH RELEASE — ALQANIME!` — khusus batch sub indo
-  • `🔴 EPISODE BARU — ALQANIME!` — khusus episode mingguan
-  • `🔥 LAGI HANGAT — ALQANIME!` — khusus perubahan hot list
-- Semua realtime dari alqanime.net, tidak ada duplikat, no bug
-
-*2. 📋 Alqanime Notif — `.alqanimenotif status` Diupgrade*
-- ~Sebelumnya: hanya tampil JID & tanggal, tanpa nama GC, tanpa urutan~
-- Sesudahnya: tampil list lengkap semua GC yang bot ikuti dengan nomor urut & nama GC
-- Urutan otomatis rapi: ✅ Aktif di atas → ❌ Nonaktif tengah → ➕ Belum daftar bawah
-- Ada garis pemisah antar kelompok biar mudah dibaca
-- Bisa diakses dari mana saja (tidak harus dari dalam GC)
-
-*3. ➕ Alqanime Notif — Tambah/Hapus GC via Reply Status*
-- ~Sebelumnya: harus masuk ke tiap GC satu-satu lalu ketik `.alqanimenotif on`~
-- Sesudahnya: cukup ketik `.alqanimenotif status` → *reply* pesan itu dengan:
-  • `add 1,2,3` — aktifkan GC nomor 1, 2, dan 3 sekaligus (multi-select)
-  • `del 2,4` — nonaktifkan GC nomor 2 dan 4 sekaligus
-- Menu berlaku 5 menit setelah status dikirim
-
-*4. ⚡ Alqanime Scraper — Fetch Homepage 1x untuk Semua Section*
-- ~Sebelumnya: tiap function (getRilisanTerbaru, getLatestAlqanime) fetch homepage sendiri-sendiri~
-- Sesudahnya: `getHomepageData()` fetch 1x → parse semua section sekaligus:
-  • Semua cards (untuk deteksi episode baru)
-  • Section "Lagi Hangat Saat Ini"
-  • Section "Rilisan Terbaru"
-- Lebih hemat request, lebih cepat, tidak ada request ganda ke alqanime.net
-
-━━━━━━━━━━━━━━━━━━━━━━
-━━━━━━━━━━━━━━━━━━━━━━
-🤖 *WILY BOT — V24*
-✨ *2 Fitur Baru*
+✨ *3 Fitur Baru*
 🔧 *5 Bug/Error Fix*
-🚀 *6 Perubahan*
+🚀 *10 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -68,6 +19,13 @@ _Ubah teks biasa jadi berbagai gaya font unik via tombol pilihan interaktif_
 _Cari dan kirim GIF anime dari Tenor langsung ke chat_
 - Cara pakai: `.animegif [kata kunci]`
 - Contoh: `.animegif naruto`, `.animegif one piece fight`
+
+*3. 🔥 Alqanime — Monitor "Lagi Hangat Saat Ini"*
+_Bot kini pantau section "Lagi Hangat Saat Ini" di alqanime.net secara realtime_
+- Saat ada anime baru masuk hot list → bot otomatis kirim notif *terpisah* ke semua GC aktif
+- Format notif: `🔥 LAGI HANGAT — ALQANIME!` + daftar baru masuk + semua hot list saat ini
+- Tidak ada request ganda — data diambil dari 1x fetch homepage bersamaan cek episode baru
+> Aktif otomatis jika `.alqanimenotif on` sudah diaktifkan di GC
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🔧 *BUG/ERROR FIX*
@@ -148,3 +106,33 @@ _Cari dan kirim GIF anime dari Tenor langsung ke chat_
   2. `gemini-2.5-pro` ← cadangan kedua
   3. `gemini-flash-latest` ← terakhir jika keduanya tidak tersedia
 > Berlaku untuk semua call WilyAI: text, vision, auto-reply, command `.wily`
+
+*7. 📺 Alqanime Notif — Notif Terpisah Per Tipe*
+- ~Sebelumnya: semua rilisan digabung dalam 1 format notif~
+- Sesudahnya: masing-masing tipe punya pesan notif *sendiri-sendiri*:
+  • `📦 BATCH RELEASE — ALQANIME!` — khusus batch sub indo
+  • `🔴 EPISODE BARU — ALQANIME!` — khusus episode mingguan
+  • `🔥 LAGI HANGAT — ALQANIME!` — khusus perubahan hot list
+- Semua realtime dari alqanime.net, tidak ada duplikat, no bug
+
+*8. 📋 Alqanime Notif — `.alqanimenotif status` Diupgrade*
+- ~Sebelumnya: hanya tampil JID & tanggal, tanpa nama GC, tanpa urutan~
+- Sesudahnya: tampil list lengkap semua GC yang bot ikuti dengan nomor urut & nama GC
+- Urutan otomatis rapi: ✅ Aktif di atas → ❌ Nonaktif tengah → ➕ Belum daftar bawah
+- Ada garis pemisah antar kelompok biar mudah dibaca
+- Bisa diakses dari mana saja (tidak harus dari dalam GC)
+
+*9. ➕ Alqanime Notif — Tambah/Hapus GC via Reply Status*
+- ~Sebelumnya: harus masuk ke tiap GC satu-satu lalu ketik `.alqanimenotif on`~
+- Sesudahnya: cukup ketik `.alqanimenotif status` → *reply* pesan itu dengan:
+  • `add 1,2,3` — aktifkan GC nomor 1, 2, dan 3 sekaligus (multi-select)
+  • `del 2,4` — nonaktifkan GC nomor 2 dan 4 sekaligus
+- Menu berlaku 5 menit setelah status dikirim
+
+*10. ⚡ Alqanime Scraper — Fetch Homepage 1x untuk Semua Section*
+- ~Sebelumnya: tiap function fetch homepage sendiri-sendiri (request ganda)~
+- Sesudahnya: `getHomepageData()` fetch 1x → parse semua section sekaligus:
+  • Semua cards (untuk deteksi episode baru)
+  • Section "Lagi Hangat Saat Ini"
+  • Section "Rilisan Terbaru"
+- Lebih hemat request, lebih cepat, tidak ada request ganda ke alqanime.net
