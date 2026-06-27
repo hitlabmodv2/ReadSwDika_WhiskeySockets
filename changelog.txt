@@ -3,7 +3,7 @@ _📅 27 Juni 2026_ 🕐
 _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurna_ 🙏
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V24*
-✨ *3 Fitur Baru*
+✨ *4 Fitur Baru*
 🔧 *7 Bug/Error Fix*
 🚀 *12 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -26,6 +26,15 @@ _Bot kini pantau section "Lagi Hangat Saat Ini" di alqanime.net secara realtime_
 - Format notif: `🔥 LAGI HANGAT — ALQANIME!` + daftar baru masuk + semua hot list saat ini
 - Tidak ada request ganda — data diambil dari 1x fetch homepage bersamaan cek episode baru
 > Aktif otomatis jika `.alqanimenotif on` sudah diaktifkan di GC
+
+*4. 📅 Alqanime — Per Musim (Seasonal) TXT + PDF*
+_Kini `.alq winter 2025` & `.alqanime spring 2025` generate file TXT + PDF lengkap_
+- Cara pakai: `.alq winter 2025` / `.alq spring 2025` / `.alqanime fall 2024`
+- Bot scrape daftar anime musim tsb dari alqanime.net → ambil detail tiap anime
+- Generate file *TXT*: judul, info, sinopsis, semua link download per episode
+- Generate file *PDF*: cover page + daftar judul + halaman info per anime dengan poster
+- Progress bar ditampilkan realtime selama proses (~2–5 menit)
+- Sama seperti `.anime winter 2025` tapi dari alqanime.net
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🔧 *BUG/ERROR FIX*
