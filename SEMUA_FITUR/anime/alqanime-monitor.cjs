@@ -932,6 +932,19 @@ async function handleAlqanimeNotif({ hisoka, m, query, tolak, logCommand, sendCo
                         txt += `│ Ket: ✅ Aktif  ❌ Nonaktif  ➕ Belum daftar\n`;
                         txt += `│━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
 
+                        // Urutkan: ✅ Aktif → ❌ Nonaktif → ➕ Belum daftar
+                        const _urutan = (g) => {
+                                const reg = registered[g.id];
+                                if (reg?.enabled === true)  return 0;
+                                if (reg?.enabled === false) return 1;
+                                return 2;
+                        };
+                        allGroups.sort((a, b) => {
+                                const uA = _urutan(a), uB = _urutan(b);
+                                if (uA !== uB) return uA - uB;
+                                return (a.subject || '').localeCompare(b.subject || '', 'id');
+                        });
+
                         const gcList = allGroups.map((g, i) => {
                                 const jid  = g.id;
                                 const nama = (g.subject || 'Tanpa Nama').slice(0, 28);
@@ -940,7 +953,14 @@ async function handleAlqanimeNotif({ hisoka, m, query, tolak, logCommand, sendCo
                                 return { no: i + 1, jid, nama, ikon };
                         });
 
+                        // Sisipkan pemisah antar kelompok
+                        let lastIkon = '';
                         gcList.forEach(({ no, nama, ikon }) => {
+                                if (ikon !== lastIkon) {
+                                        const label = ikon === '✅' ? 'Aktif' : ikon === '❌' ? 'Nonaktif' : 'Belum daftar';
+                                        txt += `│ ┄ ${label} ┄\n`;
+                                        lastIkon = ikon;
+                                }
                                 const noStr = String(no).padStart(2, ' ');
                                 txt += `│ ${noStr}. ${ikon} ${nama}\n`;
                         });

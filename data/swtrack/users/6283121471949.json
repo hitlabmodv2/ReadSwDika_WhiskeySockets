@@ -47,9 +47,9 @@
     "name": "gatot",
     "type": "imageMessage",
     "arrivedAt": "2026-06-27T06:04:47.763Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "⚽",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6283121471949",
@@ -62,6 +62,25 @@
       "participant": "127461811601572@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-27T06:04:47.763Z"
+    "updatedAt": "2026-06-27T06:05:05.308Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283121471949@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACE0A7505591B168B8261EC8B27B2A69",
+        "participant": "127461811601572@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283121471949@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACE0A7505591B168B8261EC8B27B2A69",
+        "participant": "6283121471949@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-27T06:05:05.308Z"
   }
 }
