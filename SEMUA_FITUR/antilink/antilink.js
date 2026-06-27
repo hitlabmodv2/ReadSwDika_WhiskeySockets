@@ -335,15 +335,15 @@ export default async function handleAntiLink(message, hisoka) {
                     if (botIsAdmin) {
                         const deleted = await deleteMsg(remoteJid, qId, qParticipant, hisoka);
                         const _delTxt = deleted
-                            ? `╭─〔 ✅ *Anti-Link* 〕\n│\n│ 🗑️ Pesan link dihapus!\n│ 👤 Pengirim : @${qNum}\n│ 🔗 ${linkPreview}\n│\n│ _(oleh ${isOwner ? 'owner' : 'admin'})_\n╰────────────────────`
-                            : `╭─〔 ❌ *Anti-Link* 〕\n│\n│ Gagal hapus pesan.\n│ Cek ulang status admin bot.\n╰────────────────────`;
+                            ? `╭─〔 🗑️ *Anti-Link* 〕\n│\n│ ✅ *Pesan link berhasil dihapus!*\n│\n│ 👤 Pengirim : @${qNum}\n│ 🛡️ Dihapus oleh : _${isOwner ? 'owner' : 'admin'}_\n│\n╰────────────────────`
+                            : `╭─〔 ❌ *Anti-Link* 〕\n│\n│ *Gagal hapus pesan link.*\n│\n> Pastikan bot sudah menjadi\n> *admin grup* lalu coba lagi.\n│\n╰────────────────────`;
                         await hisoka.sendMessage(remoteJid, {
                             text: _delTxt,
                             contextInfo: { mentionedJid: qParticipant ? [jidNormalizedUser(qParticipant)] : [] }
                         }, { quoted: message });
                     } else {
                         await hisoka.sendMessage(remoteJid, {
-                            text: `╭─〔 ⚠️ *Anti-Link* 〕\n│\n│ 🤖 Bot bukan admin!\n│ Jadikan bot *admin* agar bisa\n│ hapus pesan link otomatis.\n╰────────────────────`
+                            text: `╭─〔 ⚠️ *Anti-Link* 〕\n│\n│ 🤖 Bot *bukan admin* di grup ini!\n│\n> Jadikan bot *admin grup* agar\n> bisa hapus pesan link otomatis.\n│\n╰────────────────────`
                         }, { quoted: message });
                     }
                 }
@@ -374,12 +374,12 @@ export default async function handleAntiLink(message, hisoka) {
                 text:
                     `╭─〔 ⚠️ *Anti-Link* 〕\n│\n` +
                     `│ 👤 ${_user2}\n` +
-                    `│ 📅 ${timeStr} • ${dateStr}\n│\n` +
+                    `│ 🕐 ${timeStr} • ${dateStr}\n│\n` +
                     `│ ⚠️ Mengirim *link* di grup ini!\n│\n` +
-                    `│ ❌ Bot *bukan admin*, tidak bisa\n` +
-                    `│    hapus pesan atau kick member.\n│\n` +
-                    `│ ℹ️ Jadikan bot *admin grup* agar\n` +
-                    `│    Anti-Link bisa berjalan penuh!\n` +
+                    `> ❌ Bot *bukan admin*, tidak bisa\n` +
+                    `> hapus pesan atau kick member.\n` +
+                    `> Jadikan bot *admin grup* agar\n` +
+                    `> Anti-Link bisa berjalan penuh!\n│\n` +
                     `╰────────────────────`,
                 contextInfo: { mentionedJid: _mention2 }
             });
@@ -415,16 +415,16 @@ export default async function handleAntiLink(message, hisoka) {
 
             await hisoka.sendMessage(remoteJid, {
                 text:
-                    `╭─〔 🔗 *Anti-Link — KICK* 〕\n│\n` +
+                    `╭─〔 🔨 *Anti-Link — KICK* 〕\n│\n` +
                     `│ 👤 ${_user}\n` +
-                    `│ 🔗 ${linkPreview}\n` +
                     `│ 🕐 ${timeStr} • ${dateStr}\n│\n` +
-                    `│ 🔴 Warn [${warnBar}] ${maxWarnings}/${maxWarnings}\n` +
-                    `│ 💥 Telah di-*KICK* dari grup!\n│\n` +
-                    `│ _Jangan kirim link sembarangan!_\n` +
+                    `│ 🔴 Peringatan [${warnBar}] *${maxWarnings}/${maxWarnings}*\n│\n` +
+                    `• Pesan berisi link _telah dihapus_\n` +
+                    `• Member telah di-*KICK* dari grup!\n│\n` +
+                    `> _Akibat mengirim link berulang kali!_\n│\n` +
                     `╰────────────────────`,
                 contextInfo: { mentionedJid: _mention }
-            }, { quoted: message });
+            });
 
             try {
                 await hisoka.groupParticipantsUpdate(remoteJid, [senderJid], 'remove');
@@ -432,27 +432,31 @@ export default async function handleAntiLink(message, hisoka) {
             } catch (kickErr) {
                 console.error('\x1b[31m[AntiLink] Gagal kick:\x1b[39m', kickErr.message);
                 await hisoka.sendMessage(remoteJid, {
-                    text: `❌ Gagal kick ${isLid ? '_(LID)_' : `@${senderNumber}`}. Cek status admin bot.`,
+                    text:
+                        `╭─〔 ❌ *Anti-Link* 〕\n│\n` +
+                        `│ *Gagal kick* ${isLid ? '_akun privat_' : `@${senderNumber}`}!\n│\n` +
+                        `> Pastikan bot masih berstatus *admin grup*.\n│\n` +
+                        `╰────────────────────`,
                     contextInfo: { mentionedJid: _mention }
                 });
             }
         } else {
             const nextInfo = newWarn >= maxWarnings - 1
-                ? `⚡ Satu lagi = *KICK otomatis!*`
-                : `💡 Sisa *${maxWarnings - newWarn}x* lagi sebelum di-kick`;
+                ? `• ⚡ *Satu lagi = KICK otomatis!*`
+                : `• 💡 Sisa *${maxWarnings - newWarn}x* lagi sebelum di-kick`;
 
             await hisoka.sendMessage(remoteJid, {
                 text:
-                    `╭─〔 ⚠️ *Anti-Link* 〕\n│\n` +
+                    `╭─〔 ⚠️ *Anti-Link — Peringatan* 〕\n│\n` +
                     `│ 👤 ${_user}\n` +
-                    `│ 🔗 ${linkPreview}\n` +
                     `│ 🕐 ${timeStr} • ${dateStr}\n│\n` +
-                    `│ 🟡 Warn [${warnBar}] ${newWarn}/${maxWarnings}\n` +
-                    `│ ${nextInfo}\n│\n` +
-                    `│ _Dilarang kirim link di sini!_\n` +
+                    `│ 🟡 Peringatan [${warnBar}] *${newWarn}/${maxWarnings}*\n│\n` +
+                    `• Pesan berisi link _telah dihapus_\n` +
+                    `${nextInfo}\n│\n` +
+                    `> _Dilarang mengirim link di grup ini!_\n│\n` +
                     `╰────────────────────`,
                 contextInfo: { mentionedJid: _mention }
-            }, { quoted: message });
+            });
         }
     } catch (err) {
         console.error('\x1b[31m[AntiLink] Error:\x1b[39m', err.message);
@@ -483,12 +487,12 @@ export async function handleAntilink({ hisoka, m, query, tolak, logCommand, load
         sc(config);
         logCommand(m, hisoka, `antilink ${arg}`);
         return tolak(hisoka, m,
-            `╭───〔 *🌐 ANTILINK GLOBAL* 〕───╮\n│\n` +
+            `╭─〔 🌐 *Anti-Link Global* 〕\n│\n` +
             `│ ${enable ? '✅ *Global AntiLink DIAKTIFKAN!*' : '🔴 *Global AntiLink DINONAKTIFKAN!*'}\n│\n` +
             (enable
-                ? `│ ℹ️ Sekarang admin grup bisa\n│    mengaktifkan fitur ini di\n│    masing-masing grup.\n`
-                : `│ ℹ️ Fitur tidak akan aktif\n│    di semua grup.\n`) +
-            `│\n╰────────────────────────────────────╯`
+                ? `> Sekarang admin grup bisa mengaktifkan\n> fitur ini di masing-masing grup.\n`
+                : `> Fitur _tidak akan aktif_ di semua grup.\n`) +
+            `│\n╰────────────────────`
         );
     }
 
@@ -510,16 +514,16 @@ export async function handleAntilink({ hisoka, m, query, tolak, logCommand, load
         const botJid = jidNormalizedUser(hisoka.user?.id || '');
         const { isAdmin: botIsAdmin } = await getBotAdminStatus(m.from, botJid.split('@')[0], hisoka);
         const botNote = botIsAdmin
-            ? `│ 🤖 Bot Admin : ✅ Bisa hapus & kick\n`
-            : `│ 🤖 Bot Admin : ❌ *Bukan admin!*\n│    ⚠️ Jadikan bot admin agar bisa\n│    hapus pesan & kick otomatis.\n`;
+            ? `│ 🤖 Status Bot : ✅ _Admin — bisa hapus & kick_\n`
+            : `│ 🤖 Status Bot : ❌ *Bukan admin!*\n> ⚠️ Jadikan bot *admin grup* agar\n> bisa hapus pesan & kick otomatis.\n`;
 
         return tolak(hisoka, m,
-            `╭───〔 *✅ ANTI-LINK* 〕───╮\n│\n│ 🟢 *Fitur AntiLink AKTIF!*\n` +
-            (globalAutoEnabled ? `│ 🌐 *Global juga diaktifkan otomatis!*\n` : '') +
+            `╭─〔 ✅ *Anti-Link* 〕\n│\n│ 🟢 *Fitur AntiLink AKTIF!*\n` +
+            (globalAutoEnabled ? `│ 🌐 _Global juga diaktifkan otomatis!_\n` : '') +
             `│\n` + botNote +
-            `│\n│ ⚙️ Konfigurasi:\n│ • Maks. warning: *${config.antiLink?.maxWarnings ?? 3}x*\n│\n` +
-            `│ ℹ️ Link yang dikirim member akan\n│    dihapus & dapat peringatan/kick!\n│\n` +
-            `│ 👑 Admin & Owner GC bebas kirim link.\n│\n╰────────────────────────────────────╯`
+            `│\n│ ⚙️ *Konfigurasi:*\n│ • Maks. warning : *${config.antiLink?.maxWarnings ?? 3}x*\n│\n` +
+            `> Link dari member akan dihapus\n> dan mendapat peringatan atau kick.\n│\n` +
+            `│ 👑 _Admin & Owner GC bebas kirim link_\n│\n╰────────────────────`
         );
     }
 
@@ -528,8 +532,8 @@ export async function handleAntilink({ hisoka, m, query, tolak, logCommand, load
         toggleAntiLink(m.from, false);
         logCommand(m, hisoka, 'antilink off');
         return tolak(hisoka, m,
-            `╭───〔 *❌ ANTI-LINK* 〕───╮\n│\n│ 🔴 *Fitur AntiLink NONAKTIF!*\n│\n` +
-            `│ ℹ️ Semua warning di grup ini\n│    juga telah direset.\n│\n╰────────────────────────────────────╯`
+            `╭─〔 🔴 *Anti-Link* 〕\n│\n│ *Fitur AntiLink NONAKTIF!*\n│\n` +
+            `> Semua warning di grup ini\n> juga telah _direset otomatis_.\n│\n╰────────────────────`
         );
     }
 
@@ -546,12 +550,12 @@ export async function handleAntilink({ hisoka, m, query, tolak, logCommand, load
         toggleAntiLink(m.from, true);
         logCommand(m, hisoka, 'antilink add');
         return tolak(hisoka, m,
-            `╭───〔 *✅ ANTI-LINK* 〕───╮\n│\n` +
-            `│ ${alreadyAdded ? '🔄 Grup ini *sudah terdaftar* sebelumnya.' : '➕ Grup ini berhasil *ditambahkan!*'}\n│\n` +
+            `╭─〔 ✅ *Anti-Link* 〕\n│\n` +
+            `│ ${alreadyAdded ? '🔄 Grup ini _sudah terdaftar_ sebelumnya.' : '➕ Grup ini berhasil *ditambahkan!*'}\n│\n` +
             `│ 🌐 Global   : 🟢 Aktif\n│ 📌 Grup ini : 🟢 *Aktif*\n│\n` +
-            `│ ⚙️ Konfigurasi:\n│ • Maks. warning: *${config.antiLink?.maxWarnings ?? 3}x*\n│\n` +
-            `│ ℹ️ Link yang dikirim member akan\n│    dihapus & dapat peringatan/kick!\n│\n` +
-            `│ 👑 Admin & Owner GC bebas kirim link.\n│\n╰────────────────────────────────────╯`
+            `│ ⚙️ *Konfigurasi:*\n│ • Maks. warning : *${config.antiLink?.maxWarnings ?? 3}x*\n│\n` +
+            `> Link dari member akan dihapus\n> dan mendapat peringatan atau kick.\n│\n` +
+            `│ 👑 _Admin & Owner GC bebas kirim link_\n│\n╰────────────────────`
         );
     }
 
@@ -559,7 +563,7 @@ export async function handleAntilink({ hisoka, m, query, tolak, logCommand, load
     if (arg === 'reset') {
         resetAntiLinkWarnings(m.from);
         logCommand(m, hisoka, 'antilink reset');
-        return tolak(hisoka, m, '✅ Semua warning AntiLink di grup ini telah direset!');
+        return tolak(hisoka, m, `╭─〔 🔄 *Anti-Link — Reset* 〕\n│\n│ ✅ *Semua warning* di grup ini\n│ telah _direset!_\n│\n╰────────────────────`);
     }
 
     // ── warn <n> ──────────────────────────────────────────────────────────────
@@ -568,8 +572,10 @@ export async function handleAntilink({ hisoka, m, query, tolak, logCommand, load
         const warnNum = parseInt(arg.replace(/^warn\s*/,'').trim(), 10);
         if (!warnNum || isNaN(warnNum) || warnNum < 1 || warnNum > 100) {
             return tolak(hisoka, m,
-                `╭───〔 *⚠️ ANTILINK WARN* 〕───╮\n│\n│ ❌ Angka tidak valid!\n│\n` +
-                `│ 📌 Format: *.antilink warn <angka>*\n│ 📌 Contoh: *.antilink warn 5*\n│\n│ ℹ️ Angka valid: *1 - 100*\n│\n╰────────────────────────────────────╯`
+                `╭─〔 ⚠️ *Anti-Link — Warn* 〕\n│\n│ ❌ *Angka tidak valid!*\n│\n` +
+                `│ 📌 *Format:*\n│ \`.antilink warn <angka>\`\n│\n` +
+                `│ 📌 *Contoh:*\n│ \`.antilink warn 5\`\n│\n` +
+                `│ ℹ️ Angka valid: *1 — 100*\n│\n╰────────────────────`
             );
         }
         const config = lc();
@@ -579,10 +585,10 @@ export async function handleAntilink({ hisoka, m, query, tolak, logCommand, load
         sc(config);
         logCommand(m, hisoka, `antilink warn ${warnNum}`);
         return tolak(hisoka, m,
-            `╭───〔 *⚠️ ANTILINK WARN* 〕───╮\n│\n│ ✅ Batas warning berhasil diubah!\n│\n` +
-            `│ 📊 Sebelum : *${oldMax}x*\n│ 📊 Sekarang: *${warnNum}x*\n│\n` +
-            `│ ℹ️ Anggota akan dikick setelah\n│    melanggar sebanyak *${warnNum}x*\n│\n` +
-            `│ 💾 Tersimpan ke config.json\n│\n╰────────────────────────────────────╯`
+            `╭─〔 ⚙️ *Anti-Link — Warn* 〕\n│\n│ ✅ *Batas warning berhasil diubah!*\n│\n` +
+            `│ 📊 Sebelum  : ~${oldMax}x~\n│ 📊 Sekarang : *${warnNum}x*\n│\n` +
+            `> Anggota akan dikick setelah\n> melanggar sebanyak *${warnNum}x*\n│\n` +
+            `│ 💾 _Tersimpan ke config_\n│\n╰────────────────────`
         );
     }
 
@@ -591,8 +597,8 @@ export async function handleAntilink({ hisoka, m, query, tolak, logCommand, load
         const allGroups = getAllAntiLinkGroups();
         if (!allGroups.length) {
             return tolak(hisoka, m,
-                `╭───〔 *📋 DAFTAR ANTILINK* 〕───╮\n│\n│ ❌ Belum ada grup yang terdaftar.\n│\n` +
-                `│ Gunakan *.antilink add* di grup\n│ yang ingin diaktifkan.\n│\n╰────────────────────────────────────╯`
+                `╭─〔 📋 *Daftar Anti-Link* 〕\n│\n│ ❌ _Belum ada grup yang terdaftar._\n│\n` +
+                `> Gunakan \`.antilink add\` di grup\n> yang ingin diaktifkan.\n│\n╰────────────────────`
             );
         }
 
@@ -642,11 +648,11 @@ export async function handleAntilink({ hisoka, m, query, tolak, logCommand, load
         }
 
         const listText =
-            `╭───〔 *📋 DAFTAR ANTILINK* 〕───╮\n│\n│ 🟢 Total aktif: *${allGroups.length} grup*\n│\n` +
+            `╭─〔 📋 *Daftar Anti-Link* 〕\n│\n│ 🟢 Total aktif: *${allGroups.length} grup*\n│\n` +
             listBaris +
-            `│ ─────────────────────────────────\n│ 🗑️ *Cara hapus:*\n` +
+            `│ ─────────────────\n│ 🗑️ *Cara hapus:*\n` +
             `│ Reply pesan ini dengan nomor urut\n│ Contoh: *1* atau *1,2* atau *1,2,3*\n│\n` +
-            `│ Ketik *semua* → hapus semua grup\n│ Ketik *reset* → reset warning semua\n│\n╰────────────────────────────────────╯`;
+            `│ • Ketik *semua* → hapus semua grup\n│ • Ketik *reset* → reset warning semua\n│\n╰────────────────────`;
 
         if (!global.__antiLinkListSessions) global.__antiLinkListSessions = new Map();
         const sentList = await hisoka.sendMessage(m.from, { text: listText }, { quoted: m }).catch(() => null);
@@ -680,12 +686,13 @@ export async function handleAntilink({ hisoka, m, query, tolak, logCommand, load
 
         if (!rawLogs.length) {
             return tolak(hisoka, m,
-                `╭───〔 *📜 LOG ANTILINK* 〕───╮\n│\n│ ℹ️ Belum ada riwayat pelanggaran${showAll ? '' : ' di grup ini'}.\n│\n` +
-                `│ 📋 Sub-perintah:\n│ • *.antilink log*           → Log grup ini\n` +
-                (m.isOwner ? `│ • *.antilink log all*        → Semua grup\n` : '') +
-                `│ • *.antilink log clear*      → Hapus log grup ini\n` +
-                (m.isOwner ? `│ • *.antilink log clear all*  → Hapus semua\n` : '') +
-                `│\n╰────────────────────────────────────╯`
+                `╭─〔 📜 *Log Anti-Link* 〕\n│\n│ ℹ️ _Belum ada riwayat pelanggaran${showAll ? '' : ' di grup ini'}._\n│\n` +
+                `│ 📋 *Sub-perintah:*\n` +
+                `│ • \`.antilink log\` — Log grup ini\n` +
+                (m.isOwner ? `│ • \`.antilink log all\` — Semua grup\n` : '') +
+                `│ • \`.antilink log clear\` — Hapus log grup\n` +
+                (m.isOwner ? `│ • \`.antilink log clear all\` — Hapus semua\n` : '') +
+                `│\n╰────────────────────`
             );
         }
 
@@ -704,9 +711,9 @@ export async function handleAntilink({ hisoka, m, query, tolak, logCommand, load
                 catch { try { namaCache[gid] = hisoka.groups?.read(gid)?.subject || gid.split('@')[0]; } catch { namaCache[gid] = gid.split('@')[0]; } }
             }));
             const header =
-                `╭───〔 *📜 LOG ANTILINK — SEMUA GRUP* 〕───╮\n│\n` +
-                `│ 🏘️ Jumlah grup: *${uniqueGids.length}*\n│ 📊 Total log  : *${rawLogs.length}*\n` +
-                `│ 🟡 Warn: *${totalWarn}* | 🔴 Kick: *${totalKick}*\n│\n╰────────────────────────────────────╯`;
+                `╭─〔 📜 *Log Anti-Link — Semua Grup* 〕\n│\n` +
+                `│ 🏘️ Jumlah grup : *${uniqueGids.length}*\n│ 📊 Total log   : *${rawLogs.length}*\n` +
+                `│ 🟡 Warn: *${totalWarn}* | 🔴 Kick: *${totalKick}*\n│\n╰────────────────────`;
             const GRUP_PER_MSG = 5;
             for (let gi = 0; gi < uniqueGids.length; gi += GRUP_PER_MSG) {
                 const batch = uniqueGids.slice(gi, gi + GRUP_PER_MSG);
@@ -734,14 +741,15 @@ export async function handleAntilink({ hisoka, m, query, tolak, logCommand, load
                 logBaris += `│ *${i+1}.* ${_fmtAction(l)}\n│    👤 @${l.senderNum || l.senderJid?.split('@')[0]}\n│    🔗 ${l.link || '-'} • 🕐 ${_fmtWaktu(l.ts)}\n│\n`;
             }
             await tolak(hisoka, m,
-                `╭───〔 *📜 LOG ANTILINK* 〕───╮\n│\n│ 📊 Total log grup ini: *${rawLogs.length}*\n` +
-                `│ 🟡 Warn: *${totalWarn}* | 🔴 Kick: *${totalKick}*\n│ (Tampil 25 terbaru)\n│\n` +
+                `╭─〔 📜 *Log Anti-Link* 〕\n│\n│ 📊 Total log grup ini: *${rawLogs.length}*\n` +
+                `│ 🟡 Warn: *${totalWarn}* | 🔴 Kick: *${totalKick}*\n│ _Tampil 25 terbaru_\n│\n` +
                 logBaris +
-                `│ 📋 Sub-perintah:\n│ • *.antilink log*           → Log grup ini\n` +
-                (m.isOwner ? `│ • *.antilink log all*        → Semua grup\n` : '') +
-                `│ • *.antilink log clear*      → Hapus log grup ini\n` +
-                (m.isOwner ? `│ • *.antilink log clear all*  → Hapus semua\n` : '') +
-                `│\n╰────────────────────────────────────╯`
+                `│ 📋 *Sub-perintah:*\n` +
+                `│ • \`.antilink log\` — Log grup ini\n` +
+                (m.isOwner ? `│ • \`.antilink log all\` — Semua grup\n` : '') +
+                `│ • \`.antilink log clear\` — Hapus log grup\n` +
+                (m.isOwner ? `│ • \`.antilink log clear all\` — Hapus semua\n` : '') +
+                `│\n╰────────────────────`
             );
         }
         logCommand(m, hisoka, 'antilink log');
