@@ -1,0 +1,44 @@
+{
+  "AC0A956DB013177481BD4E33F6255BA3": {
+    "id": "AC0A956DB013177481BD4E33F6255BA3",
+    "sender": "6285800889266@s.whatsapp.net",
+    "name": "harry potter",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-27T09:34:38.378Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐺",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285800889266",
+    "resolvedPn": "6285800889266@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285800889266@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC0A956DB013177481BD4E33F6255BA3",
+      "participant": "101611057766412@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-27T09:34:57.569Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285800889266@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC0A956DB013177481BD4E33F6255BA3",
+        "participant": "101611057766412@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285800889266@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC0A956DB013177481BD4E33F6255BA3",
+        "participant": "6285800889266@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-27T09:34:57.569Z"
+  }
+}
