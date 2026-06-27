@@ -1560,13 +1560,24 @@ async function main() {
                                                         const caption   = _alq.buatCaptionGabung(item);
                                                         const urlGambar = _alq.ambilUrlGambar(item);
 
+                                                        // Download buffer dulu → bypass Cloudflare/stream block
+                                                        let imgBuffer = null;
+                                                        if (urlGambar) {
+                                                                imgBuffer = await _alq.downloadImageBuffer(urlGambar);
+                                                        }
+
                                                         const BATCH = 5;
                                                         for (let i = 0; i < daftarGrup.length; i += BATCH) {
                                                                 const chunk = daftarGrup.slice(i, i + BATCH);
                                                                 await Promise.allSettled(chunk.map(async jid => {
                                                                         try {
-                                                                                // 1 pesan: gambar + caption gabungan (info + sinopsis + download)
-                                                                                if (urlGambar) {
+                                                                                if (imgBuffer) {
+                                                                                        await hisoka.sendMessage(jid, {
+                                                                                                image   : imgBuffer,
+                                                                                                mimetype: 'image/jpeg',
+                                                                                                caption,
+                                                                                        });
+                                                                                } else if (urlGambar) {
                                                                                         await hisoka.sendMessage(jid, {
                                                                                                 image: { url: urlGambar },
                                                                                                 caption,

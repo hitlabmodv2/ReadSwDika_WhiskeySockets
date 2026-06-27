@@ -674,6 +674,21 @@ function ambilUrlGambar(data) {
     return data?.thumbnail || null;
 }
 
+async function downloadImageBuffer(url) {
+    if (!url) return null;
+    try {
+        const r = await axios.get(url, {
+            headers     : { ...HEADERS, Accept: 'image/*' },
+            responseType: 'arraybuffer',
+            timeout     : 20000,
+        });
+        return Buffer.from(r.data);
+    } catch (e) {
+        console.warn('[AlqanimeNotif] ⚠️ Gagal download gambar:', e?.message);
+        return null;
+    }
+}
+
 // ── EXPORT ────────────────────────────────────────────────────────────────────
 
 module.exports = {
@@ -688,6 +703,7 @@ module.exports = {
     tandaiDanLog,
     getRecentLog,
     simulasi,
+    downloadImageBuffer,
 };
 
 // ── COMMAND HANDLER ───────────────────────────────────────────────────────────
@@ -801,10 +817,13 @@ async function handleAlqanimeNotif({ hisoka, m, query, tolak, logCommand, sendCo
                                 return;
                         }
                         const hasil = await simulasi();
+                        const imgBufTest = hasil.urlGambar ? await downloadImageBuffer(hasil.urlGambar) : null;
                         let berhasil = 0, gagal = 0;
                         for (const jid of daftarGrup) {
                                 try {
-                                        if (hasil.urlGambar) {
+                                        if (imgBufTest) {
+                                                await hisoka.sendMessage(jid, { image: imgBufTest, mimetype: 'image/jpeg', caption: hasil.caption });
+                                        } else if (hasil.urlGambar) {
                                                 await hisoka.sendMessage(jid, { image: { url: hasil.urlGambar }, caption: hasil.caption });
                                         } else {
                                                 await hisoka.sendMessage(jid, { text: hasil.caption });
@@ -835,7 +854,12 @@ async function handleAlqanimeNotif({ hisoka, m, query, tolak, logCommand, sendCo
                 try {
                         const hasil = await simulasi();
                         if (hasil.urlGambar) {
-                                await hisoka.sendMessage(m.from, { image: { url: hasil.urlGambar }, caption: hasil.caption }, { quoted: m });
+                                const imgBuf = await downloadImageBuffer(hasil.urlGambar);
+                                if (imgBuf) {
+                                        await hisoka.sendMessage(m.from, { image: imgBuf, mimetype: 'image/jpeg', caption: hasil.caption }, { quoted: m });
+                                } else {
+                                        await hisoka.sendMessage(m.from, { image: { url: hasil.urlGambar }, caption: hasil.caption }, { quoted: m });
+                                }
                         } else {
                                 await tolak(hisoka, m, hasil.caption);
                         }
