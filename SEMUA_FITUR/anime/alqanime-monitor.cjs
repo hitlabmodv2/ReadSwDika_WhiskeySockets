@@ -196,16 +196,13 @@ function getRecentLog(jumlah = 20) {
 // RETRY_TTL_MS (30 menit) sebelum diabaikan permanen.
 
 async function cariEpisodeBaru() {
-    const { getLatestAlqanime, getDetailAlqanime } = require('./alqanime.cjs');
+    const { getHomepageData, getDetailAlqanime } = require('./alqanime.cjs');
 
     const now  = Date.now();
     const data = bacaData();
 
-    // Simpan apakah ini first run SEBELUM menimpa lastCheckTime
     const isFirstRun = !data.lastCheckTime;
 
-    // Simpan waktu check sekarang SEBELUM proses
-    // (agar check berikutnya punya referensi waktu yang akurat — sama seperti animasu)
     data.lastCheckTime = now;
     if (!data.idTerkirim) data.idTerkirim = [];
     if (!data.idGagal)    data.idGagal    = [];
@@ -213,6 +210,17 @@ async function cariEpisodeBaru() {
 
     const baru        = [];
     const idGagalBaru = [];
+
+    // ── Fetch homepage 1x — dapat semua section sekaligus ─────────────────────
+    let homeData = { lagiHangat: [], rilisanTerbaru: [], semua: [] };
+    try {
+        homeData = await getHomepageData();
+    } catch (e) {
+        console.error('[AlqanimeNotif] ❌ Gagal fetch homepage:', e?.message);
+    }
+
+    const cards    = homeData.semua;
+    const sections = { lagiHangat: homeData.lagiHangat, rilisanTerbaru: homeData.rilisanTerbaru };
 
     // ── Retry gagal sebelumnya ─────────────────────────────────────────────────
     for (const gagal of (data.idGagal || [])) {
@@ -226,14 +234,15 @@ async function cariEpisodeBaru() {
         }
 
         try {
-            const detail  = await getDetailAlqanime(gagal.url);
-            const item    = {
+            const detail = await getDetailAlqanime(gagal.url);
+            const item   = {
                 id       : gagal.id,
                 url      : gagal.url,
                 judul    : gagal.judul,
                 epNum    : gagal.epNum,
                 thumbnail: detail.thumbnail || gagal.thumbnail,
                 ...detail,
+                sections,
             };
             console.log(`[AlqanimeNotif] 🔄 Retry berhasil: "${gagal.judul}" ep ${gagal.epNum}`);
             baru.push(item);
@@ -243,26 +252,14 @@ async function cariEpisodeBaru() {
         }
     }
 
-    // ── Fetch homepage ─────────────────────────────────────────────────────────
-    let cards = [];
-    try {
-        cards = await getLatestAlqanime();
-    } catch (e) {
-        console.error('[AlqanimeNotif] ❌ Gagal fetch homepage:', e?.message);
-    }
-
-    // ── Pertama kali bot jalan (tidak ada lastCheckTime sebelumnya) ────────────
-    // Tandai semua card saat ini sebagai seen, jangan kirim
-    // Sama seperti animasu: hindari flood notif saat bot baru start
+    // ── Pertama kali bot jalan — tandai semua sebagai seen, jangan kirim ──────
     if (isFirstRun) {
         console.log(`[AlqanimeNotif] 🚀 First run — tandai ${cards.length} card sebagai seen`);
         const df = bacaData();
         for (const card of cards) {
             const { epNum } = parseJudulEp(card.title || '');
             const id = buatId(card.url, epNum);
-            if (!df.idTerkirim.includes(String(id))) {
-                df.idTerkirim.unshift(String(id));
-            }
+            if (!df.idTerkirim.includes(String(id))) df.idTerkirim.unshift(String(id));
         }
         df.idGagal = idGagalBaru;
         simpanData(df);
@@ -285,6 +282,7 @@ async function cariEpisodeBaru() {
                 epNum    : epD || epNum,
                 thumbnail: detail.thumbnail || card.thumbnail,
                 ...detail,
+                sections,
             };
             baru.push(baseItem);
         } catch (e) {
@@ -300,7 +298,6 @@ async function cariEpisodeBaru() {
         }
     }
 
-    // Simpan antrian retry terbaru
     const dataFinal = bacaData();
     dataFinal.idGagal = idGagalBaru;
     simpanData(dataFinal);
@@ -311,10 +308,13 @@ async function cariEpisodeBaru() {
 // ── SIMULASI ──────────────────────────────────────────────────────────────────
 
 async function simulasi() {
-    const { getRilisanTerbaru, getDetailAlqanime } = require('./alqanime.cjs');
+    const { getHomepageData, getDetailAlqanime } = require('./alqanime.cjs');
 
-    const cards = await getRilisanTerbaru();
+    const homeData = await getHomepageData();
+    const cards    = homeData.rilisanTerbaru.length ? homeData.rilisanTerbaru : homeData.semua;
     if (!cards.length) throw new Error('Tidak ada rilisan terbaru dari alqanime.net');
+
+    const sections = { lagiHangat: homeData.lagiHangat, rilisanTerbaru: homeData.rilisanTerbaru };
 
     const card   = cards[0];
     const { judul, epNum } = parseJudulEp(card.title || '');
@@ -329,6 +329,7 @@ async function simulasi() {
         epNum    : epD || epNum,
         thumbnail: detail.thumbnail || card.thumbnail,
         ...detail,
+        sections,
     };
 
     const caption   = buatCaptionGabung(baseItem);
@@ -537,6 +538,7 @@ function buatCaptionGabung(data) {
     const {
         judul, epNum, title,
         info = {}, genres = [], sinopsis, episodes = [], url,
+        sections = {},
     } = data;
 
     const sekarang   = new Date();
@@ -642,6 +644,32 @@ function buatCaptionGabung(data) {
         }
     }
 
+    // ── Blok section: Lagi Hangat + Rilisan Terbaru ──────────────────────────
+    let sectionBlok = '';
+    const lagiHangat     = Array.isArray(sections?.lagiHangat)     ? sections.lagiHangat     : [];
+    const rilisanTerbaru = Array.isArray(sections?.rilisanTerbaru) ? sections.rilisanTerbaru : [];
+
+    if (lagiHangat.length || rilisanTerbaru.length) {
+        sectionBlok += `\n${SEP}`;
+
+        if (lagiHangat.length) {
+            sectionBlok += `\n🔥 *Lagi Hangat Saat Ini*\n${SEP2}\n`;
+            lagiHangat.slice(0, 5).forEach((a, i) => {
+                const scoreStr = a.score ? ` ⭐${a.score}` : '';
+                sectionBlok += `${i + 1}. ${a.title}${scoreStr}\n`;
+            });
+        }
+
+        if (rilisanTerbaru.length) {
+            sectionBlok += `\n📋 *Rilisan Terbaru*\n${SEP2}\n`;
+            rilisanTerbaru.slice(0, 5).forEach((a, i) => {
+                sectionBlok += `${i + 1}. ${a.title}\n`;
+            });
+        }
+
+        sectionBlok = sectionBlok.trimEnd();
+    }
+
     // ── Rakitan caption ──
     const baris = [
         headerUtama,
@@ -665,6 +693,7 @@ function buatCaptionGabung(data) {
         `▶️ *Tonton* : ${url}`,
         `🔗 *Source* : alqanime.net`,
         dlBlok ? dlBlok : null,
+        sectionBlok ? sectionBlok : null,
     ];
 
     return baris.filter(b => b !== null).join('\n');

@@ -195,13 +195,28 @@ async function getLatestAlqanime() {
 
 async function getRilisanTerbaru() {
     const md = await fetchMarkdown(BASE);
-    // Potong hanya seksi "Rilisan Terbaru" sampai seksi berikutnya
     const sectionM = md.match(/###\s*Rilisan Terbaru\s*\n([\s\S]*?)(?=###\s|\n##\s|$)/i);
-    if (!sectionM) return parseAnimeCards(md); // fallback ke semua cards
+    if (!sectionM) return parseAnimeCards(md);
     return parseAnimeCards(sectionM[1]);
 }
 
-module.exports = { searchAlqanime, getDetailAlqanime, getLatestAlqanime, getRilisanTerbaru };
+// Fetch homepage 1x, parse semua section sekaligus — tidak ada request ganda
+async function getHomepageData() {
+    const md = await fetchMarkdown(BASE);
+
+    const _parseSection = (pattern) => {
+        const m = md.match(pattern);
+        return m ? parseAnimeCards(m[1]) : [];
+    };
+
+    const lagiHangat     = _parseSection(/###\s*Lagi\s*Hangat\s*(?:Saat\s*Ini)?\s*\n([\s\S]*?)(?=###\s|\n##\s|$)/i);
+    const rilisanTerbaru = _parseSection(/###\s*Rilisan\s*Terbaru\s*\n([\s\S]*?)(?=###\s|\n##\s|$)/i);
+    const semua          = parseAnimeCards(md);
+
+    return { lagiHangat, rilisanTerbaru, semua };
+}
+
+module.exports = { searchAlqanime, getDetailAlqanime, getLatestAlqanime, getRilisanTerbaru, getHomepageData };
 
 // ── COMMAND HANDLER ───────────────────────────────────────────────────────────
 
