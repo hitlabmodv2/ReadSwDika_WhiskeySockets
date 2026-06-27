@@ -373,16 +373,16 @@ export default async function handleAntiLink(message, hisoka) {
             await hisoka.sendMessage(remoteJid, {
                 text:
                     `╭─〔 ⚠️ *Anti-Link* 〕\n│\n` +
-                    `│ 👤 ${_user2} mengirim link!\n` +
-                    `│ 🔗 ${linkPreview}\n` +
-                    `│ 🕐 ${timeStr} • ${dateStr}\n│\n` +
+                    `│ 👤 ${_user2}\n` +
+                    `│ 📅 ${timeStr} • ${dateStr}\n│\n` +
+                    `│ ⚠️ Mengirim *link* di grup ini!\n│\n` +
                     `│ ❌ Bot *bukan admin*, tidak bisa\n` +
                     `│    hapus pesan atau kick member.\n│\n` +
                     `│ ℹ️ Jadikan bot *admin grup* agar\n` +
                     `│    Anti-Link bisa berjalan penuh!\n` +
                     `╰────────────────────`,
                 contextInfo: { mentionedJid: _mention2 }
-            }, { quoted: message });
+            });
             return;
         }
 
