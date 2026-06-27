@@ -674,30 +674,65 @@ function ambilUrlGambar(data) {
     return data?.thumbnail || null;
 }
 
-// Buat proxy URL via wsrv.nl (image CDN proxy gratis)
-// Dipakai sebagai fallback saat direct URL diblokir server alqanime.net
+// ── IMAGE DOWNLOAD + PROXY ────────────────────────────────────────────────────
+
+// Cache strategi per domain: 'direct' | 'proxy'
+// Kalau domain sudah diketahui blokir direct fetch → langsung skip ke proxy
+// Reset otomatis tiap 6 jam supaya tidak stuck selamanya
+const _domainStrategy = {};   // { 'alqanime.net': { mode: 'proxy', since: timestamp } }
+const STRATEGY_TTL_MS = 6 * 60 * 60 * 1000; // 6 jam
+
+function _getStrategy(domain) {
+    const entry = _domainStrategy[domain];
+    if (!entry) return 'direct';
+    if (Date.now() - entry.since > STRATEGY_TTL_MS) {
+        delete _domainStrategy[domain]; // expired — coba direct lagi
+        return 'direct';
+    }
+    return entry.mode;
+}
+
+function _setStrategy(domain, mode) {
+    _domainStrategy[domain] = { mode, since: Date.now() };
+}
+
+// Buat proxy URL via wsrv.nl (image CDN proxy, bypass hotlink/IP block)
 function buatProxyUrl(url) {
     if (!url) return null;
     return `https://wsrv.nl/?url=${encodeURIComponent(url)}&output=jpg&q=90`;
 }
 
+// Download gambar ke buffer.
+// Kalau direct sudah diketahui gagal → skip langsung, return null → caller pakai buatProxyUrl()
 async function downloadImageBuffer(url) {
     if (!url) return null;
 
-    // Coba download langsung dengan Referer alqanime.net
+    let domain;
+    try { domain = new URL(url).hostname; } catch (_) { return null; }
+
+    if (_getStrategy(domain) === 'proxy') {
+        return null; // sudah diketahui gagal — langsung skip
+    }
+
+    // Coba direct dengan Referer domain sendiri
     try {
         const r = await axios.get(url, {
             headers: {
                 ...HEADERS,
                 Accept  : 'image/webp,image/apng,image/*,*/*;q=0.8',
-                Referer : 'https://alqanime.net/',
-                Origin  : 'https://alqanime.net',
+                Referer : `https://${domain}/`,
+                Origin  : `https://${domain}`,
             },
             responseType: 'arraybuffer',
-            timeout     : 15000,
+            timeout     : 12000,
         });
-        if (r.data && r.data.byteLength > 1000) return Buffer.from(r.data);
-    } catch (_) {}
+        if (r.data && r.data.byteLength > 1000) {
+            _setStrategy(domain, 'direct'); // konfirmasi direct berhasil
+            return Buffer.from(r.data);
+        }
+    } catch (_) {
+        _setStrategy(domain, 'proxy'); // catat: domain ini blokir direct
+    }
 
     return null;
 }

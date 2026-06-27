@@ -40,5 +40,47 @@
       }
     ],
     "processedAt": "2026-06-27T03:55:37.311Z"
+  },
+  "AC081A73545CB3814868A1E2E801DFBB": {
+    "id": "AC081A73545CB3814868A1E2E801DFBB",
+    "sender": "6281342509401@s.whatsapp.net",
+    "name": "pen femes",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-27T05:15:32.253Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "⚽",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6281342509401",
+    "resolvedPn": "6281342509401@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6281342509401@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC081A73545CB3814868A1E2E801DFBB",
+      "participant": "18180663689449@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-27T05:15:36.607Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281342509401@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC081A73545CB3814868A1E2E801DFBB",
+        "participant": "18180663689449@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281342509401@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC081A73545CB3814868A1E2E801DFBB",
+        "participant": "6281342509401@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-27T05:15:36.607Z"
   }
 }
