@@ -34,41 +34,33 @@ const { isJidGroup, jidNormalizedUser, areJidsSameUser, jidDecode, getContentTyp
 
 import { kvGet, kvSet } from '../../src/db/datadb.js';
 
-// Set global untuk menandai pesan yang dihapus oleh antilink
-// agar anti-delete tidak mengirim notifikasi "PESAN DIHAPUS"
+// Tandai pesan yang dihapus oleh antilink agar anti-delete tidak notif
 if (!global.__antiLinkDeletedIds) global.__antiLinkDeletedIds = new Set();
 
 // ─── Regex deteksi link ───────────────────────────────────────────────────────
 const LINK_REGEX = /(?:https?:\/\/|www\.)[^\s<>"']+|(?:[a-zA-Z0-9](?:[a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+(?:com|net|org|id|co|io|me|info|biz|tv|online|site|web|app|shop|store|link|cc|to|ly|gg|lol|wtf|xyz|top|pro|live|news|tech|digital|media|click|page|space|chat|group|my|asia|be|in|us|uk|de|fr|ru|jp|au|ca|it|es|br|nl|pl|se|no|fi|dk|sg|ph|vn|th|hk|tw|nz|za|ae|tr|mx|ar|cl|pe)\b(?:[\/\w\-._~:/?#[\]@!$&'()*+,;=%]*)?/gi;
 
-// ─── Tipe pesan yang bisa mengandung teks / caption ──────────────────────────
+// Tipe pesan yang bisa mengandung teks / caption
 const TEXT_MSG_TYPES = [
-    'conversation',
-    'extendedTextMessage',
-    'imageMessage',
-    'videoMessage',
-    'documentMessage',
-    'documentWithCaptionMessage',
-    'audioMessage',
-    'buttonsMessage',
-    'listMessage',
-    'templateMessage',
+    'conversation', 'extendedTextMessage',
+    'imageMessage', 'videoMessage', 'documentMessage',
+    'documentWithCaptionMessage', 'audioMessage',
+    'buttonsMessage', 'listMessage', 'templateMessage',
 ];
 
 // ─── Config & Data helpers ────────────────────────────────────────────────────
 
 function loadConfig() {
     try {
-        const configPath = path.join(process.cwd(), 'config.json');
-        if (fs.existsSync(configPath)) return JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+        const p = path.join(process.cwd(), 'config.json');
+        if (fs.existsSync(p)) return JSON.parse(fs.readFileSync(p, 'utf-8'));
     } catch (_) {}
     return {};
 }
 
-function saveConfig(config) {
+function saveConfig(cfg) {
     try {
-        const configPath = path.join(process.cwd(), 'config.json');
-        fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf-8');
+        fs.writeFileSync(path.join(process.cwd(), 'config.json'), JSON.stringify(cfg, null, 2), 'utf-8');
     } catch (err) {
         console.error('\x1b[31m[AntiLink] Gagal simpan config:\x1b[39m', err.message);
     }
@@ -78,56 +70,53 @@ function loadData() {
     return kvGet('security/antilink', { groups: [], warnings: {} });
 }
 
-function saveData(data) {
-    try {
-        kvSet('security/antilink', data);
-    } catch (err) {
-        console.error('\x1b[31m[AntiLink] Gagal simpan data:\x1b[39m', err.message);
-    }
+function saveData(d) {
+    try { kvSet('security/antilink', d); }
+    catch (err) { console.error('\x1b[31m[AntiLink] Gagal simpan data:\x1b[39m', err.message); }
 }
 
 // ─── Exported helpers ─────────────────────────────────────────────────────────
 
 export function isAntiLinkEnabled(groupId) {
-    const data = loadData();
-    return Array.isArray(data.groups) && data.groups.includes(groupId);
+    const d = loadData();
+    return Array.isArray(d.groups) && d.groups.includes(groupId);
 }
 
 export function toggleAntiLink(groupId, enable) {
-    const data = loadData();
-    if (!Array.isArray(data.groups)) data.groups = [];
-    if (!data.warnings) data.warnings = {};
+    const d = loadData();
+    if (!Array.isArray(d.groups)) d.groups = [];
+    if (!d.warnings) d.warnings = {};
     if (enable) {
-        if (!data.groups.includes(groupId)) data.groups.push(groupId);
+        if (!d.groups.includes(groupId)) d.groups.push(groupId);
     } else {
-        data.groups = data.groups.filter(g => g !== groupId);
-        if (data.warnings[groupId]) delete data.warnings[groupId];
+        d.groups = d.groups.filter(g => g !== groupId);
+        if (d.warnings[groupId]) delete d.warnings[groupId];
     }
-    saveData(data);
+    saveData(d);
 }
 
 export function getAntiLinkWarnings(groupId) {
-    const data = loadData();
-    return (data.warnings || {})[groupId] || {};
+    const d = loadData();
+    return (d.warnings || {})[groupId] || {};
 }
 
 export function resetAntiLinkWarnings(groupId) {
-    const data = loadData();
-    if (!data.warnings) data.warnings = {};
-    if (groupId) delete data.warnings[groupId];
-    else data.warnings = {};
-    saveData(data);
+    const d = loadData();
+    if (!d.warnings) d.warnings = {};
+    if (groupId) delete d.warnings[groupId];
+    else d.warnings = {};
+    saveData(d);
 }
 
 export function getAllAntiLinkGroups() {
-    const data = loadData();
-    return Array.isArray(data.groups) ? data.groups : [];
+    const d = loadData();
+    return Array.isArray(d.groups) ? [...d.groups] : [];
 }
 
 // ─── Log ──────────────────────────────────────────────────────────────────────
 
 const _LOG_KEY = 'security/antilink_log';
-const _LOG_MAX = 500;
+const _LOG_MAX  = 500;
 
 function appendLog(entry) {
     try {
@@ -148,28 +137,26 @@ export function getAntiLinkLog(groupId) {
 export function clearAntiLinkLog(groupId) {
     try {
         if (!groupId) { kvSet(_LOG_KEY, []); return; }
-        const logs = kvGet(_LOG_KEY, []);
-        kvSet(_LOG_KEY, logs.filter(l => l.gid !== groupId));
+        kvSet(_LOG_KEY, kvGet(_LOG_KEY, []).filter(l => l.gid !== groupId));
     } catch (_) {}
 }
 
 // ─── Ambil teks dari berbagai tipe pesan ─────────────────────────────────────
+
 function extractTextFromMsgObj(msgObj) {
     if (!msgObj || typeof msgObj !== 'object') return '';
-    const msgType = getContentType(msgObj);
-    if (!msgType) return '';
-    const inner = msgObj[msgType] || {};
-    if (msgType === 'conversation') return inner || '';
-    if (msgType === 'extendedTextMessage') return inner.text || '';
-    if (['imageMessage', 'videoMessage', 'documentMessage', 'documentWithCaptionMessage', 'audioMessage'].includes(msgType)) {
+    const t = getContentType(msgObj);
+    if (!t) return '';
+    const inner = msgObj[t] || {};
+    if (t === 'conversation') return inner || '';
+    if (t === 'extendedTextMessage') return inner.text || '';
+    if (['imageMessage','videoMessage','documentMessage','documentWithCaptionMessage','audioMessage'].includes(t))
         return inner.caption || '';
-    }
-    if (msgType === 'buttonsMessage') return inner.contentText || inner.footerText || '';
-    if (msgType === 'listMessage') return inner.description || inner.title || '';
-    if (msgType === 'templateMessage') {
+    if (t === 'buttonsMessage') return inner.contentText || inner.footerText || '';
+    if (t === 'listMessage') return inner.description || inner.title || '';
+    if (t === 'templateMessage')
         return inner.hydratedTemplate?.hydratedContentText
             || inner.hydratedFourRowTemplate?.hydratedContentText || '';
-    }
     return '';
 }
 
@@ -195,70 +182,52 @@ function getContextInfo(message) {
     if (!message?.message) return null;
     try {
         const msgObj = message.message;
-        const msgType = getContentType(msgObj);
-        if (!msgType) return null;
-        const inner = msgObj[msgType];
+        const t = getContentType(msgObj);
+        if (!t) return null;
+        const inner = msgObj[t];
         if (typeof inner === 'object' && inner?.contextInfo) return inner.contextInfo;
     } catch (_) {}
     return null;
 }
 
-// ─── Helper admin ─────────────────────────────────────────────────────────────
+// ─── Admin helpers ────────────────────────────────────────────────────────────
+
 function findParticipant(participants, targetNumber) {
     return participants?.find(p => {
-        const rawJid = p.jid || p.phoneNumber || p.id || '';
-        const pNum = rawJid.split('@')[0].split(':')[0];
-        return pNum === targetNumber;
+        const num = (p.jid || p.phoneNumber || p.id || '').split('@')[0].split(':')[0];
+        return num === targetNumber;
     });
 }
 
-function loadBotAdminFile() {
-    return kvGet('botadmin/botadmin', {});
-}
-
-function saveBotAdminFile(data) {
-    try { kvSet('botadmin/botadmin', data); } catch (_) {}
-}
+function loadBotAdminFile() { return kvGet('botadmin/botadmin', {}); }
+function saveBotAdminFile(d) { try { kvSet('botadmin/botadmin', d); } catch (_) {} }
 
 function isOwnerJid(senderJid, senderNumber, config) {
-    const owners = (config.owners || []);
-    const ownerJids = owners.map(o => o + '@s.whatsapp.net');
-    return ownerJids.some(o => areJidsSameUser(o, senderJid)) ||
-        owners.some(o => senderNumber === o);
+    const owners = config.owners || [];
+    return owners.some(o => areJidsSameUser(o + '@s.whatsapp.net', senderJid) || o === senderNumber);
 }
 
-// ─── Fetch bot admin status (realtime + fallback cache) ───────────────────────
 async function getBotAdminStatus(remoteJid, botNumber, hisoka) {
-    let groupMeta = null;
-    let isAdmin = false;
+    let groupMeta = null, isAdmin = false;
     try {
         groupMeta = await hisoka.groupMetadata(remoteJid);
         if (groupMeta) hisoka.groups?.write(remoteJid, groupMeta);
-        const botP = findParticipant(groupMeta?.participants, botNumber);
-        isAdmin = !!botP?.admin;
-        const bad = loadBotAdminFile();
-        bad[remoteJid] = isAdmin;
-        saveBotAdminFile(bad);
+        isAdmin = !!findParticipant(groupMeta?.participants, botNumber)?.admin;
+        const bad = loadBotAdminFile(); bad[remoteJid] = isAdmin; saveBotAdminFile(bad);
     } catch (_) {
         const bad = loadBotAdminFile();
         if (remoteJid in bad) isAdmin = bad[remoteJid] === true;
         groupMeta = hisoka.groups?.read(remoteJid) || null;
-        if (groupMeta) {
-            const botP = findParticipant(groupMeta?.participants, botNumber);
-            isAdmin = !!botP?.admin;
-        }
+        if (groupMeta) isAdmin = !!findParticipant(groupMeta?.participants, botNumber)?.admin;
     }
     return { groupMeta, isAdmin };
 }
 
-// ─── Hapus pesan dengan mark __antiLinkDeletedIds ────────────────────────────
 async function deleteMsg(remoteJid, msgId, participant, hisoka) {
     global.__antiLinkDeletedIds.add(msgId);
     setTimeout(() => global.__antiLinkDeletedIds.delete(msgId), 10000);
     try {
-        await hisoka.sendMessage(remoteJid, {
-            delete: { remoteJid, fromMe: false, id: msgId, participant }
-        });
+        await hisoka.sendMessage(remoteJid, { delete: { remoteJid, fromMe: false, id: msgId, participant } });
         return true;
     } catch (err) {
         console.error('\x1b[31m[AntiLink] Gagal hapus pesan:\x1b[39m', err.message);
@@ -266,53 +235,44 @@ async function deleteMsg(remoteJid, msgId, participant, hisoka) {
     }
 }
 
-// ─── Statistik grup ───────────────────────────────────────────────────────────
 function buildGroupStats(groupMeta, newWarn, maxWarnings) {
-    const participants = groupMeta?.participants || [];
-    const totalMembers = participants.length;
-    const totalAdmins = participants.filter(p => p.admin).length;
+    const parts = groupMeta?.participants || [];
+    const totalMembers = parts.length;
+    const totalAdmins = parts.filter(p => p.admin).length;
     const totalMembers_ = totalMembers - totalAdmins;
     const filled = '◆'.repeat(Math.min(newWarn, maxWarnings));
-    const empty = '◇'.repeat(Math.max(maxWarnings - newWarn, 0));
+    const empty  = '◇'.repeat(Math.max(maxWarnings - newWarn, 0));
     const warnBar = filled + empty;
-    const adminPct = totalMembers > 0 ? Math.round((totalAdmins / totalMembers) * 10) : 0;
-    const memberPct = 10 - adminPct;
-    const adminBar = '█'.repeat(adminPct) + '░'.repeat(memberPct);
-    return {
-        totalMembers, totalAdmins, totalMembers_, warnBar, adminBar,
-        adminPct: totalMembers > 0 ? Math.round((totalAdmins / totalMembers) * 100) : 0
-    };
+    const ap = totalMembers > 0 ? Math.round((totalAdmins / totalMembers) * 10) : 0;
+    const adminBar = '█'.repeat(ap) + '░'.repeat(10 - ap);
+    return { totalMembers, totalAdmins, totalMembers_, warnBar, adminBar,
+             adminPct: totalMembers > 0 ? Math.round((totalAdmins / totalMembers) * 100) : 0 };
 }
 
 function getWaktuStr() {
     const now = new Date();
-    const timeStr = now.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    const dateStr = now.toLocaleDateString('id-ID', { timeZone: 'Asia/Jakarta', day: '2-digit', month: '2-digit', year: 'numeric' });
-    return { timeStr, dateStr };
+    return {
+        timeStr: now.toLocaleTimeString('id-ID', { timeZone:'Asia/Jakarta', hour:'2-digit', minute:'2-digit', second:'2-digit' }),
+        dateStr: now.toLocaleDateString('id-ID',  { timeZone:'Asia/Jakarta', day:'2-digit', month:'2-digit', year:'numeric' })
+    };
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  Handler Utama — Auto-deteksi link di setiap pesan grup
-//  HANYA berjalan di bot utama (hisoka.isMainBot !== false)
+//  Auto-deteksi link — HANYA bot utama (bukan jadibot)
 // ═══════════════════════════════════════════════════════════════
 export default async function handleAntiLink(message, hisoka) {
     try {
-        // ── HANYA BOT UTAMA — jadibot tidak punya fitur antilink ──
         if (hisoka?.isMainBot === false) return;
-
-        if (!message?.key?.remoteJid) return;
-        if (!message.message) return;
+        if (!message?.key?.remoteJid || !message.message) return;
 
         const remoteJid = message.key.remoteJid;
         if (!isJidGroup(remoteJid)) return;
         if (message.key?.fromMe) return;
 
-        // Cek config global aktif
         const config = loadConfig();
         const antiLinkConfig = config.antiLink || {};
         if (!antiLinkConfig.enabled) return;
 
-        // Cek apakah grup ini mengaktifkan antilink
         const data = loadData();
         if (!Array.isArray(data.groups) || !data.groups.includes(remoteJid)) return;
 
@@ -322,89 +282,72 @@ export default async function handleAntiLink(message, hisoka) {
         if (!senderJid) return;
 
         const isLid = senderJid.includes('@lid');
-        const senderNumber = isLid ? '[LID]' : (jidDecode(senderJid)?.user || senderJid.split('@')[0] || '');
+        const senderNumber      = isLid ? '[LID]' : (jidDecode(senderJid)?.user || senderJid.split('@')[0] || '');
         const senderNumberClean = senderJid.split('@')[0];
 
-        const botJid = jidNormalizedUser(hisoka.user?.id || '');
+        const botJid    = jidNormalizedUser(hisoka.user?.id || '');
         const botNumber = botJid.split('@')[0];
 
-        // Skip bot sendiri
         if (areJidsSameUser(senderJid, botJid)) return;
 
-        // Cek owner
         const isOwner = isOwnerJid(senderJid, senderNumber, config);
-
-        // Cek admin bot status (realtime)
         const { groupMeta, isAdmin: botIsAdmin } = await getBotAdminStatus(remoteJid, botNumber, hisoka);
 
-        // Cek apakah pengirim admin/owner grup
         let senderIsAdmin = false;
         if (groupMeta?.participants) {
-            const sp = findParticipant(groupMeta.participants, senderNumberClean);
-            senderIsAdmin = !!sp?.admin;
+            senderIsAdmin = !!findParticipant(groupMeta.participants, senderNumberClean)?.admin;
         }
 
         const maxWarnings = antiLinkConfig.maxWarnings ?? 3;
 
-        // ── KASUS: Admin/Owner GC me-reply (quote) pesan berisi link ──────────
-        // Jika admin/owner reply ke pesan orang lain yang ada link-nya
-        // → bot hapus pesan yang di-quote itu
+        // ── Admin / Owner GC me-reply pesan berisi link → hapus pesan quoted ──
         if (isOwner || senderIsAdmin) {
-            const ctxInfo = getContextInfo(message);
-            if (ctxInfo?.stanzaId && ctxInfo?.quotedMessage) {
-                const quotedText = extractTextFromMsgObj(ctxInfo.quotedMessage);
+            const ctx = getContextInfo(message);
+            if (ctx?.stanzaId && ctx?.quotedMessage) {
+                const quotedText = extractTextFromMsgObj(ctx.quotedMessage);
                 if (detectLink(quotedText)) {
-                    // Quoted message punya link — hapus pesan tersebut
-                    const quotedMsgId = ctxInfo.stanzaId;
-                    const quotedParticipant = ctxInfo.participant || ctxInfo.remoteJid;
-                    const quotedSenderNum = quotedParticipant
-                        ? (jidDecode(jidNormalizedUser(quotedParticipant))?.user || quotedParticipant.split('@')[0])
+                    const qId          = ctx.stanzaId;
+                    const qParticipant = ctx.participant || ctx.remoteJid;
+                    const qNum         = qParticipant
+                        ? (jidDecode(jidNormalizedUser(qParticipant))?.user || qParticipant.split('@')[0])
                         : '-';
-                    const links = extractLinks(quotedText);
-                    const linkPreview = links.length > 0
-                        ? links[0].slice(0, 60) + (links[0].length > 60 ? '…' : '')
-                        : '-';
+                    const links       = extractLinks(quotedText);
+                    const linkPreview = links[0] ? links[0].slice(0, 60) + (links[0].length > 60 ? '…' : '') : '-';
 
-                    console.log(`\x1b[33m[AntiLink] Admin/Owner @${senderNumberClean} reply pesan berisi link → hapus pesan quoted (${quotedMsgId})\x1b[39m`);
+                    console.log(`\x1b[33m[AntiLink] Admin/Owner @${senderNumberClean} reply pesan link → hapus quoted (${qId})\x1b[39m`);
 
                     if (botIsAdmin) {
-                        const deleted = await deleteMsg(remoteJid, quotedMsgId, quotedParticipant, hisoka);
+                        const deleted = await deleteMsg(remoteJid, qId, qParticipant, hisoka);
+                        const _delTxt = deleted
+                            ? `╭───〔 *✅ ANTI-LINK* 〕───╮\n│\n│ 🗑️ Pesan berisi link berhasil dihapus!\n│\n│ 👤 Pengirim : @${qNum}\n│ 🔗 Link     : \`${linkPreview}\`\n│\n│ _(Dihapus oleh ${isOwner ? 'owner' : 'admin'})_\n│\n╰────────────────────────────────────╯`
+                            : `❌ Gagal hapus pesan. Pastikan bot adalah *admin* grup.`;
                         await hisoka.sendMessage(remoteJid, {
-                            text: deleted
-                                ? `╭───〔 *✅ ANTI-LINK* 〕───╮\n│\n│ 🗑️ Pesan berisi link berhasil dihapus!\n│\n│ 👤 Pengirim : @${quotedSenderNum}\n│ 🔗 Link     : \`${linkPreview}\`\n│\n│ _(Dihapus oleh admin/owner)_\n│\n╰────────────────────────────────────╯`
-                                : `❌ Gagal hapus pesan. Pastikan bot adalah *admin* grup.`,
-                            contextInfo: { mentionedJid: quotedParticipant ? [jidNormalizedUser(quotedParticipant)] : [] }
+                            text: _delTxt,
+                            contextInfo: { mentionedJid: qParticipant ? [jidNormalizedUser(qParticipant)] : [] }
                         }, { quoted: message });
                     } else {
                         await hisoka.sendMessage(remoteJid, {
-                            text: `╭───〔 *⚠️ ANTI-LINK* 〕───╮\n│\n│ ⚠️ Bot *bukan admin* — tidak bisa hapus!\n│\n│ 🔗 Link terdeteksi di pesan quoted:\n│    \`${linkPreview}\`\n│\n│ 💡 Jadikan bot *admin* agar bisa\n│    hapus pesan otomatis.\n│\n╰────────────────────────────────────╯`
+                            text: `╭───〔 *⚠️ ANTI-LINK* 〕───╮\n│\n│ ⚠️ Bot *bukan admin* — tidak bisa hapus!\n│\n│ 🔗 Link di pesan quoted:\n│    \`${linkPreview}\`\n│\n│ 💡 Jadikan bot *admin* agar bisa hapus otomatis.\n│\n╰────────────────────────────────────╯`
                         }, { quoted: message });
                     }
                 }
             }
-            // Admin/Owner bebas kirim link sendiri — tidak perlu proses lebih lanjut
-            return;
+            return; // Owner/Admin bebas kirim link sendiri
         }
 
-        // ── KASUS: Member biasa kirim pesan berisi link ───────────────────────
+        // ── Member biasa kirim pesan berisi link ──────────────────────────────
         const msgType = getContentType(message.message);
         if (!msgType || !TEXT_MSG_TYPES.includes(msgType)) return;
 
         const text = extractText(message);
         if (!text || !detectLink(text)) return;
 
-        const links = extractLinks(text);
-        const linkPreview = links.length > 0
-            ? links[0].slice(0, 60) + (links[0].length > 60 ? '…' : '')
-            : '-';
+        const links       = extractLinks(text);
+        const linkPreview = links[0] ? links[0].slice(0, 60) + (links[0].length > 60 ? '…' : '') : '-';
 
         console.log(`\x1b[33m[AntiLink] Link terdeteksi! Sender: ${senderNumber} | BotAdmin: ${botIsAdmin} | Link: ${linkPreview}\x1b[39m`);
+        if (!botIsAdmin) console.log('\x1b[33m[AntiLink] Bot bukan admin, hanya peringatan.\x1b[39m');
 
-        if (!botIsAdmin) {
-            console.log('\x1b[33m[AntiLink] Bot bukan admin, hanya kirim peringatan (tanpa hapus/kick).\x1b[39m');
-        }
-
-        // Update warning
         const freshData = loadData();
         if (!freshData.warnings) freshData.warnings = {};
         if (!freshData.warnings[remoteJid]) freshData.warnings[remoteJid] = {};
@@ -413,61 +356,37 @@ export default async function handleAntiLink(message, hisoka) {
         const newWarn = freshData.warnings[remoteJid][senderJid];
         saveData(freshData);
 
-        appendLog({
-            gid: remoteJid,
-            senderJid,
-            senderNum: senderNumber,
+        appendLog({ gid: remoteJid, senderJid, senderNum: senderNumber,
             action: newWarn >= maxWarnings ? 'kick' : 'warn',
-            warnCount: newWarn,
-            maxWarn: maxWarnings,
-            link: linkPreview,
-            ts: Date.now(),
-        });
+            warnCount: newWarn, maxWarn: maxWarnings, link: linkPreview, ts: Date.now() });
 
         const { timeStr, dateStr } = getWaktuStr();
         const stats = buildGroupStats(groupMeta, newWarn, maxWarnings);
-        const _pelanggarLabel = isLid
+        const _mention = isLid ? [] : [senderJid];
+        const _pelanggar = isLid
             ? `👤 *Pelanggar* ﹕_(ID tidak dikenal / akun privat)_\n`
             : `👤 *Pelanggar* ﹕@${senderNumber}\n`;
-        const _mentionList = isLid ? [] : [senderJid];
 
         if (newWarn >= maxWarnings) {
-            // Reset warning setelah max tercapai
             delete freshData.warnings[remoteJid][senderJid];
             saveData(freshData);
 
-            const kickStatusLine = botIsAdmin
+            const kickLine = botIsAdmin
                 ? `💥 *Status*    ﹕ Telah di-*KICK* dari grup!`
                 : `⚠️ *Bot bukan admin* — tidak bisa kick!\n💡 Jadikan bot admin agar bisa kick otomatis.`;
 
-            const kickMsg =
-                `⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛\n` +
-                `✦ 🔗 *ANTI-LINK* 🔗 ✦\n` +
-                `⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛\n\n` +
-                _pelanggarLabel +
-                `🕐 *Waktu*     ﹕${timeStr} • ${dateStr}\n` +
-                `🔗 *Link*      ﹕\`${linkPreview}\`\n\n` +
-                `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
-                `  📊 *STATISTIK GRUP*\n` +
-                `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
-                `👥 *Total Member*  ﹕ ${stats.totalMembers} orang\n` +
-                `🛡️ *Total Admin*   ﹕ ${stats.totalAdmins} orang\n` +
-                `🙋 *Member Biasa* ﹕ ${stats.totalMembers_} orang\n` +
-                `📈 *Rasio Admin*   ﹕ ${stats.adminPct}%\n` +
-                `     [${stats.adminBar}]\n` +
-                `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n\n` +
-                `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
-                `  ⚠️ *PELANGGARAN*\n` +
-                `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
-                `🚫 Mengirim *link* di grup!\n\n` +
-                `🔴 *Peringatan* ﹕ ◆◆◆ ${maxWarnings}/${maxWarnings}\n` +
-                `${kickStatusLine}\n` +
-                `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n\n` +
-                `_Dilarang menyebarkan link sembarangan di grup ini!_ 😤`;
-
             await hisoka.sendMessage(remoteJid, {
-                text: kickMsg,
-                contextInfo: { mentionedJid: _mentionList }
+                text:
+                    `⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛\n✦ 🔗 *ANTI-LINK* 🔗 ✦\n⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛\n\n` +
+                    _pelanggar +
+                    `🕐 *Waktu*     ﹕${timeStr} • ${dateStr}\n` +
+                    `🔗 *Link*      ﹕\`${linkPreview}\`\n\n` +
+                    `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n  📊 *STATISTIK GRUP*\n◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
+                    `👥 *Total Member*  ﹕ ${stats.totalMembers} orang\n🛡️ *Total Admin*   ﹕ ${stats.totalAdmins} orang\n🙋 *Member Biasa* ﹕ ${stats.totalMembers_} orang\n📈 *Rasio Admin*   ﹕ ${stats.adminPct}%\n     [${stats.adminBar}]\n◈━━━━━━━━━━━━━━━━━━━━━━━◈\n\n` +
+                    `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n  ⚠️ *PELANGGARAN*\n◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
+                    `🚫 Mengirim *link* di grup!\n\n🔴 *Peringatan* ﹕ ◆◆◆ ${maxWarnings}/${maxWarnings}\n${kickLine}\n◈━━━━━━━━━━━━━━━━━━━━━━━◈\n\n` +
+                    `_Dilarang menyebarkan link sembarangan di grup ini!_ 😤`,
+                contextInfo: { mentionedJid: _mention }
             }, { quoted: message });
 
             if (botIsAdmin) {
@@ -478,256 +397,429 @@ export default async function handleAntiLink(message, hisoka) {
                 } catch (kickErr) {
                     console.error('\x1b[31m[AntiLink] Gagal kick:\x1b[39m', kickErr.message);
                     await hisoka.sendMessage(remoteJid, {
-                        text: `❌ Gagal kick ${isLid ? '_(ID tidak dikenal / LID)_' : '@' + senderNumber}. Pastikan bot adalah admin grup.`,
-                        contextInfo: { mentionedJid: _mentionList }
+                        text: `❌ Gagal kick ${isLid ? '_(LID)_' : '@' + senderNumber}. Pastikan bot adalah admin grup.`,
+                        contextInfo: { mentionedJid: _mention }
                     });
                 }
             }
-
         } else {
-            const deleteInfo = botIsAdmin
-                ? `🗑️ *Pesan*     ﹕ Telah dihapus otomatis.\n`
-                : `⚠️ *Pesan*     ﹕ Bot bukan admin, tidak bisa hapus.\n`;
+            const deleteInfo  = botIsAdmin ? `🗑️ *Pesan*     ﹕ Telah dihapus otomatis.\n` : `⚠️ *Pesan*     ﹕ Bot bukan admin, tidak bisa hapus.\n`;
             const nextWarnInfo = (newWarn >= maxWarnings - 1)
                 ? `⚡ *Peringatan berikutnya = KICK otomatis!*`
                 : `💡 Sisa *${maxWarnings - newWarn}x* lagi sebelum di-kick!`;
 
-            const warnMsg =
-                `⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛\n` +
-                `✦ ⚠️ *ANTI-LINK* ⚠️ ✦\n` +
-                `⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛\n\n` +
-                _pelanggarLabel +
-                `🕐 *Waktu*     ﹕${timeStr} • ${dateStr}\n` +
-                `🔗 *Link*      ﹕\`${linkPreview}\`\n` +
-                `${deleteInfo}\n` +
-                `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
-                `  📊 *STATISTIK GRUP*\n` +
-                `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
-                `👥 *Total Member*  ﹕ ${stats.totalMembers} orang\n` +
-                `🛡️ *Total Admin*   ﹕ ${stats.totalAdmins} orang\n` +
-                `🙋 *Member Biasa* ﹕ ${stats.totalMembers_} orang\n` +
-                `📈 *Rasio Admin*   ﹕ ${stats.adminPct}%\n` +
-                `     [${stats.adminBar}]\n` +
-                `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n\n` +
-                `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
-                `  ⚠️ *PERINGATAN ke-${newWarn}/${maxWarnings}*\n` +
-                `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
-                `🚫 Mengirim *link* di grup!\n\n` +
-                `🟡 *Warn* ﹕ [${stats.warnBar}] ${newWarn}/${maxWarnings}\n` +
-                `${nextWarnInfo}\n` +
-                `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n\n` +
-                `_Dilarang mengirim link sembarangan di grup ini!_ 🚫`;
-
             await hisoka.sendMessage(remoteJid, {
-                text: warnMsg,
-                contextInfo: { mentionedJid: _mentionList }
+                text:
+                    `⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛\n✦ ⚠️ *ANTI-LINK* ⚠️ ✦\n⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛\n\n` +
+                    _pelanggar +
+                    `🕐 *Waktu*     ﹕${timeStr} • ${dateStr}\n` +
+                    `🔗 *Link*      ﹕\`${linkPreview}\`\n` +
+                    deleteInfo + `\n` +
+                    `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n  📊 *STATISTIK GRUP*\n◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
+                    `👥 *Total Member*  ﹕ ${stats.totalMembers} orang\n🛡️ *Total Admin*   ﹕ ${stats.totalAdmins} orang\n🙋 *Member Biasa* ﹕ ${stats.totalMembers_} orang\n📈 *Rasio Admin*   ﹕ ${stats.adminPct}%\n     [${stats.adminBar}]\n◈━━━━━━━━━━━━━━━━━━━━━━━◈\n\n` +
+                    `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n  ⚠️ *PERINGATAN ke-${newWarn}/${maxWarnings}*\n◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
+                    `🚫 Mengirim *link* di grup!\n\n🟡 *Warn* ﹕ [${stats.warnBar}] ${newWarn}/${maxWarnings}\n${nextWarnInfo}\n◈━━━━━━━━━━━━━━━━━━━━━━━◈\n\n` +
+                    `_Dilarang mengirim link sembarangan di grup ini!_ 🚫`,
+                contextInfo: { mentionedJid: _mention }
             }, { quoted: message });
 
             if (botIsAdmin) {
                 await deleteMsg(remoteJid, message.key.id, message.key.participant, hisoka);
             }
         }
-
     } catch (err) {
         console.error('\x1b[31m[AntiLink] Error:\x1b[39m', err.message);
     }
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  Command Handler — .antilink on/off/status/reset/list/warn/log
-//  HANYA untuk bot utama
+//  Command Handler — .antilink [sub-perintah]
+//  HANYA bot utama
 // ═══════════════════════════════════════════════════════════════
-export async function handleAntilink({ hisoka, m, query, tolak, logCommand, isMainBot, loadConfig: _lc, saveConfig: _sc }) {
-    // ── Hanya bot utama — jadibot tidak punya fitur ini ──
+export async function handleAntilink({ hisoka, m, query, tolak, logCommand, loadConfig: _lc, saveConfig: _sc }) {
     if (hisoka?.isMainBot === false) return;
+    if (!m.isGroup) return tolak(hisoka, m, '❌ Fitur ini hanya bisa digunakan di grup!');
+    if (!m.isAdmin && !m.isOwner) return tolak(hisoka, m, '❌ Hanya admin grup atau owner bot yang bisa menggunakan perintah ini!');
 
     const lc = _lc || loadConfig;
     const sc = _sc || saveConfig;
 
-    if (!m.isGroup) return tolak(hisoka, m, '❌ Perintah ini hanya bisa digunakan di dalam *grup*!');
+    const arg = (query || '').trim().toLowerCase();
 
-    const isAdminOrOwner = m.isAdmin || m.isOwner;
-    const sub = (query || '').trim().toLowerCase();
-    const subParts = sub.split(/\s+/);
-    const subCmd = subParts[0] || '';
-
-    // ── .antilink global on/off — khusus owner ────────────────────────────────
-    if (subCmd === 'global') {
-        if (!m.isOwner) return tolak(hisoka, m, '❌ Perintah global hanya untuk *Owner bot*!');
-        const act = subParts[1] || '';
+    // ── global on/off ─────────────────────────────────────────────────────────
+    if (arg === 'global on' || arg === 'global off') {
+        if (!m.isOwner) return tolak(hisoka, m, '❌ Hanya owner bot yang bisa mengubah pengaturan global!');
+        const enable = arg === 'global on';
         const config = lc();
         if (!config.antiLink) config.antiLink = {};
-        if (act === 'on') {
-            config.antiLink.enabled = true;
-            sc(config);
-            logCommand(m, hisoka, 'antilink global on');
-            return tolak(hisoka, m,
-                `╭───〔 *✅ ANTI-LINK GLOBAL* 〕───╮\n│\n│ 🟢 Anti-Link *diaktifkan* secara global!\n│\n│ ℹ️ Aktifkan per grup: *.antilink on*\n│\n╰────────────────────────────────────╯`
-            );
-        } else if (act === 'off') {
-            config.antiLink.enabled = false;
-            sc(config);
-            logCommand(m, hisoka, 'antilink global off');
-            return tolak(hisoka, m,
-                `╭───〔 *🔴 ANTI-LINK GLOBAL* 〕───╮\n│\n│ 🔴 Anti-Link *dinonaktifkan* secara global!\n│\n╰────────────────────────────────────╯`
-            );
-        }
-        return tolak(hisoka, m, `❌ Format: *.antilink global on* atau *.antilink global off*`);
-    }
-
-    // ── .antilink warn <n> — khusus owner ────────────────────────────────────
-    if (subCmd === 'warn' && subParts[1]) {
-        if (!m.isOwner) return tolak(hisoka, m, '❌ Perintah ini hanya untuk *Owner bot*!');
-        const n = parseInt(subParts[1], 10);
-        if (isNaN(n) || n < 1 || n > 20) return tolak(hisoka, m, `❌ Angka warning tidak valid! Gunakan 1-20.\nContoh: *.antilink warn 3*`);
-        const config = lc();
-        if (!config.antiLink) config.antiLink = {};
-        config.antiLink.maxWarnings = n;
+        config.antiLink.enabled = enable;
         sc(config);
-        logCommand(m, hisoka, `antilink warn ${n}`);
+        logCommand(m, hisoka, `antilink ${arg}`);
         return tolak(hisoka, m,
-            `╭───〔 *⚙️ ANTI-LINK WARN* 〕───╮\n│\n│ ✅ Maks. warning diset ke *${n}x*!\n│\n│ ℹ️ Member akan di-kick setelah ${n}x kirim link.\n│\n╰────────────────────────────────────╯`
+            `╭───〔 *🌐 ANTILINK GLOBAL* 〕───╮\n│\n` +
+            `│ ${enable ? '✅ *Global AntiLink DIAKTIFKAN!*' : '🔴 *Global AntiLink DINONAKTIFKAN!*'}\n│\n` +
+            (enable
+                ? `│ ℹ️ Sekarang admin grup bisa\n│    mengaktifkan fitur ini di\n│    masing-masing grup.\n`
+                : `│ ℹ️ Fitur tidak akan aktif\n│    di semua grup.\n`) +
+            `│\n╰────────────────────────────────────╯`
         );
     }
 
-    // ── Semua perintah di bawah butuh admin/owner ─────────────────────────────
-    if (!isAdminOrOwner) return tolak(hisoka, m, '❌ Perintah ini hanya untuk *Admin grup* atau *Owner bot*!');
-
-    // Cek status bot admin secara realtime
-    const botJid = jidNormalizedUser(hisoka.user?.id || '');
-    const botNumber = botJid.split('@')[0];
-    const { groupMeta, isAdmin: botIsAdmin } = await getBotAdminStatus(m.from, botNumber, hisoka);
-
-    const config = lc();
-    const antiLinkConfig = config.antiLink || {};
-    const globalEnabled = antiLinkConfig.enabled ?? false;
-    const maxWarnings = antiLinkConfig.maxWarnings ?? 3;
-
-    // ── .antilink on ──────────────────────────────────────────────────────────
-    if (subCmd === 'on' || subCmd === '') {
-        if (!globalEnabled) {
-            return tolak(hisoka, m,
-                `╭───〔 *⚠️ ANTI-LINK* 〕───╮\n│\n│ ❌ Anti-Link *belum aktif secara global*!\n│\n│ 💡 Minta owner aktifkan dulu:\n│    *.antilink global on*\n│\n╰────────────────────────────────────╯`
-            );
+    // ── on ────────────────────────────────────────────────────────────────────
+    if (arg === 'on') {
+        const config = lc();
+        let globalAutoEnabled = false;
+        if (!config.antiLink?.enabled) {
+            if (!m.isOwner) return tolak(hisoka, m, '❌ Fitur AntiLink dinonaktifkan secara global oleh owner bot.\nMinta owner aktifkan dengan perintah: *.antilink global on*');
+            if (!config.antiLink) config.antiLink = {};
+            config.antiLink.enabled = true;
+            sc(config);
+            globalAutoEnabled = true;
         }
         toggleAntiLink(m.from, true);
         logCommand(m, hisoka, 'antilink on');
-        const botAdminNote = botIsAdmin
-            ? `│ 🤖 Bot : 🟢 Admin — bisa hapus & kick\n`
-            : `│ 🤖 Bot : 🔴 *Bukan admin* — hanya peringatan!\n│ ⚠️ Jadikan bot admin agar bisa hapus & kick.\n`;
+
+        // Cek bot admin realtime
+        const botJid = jidNormalizedUser(hisoka.user?.id || '');
+        const { isAdmin: botIsAdmin } = await getBotAdminStatus(m.from, botJid.split('@')[0], hisoka);
+        const botNote = botIsAdmin
+            ? `│ 🤖 Bot Admin : ✅ Bisa hapus & kick\n`
+            : `│ 🤖 Bot Admin : ❌ *Bukan admin!*\n│    ⚠️ Jadikan bot admin agar bisa\n│    hapus pesan & kick otomatis.\n`;
+
         return tolak(hisoka, m,
-            `╭───〔 *✅ ANTI-LINK ON* 〕───╮\n│\n│ 🟢 Anti-Link *diaktifkan* di grup ini!\n│\n` +
-            botAdminNote +
-            `│\n│ ⚙️ Konfigurasi:\n│ • Maks. warning : *${maxWarnings}x*\n│ • Setelah ${maxWarnings}x warn → *KICK otomatis*\n│\n│ ℹ️ Admin & Owner GC bebas kirim link.\n│ ℹ️ Admin bisa reply pesan link → bot hapus.\n│\n╰────────────────────────────────────╯`
+            `╭───〔 *✅ ANTI-LINK* 〕───╮\n│\n│ 🟢 *Fitur AntiLink AKTIF!*\n` +
+            (globalAutoEnabled ? `│ 🌐 *Global juga diaktifkan otomatis!*\n` : '') +
+            `│\n` + botNote +
+            `│\n│ ⚙️ Konfigurasi:\n│ • Maks. warning: *${config.antiLink?.maxWarnings ?? 3}x*\n│\n` +
+            `│ ℹ️ Link yang dikirim member akan\n│    dihapus & dapat peringatan/kick!\n│\n` +
+            `│ 👑 Admin & Owner GC bebas kirim link.\n│\n╰────────────────────────────────────╯`
         );
     }
 
-    // ── .antilink off ─────────────────────────────────────────────────────────
-    if (subCmd === 'off') {
+    // ── off ───────────────────────────────────────────────────────────────────
+    if (arg === 'off') {
         toggleAntiLink(m.from, false);
         logCommand(m, hisoka, 'antilink off');
         return tolak(hisoka, m,
-            `╭───〔 *🔴 ANTI-LINK OFF* 〕───╮\n│\n│ 🔴 Anti-Link *dinonaktifkan* di grup ini!\n│ ⚠️ Semua warning di grup ini direset.\n│\n╰────────────────────────────────────╯`
+            `╭───〔 *❌ ANTI-LINK* 〕───╮\n│\n│ 🔴 *Fitur AntiLink NONAKTIF!*\n│\n` +
+            `│ ℹ️ Semua warning di grup ini\n│    juga telah direset.\n│\n╰────────────────────────────────────╯`
         );
     }
 
-    // ── .antilink reset ───────────────────────────────────────────────────────
-    if (subCmd === 'reset') {
-        if (subParts[1] === 'all' && !m.isOwner) return tolak(hisoka, m, '❌ Reset all hanya untuk *Owner bot*!');
-        const target = (subParts[1] === 'all' && m.isOwner) ? null : m.from;
-        resetAntiLinkWarnings(target);
-        logCommand(m, hisoka, `antilink reset${target ? '' : ' all'}`);
+    // ── add ───────────────────────────────────────────────────────────────────
+    if (arg === 'add') {
+        const config = lc();
+        if (!config.antiLink?.enabled) {
+            if (!m.isOwner) return tolak(hisoka, m, '❌ Fitur AntiLink dinonaktifkan secara global.\nMinta owner aktifkan dulu: *.antilink global on*');
+            if (!config.antiLink) config.antiLink = {};
+            config.antiLink.enabled = true;
+            sc(config);
+        }
+        const alreadyAdded = isAntiLinkEnabled(m.from);
+        toggleAntiLink(m.from, true);
+        logCommand(m, hisoka, 'antilink add');
         return tolak(hisoka, m,
-            `╭───〔 *🔄 ANTI-LINK RESET* 〕───╮\n│\n│ ✅ Warning berhasil direset!\n│ ${target ? '📌 Grup ini saja.' : '🌐 Semua grup.'}\n│\n╰────────────────────────────────────╯`
+            `╭───〔 *✅ ANTI-LINK* 〕───╮\n│\n` +
+            `│ ${alreadyAdded ? '🔄 Grup ini *sudah terdaftar* sebelumnya.' : '➕ Grup ini berhasil *ditambahkan!*'}\n│\n` +
+            `│ 🌐 Global   : 🟢 Aktif\n│ 📌 Grup ini : 🟢 *Aktif*\n│\n` +
+            `│ ⚙️ Konfigurasi:\n│ • Maks. warning: *${config.antiLink?.maxWarnings ?? 3}x*\n│\n` +
+            `│ ℹ️ Link yang dikirim member akan\n│    dihapus & dapat peringatan/kick!\n│\n` +
+            `│ 👑 Admin & Owner GC bebas kirim link.\n│\n╰────────────────────────────────────╯`
         );
     }
 
-    // ── .antilink list — khusus owner ─────────────────────────────────────────
-    if (subCmd === 'list') {
-        if (!m.isOwner) return tolak(hisoka, m, '❌ Perintah ini hanya untuk *Owner bot*!');
+    // ── reset ─────────────────────────────────────────────────────────────────
+    if (arg === 'reset') {
+        resetAntiLinkWarnings(m.from);
+        logCommand(m, hisoka, 'antilink reset');
+        return tolak(hisoka, m, '✅ Semua warning AntiLink di grup ini telah direset!');
+    }
+
+    // ── warn <n> ──────────────────────────────────────────────────────────────
+    if (arg.startsWith('warn')) {
+        if (!m.isOwner) return tolak(hisoka, m, '❌ Hanya owner yang bisa mengubah batas warning!');
+        const warnNum = parseInt(arg.replace(/^warn\s*/,'').trim(), 10);
+        if (!warnNum || isNaN(warnNum) || warnNum < 1 || warnNum > 100) {
+            return tolak(hisoka, m,
+                `╭───〔 *⚠️ ANTILINK WARN* 〕───╮\n│\n│ ❌ Angka tidak valid!\n│\n` +
+                `│ 📌 Format: *.antilink warn <angka>*\n│ 📌 Contoh: *.antilink warn 5*\n│\n│ ℹ️ Angka valid: *1 - 100*\n│\n╰────────────────────────────────────╯`
+            );
+        }
+        const config = lc();
+        if (!config.antiLink) config.antiLink = {};
+        const oldMax = config.antiLink.maxWarnings ?? 3;
+        config.antiLink.maxWarnings = warnNum;
+        sc(config);
+        logCommand(m, hisoka, `antilink warn ${warnNum}`);
+        return tolak(hisoka, m,
+            `╭───〔 *⚠️ ANTILINK WARN* 〕───╮\n│\n│ ✅ Batas warning berhasil diubah!\n│\n` +
+            `│ 📊 Sebelum : *${oldMax}x*\n│ 📊 Sekarang: *${warnNum}x*\n│\n` +
+            `│ ℹ️ Anggota akan dikick setelah\n│    melanggar sebanyak *${warnNum}x*\n│\n` +
+            `│ 💾 Tersimpan ke config.json\n│\n╰────────────────────────────────────╯`
+        );
+    }
+
+    // ── list ──────────────────────────────────────────────────────────────────
+    if (arg === 'list') {
         const allGroups = getAllAntiLinkGroups();
         if (!allGroups.length) {
             return tolak(hisoka, m,
-                `╭───〔 *📋 DAFTAR ANTI-LINK* 〕───╮\n│\n│ ℹ️ Belum ada grup yang terdaftar.\n│\n│ 💡 Ketik *.antilink on* di grup.\n│\n╰────────────────────────────────────╯`
+                `╭───〔 *📋 DAFTAR ANTILINK* 〕───╮\n│\n│ ❌ Belum ada grup yang terdaftar.\n│\n` +
+                `│ Gunakan *.antilink add* di grup\n│ yang ingin diaktifkan.\n│\n╰────────────────────────────────────╯`
             );
         }
-        let listTxt = `╭───〔 *📋 DAFTAR ANTI-LINK* 〕───╮\n│\n│ 📊 Total: *${allGroups.length} grup*\n│\n`;
+
+        const botAdminCache = loadBotAdminFile();
+        const botNum = (hisoka.user?.id || '').split(':')[0].split('@')[0];
+
+        const grupInfoList = [];
         for (let i = 0; i < allGroups.length; i++) {
             const gid = allGroups[i];
-            let namaGrup = gid;
-            try { const mt = await hisoka.groupMetadata(gid); namaGrup = mt?.subject || gid; } catch { try { namaGrup = hisoka.groups?.read(gid)?.subject || gid; } catch {} }
-            const warns = getAntiLinkWarnings(gid);
-            const totalWarn = Object.keys(warns).length;
-            listTxt += `│ *${i + 1}.* ${namaGrup}\n│    🆔 \`${gid}\`\n│    ⚠️ Member warned: ${totalWarn} orang\n│\n`;
-        }
-        listTxt += `╰────────────────────────────────────╯`;
-        return tolak(hisoka, m, listTxt);
-    }
-
-    // ── .antilink log ─────────────────────────────────────────────────────────
-    if (subCmd === 'log') {
-        const subLog = subParts[1] || '';
-        if (subLog === 'clear') {
-            if (subParts[2] === 'all' && m.isOwner) {
-                clearAntiLinkLog(null);
-                return tolak(hisoka, m, `╭───〔 *🗑️ LOG ANTI-LINK* 〕───╮\n│\n│ ✅ Semua log berhasil dihapus!\n│\n╰────────────────────────────────────╯`);
+            let namaGrup = '-', totalMember = '?', totalAdmin = '?';
+            let botIsAdminGrup = botAdminCache[gid] === true;
+            try {
+                const meta = await hisoka.groupMetadata(gid);
+                if (meta) {
+                    namaGrup = meta.subject || '-';
+                    const parts = meta.participants || [];
+                    totalMember = parts.length;
+                    totalAdmin  = parts.filter(p => p.admin).length;
+                    const botP  = parts.find(p => (p.jid || p.id || '').split('@')[0].split(':')[0] === botNum);
+                    botIsAdminGrup = botP !== undefined ? !!botP.admin : (botAdminCache[gid] === true);
+                }
+            } catch {
+                try {
+                    const cached = hisoka.groups?.read(gid);
+                    if (cached) {
+                        namaGrup = cached.subject || '-';
+                        const parts = cached.participants || [];
+                        totalMember = parts.length;
+                        totalAdmin  = parts.filter(p => p.admin).length;
+                    }
+                } catch {}
             }
-            clearAntiLinkLog(m.from);
-            logCommand(m, hisoka, 'antilink log clear');
-            return tolak(hisoka, m, `╭───〔 *🗑️ LOG ANTI-LINK* 〕───╮\n│\n│ ✅ Log grup ini berhasil dihapus!\n│\n╰────────────────────────────────────╯`);
+            const warns      = getAntiLinkWarnings(gid);
+            const totalWarned = Object.keys(warns).length;
+            grupInfoList.push({ gid, namaGrup, totalMember, totalAdmin, totalWarned, botIsAdmin: botIsAdminGrup });
         }
-        const rawLogs = getAntiLinkLog(subLog === 'all' && m.isOwner ? null : m.from);
-        if (!rawLogs.length) {
-            return tolak(hisoka, m, `╭───〔 *📜 LOG ANTI-LINK* 〕───╮\n│\n│ ℹ️ Belum ada riwayat pelanggaran.\n│\n╰────────────────────────────────────╯`);
+
+        let listBaris = '';
+        for (let i = 0; i < grupInfoList.length; i++) {
+            const { gid, namaGrup, totalMember, totalAdmin, totalWarned, botIsAdmin } = grupInfoList[i];
+            listBaris +=
+                `│ *${i + 1}.* ${namaGrup}\n` +
+                `│    🆔 \`${gid}\`\n` +
+                `│    👥 Anggota : *${totalMember}* | 🛡️ Admin: *${totalAdmin}*\n` +
+                `│    🤖 Bot Admin: ${botIsAdmin ? '✅ Ya' : '❌ Bukan'}\n` +
+                `│    ⚠️ Warned  : *${totalWarned} orang*\n│\n`;
         }
-        const totalWarn = rawLogs.filter(l => l.action === 'warn').length;
-        const totalKick = rawLogs.filter(l => l.action === 'kick').length;
-        const _fmtWaktu = (ts) => {
-            if (!ts) return '-';
-            const d = new Date(ts);
-            return d.toLocaleString('id-ID', { timeZone: 'Asia/Jakarta', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-        };
-        const _fmtAction = (l) => l.action === 'kick' ? `🔴 KICK [${l.warnCount}/${l.maxWarn}]` : `🟡 WARN [${l.warnCount}/${l.maxWarn}]`;
-        const recent = rawLogs.slice(-25).reverse();
-        let logBaris = '';
-        for (let i = 0; i < recent.length; i++) {
-            const l = recent[i];
-            logBaris +=
-                `│ *${i + 1}.* ${_fmtAction(l)}\n` +
-                `│    👤 @${l.senderNum || l.senderJid?.split('@')[0]}\n` +
-                `│    🔗 ${l.link || '-'} • 🕐 ${_fmtWaktu(l.ts)}\n│\n`;
+
+        const listText =
+            `╭───〔 *📋 DAFTAR ANTILINK* 〕───╮\n│\n│ 🟢 Total aktif: *${allGroups.length} grup*\n│\n` +
+            listBaris +
+            `│ ─────────────────────────────────\n│ 🗑️ *Cara hapus:*\n` +
+            `│ Reply pesan ini dengan nomor urut\n│ Contoh: *1* atau *1,2* atau *1,2,3*\n│\n` +
+            `│ Ketik *semua* → hapus semua grup\n│ Ketik *reset* → reset warning semua\n│\n╰────────────────────────────────────╯`;
+
+        if (!global.__antiLinkListSessions) global.__antiLinkListSessions = new Map();
+        const sentList = await hisoka.sendMessage(m.from, { text: listText }, { quoted: m }).catch(() => null);
+        if (sentList?.key?.id) {
+            global.__antiLinkListSessions.set(sentList.key.id, {
+                groups: grupInfoList, from: m.from,
+                by: m.sender || m.key?.participant || m.from, ts: Date.now()
+            });
+            setTimeout(() => global.__antiLinkListSessions?.delete(sentList.key.id), 5 * 60 * 1000);
         }
-        return tolak(hisoka, m,
-            `╭───〔 *📜 LOG ANTI-LINK* 〕───╮\n│\n` +
-            `│ 📊 Total: *${rawLogs.length}* | 🟡 Warn: *${totalWarn}* | 🔴 Kick: *${totalKick}*\n│\n` +
-            logBaris +
-            `│ 📋 Sub-perintah:\n│ • *.antilink log* → Log grup ini\n│ • *.antilink log clear* → Hapus log\n│\n╰────────────────────────────────────╯`
-        );
+        logCommand(m, hisoka, 'antilink list');
+        return;
     }
 
-    // ── .antilink status (default) ────────────────────────────────────────────
-    const isEnabled = isAntiLinkEnabled(m.from);
-    let grupStatus = isEnabled ? '🟢 Aktif' : globalEnabled ? '🔴 Nonaktif *(belum diaktifkan)*' : '🔴 Nonaktif';
-    const warns = getAntiLinkWarnings(m.from);
-    const totalWarned = Object.keys(warns).length;
-    const botAdminStatus = botIsAdmin ? '🟢 Ya (hapus & kick)' : '🔴 Tidak (hanya peringatan)';
+    // ── log ───────────────────────────────────────────────────────────────────
+    if (arg === 'log' || arg.startsWith('log ')) {
+        const logSub  = arg.slice(3).trim();
+
+        if (logSub === 'clear all') {
+            if (!m.isOwner) return tolak(hisoka, m, '❌ Hanya owner yang bisa clear semua log!');
+            clearAntiLinkLog();
+            return tolak(hisoka, m, '✅ Semua log AntiLink berhasil dihapus!');
+        }
+        if (logSub === 'clear') {
+            clearAntiLinkLog(m.from);
+            return tolak(hisoka, m, '✅ Log AntiLink grup ini berhasil dihapus!');
+        }
+
+        const showAll = (logSub === 'all') && m.isOwner;
+        const rawLogs = getAntiLinkLog(showAll ? null : m.from);
+
+        if (!rawLogs.length) {
+            return tolak(hisoka, m,
+                `╭───〔 *📜 LOG ANTILINK* 〕───╮\n│\n│ ℹ️ Belum ada riwayat pelanggaran${showAll ? '' : ' di grup ini'}.\n│\n` +
+                `│ 📋 Sub-perintah:\n│ • *.antilink log*           → Log grup ini\n` +
+                (m.isOwner ? `│ • *.antilink log all*        → Semua grup\n` : '') +
+                `│ • *.antilink log clear*      → Hapus log grup ini\n` +
+                (m.isOwner ? `│ • *.antilink log clear all*  → Hapus semua\n` : '') +
+                `│\n╰────────────────────────────────────╯`
+            );
+        }
+
+        const _fmtWaktu  = ts => new Date(ts).toLocaleString('id-ID', { timeZone:'Asia/Jakarta', day:'2-digit', month:'2-digit', year:'2-digit', hour:'2-digit', minute:'2-digit' });
+        const _fmtAction = l  => l.action === 'kick' ? `🔴 KICK` : `🟡 WARN ${l.warnCount}/${l.maxWarn}`;
+        const totalWarn  = rawLogs.filter(l => l.action === 'warn').length;
+        const totalKick  = rawLogs.filter(l => l.action === 'kick').length;
+
+        if (showAll) {
+            const byGid = {};
+            for (const l of rawLogs) { if (!byGid[l.gid]) byGid[l.gid] = []; byGid[l.gid].push(l); }
+            const uniqueGids = Object.keys(byGid);
+            const namaCache  = {};
+            await Promise.all(uniqueGids.map(async gid => {
+                try { namaCache[gid] = (await hisoka.groupMetadata(gid))?.subject || gid.split('@')[0]; }
+                catch { try { namaCache[gid] = hisoka.groups?.read(gid)?.subject || gid.split('@')[0]; } catch { namaCache[gid] = gid.split('@')[0]; } }
+            }));
+            const header =
+                `╭───〔 *📜 LOG ANTILINK — SEMUA GRUP* 〕───╮\n│\n` +
+                `│ 🏘️ Jumlah grup: *${uniqueGids.length}*\n│ 📊 Total log  : *${rawLogs.length}*\n` +
+                `│ 🟡 Warn: *${totalWarn}* | 🔴 Kick: *${totalKick}*\n│\n╰────────────────────────────────────╯`;
+            const GRUP_PER_MSG = 5;
+            for (let gi = 0; gi < uniqueGids.length; gi += GRUP_PER_MSG) {
+                const batch = uniqueGids.slice(gi, gi + GRUP_PER_MSG);
+                let batchTxt = '';
+                for (const gid of batch) {
+                    const logs  = byGid[gid].slice(-10).reverse();
+                    const gWarn = byGid[gid].filter(l => l.action === 'warn').length;
+                    const gKick = byGid[gid].filter(l => l.action === 'kick').length;
+                    batchTxt += `┌─〔 *🏘️ ${namaCache[gid]}* 〕\n│ 📊 Total: *${byGid[gid].length}* | 🟡 ${gWarn} | 🔴 ${gKick}\n│\n`;
+                    for (let i = 0; i < logs.length; i++) {
+                        const l = logs[i];
+                        batchTxt += `│ *${i+1}.* ${_fmtAction(l)}\n│    👤 @${l.senderNum}\n│    🔗 ${l.link || '-'} • 🕐 ${_fmtWaktu(l.ts)}\n│\n`;
+                    }
+                    batchTxt += `└────────────────────────────────\n\n`;
+                }
+                const finalTxt = gi === 0 ? header + '\n\n' + batchTxt.trim() : batchTxt.trim();
+                await tolak(hisoka, m, finalTxt);
+                if (gi + GRUP_PER_MSG < uniqueGids.length) await new Promise(r => setTimeout(r, 600));
+            }
+        } else {
+            const recent = rawLogs.slice(-25).reverse();
+            let logBaris = '';
+            for (let i = 0; i < recent.length; i++) {
+                const l = recent[i];
+                logBaris += `│ *${i+1}.* ${_fmtAction(l)}\n│    👤 @${l.senderNum || l.senderJid?.split('@')[0]}\n│    🔗 ${l.link || '-'} • 🕐 ${_fmtWaktu(l.ts)}\n│\n`;
+            }
+            await tolak(hisoka, m,
+                `╭───〔 *📜 LOG ANTILINK* 〕───╮\n│\n│ 📊 Total log grup ini: *${rawLogs.length}*\n` +
+                `│ 🟡 Warn: *${totalWarn}* | 🔴 Kick: *${totalKick}*\n│ (Tampil 25 terbaru)\n│\n` +
+                logBaris +
+                `│ 📋 Sub-perintah:\n│ • *.antilink log*           → Log grup ini\n` +
+                (m.isOwner ? `│ • *.antilink log all*        → Semua grup\n` : '') +
+                `│ • *.antilink log clear*      → Hapus log grup ini\n` +
+                (m.isOwner ? `│ • *.antilink log clear all*  → Hapus semua\n` : '') +
+                `│\n╰────────────────────────────────────╯`
+            );
+        }
+        logCommand(m, hisoka, 'antilink log');
+        return;
+    }
+
+    // ── status (default) ──────────────────────────────────────────────────────
+    const config       = lc();
+    const globalEnabled = config.antiLink?.enabled ?? false;
+    const maxWarnings   = config.antiLink?.maxWarnings ?? 3;
+    const isEnabled     = isAntiLinkEnabled(m.from);
+    const warns         = getAntiLinkWarnings(m.from);
+    const totalWarned   = Object.keys(warns).length;
+
+    // Cek bot admin realtime
+    const botJid = jidNormalizedUser(hisoka.user?.id || '');
+    const { isAdmin: botIsAdmin } = await getBotAdminStatus(m.from, botJid.split('@')[0], hisoka);
+
+    let grupStatus;
+    if (isEnabled) grupStatus = '🟢 Aktif';
+    else if (globalEnabled) grupStatus = '🔴 Nonaktif *(belum ditambahkan)*';
+    else grupStatus = '🔴 Nonaktif';
+
+    const hintAdd = globalEnabled && !isEnabled
+        ? `│ 💡 Ketik *.antilink add* untuk\n│    mengaktifkan di grup ini!\n│\n` : '';
 
     return tolak(hisoka, m,
         `╭───〔 *ℹ️ ANTI-LINK* 〕───╮\n│\n` +
         `│ 🌐 Global   : ${globalEnabled ? '🟢 Aktif' : '🔴 Nonaktif'}\n` +
         `│ 📌 Grup ini : ${grupStatus}\n` +
-        `│ 🤖 Bot Admin: ${botAdminStatus}\n│\n` +
-        `│ ⚙️ Konfigurasi:\n│ • Maks. warning: *${maxWarnings}x*\n` +
-        `│ • Member warned: *${totalWarned} orang*\n│\n` +
-        `│ ℹ️ Owner & Admin GC bebas kirim link\n` +
-        `│ ℹ️ Admin reply pesan link → bot hapus\n│\n` +
-        `│ 📋 Perintah:\n│ • *.antilink on/off*    → Toggle grup\n` +
+        `│ 🤖 Bot Admin: ${botIsAdmin ? '✅ Ya (hapus & kick)' : '❌ Tidak (hanya warn)'}\n│\n` +
+        `│ ⚙️ Konfigurasi:\n│ • Maks. warning: *${maxWarnings}x*\n│ • Member warned: *${totalWarned} orang*\n│\n` +
+        `│ ℹ️ Mendeteksi semua jenis link\n│    (http, www, wa.me, dll)\n│ 👑 Owner & Admin GC bebas kirim link\n│\n` +
+        hintAdd +
+        `│ 📋 Cara penggunaan:\n` +
+        `│ • *.antilink add*       → Tambah grup ini\n` +
+        `│ • *.antilink on*        → Aktifkan\n` +
+        `│ • *.antilink off*       → Nonaktifkan\n` +
         `│ • *.antilink reset*     → Reset warning\n` +
+        `│ • *.antilink status*    → Info ini\n` +
         `│ • *.antilink log*       → Riwayat\n` +
-        (m.isOwner ?
-        `│ • *.antilink list*      → Daftar grup\n` +
-        `│ • *.antilink warn <n>*  → Set maks warn\n` +
-        `│ • *.antilink global on/off* → Toggle global\n` : '') +
+        (m.isOwner
+            ? `│ • *.antilink list*      → Daftar grup\n` +
+              `│ • *.antilink warn <n>*  → Set maks warn\n` +
+              `│ • *.antilink global on*  → Aktifkan global\n` +
+              `│ • *.antilink global off* → Nonaktifkan\n`
+            : '') +
         `│\n╰────────────────────────────────────╯`
     );
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  Callbacks — Tangani reply dari .antilink list (sesi interaktif)
+// ═══════════════════════════════════════════════════════════════
+export async function handleAntilinkCallbacks({ hisoka, m, tolak }) {
+    if (!global.__antiLinkListSessions?.size) return false;
+    if (!m.quoted?.key?.id) return false;
+    if (!m.isOwner && !m.isAdmin) return false;
+
+    const sessId = m.quoted.key.id;
+    const sess   = global.__antiLinkListSessions?.get(sessId);
+    if (!sess || sess.from !== m.from) return false;
+
+    const rawReply = (m.text || m.body || '').trim().toLowerCase();
+    if (!rawReply) return false;
+
+    global.__antiLinkListSessions.delete(sessId);
+
+    try {
+        const { groups: sessGroups } = sess;
+        if (rawReply === 'semua') {
+            const total = sessGroups.length;
+            for (const g of sessGroups) toggleAntiLink(g.gid, false);
+            await tolak(hisoka, m,
+                `╭───〔 *🗑️ HAPUS SEMUA* 〕───╮\n│\n│ ✅ Semua grup dihapus!\n│ 🗑️ Total: *${total} grup*\n│ ⚠️ Semua warning juga direset.\n│\n╰────────────────────────────────────╯`
+            );
+        } else if (rawReply === 'reset') {
+            for (const g of sessGroups) resetAntiLinkWarnings(g.gid);
+            await tolak(hisoka, m,
+                `╭───〔 *🔄 RESET WARNING* 〕───╮\n│\n│ ✅ Warning direset!\n│ 📊 Total: *${sessGroups.length} grup*\n│ 🟢 Grup tetap terdaftar.\n│\n╰────────────────────────────────────╯`
+            );
+        } else {
+            const nums = rawReply.split(/[,\s]+/)
+                .map(n => parseInt(n.trim(), 10))
+                .filter(n => !isNaN(n) && n >= 1 && n <= sessGroups.length);
+            const uniq = [...new Set(nums)];
+            if (!uniq.length) {
+                await tolak(hisoka, m,
+                    `❌ Nomor tidak valid!\nMasukkan angka 1-${sessGroups.length}, contoh: *1* atau *1,2,3*\nAtau ketik *semua* / *reset*`
+                );
+            } else {
+                const dihapus = [];
+                for (const n of uniq) {
+                    const g = sessGroups[n - 1];
+                    if (g) { toggleAntiLink(g.gid, false); dihapus.push(`${n}. *${g.namaGrup}*`); }
+                }
+                const listDihapus = dihapus.map(d => `│ ✅ ${d}`).join('\n');
+                await tolak(hisoka, m,
+                    `╭───〔 *🗑️ ANTILINK REMOVED* 〕───╮\n│\n│ ✅ *${dihapus.length} grup* berhasil dihapus!\n│\n` +
+                    listDihapus + `\n│\n│ ⚠️ Warning di grup tersebut direset.\n│\n╰────────────────────────────────────╯`
+                );
+            }
+        }
+    } catch (e) {
+        await tolak(hisoka, m, `❌ Gagal proses: ${e.message}`);
+    }
+    return true;
 }
