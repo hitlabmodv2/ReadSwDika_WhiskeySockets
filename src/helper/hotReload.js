@@ -56,6 +56,7 @@ const WATCHED_FILES = [
     { key: 'message',      rel: 'message.js' },
     { key: 'antidelete',   rel: 'SEMUA_FITUR/antidel/antidelete.js' },
     { key: 'antitagsw',    rel: 'SEMUA_FITUR/antitagsw/antitagsw.js' },
+    { key: 'antilink',     rel: 'SEMUA_FITUR/antilink/antilink.js' },
     { key: 'antitagbot',   rel: 'SEMUA_FITUR/antitag/antitag.js' },
     { key: 'event',        rel: 'SEMUA_FITUR/event/event.js' },
     { key: 'featureEmoji', rel: 'SEMUA_FITUR/helper/emoji.js' },

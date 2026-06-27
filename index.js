@@ -2556,6 +2556,13 @@ async function main() {
                                         antiTagSWHandler(message, hisoka)
                                 ).catch(err => console.error('[AntiTagSW]', err.message));
                         }
+                        // ── Anti-Link: hapus pesan berisi link di GC ──────────────────
+                        const antiLinkHandler = getHandler('antilink');
+                        if (typeof antiLinkHandler === 'function') {
+                                Promise.resolve(
+                                        antiLinkHandler(message, hisoka)
+                                ).catch(err => console.error('[AntiLink]', err.message));
+                        }
                         // ── Anti-Tag Bot: hapus pesan yang tag nomor bot sendiri di GC ──
                         const antiTagBotHandler = getHandler('antitagbot');
                         if (typeof antiTagBotHandler === 'function') {

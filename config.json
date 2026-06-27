@@ -60,6 +60,10 @@
     "enabled": false,
     "maxWarnings": 10
   },
+  "antiLink": {
+    "enabled": false,
+    "maxWarnings": 3
+  },
   "autoCleaner": {
     "enabled": false,
     "intervalHours": 24

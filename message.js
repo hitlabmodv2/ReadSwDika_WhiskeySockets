@@ -43,6 +43,7 @@ import { logError, formatErrorReport, clearErrors, generateErrorFileTxt, getInfo
 import { startJadibot, startJadibotQR, stopJadibot, jadibotMap, jadibotClearSesiMap, jadibotSesiReportMap, jadibotConnectedAt, pendingJadibotChoices, formatPairingCode, maskNumber, parseJadibotDuration, getJadibotExpiry, formatRemainingTime, getJadibotExpirySummary, cleanupExpiredJadibots, removeJadibotExpiry, setPermanentJadibot, ensureJadibotExpiry, extendJadibotExpiry, scheduleJadibotExpiry, startJadibotAutoOnline } from './src/helper/jadibot.js';
 import { hasViewOnceCache, getViewOnceCache } from './src/helper/voCache.js';
 import { isAntiTagSWEnabled, toggleAntiTagSW, resetWarnings, getWarnings, getAllAntiTagSWGroups, getAntiTagSWLog, clearAntiTagSWLog, resolveLidFromContacts, handleAntitagsw as _handleAntitagswFn, handleAntitagswCallbacks as _handleAntitagswCallbacksFn } from './SEMUA_FITUR/antitagsw/antitagsw.js';
+import { handleAntilink as _handleAntilinkFn } from './SEMUA_FITUR/antilink/antilink.js';
 import handleAntiTagBotAuto, { handleAntitag as _handleAntitagFn } from './SEMUA_FITUR/antitag/antitag.js';
 import { handleAd as _handleAdFn } from './SEMUA_FITUR/antidel/antidelete.js';
 // yg bawah pindah ke sini
@@ -1497,6 +1498,11 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                         case 'antitagsw': {
                                 await _handleAntitagswFn({ hisoka, m, query, tolak, logCommand, isMainBot, loadConfig, saveConfig, getJadibotNumber, jadibotMap, sendConfirmWithButtons });
+                                break;
+                        }
+
+                        case 'antilink': {
+                                await _handleAntilinkFn({ hisoka, m, query, tolak, logCommand, isMainBot, loadConfig, saveConfig });
                                 break;
                         }
 
