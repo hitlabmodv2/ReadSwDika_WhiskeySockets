@@ -300,6 +300,7 @@ export default async function handleAntiLink(message, hisoka) {
         const isLid = senderJid.includes('@lid');
         const senderNumber      = isLid ? '[LID]' : (jidDecode(senderJid)?.user || senderJid.split('@')[0] || '');
         const senderNumberClean = senderJid.split('@')[0];
+        const pushName          = message.pushName || message.verifiedBizName || null;
 
         const botJid    = jidNormalizedUser(hisoka.user?.id || '');
         const botNumber = botJid.split('@')[0];
@@ -369,17 +370,23 @@ export default async function handleAntiLink(message, hisoka) {
             const { dateStr, timeStr } = getWaktuStr();
             const isLid2 = senderJid.includes('@lid');
             const _mention2 = isLid2 ? [] : [senderJid];
-            const _user2 = isLid2 ? '_(akun privat)_' : `@${senderNumber}`;
+            const _name2 = isLid2
+                ? (pushName ? `*${pushName}*` : '_akun privat_')
+                : `@${senderNumber}`;
             await hisoka.sendMessage(remoteJid, {
                 text:
-                    `╭─〔 ⚠️ *Anti-Link* 〕\n│\n` +
-                    `│ 👤 ${_user2}\n` +
-                    `│ 🕐 ${timeStr} • ${dateStr}\n│\n` +
-                    `│ ⚠️ Mengirim *link* di grup ini!\n│\n` +
-                    `> ❌ Bot *bukan admin*, tidak bisa\n` +
-                    `> hapus pesan atau kick member.\n` +
-                    `> Jadikan bot *admin grup* agar\n` +
-                    `> Anti-Link bisa berjalan penuh!\n│\n` +
+                    `╭─〔 ⚠️ *Anti-Link* 〕\n` +
+                    `│\n` +
+                    `│ 👤 ${_name2}\n` +
+                    `│ 🕐 ${timeStr} • ${dateStr}\n` +
+                    `│\n` +
+                    `│ ⚠️ Mengirim *link* di grup ini!\n` +
+                    `│\n` +
+                    `│ ❌ Bot *bukan admin* — tidak bisa\n` +
+                    `│    hapus pesan atau kick member.\n` +
+                    `│ ℹ️ Jadikan bot *admin grup* agar\n` +
+                    `│    Anti-Link bisa berjalan penuh!\n` +
+                    `│\n` +
                     `╰────────────────────`,
                 contextInfo: { mentionedJid: _mention2 }
             }, { quoted: message });
@@ -404,7 +411,9 @@ export default async function handleAntiLink(message, hisoka) {
         const warnEmpty  = '◇'.repeat(Math.max(maxWarnings - newWarn, 0));
         const warnBar    = warnFilled + warnEmpty;
         const _mention   = isLid ? [] : [senderJid];
-        const _user      = isLid ? '_(akun privat)_' : `@${senderNumber}`;
+        const _user      = isLid
+            ? (pushName ? `*${pushName}*` : '_akun privat_')
+            : `@${senderNumber}`;
 
         // Hapus pesan dulu
         await deleteMsg(remoteJid, message.key.id, message.key.participant, hisoka);
@@ -415,13 +424,18 @@ export default async function handleAntiLink(message, hisoka) {
 
             await hisoka.sendMessage(remoteJid, {
                 text:
-                    `╭─〔 🔨 *Anti-Link — KICK* 〕\n│\n` +
+                    `╭─〔 🔨 *Anti-Link — KICK* 〕\n` +
+                    `│\n` +
                     `│ 👤 ${_user}\n` +
-                    `│ 🕐 ${timeStr} • ${dateStr}\n│\n` +
-                    `│ 🔴 Peringatan [${warnBar}] *${maxWarnings}/${maxWarnings}*\n│\n` +
-                    `• Pesan berisi link _telah dihapus_\n` +
-                    `• Member telah di-*KICK* dari grup!\n│\n` +
-                    `> _Akibat mengirim link berulang kali!_\n│\n` +
+                    `│ 🕐 ${timeStr} • ${dateStr}\n` +
+                    `│\n` +
+                    `│ 🔴 Peringatan [${warnBar}] *${maxWarnings}/${maxWarnings}*\n` +
+                    `│\n` +
+                    `│ • Pesan berisi link _telah dihapus_\n` +
+                    `│ • Member telah di-*KICK* dari grup!\n` +
+                    `│\n` +
+                    `│ _Akibat mengirim link berulang kali!_\n` +
+                    `│\n` +
                     `╰────────────────────`,
                 contextInfo: { mentionedJid: _mention }
             }, { quoted: message });
@@ -442,18 +456,23 @@ export default async function handleAntiLink(message, hisoka) {
             }
         } else {
             const nextInfo = newWarn >= maxWarnings - 1
-                ? `• ⚡ *Satu lagi = KICK otomatis!*`
-                : `• 💡 Sisa *${maxWarnings - newWarn}x* lagi sebelum di-kick`;
+                ? `│ • ⚡ *Satu lagi = KICK otomatis!*`
+                : `│ • 💡 Sisa *${maxWarnings - newWarn}x* lagi sebelum di-kick`;
 
             await hisoka.sendMessage(remoteJid, {
                 text:
-                    `╭─〔 ⚠️ *Anti-Link — Peringatan* 〕\n│\n` +
+                    `╭─〔 ⚠️ *Anti-Link — Peringatan* 〕\n` +
+                    `│\n` +
                     `│ 👤 ${_user}\n` +
-                    `│ 🕐 ${timeStr} • ${dateStr}\n│\n` +
-                    `│ 🟡 Peringatan [${warnBar}] *${newWarn}/${maxWarnings}*\n│\n` +
-                    `• Pesan berisi link _telah dihapus_\n` +
-                    `${nextInfo}\n│\n` +
-                    `> _Dilarang mengirim link di grup ini!_\n│\n` +
+                    `│ 🕐 ${timeStr} • ${dateStr}\n` +
+                    `│\n` +
+                    `│ 🟡 Peringatan [${warnBar}] *${newWarn}/${maxWarnings}*\n` +
+                    `│\n` +
+                    `│ • Pesan berisi link _telah dihapus_\n` +
+                    `${nextInfo}\n` +
+                    `│\n` +
+                    `│ _Dilarang mengirim link di grup ini!_\n` +
+                    `│\n` +
                     `╰────────────────────`,
                 contextInfo: { mentionedJid: _mention }
             }, { quoted: message });
