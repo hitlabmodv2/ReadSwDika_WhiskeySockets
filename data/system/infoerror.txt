@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 26/06/2026, 14.29.35  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 27/06/2026, 05.01.58  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  console.error
+│  #001  —  AlqanimeNotif
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [31m[HotReload] ✗ Gagal reload 'SEMUA_FITUR/antitag/antitag.js', pakai versi lama.[39m
+│  [AlqanimeNotif] Error scheduler: ambilThumbnailMAL is not defined
 │
 │  DETAIL
-│  Sumber      : console.error
+│  Sumber      : AlqanimeNotif
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 26/06/2026, 14.29.35
-│  Terakhir    : 26/06/2026, 14.29.35
+│  Pertama     : 27/06/2026, 05.01.58
+│  Terakhir    : 27/06/2026, 05.01.58
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [31m[HotReload] ✗ Gagal reload 'SEMUA_FITUR/antitag/antitag.js', pakai versi lama.[39m
+│  ▶  Error: [AlqanimeNotif] Error scheduler: ambilThumbnailMAL is not defined
 │     at console.error (file:///home/runner/workspace/index.js:412:27)
-│     at Timeout._onTimeout (file:///home/runner/workspace/src/helper/hotReload.js:274:33)
+│     at Timeout.runAlqanime [as _onTimeout] (file:///home/runner/workspace/index.js:1591:57)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 26/06/2026, 14.29.35
+  Terakhir diperbarui: 27/06/2026, 05.01.58
 ════════════════════════════════════════════════════════════════════════

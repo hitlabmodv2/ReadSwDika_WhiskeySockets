@@ -40,5 +40,47 @@
       }
     ],
     "processedAt": "2026-06-26T13:57:44.642Z"
+  },
+  "AC1856D42A2B1AB175F293F21321E0D9": {
+    "id": "AC1856D42A2B1AB175F293F21321E0D9",
+    "sender": "6285778517902@s.whatsapp.net",
+    "name": "Stephanie Floriska",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-27T03:57:58.680Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🏀",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285778517902",
+    "resolvedPn": "6285778517902@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285778517902@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC1856D42A2B1AB175F293F21321E0D9",
+      "participant": "178701056626923@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-27T03:58:01.521Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285778517902@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC1856D42A2B1AB175F293F21321E0D9",
+        "participant": "178701056626923@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285778517902@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC1856D42A2B1AB175F293F21321E0D9",
+        "participant": "6285778517902@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-27T03:58:01.521Z"
   }
 }
