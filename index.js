@@ -1544,62 +1544,76 @@ async function main() {
                                                 const daftarGrup = _alq.getEnabledGroups();
                                                 if (!daftarGrup.length) return;
 
-                                                const episodeBaru = await _alq.cariEpisodeBaru();
-                                                if (!episodeBaru.length) return;
+                                                // cariEpisodeBaru sekarang return { episodes, perubahanHangat, lagiHangat }
+                                                const hasil        = await _alq.cariEpisodeBaru();
+                                                const episodeBaru  = Array.isArray(hasil) ? hasil : (hasil.episodes || []);
+                                                const hangat       = Array.isArray(hasil) ? [] : (hasil.perubahanHangat || []);
+                                                const allHangat    = Array.isArray(hasil) ? [] : (hasil.lagiHangat || []);
 
-                                                // Dedup by url+epNum
-                                                const sudahKirimEp = new Set();
-                                                const episodeUnik  = episodeBaru.filter(item => {
-                                                        const key = item.id || `${item.url}::${item.epNum}`;
-                                                        if (sudahKirimEp.has(key)) return false;
-                                                        sudahKirimEp.add(key);
-                                                        return true;
-                                                });
+                                                // ── Kirim notif EPISODE/BATCH BARU ────────────────────────────────────
+                                                if (episodeBaru.length) {
+                                                        const sudahKirimEp = new Set();
+                                                        const episodeUnik  = episodeBaru.filter(item => {
+                                                                const key = item.id || `${item.url}::${item.epNum}`;
+                                                                if (sudahKirimEp.has(key)) return false;
+                                                                sudahKirimEp.add(key);
+                                                                return true;
+                                                        });
 
-                                                for (const item of episodeUnik) {
-                                                        const caption   = _alq.buatCaptionGabung(item);
-                                                        const urlGambar = _alq.ambilUrlGambar(item);
+                                                        for (const item of episodeUnik) {
+                                                                const caption   = _alq.buatCaptionGabung(item);
+                                                                const urlGambar = _alq.ambilUrlGambar(item);
 
-                                                        // Download buffer dulu; kalau gagal (403/block), pakai proxy wsrv.nl
-                                                        let imgBuffer  = null;
-                                                        let imgSendUrl = null;
-                                                        if (urlGambar) {
-                                                                imgBuffer  = await _alq.downloadImageBuffer(urlGambar);
-                                                                if (!imgBuffer) imgSendUrl = _alq.buatProxyUrl(urlGambar);
+                                                                let imgBuffer  = null;
+                                                                let imgSendUrl = null;
+                                                                if (urlGambar) {
+                                                                        imgBuffer  = await _alq.downloadImageBuffer(urlGambar);
+                                                                        if (!imgBuffer) imgSendUrl = _alq.buatProxyUrl(urlGambar);
+                                                                }
+
+                                                                const BATCH = 5;
+                                                                for (let i = 0; i < daftarGrup.length; i += BATCH) {
+                                                                        const chunk = daftarGrup.slice(i, i + BATCH);
+                                                                        await Promise.allSettled(chunk.map(async jid => {
+                                                                                try {
+                                                                                        if (imgBuffer) {
+                                                                                                await hisoka.sendMessage(jid, { image: imgBuffer, mimetype: 'image/jpeg', caption });
+                                                                                        } else if (imgSendUrl) {
+                                                                                                await hisoka.sendMessage(jid, { image: { url: imgSendUrl }, caption });
+                                                                                        } else {
+                                                                                                await hisoka.sendMessage(jid, { text: caption });
+                                                                                        }
+                                                                                } catch (e) {
+                                                                                        console.error(`[AlqanimeNotif] Gagal kirim ep ke ${jid}:`, e?.message);
+                                                                                }
+                                                                        }));
+                                                                        if (i + BATCH < daftarGrup.length) await new Promise(r => setTimeout(r, 1000));
+                                                                }
+
+                                                                _alq.tandaiDanLog(item, daftarGrup);
+                                                                console.log(`[AlqanimeNotif] ✅ Ep ${item.epNum} "${item.judul}" terkirim ke ${daftarGrup.length} grup`);
+                                                                await new Promise(r => setTimeout(r, 2000));
                                                         }
+                                                }
 
+                                                // ── Kirim notif LAGI HANGAT (pesan terpisah) ──────────────────────────
+                                                if (hangat.length && allHangat.length) {
+                                                        const captionHangat = _alq.buatCaptionHangat(hangat, allHangat);
                                                         const BATCH = 5;
                                                         for (let i = 0; i < daftarGrup.length; i += BATCH) {
                                                                 const chunk = daftarGrup.slice(i, i + BATCH);
                                                                 await Promise.allSettled(chunk.map(async jid => {
                                                                         try {
-                                                                                if (imgBuffer) {
-                                                                                        await hisoka.sendMessage(jid, {
-                                                                                                image   : imgBuffer,
-                                                                                                mimetype: 'image/jpeg',
-                                                                                                caption,
-                                                                                        });
-                                                                                } else if (imgSendUrl) {
-                                                                                        await hisoka.sendMessage(jid, {
-                                                                                                image: { url: imgSendUrl },
-                                                                                                caption,
-                                                                                        });
-                                                                                } else {
-                                                                                        await hisoka.sendMessage(jid, { text: caption });
-                                                                                }
+                                                                                await hisoka.sendMessage(jid, { text: captionHangat });
                                                                         } catch (e) {
-                                                                                console.error(`[AlqanimeNotif] Gagal kirim ke ${jid}:`, e?.message);
+                                                                                console.error(`[AlqanimeNotif] Gagal kirim hangat ke ${jid}:`, e?.message);
                                                                         }
                                                                 }));
-                                                                if (i + BATCH < daftarGrup.length) {
-                                                                        await new Promise(r => setTimeout(r, 1000));
-                                                                }
+                                                                if (i + BATCH < daftarGrup.length) await new Promise(r => setTimeout(r, 1000));
                                                         }
-
-                                                        _alq.tandaiDanLog(item, daftarGrup);
-                                                        console.log(`[AlqanimeNotif] ✅ Ep ${item.epNum} "${item.judul}" terkirim ke ${daftarGrup.length} grup`);
-                                                        await new Promise(r => setTimeout(r, 2000));
+                                                        console.log(`[AlqanimeNotif] 🔥 Lagi Hangat berubah (${hangat.length} baru) — terkirim ke ${daftarGrup.length} grup`);
                                                 }
+
                                         } catch (err) {
                                                 console.error('[AlqanimeNotif] Error scheduler:', err?.message);
                                         } finally {

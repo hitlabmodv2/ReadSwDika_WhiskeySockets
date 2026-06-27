@@ -219,8 +219,10 @@ async function cariEpisodeBaru() {
         console.error('[AlqanimeNotif] ❌ Gagal fetch homepage:', e?.message);
     }
 
-    const cards    = homeData.semua;
-    const sections = { lagiHangat: homeData.lagiHangat, rilisanTerbaru: homeData.rilisanTerbaru };
+    const cards = homeData.semua;
+
+    // ── Cek perubahan "Lagi Hangat" (sync, baca/tulis state.json) ─────────────
+    const perubahanHangat = cariPerubahanHangat(homeData.lagiHangat);
 
     // ── Retry gagal sebelumnya ─────────────────────────────────────────────────
     for (const gagal of (data.idGagal || [])) {
@@ -242,7 +244,6 @@ async function cariEpisodeBaru() {
                 epNum    : gagal.epNum,
                 thumbnail: detail.thumbnail || gagal.thumbnail,
                 ...detail,
-                sections,
             };
             console.log(`[AlqanimeNotif] 🔄 Retry berhasil: "${gagal.judul}" ep ${gagal.epNum}`);
             baru.push(item);
@@ -263,7 +264,7 @@ async function cariEpisodeBaru() {
         }
         df.idGagal = idGagalBaru;
         simpanData(df);
-        return [];
+        return { episodes: [], perubahanHangat: [], lagiHangat: homeData.lagiHangat };
     }
 
     // ── Run normal ─────────────────────────────────────────────────────────────
@@ -282,7 +283,6 @@ async function cariEpisodeBaru() {
                 epNum    : epD || epNum,
                 thumbnail: detail.thumbnail || card.thumbnail,
                 ...detail,
-                sections,
             };
             baru.push(baseItem);
         } catch (e) {
@@ -302,7 +302,7 @@ async function cariEpisodeBaru() {
     dataFinal.idGagal = idGagalBaru;
     simpanData(dataFinal);
 
-    return baru;
+    return { episodes: baru, perubahanHangat, lagiHangat: homeData.lagiHangat };
 }
 
 // ── SIMULASI ──────────────────────────────────────────────────────────────────
@@ -538,7 +538,6 @@ function buatCaptionGabung(data) {
     const {
         judul, epNum, title,
         info = {}, genres = [], sinopsis, episodes = [], url,
-        sections = {},
     } = data;
 
     const sekarang   = new Date();
@@ -644,32 +643,6 @@ function buatCaptionGabung(data) {
         }
     }
 
-    // ── Blok section: Lagi Hangat + Rilisan Terbaru ──────────────────────────
-    let sectionBlok = '';
-    const lagiHangat     = Array.isArray(sections?.lagiHangat)     ? sections.lagiHangat     : [];
-    const rilisanTerbaru = Array.isArray(sections?.rilisanTerbaru) ? sections.rilisanTerbaru : [];
-
-    if (lagiHangat.length || rilisanTerbaru.length) {
-        sectionBlok += `\n${SEP}`;
-
-        if (lagiHangat.length) {
-            sectionBlok += `\n🔥 *Lagi Hangat Saat Ini*\n${SEP2}\n`;
-            lagiHangat.slice(0, 5).forEach((a, i) => {
-                const scoreStr = a.score ? ` ⭐${a.score}` : '';
-                sectionBlok += `${i + 1}. ${a.title}${scoreStr}\n`;
-            });
-        }
-
-        if (rilisanTerbaru.length) {
-            sectionBlok += `\n📋 *Rilisan Terbaru*\n${SEP2}\n`;
-            rilisanTerbaru.slice(0, 5).forEach((a, i) => {
-                sectionBlok += `${i + 1}. ${a.title}\n`;
-            });
-        }
-
-        sectionBlok = sectionBlok.trimEnd();
-    }
-
     // ── Rakitan caption ──
     const baris = [
         headerUtama,
@@ -693,10 +666,79 @@ function buatCaptionGabung(data) {
         `▶️ *Tonton* : ${url}`,
         `🔗 *Source* : alqanime.net`,
         dlBlok ? dlBlok : null,
-        sectionBlok ? sectionBlok : null,
     ];
 
     return baris.filter(b => b !== null).join('\n');
+}
+
+// ── Monitor perubahan "Lagi Hangat Saat Ini" ─────────────────────────────────
+//
+// Dibandingkan dengan state tersimpan di state.json (key: lastHangat).
+// Kembalikan array item yang BARU MASUK ke hot list.
+// Kalau first run (belum ada lastHangat) → simpan dulu, return [].
+
+function cariPerubahanHangat(lagiHangat) {
+    if (!Array.isArray(lagiHangat) || !lagiHangat.length) return [];
+
+    const data = bacaData();
+
+    // Normalisasi: pakai URL sebagai key unik
+    const idBaru  = lagiHangat.map(a => a.url || a.title || '').filter(Boolean);
+    const idLama  = Array.isArray(data.lastHangat) ? data.lastHangat : null;
+
+    // Simpan state terbaru
+    data.lastHangat = idBaru;
+    simpanData(data);
+
+    // First run → simpan saja, jangan notif
+    if (!idLama) return [];
+
+    const setLama = new Set(idLama);
+    const masukBaru = lagiHangat.filter(a => {
+        const key = a.url || a.title || '';
+        return key && !setLama.has(key);
+    });
+
+    return masukBaru;
+}
+
+// ── Format caption notif "Lagi Hangat" ───────────────────────────────────────
+
+function buatCaptionHangat(newEntries, allHangat) {
+    const sekarang   = new Date();
+    const opsiHari   = { timeZone: 'Asia/Jakarta', weekday: 'long' };
+    const opsiTgl    = { timeZone: 'Asia/Jakarta', day: '2-digit', month: 'long', year: 'numeric' };
+    const opsiJam    = { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit', hour12: false };
+    const namaHari   = sekarang.toLocaleDateString('id-ID', opsiHari);
+    const tglLengkap = sekarang.toLocaleDateString('id-ID', opsiTgl);
+    const jamMenit   = sekarang.toLocaleTimeString('id-ID', opsiJam).replace('.', ':');
+    const headerWaktu = `${namaHari}, ${tglLengkap} · ${jamMenit} WIB`;
+
+    let txt = `🔥 *LAGI HANGAT — ALQANIME!*\n`;
+    txt += `${SEP}\n`;
+    txt += `📅 _${headerWaktu}_\n`;
+    txt += `${SEP}\n\n`;
+
+    if (newEntries.length) {
+        txt += `✨ *Baru Masuk Hot List:*\n`;
+        newEntries.slice(0, 5).forEach((a, i) => {
+            const scoreStr = a.score ? ` ⭐${a.score}` : '';
+            txt += `${i + 1}. *${a.title}*${scoreStr}\n`;
+        });
+        txt += `\n`;
+    }
+
+    txt += `${SEP}\n`;
+    txt += `🔥 *Semua Lagi Hangat Saat Ini:*\n`;
+    txt += `${SEP2}\n`;
+    allHangat.slice(0, 10).forEach((a, i) => {
+        const scoreStr = a.score ? ` ⭐${a.score}` : '';
+        txt += `${i + 1}. ${a.title}${scoreStr}\n`;
+    });
+    txt += `${SEP}\n`;
+    txt += `🌐 alqanime.net`;
+
+    return txt.trim();
 }
 
 function ambilUrlGambar(data) {
@@ -772,9 +814,11 @@ module.exports = {
     getEnabledGroups,
     setGroupEnabled,
     cariEpisodeBaru,
+    cariPerubahanHangat,
     buatCaption,
     buatCaptionLanjutan,
     buatCaptionGabung,
+    buatCaptionHangat,
     ambilUrlGambar,
     tandaiSudahKirim,
     tandaiDanLog,
