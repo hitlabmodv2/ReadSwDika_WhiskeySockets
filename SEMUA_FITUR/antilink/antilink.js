@@ -335,15 +335,15 @@ export default async function handleAntiLink(message, hisoka) {
                     if (botIsAdmin) {
                         const deleted = await deleteMsg(remoteJid, qId, qParticipant, hisoka);
                         const _delTxt = deleted
-                            ? `╭───〔 *✅ ANTI-LINK* 〕───╮\n│\n│ 🗑️ Pesan berisi link berhasil dihapus!\n│\n│ 👤 Pengirim : @${qNum}\n│ 🔗 Link     : \`${linkPreview}\`\n│\n│ _(Dihapus oleh ${isOwner ? 'owner' : 'admin'})_\n│\n╰────────────────────────────────────╯`
-                            : `❌ Gagal hapus pesan. Pastikan bot adalah *admin* grup.`;
+                            ? `╭─〔 ✅ *Anti-Link* 〕\n│\n│ 🗑️ Pesan link dihapus!\n│ 👤 Pengirim : @${qNum}\n│ 🔗 ${linkPreview}\n│\n│ _(oleh ${isOwner ? 'owner' : 'admin'})_\n╰────────────────────`
+                            : `╭─〔 ❌ *Anti-Link* 〕\n│\n│ Gagal hapus pesan.\n│ Cek ulang status admin bot.\n╰────────────────────`;
                         await hisoka.sendMessage(remoteJid, {
                             text: _delTxt,
                             contextInfo: { mentionedJid: qParticipant ? [jidNormalizedUser(qParticipant)] : [] }
                         }, { quoted: message });
                     } else {
                         await hisoka.sendMessage(remoteJid, {
-                            text: `╭───〔 *⚠️ ANTI-LINK* 〕───╮\n│\n│ ⚠️ Bot *bukan admin* — tidak bisa hapus!\n│\n│ 🔗 Link di pesan quoted:\n│    \`${linkPreview}\`\n│\n│ 💡 Jadikan bot *admin* agar bisa hapus otomatis.\n│\n╰────────────────────────────────────╯`
+                            text: `╭─〔 ⚠️ *Anti-Link* 〕\n│\n│ 🤖 Bot bukan admin!\n│ Jadikan bot *admin* agar bisa\n│ hapus pesan link otomatis.\n╰────────────────────`
                         }, { quoted: message });
                     }
                 }
@@ -363,12 +363,9 @@ export default async function handleAntiLink(message, hisoka) {
 
         console.log(`\x1b[33m[AntiLink] Link terdeteksi! Sender: ${senderNumber} | BotAdmin: ${botIsAdmin} | Link: ${linkPreview}\x1b[39m`);
 
-        // ── Bot bukan admin → tidak bisa enforce, skip warn ───────────────────
+        // ── Bot bukan admin → silent skip, tidak warn, tidak bisa enforce ──────
         if (!botIsAdmin) {
-            console.log('\x1b[33m[AntiLink] Bot bukan admin — skip warn.\x1b[39m');
-            await hisoka.sendMessage(remoteJid, {
-                text: `╭─〔 ⚠️ *Anti-Link* 〕\n│\n│ 🤖 Bot perlu jadi *admin* agar\n│    Anti-Link bisa berjalan!\n│\n│ 💡 Jadikan bot admin → Auto warn+kick aktif\n╰────────────────────`
-            }, { quoted: message });
+            console.log('\x1b[33m[AntiLink] Bot bukan admin — silent skip.\x1b[39m');
             return;
         }
 
