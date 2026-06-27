@@ -127,12 +127,14 @@ function parseDetail(md) {
     const title   = titleM ? titleM[1].replace(/ - Alqanime$/, '').trim() : '';
 
     // Scan semua gambar wp-content → pisahkan landscape banner vs portrait 200x300
-    const imgRe = /!\[Image \d+[^\]]*\]\((https:\/\/alqanime\.net\/wp-content\/uploads\/[^)]+\.(?:jpg|jpeg|png|webp))\)/gi;
+    // Regex broad: ambil semua URL wp-content (termasuk yg ada query params / tanpa ekstensi eksplisit)
+    const imgRe = /!\[[^\]]*\]\((https:\/\/alqanime\.net\/wp-content\/uploads\/[^)\s"]+)\)/gi;
     let bannerUrl = '', portraitUrl = '', imgM;
     while ((imgM = imgRe.exec(md)) !== null) {
-        const imgUrl = imgM[1];
-        if (/Header|logo|favicon/i.test(imgUrl)) continue;
-        if (/[_-]200x300|[_-]150x225/i.test(imgUrl)) {
+        const imgUrl = imgM[1].split('?')[0]; // hapus query params
+        if (/Header|logo|favicon|icon/i.test(imgUrl)) continue;
+        if (!/\.(jpg|jpeg|png|webp|gif)$/i.test(imgUrl)) continue; // harus file gambar
+        if (/[_-]200x300|[_-]150x225|[_-]300x450/i.test(imgUrl)) {
             if (!portraitUrl) portraitUrl = imgUrl; // poster kecil
         } else {
             if (!bannerUrl) bannerUrl = imgUrl;     // gambar besar/landscape pertama
@@ -249,7 +251,8 @@ function parseAlqSeasonInput(input) {
 
 async function getAlqSeasonAnimeList(season, year) {
     const slug    = `${season.toLowerCase()}-${year}`;
-    const baseUrl = `${BASE}/advanced-search/?season%5B%5D=${slug}&order=update`;
+    // status=completed: hanya ambil anime yg sudah tamat & ada batch
+    const baseUrl = `${BASE}/advanced-search/?season%5B%5D=${slug}&status=completed&order=update`;
     const all     = [];
     let page = 1;
 
@@ -259,11 +262,13 @@ async function getAlqSeasonAnimeList(season, year) {
             const md = await fetchMarkdown(url);
             const items = parseAnimeCards(md);
             if (!items.length) break;
-            all.push(...items);
-            // Jika halaman ini penuh (biasanya 12 atau 24 per page), coba halaman berikutnya
-            if (items.length < 12) break;
+            // Deduplikasi berdasarkan URL
+            for (const item of items) {
+                if (!all.find(x => x.url === item.url)) all.push(item);
+            }
+            if (items.length < 10) break; // halaman terakhir
             page++;
-            if (page > 10) break; // safety limit
+            if (page > 5) break; // safety limit
             await new Promise(r => setTimeout(r, 500));
         } catch (_) { break; }
     }

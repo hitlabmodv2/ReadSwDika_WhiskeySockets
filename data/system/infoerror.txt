@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 27/06/2026, 08.25.40  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 27/06/2026, 10.09.35  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  console.error
+│  #001  —  AlqanimeNotif
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [31m[HotReload] ✗ Gagal reload 'message.js', pakai versi lama.[39m
+│  [AlqanimeNotif] ❌ Gagal fetch homepage: Request failed with status code 429
 │
 │  DETAIL
-│  Sumber      : console.error
+│  Sumber      : AlqanimeNotif
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 27/06/2026, 08.25.40
-│  Terakhir    : 27/06/2026, 08.25.40
+│  Pertama     : 27/06/2026, 10.09.35
+│  Terakhir    : 27/06/2026, 10.09.35
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [31m[HotReload] ✗ Gagal reload 'message.js', pakai versi lama.[39m
+│  ▶  Error: [AlqanimeNotif] ❌ Gagal fetch homepage: Request failed with status code 429
 │     at console.error (file:///home/runner/workspace/index.js:412:27)
-│     at Timeout._onTimeout (file:///home/runner/workspace/src/helper/hotReload.js:300:33)
+│     at Object.cariEpisodeBaru (/home/runner/workspace/SEMUA_FITUR/anime/alqanime-monitor.cjs:219:17)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 27/06/2026, 08.25.40
+  Terakhir diperbarui: 27/06/2026, 10.09.35
 ════════════════════════════════════════════════════════════════════════
