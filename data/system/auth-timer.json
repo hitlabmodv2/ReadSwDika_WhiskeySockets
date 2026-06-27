@@ -2,6 +2,14 @@
   "events": [
     {
       "type": "connected",
+      "connectedAt": "2026-06-27T05:14:05.331Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-06-27T05:09:54.014Z"
+    },
+    {
+      "type": "connected",
       "connectedAt": "2026-06-27T05:06:49.919Z"
     },
     {
@@ -191,16 +199,8 @@
     {
       "type": "connected",
       "connectedAt": "2026-06-25T15:31:33.648Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-06-25T15:30:43.932Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-06-25T15:28:27.631Z"
     }
   ],
-  "lastUpdated": "2026-06-27T05:06:49.920Z",
+  "lastUpdated": "2026-06-27T05:14:05.331Z",
   "sessionStart": "2026-06-24T07:52:30.494Z"
 }

@@ -1560,10 +1560,12 @@ async function main() {
                                                         const caption   = _alq.buatCaptionGabung(item);
                                                         const urlGambar = _alq.ambilUrlGambar(item);
 
-                                                        // Download buffer dulu → bypass Cloudflare/stream block
-                                                        let imgBuffer = null;
+                                                        // Download buffer dulu; kalau gagal (403/block), pakai proxy wsrv.nl
+                                                        let imgBuffer  = null;
+                                                        let imgSendUrl = null;
                                                         if (urlGambar) {
-                                                                imgBuffer = await _alq.downloadImageBuffer(urlGambar);
+                                                                imgBuffer  = await _alq.downloadImageBuffer(urlGambar);
+                                                                if (!imgBuffer) imgSendUrl = _alq.buatProxyUrl(urlGambar);
                                                         }
 
                                                         const BATCH = 5;
@@ -1577,9 +1579,9 @@ async function main() {
                                                                                                 mimetype: 'image/jpeg',
                                                                                                 caption,
                                                                                         });
-                                                                                } else if (urlGambar) {
+                                                                                } else if (imgSendUrl) {
                                                                                         await hisoka.sendMessage(jid, {
-                                                                                                image: { url: urlGambar },
+                                                                                                image: { url: imgSendUrl },
                                                                                                 caption,
                                                                                         });
                                                                                 } else {

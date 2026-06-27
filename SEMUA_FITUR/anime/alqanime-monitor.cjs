@@ -674,19 +674,32 @@ function ambilUrlGambar(data) {
     return data?.thumbnail || null;
 }
 
+// Buat proxy URL via wsrv.nl (image CDN proxy gratis)
+// Dipakai sebagai fallback saat direct URL diblokir server alqanime.net
+function buatProxyUrl(url) {
+    if (!url) return null;
+    return `https://wsrv.nl/?url=${encodeURIComponent(url)}&output=jpg&q=90`;
+}
+
 async function downloadImageBuffer(url) {
     if (!url) return null;
+
+    // Coba download langsung dengan Referer alqanime.net
     try {
         const r = await axios.get(url, {
-            headers     : { ...HEADERS, Accept: 'image/*' },
+            headers: {
+                ...HEADERS,
+                Accept  : 'image/webp,image/apng,image/*,*/*;q=0.8',
+                Referer : 'https://alqanime.net/',
+                Origin  : 'https://alqanime.net',
+            },
             responseType: 'arraybuffer',
-            timeout     : 20000,
+            timeout     : 15000,
         });
-        return Buffer.from(r.data);
-    } catch (e) {
-        console.warn('[AlqanimeNotif] ⚠️ Gagal download gambar:', e?.message);
-        return null;
-    }
+        if (r.data && r.data.byteLength > 1000) return Buffer.from(r.data);
+    } catch (_) {}
+
+    return null;
 }
 
 // ── EXPORT ────────────────────────────────────────────────────────────────────
@@ -704,6 +717,7 @@ module.exports = {
     getRecentLog,
     simulasi,
     downloadImageBuffer,
+    buatProxyUrl,
 };
 
 // ── COMMAND HANDLER ───────────────────────────────────────────────────────────
@@ -817,14 +831,15 @@ async function handleAlqanimeNotif({ hisoka, m, query, tolak, logCommand, sendCo
                                 return;
                         }
                         const hasil = await simulasi();
-                        const imgBufTest = hasil.urlGambar ? await downloadImageBuffer(hasil.urlGambar) : null;
+                        const imgBufTest  = hasil.urlGambar ? await downloadImageBuffer(hasil.urlGambar) : null;
+                        const proxyUrlTest = hasil.urlGambar ? buatProxyUrl(hasil.urlGambar) : null;
                         let berhasil = 0, gagal = 0;
                         for (const jid of daftarGrup) {
                                 try {
                                         if (imgBufTest) {
                                                 await hisoka.sendMessage(jid, { image: imgBufTest, mimetype: 'image/jpeg', caption: hasil.caption });
-                                        } else if (hasil.urlGambar) {
-                                                await hisoka.sendMessage(jid, { image: { url: hasil.urlGambar }, caption: hasil.caption });
+                                        } else if (proxyUrlTest) {
+                                                await hisoka.sendMessage(jid, { image: { url: proxyUrlTest }, caption: hasil.caption });
                                         } else {
                                                 await hisoka.sendMessage(jid, { text: hasil.caption });
                                         }
@@ -854,11 +869,12 @@ async function handleAlqanimeNotif({ hisoka, m, query, tolak, logCommand, sendCo
                 try {
                         const hasil = await simulasi();
                         if (hasil.urlGambar) {
-                                const imgBuf = await downloadImageBuffer(hasil.urlGambar);
+                                const imgBuf   = await downloadImageBuffer(hasil.urlGambar);
+                                const imgUrl   = imgBuf ? null : buatProxyUrl(hasil.urlGambar);
                                 if (imgBuf) {
                                         await hisoka.sendMessage(m.from, { image: imgBuf, mimetype: 'image/jpeg', caption: hasil.caption }, { quoted: m });
                                 } else {
-                                        await hisoka.sendMessage(m.from, { image: { url: hasil.urlGambar }, caption: hasil.caption }, { quoted: m });
+                                        await hisoka.sendMessage(m.from, { image: { url: imgUrl }, caption: hasil.caption }, { quoted: m });
                                 }
                         } else {
                                 await tolak(hisoka, m, hasil.caption);
