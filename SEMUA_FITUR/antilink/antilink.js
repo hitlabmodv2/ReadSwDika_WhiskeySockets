@@ -362,8 +362,17 @@ export default async function handleAntiLink(message, hisoka) {
         const linkPreview = links[0] ? links[0].slice(0, 60) + (links[0].length > 60 ? '…' : '') : '-';
 
         console.log(`\x1b[33m[AntiLink] Link terdeteksi! Sender: ${senderNumber} | BotAdmin: ${botIsAdmin} | Link: ${linkPreview}\x1b[39m`);
-        if (!botIsAdmin) console.log('\x1b[33m[AntiLink] Bot bukan admin, hanya peringatan.\x1b[39m');
 
+        // ── Bot bukan admin → tidak bisa enforce, skip warn ───────────────────
+        if (!botIsAdmin) {
+            console.log('\x1b[33m[AntiLink] Bot bukan admin — skip warn.\x1b[39m');
+            await hisoka.sendMessage(remoteJid, {
+                text: `╭─〔 ⚠️ *Anti-Link* 〕\n│\n│ 🤖 Bot perlu jadi *admin* agar\n│    Anti-Link bisa berjalan!\n│\n│ 💡 Jadikan bot admin → Auto warn+kick aktif\n╰────────────────────`
+            }, { quoted: message });
+            return;
+        }
+
+        // ── Bot admin → proses warn + hapus pesan ────────────────────────────
         const freshData = loadData();
         if (!freshData.warnings) freshData.warnings = {};
         if (!freshData.warnings[remoteJid]) freshData.warnings[remoteJid] = {};
@@ -376,72 +385,60 @@ export default async function handleAntiLink(message, hisoka) {
             action: newWarn >= maxWarnings ? 'kick' : 'warn',
             warnCount: newWarn, maxWarn: maxWarnings, link: linkPreview, ts: Date.now() });
 
-        const { timeStr, dateStr } = getWaktuStr();
-        const stats = buildGroupStats(groupMeta, newWarn, maxWarnings);
-        const _mention = isLid ? [] : [senderJid];
-        const _pelanggar = isLid
-            ? `👤 *Pelanggar* ﹕_(ID tidak dikenal / akun privat)_\n`
-            : `👤 *Pelanggar* ﹕@${senderNumber}\n`;
+        const { dateStr, timeStr } = getWaktuStr();
+        const warnFilled = '◆'.repeat(Math.min(newWarn, maxWarnings));
+        const warnEmpty  = '◇'.repeat(Math.max(maxWarnings - newWarn, 0));
+        const warnBar    = warnFilled + warnEmpty;
+        const _mention   = isLid ? [] : [senderJid];
+        const _user      = isLid ? '_(akun privat)_' : `@${senderNumber}`;
+
+        // Hapus pesan dulu
+        await deleteMsg(remoteJid, message.key.id, message.key.participant, hisoka);
 
         if (newWarn >= maxWarnings) {
             delete freshData.warnings[remoteJid][senderJid];
             saveData(freshData);
 
-            const kickLine = botIsAdmin
-                ? `💥 *Status*    ﹕ Telah di-*KICK* dari grup!`
-                : `⚠️ *Bot bukan admin* — tidak bisa kick!\n💡 Jadikan bot admin agar bisa kick otomatis.`;
-
             await hisoka.sendMessage(remoteJid, {
                 text:
-                    `⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛\n✦ 🔗 *ANTI-LINK* 🔗 ✦\n⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛\n\n` +
-                    _pelanggar +
-                    `🕐 *Waktu*     ﹕${timeStr} • ${dateStr}\n` +
-                    `🔗 *Link*      ﹕\`${linkPreview}\`\n\n` +
-                    `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n  📊 *STATISTIK GRUP*\n◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
-                    `👥 *Total Member*  ﹕ ${stats.totalMembers} orang\n🛡️ *Total Admin*   ﹕ ${stats.totalAdmins} orang\n🙋 *Member Biasa* ﹕ ${stats.totalMembers_} orang\n📈 *Rasio Admin*   ﹕ ${stats.adminPct}%\n     [${stats.adminBar}]\n◈━━━━━━━━━━━━━━━━━━━━━━━◈\n\n` +
-                    `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n  ⚠️ *PELANGGARAN*\n◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
-                    `🚫 Mengirim *link* di grup!\n\n🔴 *Peringatan* ﹕ ◆◆◆ ${maxWarnings}/${maxWarnings}\n${kickLine}\n◈━━━━━━━━━━━━━━━━━━━━━━━◈\n\n` +
-                    `_Dilarang menyebarkan link sembarangan di grup ini!_ 😤`,
+                    `╭─〔 🔗 *Anti-Link — KICK* 〕\n│\n` +
+                    `│ 👤 ${_user}\n` +
+                    `│ 🔗 ${linkPreview}\n` +
+                    `│ 🕐 ${timeStr} • ${dateStr}\n│\n` +
+                    `│ 🔴 Warn [${warnBar}] ${maxWarnings}/${maxWarnings}\n` +
+                    `│ 💥 Telah di-*KICK* dari grup!\n│\n` +
+                    `│ _Jangan kirim link sembarangan!_\n` +
+                    `╰────────────────────`,
                 contextInfo: { mentionedJid: _mention }
             }, { quoted: message });
 
-            if (botIsAdmin) {
-                await deleteMsg(remoteJid, message.key.id, message.key.participant, hisoka);
-                try {
-                    await hisoka.groupParticipantsUpdate(remoteJid, [senderJid], 'remove');
-                    console.log(`\x1b[31m[AntiLink] ✓ Kicked ${senderNumber} dari ${remoteJid}\x1b[39m`);
-                } catch (kickErr) {
-                    console.error('\x1b[31m[AntiLink] Gagal kick:\x1b[39m', kickErr.message);
-                    await hisoka.sendMessage(remoteJid, {
-                        text: `❌ Gagal kick ${isLid ? '_(LID)_' : '@' + senderNumber}. Pastikan bot adalah admin grup.`,
-                        contextInfo: { mentionedJid: _mention }
-                    });
-                }
+            try {
+                await hisoka.groupParticipantsUpdate(remoteJid, [senderJid], 'remove');
+                console.log(`\x1b[31m[AntiLink] ✓ Kicked ${senderNumber} dari ${remoteJid}\x1b[39m`);
+            } catch (kickErr) {
+                console.error('\x1b[31m[AntiLink] Gagal kick:\x1b[39m', kickErr.message);
+                await hisoka.sendMessage(remoteJid, {
+                    text: `❌ Gagal kick ${isLid ? '_(LID)_' : `@${senderNumber}`}. Cek status admin bot.`,
+                    contextInfo: { mentionedJid: _mention }
+                });
             }
         } else {
-            const deleteInfo  = botIsAdmin ? `🗑️ *Pesan*     ﹕ Telah dihapus otomatis.\n` : `⚠️ *Pesan*     ﹕ Bot bukan admin, tidak bisa hapus.\n`;
-            const nextWarnInfo = (newWarn >= maxWarnings - 1)
-                ? `⚡ *Peringatan berikutnya = KICK otomatis!*`
-                : `💡 Sisa *${maxWarnings - newWarn}x* lagi sebelum di-kick!`;
+            const nextInfo = newWarn >= maxWarnings - 1
+                ? `⚡ Satu lagi = *KICK otomatis!*`
+                : `💡 Sisa *${maxWarnings - newWarn}x* lagi sebelum di-kick`;
 
             await hisoka.sendMessage(remoteJid, {
                 text:
-                    `⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛\n✦ ⚠️ *ANTI-LINK* ⚠️ ✦\n⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛\n\n` +
-                    _pelanggar +
-                    `🕐 *Waktu*     ﹕${timeStr} • ${dateStr}\n` +
-                    `🔗 *Link*      ﹕\`${linkPreview}\`\n` +
-                    deleteInfo + `\n` +
-                    `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n  📊 *STATISTIK GRUP*\n◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
-                    `👥 *Total Member*  ﹕ ${stats.totalMembers} orang\n🛡️ *Total Admin*   ﹕ ${stats.totalAdmins} orang\n🙋 *Member Biasa* ﹕ ${stats.totalMembers_} orang\n📈 *Rasio Admin*   ﹕ ${stats.adminPct}%\n     [${stats.adminBar}]\n◈━━━━━━━━━━━━━━━━━━━━━━━◈\n\n` +
-                    `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n  ⚠️ *PERINGATAN ke-${newWarn}/${maxWarnings}*\n◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
-                    `🚫 Mengirim *link* di grup!\n\n🟡 *Warn* ﹕ [${stats.warnBar}] ${newWarn}/${maxWarnings}\n${nextWarnInfo}\n◈━━━━━━━━━━━━━━━━━━━━━━━◈\n\n` +
-                    `_Dilarang mengirim link sembarangan di grup ini!_ 🚫`,
+                    `╭─〔 ⚠️ *Anti-Link* 〕\n│\n` +
+                    `│ 👤 ${_user}\n` +
+                    `│ 🔗 ${linkPreview}\n` +
+                    `│ 🕐 ${timeStr} • ${dateStr}\n│\n` +
+                    `│ 🟡 Warn [${warnBar}] ${newWarn}/${maxWarnings}\n` +
+                    `│ ${nextInfo}\n│\n` +
+                    `│ _Dilarang kirim link di sini!_\n` +
+                    `╰────────────────────`,
                 contextInfo: { mentionedJid: _mention }
             }, { quoted: message });
-
-            if (botIsAdmin) {
-                await deleteMsg(remoteJid, message.key.id, message.key.participant, hisoka);
-            }
         }
     } catch (err) {
         console.error('\x1b[31m[AntiLink] Error:\x1b[39m', err.message);
