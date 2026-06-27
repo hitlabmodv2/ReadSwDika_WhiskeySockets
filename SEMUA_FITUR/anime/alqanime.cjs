@@ -285,6 +285,7 @@ async function batchFetchAlqDetails(animeList, onProgress) {
             getDetailAlqanime(a.url).then(d => ({
                 ...d,
                 url      : a.url,
+                listThumb: a.thumbnail || '',          // thumbnail card dari listing (pasti valid)
                 thumbnail: d.thumbnail || a.thumbnail || '',
             }))
         ));

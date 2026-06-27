@@ -105,11 +105,11 @@ async function generateAlqSeasonPdf(season, year, animes) {
     });
     const valid = animes.filter(Boolean);
 
-    // Pre-fetch banners (5 at a time) — pakai gambar landscape (banner) bukan portrait
+    // Pre-fetch thumbnails (5 at a time) — pakai listThumb (card listing) sebagai primary
     const banners = [];
     for (let i = 0; i < valid.length; i += 5) {
         const batch = await Promise.all(
-            valid.slice(i, i + 5).map(a => fetchBanner(a.banner || a.thumbnail))
+            valid.slice(i, i + 5).map(a => fetchBanner(a.listThumb || a.thumbnail || a.banner))
         );
         banners.push(...batch);
     }
@@ -142,7 +142,7 @@ async function generateAlqSeasonPdf(season, year, animes) {
 
         fill(doc, ML, SBY, W1, SBH, DARK2);
         doc.fillColor(RED).font('Helvetica-Bold').fontSize(26)
-           .text(String(valid.length), ML, SBY + 4, { width: W1, align: 'center' });
+           .text(String(animes.length), ML, SBY + 4, { width: W1, align: 'center' });
         doc.fillColor(LGRAY).font('Helvetica').fontSize(7.5)
            .text('TOTAL ANIME', ML, SBY + 35, { width: W1, align: 'center' });
 
