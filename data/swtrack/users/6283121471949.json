@@ -40,5 +40,28 @@
       }
     ],
     "processedAt": "2026-06-26T14:46:43.962Z"
+  },
+  "ACE0A7505591B168B8261EC8B27B2A69": {
+    "id": "ACE0A7505591B168B8261EC8B27B2A69",
+    "sender": "6283121471949@s.whatsapp.net",
+    "name": "gatot",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-27T06:04:47.763Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6283121471949",
+    "resolvedPn": "6283121471949@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6283121471949@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACE0A7505591B168B8261EC8B27B2A69",
+      "participant": "127461811601572@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-27T06:04:47.763Z"
   }
 }

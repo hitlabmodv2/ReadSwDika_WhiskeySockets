@@ -126,6 +126,7 @@ const pendingMusikaiCache  = new Map(); // key → { results, params, ts }
 const pendingMusikai2Cache = new Map(); // key → { results, params, ts } (musikai2)
 const pendingAlqDlChoices = new Map();
 const pendingAlqUpdateChoices = new Map();
+const pendingAlqNotifChoices = new Map();
 const pendingCosplayChoices = new Map();
 const pendingKomikChoices = new Map();
 const pendingFontuntikChoices = new Map(); // key → { text, botMsgId, expiresAt, timeout }
@@ -606,6 +607,12 @@ export default async function ({ message, type: messagesType }, hisoka) {
                 // ── Handle pending alqdl choice → alqanime-cmd.cjs ──
                 if (await handleAlqDlChoice({ hisoka, m, fs, pendingAlqDlChoices, getJadibotChoiceKey, getQuotedStanzaId, pickBestAlqLink, getAllAlqLinksByPriority, formatAlqLinkMsg, tolak, logError })) return;
 
+                // ── Handle reply ke status alqanimenotif (add/del GC) ──
+                {
+                        const { handleAlqNotifReply } = _require(path.resolve('./SEMUA_FITUR/anime/alqanime-monitor.cjs'));
+                        if (await handleAlqNotifReply({ hisoka, m, pendingAlqNotifChoices, getQuotedStanzaId, tolak, logCommand, loadConfig, fs, path })) return;
+                }
+
                 // ── Handle pending cosplaytele search choice → cosplay-cmd.cjs ──
                 if (await handleCosplayChoice({ hisoka, m, pendingCosplayChoices, getQuotedStanzaId, tolak, logCommand, logError })) return;
 
@@ -881,9 +888,9 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'alqanime':
                         case 'alq': {
                                 const _alqSub = (query || '').trim().toLowerCase();
-                                if (['on', 'off', 'status', 'test', 'help', 'test grup'].includes(_alqSub)) {
+                                if (['on', 'off', 'status', 'test', 'help', 'test grup', 'add', 'del'].includes(_alqSub) || /^(add|del)\s/.test(_alqSub)) {
                                         const { handleAlqanimeNotif } = _require(path.resolve('./SEMUA_FITUR/anime/alqanime-monitor.cjs'));
-                                        await handleAlqanimeNotif({ hisoka, m, query, tolak, logCommand, sendConfirmWithButtons, fs, path, loadConfig });
+                                        await handleAlqanimeNotif({ hisoka, m, query, tolak, logCommand, sendConfirmWithButtons, fs, path, loadConfig, pendingAlqNotifChoices, getQuotedStanzaId });
                                 } else {
                                         const { handleAlq } = _require(path.resolve('./SEMUA_FITUR/anime/alqanime.cjs'));
                                         await handleAlq({ hisoka, m, query, tolak, logCommand, logError, path, pendingAlqDlChoices, getJadibotChoiceKey });
@@ -1598,7 +1605,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                         case 'alqanimenotif': {
                                 const { handleAlqanimeNotif } = _require(path.resolve('./SEMUA_FITUR/anime/alqanime-monitor.cjs'));
-                                await handleAlqanimeNotif({ hisoka, m, query, tolak, logCommand, sendConfirmWithButtons, fs, path, loadConfig });
+                                await handleAlqanimeNotif({ hisoka, m, query, tolak, logCommand, sendConfirmWithButtons, fs, path, loadConfig, pendingAlqNotifChoices, getQuotedStanzaId });
                                 break;
                         }
 
