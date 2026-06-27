@@ -1038,9 +1038,9 @@
     "name": "Finn么",
     "type": "videoMessage",
     "arrivedAt": "2026-06-27T09:48:08.365Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "🧸",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6285222772192",
@@ -1053,6 +1053,8 @@
       "participant": "12661630705832@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-27T09:48:08.366Z"
+    "updatedAt": "2026-06-27T11:31:21.342Z",
+    "retriedOnStartup": true,
+    "retriedAt": "2026-06-27T11:31:21.342Z"
   }
 }

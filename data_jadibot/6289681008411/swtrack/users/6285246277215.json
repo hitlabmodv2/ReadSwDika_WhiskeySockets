@@ -1,13 +1,13 @@
 {
-  "AC0ABE1AD0A5B73B746B5BEF1A515842": {
-    "id": "AC0ABE1AD0A5B73B746B5BEF1A515842",
+  "AC9070523D64800E4B6194DC90250884": {
+    "id": "AC9070523D64800E4B6194DC90250884",
     "sender": "6285246277215@s.whatsapp.net",
     "name": "정한",
     "type": "videoMessage",
-    "arrivedAt": "2026-06-23T16:00:41.208Z",
+    "arrivedAt": "2026-06-27T11:32:21.670Z",
     "read": true,
     "reacted": true,
-    "emoji": "💚",
+    "emoji": "🎃",
     "resolve": "Signal Lib ✓",
     "source": "status",
     "number": "6285246277215",
@@ -16,17 +16,17 @@
       "remoteJid": "status@broadcast",
       "remoteJidAlt": "6285246277215@s.whatsapp.net",
       "fromMe": false,
-      "id": "AC0ABE1AD0A5B73B746B5BEF1A515842",
+      "id": "AC9070523D64800E4B6194DC90250884",
       "participant": "272245645643794@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-23T16:00:43.472Z",
+    "updatedAt": "2026-06-27T11:32:37.129Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6285246277215@s.whatsapp.net",
         "fromMe": false,
-        "id": "AC0ABE1AD0A5B73B746B5BEF1A515842",
+        "id": "AC9070523D64800E4B6194DC90250884",
         "participant": "272245645643794@lid",
         "addressingMode": "lid"
       },
@@ -34,11 +34,11 @@
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6285246277215@s.whatsapp.net",
         "fromMe": false,
-        "id": "AC0ABE1AD0A5B73B746B5BEF1A515842",
+        "id": "AC9070523D64800E4B6194DC90250884",
         "participant": "6285246277215@s.whatsapp.net",
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-23T16:00:43.472Z"
+    "processedAt": "2026-06-27T11:32:37.129Z"
   }
 }
