@@ -424,7 +424,7 @@ export default async function handleAntiLink(message, hisoka) {
                     `> _Akibat mengirim link berulang kali!_\n│\n` +
                     `╰────────────────────`,
                 contextInfo: { mentionedJid: _mention }
-            });
+            }, { quoted: message });
 
             try {
                 await hisoka.groupParticipantsUpdate(remoteJid, [senderJid], 'remove');
@@ -456,7 +456,7 @@ export default async function handleAntiLink(message, hisoka) {
                     `> _Dilarang mengirim link di grup ini!_\n│\n` +
                     `╰────────────────────`,
                 contextInfo: { mentionedJid: _mention }
-            });
+            }, { quoted: message });
         }
     } catch (err) {
         console.error('\x1b[31m[AntiLink] Error:\x1b[39m', err.message);
