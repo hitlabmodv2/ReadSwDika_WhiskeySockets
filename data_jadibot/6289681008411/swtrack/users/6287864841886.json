@@ -1,13 +1,13 @@
 {
-  "AC4383C3D0FCABC806AC244B1DDB3AF6": {
-    "id": "AC4383C3D0FCABC806AC244B1DDB3AF6",
+  "AC2DCC0266990202B4C1A368E7A69FF0": {
+    "id": "AC2DCC0266990202B4C1A368E7A69FF0",
     "sender": "6287864841886@s.whatsapp.net",
-    "name": "Dyy Keselek Jengkol JR.",
-    "type": "imageMessage",
-    "arrivedAt": "2026-06-26T09:59:48.050Z",
+    "name": "Om Dyy",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-27T14:13:14.820Z",
     "read": true,
     "reacted": true,
-    "emoji": "🎳",
+    "emoji": "⚽",
     "resolve": "Signal Lib ✓",
     "source": "status",
     "number": "6287864841886",
@@ -16,17 +16,17 @@
       "remoteJid": "status@broadcast",
       "remoteJidAlt": "6287864841886@s.whatsapp.net",
       "fromMe": false,
-      "id": "AC4383C3D0FCABC806AC244B1DDB3AF6",
+      "id": "AC2DCC0266990202B4C1A368E7A69FF0",
       "participant": "69132145979405@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-26T09:59:55.713Z",
+    "updatedAt": "2026-06-27T14:13:34.723Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6287864841886@s.whatsapp.net",
         "fromMe": false,
-        "id": "AC4383C3D0FCABC806AC244B1DDB3AF6",
+        "id": "AC2DCC0266990202B4C1A368E7A69FF0",
         "participant": "69132145979405@lid",
         "addressingMode": "lid"
       },
@@ -34,11 +34,11 @@
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6287864841886@s.whatsapp.net",
         "fromMe": false,
-        "id": "AC4383C3D0FCABC806AC244B1DDB3AF6",
+        "id": "AC2DCC0266990202B4C1A368E7A69FF0",
         "participant": "6287864841886@s.whatsapp.net",
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-26T09:59:55.713Z"
+    "processedAt": "2026-06-27T14:13:34.723Z"
   }
 }
