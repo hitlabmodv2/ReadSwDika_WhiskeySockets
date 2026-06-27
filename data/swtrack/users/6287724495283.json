@@ -317,5 +317,70 @@
       }
     ],
     "processedAt": "2026-06-27T04:06:19.429Z"
+  },
+  "ACE10B7692F0B9F9520341101D260FF4": {
+    "id": "ACE10B7692F0B9F9520341101D260FF4",
+    "sender": "6287724495283@s.whatsapp.net",
+    "name": "Rifki Aryananda Aji Nugro",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-27T08:00:54.296Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🎭",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6287724495283",
+    "resolvedPn": "6287724495283@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6287724495283@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACE10B7692F0B9F9520341101D260FF4",
+      "participant": "215225257189383@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-27T08:00:58.617Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287724495283@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACE10B7692F0B9F9520341101D260FF4",
+        "participant": "215225257189383@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287724495283@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACE10B7692F0B9F9520341101D260FF4",
+        "participant": "6287724495283@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-27T08:00:58.616Z"
+  },
+  "AC6CC0F0EB364E5ABC5D28BAE338F9DA": {
+    "id": "AC6CC0F0EB364E5ABC5D28BAE338F9DA",
+    "sender": "6287724495283@s.whatsapp.net",
+    "name": "Rifki Aryananda Aji Nugro",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-27T08:00:54.304Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6287724495283",
+    "resolvedPn": "6287724495283@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6287724495283@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC6CC0F0EB364E5ABC5D28BAE338F9DA",
+      "participant": "215225257189383@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-27T08:00:54.305Z"
   }
 }
