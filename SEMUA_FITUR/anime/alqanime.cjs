@@ -73,18 +73,24 @@ function parseAnimeCards(md) {
 }
 
 function parseDownloadLinks(md) {
-    const episodes  = [];
+    const episodes = [];
     const dlSection = md.match(/## Download [^\n]+\n([\s\S]*?)(?:### Series Terkait|### Komentar|### Rekomendasi|$)/);
     if (!dlSection) return episodes;
 
     const dlContent = dlSection[1];
+    const epBlocks  = dlContent.split(/(?=### Episode )/);
 
-    // Split by ### Episode ATAU ### Batch
-    const epBlocks = dlContent.split(/(?=###\s+(?:Episode|Batch))/i);
+    for (const block of epBlocks) {
+        const epMatch = block.match(/### Episode\s+([^\n]+)/);
+        if (!epMatch) continue;
 
-    function parseLinks(block) {
-        const links = {};
-        const lines = block.split('\n').filter(l => /360p|480p|720p|1080p/i.test(l));
+        const epLabel = epMatch[1].trim();
+        const links   = {};
+
+        // Parse per-resolution links: 360p[Host](url)[Host2](url2)
+        const resRegex = /(360p|480p|720p|1080p)/gi;
+        const lines    = block.split('\n').filter(l => /360p|480p|720p|1080p/i.test(l));
+
         for (const line of lines) {
             const resM = line.match(/^(360p|480p|720p|1080p)/i);
             if (!resM) continue;
@@ -97,25 +103,13 @@ function parseDownloadLinks(md) {
             }
             if (hosts.length) links[res] = hosts;
         }
-        return links;
-    }
 
-    for (const block of epBlocks) {
-        // Tangkap Episode
-        const epMatch = block.match(/###\s+Episode\s+([^\n]+)/i);
-        if (epMatch) {
-            const epLabel = epMatch[1].trim();
-            const links   = parseLinks(block);
-            if (Object.keys(links).length) episodes.push({ episode: epLabel, links });
-            continue;
-        }
+        // Batch link (episode sebelumnya)
+        const batchM = block.match(/360p.*1080p\[([^\]]+)\]\((https?:\/\/[^)]+)\)/);
+        if (batchM) links['batch'] = [{ host: batchM[1], url: batchM[2] }];
 
-        // Tangkap Batch (label "Batch" atau "Complete" dll)
-        const batchMatch = block.match(/###\s+(Batch[^\n]*|Complete[^\n]*|BD[^\n]*)/i);
-        if (batchMatch) {
-            const epLabel = batchMatch[1].trim();
-            const links   = parseLinks(block);
-            if (Object.keys(links).length) episodes.push({ episode: epLabel, links });
+        if (Object.keys(links).length) {
+            episodes.push({ episode: epLabel, links });
         }
     }
 
@@ -126,23 +120,11 @@ function parseDetail(md) {
     const titleM  = md.match(/^# ([^\n]+)/m);
     const title   = titleM ? titleM[1].replace(/ - Alqanime$/, '').trim() : '';
 
-    // Scan semua gambar wp-content → pisahkan landscape banner vs portrait 200x300
-    // Regex broad: ambil semua URL wp-content (termasuk yg ada query params / tanpa ekstensi eksplisit)
-    const imgRe = /!\[[^\]]*\]\((https:\/\/alqanime\.net\/wp-content\/uploads\/[^)\s"]+)\)/gi;
-    let bannerUrl = '', portraitUrl = '', imgM;
-    while ((imgM = imgRe.exec(md)) !== null) {
-        const imgUrl = imgM[1].split('?')[0]; // hapus query params
-        if (/Header|logo|favicon|icon/i.test(imgUrl)) continue;
-        if (!/\.(jpg|jpeg|png|webp|gif)$/i.test(imgUrl)) continue; // harus file gambar
-        if (/[_-]200x300|[_-]150x225|[_-]300x450/i.test(imgUrl)) {
-            if (!portraitUrl) portraitUrl = imgUrl; // poster kecil
-        } else {
-            if (!bannerUrl) bannerUrl = imgUrl;     // gambar besar/landscape pertama
-        }
-    }
-    // thumbnail = portrait untuk chat; banner = landscape untuk PDF
-    const thumbnail = portraitUrl || bannerUrl;
-    const banner    = bannerUrl || portraitUrl;
+    // Poster 200x300 (bukan logo header)
+    const thumbM  = md.match(/!\[Image \d+[^\]]*\]\((https:\/\/alqanime\.net\/wp-content\/uploads\/[^)]*-200x300[^)]*)\)/);
+    // Fallback ke gambar besar pertama jika tidak ada 200x300
+    const thumbFB = md.match(/!\[Image \d+[^\]]*\]\((https:\/\/alqanime\.net\/wp-content\/uploads\/(?!.*Header)[^)]+\.(?:jpg|png|webp))\)/);
+    const thumbnail = thumbM ? thumbM[1] : (thumbFB ? thumbFB[1] : '');
 
     const info = {};
     for (const field of [
@@ -192,7 +174,7 @@ function parseDetail(md) {
 
     const episodes = parseDownloadLinks(md);
 
-    return { title, thumbnail, banner, info, sinopsis, genres, episodes };
+    return { title, thumbnail, info, sinopsis, genres, episodes };
 }
 
 async function searchAlqanime(query) {
@@ -234,138 +216,7 @@ async function getHomepageData() {
     return { lagiHangat, rilisanTerbaru, semua };
 }
 
-// ── Season helpers ─────────────────────────────────────────────────────────────
-
-const SEASON_NAMES_ALQ = {
-    winter: 'Winter', spring: 'Spring', summer: 'Summer', fall: 'Fall',
-};
-
-function parseAlqSeasonInput(input) {
-    const lower = input.toLowerCase().trim();
-    const seasons = ['winter', 'spring', 'summer', 'fall'];
-    const yearMatch = lower.match(/\b(19|20)\d{2}\b/);
-    const year = yearMatch ? yearMatch[0] : null;
-    const season = seasons.find(s => lower.includes(s)) || null;
-    return season && year ? { season, year } : null;
-}
-
-async function getAlqSeasonAnimeList(season, year) {
-    const slug    = `${season.toLowerCase()}-${year}`;
-    // status=completed: hanya ambil anime yg sudah tamat & ada batch
-    const baseUrl = `${BASE}/advanced-search/?season%5B%5D=${slug}&status=completed&order=update`;
-    const all     = [];
-    let page = 1;
-
-    while (true) {
-        const url = page === 1 ? baseUrl : `${baseUrl}&page=${page}`;
-        try {
-            const md = await fetchMarkdown(url);
-            const items = parseAnimeCards(md);
-            if (!items.length) break;
-            // Deduplikasi berdasarkan URL
-            for (const item of items) {
-                if (!all.find(x => x.url === item.url)) all.push(item);
-            }
-            if (items.length < 10) break; // halaman terakhir
-            page++;
-            if (page > 5) break; // safety limit
-            await new Promise(r => setTimeout(r, 500));
-        } catch (_) { break; }
-    }
-
-    return all;
-}
-
-async function batchFetchAlqDetails(animeList, onProgress) {
-    const BATCH = 3;
-    const results = [];
-    for (let i = 0; i < animeList.length; i += BATCH) {
-        const chunk = animeList.slice(i, i + BATCH);
-        const settled = await Promise.allSettled(chunk.map(a =>
-            getDetailAlqanime(a.url).then(d => ({
-                ...d,
-                url      : a.url,
-                listThumb: a.thumbnail || '',          // thumbnail card dari listing (pasti valid)
-                thumbnail: d.thumbnail || a.thumbnail || '',
-            }))
-        ));
-        for (const s of settled) {
-            results.push(s.status === 'fulfilled' ? s.value : null);
-        }
-        if (onProgress) onProgress(Math.min(i + BATCH, animeList.length), animeList.length);
-        if (i + BATCH < animeList.length) await new Promise(r => setTimeout(r, 800));
-    }
-    return results;
-}
-
-function formatAlqSeasonTxt(season, year, animes) {
-    const label = SEASON_NAMES_ALQ[season.toLowerCase()] || season;
-    const now = new Date().toLocaleString('id-ID', {
-        day: '2-digit', month: 'long', year: 'numeric',
-        hour: '2-digit', minute: '2-digit', hour12: false,
-    });
-    const W    = 60;
-    const SEP  = '='.repeat(W);
-    const SEP2 = '-'.repeat(W);
-    const valid = animes.filter(Boolean);
-    let out = '';
-
-    out += `${SEP}\n`;
-    out += ` ALQANIME - ANIME ${label.toUpperCase()} ${year}\n`;
-    out += ` Source  : alqanime.net\n`;
-    out += ` Diambil : ${now}\n`;
-    out += ` Total   : ${valid.length} judul\n`;
-    out += `${SEP}\n`;
-
-    out += `\n DAFTAR JUDUL:\n${SEP2}\n`;
-    let idx = 1;
-    for (const anime of animes) {
-        if (!anime) continue;
-        out += ` > ${String(idx++).padStart(2, '0')}. ${anime.title}\n`;
-    }
-    out += `${SEP}\n`;
-
-    out += `\n DETAIL & DOWNLOAD LINKS:\n${SEP}\n`;
-    let no = 1;
-    for (const anime of animes) {
-        if (!anime) continue;
-        out += `\n[${String(no++).padStart(2, '0')}] ${anime.title}\n${SEP2}\n`;
-        const info = anime.info || {};
-        for (const [k, lbl] of [
-            ['Status', 'Status  '], ['Tipe', 'Tipe    '], ['Studio', 'Studio  '],
-            ['Dirilis', 'Rilis   '], ['Musim', 'Musim   '], ['Episode', 'Episode '],
-            ['Durasi', 'Durasi  '], ['Score', 'Score   '],
-        ]) {
-            if (info[k]) out += ` ${lbl} : ${info[k]}\n`;
-        }
-        if (anime.genres?.length) out += ` Genre    : ${anime.genres.join(', ')}\n`;
-        if (anime.sinopsis) {
-            const syn = anime.sinopsis.slice(0, 300) + (anime.sinopsis.length > 300 ? '...' : '');
-            out += ` Sinopsis : ${syn}\n`;
-        }
-        if (anime.url) out += ` URL      : ${anime.url}\n`;
-        if (anime.episodes?.length) {
-            out += `\n Download Links:\n`;
-            for (const ep of anime.episodes) {
-                out += `\n  >> Episode ${ep.episode}\n`;
-                for (const [res, hosts] of Object.entries(ep.links || {})) {
-                    out += `     [${res.toUpperCase()}]\n`;
-                    for (const h of (hosts || [])) {
-                        out += `       - ${(h.host || '-').padEnd(14)}: ${h.url}\n`;
-                    }
-                }
-            }
-        }
-        out += `\n${SEP}\n`;
-    }
-    out += ` Generated by Wily Bot | alqanime.net\n${SEP}\n`;
-    return out;
-}
-
-module.exports = {
-    searchAlqanime, getDetailAlqanime, getLatestAlqanime, getRilisanTerbaru, getHomepageData,
-    parseAlqSeasonInput, getAlqSeasonAnimeList, batchFetchAlqDetails, formatAlqSeasonTxt, SEASON_NAMES_ALQ,
-};
+module.exports = { searchAlqanime, getDetailAlqanime, getLatestAlqanime, getRilisanTerbaru, getHomepageData };
 
 // ── COMMAND HANDLER ───────────────────────────────────────────────────────────
 
@@ -378,75 +229,6 @@ async function handleAlq({ hisoka, m, query, tolak, logCommand, logError, path, 
                 /* .alq [judul] → untuk pencarian spesifik */
                 const isAlqanimeCmd = (m.command || '').toLowerCase() === 'alqanime';
 
-                // ── Deteksi input musim → kirim TXT + PDF (berlaku untuk .alqanime & .alq) ───
-                if (input) {
-                    const seasonParsed = parseAlqSeasonInput(input);
-                    if (seasonParsed) {
-                        const { season, year } = seasonParsed;
-                        const label    = SEASON_NAMES_ALQ[season] || season;
-                        const baseName = `Alqanime_${label}_${year}`;
-
-                        await hisoka.sendMessage(m.from, { react: { text: '📅', key: m.key } });
-                        const loadingMsg = await m.reply(
-                            `📅 *Mengambil daftar ${label} ${year}...*\n⏳ Mohon tunggu, proses ~2–5 menit\n📡 Mengambil daftar anime dari alqanime.net...`
-                        );
-
-                        const animeList = await getAlqSeasonAnimeList(season, year);
-                        if (!animeList.length) {
-                            await m.reply({ edit: loadingMsg.key, text: `❌ Season *${label} ${year}* tidak ditemukan di Alqanime.` });
-                            return;
-                        }
-
-                        await m.reply({
-                            edit: loadingMsg.key,
-                            text: `📅 *${label} ${year}* — ${animeList.length} anime\n⏳ Mengambil detail + link download...\n[░░░░░░░░░░] 0/${animeList.length}`,
-                        });
-
-                        let lastUpdate = 0;
-                        const details = await batchFetchAlqDetails(animeList, async (done, total) => {
-                            const now2 = Date.now();
-                            if (now2 - lastUpdate < 4000 && done < total) return;
-                            lastUpdate = now2;
-                            const pct    = Math.round((done / total) * 100);
-                            const filled = Math.round(pct / 10);
-                            const bar    = '█'.repeat(filled) + '░'.repeat(10 - filled);
-                            try {
-                                await m.reply({
-                                    edit: loadingMsg.key,
-                                    text: `📅 *${label} ${year}* — ${animeList.length} anime\n⏳ Mengambil detail...\n[${bar}] ${pct}% (${done}/${total})`,
-                                });
-                            } catch (_) {}
-                        });
-
-                        const validCount = details.filter(Boolean).length;
-                        const txtContent = formatAlqSeasonTxt(season, year, details);
-                        const txtBuf     = Buffer.from(txtContent, 'utf8');
-
-                        try { await m.reply({ edit: loadingMsg.key, text: `✅ Detail selesai!\n🖨 Membuat file PDF (${validCount} anime + gambar)...` }); } catch (_) {}
-
-                        const { generateAlqSeasonPdf } = require(path.resolve('./SEMUA_FITUR/anime/alqanime-pdf.cjs'));
-                        const pdfBuf = await generateAlqSeasonPdf(season, year, details);
-
-                        try { await m.reply({ edit: loadingMsg.key, text: `✅ Semua file siap! Mengirim TXT + PDF...` }); } catch (_) {}
-
-                        const caption =
-                            `📅 *Alqanime — ${label} ${year}*\n━━━━━━━━━━━━━━━━━━━\n` +
-                            `🎌 Total anime  : *${validCount}* judul\n` +
-                            `📄 File TXT     : info + semua link download\n` +
-                            `🎨 File PDF     : desain keren + gambar anime\n` +
-                            `🌐 Sumber       : alqanime.net`;
-
-                        await hisoka.sendMessage(m.from, { document: txtBuf, mimetype: 'text/plain', fileName: `${baseName}.txt`, caption }, { quoted: m });
-                        await hisoka.sendMessage(m.from, {
-                            document: pdfBuf, mimetype: 'application/pdf', fileName: `${baseName}.pdf`,
-                            caption: `📄 *PDF ${label} ${year}* — ${validCount} anime\n🎨 Termasuk cover, poster, info & link download tiap anime`,
-                        }, { quoted: m });
-                        await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
-                        logCommand(m, hisoka, `alqanime season ${season} ${year}`);
-                        return;
-                    }
-                }
-
                 if (!input || isAlqanimeCmd) {
                         await hisoka.sendMessage(m.from, { react: { text: '📺', key: m.key } });
                         const { getRilisanTerbaru } = module.exports;
@@ -458,11 +240,7 @@ async function handleAlq({ hisoka, m, query, tolak, logCommand, logError, path, 
                         let latestText = `🎌 *Rilisan Terbaru — Alqanime*\n━━━━━━━━━━━━━━━━━━━\n`;
                         latest.slice(0, 15).forEach((a, i) => { latestText += `${i + 1}. ${a.title}\n`; });
                         latestText += `━━━━━━━━━━━━━━━━━━━\n🌐 alqanime.net\n\n`;
-                        latestText += `📌 *Cari anime spesifik:* ${pfx}alq <judul>\n`;
-                        latestText += `📅 *Per musim (TXT + PDF):*\n`;
-                        latestText += `   ${pfx}alq winter 2025\n`;
-                        latestText += `   ${pfx}alq spring 2025\n`;
-                        latestText += `   ${pfx}alqanime fall 2024`;
+                        latestText += `📌 *Cari anime spesifik:* ${pfx}alq <judul>`;
                         await tolak(hisoka, m, latestText);
                         await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
                         logCommand(m, hisoka, 'alqanime');
