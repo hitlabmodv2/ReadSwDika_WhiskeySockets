@@ -1,12 +1,16 @@
 {
   "events": [
     {
+      "type": "connected",
+      "connectedAt": "2026-06-28T05:56:03.443Z"
+    },
+    {
       "type": "qr_session_start",
-      "startAt": "2026-06-27T14:36:00.302Z",
-      "expireAt": "2026-06-27T14:39:00.302Z",
+      "startAt": "2026-06-28T05:55:43.941Z",
+      "expireAt": "2026-06-28T05:58:43.941Z",
       "durationSeconds": 180
     }
   ],
-  "lastUpdated": "2026-06-27T14:36:00.303Z",
-  "sessionStart": "2026-06-27T14:36:00.303Z"
+  "lastUpdated": "2026-06-28T05:56:03.444Z",
+  "sessionStart": "2026-06-28T05:55:43.959Z"
 }
