@@ -28,6 +28,25 @@ import fs from 'fs';
 import path from 'path';
 import { createRequire } from 'module';
 const _require = createRequire(import.meta.url);
+
+// ── Warna tema logsw — baca dari config.json (logsw.theme) ───────────────────
+// Dipakai semua kotak log (WILY BOT AKTIF, AutoReadStory startup, AUTO JADIBOT)
+function getLogswBoxColor() {
+    try {
+        const { LOGSW_ANSI, LOGSW_RANDOM_KEYS } = _require(
+            path.join(process.cwd(), 'src', 'config', 'logsw-colors.cjs')
+        );
+        const cfgRaw  = fs.readFileSync(path.join(process.cwd(), 'config.json'), 'utf-8');
+        const theme   = (JSON.parse(cfgRaw)?.logsw?.theme || 'default').toLowerCase().trim();
+        if (theme === 'random') {
+            return LOGSW_ANSI[LOGSW_RANDOM_KEYS[Math.floor(Math.random() * LOGSW_RANDOM_KEYS.length)]]
+                || LOGSW_ANSI.default;
+        }
+        return LOGSW_ANSI[theme] || LOGSW_ANSI.default;
+    } catch {
+        return '\x1b[36m'; // fallback cyan
+    }
+}
 const {
         default: makeWASocket,
         delay,
@@ -1037,7 +1056,7 @@ async function main() {
                         const autoOnline2 = config2.autoOnline || {};
                         const modeLabel = autoOnline2.enabled !== false ? 'ONLINE 🟢' : 'OFFLINE 🔴';
 
-                        const G = '\x1b[32m', Y = '\x1b[33m', C = '\x1b[36m', R = '\x1b[0m', B = '\x1b[1m';
+                        const G = '\x1b[32m', Y = '\x1b[33m', C = getLogswBoxColor(), R = '\x1b[0m', B = '\x1b[1m';
                         const _bKey2   = (global.__activeBrowserKey || 'v1').toLowerCase();
                         const _bInfo2  = BROWSER_LIST.find(b => b.key === _bKey2);
                         const _bLabel2 = _bInfo2
@@ -1114,7 +1133,7 @@ async function main() {
                                         const _swMons=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
                                         const _swPad=(s,w)=>{s=String(s||'');return s.length>=w?s:s+' '.repeat(w-s.length);};
                                         const _swBox=(entry,emoji,delMs)=>{
-                                                const cy='\x1b[36m',wh='\x1b[37m',ye='\x1b[33m',gr='\x1b[32m',bl='\x1b[34m',or='\x1b[38;2;255;165;0m',pu='\x1b[38;2;180;120;255m',rs='\x1b[0m';
+                                                const cy=getLogswBoxColor(),wh='\x1b[37m',ye='\x1b[33m',gr='\x1b[32m',bl='\x1b[34m',or='\x1b[38;2;255;165;0m',pu='\x1b[38;2;180;120;255m',rs='\x1b[0m';
                                                 const bW=35,cW=16,title='AutoReadStoryWhatsApp',tp=Math.floor((bW-title.length)/2);
                                                 const d=new Date(new Date(entry.arrivedAt||Date.now()).toLocaleString('en-US',{timeZone:'Asia/Jakarta'}));
                                                 const hh=d.getHours(),greeting=hh<10?'Subuh 🌙':hh<15?'Siang 🏙️':hh<18?'Sore 🌆':'Malam 🌙';
@@ -2774,7 +2793,7 @@ setTimeout(async () => {
 
   if (!bots.length && !expiredBots.length) return;
 
-  const C = '\x1b[36m', G = '\x1b[32m', Y = '\x1b[33m', R = '\x1b[0m', B = '\x1b[1m';
+  const C = getLogswBoxColor(), G = '\x1b[32m', Y = '\x1b[33m', R = '\x1b[0m', B = '\x1b[1m';
   const RED = '\x1b[31m', DIM = '\x1b[2m';
 
   const validBots = [], invalidBots = [];
