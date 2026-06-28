@@ -420,7 +420,6 @@ function getLogswBoxColor() {
 export function logStoryView(data) {
         const { botId, mediaType, greeting, dayName, date, time, name, number, success, reaction, delaySeconds, mode, resolve, storyCount, idStory, emojiMode } = data;
         const { boxColor: cyan, fgColor: white } = getLogswBoxColor(); // border & teks ikut tema config.json
-        const red   = '\x1b[31m';               // hanya state error (❌)
         const reset = '\x1b[0m';
 
         const boxWidth = 35;
@@ -459,12 +458,10 @@ export function logStoryView(data) {
                 const _modeStr = String(emojiMode).toLowerCase() === 'custom' ? 'Custom 🟢' : 'Default 🔵';
                 console.log(`${cyan}│${reset} ${white}⭔ EmojiMode   : ${padEnd(_modeStr, contentWidth)}${reset}${cyan}${reset}`);
         }
-        const successColor = String(success).includes('❌') ? red : white;
-        console.log(`${cyan}│${reset} ${white}⭔ Berhasil    : ${successColor}${padEnd(success, contentWidth)}${reset}${cyan}${reset}`);
+        console.log(`${cyan}│${reset} ${white}⭔ Berhasil    : ${padEnd(success, contentWidth)}${reset}${cyan}${reset}`);
         console.log(`${cyan}│${reset} ${white}⭔ Reaksi      : ${padEnd(reaction, contentWidth)}${reset}${cyan}${reset}`);
         if (resolve) {
-                const resolveColor = resolve.includes('❌') ? red : white;
-                console.log(`${cyan}│${reset} ${white}⭔ Resolve     : ${resolveColor}${padEnd(resolve, contentWidth)}${reset}${cyan}${reset}`);
+                console.log(`${cyan}│${reset} ${white}⭔ Resolve     : ${padEnd(resolve, contentWidth)}${reset}${cyan}${reset}`);
         }
         console.log(`${cyan}│${reset} ${white}⭔ Delay       : ${padEnd(delayStr, contentWidth)}${reset}${cyan}${reset}`);
         console.log(`${cyan}└${'─'.repeat(13)}···${reset}`);
