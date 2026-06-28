@@ -3,7 +3,7 @@ _📅 27 Juni 2026_ 🕐
 _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurna_
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V24*
-✨ *5 Fitur Baru*
+✨ *6 Fitur Baru*
 🔧 *7 Bug/Error Fix*
 🚀 *14 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -45,6 +45,16 @@ _Kirim pesan teks/media ke semua GC atau satu GC tertentu, dengan delay otomatis
 _Lihat daftar semua GC yang sedang diikuti bot, lengkap dengan nomor urut, nama GC, dan JID_
 - Format: nomor | nama GC | JID
 - Berguna untuk dapat GID yang dipakai di `.jpm GID >> pesan | delay`
+> Owner only
+
+*6. 📤 Push Kontak GC —* `.pushkontakgc`
+_Kirim pesan teks/media langsung ke semua member di dalam satu GC, satu per satu dengan delay_
+- *Cara pakai (teks):* `.pushkontakgc GID | pesan | delay`
+- *Cara pakai (media):* reply gambar/video → `.pushkontakgc GID | caption | delay`
+- Progress bar realtime (edit pesan otomatis saat proses berjalan)
+- Delay minimal 3 detik, maksimal 10 detik per member
+- Bisa dihentikan kapan saja dengan `.pushkontakgcstop` atau `.pkgstop`
+- Guard aktif: jika proses masih berjalan → command baru ditolak otomatis
 > Owner only
 
 ━━━━━━━━━━━━━━━━━━━━━━
