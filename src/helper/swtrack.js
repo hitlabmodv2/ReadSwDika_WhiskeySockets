@@ -402,22 +402,24 @@ const _logswColorPath = path.join(process.cwd(), 'src', 'config', 'logsw-colors.
 function getLogswBoxColor() {
         try {
                 delete _require.cache[_logswColorPath];
-                const { LOGSW_ANSI, LOGSW_RANDOM_KEYS } = _require(_logswColorPath);
+                const { LOGSW_ANSI, LOGSW_FG, LOGSW_RANDOM_KEYS } = _require(_logswColorPath);
                 const cfgRaw = fs.readFileSync(path.join(process.cwd(), 'config.json'), 'utf-8');
                 let theme = (JSON.parse(cfgRaw)?.logsw?.theme || 'default').toLowerCase().trim();
                 if (theme === 'random') {
                         theme = LOGSW_RANDOM_KEYS[Math.floor(Math.random() * LOGSW_RANDOM_KEYS.length)];
                 }
-                return LOGSW_ANSI[theme] || LOGSW_ANSI.default;
+                return {
+                        boxColor: LOGSW_ANSI[theme] || LOGSW_ANSI.default,
+                        fgColor:  LOGSW_FG[theme]   || LOGSW_FG.default,
+                };
         } catch {
-                return '\x1b[36m'; // fallback cyan
+                return { boxColor: '\x1b[36m', fgColor: '\x1b[97m' };
         }
 }
 
 export function logStoryView(data) {
         const { botId, mediaType, greeting, dayName, date, time, name, number, success, reaction, delaySeconds, mode, resolve, storyCount, idStory, emojiMode } = data;
-        const cyan = getLogswBoxColor(); // border/struktur ikut tema config.json
-        const white = '\x1b[97m';               // semua teks di dalam kotak = putih terang
+        const { boxColor: cyan, fgColor: white } = getLogswBoxColor(); // border & teks ikut tema config.json
         const red   = '\x1b[31m';               // hanya state error (❌)
         const reset = '\x1b[0m';
 
