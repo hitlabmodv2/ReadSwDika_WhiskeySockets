@@ -61,6 +61,23 @@ const LOGSW_ANSI = {
     bata         : '\x1b[48;5;167m\x1b[97m',         // Merah Bata  BG + teks putih
     gelap        : '\x1b[48;5;235m\x1b[97m',         // Gelap       BG + teks putih
     neon         : '\x1b[48;5;46m\x1b[30m',          // Neon Green  BG + teks hitam
+
+    // ── Koleksi Premium (warna cantik pilihan) ────────────────────────────────
+    fuchsia      : '\x1b[48;5;129m\x1b[30m',         // Fuchsia/Pink Ungu BG + teks hitam
+    indigo       : '\x1b[48;5;54m\x1b[97m',          // Indigo      BG + teks putih
+    turquoise    : '\x1b[48;5;45m\x1b[30m',          // Turquoise   BG + teks hitam
+    coral        : '\x1b[48;5;203m\x1b[30m',         // Coral       BG + teks hitam
+    violet       : '\x1b[48;5;93m\x1b[97m',          // Violet      BG + teks putih
+    amber        : '\x1b[48;5;214m\x1b[30m',         // Amber       BG + teks hitam
+    emerald      : '\x1b[48;5;28m\x1b[97m',          // Emerald     BG + teks putih
+    langit       : '\x1b[48;5;117m\x1b[30m',         // Langit/Sky  BG + teks hitam
+    lila         : '\x1b[48;5;141m\x1b[30m',         // Lila/Lilac  BG + teks hitam
+    orchid       : '\x1b[48;5;170m\x1b[30m',         // Orchid      BG + teks hitam
+    peach        : '\x1b[48;5;217m\x1b[30m',         // Peach       BG + teks hitam
+    cobalt       : '\x1b[48;5;27m\x1b[97m',          // Cobalt Blue BG + teks putih
+    crimson      : '\x1b[48;5;160m\x1b[97m',         // Crimson     BG + teks putih
+    rose         : '\x1b[48;5;211m\x1b[30m',         // Rose Pink   BG + teks hitam
+    periwinkle   : '\x1b[48;5;105m\x1b[97m',         // Periwinkle  BG + teks putih
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -100,6 +117,22 @@ const LOGSW_THEMES = {
     bata         : { label: 'Merah Bata',           emoji: '🧱' },
     gelap        : { label: 'Gelap / Dark',         emoji: '🌑' },
     neon         : { label: 'Neon Green',           emoji: '💡' },
+    // Premium
+    fuchsia      : { label: 'Fuchsia',              emoji: '🌸' },
+    indigo       : { label: 'Indigo',               emoji: '🔹' },
+    turquoise    : { label: 'Turquoise',            emoji: '🩵' },
+    coral        : { label: 'Coral',                emoji: '🪸' },
+    violet       : { label: 'Violet',               emoji: '💜' },
+    amber        : { label: 'Amber',                emoji: '🍯' },
+    emerald      : { label: 'Emerald',              emoji: '💎' },
+    langit       : { label: 'Langit / Sky',         emoji: '🌤️' },
+    lila         : { label: 'Lila / Lilac',         emoji: '🪻' },
+    orchid       : { label: 'Orchid',               emoji: '🌺' },
+    peach        : { label: 'Peach',                emoji: '🍑' },
+    cobalt       : { label: 'Cobalt Blue',          emoji: '🌀' },
+    crimson      : { label: 'Crimson',              emoji: '🩸' },
+    rose         : { label: 'Rose Pink',            emoji: '🌹' },
+    periwinkle   : { label: 'Periwinkle',           emoji: '🫐' },
     // Special
     random       : { label: 'Random',               emoji: '🎲' },
 };
@@ -141,6 +174,22 @@ const LOGSW_FG = {
     bata         : '\x1b[38;5;167m',      // Merah Bata
     gelap        : '\x1b[37m',            // Abu-abu (gelap terlalu gelap sbg teks)
     neon         : '\x1b[38;5;46m',       // Neon Green
+    // Premium
+    fuchsia      : '\x1b[38;5;213m',      // Fuchsia terang
+    indigo       : '\x1b[38;5;99m',       // Indigo/blue-purple
+    turquoise    : '\x1b[38;5;45m',       // Turquoise
+    coral        : '\x1b[38;5;203m',      // Coral
+    violet       : '\x1b[38;5;135m',      // Violet terang
+    amber        : '\x1b[38;5;214m',      // Amber/oranye emas
+    emerald      : '\x1b[38;5;40m',       // Emerald hijau
+    langit       : '\x1b[38;5;117m',      // Sky blue
+    lila         : '\x1b[38;5;141m',      // Lilac
+    orchid       : '\x1b[38;5;170m',      // Orchid
+    peach        : '\x1b[38;5;217m',      // Peach
+    cobalt       : '\x1b[38;5;75m',       // Cobalt terang
+    crimson      : '\x1b[38;5;196m',      // Crimson terang
+    rose         : '\x1b[38;5;211m',      // Rose pink
+    periwinkle   : '\x1b[38;5;105m',      // Periwinkle
 };
 
 // ─────────────────────────────────────────────────────────────────────────────

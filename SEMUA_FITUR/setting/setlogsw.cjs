@@ -20,7 +20,7 @@
  *
  *  setlogsw.cjs — Set tema warna latar belakang log SW
  *  Perintah .setlogsw untuk mengubah warna background kotak log AutoReadStoryWhatsApp
- *  Tersedia 30 warna + mode Random. Picker interaktif via Button (addReply + addSelection).
+ *  Tersedia 45 warna + mode Random. Picker interaktif via Button (addReply + addSelection).
  * ───────────────────────────────
  */
 'use strict';
@@ -39,6 +39,7 @@ const { LOGSW_THEMES, LOGSW_THEME_KEYS: THEME_KEYS } = require(
 const G_STANDAR = ['merah','hijau','biru','kuning','ungu','cyan','putih','hitam'];
 const G_CERAH   = ['merah_cerah','hijau_cerah','biru_cerah','kuning_cerah','pink','cyan_cerah','abu'];
 const G_256     = ['oranye','emas','toska','navy','coklat','lime','maroon','ungu_tua','salmon','lavender','mint','bata','gelap','neon'];
+const G_PREMIUM = ['fuchsia','indigo','turquoise','coral','violet','amber','emerald','langit','lila','orchid','peach','cobalt','crimson','rose','periwinkle'];
 
 // ── Config helpers ─────────────────────────────────────────────────────────────
 
@@ -88,6 +89,7 @@ async function handleSetlogsw({ hisoka, m, query, tolak, logCommand, Button }) {
             `🎯 Standar  : *${G_STANDAR.length}* tema\n` +
             `✨ Cerah    : *${G_CERAH.length}* tema\n` +
             `🌈 Ekstra   : *${G_256.length}* tema\n` +
+            `💎 Premium  : *${G_PREMIUM.length}* tema\n` +
             `🎲 Special  : Random & Default\n` +
             `▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n` +
             `Total *${totalWarna}* pilihan warna tersedia`;
@@ -125,6 +127,14 @@ async function handleSetlogsw({ hisoka, m, query, tolak, logCommand, Button }) {
                 btn.makeRow(tag, t.label, `Latar belakang ${t.label}`, `${pref}setlogsw ${k}`);
             }
 
+            // ── Premium ───────────────────────────────────────────────────
+            btn.makeSections(`💎 Premium — Koleksi Cantik (${G_PREMIUM.length} tema)`);
+            for (const k of G_PREMIUM) {
+                const t   = LOGSW_THEMES[k];
+                const tag = k === curTheme ? '✓ Aktif' : t.emoji;
+                btn.makeRow(tag, t.label, `Latar belakang ${t.label}`, `${pref}setlogsw ${k}`);
+            }
+
             await btn.run(m.from, hisoka, m);
             sent = true;
         } catch (_) {}
@@ -146,6 +156,7 @@ async function handleSetlogsw({ hisoka, m, query, tolak, logCommand, Button }) {
                 `*🎯 Standar:*\n${_grp(G_STANDAR)}\n\n` +
                 `*✨ Cerah (Bright):*\n${_grp(G_CERAH)}\n\n` +
                 `*🌈 Ekstra (256-warna):*\n${_grp(G_256)}\n\n` +
+                `*💎 Premium:*\n${_grp(G_PREMIUM)}\n\n` +
                 `*🎲 Special:* \`random\`  🔵 \`default\`\n` +
                 `━━━━━━━━━━━━━━━━━\n` +
                 `\`${pref}setlogsw [nama]\` — pilih warna\n` +

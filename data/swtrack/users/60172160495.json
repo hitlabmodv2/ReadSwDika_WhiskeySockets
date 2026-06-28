@@ -1,46 +1,4 @@
 {
-  "ACAFBE2B7AE3CE5FDB90424910977C42": {
-    "id": "ACAFBE2B7AE3CE5FDB90424910977C42",
-    "sender": "60172160495@s.whatsapp.net",
-    "name": "aidil🍃",
-    "type": "videoMessage",
-    "arrivedAt": "2026-06-27T08:03:00.515Z",
-    "read": true,
-    "reacted": true,
-    "emoji": "𝖲𝖠𝖸𝖠 𝖠𝖪𝖠𝖭 𝖫𝖠𝖶𝖠𝖭 🤬",
-    "resolve": "PN langsung ✓",
-    "source": "status",
-    "number": "60172160495",
-    "resolvedPn": "60172160495@s.whatsapp.net",
-    "messageKey": {
-      "remoteJid": "status@broadcast",
-      "remoteJidAlt": "60172160495@s.whatsapp.net",
-      "fromMe": false,
-      "id": "ACAFBE2B7AE3CE5FDB90424910977C42",
-      "participant": "67066115670033@lid",
-      "addressingMode": "lid"
-    },
-    "updatedAt": "2026-06-27T08:03:20.715Z",
-    "receiptKeys": [
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "60172160495@s.whatsapp.net",
-        "fromMe": false,
-        "id": "ACAFBE2B7AE3CE5FDB90424910977C42",
-        "participant": "67066115670033@lid",
-        "addressingMode": "lid"
-      },
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "60172160495@s.whatsapp.net",
-        "fromMe": false,
-        "id": "ACAFBE2B7AE3CE5FDB90424910977C42",
-        "participant": "60172160495@s.whatsapp.net",
-        "addressingMode": "lid"
-      }
-    ],
-    "processedAt": "2026-06-27T08:03:20.715Z"
-  },
   "AC0710B6A414662A8F03F24F508360AD": {
     "id": "AC0710B6A414662A8F03F24F508360AD",
     "sender": "60172160495@s.whatsapp.net",
@@ -84,5 +42,30 @@
     "processedAt": "2026-06-28T06:19:22.194Z",
     "deleted": true,
     "deletedAt": "2026-06-28T09:58:49.542Z"
+  },
+  "AC4212753841A4A06B7B4588C4B5E93E": {
+    "id": "AC4212753841A4A06B7B4588C4B5E93E",
+    "sender": "60172160495@s.whatsapp.net",
+    "name": "aidil🐦",
+    "type": "extendedTextMessage",
+    "arrivedAt": "2026-06-28T11:15:49.592Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "60172160495",
+    "resolvedPn": "60172160495@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "60172160495@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC4212753841A4A06B7B4588C4B5E93E",
+      "participant": "67066115670033@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-28T11:16:02.907Z",
+    "deleted": true,
+    "deletedAt": "2026-06-28T11:16:02.907Z"
   }
 }
