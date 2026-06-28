@@ -4,7 +4,7 @@ _🔍 Masih dalam tahap pemantauan — informasi tanggal rilis akan diumumkan ke
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V24*
 ✨ *7 Fitur Baru*
-🔧 *9 Bug/Error Fix*
+🔧 *10 Bug/Error Fix*
 🚀 *16 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
@@ -133,6 +133,13 @@ _Ubah warna latar belakang & teks kotak log AutoReadStoryWhatsApp secara realtim
 - Fix: kotak startup dikembalikan ke cyan hardcoded (`\x1b[36m`) — tidak lagi ikut tema logsw
 - Kini *hanya kotak AutoReadStoryWhatsApp* yang berubah sesuai `.setlogsw`
 > Kotak STATUS JADIBOT AKTIF sudah benar sejak awal (cyan tetap)
+
+*10. 🎨 SetLogSW — Baris Berhasil & Resolve Warnanya Beda Sendiri*
+- ~Bug: baris `Berhasil : Ke Tele ❌` dan `Resolve : Signal Lib ❌` tampil warna *merah* — tidak ikut tema `.setlogsw`~
+- Penyebab: kode pakai `successColor` dan `resolveColor` hardcoded `\x1b[31m]` (merah) saat nilai mengandung ❌
+- Fix: variabel warna merah dihapus — semua baris termasuk `Berhasil` dan `Resolve` kini pakai `fgColor` dari tema
+- Indikator error tetap terlihat jelas dari emoji ❌ di nilai barisnya
+> Semua baris di kotak AutoReadStoryWhatsApp kini konsisten 1 warna sesuai tema `.setlogsw`
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *PERUBAHAN*
