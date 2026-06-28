@@ -35,8 +35,13 @@ async function handleGhosttag({ hisoka, m, query, tolak, logCommand, generateWAM
 
         /**
          * Kirim satu albumMessage ke JID grup dengan self-reply.
-         * Self-reply: pesan di-quote oleh dirinya sendiri —
-         * sehingga tampil sebagai "membalas pesan sendiri" di WA.
+         *
+         * Cara kerja:
+         * 1. Generate album pertama → ambil msgId-nya
+         * 2. Generate ulang album KEDUA dengan messageId yg sama + quoted = album pertama
+         *    → Baileys otomatis inject contextInfo (stanzaId, participant, quotedMessage)
+         *    → karena quoted.key.fromMe = true, participant = userJid (bot sendiri) ✓
+         *    → hasilnya: pesan tampil sebagai "membalas pesan sendiri" di WA ✓
          */
         async function gtSendOne(jid) {
                 // ── Ambil daftar participant ────────────────────────────────────
@@ -55,8 +60,8 @@ async function handleGhosttag({ hisoka, m, query, tolak, logCommand, generateWAM
 
                 if (!participants.length) return 0;
 
-                // ── Step 1: generate album message (tanpa self-reply dulu) ──────
-                const album = generateWAMessageFromContent(
+                // ── Step 1: generate pertama → ambil ID ────────────────────────
+                const tempAlbum = generateWAMessageFromContent(
                         jid,
                         {
                                 albumMessage: {
@@ -68,27 +73,30 @@ async function handleGhosttag({ hisoka, m, query, tolak, logCommand, generateWAM
                         { userJid: gtUserJid }
                 );
 
-                const msgId = album.key.id;
+                const msgId = tempAlbum.key.id;
 
-                // ── Step 2: inject self-reply ke contextInfo ────────────────────
-                // Ambil referensi inner albumMessage dari proto yang sudah dibuat,
-                // lalu tambahkan stanzaId & quotedMessage yang menunjuk ke dirinya sendiri.
-                const innerAlbum = album.message?.albumMessage;
-                if (innerAlbum) {
-                        innerAlbum.contextInfo = {
-                                mentionedJid: participants,
-                                stanzaId    : msgId,
-                                participant : gtUserJid,
-                                quotedMessage: {
-                                        albumMessage: {
-                                                expectedImageCount: 0,
-                                                expectedVideoCount: 0,
-                                        },
+                // ── Step 2: generate ulang dengan ID sama + quoted = diri sendiri
+                // Baileys akan otomatis:
+                //   contextInfo.stanzaId     = msgId        (ID pesan sendiri)
+                //   contextInfo.participant   = userJid      (bot sendiri, karena fromMe=true)
+                //   contextInfo.quotedMessage = isi album    (stripped copy)
+                const album = generateWAMessageFromContent(
+                        jid,
+                        {
+                                albumMessage: {
+                                        expectedImageCount: 0,
+                                        expectedVideoCount: 0,
+                                        contextInfo: { mentionedJid: participants },
                                 },
-                        };
-                }
+                        },
+                        {
+                                userJid  : gtUserJid,
+                                messageId: msgId,      // paksa ID sama → self-quote
+                                quoted   : tempAlbum,  // quote album pertama (= diri sendiri)
+                        }
+                );
 
-                // ── Step 3: relay pesan yang sudah di-inject ────────────────────
+                // ── Step 3: relay ───────────────────────────────────────────────
                 await hisoka.relayMessage(jid, album.message, { messageId: msgId });
 
                 return participants.length;
