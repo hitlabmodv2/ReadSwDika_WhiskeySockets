@@ -3,9 +3,9 @@ _📅 27 Juni 2026_ 🕐
 _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurna_
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V24*
-✨ *6 Fitur Baru*
-🔧 *7 Bug/Error Fix*
-🚀 *14 Perubahan*
+✨ *7 Fitur Baru*
+🔧 *9 Bug/Error Fix*
+🚀 *16 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -57,6 +57,24 @@ _Kirim pesan teks/media langsung ke semua member di dalam satu GC, satu per satu
 - Guard aktif: jika proses masih berjalan → command baru ditolak otomatis
 > Owner only
 
+*7. 🎨 Set Warna Log AutoReadStory —* `.setlogsw`
+_Ubah warna latar belakang & teks kotak log AutoReadStoryWhatsApp secara realtime tanpa restart bot_
+- Cara pakai: `.setlogsw` → muncul picker interaktif lengkap
+- Cara langsung: `.setlogsw [nama warna]` → contoh: `.setlogsw ungu`
+- Picker interaktif:
+  • Button *"🎲 Random"* — warna acak tiap muncul log story
+  • Button *"🔵 Reset Default"* — kembali ke cyan bawaan
+  • Selection list *"🎨 Pilih Warna Tema"* → 3 section pilihan warna
+- Total *30 pilihan warna* + mode Random:
+  • 🎯 *Standar* (8): merah, hijau, biru, kuning, ungu, cyan, putih, hitam
+  • ✨ *Cerah/Bright* (7): merah cerah, hijau cerah, biru cerah, kuning cerah, pink, cyan cerah, abu
+  • 🌈 *Ekstra 256-warna* (14): oranye, emas, toska, navy, coklat, lime, maroon, ungu tua, salmon, lavender, mint, bata, gelap, neon
+  • 🎲 *Special*: Random & Default
+- Warna berlaku *realtime* — log story berikutnya langsung pakai warna baru
+- *Border* kotak ikut tema, *teks isi* (Mode, TipeStory, Nama, dll) ikut warna FG tema
+- Kotak startup bot (WILY BOT AKTIF, AUTO JADIBOT) *tidak terpengaruh* — selalu cyan
+> Owner only, bot utama saja (tidak berlaku untuk jadibot user)
+
 ━━━━━━━━━━━━━━━━━━━━━━
 🔧 *BUG/ERROR FIX*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -101,6 +119,20 @@ _Kirim pesan teks/media langsung ke semua member di dalam satu GC, satu per satu
 - Penyebab: kode tidak mengambil `pushName` dari objek pesan
 - Fix: sekarang pakai `message.pushName` → nama display tampil realtime
 > Jika pushName tidak tersedia, fallback ke _akun privat_
+
+*8. 🎨 SetLogSW — Teks Isi Kotak Tidak Ikut Berubah Warna*
+- ~Bug: setelah `.setlogsw [warna]`, border kotak berubah tapi teks isi (Mode, TipeStory, Nama, dll) tetap putih~
+- Penyebab: fungsi `getLogswBoxColor()` hanya mengambil `LOGSW_ANSI` (warna border), tidak mengambil `LOGSW_FG` (warna teks)
+- Fix: fungsi diperbarui → kini kembalikan `{ boxColor, fgColor }` keduanya sekaligus
+- Teks isi kotak sekarang ikut warna FG tema yang dipilih secara realtime
+> Berlaku mulai log story berikutnya setelah tema diubah
+
+*9. 🎨 SetLogSW — Kotak Startup Bot Ikut Berubah Warna*
+- ~Bug: saat `.setlogsw` diubah, kotak startup WILY BOT AKTIF & AUTO JADIBOT juga ikut berubah warna~
+- Penyebab: kedua kotak startup di `index.js` pakai `getLogswColors().box` — sama dengan kotak AutoReadStoryWhatsApp
+- Fix: kotak startup dikembalikan ke cyan hardcoded (`\x1b[36m`) — tidak lagi ikut tema logsw
+- Kini *hanya kotak AutoReadStoryWhatsApp* yang berubah sesuai `.setlogsw`
+> Kotak STATUS JADIBOT AKTIF sudah benar sejak awal (cyan tetap)
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *PERUBAHAN*
@@ -210,3 +242,14 @@ _Kirim pesan teks/media langsung ke semua member di dalam satu GC, satu per satu
 - Laporan akhir dibedakan: ✅ Selesai normal vs 🛑 Dihentikan + tampil sisa member belum terkirim
 - Guard ditambahkan: jika push sedang berjalan → `.pushkontakgc` lagi ditolak dengan pesan info
 > Tidak berpengaruh jika tidak ada proses berjalan (bot balas info)
+
+*15. 📋 Menu Utama — Tambah `.setlogsw` ke Seksi AUTO FITUR*
+- ~Sebelumnya: `.setlogsw` tidak muncul di `.menu` meskipun fitur sudah aktif~
+- Sesudahnya: `.setlogsw` terdaftar di seksi *AUTO FITUR*, tepat di bawah `.setbrowser`
+- Pengguna kini bisa temukan command ini langsung dari menu utama
+
+*16. 🔄 HotReload — `setlogsw.cjs` Kini Terdaftar (103 CJS watched)*
+- ~Sebelumnya: `SEMUA_FITUR/setting/setlogsw.cjs` tidak terdaftar di hotReload → perubahan file tidak terdeteksi~
+- Sesudahnya: ditambahkan ke `WATCHED_FILES` dengan `type: 'cjs'`
+- Total CJS yang dipantau naik dari *102 → 103*
+- Setiap perubahan pada `setlogsw.cjs` kini otomatis di-cache-clear tanpa restart bot
