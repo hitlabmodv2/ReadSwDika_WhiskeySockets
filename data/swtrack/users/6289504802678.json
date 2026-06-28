@@ -214,5 +214,47 @@
       }
     ],
     "processedAt": "2026-06-28T11:07:13.847Z"
+  },
+  "AC9FAC656A025154CF32A5C3599396E3": {
+    "id": "AC9FAC656A025154CF32A5C3599396E3",
+    "sender": "6289504802678@s.whatsapp.net",
+    "name": "TheoTheBaldBird",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-28T11:25:32.205Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🎲",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6289504802678",
+    "resolvedPn": "6289504802678@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6289504802678@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC9FAC656A025154CF32A5C3599396E3",
+      "participant": "263445207371837@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-28T11:25:47.811Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289504802678@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC9FAC656A025154CF32A5C3599396E3",
+        "participant": "263445207371837@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289504802678@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC9FAC656A025154CF32A5C3599396E3",
+        "participant": "6289504802678@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-28T11:25:47.811Z"
   }
 }

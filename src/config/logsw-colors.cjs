@@ -62,6 +62,30 @@ const LOGSW_ANSI = {
     gelap        : '\x1b[48;5;235m\x1b[97m',         // Gelap       BG + teks putih
     neon         : '\x1b[48;5;46m\x1b[30m',          // Neon Green  BG + teks hitam
 
+    // ── Koleksi Pastel (warna lembut/soft) ───────────────────────────────────
+    mauve        : '\x1b[48;5;182m\x1b[30m',         // Mauve        BG + teks hitam
+    merah_muda   : '\x1b[48;5;218m\x1b[30m',         // Merah Muda   BG + teks hitam
+    krem         : '\x1b[48;5;230m\x1b[30m',         // Krem/Ivory   BG + teks hitam
+    biru_muda    : '\x1b[48;5;153m\x1b[30m',         // Biru Muda    BG + teks hitam
+    ungu_muda    : '\x1b[48;5;177m\x1b[30m',         // Ungu Muda    BG + teks hitam
+    melon        : '\x1b[48;5;193m\x1b[30m',         // Melon        BG + teks hitam
+    kuning_muda  : '\x1b[48;5;228m\x1b[30m',         // Kuning Muda  BG + teks hitam
+    ungu_pastel  : '\x1b[48;5;189m\x1b[30m',         // Ungu Pastel  BG + teks hitam
+    pink_pastel  : '\x1b[48;5;224m\x1b[30m',         // Pink Pastel  BG + teks hitam
+    biru_es      : '\x1b[48;5;195m\x1b[30m',         // Biru Es      BG + teks hitam
+
+    // ── Koleksi Alam (warna terinspirasi alam) ────────────────────────────────
+    hijau_hutan  : '\x1b[48;5;22m\x1b[97m',          // Hijau Hutan  BG + teks putih
+    coklat_tua   : '\x1b[48;5;94m\x1b[97m',          // Coklat Tua   BG + teks putih
+    hijau_zaitun : '\x1b[48;5;100m\x1b[30m',         // Hijau Zaitun BG + teks hitam
+    hijau_lumut  : '\x1b[48;5;58m\x1b[97m',          // Hijau Lumut  BG + teks putih
+    teal_tua     : '\x1b[48;5;30m\x1b[97m',          // Teal Tua     BG + teks putih
+    anggur       : '\x1b[48;5;90m\x1b[97m',          // Anggur/Grape BG + teks putih
+    api          : '\x1b[48;5;196m\x1b[97m',         // Api/Fire Red  BG + teks putih
+    biru_langit  : '\x1b[48;5;39m\x1b[30m',          // Biru Langit  BG + teks hitam
+    biru_pupil   : '\x1b[48;5;33m\x1b[97m',          // Biru Pupil   BG + teks putih
+    slate_biru   : '\x1b[48;5;60m\x1b[97m',          // Slate Biru   BG + teks putih
+
     // ── Koleksi Premium (warna cantik pilihan) ────────────────────────────────
     fuchsia      : '\x1b[48;5;129m\x1b[30m',         // Fuchsia/Pink Ungu BG + teks hitam
     indigo       : '\x1b[48;5;54m\x1b[97m',          // Indigo      BG + teks putih
@@ -117,18 +141,40 @@ const LOGSW_THEMES = {
     bata         : { label: 'Merah Bata',           emoji: '🧱' },
     gelap        : { label: 'Gelap / Dark',         emoji: '🌑' },
     neon         : { label: 'Neon Green',           emoji: '💡' },
+    // Pastel
+    mauve        : { label: 'Mauve',                emoji: '🪷' },
+    merah_muda   : { label: 'Merah Muda',           emoji: '🌷' },
+    krem         : { label: 'Krem / Ivory',         emoji: '🥛' },
+    biru_muda    : { label: 'Biru Muda',            emoji: '🩦' },
+    ungu_muda    : { label: 'Ungu Muda',            emoji: '🟪' },
+    melon        : { label: 'Melon',                emoji: '🍈' },
+    kuning_muda  : { label: 'Kuning Muda',          emoji: '🌼' },
+    ungu_pastel  : { label: 'Ungu Pastel',          emoji: '🌂' },
+    pink_pastel  : { label: 'Pink Pastel',          emoji: '🩰' },
+    biru_es      : { label: 'Biru Es',              emoji: '🧊' },
+    // Alam
+    hijau_hutan  : { label: 'Hijau Hutan',          emoji: '🌲' },
+    coklat_tua   : { label: 'Coklat Tua',           emoji: '🪵' },
+    hijau_zaitun : { label: 'Hijau Zaitun',         emoji: '🫒' },
+    hijau_lumut  : { label: 'Hijau Lumut',          emoji: '🪴' },
+    teal_tua     : { label: 'Teal Tua',             emoji: '🐊' },
+    anggur       : { label: 'Anggur / Grape',       emoji: '🍇' },
+    api          : { label: 'Api / Fire Red',       emoji: '🔥' },
+    biru_langit  : { label: 'Biru Langit',          emoji: '🌈' },
+    biru_pupil   : { label: 'Biru Pupil',           emoji: '🌐' },
+    slate_biru   : { label: 'Slate Biru',           emoji: '🌫️' },
     // Premium
     fuchsia      : { label: 'Fuchsia',              emoji: '🌸' },
     indigo       : { label: 'Indigo',               emoji: '🔹' },
-    turquoise    : { label: 'Turquoise',            emoji: '🩵' },
+    turquoise    : { label: 'Turquoise',            emoji: '💠' },
     coral        : { label: 'Coral',                emoji: '🪸' },
-    violet       : { label: 'Violet',               emoji: '💜' },
+    violet       : { label: 'Violet',               emoji: '🎆' },
     amber        : { label: 'Amber',                emoji: '🍯' },
     emerald      : { label: 'Emerald',              emoji: '💎' },
     langit       : { label: 'Langit / Sky',         emoji: '🌤️' },
     lila         : { label: 'Lila / Lilac',         emoji: '🪻' },
     orchid       : { label: 'Orchid',               emoji: '🌺' },
-    peach        : { label: 'Peach',                emoji: '🍑' },
+    peach        : { label: 'Peach',                emoji: '🥭' },
     cobalt       : { label: 'Cobalt Blue',          emoji: '🌀' },
     crimson      : { label: 'Crimson',              emoji: '🩸' },
     rose         : { label: 'Rose Pink',            emoji: '🌹' },
@@ -174,6 +220,28 @@ const LOGSW_FG = {
     bata         : '\x1b[38;5;167m',      // Merah Bata
     gelap        : '\x1b[37m',            // Abu-abu (gelap terlalu gelap sbg teks)
     neon         : '\x1b[38;5;46m',       // Neon Green
+    // Pastel
+    mauve        : '\x1b[38;5;182m',      // Mauve
+    merah_muda   : '\x1b[38;5;218m',      // Merah Muda
+    krem         : '\x1b[38;5;229m',      // Krem agak terang
+    biru_muda    : '\x1b[38;5;153m',      // Biru Muda
+    ungu_muda    : '\x1b[38;5;177m',      // Ungu Muda
+    melon        : '\x1b[38;5;193m',      // Melon
+    kuning_muda  : '\x1b[38;5;228m',      // Kuning Muda
+    ungu_pastel  : '\x1b[38;5;189m',      // Ungu Pastel
+    pink_pastel  : '\x1b[38;5;224m',      // Pink Pastel
+    biru_es      : '\x1b[38;5;195m',      // Biru Es
+    // Alam
+    hijau_hutan  : '\x1b[38;5;34m',       // Hijau Hutan terang
+    coklat_tua   : '\x1b[38;5;130m',      // Coklat Tua
+    hijau_zaitun : '\x1b[38;5;100m',      // Hijau Zaitun
+    hijau_lumut  : '\x1b[38;5;64m',       // Hijau Lumut
+    teal_tua     : '\x1b[38;5;37m',       // Teal Tua terang
+    anggur       : '\x1b[38;5;90m',       // Anggur/Grape
+    api          : '\x1b[38;5;196m',      // Api/Fire Red
+    biru_langit  : '\x1b[38;5;39m',       // Biru Langit
+    biru_pupil   : '\x1b[38;5;33m',       // Biru Pupil
+    slate_biru   : '\x1b[38;5;67m',       // Slate Biru
     // Premium
     fuchsia      : '\x1b[38;5;213m',      // Fuchsia terang
     indigo       : '\x1b[38;5;99m',       // Indigo/blue-purple

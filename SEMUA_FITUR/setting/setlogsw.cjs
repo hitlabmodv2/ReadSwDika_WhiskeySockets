@@ -20,7 +20,7 @@
  *
  *  setlogsw.cjs — Set tema warna latar belakang log SW
  *  Perintah .setlogsw untuk mengubah warna background kotak log AutoReadStoryWhatsApp
- *  Tersedia 45 warna + mode Random. Picker interaktif via Button (addReply + addSelection).
+ *  Tersedia 65 warna + mode Random. Picker interaktif via Button (addReply + addSelection).
  * ───────────────────────────────
  */
 'use strict';
@@ -39,6 +39,8 @@ const { LOGSW_THEMES, LOGSW_THEME_KEYS: THEME_KEYS } = require(
 const G_STANDAR = ['merah','hijau','biru','kuning','ungu','cyan','putih','hitam'];
 const G_CERAH   = ['merah_cerah','hijau_cerah','biru_cerah','kuning_cerah','pink','cyan_cerah','abu'];
 const G_256     = ['oranye','emas','toska','navy','coklat','lime','maroon','ungu_tua','salmon','lavender','mint','bata','gelap','neon'];
+const G_PASTEL  = ['mauve','merah_muda','krem','biru_muda','ungu_muda','melon','kuning_muda','ungu_pastel','pink_pastel','biru_es'];
+const G_ALAM    = ['hijau_hutan','coklat_tua','hijau_zaitun','hijau_lumut','teal_tua','anggur','api','biru_langit','biru_pupil','slate_biru'];
 const G_PREMIUM = ['fuchsia','indigo','turquoise','coral','violet','amber','emerald','langit','lila','orchid','peach','cobalt','crimson','rose','periwinkle'];
 
 // ── Config helpers ─────────────────────────────────────────────────────────────
@@ -89,6 +91,8 @@ async function handleSetlogsw({ hisoka, m, query, tolak, logCommand, Button }) {
             `🎯 Standar  : *${G_STANDAR.length}* tema\n` +
             `✨ Cerah    : *${G_CERAH.length}* tema\n` +
             `🌈 Ekstra   : *${G_256.length}* tema\n` +
+            `🍃 Pastel   : *${G_PASTEL.length}* tema\n` +
+            `🌿 Alam     : *${G_ALAM.length}* tema\n` +
             `💎 Premium  : *${G_PREMIUM.length}* tema\n` +
             `🎲 Special  : Random & Default\n` +
             `▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n` +
@@ -127,6 +131,22 @@ async function handleSetlogsw({ hisoka, m, query, tolak, logCommand, Button }) {
                 btn.makeRow(tag, t.label, `Latar belakang ${t.label}`, `${pref}setlogsw ${k}`);
             }
 
+            // ── Pastel ────────────────────────────────────────────────────
+            btn.makeSections(`🍃 Pastel — Warna Lembut (${G_PASTEL.length} tema)`);
+            for (const k of G_PASTEL) {
+                const t   = LOGSW_THEMES[k];
+                const tag = k === curTheme ? '✓ Aktif' : t.emoji;
+                btn.makeRow(tag, t.label, `Latar belakang ${t.label}`, `${pref}setlogsw ${k}`);
+            }
+
+            // ── Alam ──────────────────────────────────────────────────────
+            btn.makeSections(`🌿 Alam — Terinspirasi Alam (${G_ALAM.length} tema)`);
+            for (const k of G_ALAM) {
+                const t   = LOGSW_THEMES[k];
+                const tag = k === curTheme ? '✓ Aktif' : t.emoji;
+                btn.makeRow(tag, t.label, `Latar belakang ${t.label}`, `${pref}setlogsw ${k}`);
+            }
+
             // ── Premium ───────────────────────────────────────────────────
             btn.makeSections(`💎 Premium — Koleksi Cantik (${G_PREMIUM.length} tema)`);
             for (const k of G_PREMIUM) {
@@ -156,6 +176,8 @@ async function handleSetlogsw({ hisoka, m, query, tolak, logCommand, Button }) {
                 `*🎯 Standar:*\n${_grp(G_STANDAR)}\n\n` +
                 `*✨ Cerah (Bright):*\n${_grp(G_CERAH)}\n\n` +
                 `*🌈 Ekstra (256-warna):*\n${_grp(G_256)}\n\n` +
+                `*🍃 Pastel:*\n${_grp(G_PASTEL)}\n\n` +
+                `*🌿 Alam:*\n${_grp(G_ALAM)}\n\n` +
                 `*💎 Premium:*\n${_grp(G_PREMIUM)}\n\n` +
                 `*🎲 Special:* \`random\`  🔵 \`default\`\n` +
                 `━━━━━━━━━━━━━━━━━\n` +
