@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 27/06/2026, 08.25.40  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 28/06/2026, 06.41.51  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  console.error
+│  #001  —  command:ghosttag
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [31m[HotReload] ✗ Gagal reload 'message.js', pakai versi lama.[39m
+│  Maximum call stack size exceeded
 │
 │  DETAIL
-│  Sumber      : console.error
+│  Sumber      : command:ghosttag
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 27/06/2026, 08.25.40
-│  Terakhir    : 27/06/2026, 08.25.40
+│  Pertama     : 28/06/2026, 06.41.51
+│  Terakhir    : 28/06/2026, 06.41.51
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [31m[HotReload] ✗ Gagal reload 'message.js', pakai versi lama.[39m
-│     at console.error (file:///home/runner/workspace/index.js:412:27)
-│     at Timeout._onTimeout (file:///home/runner/workspace/src/helper/hotReload.js:300:33)
+│  ▶  RangeError: Maximum call stack size exceeded
+│     at BufferWriter.write_string_buffer [as string] (/home/runner/workspace/node_modules/protobufjs/src/writer_buffer.js:69:61)
+│     at Function.encode (file:///home/runner/workspace/node_modules/@whiskeysockets/baileys/WAProto/index.js:48599:42)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 27/06/2026, 08.25.40
+  Terakhir diperbarui: 28/06/2026, 06.41.51
 ════════════════════════════════════════════════════════════════════════

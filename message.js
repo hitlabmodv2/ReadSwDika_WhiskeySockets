@@ -279,30 +279,34 @@ class Button {
                 hasMediaAttachment: !!this._data,
                 ...(this._data ? await prepareWAMessageMedia(this._data, { upload: conn.waUploadToServer }) : {})
             };
-            const interactiveContent = {
+
+            // Fungsi pembuat content BARU tiap kali dipanggil
+            // → mencegah circular reference akibat Baileys mutasi contextInfo in-place
+            const makeContent = () => ({
                 interactiveMessage: {
                     body: { text: this._body },
                     footer: { text: this._footer },
                     header,
-                    contextInfo: this._contextInfo,
+                    contextInfo: { ...this._contextInfo },
                     nativeFlowMessage: {
                         messageParamsJson: JSON.stringify(this._params),
                         buttons: this._beton
                     }
                 }
-            };
+            });
 
-            // ── Self-reply: generate temp → ambil ID → generate ulang dengan
-            //   ID yg sama + quoted = temp → pesan tampil reply ke diri sendiri
+            // ── Self-reply: generate temp (content baru) → ambil ID →
+            //   generate final (content baru lagi) dengan ID sama + quoted=temp
+            //   → Baileys inject contextInfo self-reply tanpa circular reference ✓
             let finalQuoted = quoted;
             let forceMessageId;
             if (this._selfReply) {
-                const temp = generateWAMessageFromContent(jid, interactiveContent, { userJid: conn.user?.id });
+                const temp = generateWAMessageFromContent(jid, makeContent(), { userJid: conn.user?.id });
                 finalQuoted    = temp;
                 forceMessageId = temp.key.id;
             }
 
-            const msg = generateWAMessageFromContent(jid, interactiveContent, {
+            const msg = generateWAMessageFromContent(jid, makeContent(), {
                 userJid : conn.user?.id,
                 quoted  : finalQuoted,
                 ...(forceMessageId ? { messageId: forceMessageId } : {})
