@@ -708,13 +708,17 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         }
 
                         case 'jpm': {
-                                const { handleJpm } = _require(path.resolve('./SEMUA_FITUR/group/jpm.cjs'));
+                                const _jpmPath = path.resolve('./SEMUA_FITUR/group/jpm.cjs');
+                                delete _require.cache[_jpmPath];
+                                const { handleJpm } = _require(_jpmPath);
                                 await handleJpm({ hisoka, m, query, tolak, logCommand, getQuotedMediaBuffer, Button });
                                 break;
                         }
 
                         case 'jpmstop': {
-                                const { handleJpmstop } = _require(path.resolve('./SEMUA_FITUR/group/jpm.cjs'));
+                                const _jpmPath = path.resolve('./SEMUA_FITUR/group/jpm.cjs');
+                                delete _require.cache[_jpmPath];
+                                const { handleJpmstop } = _require(_jpmPath);
                                 await handleJpmstop({ hisoka, m, tolak, logCommand });
                                 break;
                         }
@@ -722,7 +726,9 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'jpmlist':
                         case 'listjpm':
                         case 'daftargc': {
-                                const { handleJpmlist } = _require(path.resolve('./SEMUA_FITUR/group/jpm.cjs'));
+                                const _jpmPath = path.resolve('./SEMUA_FITUR/group/jpm.cjs');
+                                delete _require.cache[_jpmPath];
+                                const { handleJpmlist } = _require(_jpmPath);
                                 await handleJpmlist({ hisoka, m, tolak, logCommand });
                                 break;
                         }
