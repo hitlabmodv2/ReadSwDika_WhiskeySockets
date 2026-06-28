@@ -20,58 +20,87 @@
  *
  *  ghosttag.cjs — Ghost tag command handler
  *  Perintah .ghosttag untuk mention semua anggota grup tanpa notifikasi
+ *  Album message dikirim dengan self-reply (reply ke pesan sendiri)
  * ───────────────────────────────
- */
-/**
- * ═══════════════════════════════════════════════════════════════
- *  Ghost Tag Command Handler
- *  Perintah .ghosttag untuk mention (@tag) semua anggota grup
- *  sekaligus tanpa mengirim notifikasi pop-up ke mereka —
- *  hanya admin grup yang bisa menggunakan.
- * ═══════════════════════════════════════════════════════════════
  */
 'use strict';
 
 async function handleGhosttag({ hisoka, m, query, tolak, logCommand, generateWAMessageFromContent, Button }) {
         if (!m.isOwner) return;
 
-        const gtPrefix = m.prefix || '.';
+        const gtPrefix  = m.prefix || '.';
         const gtUserJid = hisoka.user?.id;
 
         const gtGroupKeys = hisoka.groups.keys().filter(id => id.endsWith('@g.us'));
 
+        /**
+         * Kirim satu albumMessage ke JID grup dengan self-reply.
+         * Self-reply: pesan di-quote oleh dirinya sendiri —
+         * sehingga tampil sebagai "membalas pesan sendiri" di WA.
+         */
         async function gtSendOne(jid) {
+                // ── Ambil daftar participant ────────────────────────────────────
                 let participants = [];
                 try {
                         const meta = hisoka.groups.read(jid);
                         participants = (meta?.participants || []).map(v => v.phoneNumber || v.id).filter(Boolean);
                 } catch (_) {}
+
                 if (!participants.length) {
                         try {
                                 const fetched = await hisoka.groupMetadata(jid);
-                                participants = fetched.participants.map(v => v.id).filter(Boolean);
+                                participants = (fetched.participants || []).map(v => v.id).filter(Boolean);
                         } catch (_) {}
                 }
+
                 if (!participants.length) return 0;
+
+                // ── Step 1: generate album message (tanpa self-reply dulu) ──────
                 const album = generateWAMessageFromContent(
                         jid,
                         {
                                 albumMessage: {
                                         expectedImageCount: 0,
                                         expectedVideoCount: 0,
-                                        contextInfo: { mentionedJid: participants }
-                                }
+                                        contextInfo: { mentionedJid: participants },
+                                },
                         },
                         { userJid: gtUserJid }
                 );
-                await hisoka.relayMessage(jid, album.message, { messageId: album.key.id });
+
+                const msgId = album.key.id;
+
+                // ── Step 2: inject self-reply ke contextInfo ────────────────────
+                // Ambil referensi inner albumMessage dari proto yang sudah dibuat,
+                // lalu tambahkan stanzaId & quotedMessage yang menunjuk ke dirinya sendiri.
+                const innerAlbum = album.message?.albumMessage;
+                if (innerAlbum) {
+                        innerAlbum.contextInfo = {
+                                mentionedJid: participants,
+                                stanzaId    : msgId,
+                                participant : gtUserJid,
+                                quotedMessage: {
+                                        albumMessage: {
+                                                expectedImageCount: 0,
+                                                expectedVideoCount: 0,
+                                        },
+                                },
+                        };
+                }
+
+                // ── Step 3: relay pesan yang sudah di-inject ────────────────────
+                await hisoka.relayMessage(jid, album.message, { messageId: msgId });
+
                 return participants.length;
         }
+
+        // ── Tidak ada query → tampilkan menu pilihan grup ─────────────────────
 
         if (!query || (!query.trim().endsWith('@g.us') && query.trim() !== 'all')) {
                 if (!gtGroupKeys.length) return tolak(hisoka, m, '❌ Bot tidak bergabung di grup manapun.');
 
                 const gtBotNum = (hisoka.user?.id || '').split('@')[0].split(':')[0];
+
                 const gtTotalMemberAll = gtGroupKeys.reduce((acc, jid) => {
                         const g = hisoka.groups.read(jid);
                         return acc + (g?.participants?.length || 0);
@@ -79,23 +108,20 @@ async function handleGhosttag({ hisoka, m, query, tolak, logCommand, generateWAM
 
                 const gtSorted = gtGroupKeys
                         .map(jid => {
-                                const g = hisoka.groups.read(jid);
-                                const parts = g?.participants || [];
+                                const g        = hisoka.groups.read(jid);
+                                const parts    = g?.participants || [];
                                 const totalMember = parts.length;
-                                const totalAdmin = parts.filter(p => p.admin).length;
-                                const isBotAdmin = parts.some(p => {
+                                const totalAdmin  = parts.filter(p => p.admin).length;
+                                const isBotAdmin  = parts.some(p => {
                                         const num = (p.jid || p.phoneNumber || p.id || '').split('@')[0].split(':')[0];
                                         return num === gtBotNum && p.admin;
                                 });
-                                return {
-                                        jid,
-                                        name: g?.subject || g?.name || jid,
-                                        totalMember,
-                                        totalAdmin,
-                                        isBotAdmin
-                                };
+                                return { jid, name: g?.subject || g?.name || jid, totalMember, totalAdmin, isBotAdmin };
                         })
-                        .sort((a, b) => b.totalMember - a.totalMember || a.name.toLowerCase().localeCompare(b.name.toLowerCase(), 'id', { numeric: true }));
+                        .sort((a, b) =>
+                                b.totalMember - a.totalMember ||
+                                a.name.toLowerCase().localeCompare(b.name.toLowerCase(), 'id', { numeric: true })
+                        );
 
                 const btn = new Button()
                         .setBody(
@@ -127,10 +153,12 @@ async function handleGhosttag({ hisoka, m, query, tolak, logCommand, generateWAM
                 return;
         }
 
+        // ── Query "all" → tag semua grup ──────────────────────────────────────
+
         if (query.trim() === 'all') {
                 if (!gtGroupKeys.length) return tolak(hisoka, m, '❌ Bot tidak bergabung di grup manapun.');
 
-                await tolak(hisoka, m, `⏳ Mengirim ghost tag ke *${gtGroupKeys.length}* grup, mohon tunggu...`);
+                await m.reply(`⏳ Mengirim ghost tag ke *${gtGroupKeys.length}* grup, mohon tunggu...`);
 
                 let gtOk = 0, gtFail = 0, gtTotalMember = 0;
                 for (const jid of gtGroupKeys) {
@@ -141,7 +169,7 @@ async function handleGhosttag({ hisoka, m, query, tolak, logCommand, generateWAM
                         } catch (_) { gtFail++; }
                 }
 
-                await tolak(hisoka, m,
+                await m.reply(
                         `✅ *Ghost Tag Selesai!*\n\n` +
                         `📊 *Hasil:*\n` +
                         `• ✅ Berhasil : ${gtOk} grup\n` +
@@ -152,11 +180,13 @@ async function handleGhosttag({ hisoka, m, query, tolak, logCommand, generateWAM
                 return;
         }
 
+        // ── Query berisi JID → tag satu grup spesifik ────────────────────────
+
         const gtJid = query.trim();
         try {
                 const count = await gtSendOne(gtJid);
                 if (!count) return tolak(hisoka, m, '❌ Tidak ada member ditemukan atau gagal mengambil data grup.');
-                await tolak(hisoka, m, `✅ Ghost tag berhasil dikirim ke *${count}* member!`);
+                await m.reply(`✅ Ghost tag berhasil dikirim ke *${count}* member!`);
         } catch (e) {
                 await tolak(hisoka, m, '❌ Gagal mengirim ghost tag: ' + (e.message || e));
         }
