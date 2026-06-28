@@ -103,6 +103,10 @@ ram | ceksize/disksize | autosholat | credsjson
 dbstats | sessiondb | listcontact
 cekerror | cekerror reset | contact
 
+「 📨 *BROADCAST GRUP* 」
+jpm [GID >> pesan | delay] | jpmstop | jpmlist
+pushkontakgc [GID | pesan | delay] | pushkontakgcstop
+
 `;
         const imgPath = path.join(process.cwd(), 'image', 'menu1.jpg');
         if (fs.existsSync(imgPath)) {
@@ -141,6 +145,21 @@ async function handleOwnermenu({ hisoka, m, query, loadConfig, logCommand, fs, p
 │   ╰ *.wilyai reset*
 ╰➤ *.setreactapi [key]*
    _Set API key untuk fitur react_
+
+╭─「 📨 *BROADCAST GRUP* 」
+│
+├➤ *.jpm [pesan | delay]*
+│   _Kirim pesan ke semua GC via pilih menu_
+├➤ *.jpm [GID >> pesan | delay]*
+│   _Kirim pesan ke satu GC tertentu_
+├➤ *.jpmstop*
+│   _Stop proses JPM yang sedang berjalan_
+├➤ *.jpmlist*
+│   _Lihat daftar semua GC yang diikuti bot_
+├➤ *.pushkontakgc [GID | pesan | delay]*
+│   _Kirim pesan ke semua member GC_
+╰➤ *.pushkontakgcstop / .pkgstop*
+   _Stop proses push kontak GC yang berjalan_
 
 ╭─「 📡 *BROADCAST & STATUS* 」
 │
