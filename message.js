@@ -446,8 +446,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                             'del', 'd',
                             'font', 'fontgen',
                             'fontuntik',
-                            'logo',
-                            'setlogsw'
+                            'logo'
                         ]);
                         const _rawText = (m.text || '').trim();
                         const _isFontuntikChoice = _rawText.startsWith('fu_');

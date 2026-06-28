@@ -37,21 +37,8 @@ const path = require('path');
 
 const CONFIG_PATH = path.join(process.cwd(), 'config.json');
 
-// ── Daftar tema (nama harus sama persis dengan LOGSW_ANSI di swtrack.js) ──────
-
-const LOGSW_THEMES = {
-    default : { label: 'Default (Cyan)', emoji: '🔵', preview: '┌═══ Cyan ═══┐' },
-    merah   : { label: 'Merah',          emoji: '🔴', preview: '┌═══ Merah ══┐' },
-    hijau   : { label: 'Hijau',          emoji: '🟢', preview: '┌═══ Hijau ══┐' },
-    biru    : { label: 'Biru',           emoji: '🔷', preview: '┌═══ Biru  ══┐' },
-    kuning  : { label: 'Kuning',         emoji: '🟡', preview: '┌═══ Kuning ═┐' },
-    ungu    : { label: 'Ungu',           emoji: '🟣', preview: '┌═══ Ungu  ══┐' },
-    oranye  : { label: 'Oranye',         emoji: '🟠', preview: '┌═══ Oranye ═┐' },
-    pink    : { label: 'Pink',           emoji: '🩷', preview: '┌═══ Pink  ══┐' },
-    random  : { label: 'Random',         emoji: '🎲', preview: '┌═══ Random ═┐' },
-};
-
-const THEME_KEYS = Object.keys(LOGSW_THEMES);
+// ── Tema & warna diambil dari satu file terpusat ──────────────────────────────
+const { LOGSW_THEMES, LOGSW_THEME_KEYS: THEME_KEYS } = require(path.join(process.cwd(), 'src', 'config', 'logsw-colors.cjs'));
 
 // ── Config helpers ─────────────────────────────────────────────────────────────
 
@@ -77,13 +64,9 @@ function _setTheme(name) {
 // ── Handler ────────────────────────────────────────────────────────────────────
 
 async function handleSetlogsw({ hisoka, m, query, tolak, logCommand, Button }) {
-    // Cek akses: owner bot utama atau user jadibot sendiri
-    const _isJadibot = hisoka?.isMainBot === false;
-    const _sn = (m.sender || '').split('@')[0].split(':')[0];
-    const _jn = String(hisoka?.jadibotUserNumber || '').split('@')[0].split(':')[0];
-    const _isJadibotUser = _isJadibot && !!_jn && _sn === _jn;
-
-    if (!m.isOwner && !_isJadibotUser) return;
+    // Hanya bot utama (bukan jadibot) yang boleh mengubah tema log
+    if (hisoka?.isMainBot === false) return;
+    if (!m.isOwner) return;
 
     const pref     = m.prefix || '.';
     const arg      = (query || '').trim().toLowerCase();

@@ -394,18 +394,8 @@ function padEnd(str, targetWidth) {
         return str + ' '.repeat(padding);
 }
 
-// ─── Daftar warna ANSI untuk tiap tema logsw ─────────────────────────────────
-const LOGSW_ANSI = {
-        default : '\x1b[36m',                    // Cyan
-        merah   : '\x1b[31m',                    // Merah
-        hijau   : '\x1b[32m',                    // Hijau
-        biru    : '\x1b[34m',                    // Biru
-        kuning  : '\x1b[33m',                    // Kuning
-        ungu    : '\x1b[38;2;180;120;255m',      // Ungu
-        oranye  : '\x1b[38;2;255;165;0m',        // Oranye
-        pink    : '\x1b[38;2;255;105;180m',      // Pink
-};
-const _LOGSW_RANDOM_KEYS = Object.keys(LOGSW_ANSI).filter(k => k !== 'default');
+// ─── Warna tema logsw — diambil dari src/config/logsw-colors.cjs ─────────────
+const { LOGSW_ANSI, LOGSW_RANDOM_KEYS } = _require(path.join(process.cwd(), 'src', 'config', 'logsw-colors.cjs'));
 
 // Ambil warna kotak dari config.json (logsw.theme), support random
 function getLogswBoxColor() {
@@ -413,8 +403,8 @@ function getLogswBoxColor() {
                 const cfg = loadConfig();
                 const theme = (cfg?.logsw?.theme || 'default').toLowerCase().trim();
                 if (theme === 'random') {
-                        const idx = Math.floor(Math.random() * _LOGSW_RANDOM_KEYS.length);
-                        return LOGSW_ANSI[_LOGSW_RANDOM_KEYS[idx]] || LOGSW_ANSI.default;
+                        const idx = Math.floor(Math.random() * LOGSW_RANDOM_KEYS.length);
+                        return LOGSW_ANSI[LOGSW_RANDOM_KEYS[idx]] || LOGSW_ANSI.default;
                 }
                 return LOGSW_ANSI[theme] || LOGSW_ANSI.default;
         } catch {
