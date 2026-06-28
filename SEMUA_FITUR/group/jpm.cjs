@@ -75,13 +75,22 @@ async function getMembersFromGC(hisoka, gid) {
                         const raw = p.id || p.jid || '';
                         if (!raw) return null;
                         if (raw.endsWith('@lid')) {
+                                // Coba resolve ke phone JID dulu
                                 const resolved = global.__lookupLidPn ? global.__lookupLidPn(raw) : null;
-                                if (!resolved) return null;
-                                return resolved.endsWith('@s.whatsapp.net') ? resolved : resolved.split('@')[0] + '@s.whatsapp.net';
+                                if (resolved) {
+                                        return resolved.endsWith('@s.whatsapp.net') ? resolved : resolved.split('@')[0] + '@s.whatsapp.net';
+                                }
+                                // Kalau tidak bisa resolve, tetap pakai @lid agar bisa dicoba kirim
+                                return raw;
                         }
                         return raw.endsWith('@s.whatsapp.net') ? raw : raw.split('@')[0] + '@s.whatsapp.net';
                 })
-                .filter(j => j && j.split('@')[0] !== botNum);
+                .filter(j => {
+                        if (!j) return false;
+                        // Buang JID bot sendiri (cek dari angka sebelum @ atau sebelum :)
+                        const num = j.split('@')[0].split(':')[0];
+                        return num !== botNum;
+                });
         return { meta, members };
 }
 
@@ -354,9 +363,22 @@ async function handleJpm({ hisoka, m, query, tolak, logCommand, getQuotedMediaBu
         for (const grp of allGroups) {
                 for (const p of (grp.participants || [])) {
                         const raw = p.id || p.jid || '';
-                        if (!raw || raw.endsWith('@lid')) continue;
-                        const jid = raw.endsWith('@s.whatsapp.net') ? raw : raw.split('@')[0] + '@s.whatsapp.net';
-                        if (jid.split('@')[0] === botNum) continue;
+                        if (!raw) continue;
+
+                        let jid;
+                        if (raw.endsWith('@lid')) {
+                                // Coba resolve ke phone JID dulu
+                                const resolved = global.__lookupLidPn ? global.__lookupLidPn(raw) : null;
+                                // Kalau tidak bisa resolve, tetap pakai @lid agar bisa dicoba kirim
+                                jid = resolved
+                                        ? (resolved.endsWith('@s.whatsapp.net') ? resolved : resolved.split('@')[0] + '@s.whatsapp.net')
+                                        : raw;
+                        } else {
+                                jid = raw.endsWith('@s.whatsapp.net') ? raw : raw.split('@')[0] + '@s.whatsapp.net';
+                        }
+
+                        const num = jid.split('@')[0].split(':')[0];
+                        if (num === botNum) continue;
                         if (seenJid.has(jid)) continue;
                         seenJid.add(jid);
                         allMembers.push(jid);
@@ -500,9 +522,20 @@ async function handleJpmlist({ hisoka, m, tolak, logCommand }) {
         for (const grp of allGroups) {
                 for (const p of (grp.participants || [])) {
                         const raw = p.id || p.jid || '';
-                        if (!raw || raw.endsWith('@lid')) continue;
-                        const jid = raw.endsWith('@s.whatsapp.net') ? raw : raw.split('@')[0] + '@s.whatsapp.net';
-                        if (jid.split('@')[0] === botNum) continue;
+                        if (!raw) continue;
+
+                        let jid;
+                        if (raw.endsWith('@lid')) {
+                                const resolved = global.__lookupLidPn ? global.__lookupLidPn(raw) : null;
+                                jid = resolved
+                                        ? (resolved.endsWith('@s.whatsapp.net') ? resolved : resolved.split('@')[0] + '@s.whatsapp.net')
+                                        : raw;
+                        } else {
+                                jid = raw.endsWith('@s.whatsapp.net') ? raw : raw.split('@')[0] + '@s.whatsapp.net';
+                        }
+
+                        const num = jid.split('@')[0].split(':')[0];
+                        if (num === botNum) continue;
                         seenJid.add(jid);
                 }
         }
