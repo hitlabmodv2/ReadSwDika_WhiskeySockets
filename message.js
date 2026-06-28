@@ -709,7 +709,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                         case 'jpm': {
                                 const { handleJpm } = _require(path.resolve('./SEMUA_FITUR/group/jpm.cjs'));
-                                await handleJpm({ hisoka, m, query, tolak, logCommand, getQuotedMediaBuffer });
+                                await handleJpm({ hisoka, m, query, tolak, logCommand, getQuotedMediaBuffer, Button });
                                 break;
                         }
 

@@ -148,7 +148,7 @@ async function kirimKeJidList(hisoka, {
 
 // ── Handler: .jpm ─────────────────────────────────────────────────────────────
 
-async function handleJpm({ hisoka, m, query, tolak, logCommand, getQuotedMediaBuffer }) {
+async function handleJpm({ hisoka, m, query, tolak, logCommand, getQuotedMediaBuffer, Button }) {
         // ✅ Hanya bot utama — jadibot tidak bisa pakai
         if (hisoka?.isMainBot === false) return tolak(hisoka, m, '❌ Fitur ini hanya tersedia di *bot utama*. Jadibot tidak mendukung perintah ini.');
 
@@ -306,6 +306,26 @@ async function handleJpm({ hisoka, m, query, tolak, logCommand, getQuotedMediaBu
                         } else {
                                 await m.reply(doneText);
                         }
+
+                        // ── Button ulangi JPM setelah selesai ──────────────────
+                        if (!dibatalkan && Button) {
+                                try {
+                                        const repeatCmd = `${pref}jpm ${isiQuery}`;
+                                        const btnJpm = new Button()
+                                                .setBody(
+                                                        `╭─「 🔁 *ULANGI JPM?* 」\n│\n` +
+                                                        `│ 👥 *Grup :* ${namaGrup}\n` +
+                                                        `│ ✔️ *Berhasil :* ${berhasil} orang\n` +
+                                                        `│ ❌ *Gagal :* ${gagal} orang\n│\n` +
+                                                        `│ Tekan tombol di bawah untuk\n` +
+                                                        `│ menjalankan JPM lagi ke grup ini.\n│\n` +
+                                                        `╰─────────────────────────`
+                                                )
+                                                .setFooter(`⚡ Wily Bot • JPM System`)
+                                                .addReply('🔄 Ulangi JPM Grup Ini', repeatCmd);
+                                        await btnJpm.run(m.from, hisoka, m);
+                                } catch (_) {}
+                        }
                 } finally {
                         setJpmRunning(hisoka, false);
                 }
@@ -406,6 +426,26 @@ async function handleJpm({ hisoka, m, query, tolak, logCommand, getQuotedMediaBu
                         await m.reply({ edit: progMsg.key, text: doneText });
                 } else {
                         await m.reply(doneText);
+                }
+
+                // ── Button ulangi JPM semua GC setelah selesai ─────────────
+                if (!dibatalkan && Button) {
+                        try {
+                                const repeatCmdAll = `${pref}jpm << ${isiQuery}`;
+                                const btnJpmAll = new Button()
+                                        .setBody(
+                                                `╭─「 🔁 *ULANGI JPM SEMUA GC?* 」\n│\n` +
+                                                `│ 🗂️ *Total GC :* ${allGroups.length} grup\n` +
+                                                `│ ✔️ *Berhasil :* ${berhasil} orang\n` +
+                                                `│ ❌ *Gagal :* ${gagal} orang\n│\n` +
+                                                `│ Tekan tombol di bawah untuk\n` +
+                                                `│ menjalankan JPM lagi ke semua GC.\n│\n` +
+                                                `╰─────────────────────────`
+                                        )
+                                        .setFooter(`⚡ Wily Bot • JPM System`)
+                                        .addReply('🔄 Ulangi JPM Semua GC', repeatCmdAll);
+                                await btnJpmAll.run(m.from, hisoka, m);
+                        } catch (_) {}
                 }
         } finally {
                 setJpmRunning(hisoka, false);
