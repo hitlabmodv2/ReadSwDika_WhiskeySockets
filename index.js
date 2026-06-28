@@ -1058,7 +1058,7 @@ async function main() {
                         const autoOnline2 = config2.autoOnline || {};
                         const modeLabel = autoOnline2.enabled !== false ? 'ONLINE 🟢' : 'OFFLINE 🔴';
 
-                        const G = '\x1b[32m', Y = '\x1b[33m', C = getLogswColors().box, R = '\x1b[0m', B = '\x1b[1m';
+                        const G = '\x1b[32m', Y = '\x1b[33m', C = '\x1b[36m', R = '\x1b[0m', B = '\x1b[1m';
                         const _bKey2   = (global.__activeBrowserKey || 'v1').toLowerCase();
                         const _bInfo2  = BROWSER_LIST.find(b => b.key === _bKey2);
                         const _bLabel2 = _bInfo2
@@ -2795,7 +2795,7 @@ setTimeout(async () => {
 
   if (!bots.length && !expiredBots.length) return;
 
-  const C = getLogswColors().box, G = '\x1b[32m', Y = '\x1b[33m', R = '\x1b[0m', B = '\x1b[1m';
+  const C = '\x1b[36m', G = '\x1b[32m', Y = '\x1b[33m', R = '\x1b[0m', B = '\x1b[1m';
   const RED = '\x1b[31m', DIM = '\x1b[2m';
 
   const validBots = [], invalidBots = [];
