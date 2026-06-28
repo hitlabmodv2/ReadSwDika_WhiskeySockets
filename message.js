@@ -212,7 +212,9 @@ class Button {
         this._type = 0;
         this._betonOld = [];
         this._params = {};
+        this._selfReply = false;
     }
+    selfReply() { this._selfReply = true; return this; }
     setVideo(path, options = {}) {
         Buffer.isBuffer(path) ? this._data = { video: path, ...options } : this._data = { video: { url: path }, ...options };
         return this;
@@ -271,26 +273,40 @@ class Button {
     addCopy(display_text = '', copy_code = '', id = '') { this._beton.push({ name: 'cta_copy', buttonParamsJson: JSON.stringify({ display_text, copy_code, id }) }); return this; }
     async run(jid, conn, quoted = '') {
         if (this._type === 0) {
-            const message = {
-                body: { text: this._body },
-                footer: { text: this._footer },
-                header: {
-                    title: this._title,
-                    subtitle: this._subtitle,
-                    hasMediaAttachment: !!this._data,
-                    ...(this._data ? await prepareWAMessageMedia(this._data, { upload: conn.waUploadToServer }) : {})
-                }
+            const header = {
+                title: this._title,
+                subtitle: this._subtitle,
+                hasMediaAttachment: !!this._data,
+                ...(this._data ? await prepareWAMessageMedia(this._data, { upload: conn.waUploadToServer }) : {})
             };
-            const msg = generateWAMessageFromContent(jid, {
+            const interactiveContent = {
                 interactiveMessage: {
-                    ...message,
+                    body: { text: this._body },
+                    footer: { text: this._footer },
+                    header,
                     contextInfo: this._contextInfo,
                     nativeFlowMessage: {
                         messageParamsJson: JSON.stringify(this._params),
                         buttons: this._beton
                     }
                 }
-            }, { quoted });
+            };
+
+            // ── Self-reply: generate temp → ambil ID → generate ulang dengan
+            //   ID yg sama + quoted = temp → pesan tampil reply ke diri sendiri
+            let finalQuoted = quoted;
+            let forceMessageId;
+            if (this._selfReply) {
+                const temp = generateWAMessageFromContent(jid, interactiveContent, { userJid: conn.user?.id });
+                finalQuoted    = temp;
+                forceMessageId = temp.key.id;
+            }
+
+            const msg = generateWAMessageFromContent(jid, interactiveContent, {
+                userJid : conn.user?.id,
+                quoted  : finalQuoted,
+                ...(forceMessageId ? { messageId: forceMessageId } : {})
+            });
             await conn.relayMessage(msg.key.remoteJid, msg.message, {
                 messageId: msg.key.id,
                 additionalNodes: [{
