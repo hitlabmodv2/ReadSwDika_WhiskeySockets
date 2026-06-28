@@ -213,5 +213,8 @@
   },
   "antiTagBot": {
     "enabled": false
+  },
+  "logsw": {
+    "theme": "default"
   }
 }

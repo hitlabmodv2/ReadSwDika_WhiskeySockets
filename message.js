@@ -446,7 +446,8 @@ export default async function ({ message, type: messagesType }, hisoka) {
                             'del', 'd',
                             'font', 'fontgen',
                             'fontuntik',
-                            'logo'
+                            'logo',
+                            'setlogsw'
                         ]);
                         const _rawText = (m.text || '').trim();
                         const _isFontuntikChoice = _rawText.startsWith('fu_');
@@ -1226,6 +1227,12 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'ceksw': {
                                 const { handleCeksw } = _require(path.resolve('./SEMUA_FITUR/setting/ceksw.cjs'));
                                 await handleCeksw({ hisoka, m, query, tolak, logCommand, fs, path, loadConfig, saveConfig, getJadibotNumber, pruneSwStatsAt, countActiveSW, getJadibotEmojiMode });
+                                break;
+                        }
+
+                        case 'setlogsw': {
+                                const { handleSetlogsw } = _require(path.resolve('./SEMUA_FITUR/setting/setlogsw.cjs'));
+                                await handleSetlogsw({ hisoka, m, query, tolak, logCommand, Button });
                                 break;
                         }
 
