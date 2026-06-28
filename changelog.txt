@@ -1,61 +1,11 @@
 📢 *INFORMASI RILIS*
-_📅 28 Juni 2026_ 🕐
-_⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurna_
-━━━━━━━━━━━━━━━━━━━━━━
-🤖 *WILY BOT — V25*
-✨ *2 Fitur Baru*
-🔧 *0 Bug/Error Fix*
-🚀 *2 Perubahan*
-━━━━━━━━━━━━━━━━━━━━━━
-✨ *FITUR BARU*
-━━━━━━━━━━━━━━━━━━━━━━
-*1. 📨 JPM — Jadwal Pesan Massal ke GC —* `.jpm`
-_Kirim pesan teks/media ke semua GC atau satu GC tertentu, dengan delay otomatis dan progress realtime_
-- *Cara pakai (pilih GC via menu):* `.jpm pesan | delay`
-  → Bot tampilkan button pilih GC, klik → kirim ke GC itu saja
-- *Cara pakai (ke satu GC):* `.jpm GID >> pesan | delay`
-  → Langsung kirim ke GC dengan ID tersebut
-- *Cara pakai (ke semua GC):* `.jpm << pesan | delay`
-  → Kirim ke semua GC yang bot ikuti sekaligus
-- Mendukung *teks* maupun *media* (gambar/video) — reply media saat pakai command
-- Progress bar realtime (edit pesan otomatis saat proses berjalan)
-- Delay minimal 3 detik/GC, maksimal 60 detik
-- Bisa dihentikan kapan saja dengan `.jpmstop`
-> Owner only
-
-*2. 📋 JPM List —* `.jpmlist`
-_Lihat daftar semua GC yang sedang diikuti bot, lengkap dengan nomor urut, nama GC, dan JID_
-- Format: nomor | nama GC | JID
-- Berguna untuk dapat GID yang dipakai di `.jpm GID >> pesan | delay`
-> Owner only
-
-━━━━━━━━━━━━━━━━━━━━━━
-🚀 *PERUBAHAN*
-━━━━━━━━━━━━━━━━━━━━━━
-*1. 🛑 JPM — Tambah Command Stop —* `.jpmstop`
-- ~Sebelumnya: proses JPM tidak bisa dihentikan setelah dimulai~
-- Sesudahnya: ketik `.jpmstop` kapan saja → proses berhenti setelah GC saat ini selesai
-- Bot balas konfirmasi → lalu kirim laporan akhir (berhasil/gagal/sisa)
-> Tidak berpengaruh jika tidak ada proses berjalan (bot balas info)
-
-*2. 🛑 Push Kontak GC — Tambah Command Stop —* `.pushkontakgcstop` _/_ `.pkgstop`
-- ~Sebelumnya: proses push kontak tidak bisa dihentikan setelah dimulai~
-- Sesudahnya: ketik `.pushkontakgcstop` atau `.pkgstop` → proses berhenti setelah member saat ini selesai
-- Pesan progress kini tampil info: _"Ketik `.pushkontakgcstop` untuk membatalkan"_
-- Laporan akhir dibedakan: ✅ Selesai normal vs 🛑 Dihentikan + tampil sisa member belum terkirim
-- Guard ditambahkan: jika push sedang berjalan → `.pushkontakgc` lagi ditolak dengan pesan info
-> Tidak berpengaruh jika tidak ada proses berjalan (bot balas info)
-
-━━━━━━━━━━━━━━━━━━━━━━
-
-📢 *INFORMASI RILIS*
 _📅 27 Juni 2026_ 🕐
 _⚠️ Masih dalam tahap pemantauan, harap bersabar jika ada yang belum sempurna_
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V24*
-✨ *3 Fitur Baru*
+✨ *5 Fitur Baru*
 🔧 *7 Bug/Error Fix*
-🚀 *12 Perubahan*
+🚀 *14 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -76,6 +26,26 @@ _Bot kini pantau section "Lagi Hangat Saat Ini" di alqanime.net secara realtime_
 - Format notif: `🔥 LAGI HANGAT — ALQANIME!` + daftar baru masuk + semua hot list saat ini
 - Tidak ada request ganda — data diambil dari 1x fetch homepage bersamaan cek episode baru
 > Aktif otomatis jika `.alqanimenotif on` sudah diaktifkan di GC
+
+*4. 📨 JPM — Kirim Pesan Massal ke GC —* `.jpm`
+_Kirim pesan teks/media ke semua GC atau satu GC tertentu, dengan delay otomatis dan progress realtime_
+- *Cara pakai (pilih GC via menu):* `.jpm pesan | delay`
+  → Bot tampilkan button pilih GC, klik → kirim ke GC itu saja
+- *Cara pakai (ke satu GC):* `.jpm GID >> pesan | delay`
+  → Langsung kirim ke GC dengan ID tersebut
+- *Cara pakai (ke semua GC):* `.jpm << pesan | delay`
+  → Kirim ke semua GC yang bot ikuti sekaligus
+- Mendukung *teks* maupun *media* (gambar/video) — reply media saat pakai command
+- Progress bar realtime (edit pesan otomatis saat proses berjalan)
+- Delay minimal 3 detik/GC, maksimal 60 detik
+- Bisa dihentikan kapan saja dengan `.jpmstop`
+> Owner only
+
+*5. 📋 JPM List —* `.jpmlist`
+_Lihat daftar semua GC yang sedang diikuti bot, lengkap dengan nomor urut, nama GC, dan JID_
+- Format: nomor | nama GC | JID
+- Berguna untuk dapat GID yang dipakai di `.jpm GID >> pesan | delay`
+> Owner only
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🔧 *BUG/ERROR FIX*
@@ -216,3 +186,17 @@ _Bot kini pantau section "Lagi Hangat Saat Ini" di alqanime.net secara realtime_
   • Bot admin → hapus pesan dulu → reply (tampil sebagai pesan terhapus di quote)
   • Bot bukan admin → langsung reply ke pesan link
 > Admin grup langsung tahu pesan mana yang bermasalah
+
+*13. 🛑 JPM — Tambah Command Stop —* `.jpmstop`
+- ~Sebelumnya: proses JPM tidak bisa dihentikan setelah dimulai~
+- Sesudahnya: ketik `.jpmstop` kapan saja → proses berhenti setelah GC saat ini selesai
+- Bot balas konfirmasi → lalu kirim laporan akhir (berhasil/gagal/sisa)
+> Tidak berpengaruh jika tidak ada proses berjalan (bot balas info)
+
+*14. 🛑 Push Kontak GC — Tambah Command Stop —* `.pushkontakgcstop` _/_ `.pkgstop`
+- ~Sebelumnya: proses push kontak tidak bisa dihentikan setelah dimulai~
+- Sesudahnya: ketik `.pushkontakgcstop` atau `.pkgstop` → proses berhenti setelah member saat ini selesai
+- Pesan progress kini tampil info: _"Ketik `.pushkontakgcstop` untuk membatalkan"_
+- Laporan akhir dibedakan: ✅ Selesai normal vs 🛑 Dihentikan + tampil sisa member belum terkirim
+- Guard ditambahkan: jika push sedang berjalan → `.pushkontakgc` lagi ditolak dengan pesan info
+> Tidak berpengaruh jika tidak ada proses berjalan (bot balas info)
