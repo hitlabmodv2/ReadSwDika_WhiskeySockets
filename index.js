@@ -31,23 +31,22 @@ const _require = createRequire(import.meta.url);
 
 // ── Warna tema logsw — baca dari config.json (logsw.theme) ───────────────────
 // Dipakai semua kotak log (WILY BOT AKTIF, AutoReadStory startup, AUTO JADIBOT)
-// Mengembalikan { box, fg }: box = warna border/struktur, fg = warna nilai field
+// Load logsw-colors.cjs di dalam fungsi + hapus cache → selalu fresh,
+// tidak terpengaruh hot-reload atau urutan startup module.
+const _logswColorPath = path.join(process.cwd(), 'src', 'config', 'logsw-colors.cjs');
 function getLogswColors() {
     try {
-        const { LOGSW_ANSI, LOGSW_FG, LOGSW_RANDOM_KEYS } = _require(
-            path.join(process.cwd(), 'src', 'config', 'logsw-colors.cjs')
-        );
+        delete _require.cache[_logswColorPath];
+        const { LOGSW_ANSI, LOGSW_RANDOM_KEYS } = _require(_logswColorPath);
         const cfgRaw = fs.readFileSync(path.join(process.cwd(), 'config.json'), 'utf-8');
         let theme    = (JSON.parse(cfgRaw)?.logsw?.theme || 'default').toLowerCase().trim();
         if (theme === 'random') {
             theme = LOGSW_RANDOM_KEYS[Math.floor(Math.random() * LOGSW_RANDOM_KEYS.length)];
         }
-        return {
-            box: LOGSW_ANSI[theme] || LOGSW_ANSI.default,
-            fg:  LOGSW_FG[theme]   || LOGSW_FG.default,
-        };
+        const box = LOGSW_ANSI[theme] || LOGSW_ANSI.default;
+        return { box };
     } catch {
-        return { box: '\x1b[36m', fg: '\x1b[36m' }; // fallback cyan
+        return { box: '\x1b[36m' }; // fallback cyan
     }
 }
 const {

@@ -395,29 +395,28 @@ function padEnd(str, targetWidth) {
 }
 
 // ─── Warna tema logsw — diambil dari src/config/logsw-colors.cjs ─────────────
-const { LOGSW_ANSI, LOGSW_FG, LOGSW_RANDOM_KEYS } = _require(path.join(process.cwd(), 'src', 'config', 'logsw-colors.cjs'));
-
-// Ambil PASANGAN warna (border + nilai field) dari config.json (logsw.theme)
-// Untuk theme 'random', tema dipilih sekali dan keduanya memakai tema yang sama.
-function getLogswColors() {
+// Ambil warna border kotak dari config.json (logsw.theme)
+// Load logsw-colors.cjs di DALAM fungsi dengan cache-busting → selalu fresh,
+// tidak terpengaruh hot-reload atau urutan startup module.
+const _logswColorPath = path.join(process.cwd(), 'src', 'config', 'logsw-colors.cjs');
+function getLogswBoxColor() {
         try {
-                const cfg = loadConfig();
-                let theme = (cfg?.logsw?.theme || 'default').toLowerCase().trim();
+                delete _require.cache[_logswColorPath];
+                const { LOGSW_ANSI, LOGSW_RANDOM_KEYS } = _require(_logswColorPath);
+                const cfgRaw = fs.readFileSync(path.join(process.cwd(), 'config.json'), 'utf-8');
+                let theme = (JSON.parse(cfgRaw)?.logsw?.theme || 'default').toLowerCase().trim();
                 if (theme === 'random') {
                         theme = LOGSW_RANDOM_KEYS[Math.floor(Math.random() * LOGSW_RANDOM_KEYS.length)];
                 }
-                return {
-                        box: LOGSW_ANSI[theme] || LOGSW_ANSI.default,
-                        fg:  LOGSW_FG[theme]   || LOGSW_FG.default,
-                };
+                return LOGSW_ANSI[theme] || LOGSW_ANSI.default;
         } catch {
-                return { box: LOGSW_ANSI.default, fg: LOGSW_FG.default };
+                return '\x1b[36m'; // fallback cyan
         }
 }
 
 export function logStoryView(data) {
         const { botId, mediaType, greeting, dayName, date, time, name, number, success, reaction, delaySeconds, mode, resolve, storyCount, idStory, emojiMode } = data;
-        const { box: cyan } = getLogswColors(); // border/struktur ikut tema config.json
+        const cyan = getLogswBoxColor(); // border/struktur ikut tema config.json
         const white = '\x1b[97m';               // semua teks di dalam kotak = putih terang
         const red   = '\x1b[31m';               // hanya state error (❌)
         const reset = '\x1b[0m';

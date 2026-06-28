@@ -208,5 +208,131 @@
       }
     ],
     "processedAt": "2026-06-28T09:26:01.794Z"
+  },
+  "3EB049A8A716F781D25401": {
+    "id": "3EB049A8A716F781D25401",
+    "sender": "6289667923162@s.whatsapp.net",
+    "name": "Hen V2",
+    "type": "extendedTextMessage",
+    "arrivedAt": "2026-06-28T09:33:05.343Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🎲",
+    "resolve": "Signal Lib ✓",
+    "source": "status",
+    "number": "6289667923162",
+    "resolvedPn": "6289667923162@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6289667923162@s.whatsapp.net",
+      "fromMe": false,
+      "id": "3EB049A8A716F781D25401",
+      "participant": "97968623505429@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-28T09:33:20.082Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289667923162@s.whatsapp.net",
+        "fromMe": false,
+        "id": "3EB049A8A716F781D25401",
+        "participant": "97968623505429@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289667923162@s.whatsapp.net",
+        "fromMe": false,
+        "id": "3EB049A8A716F781D25401",
+        "participant": "6289667923162@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-28T09:33:20.082Z"
+  },
+  "3EB016C0ACA5A715919CF4": {
+    "id": "3EB016C0ACA5A715919CF4",
+    "sender": "6289667923162@s.whatsapp.net",
+    "name": "Hen V2",
+    "type": "extendedTextMessage",
+    "arrivedAt": "2026-06-28T09:34:00.398Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🎳",
+    "resolve": "Signal Lib ✓",
+    "source": "status",
+    "number": "6289667923162",
+    "resolvedPn": "6289667923162@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6289667923162@s.whatsapp.net",
+      "fromMe": false,
+      "id": "3EB016C0ACA5A715919CF4",
+      "participant": "97968623505429@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-28T09:34:11.746Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289667923162@s.whatsapp.net",
+        "fromMe": false,
+        "id": "3EB016C0ACA5A715919CF4",
+        "participant": "97968623505429@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289667923162@s.whatsapp.net",
+        "fromMe": false,
+        "id": "3EB016C0ACA5A715919CF4",
+        "participant": "6289667923162@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-28T09:34:11.746Z"
+  },
+  "3EB07A28EE6F4BFF6CF81C": {
+    "id": "3EB07A28EE6F4BFF6CF81C",
+    "sender": "6289667923162@s.whatsapp.net",
+    "name": "Hen V2",
+    "type": "extendedTextMessage",
+    "arrivedAt": "2026-06-28T09:36:02.004Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🎲",
+    "resolve": "Signal Lib ✓",
+    "source": "status",
+    "number": "6289667923162",
+    "resolvedPn": "6289667923162@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6289667923162@s.whatsapp.net",
+      "fromMe": false,
+      "id": "3EB07A28EE6F4BFF6CF81C",
+      "participant": "97968623505429@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-28T09:36:08.312Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289667923162@s.whatsapp.net",
+        "fromMe": false,
+        "id": "3EB07A28EE6F4BFF6CF81C",
+        "participant": "97968623505429@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289667923162@s.whatsapp.net",
+        "fromMe": false,
+        "id": "3EB07A28EE6F4BFF6CF81C",
+        "participant": "6289667923162@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-28T09:36:08.312Z"
   }
 }
