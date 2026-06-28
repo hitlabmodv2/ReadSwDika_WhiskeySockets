@@ -9,39 +9,109 @@
  *  logsw-colors.cjs — Definisi warna tema log SW
  *  File terpusat untuk semua warna ANSI & info tema .setlogsw
  *  Dipakai oleh: src/helper/swtrack.js & SEMUA_FITUR/setting/setlogsw.cjs
+ *
+ *  FORMAT WARNA: '\x1b[BG_CODE m\x1b[TEXT_CODE m'
+ *    BG standar  : 40–47 (gelap), 100–107 (cerah/bright)
+ *    BG 256-warna: \x1b[48;5;N m  (N = 0–255)
+ *    Teks putih  : \x1b[97m   Teks hitam: \x1b[30m
  * ───────────────────────────────
  */
 'use strict';
 
-// Warna ANSI untuk tiap nama tema
+// ─────────────────────────────────────────────────────────────────────────────
+//  LOGSW_ANSI — Warna latar belakang (background) + teks kontras
+//  Format: '\x1b[<bg>m\x1b[<fg>m'  |  terlihat jelas di panel Pterodactyl
+// ─────────────────────────────────────────────────────────────────────────────
 const LOGSW_ANSI = {
-    default : '\x1b[36m',                   // Cyan  (bawaan)
-    merah   : '\x1b[31m',                   // Merah
-    hijau   : '\x1b[32m',                   // Hijau
-    biru    : '\x1b[34m',                   // Biru
-    kuning  : '\x1b[33m',                   // Kuning
-    ungu    : '\x1b[38;2;180;120;255m',     // Ungu
-    oranye  : '\x1b[38;2;255;165;0m',       // Oranye
-    pink    : '\x1b[38;2;255;105;180m',     // Pink
+
+    // ── No background (default lama, teks saja) ──────────────────────────────
+    default      : '\x1b[36m',                        // Cyan teks — bawaan
+
+    // ── Background standar ANSI (support semua panel/terminal) ───────────────
+    merah        : '\x1b[41m\x1b[97m',               // Merah BG  + teks putih
+    hijau        : '\x1b[42m\x1b[30m',               // Hijau BG  + teks hitam
+    biru         : '\x1b[44m\x1b[97m',               // Biru  BG  + teks putih
+    kuning       : '\x1b[43m\x1b[30m',               // Kuning BG + teks hitam
+    ungu         : '\x1b[45m\x1b[97m',               // Ungu  BG  + teks putih
+    cyan         : '\x1b[46m\x1b[30m',               // Cyan  BG  + teks hitam
+    putih        : '\x1b[47m\x1b[30m',               // Putih BG  + teks hitam
+    hitam        : '\x1b[40m\x1b[97m',               // Hitam BG  + teks putih
+
+    // ── Background cerah/bright ANSI ─────────────────────────────────────────
+    merah_cerah  : '\x1b[101m\x1b[30m',              // Merah cerah BG  + teks hitam
+    hijau_cerah  : '\x1b[102m\x1b[30m',              // Hijau cerah BG  + teks hitam
+    biru_cerah   : '\x1b[104m\x1b[97m',              // Biru cerah  BG  + teks putih
+    kuning_cerah : '\x1b[103m\x1b[30m',              // Kuning cerah BG + teks hitam
+    pink         : '\x1b[105m\x1b[30m',              // Pink/Magenta BG + teks hitam
+    cyan_cerah   : '\x1b[106m\x1b[30m',              // Cyan cerah   BG + teks hitam
+    abu          : '\x1b[100m\x1b[97m',              // Abu-abu gelap BG + teks putih
+
+    // ── Background 256-warna (didukung Pterodactyl & semua terminal modern) ──
+    oranye       : '\x1b[48;5;208m\x1b[30m',         // Oranye      BG + teks hitam
+    emas         : '\x1b[48;5;220m\x1b[30m',         // Emas/Gold   BG + teks hitam
+    toska        : '\x1b[48;5;43m\x1b[30m',          // Toska/Teal  BG + teks hitam
+    navy         : '\x1b[48;5;17m\x1b[97m',          // Navy Blue   BG + teks putih
+    coklat       : '\x1b[48;5;130m\x1b[97m',         // Coklat      BG + teks putih
+    lime         : '\x1b[48;5;154m\x1b[30m',         // Lime Green  BG + teks hitam
+    maroon       : '\x1b[48;5;88m\x1b[97m',          // Maroon      BG + teks putih
+    ungu_tua     : '\x1b[48;5;57m\x1b[97m',          // Ungu Tua    BG + teks putih
+    salmon       : '\x1b[48;5;209m\x1b[30m',         // Salmon      BG + teks hitam
+    lavender     : '\x1b[48;5;183m\x1b[30m',         // Lavender    BG + teks hitam
+    mint         : '\x1b[48;5;121m\x1b[30m',         // Mint        BG + teks hitam
+    bata         : '\x1b[48;5;167m\x1b[97m',         // Merah Bata  BG + teks putih
+    gelap        : '\x1b[48;5;235m\x1b[97m',         // Gelap       BG + teks putih
+    neon         : '\x1b[48;5;46m\x1b[30m',          // Neon Green  BG + teks hitam
 };
 
-// Info lengkap tiap tema (label + emoji + preview singkat)
+// ─────────────────────────────────────────────────────────────────────────────
+//  LOGSW_THEMES — Info lengkap tiap tema (label + emoji)
+// ─────────────────────────────────────────────────────────────────────────────
 const LOGSW_THEMES = {
-    default : { label: 'Default (Cyan)', emoji: '🔵', preview: '┌═══ Cyan ═══┐' },
-    merah   : { label: 'Merah',          emoji: '🔴', preview: '┌═══ Merah ══┐' },
-    hijau   : { label: 'Hijau',          emoji: '🟢', preview: '┌═══ Hijau ══┐' },
-    biru    : { label: 'Biru',           emoji: '🔷', preview: '┌═══ Biru  ══┐' },
-    kuning  : { label: 'Kuning',         emoji: '🟡', preview: '┌═══ Kuning ═┐' },
-    ungu    : { label: 'Ungu',           emoji: '🟣', preview: '┌═══ Ungu  ══┐' },
-    oranye  : { label: 'Oranye',         emoji: '🟠', preview: '┌═══ Oranye ═┐' },
-    pink    : { label: 'Pink',           emoji: '🩷', preview: '┌═══ Pink  ══┐' },
-    random  : { label: 'Random',         emoji: '🎲', preview: '┌═══ Random ═┐' },
+    // Standar
+    default      : { label: 'Default (Cyan Teks)',  emoji: '🔵' },
+    merah        : { label: 'Merah',                emoji: '🔴' },
+    hijau        : { label: 'Hijau',                emoji: '🟢' },
+    biru         : { label: 'Biru',                 emoji: '🔷' },
+    kuning       : { label: 'Kuning',               emoji: '🟡' },
+    ungu         : { label: 'Ungu',                 emoji: '🟣' },
+    cyan         : { label: 'Cyan',                 emoji: '🩵' },
+    putih        : { label: 'Putih',                emoji: '⬜' },
+    hitam        : { label: 'Hitam',                emoji: '⬛' },
+    // Cerah
+    merah_cerah  : { label: 'Merah Cerah',          emoji: '🌶️' },
+    hijau_cerah  : { label: 'Hijau Cerah',          emoji: '💚' },
+    biru_cerah   : { label: 'Biru Cerah',           emoji: '💙' },
+    kuning_cerah : { label: 'Kuning Cerah',         emoji: '⭐' },
+    pink         : { label: 'Pink',                 emoji: '🩷' },
+    cyan_cerah   : { label: 'Cyan Cerah',           emoji: '🫧' },
+    abu          : { label: 'Abu-Abu',              emoji: '🩶' },
+    // 256-warna
+    oranye       : { label: 'Oranye',               emoji: '🟠' },
+    emas         : { label: 'Emas / Gold',          emoji: '🏅' },
+    toska        : { label: 'Toska / Teal',         emoji: '🌊' },
+    navy         : { label: 'Navy Blue',            emoji: '🌌' },
+    coklat       : { label: 'Coklat',               emoji: '🤎' },
+    lime         : { label: 'Lime Green',           emoji: '🍏' },
+    maroon       : { label: 'Maroon',               emoji: '🍷' },
+    ungu_tua     : { label: 'Ungu Tua',             emoji: '🔮' },
+    salmon       : { label: 'Salmon',               emoji: '🍑' },
+    lavender     : { label: 'Lavender',             emoji: '💜' },
+    mint         : { label: 'Mint',                 emoji: '🌿' },
+    bata         : { label: 'Merah Bata',           emoji: '🧱' },
+    gelap        : { label: 'Gelap / Dark',         emoji: '🌑' },
+    neon         : { label: 'Neon Green',           emoji: '💡' },
+    // Special
+    random       : { label: 'Random',               emoji: '🎲' },
 };
 
-// Semua key yang bisa dipilih random (tidak termasuk 'default')
+// ─────────────────────────────────────────────────────────────────────────────
+//  Helpers
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Key yang bisa dipilih random (semua LOGSW_ANSI kecuali 'default')
 const LOGSW_RANDOM_KEYS = Object.keys(LOGSW_ANSI).filter(k => k !== 'default');
 
-// Semua key valid (termasuk 'random')
+// Semua key valid termasuk 'random'
 const LOGSW_THEME_KEYS = Object.keys(LOGSW_THEMES);
 
 module.exports = { LOGSW_ANSI, LOGSW_THEMES, LOGSW_RANDOM_KEYS, LOGSW_THEME_KEYS };

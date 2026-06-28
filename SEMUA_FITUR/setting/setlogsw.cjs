@@ -75,24 +75,33 @@ async function handleSetlogsw({ hisoka, m, query, tolak, logCommand, Button }) {
 
     // ── Tanpa argumen → tampil picker ──────────────────────────────────────────
     if (!arg) {
-        const listTeks = THEME_KEYS
+        const _grp = (keys) => keys
             .map(k => {
+                if (!LOGSW_THEMES[k]) return null;
                 const t = LOGSW_THEMES[k];
-                const aktif = k === curTheme ? ' ← *aktif*' : '';
-                return `${t.emoji} \`${k}\` — ${t.label}${aktif}`;
+                const aktif = k === curTheme ? ' ✓' : '';
+                return `${t.emoji} \`${k}\`${aktif}`;
             })
-            .join('\n');
+            .filter(Boolean)
+            .join('  ');
+
+        const G_STANDAR = ['default','merah','hijau','biru','kuning','ungu','cyan','putih','hitam'];
+        const G_CERAH   = ['merah_cerah','hijau_cerah','biru_cerah','kuning_cerah','pink','cyan_cerah','abu'];
+        const G_256     = ['oranye','emas','toska','navy','coklat','lime','maroon','ungu_tua','salmon','lavender','mint','bata','gelap','neon'];
 
         const bodyTeks =
-            `🎨 *Set Tema Log SW*\n\n` +
-            `Tema aktif sekarang:\n` +
-            `${curInfo.emoji} *${curInfo.label}*\n\n` +
+            `🎨 *Set Tema Warna Log SW*\n\n` +
+            `Aktif: ${curInfo.emoji} *${curInfo.label}*\n` +
             `━━━━━━━━━━━━━━━━━\n` +
-            `${listTeks}\n` +
-            `━━━━━━━━━━━━━━━━━\n\n` +
-            `Pilih via tombol di bawah atau:\n` +
-            `\`${pref}setlogsw [nama_tema]\`\n\n` +
-            `_Berlaku untuk log bot utama & semua jadibot._`;
+            `*🎯 Standar:*\n${_grp(G_STANDAR)}\n\n` +
+            `*✨ Cerah (Bright):*\n${_grp(G_CERAH)}\n\n` +
+            `*🌈 Ekstra (256-warna):*\n${_grp(G_256)}\n\n` +
+            `*🎲 Special:* \`random\`\n` +
+            `━━━━━━━━━━━━━━━━━\n` +
+            `Cara pakai:\n` +
+            `\`${pref}setlogsw [nama]\`\n` +
+            `\`${pref}setlogsw default\` → reset bawaan\n\n` +
+            `_Warna latar belakang terlihat di panel Pterodactyl_`;
 
         let sent = false;
         try {
@@ -111,10 +120,11 @@ async function handleSetlogsw({ hisoka, m, query, tolak, logCommand, Button }) {
 
     // ── Validasi nama tema ──────────────────────────────────────────────────────
     if (!LOGSW_THEMES[arg]) {
+        const allKeys = THEME_KEYS.map(k => `${LOGSW_THEMES[k].emoji}\`${k}\``).join(' ');
         return tolak(hisoka, m,
             `❌ *Tema tidak dikenal:* \`${arg}\`\n\n` +
-            `Tema yang tersedia:\n` +
-            THEME_KEYS.map(k => `${LOGSW_THEMES[k].emoji} \`${k}\``).join('  ')
+            `Ketik \`${pref}setlogsw\` untuk lihat semua pilihan.\n\n` +
+            `Tersedia: ${allKeys}`
         );
     }
 
