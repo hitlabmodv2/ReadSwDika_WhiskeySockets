@@ -34,6 +34,13 @@
 
 const { generateWAMessageFromContent, prepareWAMessageMedia } = require('@whiskeysockets/baileys');
 
+// ── Cancel flag per hisoka instance ──────────────────────────────────────────
+
+function isPkgRunning(hisoka)      { return hisoka._pkgRunning === true; }
+function setPkgRunning(hisoka, v)  { hisoka._pkgRunning = v; if (!v) hisoka._pkgCancel = false; }
+function requestPkgCancel(hisoka)  { hisoka._pkgCancel = true; }
+function isPkgCancelled(hisoka)    { return hisoka._pkgCancel === true; }
+
 /**
  * Ambil daftar member dari grup, resolve LID ke nomor asli kalau bisa
  */
@@ -89,8 +96,12 @@ async function pushKontakGC(hisoka, { targetGid, pesanKirim, delayDetik, mediaBu
 
         let berhasil = 0;
         let gagal = 0;
+        let dibatalkan = false;
 
         for (const jid of members) {
+                // Cek cancel sebelum tiap kirim
+                if (isPkgCancelled(hisoka)) { dibatalkan = true; break; }
+
                 const numOnly = jid.split('@')[0];
                 if (numOnly === botJid.split('@')[0]) continue;
 
@@ -122,9 +133,9 @@ async function pushKontakGC(hisoka, { targetGid, pesanKirim, delayDetik, mediaBu
                 await new Promise(res => setTimeout(res, delayDetik * 1000));
         }
 
-        if (onDone) await onDone({ namaGrup, berhasil, gagal, delayDetik, modeMedia });
+        if (onDone) await onDone({ namaGrup, berhasil, gagal, delayDetik, modeMedia, dibatalkan, total: members.length });
 
-        return { namaGrup, berhasil, gagal };
+        return { namaGrup, berhasil, gagal, dibatalkan };
 }
 
 module.exports = { pushKontakGC, getMemberList };
@@ -133,6 +144,10 @@ module.exports = { pushKontakGC, getMemberList };
 
 async function handlePushkontakgc({ hisoka, m, query, tolak, logCommand, getQuotedMediaBuffer }) {
         if (!m.isOwner) return tolak(hisoka, m, '❌ Hanya owner yang bisa pakai perintah ini.');
+        if (isPkgRunning(hisoka)) return tolak(hisoka, m,
+                '⚠️ *Push Kontak GC sedang berjalan!*\n\n' +
+                'Tunggu hingga selesai atau ketik `.pushkontakgcstop` untuk membatalkan.'
+        );
 
         if (!query || !query.includes('|')) return tolak(hisoka, m,
                 '❌ *Format salah!*\n\n' +
@@ -189,8 +204,10 @@ async function handlePushkontakgc({ hisoka, m, query, tolak, logCommand, getQuot
                 '❌ *Delay tidak valid!*\n\n⏱ Masukkan delay antara *3–10 detik*\n\n📝 *Contoh:*\n`.pushkontakgc 120363192554714254@g.us | Halo kak! | 5`'
         );
 
+        setPkgRunning(hisoka, true);
         try {
                 let pkgProgMsg = null;
+                const pref = m.prefix || '.';
                 await pushKontakGC(hisoka, {
                         targetGid: pkgTargetGid,
                         pesanKirim: pkgPesan,
@@ -203,8 +220,9 @@ async function handlePushkontakgc({ hisoka, m, query, tolak, logCommand, getQuot
                                         `👥 *Grup :* ${namaGrup}\n` +
                                         `📋 *Total :* ${total} orang\n` +
                                         `📤 *Mode :* ${modeMedia ? (mt === 'imageMessage' ? '🖼️ Gambar' : '🎥 Video') : '💬 Teks'}\n` +
-                                        `⏱ *Delay :* ${pkgDelay} detik/pesan\n\n` +
-                                        `_Sedang mengirim ke semua member..._`
+                                        `⏱️ *Delay :* ${pkgDelay} detik/pesan\n\n` +
+                                        `_Sedang mengirim ke semua member..._\n` +
+                                        `_Ketik \`${pref}pushkontakgcstop\` untuk membatalkan._`
                                 );
                         },
                         onProgress: async ({ sent, total, berhasil, gagal, namaGrup: ng, modeMedia: mm }) => {
@@ -222,18 +240,24 @@ async function handlePushkontakgc({ hisoka, m, query, tolak, logCommand, getQuot
                                                         `📬 *Terkirim :* ${sent}/${total} orang\n` +
                                                         `✔️ *Berhasil :* ${berhasil} | ❌ *Gagal :* ${gagal}\n` +
                                                         `📤 *Mode :* ${mm ? '🖼️ Media' : '💬 Teks'}\n\n` +
-                                                        `_Harap tunggu..._`
+                                                        `_Ketik \`${pref}pushkontakgcstop\` untuk membatalkan._`
                                         });
                                 } catch (_) {}
                         },
-                        onDone: async ({ namaGrup, berhasil, gagal, delayDetik: dd, modeMedia }) => {
-                                const doneText =
-                                        `✅ *Push Kontak GC selesai!*\n\n` +
-                                        `👥 *Grup :* ${namaGrup}\n` +
-                                        `📤 *Mode :* ${modeMedia ? '🖼️ Media' : '💬 Teks'}\n` +
-                                        `⏱ *Delay :* ${dd} detik/pesan\n` +
-                                        `✔️ *Berhasil :* ${berhasil} orang\n` +
-                                        `❌ *Gagal :* ${gagal} orang`;
+                        onDone: async ({ namaGrup, berhasil, gagal, delayDetik: dd, modeMedia, dibatalkan, total }) => {
+                                const doneText = dibatalkan
+                                        ? `🛑 *Push Kontak GC dihentikan!*\n\n` +
+                                          `👥 *Grup :* ${namaGrup}\n` +
+                                          `📤 *Mode :* ${modeMedia ? '🖼️ Media' : '💬 Teks'}\n` +
+                                          `✔️ *Berhasil :* ${berhasil} orang\n` +
+                                          `❌ *Gagal :* ${gagal} orang\n` +
+                                          `🔘 *Sisa :* ${total - (berhasil + gagal)} orang belum terkirim`
+                                        : `✅ *Push Kontak GC selesai!*\n\n` +
+                                          `👥 *Grup :* ${namaGrup}\n` +
+                                          `📤 *Mode :* ${modeMedia ? '🖼️ Media' : '💬 Teks'}\n` +
+                                          `⏱️ *Delay :* ${dd} detik/pesan\n` +
+                                          `✔️ *Berhasil :* ${berhasil} orang\n` +
+                                          `❌ *Gagal :* ${gagal} orang`;
                                 if (pkgProgMsg?.key) {
                                         await m.reply({ edit: pkgProgMsg.key, text: doneText });
                                 } else {
@@ -247,10 +271,26 @@ async function handlePushkontakgc({ hisoka, m, query, tolak, logCommand, getQuot
                                 ? `❌ *Grup tidak memiliki member atau gagal ambil data member.*\n\nPastikan bot masih ada di grup tersebut.`
                                 : `❌ Terjadi error: ${err.message}`
                 );
-                return;
+        } finally {
+                setPkgRunning(hisoka, false);
         }
 
         logCommand(m, hisoka, 'pushkontakgc');
 }
 
-module.exports.handlePushkontakgc = handlePushkontakgc;
+// ── HANDLER: pushkontakgcstop ─────────────────────────────────────────────────
+
+async function handlePushkontakgcstop({ hisoka, m, tolak, logCommand }) {
+        if (!m.isOwner) return tolak(hisoka, m, '❌ Hanya owner yang bisa pakai perintah ini.');
+
+        if (!isPkgRunning(hisoka)) {
+                return m.reply('ℹ️ Tidak ada proses Push Kontak GC yang sedang berjalan saat ini.');
+        }
+
+        requestPkgCancel(hisoka);
+        await m.reply('🛑 *Permintaan stop Push Kontak GC diterima!*\n\n_Proses akan dihentikan setelah member saat ini selesai diproses..._');
+        logCommand(m, hisoka, 'pushkontakgcstop');
+}
+
+module.exports.handlePushkontakgc     = handlePushkontakgc;
+module.exports.handlePushkontakgcstop = handlePushkontakgcstop;

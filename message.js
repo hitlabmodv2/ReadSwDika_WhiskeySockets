@@ -702,8 +702,19 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         }
 
                         case 'pushkontakgc': {
-                                const { handlePushkontakgc } = _require(path.resolve('./SEMUA_FITUR/group/pushkontakgc.cjs'));
+                                const _pkgPath = path.resolve('./SEMUA_FITUR/group/pushkontakgc.cjs');
+                                delete _require.cache[_pkgPath];
+                                const { handlePushkontakgc } = _require(_pkgPath);
                                 await handlePushkontakgc({ hisoka, m, query, tolak, logCommand, getQuotedMediaBuffer });
+                                break;
+                        }
+
+                        case 'pushkontakgcstop':
+                        case 'pkgstop': {
+                                const _pkgPath = path.resolve('./SEMUA_FITUR/group/pushkontakgc.cjs');
+                                delete _require.cache[_pkgPath];
+                                const { handlePushkontakgcstop } = _require(_pkgPath);
+                                await handlePushkontakgcstop({ hisoka, m, tolak, logCommand });
                                 break;
                         }
 
