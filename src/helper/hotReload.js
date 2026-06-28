@@ -217,6 +217,9 @@ const WATCHED_FILES = [
     { key: 'cjs:reactapi',     rel: 'SEMUA_FITUR/reactionsw/reactapi.cjs', type: 'cjs' },
     { key: 'cjs:readsw',       rel: 'SEMUA_FITUR/readsw/readsw.cjs',       type: 'cjs' },
 
+    // ── Config CJS (dependency file, bukan handler) ──────────────────────────
+    { key: 'cjs:logswColors', rel: 'src/config/logsw-colors.cjs', type: 'cjs' },
+
     // ── SKIP ESM (memegang state/timer aktif) ────
     // crashGuard.js    → handle signal proses, berbahaya
     // hotReload.js     → dirinya sendiri
@@ -225,6 +228,7 @@ const WATCHED_FILES = [
     // authState.js     → pegang creds/session WA di memory
     // browserSwitch.js → manage koneksi socket aktif
     // aiHistory.js     → punya _writeLock promise, bahaya direload saat menulis
+    // pm2Metrics.js    → punya _timer setInterval aktif + process.send() IPC
 
     // ── SKIP CJS top-level (diload saat startup, butuh restart) ─
     // wm.cjs, cekauto-cmd.cjs, interactive-msg.cjs, media-helper.cjs,
