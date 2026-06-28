@@ -417,9 +417,9 @@ function getLogswColors() {
 
 export function logStoryView(data) {
         const { botId, mediaType, greeting, dayName, date, time, name, number, success, reaction, delaySeconds, mode, resolve, storyCount, idStory, emojiMode } = data;
-        const { box: cyan, fg } = getLogswColors(); // border & nilai field ikut tema
-        const white = '\x1b[97m';                   // nama, nomor, idStory — netral
-        const red   = '\x1b[31m';                   // state error (❌) saja
+        const { box: cyan } = getLogswColors(); // border/struktur ikut tema config.json
+        const white = '\x1b[97m';               // semua teks di dalam kotak = putih terang
+        const red   = '\x1b[31m';               // hanya state error (❌)
         const reset = '\x1b[0m';
 
         const boxWidth = 35;
@@ -433,39 +433,39 @@ export function logStoryView(data) {
         const modeStr = mode === 'Off ❌' ? 'Read Only' : (mode.startsWith('Read') ? mode : 'Read+Reaction ✓');
 
         console.log(`${cyan}┌${'═'.repeat(boxWidth)}┐${reset}`);
-        console.log(`${cyan}║${' '.repeat(titlePadding)}${fg}${title}${reset}${cyan}${' '.repeat(boxWidth - titlePadding - title.length)}║${reset}`);
+        console.log(`${cyan}║${' '.repeat(titlePadding)}${white}${title}${reset}${cyan}${' '.repeat(boxWidth - titlePadding - title.length)}║${reset}`);
         console.log(`${cyan}├${'═'.repeat(boxWidth)}┤${reset}`);
         if (botId) {
-                console.log(`${cyan}│${reset} ${white}⭔ Jadibot     : ${fg}${padEnd(botId, contentWidth)}${reset}${cyan}${reset}`);
+                console.log(`${cyan}│${reset} ${white}⭔ Jadibot     : ${padEnd(botId, contentWidth)}${reset}${cyan}${reset}`);
         }
-        console.log(`${cyan}│${reset} ${white}⭔ Mode        : ${fg}${padEnd(modeStr, contentWidth)}${reset}${cyan}${reset}`);
-        console.log(`${cyan}│${reset} ${white}⭔ TipeStory   : ${fg}${padEnd(mediaStr, contentWidth)}${reset}${cyan}${reset}`);
+        console.log(`${cyan}│${reset} ${white}⭔ Mode        : ${padEnd(modeStr, contentWidth)}${reset}${cyan}${reset}`);
+        console.log(`${cyan}│${reset} ${white}⭔ TipeStory   : ${padEnd(mediaStr, contentWidth)}${reset}${cyan}${reset}`);
         if (idStory) {
                 const _id = String(idStory);
                 const idStr = _id.length > 16 ? _id.slice(0, 8) + '···' + _id.slice(-4) : _id;
-                console.log(`${cyan}│${reset} ${white}⭔ IdStory     : ${white}${padEnd(idStr, contentWidth)}${reset}${cyan}${reset}`);
+                console.log(`${cyan}│${reset} ${white}⭔ IdStory     : ${padEnd(idStr, contentWidth)}${reset}${cyan}${reset}`);
         }
-        console.log(`${cyan}│${reset} ${white}⭔ Selamat     : ${fg}${padEnd(greeting, contentWidth)}${reset}${cyan}${reset}`);
-        console.log(`${cyan}│${reset} ${white}⭔ Hari        : ${fg}${padEnd(dayName, contentWidth)}${reset}${cyan}${reset}`);
-        console.log(`${cyan}│${reset} ${white}⭔ Tanggal     : ${fg}${padEnd(date, contentWidth)}${reset}${cyan}${reset}`);
-        console.log(`${cyan}│${reset} ${white}⭔ Waktu       : ${fg}${padEnd(time, contentWidth)}${reset}${cyan}${reset}`);
-        console.log(`${cyan}│${reset} ${white}⭔ Nama        : ${white}${padEnd(String(name || '').slice(0, contentWidth - 2), contentWidth)}${reset}${cyan}${reset}`);
-        console.log(`${cyan}│${reset} ${white}⭔ Nomor       : ${white}${padEnd(number, contentWidth)}${reset}${cyan}${reset}`);
+        console.log(`${cyan}│${reset} ${white}⭔ Selamat     : ${padEnd(greeting, contentWidth)}${reset}${cyan}${reset}`);
+        console.log(`${cyan}│${reset} ${white}⭔ Hari        : ${padEnd(dayName, contentWidth)}${reset}${cyan}${reset}`);
+        console.log(`${cyan}│${reset} ${white}⭔ Tanggal     : ${padEnd(date, contentWidth)}${reset}${cyan}${reset}`);
+        console.log(`${cyan}│${reset} ${white}⭔ Waktu       : ${padEnd(time, contentWidth)}${reset}${cyan}${reset}`);
+        console.log(`${cyan}│${reset} ${white}⭔ Nama        : ${padEnd(String(name || '').slice(0, contentWidth - 2), contentWidth)}${reset}${cyan}${reset}`);
+        console.log(`${cyan}│${reset} ${white}⭔ Nomor       : ${padEnd(number, contentWidth)}${reset}${cyan}${reset}`);
         if (storyCount != null) {
-                console.log(`${cyan}│${reset} ${white}⭔ TotalStory  : ${fg}${padEnd(String(storyCount), contentWidth)}${reset}${cyan}${reset}`);
+                console.log(`${cyan}│${reset} ${white}⭔ TotalStory  : ${padEnd(String(storyCount), contentWidth)}${reset}${cyan}${reset}`);
         }
         if (emojiMode != null) {
                 const _modeStr = String(emojiMode).toLowerCase() === 'custom' ? 'Custom 🟢' : 'Default 🔵';
-                console.log(`${cyan}│${reset} ${white}⭔ EmojiMode   : ${fg}${padEnd(_modeStr, contentWidth)}${reset}${cyan}${reset}`);
+                console.log(`${cyan}│${reset} ${white}⭔ EmojiMode   : ${padEnd(_modeStr, contentWidth)}${reset}${cyan}${reset}`);
         }
-        const successColor = String(success).includes('❌') ? red : fg;
+        const successColor = String(success).includes('❌') ? red : white;
         console.log(`${cyan}│${reset} ${white}⭔ Berhasil    : ${successColor}${padEnd(success, contentWidth)}${reset}${cyan}${reset}`);
         console.log(`${cyan}│${reset} ${white}⭔ Reaksi      : ${padEnd(reaction, contentWidth)}${reset}${cyan}${reset}`);
         if (resolve) {
-                const resolveColor = resolve.includes('❌') ? red : fg;
+                const resolveColor = resolve.includes('❌') ? red : white;
                 console.log(`${cyan}│${reset} ${white}⭔ Resolve     : ${resolveColor}${padEnd(resolve, contentWidth)}${reset}${cyan}${reset}`);
         }
-        console.log(`${cyan}│${reset} ${white}⭔ Delay       : ${fg}${padEnd(delayStr, contentWidth)}${reset}${cyan}${reset}`);
+        console.log(`${cyan}│${reset} ${white}⭔ Delay       : ${padEnd(delayStr, contentWidth)}${reset}${cyan}${reset}`);
         console.log(`${cyan}└${'─'.repeat(13)}···${reset}`);
 }
 

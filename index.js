@@ -1136,29 +1136,29 @@ async function main() {
                                         const _swMons=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
                                         const _swPad=(s,w)=>{s=String(s||'');return s.length>=w?s:s+' '.repeat(w-s.length);};
                                         const _swBox=(entry,emoji,delMs)=>{
-                                                const {box:cy,fg}=getLogswColors(),wh='\x1b[97m',red='\x1b[31m',rs='\x1b[0m';
+                                                const {box:cy}=getLogswColors(),wh='\x1b[97m',red='\x1b[31m',rs='\x1b[0m';
                                                 const bW=35,cW=16,title='AutoReadStoryWhatsApp',tp=Math.floor((bW-title.length)/2);
                                                 const d=new Date(new Date(entry.arrivedAt||Date.now()).toLocaleString('en-US',{timeZone:'Asia/Jakarta'}));
                                                 const hh=d.getHours(),greeting=hh<10?'Subuh 🌙':hh<15?'Siang 🏙️':hh<18?'Sore 🌆':'Malam 🌙';
                                                 const num=(entry.number||(entry.resolvedPn||'').split('@')[0])||'-';
                                                 const masked=num.length>6?num.slice(0,4)+'****'+num.slice(-3):num;
-                                                const rc=(entry.resolve||'').includes('❌')?red:fg;
+                                                const rc=(entry.resolve||'').includes('❌')?red:wh;
                                                 console.log(`${cy}┌${'═'.repeat(bW)}┐${rs}`);
-                                                console.log(`${cy}║${' '.repeat(tp)}${fg}${title}${rs}${cy}${' '.repeat(bW-tp-title.length)}║${rs}`);
+                                                console.log(`${cy}║${' '.repeat(tp)}${wh}${title}${rs}${cy}${' '.repeat(bW-tp-title.length)}║${rs}`);
                                                 console.log(`${cy}├${'═'.repeat(bW)}┤${rs}`);
-                                                console.log(`${cy}│${rs} ${wh}⭔ Mode        : ${fg}${_swPad('Read+Reaction ✓',cW)}${rs}`);
-                                                console.log(`${cy}│${rs} ${wh}⭔ TipeStory   : ${fg}${_swPad(entry.type||'Teks 📝',cW)}${rs}`);
-                                                console.log(`${cy}│${rs} ${wh}⭔ Selamat     : ${fg}${_swPad(greeting,cW)}${rs}`);
-                                                console.log(`${cy}│${rs} ${wh}⭔ Hari        : ${fg}${_swPad(_swDays[d.getDay()]+' 🔁',cW)}${rs}`);
-                                                console.log(`${cy}│${rs} ${wh}⭔ Tanggal     : ${fg}${_swPad(`${d.getDate()} ${_swMons[d.getMonth()]} ${d.getFullYear()}`,cW)}${rs}`);
-                                                console.log(`${cy}│${rs} ${wh}⭔ Waktu       : ${fg}${_swPad(d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',hour12:false}).replace(':','.'),cW)}${rs}`);
-                                                console.log(`${cy}│${rs} ${wh}⭔ Nama        : ${wh}${_swPad(entry.name||num,cW)}${rs}`);
-                                                console.log(`${cy}│${rs} ${wh}⭔ Nomor       : ${wh}${_swPad(masked,cW)}${rs}`);
-                                                try { const _swCntF = path.join(process.cwd(),'data','swtrack','users',`${num}.json`); const _swCntD = fs.existsSync(_swCntF)?JSON.parse(fs.readFileSync(_swCntF,'utf-8')):{};const _swNow=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Jakarta'}));const _swTd=`${_swNow.getFullYear()}-${String(_swNow.getMonth()+1).padStart(2,'0')}-${String(_swNow.getDate()).padStart(2,'0')}`;const _swCnt=Object.values(_swCntD).filter(e=>{if(!e.arrivedAt)return false;const _d=new Date(new Date(e.arrivedAt).toLocaleString('en-US',{timeZone:'Asia/Jakarta'}));return `${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`===_swTd;}).length;if(_swCnt>0)console.log(`${cy}│${rs} ${wh}⭔ TotalStory  : ${fg}${_swPad(String(_swCnt),cW)}${rs}`); } catch {}
-                                                console.log(`${cy}│${rs} ${wh}⭔ Berhasil    : ${fg}${_swPad('Startup Retry ♻️',cW)}${rs}`);
+                                                console.log(`${cy}│${rs} ${wh}⭔ Mode        : ${_swPad('Read+Reaction ✓',cW)}${rs}`);
+                                                console.log(`${cy}│${rs} ${wh}⭔ TipeStory   : ${_swPad(entry.type||'Teks 📝',cW)}${rs}`);
+                                                console.log(`${cy}│${rs} ${wh}⭔ Selamat     : ${_swPad(greeting,cW)}${rs}`);
+                                                console.log(`${cy}│${rs} ${wh}⭔ Hari        : ${_swPad(_swDays[d.getDay()]+' 🔁',cW)}${rs}`);
+                                                console.log(`${cy}│${rs} ${wh}⭔ Tanggal     : ${_swPad(`${d.getDate()} ${_swMons[d.getMonth()]} ${d.getFullYear()}`,cW)}${rs}`);
+                                                console.log(`${cy}│${rs} ${wh}⭔ Waktu       : ${_swPad(d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',hour12:false}).replace(':','.'),cW)}${rs}`);
+                                                console.log(`${cy}│${rs} ${wh}⭔ Nama        : ${_swPad(entry.name||num,cW)}${rs}`);
+                                                console.log(`${cy}│${rs} ${wh}⭔ Nomor       : ${_swPad(masked,cW)}${rs}`);
+                                                try { const _swCntF = path.join(process.cwd(),'data','swtrack','users',`${num}.json`); const _swCntD = fs.existsSync(_swCntF)?JSON.parse(fs.readFileSync(_swCntF,'utf-8')):{};const _swNow=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Jakarta'}));const _swTd=`${_swNow.getFullYear()}-${String(_swNow.getMonth()+1).padStart(2,'0')}-${String(_swNow.getDate()).padStart(2,'0')}`;const _swCnt=Object.values(_swCntD).filter(e=>{if(!e.arrivedAt)return false;const _d=new Date(new Date(e.arrivedAt).toLocaleString('en-US',{timeZone:'Asia/Jakarta'}));return `${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`===_swTd;}).length;if(_swCnt>0)console.log(`${cy}│${rs} ${wh}⭔ TotalStory  : ${_swPad(String(_swCnt),cW)}${rs}`); } catch {}
+                                                console.log(`${cy}│${rs} ${wh}⭔ Berhasil    : ${_swPad('Startup Retry ♻️',cW)}${rs}`);
                                                 console.log(`${cy}│${rs} ${wh}⭔ Reaksi      : ${_swPad(emoji||'Off ❌',cW)}${rs}`);
                                                 console.log(`${cy}│${rs} ${wh}⭔ Resolve     : ${rc}${_swPad((entry.resolve||'-')+' ♻️',cW)}${rs}`);
-                                                console.log(`${cy}│${rs} ${wh}⭔ Delay       : ${fg}${_swPad(delMs?(delMs/1000).toFixed(1)+' detik':'-',cW)}${rs}`);
+                                                console.log(`${cy}│${rs} ${wh}⭔ Delay       : ${_swPad(delMs?(delMs/1000).toFixed(1)+' detik':'-',cW)}${rs}`);
                                                 console.log(`${cy}└${'─'.repeat(13)}···${rs}`);
                                         };
 
