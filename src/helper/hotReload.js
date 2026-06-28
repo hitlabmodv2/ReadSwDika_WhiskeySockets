@@ -141,6 +141,7 @@ const WATCHED_FILES = [
     { key: 'cjs:ceksw',        rel: 'SEMUA_FITUR/setting/ceksw.cjs',       type: 'cjs' },
     { key: 'cjs:online',       rel: 'SEMUA_FITUR/setting/online.cjs',      type: 'cjs' },
     { key: 'cjs:readchat',     rel: 'SEMUA_FITUR/setting/readchat.cjs',    type: 'cjs' },
+    { key: 'cjs:setlogsw',     rel: 'SEMUA_FITUR/setting/setlogsw.cjs',    type: 'cjs' },
     // System
     { key: 'cjs:shutdown',     rel: 'SEMUA_FITUR/system/shutdown.cjs',     type: 'cjs' },
     { key: 'cjs:autocleaner',  rel: 'SEMUA_FITUR/system/autocleaner.cjs',  type: 'cjs' },
