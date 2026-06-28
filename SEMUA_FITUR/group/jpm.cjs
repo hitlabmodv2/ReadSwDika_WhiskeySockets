@@ -432,4 +432,102 @@ async function handleJpmstop({ hisoka, m, tolak, logCommand }) {
         logCommand(m, hisoka, 'jpmstop');
 }
 
-module.exports = { handleJpm, handleJpmstop };
+// ── Handler: .jpmlist ─────────────────────────────────────────────────────────
+
+async function handleJpmlist({ hisoka, m, tolak, logCommand }) {
+        // ✅ Hanya bot utama — jadibot tidak bisa pakai
+        if (hisoka?.isMainBot === false) return tolak(hisoka, m, '❌ Fitur ini hanya tersedia di *bot utama*. Jadibot tidak mendukung perintah ini.');
+
+        // ✅ Hanya owner
+        if (!m.isOwner) return tolak(hisoka, m, '❌ Hanya owner yang bisa pakai perintah ini.');
+
+        await m.reply('⏳ _Mengambil data semua GC..._');
+
+        let allGroupsRaw;
+        try {
+                allGroupsRaw = await hisoka.groupFetchAllParticipating();
+        } catch (err) {
+                return tolak(hisoka, m, `❌ Gagal ambil daftar grup: ${err.message}`);
+        }
+
+        const allGroups = Object.values(allGroupsRaw || {});
+        if (!allGroups.length) return tolak(hisoka, m, '❌ Bot tidak ada di grup manapun.');
+
+        // Hitung unique member lintas semua GC (sama seperti .jpm <<)
+        const botNum = (hisoka.user?.id || '').split(':')[0];
+        const seenJid = new Set();
+
+        for (const grp of allGroups) {
+                for (const p of (grp.participants || [])) {
+                        const raw = p.id || p.jid || '';
+                        if (!raw || raw.endsWith('@lid')) continue;
+                        const jid = raw.endsWith('@s.whatsapp.net') ? raw : raw.split('@')[0] + '@s.whatsapp.net';
+                        if (jid.split('@')[0] === botNum) continue;
+                        seenJid.add(jid);
+                }
+        }
+
+        const totalUnique = seenJid.size;
+
+        // Urutkan GC: member terbanyak dulu
+        allGroups.sort((a, b) => {
+                const mA = (a.participants || []).length;
+                const mB = (b.participants || []).length;
+                if (mB !== mA) return mB - mA;
+                return (a.subject || '').localeCompare(b.subject || '', 'id');
+        });
+
+        const pref = m.prefix || '.';
+
+        // Bangun teks daftar GC
+        // Jika terlalu panjang, pecah menjadi beberapa pesan
+        const MAKS_BARIS = 50;
+        const baris = allGroups.map((g, i) => {
+                const nama = (g.subject || 'Tanpa Nama').slice(0, 30);
+                const jml  = (g.participants || []).length;
+                return `│ ${String(i + 1).padStart(2, ' ')}. ${nama}\n│     👥 ${jml} member  •  \`${g.id}\``;
+        });
+
+        const header =
+                `╭─「 📋 *JPM LIST* 」\n│\n` +
+                `│ 🗂️ Total GC    : *${allGroups.length} grup*\n` +
+                `│ 👥 Member unik : *${totalUnique} orang*\n` +
+                `│ _(jika \`${pref}jpm <<\` dijalankan)_\n│\n` +
+                `│ Diurutkan: member terbanyak dulu\n` +
+                `│━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+
+        const footer =
+                `│\n` +
+                `╰─ 💡 Pakai \`${pref}jpm <pesan> | <delay>\` untuk push ke GC saat ini\n` +
+                `    Pakai \`${pref}jpm << <pesan> | <delay>\` untuk broadcast semua GC`;
+
+        // Kirim dalam batch kalau grup > 50
+        const chunks = [];
+        for (let i = 0; i < baris.length; i += MAKS_BARIS) {
+                chunks.push(baris.slice(i, i + MAKS_BARIS));
+        }
+
+        for (let ci = 0; ci < chunks.length; ci++) {
+                const isFirst = ci === 0;
+                const isLast  = ci === chunks.length - 1;
+                const bagian  = chunks.length > 1 ? ` _(${ci + 1}/${chunks.length})_` : '';
+
+                let teks = '';
+                if (isFirst) teks += header;
+                else         teks += `╭─「 📋 *JPM LIST${bagian}* 」\n│\n`;
+
+                teks += chunks[ci].join('\n│\n');
+
+                if (isLast)  teks += '\n' + footer;
+                else         teks += `\n│\n╰─ _Lanjut ke pesan berikutnya..._`;
+
+                await m.reply(teks);
+
+                // Jeda antar pesan supaya tidak flood
+                if (!isLast) await new Promise(res => setTimeout(res, 800));
+        }
+
+        logCommand(m, hisoka, 'jpmlist');
+}
+
+module.exports = { handleJpm, handleJpmstop, handleJpmlist };

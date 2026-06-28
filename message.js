@@ -699,6 +699,14 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 break;
                         }
 
+                        case 'jpmlist':
+                        case 'listjpm':
+                        case 'daftargc': {
+                                const { handleJpmlist } = _require(path.resolve('./SEMUA_FITUR/group/jpm.cjs'));
+                                await handleJpmlist({ hisoka, m, tolak, logCommand });
+                                break;
+                        }
+
                         case 'clearsesi':
                         case 'cs': {
                                 const { handleClearsesi } = _require(path.resolve('./SEMUA_FITUR/jadibot/clearsesi.cjs'));
