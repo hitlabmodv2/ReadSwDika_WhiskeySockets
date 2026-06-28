@@ -105,6 +105,45 @@ const LOGSW_THEMES = {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
+//  LOGSW_FG — Warna teks/foreground untuk isi nilai field di dalam kotak log
+//  Dipakai untuk field-field VALUE (Mode, TipeStory, Selamat, dll.)
+//  yang tampil di ATAS latar gelap terminal (bukan di atas background tema).
+//  Semua warna dipilih agar jelas terlihat di Pterodactyl (dark background).
+// ─────────────────────────────────────────────────────────────────────────────
+const LOGSW_FG = {
+    default      : '\x1b[36m',            // Cyan — sama dengan default lama
+    merah        : '\x1b[91m',            // Merah terang
+    hijau        : '\x1b[92m',            // Hijau terang
+    biru         : '\x1b[94m',            // Biru terang
+    kuning       : '\x1b[93m',            // Kuning terang
+    ungu         : '\x1b[95m',            // Magenta/Ungu terang
+    cyan         : '\x1b[96m',            // Cyan terang
+    putih        : '\x1b[97m',            // Putih terang
+    hitam        : '\x1b[37m',            // Abu-abu (hitam terlalu gelap di terminal gelap)
+    merah_cerah  : '\x1b[91m',
+    hijau_cerah  : '\x1b[92m',
+    biru_cerah   : '\x1b[94m',
+    kuning_cerah : '\x1b[93m',
+    pink         : '\x1b[95m',
+    cyan_cerah   : '\x1b[96m',
+    abu          : '\x1b[37m',
+    oranye       : '\x1b[38;5;214m',      // Oranye terang
+    emas         : '\x1b[38;5;220m',      // Emas/Gold
+    toska        : '\x1b[38;5;43m',       // Toska/Teal
+    navy         : '\x1b[94m',            // Biru terang (navy terlalu gelap sbg teks)
+    coklat       : '\x1b[38;5;136m',      // Coklat agak terang
+    lime         : '\x1b[38;5;154m',      // Lime Green
+    maroon       : '\x1b[38;5;160m',      // Merah maroon terang
+    ungu_tua     : '\x1b[38;5;135m',      // Ungu agak terang
+    salmon       : '\x1b[38;5;209m',      // Salmon
+    lavender     : '\x1b[38;5;183m',      // Lavender
+    mint         : '\x1b[38;5;121m',      // Mint
+    bata         : '\x1b[38;5;167m',      // Merah Bata
+    gelap        : '\x1b[37m',            // Abu-abu (gelap terlalu gelap sbg teks)
+    neon         : '\x1b[38;5;46m',       // Neon Green
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 //  Helpers
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -114,4 +153,4 @@ const LOGSW_RANDOM_KEYS = Object.keys(LOGSW_ANSI).filter(k => k !== 'default');
 // Semua key valid termasuk 'random'
 const LOGSW_THEME_KEYS = Object.keys(LOGSW_THEMES);
 
-module.exports = { LOGSW_ANSI, LOGSW_THEMES, LOGSW_RANDOM_KEYS, LOGSW_THEME_KEYS };
+module.exports = { LOGSW_ANSI, LOGSW_FG, LOGSW_THEMES, LOGSW_RANDOM_KEYS, LOGSW_THEME_KEYS };

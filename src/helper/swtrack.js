@@ -395,33 +395,31 @@ function padEnd(str, targetWidth) {
 }
 
 // ─── Warna tema logsw — diambil dari src/config/logsw-colors.cjs ─────────────
-const { LOGSW_ANSI, LOGSW_RANDOM_KEYS } = _require(path.join(process.cwd(), 'src', 'config', 'logsw-colors.cjs'));
+const { LOGSW_ANSI, LOGSW_FG, LOGSW_RANDOM_KEYS } = _require(path.join(process.cwd(), 'src', 'config', 'logsw-colors.cjs'));
 
-// Ambil warna kotak dari config.json (logsw.theme), support random
-function getLogswBoxColor() {
+// Ambil PASANGAN warna (border + nilai field) dari config.json (logsw.theme)
+// Untuk theme 'random', tema dipilih sekali dan keduanya memakai tema yang sama.
+function getLogswColors() {
         try {
                 const cfg = loadConfig();
-                const theme = (cfg?.logsw?.theme || 'default').toLowerCase().trim();
+                let theme = (cfg?.logsw?.theme || 'default').toLowerCase().trim();
                 if (theme === 'random') {
-                        const idx = Math.floor(Math.random() * LOGSW_RANDOM_KEYS.length);
-                        return LOGSW_ANSI[LOGSW_RANDOM_KEYS[idx]] || LOGSW_ANSI.default;
+                        theme = LOGSW_RANDOM_KEYS[Math.floor(Math.random() * LOGSW_RANDOM_KEYS.length)];
                 }
-                return LOGSW_ANSI[theme] || LOGSW_ANSI.default;
+                return {
+                        box: LOGSW_ANSI[theme] || LOGSW_ANSI.default,
+                        fg:  LOGSW_FG[theme]   || LOGSW_FG.default,
+                };
         } catch {
-                return LOGSW_ANSI.default;
+                return { box: LOGSW_ANSI.default, fg: LOGSW_FG.default };
         }
 }
 
 export function logStoryView(data) {
         const { botId, mediaType, greeting, dayName, date, time, name, number, success, reaction, delaySeconds, mode, resolve, storyCount, idStory, emojiMode } = data;
-        const boxColor = getLogswBoxColor();  // warna kotak dari config logsw.theme
-        const cyan = boxColor;               // border & struktur kotak memakai tema aktif
-        const white = '\x1b[37m';
-        const yellow = '\x1b[33m';
-        const green = '\x1b[32m';
-        const blue = '\x1b[34m';
-        const orange = '\x1b[38;2;255;165;0m';
-        const purple = '\x1b[38;2;180;120;255m';
+        const { box: cyan, fg } = getLogswColors(); // border & nilai field ikut tema
+        const white = '\x1b[97m';                   // nama, nomor, idStory — netral
+        const red   = '\x1b[31m';                   // state error (❌) saja
         const reset = '\x1b[0m';
 
         const boxWidth = 35;
@@ -435,40 +433,39 @@ export function logStoryView(data) {
         const modeStr = mode === 'Off ❌' ? 'Read Only' : (mode.startsWith('Read') ? mode : 'Read+Reaction ✓');
 
         console.log(`${cyan}┌${'═'.repeat(boxWidth)}┐${reset}`);
-        console.log(`${cyan}║${' '.repeat(titlePadding)}${yellow}${title}${reset}${cyan}${' '.repeat(boxWidth - titlePadding - title.length)}║${reset}`);
+        console.log(`${cyan}║${' '.repeat(titlePadding)}${fg}${title}${reset}${cyan}${' '.repeat(boxWidth - titlePadding - title.length)}║${reset}`);
         console.log(`${cyan}├${'═'.repeat(boxWidth)}┤${reset}`);
         if (botId) {
-                console.log(`${cyan}│${reset} ${white}⭔ Jadibot     : ${white}${padEnd(botId, contentWidth)}${reset}${cyan}${reset}`);
+                console.log(`${cyan}│${reset} ${white}⭔ Jadibot     : ${fg}${padEnd(botId, contentWidth)}${reset}${cyan}${reset}`);
         }
-        console.log(`${cyan}│${reset} ${white}⭔ Mode        : ${green}${padEnd(modeStr, contentWidth)}${reset}${cyan}${reset}`);
-        console.log(`${cyan}│${reset} ${white}⭔ TipeStory   : ${orange}${padEnd(mediaStr, contentWidth)}${reset}${cyan}${reset}`);
+        console.log(`${cyan}│${reset} ${white}⭔ Mode        : ${fg}${padEnd(modeStr, contentWidth)}${reset}${cyan}${reset}`);
+        console.log(`${cyan}│${reset} ${white}⭔ TipeStory   : ${fg}${padEnd(mediaStr, contentWidth)}${reset}${cyan}${reset}`);
         if (idStory) {
                 const _id = String(idStory);
                 const idStr = _id.length > 16 ? _id.slice(0, 8) + '···' + _id.slice(-4) : _id;
                 console.log(`${cyan}│${reset} ${white}⭔ IdStory     : ${white}${padEnd(idStr, contentWidth)}${reset}${cyan}${reset}`);
         }
-        console.log(`${cyan}│${reset} ${white}⭔ Selamat     : ${purple}${padEnd(greeting, contentWidth)}${reset}${cyan}${reset}`);
-        console.log(`${cyan}│${reset} ${white}⭔ Hari        : ${blue}${padEnd(dayName, contentWidth)}${reset}${cyan}${reset}`);
-        console.log(`${cyan}│${reset} ${white}⭔ Tanggal     : ${yellow}${padEnd(date, contentWidth)}${reset}${cyan}${reset}`);
-        console.log(`${cyan}│${reset} ${white}⭔ Waktu       : ${blue}${padEnd(time, contentWidth)}${reset}${cyan}${reset}`);
+        console.log(`${cyan}│${reset} ${white}⭔ Selamat     : ${fg}${padEnd(greeting, contentWidth)}${reset}${cyan}${reset}`);
+        console.log(`${cyan}│${reset} ${white}⭔ Hari        : ${fg}${padEnd(dayName, contentWidth)}${reset}${cyan}${reset}`);
+        console.log(`${cyan}│${reset} ${white}⭔ Tanggal     : ${fg}${padEnd(date, contentWidth)}${reset}${cyan}${reset}`);
+        console.log(`${cyan}│${reset} ${white}⭔ Waktu       : ${fg}${padEnd(time, contentWidth)}${reset}${cyan}${reset}`);
         console.log(`${cyan}│${reset} ${white}⭔ Nama        : ${white}${padEnd(String(name || '').slice(0, contentWidth - 2), contentWidth)}${reset}${cyan}${reset}`);
         console.log(`${cyan}│${reset} ${white}⭔ Nomor       : ${white}${padEnd(number, contentWidth)}${reset}${cyan}${reset}`);
         if (storyCount != null) {
-                console.log(`${cyan}│${reset} ${white}⭔ TotalStory  : ${orange}${padEnd(String(storyCount), contentWidth)}${reset}${cyan}${reset}`);
+                console.log(`${cyan}│${reset} ${white}⭔ TotalStory  : ${fg}${padEnd(String(storyCount), contentWidth)}${reset}${cyan}${reset}`);
         }
         if (emojiMode != null) {
-                const _isCustom = String(emojiMode).toLowerCase() === 'custom';
-                const _modeColor = _isCustom ? green : blue;
-                const _modeStr = _isCustom ? 'Custom 🟢' : 'Default 🔵';
-                console.log(`${cyan}│${reset} ${white}⭔ EmojiMode   : ${_modeColor}${padEnd(_modeStr, contentWidth)}${reset}${cyan}${reset}`);
+                const _modeStr = String(emojiMode).toLowerCase() === 'custom' ? 'Custom 🟢' : 'Default 🔵';
+                console.log(`${cyan}│${reset} ${white}⭔ EmojiMode   : ${fg}${padEnd(_modeStr, contentWidth)}${reset}${cyan}${reset}`);
         }
-        console.log(`${cyan}│${reset} ${white}⭔ Berhasil    : ${green}${padEnd(success, contentWidth)}${reset}${cyan}${reset}`);
+        const successColor = String(success).includes('❌') ? red : fg;
+        console.log(`${cyan}│${reset} ${white}⭔ Berhasil    : ${successColor}${padEnd(success, contentWidth)}${reset}${cyan}${reset}`);
         console.log(`${cyan}│${reset} ${white}⭔ Reaksi      : ${padEnd(reaction, contentWidth)}${reset}${cyan}${reset}`);
         if (resolve) {
-                const resolveColor = resolve.includes('❌') ? '\x1b[31m' : (resolve.includes('PN') ? green : (resolve.includes('Cache') ? yellow : blue));
+                const resolveColor = resolve.includes('❌') ? red : fg;
                 console.log(`${cyan}│${reset} ${white}⭔ Resolve     : ${resolveColor}${padEnd(resolve, contentWidth)}${reset}${cyan}${reset}`);
         }
-        console.log(`${cyan}│${reset} ${white}⭔ Delay       : ${orange}${padEnd(delayStr, contentWidth)}${reset}${cyan}${reset}`);
+        console.log(`${cyan}│${reset} ${white}⭔ Delay       : ${fg}${padEnd(delayStr, contentWidth)}${reset}${cyan}${reset}`);
         console.log(`${cyan}└${'─'.repeat(13)}···${reset}`);
 }
 

@@ -208,5 +208,28 @@
       }
     ],
     "processedAt": "2026-06-28T09:14:13.800Z"
+  },
+  "AC378F0AE1A8D39ACDE299F9FA424ED0": {
+    "id": "AC378F0AE1A8D39ACDE299F9FA424ED0",
+    "sender": "6281342509401@s.whatsapp.net",
+    "name": "pen femes",
+    "type": "imageMessage",
+    "arrivedAt": "2026-06-28T09:25:33.437Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6281342509401",
+    "resolvedPn": "6281342509401@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6281342509401@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC378F0AE1A8D39ACDE299F9FA424ED0",
+      "participant": "18180663689449@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-28T09:25:33.437Z"
   }
 }

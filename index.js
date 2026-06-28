@@ -31,20 +31,23 @@ const _require = createRequire(import.meta.url);
 
 // ── Warna tema logsw — baca dari config.json (logsw.theme) ───────────────────
 // Dipakai semua kotak log (WILY BOT AKTIF, AutoReadStory startup, AUTO JADIBOT)
-function getLogswBoxColor() {
+// Mengembalikan { box, fg }: box = warna border/struktur, fg = warna nilai field
+function getLogswColors() {
     try {
-        const { LOGSW_ANSI, LOGSW_RANDOM_KEYS } = _require(
+        const { LOGSW_ANSI, LOGSW_FG, LOGSW_RANDOM_KEYS } = _require(
             path.join(process.cwd(), 'src', 'config', 'logsw-colors.cjs')
         );
-        const cfgRaw  = fs.readFileSync(path.join(process.cwd(), 'config.json'), 'utf-8');
-        const theme   = (JSON.parse(cfgRaw)?.logsw?.theme || 'default').toLowerCase().trim();
+        const cfgRaw = fs.readFileSync(path.join(process.cwd(), 'config.json'), 'utf-8');
+        let theme    = (JSON.parse(cfgRaw)?.logsw?.theme || 'default').toLowerCase().trim();
         if (theme === 'random') {
-            return LOGSW_ANSI[LOGSW_RANDOM_KEYS[Math.floor(Math.random() * LOGSW_RANDOM_KEYS.length)]]
-                || LOGSW_ANSI.default;
+            theme = LOGSW_RANDOM_KEYS[Math.floor(Math.random() * LOGSW_RANDOM_KEYS.length)];
         }
-        return LOGSW_ANSI[theme] || LOGSW_ANSI.default;
+        return {
+            box: LOGSW_ANSI[theme] || LOGSW_ANSI.default,
+            fg:  LOGSW_FG[theme]   || LOGSW_FG.default,
+        };
     } catch {
-        return '\x1b[36m'; // fallback cyan
+        return { box: '\x1b[36m', fg: '\x1b[36m' }; // fallback cyan
     }
 }
 const {
@@ -1056,7 +1059,7 @@ async function main() {
                         const autoOnline2 = config2.autoOnline || {};
                         const modeLabel = autoOnline2.enabled !== false ? 'ONLINE 🟢' : 'OFFLINE 🔴';
 
-                        const G = '\x1b[32m', Y = '\x1b[33m', C = getLogswBoxColor(), R = '\x1b[0m', B = '\x1b[1m';
+                        const G = '\x1b[32m', Y = '\x1b[33m', C = getLogswColors().box, R = '\x1b[0m', B = '\x1b[1m';
                         const _bKey2   = (global.__activeBrowserKey || 'v1').toLowerCase();
                         const _bInfo2  = BROWSER_LIST.find(b => b.key === _bKey2);
                         const _bLabel2 = _bInfo2
@@ -1133,29 +1136,29 @@ async function main() {
                                         const _swMons=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
                                         const _swPad=(s,w)=>{s=String(s||'');return s.length>=w?s:s+' '.repeat(w-s.length);};
                                         const _swBox=(entry,emoji,delMs)=>{
-                                                const cy=getLogswBoxColor(),wh='\x1b[37m',ye='\x1b[33m',gr='\x1b[32m',bl='\x1b[34m',or='\x1b[38;2;255;165;0m',pu='\x1b[38;2;180;120;255m',rs='\x1b[0m';
+                                                const {box:cy,fg}=getLogswColors(),wh='\x1b[97m',red='\x1b[31m',rs='\x1b[0m';
                                                 const bW=35,cW=16,title='AutoReadStoryWhatsApp',tp=Math.floor((bW-title.length)/2);
                                                 const d=new Date(new Date(entry.arrivedAt||Date.now()).toLocaleString('en-US',{timeZone:'Asia/Jakarta'}));
                                                 const hh=d.getHours(),greeting=hh<10?'Subuh 🌙':hh<15?'Siang 🏙️':hh<18?'Sore 🌆':'Malam 🌙';
                                                 const num=(entry.number||(entry.resolvedPn||'').split('@')[0])||'-';
                                                 const masked=num.length>6?num.slice(0,4)+'****'+num.slice(-3):num;
-                                                const rc=(entry.resolve||'').includes('PN')?gr:bl;
+                                                const rc=(entry.resolve||'').includes('❌')?red:fg;
                                                 console.log(`${cy}┌${'═'.repeat(bW)}┐${rs}`);
-                                                console.log(`${cy}║${' '.repeat(tp)}${ye}${title}${rs}${cy}${' '.repeat(bW-tp-title.length)}║${rs}`);
+                                                console.log(`${cy}║${' '.repeat(tp)}${fg}${title}${rs}${cy}${' '.repeat(bW-tp-title.length)}║${rs}`);
                                                 console.log(`${cy}├${'═'.repeat(bW)}┤${rs}`);
-                                                console.log(`${cy}│${rs} ${wh}⭔ Mode        : ${gr}${_swPad('Read+Reaction ✓',cW)}${rs}`);
-                                                console.log(`${cy}│${rs} ${wh}⭔ TipeStory   : ${or}${_swPad(entry.type||'Teks 📝',cW)}${rs}`);
-                                                console.log(`${cy}│${rs} ${wh}⭔ Selamat     : ${pu}${_swPad(greeting,cW)}${rs}`);
-                                                console.log(`${cy}│${rs} ${wh}⭔ Hari        : ${bl}${_swPad(_swDays[d.getDay()]+' 🔁',cW)}${rs}`);
-                                                console.log(`${cy}│${rs} ${wh}⭔ Tanggal     : ${ye}${_swPad(`${d.getDate()} ${_swMons[d.getMonth()]} ${d.getFullYear()}`,cW)}${rs}`);
-                                                console.log(`${cy}│${rs} ${wh}⭔ Waktu       : ${bl}${_swPad(d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',hour12:false}).replace(':','.'),cW)}${rs}`);
+                                                console.log(`${cy}│${rs} ${wh}⭔ Mode        : ${fg}${_swPad('Read+Reaction ✓',cW)}${rs}`);
+                                                console.log(`${cy}│${rs} ${wh}⭔ TipeStory   : ${fg}${_swPad(entry.type||'Teks 📝',cW)}${rs}`);
+                                                console.log(`${cy}│${rs} ${wh}⭔ Selamat     : ${fg}${_swPad(greeting,cW)}${rs}`);
+                                                console.log(`${cy}│${rs} ${wh}⭔ Hari        : ${fg}${_swPad(_swDays[d.getDay()]+' 🔁',cW)}${rs}`);
+                                                console.log(`${cy}│${rs} ${wh}⭔ Tanggal     : ${fg}${_swPad(`${d.getDate()} ${_swMons[d.getMonth()]} ${d.getFullYear()}`,cW)}${rs}`);
+                                                console.log(`${cy}│${rs} ${wh}⭔ Waktu       : ${fg}${_swPad(d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',hour12:false}).replace(':','.'),cW)}${rs}`);
                                                 console.log(`${cy}│${rs} ${wh}⭔ Nama        : ${wh}${_swPad(entry.name||num,cW)}${rs}`);
                                                 console.log(`${cy}│${rs} ${wh}⭔ Nomor       : ${wh}${_swPad(masked,cW)}${rs}`);
-                                                try { const _swCntF = path.join(process.cwd(),'data','swtrack','users',`${num}.json`); const _swCntD = fs.existsSync(_swCntF)?JSON.parse(fs.readFileSync(_swCntF,'utf-8')):{};const _swNow=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Jakarta'}));const _swTd=`${_swNow.getFullYear()}-${String(_swNow.getMonth()+1).padStart(2,'0')}-${String(_swNow.getDate()).padStart(2,'0')}`;const _swCnt=Object.values(_swCntD).filter(e=>{if(!e.arrivedAt)return false;const _d=new Date(new Date(e.arrivedAt).toLocaleString('en-US',{timeZone:'Asia/Jakarta'}));return `${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`===_swTd;}).length;if(_swCnt>0)console.log(`${cy}│${rs} ${wh}⭔ TotalStory  : ${or}${_swPad(String(_swCnt),cW)}${rs}`); } catch {}
-                                                console.log(`${cy}│${rs} ${wh}⭔ Berhasil    : ${gr}${_swPad('Startup Retry ♻️',cW)}${rs}`);
+                                                try { const _swCntF = path.join(process.cwd(),'data','swtrack','users',`${num}.json`); const _swCntD = fs.existsSync(_swCntF)?JSON.parse(fs.readFileSync(_swCntF,'utf-8')):{};const _swNow=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Jakarta'}));const _swTd=`${_swNow.getFullYear()}-${String(_swNow.getMonth()+1).padStart(2,'0')}-${String(_swNow.getDate()).padStart(2,'0')}`;const _swCnt=Object.values(_swCntD).filter(e=>{if(!e.arrivedAt)return false;const _d=new Date(new Date(e.arrivedAt).toLocaleString('en-US',{timeZone:'Asia/Jakarta'}));return `${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`===_swTd;}).length;if(_swCnt>0)console.log(`${cy}│${rs} ${wh}⭔ TotalStory  : ${fg}${_swPad(String(_swCnt),cW)}${rs}`); } catch {}
+                                                console.log(`${cy}│${rs} ${wh}⭔ Berhasil    : ${fg}${_swPad('Startup Retry ♻️',cW)}${rs}`);
                                                 console.log(`${cy}│${rs} ${wh}⭔ Reaksi      : ${_swPad(emoji||'Off ❌',cW)}${rs}`);
                                                 console.log(`${cy}│${rs} ${wh}⭔ Resolve     : ${rc}${_swPad((entry.resolve||'-')+' ♻️',cW)}${rs}`);
-                                                console.log(`${cy}│${rs} ${wh}⭔ Delay       : ${or}${_swPad(delMs?(delMs/1000).toFixed(1)+' detik':'-',cW)}${rs}`);
+                                                console.log(`${cy}│${rs} ${wh}⭔ Delay       : ${fg}${_swPad(delMs?(delMs/1000).toFixed(1)+' detik':'-',cW)}${rs}`);
                                                 console.log(`${cy}└${'─'.repeat(13)}···${rs}`);
                                         };
 
@@ -2793,7 +2796,7 @@ setTimeout(async () => {
 
   if (!bots.length && !expiredBots.length) return;
 
-  const C = getLogswBoxColor(), G = '\x1b[32m', Y = '\x1b[33m', R = '\x1b[0m', B = '\x1b[1m';
+  const C = getLogswColors().box, G = '\x1b[32m', Y = '\x1b[33m', R = '\x1b[0m', B = '\x1b[1m';
   const RED = '\x1b[31m', DIM = '\x1b[2m';
 
   const validBots = [], invalidBots = [];
