@@ -156,7 +156,7 @@ async function handleGhosttag({ hisoka, m, query, tolak, logCommand, generateWAM
                         );
                 }
 
-                await btn.selfReply().run(m.from, hisoka);
+                await btn.run(m.from, hisoka, m);
                 logCommand(m, hisoka, 'ghosttag');
                 return;
         }
