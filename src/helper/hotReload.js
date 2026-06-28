@@ -118,6 +118,7 @@ const WATCHED_FILES = [
     // Group
     { key: 'cjs:hidetag',      rel: 'SEMUA_FITUR/group/hidetag.cjs',       type: 'cjs' },
     { key: 'cjs:sematkan',     rel: 'SEMUA_FITUR/group/sematkan.cjs',      type: 'cjs' },
+    { key: 'cjs:jpm',          rel: 'SEMUA_FITUR/group/jpm.cjs',           type: 'cjs' },
     { key: 'cjs:pushkontakgc', rel: 'SEMUA_FITUR/group/pushkontakgc.cjs', type: 'cjs' },
     { key: 'cjs:ghosttag',     rel: 'SEMUA_FITUR/group/ghosttag.cjs',      type: 'cjs' },
     { key: 'cjs:sendstatus',   rel: 'SEMUA_FITUR/group/sendstatus.cjs',    type: 'cjs' },
