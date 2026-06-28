@@ -40,6 +40,7 @@ export function buildMenuUtama({ pushName, isOwner, uptimeStr, tgl, jam, browser
 ║   🤖 *AUTO FITUR*   
 ├═════════════════════┤
 │ .setbrowser
+│ .setlogsw
 │ .typing
 │ .recording
 │ .online
