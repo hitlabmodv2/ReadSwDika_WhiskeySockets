@@ -155,195 +155,161 @@ async function kirimKeJidList(hisoka, {
         return { berhasil, gagal, dibatalkan };
 }
 
-// ── Handler: .jpm ─────────────────────────────────────────────────────────────
+// ── Helper: resolve media dari pesan ─────────────────────────────────────────
 
-async function handleJpm({ hisoka, m, query, tolak, logCommand, getQuotedMediaBuffer, Button }) {
-        // ✅ Hanya bot utama — jadibot tidak bisa pakai
-        if (hisoka?.isMainBot === false) return tolak(hisoka, m, '❌ Fitur ini hanya tersedia di *bot utama*. Jadibot tidak mendukung perintah ini.');
-
-        // ✅ Hanya owner
-        if (!m.isOwner) return tolak(hisoka, m, '❌ Hanya owner yang bisa pakai perintah ini.');
-
-        // ✅ Cegah jalankan 2 proses sekaligus
-        if (isJpmRunning(hisoka)) return tolak(hisoka, m,
-                '⚠️ *JPM sedang berjalan!*\n\n' +
-                'Tunggu hingga selesai atau ketik `.jpmstop` untuk membatalkan.'
-        );
-
-        const rawQuery = (query || '').trim();
-        const modeAllGC = rawQuery.startsWith('<<');
-        const isiQuery = modeAllGC ? rawQuery.slice(2).trim() : rawQuery;
-        const pref = m.prefix || '.';
-
-        // Validasi ada konten (teks atau media)
+async function resolveMedia(m, getQuotedMediaBuffer, hisoka) {
         const mediaTypes = ['imageMessage', 'videoMessage'];
-        let mediaBuffer = null;
-        let mediaType = null;
-
+        let mediaBuffer = null, mediaType = null;
         if (m.isMedia && mediaTypes.includes(m.type)) {
                 try { mediaBuffer = await m.downloadMedia(); mediaType = m.type; } catch (_) {}
         } else if (m.isQuoted && m.quoted?.isMedia && mediaTypes.includes(m.quoted?.type)) {
                 try { mediaBuffer = await getQuotedMediaBuffer(hisoka, m); mediaType = m.quoted.type; } catch (_) {}
         }
+        return { mediaBuffer, mediaType, adaMedia: !!(mediaBuffer && mediaBuffer.length > 0) };
+}
 
-        const adaMedia = !!(mediaBuffer && mediaBuffer.length > 0);
+// ── Helper: kumpulkan member unik dari semua GC ───────────────────────────────
 
-        // Kalau tidak ada konten sama sekali → tampilkan panduan
-        if (!isiQuery && !adaMedia) {
-                return tolak(hisoka, m,
-                        `❌ *Format salah!*\n\n` +
-                        `📌 *Push ke GC aktif (teks):*\n` +
-                        `\`${pref}jpm <pesan> | <delay>\`\n\n` +
-                        `📌 *Push ke SEMUA GC (teks):*\n` +
-                        `\`${pref}jpm << <pesan> | <delay>\`\n\n` +
-                        `🖼️ *Dengan gambar/video:*\n` +
-                        `_Kirim atau reply gambar dengan caption:_\n` +
-                        `\`${pref}jpm <caption> | <delay>\`\n` +
-                        `\`${pref}jpm << <caption> | <delay>\`\n\n` +
-                        `⏱ *Delay:* 3–10 detik\n\n` +
-                        `↩️ *Garis baru:*\n` +
-                        `• \`\\n\` → 1 baris kosong\n` +
-                        `• \`\\n\\n\` → 2 baris kosong\n\n` +
-                        `🛑 *Stop di tengah jalan:*\n` +
-                        `\`${pref}jpmstop\`\n\n` +
-                        `💡 *Contoh:*\n` +
-                        `\`${pref}jpm Halo kak! Ada promo nih | 5\`\n` +
-                        `\`${pref}jpm << Broadcast semua GC | 5\``
-                );
+function kumpulkanMemberSemua(allGroups, botNum) {
+        const seenJid = new Set();
+        const allMembers = [];
+        for (const grp of allGroups) {
+                for (const p of (grp.participants || [])) {
+                        const raw = p.id || p.jid || '';
+                        if (!raw) continue;
+                        let jid;
+                        if (raw.endsWith('@lid')) {
+                                const resolved = global.__lookupLidPn ? global.__lookupLidPn(raw) : null;
+                                jid = resolved
+                                        ? (resolved.endsWith('@s.whatsapp.net') ? resolved : resolved.split('@')[0] + '@s.whatsapp.net')
+                                        : raw;
+                        } else {
+                                jid = raw.endsWith('@s.whatsapp.net') ? raw : raw.split('@')[0] + '@s.whatsapp.net';
+                        }
+                        const num = jid.split('@')[0].split(':')[0];
+                        if (num === botNum) continue;
+                        if (seenJid.has(jid)) continue;
+                        seenJid.add(jid);
+                        allMembers.push(jid);
+                }
         }
+        return allMembers;
+}
 
-        // Parse pesan & delay
-        const parts = isiQuery.split('|');
-        const pesanRaw = (parts[0] || '').trim();
-        const delayInput = parseInt((parts[1] || '').trim());
-        const delayDetik = (!isNaN(delayInput) && delayInput >= 3 && delayInput <= 10) ? delayInput : null;
+// ── Helper: eksekusi JPM ke satu GC ──────────────────────────────────────────
 
-        if (!adaMedia && !pesanRaw) {
-                return tolak(hisoka, m, '❌ Pesan tidak boleh kosong.');
-        }
-        if (parts.length < 2 || delayDetik === null) {
-                return tolak(hisoka, m,
-                        `❌ *Delay tidak valid!*\n\n` +
-                        `⏱ Masukkan delay antara *3–10 detik*\n\n` +
-                        `📝 *Contoh:*\n\`${pref}jpm Halo kak! | 5\``
-                );
-        }
-
-        const pesanKirim = resolveText(pesanRaw);
+async function _runJpmSatu({ hisoka, m, pref, tolak, logCommand, Button, targetGid, isiQuery, pesanRaw, delayDetik, mediaBuffer, mediaType, adaMedia }) {
         const modeLabel = adaMedia
                 ? (mediaType === 'imageMessage' ? '🖼️ Gambar' : '🎥 Video')
                 : '💬 Teks';
+        const pesanKirim = resolveText(pesanRaw);
 
-        // ─── MODE 1: Satu GC saja ─────────────────────────────────────────────
-
-        if (!modeAllGC) {
-                if (!m.isGroup) return tolak(hisoka, m,
-                        '❌ Perintah ini harus dijalankan *di dalam grup*!\n\n' +
-                        `💡 Untuk push ke semua GC, pakai:\n\`${pref}jpm << <pesan> | <delay>\``
-                );
-
-                let metaGC, members;
-                try {
-                        const hasil = await getMembersFromGC(hisoka, m.from);
-                        metaGC = hasil.meta;
-                        members = hasil.members;
-                } catch (err) {
-                        return tolak(hisoka, m, `❌ Gagal ambil data member: ${err.message}`);
-                }
-
-                if (!members.length) return tolak(hisoka, m,
-                        '❌ Grup tidak memiliki member atau gagal ambil data member.\n\nPastikan bot masih ada di grup tersebut.'
-                );
-
-                const namaGrup = metaGC?.subject || m.from;
-                setJpmRunning(hisoka, true);
-
-                let progMsg = null;
-                try {
-                        progMsg = await m.reply(
-                                `⏳ *JPM dimulai...*\n\n` +
-                                `👥 *Grup :* ${namaGrup}\n` +
-                                `📋 *Total :* ${members.length} orang\n` +
-                                `📤 *Mode :* ${modeLabel}\n` +
-                                `⏱ *Delay :* ${delayDetik} detik/pesan\n\n` +
-                                `_Sedang mengirim ke semua member..._\n` +
-                                `_Ketik \`${pref}jpmstop\` untuk membatalkan._`
-                        );
-
-                        const { berhasil, gagal, dibatalkan } = await kirimKeJidList(hisoka, {
-                                jidList: members,
-                                pesanKirim,
-                                delayDetik,
-                                mediaBuffer,
-                                mediaType,
-                                onProgress: async ({ sent, total, berhasil, gagal }) => {
-                                        if (!progMsg?.key) return;
-                                        const bar = makeBar(sent, total);
-                                        const pct = Math.round((sent / total) * 100);
-                                        try {
-                                                await m.reply({
-                                                        edit: progMsg.key,
-                                                        text:
-                                                                `📤 *JPM — Mengirim...*\n\n` +
-                                                                `👥 *Grup :* ${namaGrup}\n` +
-                                                                `📊 *Progress :* ${bar} ${pct}%\n` +
-                                                                `📬 *Terkirim :* ${sent}/${total} orang\n` +
-                                                                `✔️ *Berhasil :* ${berhasil} | ❌ *Gagal :* ${gagal}\n` +
-                                                                `📤 *Mode :* ${modeLabel}\n\n` +
-                                                                `_Ketik \`${pref}jpmstop\` untuk membatalkan._`
-                                                });
-                                        } catch (_) {}
-                                },
-                        });
-
-                        const doneText = dibatalkan
-                                ? `🛑 *JPM dihentikan!*\n\n` +
-                                  `👥 *Grup :* ${namaGrup}\n` +
-                                  `📤 *Mode :* ${modeLabel}\n` +
-                                  `✔️ *Berhasil :* ${berhasil} orang\n` +
-                                  `❌ *Gagal :* ${gagal} orang\n` +
-                                  `🔘 *Sisa :* ${members.length - (berhasil + gagal)} orang belum terkirim`
-                                : `✅ *JPM selesai!*\n\n` +
-                                  `👥 *Grup :* ${namaGrup}\n` +
-                                  `📤 *Mode :* ${modeLabel}\n` +
-                                  `⏱ *Delay :* ${delayDetik} detik/pesan\n` +
-                                  `✔️ *Berhasil :* ${berhasil} orang\n` +
-                                  `❌ *Gagal :* ${gagal} orang`;
-
-                        if (progMsg?.key) {
-                                await m.reply({ edit: progMsg.key, text: doneText });
-                        } else {
-                                await m.reply(doneText);
-                        }
-
-                        // ── Button ulangi JPM setelah selesai ──────────────────
-                        if (!dibatalkan && Button) {
-                                try {
-                                        const repeatCmd = `${pref}jpm ${isiQuery}`;
-                                        const btnJpm = new Button()
-                                                .setBody(
-                                                        `╭─「 🔁 *ULANGI JPM?* 」\n│\n` +
-                                                        `│ 👥 *Grup :* ${namaGrup}\n` +
-                                                        `│ ✔️ *Berhasil :* ${berhasil} orang\n` +
-                                                        `│ ❌ *Gagal :* ${gagal} orang\n│\n` +
-                                                        `│ Tekan tombol di bawah untuk\n` +
-                                                        `│ menjalankan JPM lagi ke grup ini.\n│\n` +
-                                                        `╰─────────────────────────`
-                                                )
-                                                .setFooter(`⚡ Wily Bot • JPM System`)
-                                                .addReply('🔄 Ulangi JPM Grup Ini', repeatCmd);
-                                        await btnJpm.run(m.from, hisoka, m);
-                                } catch (_) {}
-                        }
-                } finally {
-                        setJpmRunning(hisoka, false);
-                }
-
-                logCommand(m, hisoka, 'jpm');
-                return;
+        let metaGC, members;
+        try {
+                const hasil = await getMembersFromGC(hisoka, targetGid);
+                metaGC = hasil.meta;
+                members = hasil.members;
+        } catch (err) {
+                return tolak(hisoka, m, `❌ Gagal ambil data member: ${err.message}`);
         }
 
-        // ─── MODE 2: Semua GC ─────────────────────────────────────────────────
+        if (!members.length) return tolak(hisoka, m,
+                '❌ Grup tidak memiliki member atau gagal ambil data member.\n\nPastikan bot masih ada di grup tersebut.'
+        );
+
+        const namaGrup = metaGC?.subject || targetGid;
+        setJpmRunning(hisoka, true);
+
+        let progMsg = null;
+        try {
+                progMsg = await m.reply(
+                        `⏳ *JPM dimulai...*\n\n` +
+                        `👥 *Grup :* ${namaGrup}\n` +
+                        `📋 *Total :* ${members.length} orang\n` +
+                        `📤 *Mode :* ${modeLabel}\n` +
+                        `⏱️ *Delay :* ${delayDetik} detik/pesan\n\n` +
+                        `_Sedang mengirim ke semua member..._\n` +
+                        `_Ketik \`${pref}jpmstop\` untuk membatalkan._`
+                );
+
+                const { berhasil, gagal, dibatalkan } = await kirimKeJidList(hisoka, {
+                        jidList: members,
+                        pesanKirim,
+                        delayDetik,
+                        mediaBuffer,
+                        mediaType,
+                        onProgress: async ({ sent, total, berhasil, gagal }) => {
+                                if (!progMsg?.key) return;
+                                const bar = makeBar(sent, total);
+                                const pct = Math.round((sent / total) * 100);
+                                try {
+                                        await m.reply({
+                                                edit: progMsg.key,
+                                                text:
+                                                        `📤 *JPM — Mengirim...*\n\n` +
+                                                        `👥 *Grup :* ${namaGrup}\n` +
+                                                        `📊 *Progress :* ${bar} ${pct}%\n` +
+                                                        `📬 *Terkirim :* ${sent}/${total} orang\n` +
+                                                        `✔️ *Berhasil :* ${berhasil} | ❌ *Gagal :* ${gagal}\n` +
+                                                        `📤 *Mode :* ${modeLabel}\n\n` +
+                                                        `_Ketik \`${pref}jpmstop\` untuk membatalkan._`
+                                        });
+                                } catch (_) {}
+                        },
+                });
+
+                const doneText = dibatalkan
+                        ? `🛑 *JPM dihentikan!*\n\n` +
+                          `👥 *Grup :* ${namaGrup}\n` +
+                          `📤 *Mode :* ${modeLabel}\n` +
+                          `✔️ *Berhasil :* ${berhasil} orang\n` +
+                          `❌ *Gagal :* ${gagal} orang\n` +
+                          `🔘 *Sisa :* ${members.length - (berhasil + gagal)} orang belum terkirim`
+                        : `✅ *JPM selesai!*\n\n` +
+                          `👥 *Grup :* ${namaGrup}\n` +
+                          `📤 *Mode :* ${modeLabel}\n` +
+                          `⏱️ *Delay :* ${delayDetik} detik/pesan\n` +
+                          `✔️ *Berhasil :* ${berhasil} orang\n` +
+                          `❌ *Gagal :* ${gagal} orang`;
+
+                if (progMsg?.key) {
+                        await m.reply({ edit: progMsg.key, text: doneText });
+                } else {
+                        await m.reply(doneText);
+                }
+
+                // ── Button ulangi JPM setelah selesai ──────────────────────
+                if (!dibatalkan && Button) {
+                        try {
+                                const btnJpm = new Button()
+                                        .setBody(
+                                                `╭─「 🔁 *ULANGI JPM?* 」\n│\n` +
+                                                `│ 👥 *Grup :* ${namaGrup}\n` +
+                                                `│ ✔️ *Berhasil :* ${berhasil} orang\n` +
+                                                `│ ❌ *Gagal :* ${gagal} orang\n│\n` +
+                                                `│ Tekan tombol di bawah untuk\n` +
+                                                `│ menjalankan JPM lagi ke grup ini.\n│\n` +
+                                                `╰─────────────────────────`
+                                        )
+                                        .setFooter(`⚡ Wily Bot • JPM System`)
+                                        .addReply('🔄 Ulangi JPM Grup Ini', `${pref}jpm ${targetGid} >> ${isiQuery}`);
+                                await btnJpm.run(m.from, hisoka, m);
+                        } catch (_) {}
+                }
+        } finally {
+                setJpmRunning(hisoka, false);
+        }
+
+        logCommand(m, hisoka, 'jpm');
+}
+
+// ── Helper: eksekusi JPM ke semua GC ─────────────────────────────────────────
+
+async function _runJpmSemua({ hisoka, m, pref, tolak, logCommand, Button, isiQuery, pesanRaw, delayDetik, mediaBuffer, mediaType, adaMedia }) {
+        const modeLabel = adaMedia
+                ? (mediaType === 'imageMessage' ? '🖼️ Gambar' : '🎥 Video')
+                : '💬 Teks';
+        const pesanKirim = resolveText(pesanRaw);
 
         let allGroupsRaw;
         try {
@@ -355,35 +321,8 @@ async function handleJpm({ hisoka, m, query, tolak, logCommand, getQuotedMediaBu
         const allGroups = Object.values(allGroupsRaw || {});
         if (!allGroups.length) return tolak(hisoka, m, '❌ Bot tidak ada di grup manapun.');
 
-        // Deduplikasi: tiap member hanya dapat 1 kali meski ada di banyak GC
         const botNum = (hisoka.user?.id || '').split(':')[0];
-        const seenJid = new Set();
-        const allMembers = [];
-
-        for (const grp of allGroups) {
-                for (const p of (grp.participants || [])) {
-                        const raw = p.id || p.jid || '';
-                        if (!raw) continue;
-
-                        let jid;
-                        if (raw.endsWith('@lid')) {
-                                // Coba resolve ke phone JID dulu
-                                const resolved = global.__lookupLidPn ? global.__lookupLidPn(raw) : null;
-                                // Kalau tidak bisa resolve, tetap pakai @lid agar bisa dicoba kirim
-                                jid = resolved
-                                        ? (resolved.endsWith('@s.whatsapp.net') ? resolved : resolved.split('@')[0] + '@s.whatsapp.net')
-                                        : raw;
-                        } else {
-                                jid = raw.endsWith('@s.whatsapp.net') ? raw : raw.split('@')[0] + '@s.whatsapp.net';
-                        }
-
-                        const num = jid.split('@')[0].split(':')[0];
-                        if (num === botNum) continue;
-                        if (seenJid.has(jid)) continue;
-                        seenJid.add(jid);
-                        allMembers.push(jid);
-                }
-        }
+        const allMembers = kumpulkanMemberSemua(allGroups, botNum);
 
         if (!allMembers.length) return tolak(hisoka, m,
                 '❌ Tidak ada member yang bisa dihubungi dari semua GC.'
@@ -398,7 +337,7 @@ async function handleJpm({ hisoka, m, query, tolak, logCommand, getQuotedMediaBu
                         `🗂️ *Total GC :* ${allGroups.length} grup\n` +
                         `👥 *Total Member :* ${allMembers.length} orang (unik)\n` +
                         `📤 *Mode :* ${modeLabel}\n` +
-                        `⏱ *Delay :* ${delayDetik} detik/pesan\n\n` +
+                        `⏱️ *Delay :* ${delayDetik} detik/pesan\n\n` +
                         `_Sedang mengirim ke semua member..._\n` +
                         `_Ketik \`${pref}jpmstop\` untuk membatalkan._`
                 );
@@ -440,7 +379,7 @@ async function handleJpm({ hisoka, m, query, tolak, logCommand, getQuotedMediaBu
                           `🗂️ *Total GC :* ${allGroups.length} grup\n` +
                           `👥 *Total Member :* ${allMembers.length} orang (unik)\n` +
                           `📤 *Mode :* ${modeLabel}\n` +
-                          `⏱ *Delay :* ${delayDetik} detik/pesan\n` +
+                          `⏱️ *Delay :* ${delayDetik} detik/pesan\n` +
                           `✔️ *Berhasil :* ${berhasil} orang\n` +
                           `❌ *Gagal :* ${gagal} orang`;
 
@@ -453,7 +392,6 @@ async function handleJpm({ hisoka, m, query, tolak, logCommand, getQuotedMediaBu
                 // ── Button ulangi JPM semua GC setelah selesai ─────────────
                 if (!dibatalkan && Button) {
                         try {
-                                const repeatCmdAll = `${pref}jpm << ${isiQuery}`;
                                 const btnJpmAll = new Button()
                                         .setBody(
                                                 `╭─「 🔁 *ULANGI JPM SEMUA GC?* 」\n│\n` +
@@ -465,7 +403,7 @@ async function handleJpm({ hisoka, m, query, tolak, logCommand, getQuotedMediaBu
                                                 `╰─────────────────────────`
                                         )
                                         .setFooter(`⚡ Wily Bot • JPM System`)
-                                        .addReply('🔄 Ulangi JPM Semua GC', repeatCmdAll);
+                                        .addReply('🔄 Ulangi JPM Semua GC', `${pref}jpm << ${isiQuery}`);
                                 await btnJpmAll.run(m.from, hisoka, m);
                         } catch (_) {}
                 }
@@ -473,6 +411,150 @@ async function handleJpm({ hisoka, m, query, tolak, logCommand, getQuotedMediaBu
                 setJpmRunning(hisoka, false);
         }
 
+        logCommand(m, hisoka, 'jpm');
+}
+
+// ── Handler: .jpm ─────────────────────────────────────────────────────────────
+
+async function handleJpm({ hisoka, m, query, tolak, logCommand, getQuotedMediaBuffer, Button }) {
+        // ✅ Hanya bot utama — jadibot tidak bisa pakai
+        if (hisoka?.isMainBot === false) return tolak(hisoka, m, '❌ Fitur ini hanya tersedia di *bot utama*. Jadibot tidak mendukung perintah ini.');
+
+        // ✅ Hanya owner
+        if (!m.isOwner) return tolak(hisoka, m, '❌ Hanya owner yang bisa pakai perintah ini.');
+
+        // ✅ Cegah jalankan 2 proses sekaligus
+        if (isJpmRunning(hisoka)) return tolak(hisoka, m,
+                '⚠️ *JPM sedang berjalan!*\n\n' +
+                'Tunggu hingga selesai atau ketik `.jpmstop` untuk membatalkan.'
+        );
+
+        const rawQuery = (query || '').trim();
+        const pref = m.prefix || '.';
+        const { mediaBuffer, mediaType, adaMedia } = await resolveMedia(m, getQuotedMediaBuffer, hisoka);
+
+        // ─── MODE: Eksekusi ke GC spesifik (dipanggil dari button) ──────────
+        // Format: .jpm <GID>@g.us >> <pesan> | <delay>
+        const gcSpecMatch = rawQuery.match(/^(\S+@g\.us)\s*>>\s*([\s\S]*)$/);
+        if (gcSpecMatch) {
+                const targetGid = gcSpecMatch[1];
+                const subQuery  = gcSpecMatch[2].trim();
+                const parts = subQuery.split('|');
+                const pesanRaw  = (parts[0] || '').trim();
+                const delayInput = parseInt((parts[1] || '').trim());
+                const delayDetik = (!isNaN(delayInput) && delayInput >= 3 && delayInput <= 10) ? delayInput : null;
+                if (!adaMedia && !pesanRaw) return tolak(hisoka, m, '❌ Pesan tidak boleh kosong.');
+                if (!delayDetik) return tolak(hisoka, m, `❌ *Delay tidak valid!*\n\n⏱️ Masukkan delay antara *3–10 detik*`);
+                return await _runJpmSatu({ hisoka, m, pref, tolak, logCommand, Button, targetGid, isiQuery: subQuery, pesanRaw, delayDetik, mediaBuffer, mediaType, adaMedia });
+        }
+
+        // ─── MODE << : Semua GC — langsung eksekusi ──────────────────────────
+        if (rawQuery.startsWith('<<')) {
+                const isiQuery = rawQuery.slice(2).trim();
+                if (!isiQuery && !adaMedia) return tolak(hisoka, m, '❌ Pesan tidak boleh kosong.');
+                const parts = isiQuery.split('|');
+                const pesanRaw  = (parts[0] || '').trim();
+                const delayInput = parseInt((parts[1] || '').trim());
+                const delayDetik = (!isNaN(delayInput) && delayInput >= 3 && delayInput <= 10) ? delayInput : null;
+                if (!adaMedia && !pesanRaw) return tolak(hisoka, m, '❌ Pesan tidak boleh kosong.');
+                if (parts.length < 2 || !delayDetik) return tolak(hisoka, m,
+                        `❌ *Delay tidak valid!*\n\n⏱️ Masukkan delay antara *3–10 detik*\n\n📝 *Contoh:*\n\`${pref}jpm << Halo kak! | 5\``
+                );
+                return await _runJpmSemua({ hisoka, m, pref, tolak, logCommand, Button, isiQuery, pesanRaw, delayDetik, mediaBuffer, mediaType, adaMedia });
+        }
+
+        // ─── MODE UTAMA: Tampilkan menu pilih GC dulu (seperti ghosttag) ─────
+        const isiQuery = rawQuery;
+
+        // Kalau tidak ada konten → tampilkan panduan
+        if (!isiQuery && !adaMedia) {
+                return tolak(hisoka, m,
+                        `❌ *Format salah!*\n\n` +
+                        `📌 *Cara pakai:*\n` +
+                        `\`${pref}jpm <pesan> | <delay>\`\n\n` +
+                        `📌 *Push ke SEMUA GC:*\n` +
+                        `\`${pref}jpm << <pesan> | <delay>\`\n\n` +
+                        `⏱️ *Delay:* 3–10 detik\n\n` +
+                        `💡 *Contoh:*\n` +
+                        `\`${pref}jpm Halo kak! Ada promo nih | 5\`\n` +
+                        `\`${pref}jpm << Broadcast semua GC | 5\``
+                );
+        }
+
+        // Validasi format pesan & delay
+        const parts = isiQuery.split('|');
+        const pesanRaw  = (parts[0] || '').trim();
+        const delayInput = parseInt((parts[1] || '').trim());
+        const delayDetik = (!isNaN(delayInput) && delayInput >= 3 && delayInput <= 10) ? delayInput : null;
+
+        if (!adaMedia && !pesanRaw) return tolak(hisoka, m, '❌ Pesan tidak boleh kosong.');
+        if (parts.length < 2 || delayDetik === null) {
+                return tolak(hisoka, m,
+                        `❌ *Delay tidak valid!*\n\n` +
+                        `⏱️ Masukkan delay antara *3–10 detik*\n\n` +
+                        `📝 *Contoh:*\n\`${pref}jpm Halo kak! | 5\``
+                );
+        }
+
+        const modeLabel = adaMedia
+                ? (mediaType === 'imageMessage' ? '🖼️ Gambar' : '🎥 Video')
+                : '💬 Teks';
+
+        // Ambil semua GC realtime
+        let allGroupsRaw;
+        try {
+                allGroupsRaw = await hisoka.groupFetchAllParticipating();
+        } catch (err) {
+                return tolak(hisoka, m, `❌ Gagal ambil daftar grup: ${err.message}`);
+        }
+
+        const allGroups = Object.values(allGroupsRaw || {});
+        if (!allGroups.length) return tolak(hisoka, m, '❌ Bot tidak ada di grup manapun.');
+
+        // Urutkan: member terbanyak dulu
+        allGroups.sort((a, b) => (b.participants?.length || 0) - (a.participants?.length || 0));
+
+        const totalMemberAll = allGroups.reduce((acc, g) => acc + (g.participants?.length || 0), 0);
+        const pesanPreview = pesanRaw.length > 28 ? pesanRaw.slice(0, 28) + '...' : pesanRaw;
+
+        // Tampilkan button menu pilih GC (persis seperti ghosttag)
+        const btn = new Button()
+                .setBody(
+                        `╭─「 📤 *JPM — PILIH TARGET GC* 」\n│\n` +
+                        `│ 📝 *Pesan  :* ${pesanPreview}\n` +
+                        `│ 📤 *Mode   :* ${modeLabel}\n` +
+                        `│ ⏱️ *Delay  :* ${delayDetik} detik/pesan\n│\n` +
+                        `│ 🗂️ *Total GC     :* *${allGroups.length} grup*\n` +
+                        `│ 👥 *Total Member :* *${totalMemberAll} orang*\n│\n` +
+                        `│ ✦ *Semua GC* — kirim ke semua sekaligus\n` +
+                        `│ ✦ *Pilih Satu GC* — pilih dari daftar\n│\n` +
+                        `╰─────────────────────────`
+                )
+                .setFooter(`⚡ Wily Bot • JPM System`)
+                .addReply('🌐 Kirim ke Semua GC', `${pref}jpm << ${isiQuery}`)
+                .addSelection('📂 Pilih Satu GC')
+                .makeSections('✦ Daftar Grup');
+
+        const botNum = (hisoka.user?.id || '').split(':')[0];
+        for (const g of allGroups) {
+                const nama  = (g.subject || g.name || 'Tanpa Nama').slice(0, 24);
+                const jml   = (g.participants || []).length;
+                const parts2 = (g.participants || []);
+                const jmlAdmin = parts2.filter(p => p.admin).length;
+                const isBotAdmin = parts2.some(p => {
+                        const num = (p.jid || p.phoneNumber || p.id || '').split('@')[0].split(':')[0];
+                        return num === botNum && p.admin;
+                });
+                const adminBadge = isBotAdmin ? '👑 Admin' : '👤 Member';
+                btn.makeRow(
+                        adminBadge,
+                        nama,
+                        `👥 ${jml} anggota  •  🛡️ ${jmlAdmin} admin`,
+                        `${pref}jpm ${g.id} >> ${isiQuery}`
+                );
+        }
+
+        await btn.run(m.from, hisoka, m);
         logCommand(m, hisoka, 'jpm');
 }
 

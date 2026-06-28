@@ -1,0 +1,44 @@
+{
+  "ACFDF7CDE230534CB3832ED248BB532A": {
+    "id": "ACFDF7CDE230534CB3832ED248BB532A",
+    "sender": "62882005585698@s.whatsapp.net",
+    "name": "biee",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-28T07:08:04.705Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🧸",
+    "resolve": "Signal Lib ✓",
+    "source": "status",
+    "number": "62882005585698",
+    "resolvedPn": "62882005585698@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "62882005585698@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACFDF7CDE230534CB3832ED248BB532A",
+      "participant": "137482205151384@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-28T07:08:19.020Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62882005585698@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACFDF7CDE230534CB3832ED248BB532A",
+        "participant": "137482205151384@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62882005585698@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACFDF7CDE230534CB3832ED248BB532A",
+        "participant": "62882005585698@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-28T07:08:19.020Z"
+  }
+}
