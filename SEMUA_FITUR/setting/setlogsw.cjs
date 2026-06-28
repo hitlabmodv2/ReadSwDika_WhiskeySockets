@@ -18,17 +18,10 @@
  *  Terima kasih sudah support.
  * ───────────────────────────────
  *
- *  setlogsw.cjs — Set tema warna log SW
- *  Perintah .setlogsw untuk mengubah warna latar/tema tampilan log AutoReadStoryWhatsApp
+ *  setlogsw.cjs — Set tema warna latar belakang log SW
+ *  Perintah .setlogsw untuk mengubah warna background kotak log AutoReadStoryWhatsApp
+ *  Tersedia 30 warna + mode Random. Picker interaktif via Button (addReply + addSelection).
  * ───────────────────────────────
- */
-/**
- * ═══════════════════════════════════════════════════════════════
- *  Set Log SW Theme (.setlogsw)
- *  Ubah tema warna kotak log AutoReadStoryWhatsApp & jadibot —
- *  tersedia 8 warna + mode Random. Pilih via button picker atau
- *  langsung ketik nama tema.
- * ═══════════════════════════════════════════════════════════════
  */
 'use strict';
 
@@ -38,7 +31,14 @@ const path = require('path');
 const CONFIG_PATH = path.join(process.cwd(), 'config.json');
 
 // ── Tema & warna diambil dari satu file terpusat ──────────────────────────────
-const { LOGSW_THEMES, LOGSW_THEME_KEYS: THEME_KEYS } = require(path.join(process.cwd(), 'src', 'config', 'logsw-colors.cjs'));
+const { LOGSW_THEMES, LOGSW_THEME_KEYS: THEME_KEYS } = require(
+    path.join(process.cwd(), 'src', 'config', 'logsw-colors.cjs')
+);
+
+// ── Kelompok warna untuk section pada selection list ──────────────────────────
+const G_STANDAR = ['merah','hijau','biru','kuning','ungu','cyan','putih','hitam'];
+const G_CERAH   = ['merah_cerah','hijau_cerah','biru_cerah','kuning_cerah','pink','cyan_cerah','abu'];
+const G_256     = ['oranye','emas','toska','navy','coklat','lime','maroon','ungu_tua','salmon','lavender','mint','bata','gelap','neon'];
 
 // ── Config helpers ─────────────────────────────────────────────────────────────
 
@@ -73,46 +73,86 @@ async function handleSetlogsw({ hisoka, m, query, tolak, logCommand, Button }) {
     const curTheme = _getTheme();
     const curInfo  = LOGSW_THEMES[curTheme] || LOGSW_THEMES.default;
 
-    // ── Tanpa argumen → tampil picker ──────────────────────────────────────────
+    // ── Tanpa argumen → tampil picker interaktif ───────────────────────────────
     if (!arg) {
-        const _grp = (keys) => keys
-            .map(k => {
-                if (!LOGSW_THEMES[k]) return null;
-                const t = LOGSW_THEMES[k];
-                const aktif = k === curTheme ? ' ✓' : '';
-                return `${t.emoji} \`${k}\`${aktif}`;
-            })
-            .filter(Boolean)
-            .join('  ');
-
-        const G_STANDAR = ['default','merah','hijau','biru','kuning','ungu','cyan','putih','hitam'];
-        const G_CERAH   = ['merah_cerah','hijau_cerah','biru_cerah','kuning_cerah','pink','cyan_cerah','abu'];
-        const G_256     = ['oranye','emas','toska','navy','coklat','lime','maroon','ungu_tua','salmon','lavender','mint','bata','gelap','neon'];
+        const totalWarna = THEME_KEYS.length - 1; // tidak hitung 'random'
 
         const bodyTeks =
-            `🎨 *Set Tema Warna Log SW*\n\n` +
-            `Aktif: ${curInfo.emoji} *${curInfo.label}*\n` +
-            `━━━━━━━━━━━━━━━━━\n` +
-            `*🎯 Standar:*\n${_grp(G_STANDAR)}\n\n` +
-            `*✨ Cerah (Bright):*\n${_grp(G_CERAH)}\n\n` +
-            `*🌈 Ekstra (256-warna):*\n${_grp(G_256)}\n\n` +
-            `*🎲 Special:* \`random\`\n` +
-            `━━━━━━━━━━━━━━━━━\n` +
-            `Cara pakai:\n` +
-            `\`${pref}setlogsw [nama]\`\n` +
-            `\`${pref}setlogsw default\` → reset bawaan\n\n` +
-            `_Warna latar belakang terlihat di panel Pterodactyl_`;
+            `『 🎨 』 *S E T  L O G  S W*\n` +
+            `▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n\n` +
+            `✦ *Tema Aktif :* ${curInfo.emoji} ${curInfo.label}\n\n` +
+            `✦ Pilih warna latar belakang kotak\n` +
+            `   log *AutoReadStoryWhatsApp*\n` +
+            `✦ Berlaku realtime setelah dipilih\n\n` +
+            `▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n` +
+            `🎯 Standar  : *${G_STANDAR.length}* tema\n` +
+            `✨ Cerah    : *${G_CERAH.length}* tema\n` +
+            `🌈 Ekstra   : *${G_256.length}* tema\n` +
+            `🎲 Special  : Random & Default\n` +
+            `▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n` +
+            `Total *${totalWarna}* pilihan warna tersedia`;
 
         let sent = false;
         try {
-            const btn = new Button().setBody(bodyTeks);
-            for (const [k, t] of Object.entries(LOGSW_THEMES)) {
-                btn.addReply(`${t.emoji} ${t.label}`, `${pref}setlogsw ${k}`);
+            const btn = new Button()
+                .setBody(bodyTeks)
+                .setFooter(`⚡ Wily Bot • Set Log SW`)
+                .addReply(`🎲 Random`, `${pref}setlogsw random`)
+                .addReply(`🔵 Reset Default`, `${pref}setlogsw default`)
+                .addSelection(`🎨 Pilih Warna Tema`)
+                // ── Standar ──────────────────────────────────────────────────
+                .makeSections(`🎯 Standar (${G_STANDAR.length} tema)`);
+
+            for (const k of G_STANDAR) {
+                const t   = LOGSW_THEMES[k];
+                const tag = k === curTheme ? '✓ Aktif' : t.emoji;
+                btn.makeRow(tag, t.label, `Latar belakang ${t.label}`, `${pref}setlogsw ${k}`);
             }
-            await btn.run(m.from, hisoka, { quoted: m });
+
+            // ── Cerah ─────────────────────────────────────────────────────
+            btn.makeSections(`✨ Cerah — Bright (${G_CERAH.length} tema)`);
+            for (const k of G_CERAH) {
+                const t   = LOGSW_THEMES[k];
+                const tag = k === curTheme ? '✓ Aktif' : t.emoji;
+                btn.makeRow(tag, t.label, `Latar belakang ${t.label}`, `${pref}setlogsw ${k}`);
+            }
+
+            // ── Ekstra 256-warna ──────────────────────────────────────────
+            btn.makeSections(`🌈 Ekstra — 256 Warna (${G_256.length} tema)`);
+            for (const k of G_256) {
+                const t   = LOGSW_THEMES[k];
+                const tag = k === curTheme ? '✓ Aktif' : t.emoji;
+                btn.makeRow(tag, t.label, `Latar belakang ${t.label}`, `${pref}setlogsw ${k}`);
+            }
+
+            await btn.run(m.from, hisoka, m);
             sent = true;
         } catch (_) {}
-        if (!sent) await m.reply(bodyTeks);
+
+        // fallback teks biasa kalau Button gagal
+        if (!sent) {
+            const _grp = (keys) => keys
+                .map(k => {
+                    const t = LOGSW_THEMES[k];
+                    const aktif = k === curTheme ? ' ✓' : '';
+                    return `${t.emoji} \`${k}\`${aktif}`;
+                })
+                .join('  ');
+
+            await m.reply(
+                `🎨 *Set Tema Warna Log SW*\n\n` +
+                `Aktif: ${curInfo.emoji} *${curInfo.label}*\n` +
+                `━━━━━━━━━━━━━━━━━\n` +
+                `*🎯 Standar:*\n${_grp(G_STANDAR)}\n\n` +
+                `*✨ Cerah (Bright):*\n${_grp(G_CERAH)}\n\n` +
+                `*🌈 Ekstra (256-warna):*\n${_grp(G_256)}\n\n` +
+                `*🎲 Special:* \`random\`  🔵 \`default\`\n` +
+                `━━━━━━━━━━━━━━━━━\n` +
+                `\`${pref}setlogsw [nama]\` — pilih warna\n` +
+                `\`${pref}setlogsw default\` — reset bawaan\n\n` +
+                `_Warna latar belakang terlihat di panel Pterodactyl_`
+            );
+        }
 
         logCommand(m, hisoka, 'setlogsw');
         return;
@@ -120,30 +160,64 @@ async function handleSetlogsw({ hisoka, m, query, tolak, logCommand, Button }) {
 
     // ── Validasi nama tema ──────────────────────────────────────────────────────
     if (!LOGSW_THEMES[arg]) {
-        const allKeys = THEME_KEYS.map(k => `${LOGSW_THEMES[k].emoji}\`${k}\``).join(' ');
         return tolak(hisoka, m,
             `❌ *Tema tidak dikenal:* \`${arg}\`\n\n` +
-            `Ketik \`${pref}setlogsw\` untuk lihat semua pilihan.\n\n` +
-            `Tersedia: ${allKeys}`
+            `Ketik \`${pref}setlogsw\` untuk tampilkan picker lengkap.\n\n` +
+            `Tersedia: ${THEME_KEYS.map(k => `${LOGSW_THEMES[k].emoji}\`${k}\``).join(' ')}`
         );
     }
 
     // ── Sudah aktif ────────────────────────────────────────────────────────────
     if (arg === curTheme) {
-        return m.reply(
-            `ℹ️ Tema *${curInfo.emoji} ${curInfo.label}* sudah aktif saat ini.\n\n` +
+        let sent = false;
+        try {
+            const btn = new Button()
+                .setBody(
+                    `ℹ️ *Tema sudah aktif!*\n\n` +
+                    `${curInfo.emoji} *${curInfo.label}* sedang digunakan.\n\n` +
+                    `Pilih tema lain atau buka picker lengkap.`
+                )
+                .setFooter(`⚡ Wily Bot • Set Log SW`)
+                .addReply(`🎨 Buka Picker Lengkap`, `${pref}setlogsw`)
+                .addReply(`🎲 Coba Random`, `${pref}setlogsw random`);
+            await btn.run(m.from, hisoka, m);
+            sent = true;
+        } catch (_) {}
+        if (!sent) await m.reply(
+            `ℹ️ Tema *${curInfo.emoji} ${curInfo.label}* sudah aktif.\n\n` +
             `_Ketik \`${pref}setlogsw\` untuk lihat semua pilihan._`
         );
+        return;
     }
 
-    // ── Simpan & balas ─────────────────────────────────────────────────────────
+    // ── Simpan & konfirmasi ────────────────────────────────────────────────────
     _setTheme(arg);
     const info = LOGSW_THEMES[arg];
-    await m.reply(
+
+    let sent = false;
+    try {
+        const btn = new Button()
+            .setBody(
+                `✅ *Tema Log SW Diubah!*\n\n` +
+                `${curInfo.emoji} ~~${curInfo.label}~~\n` +
+                `       ↓\n` +
+                `${info.emoji} *${info.label}*\n\n` +
+                `Log berikutnya akan tampil dengan\n` +
+                `latar belakang *${info.label}* di panel Pterodactyl.`
+            )
+            .setFooter(`⚡ Wily Bot • Set Log SW`)
+            .addReply(`🔄 Ganti Lagi`, `${pref}setlogsw`)
+            .addReply(`🔵 Reset Default`, `${pref}setlogsw default`);
+        await btn.run(m.from, hisoka, m);
+        sent = true;
+    } catch (_) {}
+
+    if (!sent) await m.reply(
         `✅ *Tema Log SW diubah!*\n\n` +
         `${curInfo.emoji} ~~${curInfo.label}~~ → ${info.emoji} *${info.label}*\n\n` +
-        `_Log SW berikutnya (bot utama & semua jadibot) akan tampil dengan tema baru._`
+        `_Log SW berikutnya akan tampil dengan latar belakang baru._`
     );
+
     logCommand(m, hisoka, 'setlogsw');
 }
 
