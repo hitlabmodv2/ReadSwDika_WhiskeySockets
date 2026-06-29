@@ -64,14 +64,18 @@ _Ubah warna latar belakang & teks kotak log AutoReadStoryWhatsApp secara realtim
 - Picker interaktif:
   • Button *"🎲 Random"* — warna acak tiap muncul log story
   • Button *"🔵 Reset Default"* — kembali ke cyan bawaan
-  • Selection list *"🎨 Pilih Warna Tema"* → 6 section pilihan warna
-- Total *65 pilihan warna* + mode Random:
+  • Selection list *"🎨 Pilih Warna Tema"* → 10 section pilihan warna
+- Total *104 pilihan warna* + mode Random:
   • 🎯 *Standar* (8): merah, hijau, biru, kuning, ungu, cyan, putih, hitam
   • ✨ *Cerah/Bright* (7): merah cerah, hijau cerah, biru cerah, kuning cerah, pink, cyan cerah, abu
   • 🌈 *Ekstra 256-warna* (14): oranye, emas, toska, navy, coklat, lime, maroon, ungu tua, salmon, lavender, mint, bata, gelap, neon
   • 🍃 *Pastel* (10): mauve, merah muda, krem, biru muda, ungu muda, melon, kuning muda, ungu pastel, pink pastel, biru es
   • 🌿 *Alam* (10): hijau hutan, coklat tua, hijau zaitun, hijau lumut, teal tua, anggur, api, biru langit, biru pupil, slate biru
   • 💎 *Premium* (15): fuchsia, indigo, turquoise, coral, violet, amber, emerald, langit, lila, orchid, peach, cobalt, crimson, rose, periwinkle
+  • 🌙 *Galaksi* (10): midnight, galaxy, nebula, aurora, meteor, supernova, zodiak, bima sakti, bulan, bintang
+  • 🎋 *Nusantara* (10): batik, wayang, keris, tenun, bambu, pasir, terumbu, padi, cengkeh, tanah
+  • ❄️ *Musim* (10): salju, musim semi, musim panas, musim gugur, musim dingin, embun, hujan, pelangi, badai, kabut
+  • 🖥️ *Teknologi* (10): matrix, cyber, glitch, hologram, neon biru, pixel, terminal, laser, robot, chip
   • 🎲 *Special*: Random & Default
 - Warna berlaku *realtime* — log story berikutnya langsung pakai warna baru
 - *Border* kotak ikut tema, *teks isi* (Mode, TipeStory, Nama, dll) ikut warna FG tema

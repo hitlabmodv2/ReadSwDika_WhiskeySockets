@@ -14,6 +14,10 @@
  *    BG standar  : 40–47 (gelap), 100–107 (cerah/bright)
  *    BG 256-warna: \x1b[48;5;N m  (N = 0–255)
  *    Teks putih  : \x1b[97m   Teks hitam: \x1b[30m
+ *
+ *  Total warna  : 105 warna + 1 default + Random
+ *  Grup         : Standar(8) · Cerah(7) · Ekstra(14) · Pastel(10) · Alam(10)
+ *                 Premium(15) · Galaksi(10) · Nusantara(10) · Musim(10) · Teknologi(10)
  * ───────────────────────────────
  */
 'use strict';
@@ -102,6 +106,54 @@ const LOGSW_ANSI = {
     crimson      : '\x1b[48;5;160m\x1b[97m',         // Crimson     BG + teks putih
     rose         : '\x1b[48;5;211m\x1b[30m',         // Rose Pink   BG + teks hitam
     periwinkle   : '\x1b[48;5;105m\x1b[97m',         // Periwinkle  BG + teks putih
+
+    // ── Koleksi Galaksi (warna luar angkasa) ──────────────────────────────────
+    midnight     : '\x1b[48;5;18m\x1b[97m',          // Biru Tengah Malam  BG + teks putih
+    galaxy       : '\x1b[48;5;55m\x1b[97m',          // Ungu Galaxy        BG + teks putih
+    nebula       : '\x1b[48;5;89m\x1b[97m',          // Ungu Nebula Gelap  BG + teks putih
+    aurora       : '\x1b[48;5;48m\x1b[30m',          // Hijau Aurora       BG + teks hitam
+    meteor       : '\x1b[48;5;202m\x1b[30m',         // Oranye Meteor      BG + teks hitam
+    supernova    : '\x1b[48;5;226m\x1b[30m',         // Kuning Supernova   BG + teks hitam
+    zodiak       : '\x1b[48;5;63m\x1b[97m',          // Biru-Ungu Zodiak   BG + teks putih
+    bima_sakti   : '\x1b[48;5;237m\x1b[97m',         // Abu Gelap Bima Sakti BG + teks putih
+    bulan        : '\x1b[48;5;252m\x1b[30m',         // Abu Terang Bulan   BG + teks hitam
+    bintang      : '\x1b[48;5;229m\x1b[30m',         // Kuning Bintang     BG + teks hitam
+
+    // ── Koleksi Nusantara (warna lokal Indonesia) ─────────────────────────────
+    batik        : '\x1b[48;5;136m\x1b[30m',         // Coklat Batik       BG + teks hitam
+    wayang       : '\x1b[48;5;52m\x1b[97m',          // Merah Gelap Wayang BG + teks putih
+    keris        : '\x1b[48;5;101m\x1b[30m',         // Hijau Tua Keris    BG + teks hitam
+    tenun        : '\x1b[48;5;96m\x1b[97m',          // Ungu Tua Tenun     BG + teks putih
+    bambu        : '\x1b[48;5;107m\x1b[30m',         // Hijau Bambu        BG + teks hitam
+    pasir        : '\x1b[48;5;180m\x1b[30m',         // Pasir/Sandy        BG + teks hitam
+    terumbu      : '\x1b[48;5;73m\x1b[30m',          // Terumbu Karang     BG + teks hitam
+    padi         : '\x1b[48;5;143m\x1b[30m',         // Kuning Padi        BG + teks hitam
+    cengkeh      : '\x1b[48;5;124m\x1b[97m',         // Merah Cengkeh      BG + teks putih
+    tanah        : '\x1b[48;5;137m\x1b[30m',         // Coklat Tanah       BG + teks hitam
+
+    // ── Koleksi Musim (warna empat musim) ────────────────────────────────────
+    salju        : '\x1b[48;5;255m\x1b[30m',         // Putih Salju        BG + teks hitam
+    musim_semi   : '\x1b[48;5;83m\x1b[30m',          // Hijau Musim Semi   BG + teks hitam
+    musim_panas  : '\x1b[48;5;215m\x1b[30m',         // Oranye Musim Panas BG + teks hitam
+    musim_gugur  : '\x1b[48;5;166m\x1b[97m',         // Oranye Gugur       BG + teks putih
+    musim_dingin : '\x1b[48;5;69m\x1b[97m',          // Biru Dingin        BG + teks putih
+    embun        : '\x1b[48;5;159m\x1b[30m',         // Biru Embun Muda    BG + teks hitam
+    hujan        : '\x1b[48;5;68m\x1b[97m',          // Biru Hujan         BG + teks putih
+    pelangi_musim: '\x1b[48;5;51m\x1b[30m',          // Cyan Pelangi       BG + teks hitam
+    badai        : '\x1b[48;5;238m\x1b[97m',         // Abu Badai Gelap    BG + teks putih
+    kabut        : '\x1b[48;5;250m\x1b[30m',         // Abu Kabut Terang   BG + teks hitam
+
+    // ── Koleksi Teknologi (warna dunia digital) ───────────────────────────────
+    matrix       : '\x1b[48;5;47m\x1b[30m',          // Hijau Matrix       BG + teks hitam
+    cyber        : '\x1b[48;5;201m\x1b[30m',         // Pink Cyber         BG + teks hitam
+    glitch       : '\x1b[48;5;198m\x1b[30m',         // Magenta Glitch     BG + teks hitam
+    hologram     : '\x1b[48;5;123m\x1b[30m',         // Cyan Hologram      BG + teks hitam
+    neon_biru    : '\x1b[48;5;81m\x1b[30m',          // Biru Neon          BG + teks hitam
+    pixel        : '\x1b[48;5;200m\x1b[30m',         // Pink Pixel         BG + teks hitam
+    terminal     : '\x1b[48;5;34m\x1b[30m',          // Hijau Terminal     BG + teks hitam
+    laser        : '\x1b[48;5;197m\x1b[30m',         // Merah Laser        BG + teks hitam
+    robot        : '\x1b[48;5;240m\x1b[97m',         // Abu Robot Gelap    BG + teks putih
+    chip         : '\x1b[48;5;23m\x1b[97m',          // Teal Gelap Chip    BG + teks putih
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -126,7 +178,7 @@ const LOGSW_THEMES = {
     pink         : { label: 'Pink',                 emoji: '🩷' },
     cyan_cerah   : { label: 'Cyan Cerah',           emoji: '🫧' },
     abu          : { label: 'Abu-Abu',              emoji: '🩶' },
-    // 256-warna
+    // Ekstra 256-warna
     oranye       : { label: 'Oranye',               emoji: '🟠' },
     emas         : { label: 'Emas / Gold',          emoji: '🏅' },
     toska        : { label: 'Toska / Teal',         emoji: '🌊' },
@@ -179,6 +231,50 @@ const LOGSW_THEMES = {
     crimson      : { label: 'Crimson',              emoji: '🩸' },
     rose         : { label: 'Rose Pink',            emoji: '🌹' },
     periwinkle   : { label: 'Periwinkle',           emoji: '🫐' },
+    // Galaksi
+    midnight     : { label: 'Biru Midnight',        emoji: '🌙' },
+    galaxy       : { label: 'Galaxy',               emoji: '🪐' },
+    nebula       : { label: 'Nebula',               emoji: '✨' },
+    aurora       : { label: 'Aurora',               emoji: '🌠' },
+    meteor       : { label: 'Meteor',               emoji: '☄️' },
+    supernova    : { label: 'Supernova',             emoji: '💫' },
+    zodiak       : { label: 'Zodiak',               emoji: '🔭' },
+    bima_sakti   : { label: 'Bima Sakti',           emoji: '🌃' },
+    bulan        : { label: 'Bulan',                emoji: '🌕' },
+    bintang      : { label: 'Bintang',              emoji: '🌟' },
+    // Nusantara
+    batik        : { label: 'Batik',                emoji: '🧶' },
+    wayang       : { label: 'Wayang',               emoji: '🎭' },
+    keris        : { label: 'Keris',                emoji: '⚔️' },
+    tenun        : { label: 'Tenun',                emoji: '🧵' },
+    bambu        : { label: 'Bambu',                emoji: '🎋' },
+    pasir        : { label: 'Pasir / Sandy',        emoji: '🏖️' },
+    terumbu      : { label: 'Terumbu Karang',       emoji: '🐚' },
+    padi         : { label: 'Padi / Sawah',         emoji: '🌾' },
+    cengkeh      : { label: 'Cengkeh',              emoji: '🏮' },
+    tanah        : { label: 'Tanah',                emoji: '🪨' },
+    // Musim
+    salju        : { label: 'Salju',                emoji: '❄️' },
+    musim_semi   : { label: 'Musim Semi',           emoji: '🌻' },
+    musim_panas  : { label: 'Musim Panas',          emoji: '☀️' },
+    musim_gugur  : { label: 'Musim Gugur',          emoji: '🍂' },
+    musim_dingin : { label: 'Musim Dingin',         emoji: '⛄' },
+    embun        : { label: 'Embun',                emoji: '💧' },
+    hujan        : { label: 'Hujan',                emoji: '🌧️' },
+    pelangi_musim: { label: 'Pelangi',              emoji: '🌦️' },
+    badai        : { label: 'Badai',                emoji: '⛈️' },
+    kabut        : { label: 'Kabut',                emoji: '🌁' },
+    // Teknologi
+    matrix       : { label: 'Matrix Green',         emoji: '🖥️' },
+    cyber        : { label: 'Cyber Pink',           emoji: '🔋' },
+    glitch       : { label: 'Glitch Magenta',       emoji: '📡' },
+    hologram     : { label: 'Hologram Cyan',        emoji: '🔬' },
+    neon_biru    : { label: 'Neon Biru',            emoji: '🫙' },
+    pixel        : { label: 'Pixel Pink',           emoji: '🎮' },
+    terminal     : { label: 'Terminal Green',       emoji: '⌨️' },
+    laser        : { label: 'Laser Red',            emoji: '🔦' },
+    robot        : { label: 'Robot Grey',           emoji: '🤖' },
+    chip         : { label: 'Chip Teal',            emoji: '💾' },
     // Special
     random       : { label: 'Random',               emoji: '🎲' },
 };
@@ -190,6 +286,7 @@ const LOGSW_THEMES = {
 //  Semua warna dipilih agar jelas terlihat di Pterodactyl (dark background).
 // ─────────────────────────────────────────────────────────────────────────────
 const LOGSW_FG = {
+    // Standar
     default      : '\x1b[36m',            // Cyan — sama dengan default lama
     merah        : '\x1b[91m',            // Merah terang
     hijau        : '\x1b[92m',            // Hijau terang
@@ -199,6 +296,7 @@ const LOGSW_FG = {
     cyan         : '\x1b[96m',            // Cyan terang
     putih        : '\x1b[97m',            // Putih terang
     hitam        : '\x1b[37m',            // Abu-abu (hitam terlalu gelap di terminal gelap)
+    // Cerah
     merah_cerah  : '\x1b[91m',
     hijau_cerah  : '\x1b[92m',
     biru_cerah   : '\x1b[94m',
@@ -206,6 +304,7 @@ const LOGSW_FG = {
     pink         : '\x1b[95m',
     cyan_cerah   : '\x1b[96m',
     abu          : '\x1b[37m',
+    // Ekstra 256-warna
     oranye       : '\x1b[38;5;214m',      // Oranye terang
     emas         : '\x1b[38;5;220m',      // Emas/Gold
     toska        : '\x1b[38;5;43m',       // Toska/Teal
@@ -258,6 +357,50 @@ const LOGSW_FG = {
     crimson      : '\x1b[38;5;196m',      // Crimson terang
     rose         : '\x1b[38;5;211m',      // Rose pink
     periwinkle   : '\x1b[38;5;105m',      // Periwinkle
+    // Galaksi
+    midnight     : '\x1b[38;5;69m',       // Biru terang midnight
+    galaxy       : '\x1b[38;5;135m',      // Ungu terang galaxy
+    nebula       : '\x1b[38;5;171m',      // Magenta terang nebula
+    aurora       : '\x1b[38;5;48m',       // Hijau terang aurora
+    meteor       : '\x1b[38;5;208m',      // Oranye terang meteor
+    supernova    : '\x1b[93m',            // Kuning terang supernova
+    zodiak       : '\x1b[38;5;111m',      // Biru-ungu terang zodiak
+    bima_sakti   : '\x1b[37m',            // Abu terang bima sakti
+    bulan        : '\x1b[97m',            // Putih terang bulan
+    bintang      : '\x1b[93m',            // Kuning terang bintang
+    // Nusantara
+    batik        : '\x1b[38;5;136m',      // Coklat amber batik
+    wayang       : '\x1b[38;5;167m',      // Merah hangat wayang
+    keris        : '\x1b[38;5;107m',      // Hijau tua keris
+    tenun        : '\x1b[38;5;147m',      // Ungu muda tenun
+    bambu        : '\x1b[38;5;148m',      // Kuning-hijau bambu
+    pasir        : '\x1b[38;5;180m',      // Pasir/sandy
+    terumbu      : '\x1b[38;5;80m',       // Teal terang terumbu
+    padi         : '\x1b[38;5;148m',      // Kuning-hijau padi
+    cengkeh      : '\x1b[38;5;160m',      // Merah cengkeh
+    tanah        : '\x1b[38;5;137m',      // Coklat tanah
+    // Musim
+    salju        : '\x1b[97m',            // Putih salju
+    musim_semi   : '\x1b[38;5;83m',       // Hijau segar semi
+    musim_panas  : '\x1b[38;5;215m',      // Oranye musim panas
+    musim_gugur  : '\x1b[38;5;172m',      // Oranye tua gugur
+    musim_dingin : '\x1b[38;5;75m',       // Biru terang dingin
+    embun        : '\x1b[38;5;159m',      // Biru lembut embun
+    hujan        : '\x1b[38;5;111m',      // Biru terang hujan
+    pelangi_musim: '\x1b[38;5;51m',       // Cyan cerah pelangi
+    badai        : '\x1b[37m',            // Abu terang badai
+    kabut        : '\x1b[97m',            // Putih kabut
+    // Teknologi
+    matrix       : '\x1b[38;5;47m',       // Hijau matrix neon
+    cyber        : '\x1b[38;5;201m',      // Pink cyber terang
+    glitch       : '\x1b[38;5;198m',      // Magenta glitch
+    hologram     : '\x1b[38;5;123m',      // Cyan hologram
+    neon_biru    : '\x1b[38;5;81m',       // Biru neon terang
+    pixel        : '\x1b[38;5;200m',      // Pink pixel
+    terminal     : '\x1b[38;5;40m',       // Hijau terminal terang
+    laser        : '\x1b[38;5;197m',      // Merah laser terang
+    robot        : '\x1b[37m',            // Abu terang robot
+    chip         : '\x1b[38;5;37m',       // Teal terang chip
 };
 
 // ─────────────────────────────────────────────────────────────────────────────

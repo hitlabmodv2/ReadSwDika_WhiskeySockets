@@ -1,13 +1,13 @@
 {
-  "A5B36756D85D1AE8AC639B7071764B8B": {
-    "id": "A5B36756D85D1AE8AC639B7071764B8B",
+  "A5904A51D659F91118FA28886D22F004": {
+    "id": "A5904A51D659F91118FA28886D22F004",
     "sender": "6288233564018@s.whatsapp.net",
     "name": "CILL SI PENJAHAT.",
-    "type": "imageMessage",
-    "arrivedAt": "2026-06-27T13:56:20.658Z",
-    "read": true,
-    "reacted": true,
-    "emoji": "🎲",
+    "type": "extendedTextMessage",
+    "arrivedAt": "2026-06-29T03:43:21.690Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6288233564018",
@@ -16,29 +16,12 @@
       "remoteJid": "status@broadcast",
       "remoteJidAlt": "6288233564018@s.whatsapp.net",
       "fromMe": false,
-      "id": "A5B36756D85D1AE8AC639B7071764B8B",
+      "id": "A5904A51D659F91118FA28886D22F004",
       "participant": "169810138779863@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-27T13:56:38.888Z",
-    "receiptKeys": [
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6288233564018@s.whatsapp.net",
-        "fromMe": false,
-        "id": "A5B36756D85D1AE8AC639B7071764B8B",
-        "participant": "169810138779863@lid",
-        "addressingMode": "lid"
-      },
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6288233564018@s.whatsapp.net",
-        "fromMe": false,
-        "id": "A5B36756D85D1AE8AC639B7071764B8B",
-        "participant": "6288233564018@s.whatsapp.net",
-        "addressingMode": "lid"
-      }
-    ],
-    "processedAt": "2026-06-27T13:56:38.888Z"
+    "updatedAt": "2026-06-29T03:43:26.361Z",
+    "deleted": true,
+    "deletedAt": "2026-06-29T03:43:26.361Z"
   }
 }
