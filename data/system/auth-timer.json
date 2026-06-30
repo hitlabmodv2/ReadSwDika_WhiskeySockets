@@ -2,15 +2,31 @@
   "events": [
     {
       "type": "connected",
-      "connectedAt": "2026-06-29T06:59:20.241Z"
+      "connectedAt": "2026-06-30T15:30:51.602Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-06-30T15:26:46.508Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-06-30T13:31:54.546Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-06-30T13:21:12.400Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-06-30T11:49:23.345Z"
     },
     {
       "type": "qr_session_start",
-      "startAt": "2026-06-29T06:59:10.340Z",
-      "expireAt": "2026-06-29T07:02:10.340Z",
+      "startAt": "2026-06-30T11:49:08.750Z",
+      "expireAt": "2026-06-30T11:52:08.750Z",
       "durationSeconds": 180
     }
   ],
-  "lastUpdated": "2026-06-29T06:59:20.242Z",
-  "sessionStart": "2026-06-29T06:59:10.355Z"
+  "lastUpdated": "2026-06-30T15:30:51.602Z",
+  "sessionStart": "2026-06-30T11:49:08.778Z"
 }

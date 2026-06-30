@@ -192,16 +192,13 @@ function _readDefaultEmojiFile(number) {
 }
 
 function _readEmojiFile(number) {
-  // Return full object { mode, emojis }
+  // Return full object { mode, emojis, customSeeded } — selalu konsisten
   // Pertama kali user → auto-init mode=default + buat defaultemoji.json
   try {
     const p = _emojiFilePath(number)
     if (!fs.existsSync(p)) {
-      // Pertama kali: sync defaultemoji.json dari bot utama
-      // emojis[] sengaja kosong — pool kustom user BELUM diisi
-      // defaultemoji.json yang dipakai untuk mode=default
       _syncDefaultEmojiFile(number)
-      const obj = { mode: 'default', emojis: [] }
+      const obj = { mode: 'default', emojis: [], customSeeded: false }
       try {
         fs.mkdirSync(path.dirname(p), { recursive: true })
         const tmp = p + '.tmp'
@@ -213,10 +210,11 @@ function _readEmojiFile(number) {
     const data = JSON.parse(fs.readFileSync(p, 'utf-8'))
     return {
       mode: data.mode || 'default',
-      emojis: Array.isArray(data.emojis) ? data.emojis : []
+      emojis: Array.isArray(data.emojis) ? data.emojis : [],
+      customSeeded: data.customSeeded === true
     }
   } catch {
-    return { mode: 'default', emojis: [] }
+    return { mode: 'default', emojis: [], customSeeded: false }
   }
 }
 
@@ -325,25 +323,35 @@ export function setDefaultEmojiMode(number) {
   _syncDefaultEmojiFile(number)
 }
 
+// Emoji seed saat pertama kali pakai mode custom — 5 emoji seru & variatif
+const CUSTOM_SEED_EMOJIS = ['🌟']
+
 export function setCustomEmojiMode(number) {
   // Mode custom: pakai emoji dari emoji.json milik jadibot sendiri
-  // Jika sebelumnya default, bersihkan emojis[] agar tidak bercampur dengan copy defaults lama
+  // Seed 5 emoji bagus hanya SEKALI seumur hidup (flag customSeeded)
   number = String(number || '').replace(/[^0-9]/g, '')
   const obj = _readEmojiFile(number)
-  if (obj.mode === 'default') {
-    // Reset custom pool ke kosong — user mulai dari 0 di mode custom
-    obj.emojis = []
+  // Seed hanya jika: belum pernah diseed (flag) DAN pool custom masih kosong
+  // Ini melindungi user lama yang sudah punya emoji tapi belum ada flag customSeeded
+  const isFirstTime = !obj.customSeeded && obj.emojis.length === 0
+  if (isFirstTime) {
+    // Benar-benar pertama kali custom & kosong: seed 5 emoji populer
+    obj.emojis = [...CUSTOM_SEED_EMOJIS]
   }
+  if (!obj.customSeeded) obj.customSeeded = true
   obj.mode = 'custom'
   _writeEmojiFile(number, obj)
+  return { isFirstTime, seeded: isFirstTime ? [...CUSTOM_SEED_EMOJIS] : [] }
 }
 
 export function resetToDefaultEmojis(number) {
   // Reset ke default bot utama + set mode=default + sync defaultemoji.json
   number = String(number || '').replace(/[^0-9]/g, '')
   const defaults = _syncDefaultEmojiFile(number)
+  const obj = _readEmojiFile(number)
   // emojis[] kosong — defaults ada di defaultemoji.json, bukan di emojis[]
-  _writeEmojiFile(number, { mode: 'default', emojis: [] })
+  // Pertahankan customSeeded agar seed tidak terulang saat .emojicustom lagi
+  _writeEmojiFile(number, { mode: 'default', emojis: [], customSeeded: obj.customSeeded === true })
   return defaults.length
 }
 
@@ -352,7 +360,9 @@ const WA_SEED_EMOJIS = ['💚']
 
 export function clearJadibotEmojis(number) {
   // Clear semua emoji → isi seed WA + mode custom (tidak pernah benar-benar kosong)
+  // Pertahankan customSeeded agar seed 5 emoji tidak terulang saat .emojicustom lagi
   number = String(number || '').replace(/[^0-9]/g, '')
-  _writeEmojiFile(number, { mode: 'custom', emojis: [...WA_SEED_EMOJIS] })
+  const obj = _readEmojiFile(number)
+  _writeEmojiFile(number, { mode: 'custom', emojis: [...WA_SEED_EMOJIS], customSeeded: obj.customSeeded === true })
   return [...WA_SEED_EMOJIS]
 }

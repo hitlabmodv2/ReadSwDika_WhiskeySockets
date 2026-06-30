@@ -247,20 +247,22 @@
     "lastSeen": "2026-06-24T03:14:39.021Z",
     "activeSW": {}
   },
+  "6283897069764": {
+    "name": "Wans Store",
+    "number": "6283897069764",
+    "reads": 7,
+    "reactions": 7,
+    "lastSeen": "2026-06-30T15:27:51.406Z",
+    "activeSW": {
+      "A502385F2BD874A2F231C175A3311CC1": 1782833271406
+    }
+  },
   "62895328878799": {
     "name": "Erlic",
     "number": "62895328878799",
     "reads": 6,
     "reactions": 6,
     "lastSeen": "2026-06-23T13:35:35.027Z",
-    "activeSW": {}
-  },
-  "6283897069764": {
-    "name": "Wans Store",
-    "number": "6283897069764",
-    "reads": 6,
-    "reactions": 6,
-    "lastSeen": "2026-06-24T06:50:48.993Z",
     "activeSW": {}
   },
   "6281973145146": {
@@ -447,20 +449,22 @@
     "lastSeen": "2026-06-24T09:36:54.796Z",
     "activeSW": {}
   },
+  "6283137961488": {
+    "name": "miftah",
+    "number": "6283137961488",
+    "reads": 3,
+    "reactions": 3,
+    "lastSeen": "2026-06-30T15:28:08.855Z",
+    "activeSW": {
+      "ACF4859716DF0F2DC03EB952BFCCF9B6": 1782833288855
+    }
+  },
   "6282268990535": {
     "name": "Otaku Hakase",
     "number": "6282268990535",
     "reads": 2,
     "reactions": 2,
     "lastSeen": "2026-06-17T14:02:31.604Z",
-    "activeSW": {}
-  },
-  "6283137961488": {
-    "name": "M.FTH.IZ",
-    "number": "6283137961488",
-    "reads": 2,
-    "reactions": 2,
-    "lastSeen": "2026-06-18T07:03:44.443Z",
     "activeSW": {}
   },
   "6281356196476": {
@@ -1142,6 +1146,7 @@
     "🧸": 6,
     "🎲": 1,
     "⚽": 1,
-    "🎳": 3
+    "🎳": 4,
+    "🎭": 1
   }
 }

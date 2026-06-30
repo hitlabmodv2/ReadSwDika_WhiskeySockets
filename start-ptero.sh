@@ -39,15 +39,6 @@ if [ ! -d "node_modules" ]; then
   npm install
 fi
 
-# Install PM2 global jika belum ada
-if ! command -v pm2 &>/dev/null; then
-  echo "▶ PM2 tidak ditemukan, install PM2..."
-  npm install pm2 -g
-fi
-
-echo "▶ Update PM2..."
-pm2 update
-
 BOT_START_TIME=$(date +%s)
 
 send_tg "✅ *Wily Bot - Pterodactyl*

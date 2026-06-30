@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 28/06/2026, 06.41.51  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 30/06/2026, 12.40.58  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  command:ghosttag
+│  #001  —  AniGame
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  Maximum call stack size exceeded
+│  [AniGame] ❌ "Choices: Stories You Play (MOD, Free Choice)" GAGAL dikirim ke semua grup (1 gagal) — TIDAK ditandai terkirim, akan dicoba lagi nanti
 │
 │  DETAIL
-│  Sumber      : command:ghosttag
+│  Sumber      : AniGame
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 28/06/2026, 06.41.51
-│  Terakhir    : 28/06/2026, 06.41.51
+│  Pertama     : 30/06/2026, 12.40.58
+│  Terakhir    : 30/06/2026, 12.40.58
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  RangeError: Maximum call stack size exceeded
-│     at BufferWriter.write_string_buffer [as string] (/home/runner/workspace/node_modules/protobufjs/src/writer_buffer.js:69:61)
-│     at Function.encode (file:///home/runner/workspace/node_modules/@whiskeysockets/baileys/WAProto/index.js:48599:42)
+│  ▶  Error: [AniGame] ❌ "Choices: Stories You Play (MOD, Free Choice)" GAGAL dikirim ke semua grup (1 gagal) — TIDAK ditandai terkirim, akan dicoba lagi nanti
+│     at console.error (file:///home/runner/workspace/index.js:433:27)
+│     at Timeout.runAnigame [as _onTimeout] (file:///home/runner/workspace/index.js:1529:73)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 28/06/2026, 06.41.51
+  Terakhir diperbarui: 30/06/2026, 12.40.58
 ════════════════════════════════════════════════════════════════════════

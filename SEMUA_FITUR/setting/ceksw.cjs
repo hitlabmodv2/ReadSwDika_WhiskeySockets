@@ -42,15 +42,30 @@ async function handleCeksw({ hisoka, m, query, tolak, logCommand, fs, path, load
                 const qLower = query ? query.trim().toLowerCase() : '';
 
                 if (qLower === 'on' || qLower === 'off') {
-                        const cfg   = loadConfig();
                         const nowOn = qLower === 'on';
-                        const wasOn = cfg.cekswTracking !== false;
-                        if (nowOn === wasOn) {
-                                await tolak(hisoka, m, `ℹ️ Tracking SW stats sudah *${nowOn ? 'aktif' : 'nonaktif'}* sebelumnya.`);
-                                return;
+                        let wasOn;
+                        if (isJadibot && jadibotNum) {
+                                // Baca/tulis config per-jadibot
+                                const jbCfgPath = path.join(process.cwd(), 'data_jadibot', jadibotNum, 'ceksw', 'config.json');
+                                let jbCfg = { cekswTracking: true };
+                                try { if (fs.existsSync(jbCfgPath)) jbCfg = JSON.parse(fs.readFileSync(jbCfgPath, 'utf-8')); } catch {}
+                                wasOn = jbCfg.cekswTracking === true;
+                                if (nowOn === wasOn) {
+                                        await tolak(hisoka, m, `ℹ️ Tracking SW stats sudah *${nowOn ? 'aktif' : 'nonaktif'}* sebelumnya.`);
+                                        return;
+                                }
+                                jbCfg.cekswTracking = nowOn;
+                                try { fs.mkdirSync(path.dirname(jbCfgPath), { recursive: true }); fs.writeFileSync(jbCfgPath, JSON.stringify(jbCfg, null, 2), 'utf-8'); } catch {}
+                        } else {
+                                const cfg = loadConfig();
+                                wasOn = cfg.cekswTracking !== false;
+                                if (nowOn === wasOn) {
+                                        await tolak(hisoka, m, `ℹ️ Tracking SW stats sudah *${nowOn ? 'aktif' : 'nonaktif'}* sebelumnya.`);
+                                        return;
+                                }
+                                cfg.cekswTracking = nowOn;
+                                saveConfig(cfg);
                         }
-                        cfg.cekswTracking = nowOn;
-                        saveConfig(cfg);
                         await hisoka.sendMessage(m.from, { react: { text: nowOn ? '✅' : '❌', key: m.key } });
                         await tolak(hisoka, m,
                                 `╭══『 📊 *CEK SW TRACKING* 』══╮\n│\n` +
@@ -208,7 +223,15 @@ async function handleCeksw({ hisoka, m, query, tolak, logCommand, fs, path, load
                         text += `│\n`;
                 }
 
-                const trackingOn  = loadConfig().cekswTracking !== false;
+                let trackingOn;
+                if (isJadibot && jadibotNum) {
+                        const jbCfgPath = path.join(process.cwd(), 'data_jadibot', jadibotNum, 'ceksw', 'config.json');
+                        let jbCfg = { cekswTracking: true };
+                        try { if (fs.existsSync(jbCfgPath)) jbCfg = JSON.parse(fs.readFileSync(jbCfgPath, 'utf-8')); } catch {}
+                        trackingOn = jbCfg.cekswTracking === true;
+                } else {
+                        trackingOn = loadConfig().cekswTracking !== false;
+                }
                 const _rawMode    = getJadibotEmojiMode ? getJadibotEmojiMode(_botNum) : 'default';
                 const _isCustom   = String(_rawMode).toLowerCase() === 'custom';
                 const _emojiLabel = _isCustom ? '🟢 Custom' : '🔵 Default';

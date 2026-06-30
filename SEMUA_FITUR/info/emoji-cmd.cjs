@@ -101,14 +101,18 @@ async function handleEmojicustom({ hisoka, m, tolak, logCommand, getJadibotNumbe
                         return;
                 }
                 const _jbNum = getJadibotNumber(hisoka);
-                setCustomEmojiMode(_jbNum);
+                const _result = setCustomEmojiMode(_jbNum);
                 const data = listJadibotEmojis(_jbNum);
                 let response = `╭═══『 *CUSTOM EMOJI* 』═══╮\n│\n`;
                 response += `│ 👤 *Milik:* +${_jbNum}\n│\n`;
                 response += `│ ✅ Mode diubah ke *Custom*\n`;
+                if (_result && _result.isFirstTime && _result.seeded && _result.seeded.length > 0) {
+                        response += `│\n│ 🆕 *Pertama kali Custom!*\n`;
+                        response += `│ Auto-seed: ${_result.seeded.join(' ')}\n`;
+                }
                 response += `│\n│ 🎨 Reaksi SW sekarang pakai\n`;
                 response += `│ emoji dari *file kamu sendiri*\n`;
-                response += `│ (${data.count} emoji tersimpan)\n`;
+                response += `│ 📊 Total: ${data.count} emoji tersimpan\n`;
                 response += `│\n│ 📋 *Command:*\n`;
                 response += `│ .emoji — lihat tutorial lengkap\n`;
                 response += `│ .emojiadd 😊,😄 — tambah single\n`;

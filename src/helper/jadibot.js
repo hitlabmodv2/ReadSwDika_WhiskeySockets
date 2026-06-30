@@ -55,6 +55,7 @@ import {
   getMediaTypeEmoji,
   getStoryCountToday,
   createSwTracker,
+  initJadibotCekswConfig,
 } from './swtrack.js'
 import { injectClient } from '../helper/inject.js'
 import { useSingleFileAuthState } from './authState.js'
@@ -1649,6 +1650,9 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
       // Auto-init emoji.json per jadibot — copy dari bot utama jika belum ada
       try { getJadibotEmojis(number) } catch {}
 
+      // Init ceksw config per-jadibot — default OFF jika belum pernah ada
+      try { initJadibotCekswConfig(number) } catch {}
+
       // SwStats: prune activeSW expired supaya data jadibot realtime & akurat
       try { pruneSwStatsAt(path.join(process.cwd(), 'data_jadibot', number, 'ceksw', 'swstats.json'), number) } catch {}
 
@@ -2188,6 +2192,9 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
 
       // Auto-init emoji.json per jadibot — copy dari bot utama jika belum ada
       try { getJadibotEmojis(number) } catch {}
+
+      // Init ceksw config per-jadibot — default OFF jika belum pernah ada
+      try { initJadibotCekswConfig(number) } catch {}
 
       // SwStats: prune activeSW expired supaya data jadibot realtime & akurat
       try { pruneSwStatsAt(path.join(process.cwd(), 'data_jadibot', number, 'ceksw', 'swstats.json'), number) } catch {}

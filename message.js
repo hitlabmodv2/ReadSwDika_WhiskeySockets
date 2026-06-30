@@ -1237,7 +1237,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                         case 'ceksetting': {
                                 const { handleCeksetting } = _require(path.resolve('./SEMUA_FITUR/setting/ceksetting.cjs'));
-                                await handleCeksetting({ hisoka, m, tolak, logCommand, isMainBot, getJadibotNumber, getJadibotExpiry, getJadibotExpirySummary, jadibotMap, maskNumber, formatRemainingTime, loadConfig });
+                                await handleCeksetting({ hisoka, m, tolak, logCommand, isMainBot, getJadibotNumber, getJadibotReadsw, getJadibotAntidel, getJadibotAnticall, getJadibotAnticallvid, getJadibotAutoOnline, getJadibotAutoTyping, getJadibotAutoRecording, listJadibotEmojis, getJadibotExpiry, getJadibotExpirySummary, jadibotMap, maskNumber, formatRemainingTime, loadConfig });
                                 break;
                         }
 
@@ -1505,7 +1505,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 break;
                         }
 
-                        case 'jadibot': {
+                        case 'jadibot1': {
                                 const { handleJadibot } = _require(path.resolve('./SEMUA_FITUR/jadibot/jadibot-cmd.cjs'));
                                 await handleJadibot({ hisoka, m, query, tolak, logCommand, isMainBot, path, fs, jadibotMap, parseJadibotDuration, startJadibot, maskNumber, getJadibotExpirySummary, scheduleJadibotExpiry, setPermanentJadibot, removeJadibotExpiry, ensureJadibotExpiry });
                                 break;

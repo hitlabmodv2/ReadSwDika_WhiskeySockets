@@ -1,13 +1,13 @@
 {
-  "AC3D19E327E6AC263C6BC6D6B9B835D3": {
-    "id": "AC3D19E327E6AC263C6BC6D6B9B835D3",
+  "AC5C883A45BD7E2C552E4DDDEBC1A62B": {
+    "id": "AC5C883A45BD7E2C552E4DDDEBC1A62B",
     "sender": "6285136314199@s.whatsapp.net",
     "name": "Nurll? sakit bu",
     "type": "imageMessage",
-    "arrivedAt": "2026-06-29T03:43:21.563Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "arrivedAt": "2026-06-30T11:52:36.319Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "𝖲𝖠𝖸𝖠 𝖠𝖪𝖠𝖭 𝖫𝖠𝖶𝖠𝖭 🤬",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6285136314199",
@@ -16,12 +16,31 @@
       "remoteJid": "status@broadcast",
       "remoteJidAlt": "6285136314199@s.whatsapp.net",
       "fromMe": false,
-      "id": "AC3D19E327E6AC263C6BC6D6B9B835D3",
+      "id": "AC5C883A45BD7E2C552E4DDDEBC1A62B",
       "participant": "90916371062907@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-29T03:43:22.733Z",
+    "updatedAt": "2026-06-30T12:27:26.414Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285136314199@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC5C883A45BD7E2C552E4DDDEBC1A62B",
+        "participant": "90916371062907@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285136314199@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC5C883A45BD7E2C552E4DDDEBC1A62B",
+        "participant": "6285136314199@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-30T11:52:40.547Z",
     "deleted": true,
-    "deletedAt": "2026-06-29T03:43:22.733Z"
+    "deletedAt": "2026-06-30T12:27:26.413Z"
   }
 }

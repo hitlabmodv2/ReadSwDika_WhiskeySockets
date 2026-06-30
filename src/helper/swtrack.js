@@ -46,6 +46,29 @@ function loadConfig() {
         return {};
 }
 
+// ─── Per-jadibot ceksw config: data_jadibot/<number>/ceksw/config.json ───────
+export function loadJadibotCekswConfig(jadibotNum) {
+        try {
+                const p = path.join(process.cwd(), 'data_jadibot', jadibotNum, 'ceksw', 'config.json');
+                if (fs.existsSync(p)) return JSON.parse(fs.readFileSync(p, 'utf-8'));
+        } catch {}
+        // Default: cekswTracking ON untuk jadibot baru
+        return { cekswTracking: true };
+}
+
+export function saveJadibotCekswConfig(jadibotNum, cfg) {
+        const dir = path.join(process.cwd(), 'data_jadibot', jadibotNum, 'ceksw');
+        fs.mkdirSync(dir, { recursive: true });
+        fs.writeFileSync(path.join(dir, 'config.json'), JSON.stringify(cfg, null, 2), 'utf-8');
+}
+
+export function initJadibotCekswConfig(jadibotNum) {
+        const p = path.join(process.cwd(), 'data_jadibot', jadibotNum, 'ceksw', 'config.json');
+        if (!fs.existsSync(p)) {
+                saveJadibotCekswConfig(jadibotNum, { cekswTracking: true });
+        }
+}
+
 // ─── SwStats: data/ceksw/swstats.json ────────────────────────────────────────
 export const SW_STATS_PATH = path.join(process.cwd(), 'data', 'ceksw', 'swstats.json');
 
@@ -87,7 +110,14 @@ export function countActiveSW(activeSW) {
 // msgId opsional — dipakai untuk deduplikasi (story yang sama tidak dihitung 2x)
 export function updateSwStatsAt(statsPath, number, name, reacted, emoji, msgId) {
         if (!number || !statsPath) return;
-        if (loadConfig().cekswTracking === false) return;
+        // Cek config per-jadibot jika statsPath ada di data_jadibot/
+        const _normPath = statsPath.replace(/\\/g, '/');
+        const _jbMatch  = _normPath.match(/data_jadibot\/([^/]+)\/ceksw/);
+        if (_jbMatch) {
+                if (loadJadibotCekswConfig(_jbMatch[1]).cekswTracking === false) return;
+        } else {
+                if (loadConfig().cekswTracking === false) return;
+        }
         try {
                 let stats = {};
                 if (fs.existsSync(statsPath)) {
