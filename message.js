@@ -452,7 +452,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         ]);
                         const _rawText = (m.text || '').trim();
                         const _isFontuntikChoice = _rawText.startsWith('fu_');
-                        const _isWaifuChoice = _rawText.startsWith('waifu_mode_') || _rawText.startsWith('waifu_char_');
+                        const _isWaifuChoice = _rawText.startsWith('waifu_mode_') || _rawText.startsWith('waifu_char_') || _rawText.startsWith('waifu_next_') || _rawText.startsWith('waifu_back_');
                         if (!_isFontuntikChoice && !_isWaifuChoice && !jadibotAllowedCommands.has(m.command)) {
                             return;
                         }
