@@ -221,7 +221,7 @@ function _normalizeTbib(item) {
         // Metadata tambahan
         width:       item.width       || null,
         height:      item.height      || null,
-        score:       item.score       ?? null,
+        score:       (item.score !== null && item.score !== undefined) ? Number(item.score) : 0,
         uploadedAt:  uploadedAt,
         postId:      item.id          || null,
         owner:       item.owner       || null,
@@ -278,7 +278,7 @@ async function _sendImageResult(hisoka, m, Button, pendingWaifuChoices, getJadib
     const dimStr    = (imgData.width && imgData.height)
         ? `${imgData.width} × ${imgData.height} px`
         : '?';
-    const scoreStr  = imgData.score != null ? String(imgData.score) : '?';
+    const scoreStr  = (imgData.score !== null && imgData.score !== undefined) ? String(imgData.score) : '0';
     const dateStr   = imgData.uploadedAt || '?';
     const ratingStr = imgData.rating
         ? imgData.rating.charAt(0).toUpperCase() + imgData.rating.slice(1)
@@ -606,7 +606,7 @@ async function _sendSearchResult(hisoka, m, Button, pendingWaifuChoices, getJadi
 
     const fileSize  = imgData.buffer ? _formatFileSize(imgData.buffer.length) : '?';
     const dimStr    = (imgData.width && imgData.height) ? `${imgData.width} × ${imgData.height} px` : '?';
-    const scoreStr  = imgData.score != null ? String(imgData.score) : '?';
+    const scoreStr  = (imgData.score !== null && imgData.score !== undefined) ? String(imgData.score) : '0';
     const dateStr   = imgData.uploadedAt || '?';
     const ratingStr = imgData.rating
         ? imgData.rating.charAt(0).toUpperCase() + imgData.rating.slice(1)
