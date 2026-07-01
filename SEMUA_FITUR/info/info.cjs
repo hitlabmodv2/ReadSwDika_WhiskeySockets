@@ -72,7 +72,7 @@ function parseEmojiInput(input) {
 // Single = 1 grapheme cluster (contoh: 😊)
 // Gabung = >1 grapheme cluster dalam 1 string (contoh: 👮🧠🦓 dari .emojiadd 👮🧠🦓)
 function renderEmojiList(emojis) {
-        if (!emojis || emojis.length === 0) return '│ ❌ Belum ada emoji tersimpan\n';
+        if (!emojis || emojis.length === 0) return '❌ _Belum ada emoji tersimpan_\n';
         try {
                 const segmenter = new Intl.Segmenter('en', { granularity: 'grapheme' });
                 const single = [];
@@ -83,11 +83,11 @@ function renderEmojiList(emojis) {
                         else single.push(e);
                 }
                 let out = '';
-                if (single.length > 0) out += `│ 📌 *Single (${single.length}):* ${single.join(' ')}\n`;
-                if (gabung.length > 0) out += `│ 🔗 *Gabung (${gabung.length}):* ${gabung.map((g, i) => `${i + 1}:[${g}]`).join(' ')}\n`;
-                return out || '│ ❌ Belum ada emoji tersimpan\n';
+                if (single.length > 0) out += `📌 *Single (${single.length}):* ${single.join(' ')}\n`;
+                if (gabung.length > 0) out += `🔗 *Gabung (${gabung.length}):* ${gabung.map((g, i) => `${i + 1}:[${g}]`).join(' ')}\n`;
+                return out || '❌ _Belum ada emoji tersimpan_\n';
         } catch {
-                return `│ *Daftar:* ${emojis.join(' ')}\n`;
+                return `*Daftar:* ${emojis.join(' ')}\n`;
         }
 }
 
@@ -671,41 +671,40 @@ async function handleEmoji({ hisoka, m, tolak, logCommand, getJadibotNumber, lis
                 const modeNow     = isCustom ? 'custom' : 'default';
                 const markMode    = (key) => key === modeNow ? '✓ ' : '';
 
-                let bodyText = `╭═══『 *🎭 EMOJI MANAGER* 』═══╮\n│\n`;
-                if (_isJb) bodyText += `│ 👤 *Milik:* +${_jbNum}\n`;
-                bodyText += `│ ⚙️ *Mode:* ${_modeLabel}\n`;
-                bodyText += `│ 📊 *Total:* ${data.count} emoji aktif\n`;
+                let bodyText = `*🎭 EMOJI MANAGER*\n`;
+                if (_isJb) bodyText += `👤 *Milik:* +${_jbNum}\n`;
+                bodyText += `⚙️ *Mode:* ${_modeLabel}\n`;
+                bodyText += `📊 *Total:* ${data.count} emoji aktif\n\n`;
                 bodyText += renderEmojiList(data.emojis);
-                bodyText += `│\n├──『 *➕ Tambah Emoji* 』──\n│\n`;
-                bodyText += `│ *Cara pakai (pilih salah satu):*\n`;
-                bodyText += `│ 1. \`\`\`.emojiadd 😊\`\`\` — _tambah 1 emoji_\n`;
-                bodyText += `│ 2. \`\`\`.emojiadd 😊,😄,😁\`\`\` — _banyak pakai koma_\n`;
-                bodyText += `│ 3. \`\`\`.emojiadd 😊 😄 😁\`\`\` — _banyak pakai spasi_\n`;
-                bodyText += `│\n│ 🔗 *Gabung jadi 1* _(langsung tanpa pemisah):_\n`;
-                bodyText += `│ • \`\`\`.emojiadd 😊😄😁\`\`\` → _tersimpan sbg 1_\n`;
-                bodyText += `│ • \`\`\`.emojiadd 😊😄😁,🍞🥯🥐\`\`\` → _2 gabungan_\n`;
-                bodyText += `│\n├──『 *➖ Hapus Emoji* 』──\n│\n`;
-                bodyText += `│ *Single:*\n`;
-                bodyText += `│ • \`\`\`.emojidel 😊\`\`\` — _hapus 1 emoji_\n`;
-                bodyText += `│ • \`\`\`.emojidel 😊,😄\`\`\` — _hapus banyak pakai koma_\n`;
-                bodyText += `│\n│ *Gabung* _(nomor dari_ \`\`\`.emojilist\`\`\`_):_\n`;
-                bodyText += `│ • \`\`\`.emojidel 1\`\`\` — _hapus gabung nomor 1_\n`;
-                bodyText += `│ • \`\`\`.emojidel 1,2\`\`\` — _hapus gabung nomor 1 dan 2_\n`;
-                bodyText += `│\n├──『 *⚙️ Mode & Lainnya* 』──\n│\n`;
+                bodyText += `\n*➕ Tambah Emoji*\n\n`;
+                bodyText += `*Cara pakai (pilih salah satu):*\n`;
+                bodyText += `1. \`\`\`.emojiadd 😊\`\`\` — _tambah 1 emoji_\n`;
+                bodyText += `2. \`\`\`.emojiadd 😊,😄,😁\`\`\` — _banyak pakai koma_\n`;
+                bodyText += `3. \`\`\`.emojiadd 😊 😄 😁\`\`\` — _banyak pakai spasi_\n`;
+                bodyText += `\n🔗 *Gabung jadi 1* _(langsung tanpa pemisah):_\n`;
+                bodyText += `• \`\`\`.emojiadd 😊😄😁\`\`\` → _tersimpan sbg 1_\n`;
+                bodyText += `• \`\`\`.emojiadd 😊😄😁,🍞🥯🥐\`\`\` → _2 gabungan_\n`;
+                bodyText += `\n*➖ Hapus Emoji*\n\n`;
+                bodyText += `*Single:*\n`;
+                bodyText += `• \`\`\`.emojidel 😊\`\`\` — _hapus 1 emoji_\n`;
+                bodyText += `• \`\`\`.emojidel 😊,😄\`\`\` — _hapus banyak pakai koma_\n`;
+                bodyText += `\n*Gabung* _(nomor dari_ \`\`\`.emojilist\`\`\`_):_\n`;
+                bodyText += `• \`\`\`.emojidel 1\`\`\` — _hapus gabung nomor 1_\n`;
+                bodyText += `• \`\`\`.emojidel 1,2\`\`\` — _hapus gabung nomor 1 dan 2_\n`;
+                bodyText += `\n*⚙️ Mode & Lainnya*\n\n`;
                 if (_isJb) {
-                        bodyText += `│ • \`\`\`.emojicustom\`\`\` → _pakai emoji kamu sendiri_\n`;
-                        bodyText += `│ • \`\`\`.emojidefault\`\`\` → _ikut emoji bot utama_\n`;
-                        bodyText += `│ • \`\`\`.emojiclear\`\`\` → ~semua emoji~ _direset ke awal_ ⚠️\n`;
+                        bodyText += `• \`\`\`.emojicustom\`\`\` → _pakai emoji kamu sendiri_\n`;
+                        bodyText += `• \`\`\`.emojidefault\`\`\` → _ikut emoji bot utama_\n`;
+                        bodyText += `• \`\`\`.emojiclear\`\`\` → ~semua emoji~ _direset ke awal_ ⚠️\n`;
                 } else {
-                        bodyText += `│ • \`\`\`.emojicustom\`\`\` → _aktifkan emoji kustom_\n`;
-                        bodyText += `│ • \`\`\`.emojidefault\`\`\` → _balik ke 1900 emoji default_\n`;
-                        bodyText += `│ • \`\`\`.emojiclear\`\`\` → ~semua emoji~ _direset ke awal_ ⚠️\n`;
+                        bodyText += `• \`\`\`.emojicustom\`\`\` → _aktifkan emoji kustom_\n`;
+                        bodyText += `• \`\`\`.emojidefault\`\`\` → _balik ke 1900 emoji default_\n`;
+                        bodyText += `• \`\`\`.emojiclear\`\`\` → ~semua emoji~ _direset ke awal_ ⚠️\n`;
                 }
-                bodyText += `│ • \`\`\`.emojilist\`\`\` → _lihat daftar emoji aktif_\n`;
-                bodyText += `│ • \`\`\`.emoji\`\`\` → _tampilkan panduan ini_\n`;
-                if (_isJb) bodyText += `│\n│ 📁 *Data tersimpan di folder kamu sendiri*\n│ _tidak berpengaruh ke bot utama_ ✅\n`;
-                bodyText += `│\n> 💡 _Ketuk tombol di bawah untuk aksi cepat!_\n`;
-                bodyText += `╰══════════════════════╯`;
+                bodyText += `• \`\`\`.emojilist\`\`\` → _lihat daftar emoji aktif_\n`;
+                bodyText += `• \`\`\`.emoji\`\`\` → _tampilkan panduan ini_\n`;
+                if (_isJb) bodyText += `\n📁 *Data tersimpan di folder kamu sendiri*\n_tidak berpengaruh ke bot utama_ ✅\n`;
+                bodyText += `\n> 💡 _Ketuk tombol di bawah untuk aksi cepat!_`;
 
                 // ── Kirim dengan single button, fallback ke teks biasa ────────────────
                 if (Button) {
@@ -816,31 +815,30 @@ async function handleEmojilist({ hisoka, m, tolak, logCommand, getJadibotNumber,
                 const modeNow    = isCustom ? 'custom' : 'default';
                 const markMode   = (key) => key === modeNow ? '✓ ' : '';
 
-                let response = `╭═══『 *📋 LIST EMOJI* 』═══╮\n│\n`;
-                if (_isJb) response += `│ 👤 *Milik:* +${_jbNum}\n`;
-                response += `│ ⚙️ *Mode:* ${_modeLabel}\n`;
-                response += `│ 📊 *Total:* ${data.count} emoji\n│\n`;
+                let response = `*📋 LIST EMOJI*\n`;
+                if (_isJb) response += `👤 *Milik:* +${_jbNum}\n`;
+                response += `⚙️ *Mode:* ${_modeLabel}\n`;
+                response += `📊 *Total:* ${data.count} emoji\n\n`;
                 response += renderEmojiList(data.emojis);
-                response += `│\n├──『 *⚡ Aksi Cepat* 』──\n│\n`;
-                response += `│ *Tambah:*\n`;
-                response += `│ • \`\`\`.emojiadd 😊,😄\`\`\` — _tambah single_\n`;
-                response += `│ • \`\`\`.emojiadd 😊😄😁\`\`\` — _tambah gabungan_\n`;
-                response += `│\n│ *Hapus:*\n`;
-                response += `│ • \`\`\`.emojidel 😊\`\`\` — _hapus single_\n`;
-                response += `│ • \`\`\`.emojidel 1,2\`\`\` — _hapus gabung by nomor_\n`;
-                response += `│\n│ *Mode & Lainnya:*\n`;
+                response += `\n*⚡ Aksi Cepat*\n\n`;
+                response += `*Tambah:*\n`;
+                response += `• \`\`\`.emojiadd 😊,😄\`\`\` — _tambah single_\n`;
+                response += `• \`\`\`.emojiadd 😊😄😁\`\`\` — _tambah gabungan_\n`;
+                response += `\n*Hapus:*\n`;
+                response += `• \`\`\`.emojidel 😊\`\`\` — _hapus single_\n`;
+                response += `• \`\`\`.emojidel 1,2\`\`\` — _hapus gabung by nomor_\n`;
+                response += `\n*Mode & Lainnya:*\n`;
                 if (_isJb) {
-                        response += `│ • \`\`\`.emojicustom\`\`\` → _pakai emoji kamu sendiri_\n`;
-                        response += `│ • \`\`\`.emojidefault\`\`\` → _ikut emoji bot utama_\n`;
-                        response += `│ • \`\`\`.emojiclear\`\`\` → ~semua emoji~ _direset ke awal_ ⚠️\n`;
+                        response += `• \`\`\`.emojicustom\`\`\` → _pakai emoji kamu sendiri_\n`;
+                        response += `• \`\`\`.emojidefault\`\`\` → _ikut emoji bot utama_\n`;
+                        response += `• \`\`\`.emojiclear\`\`\` → ~semua emoji~ _direset ke awal_ ⚠️\n`;
                 } else {
-                        response += `│ • \`\`\`.emojicustom\`\`\` → _aktifkan emoji kustom_\n`;
-                        response += `│ • \`\`\`.emojidefault\`\`\` → _balik ke 1900 default_\n`;
-                        response += `│ • \`\`\`.emojiclear\`\`\` → ~semua emoji~ _direset ke awal_ ⚠️\n`;
+                        response += `• \`\`\`.emojicustom\`\`\` → _aktifkan emoji kustom_\n`;
+                        response += `• \`\`\`.emojidefault\`\`\` → _balik ke 1900 default_\n`;
+                        response += `• \`\`\`.emojiclear\`\`\` → ~semua emoji~ _direset ke awal_ ⚠️\n`;
                 }
-                response += `│ • \`\`\`.emoji\`\`\` → _lihat tutorial lengkap_\n`;
-                response += `│\n> 💡 _Ketuk tombol di bawah untuk aksi cepat!_\n`;
-                response += `╰═════════════════════╯`;
+                response += `• \`\`\`.emoji\`\`\` → _lihat tutorial lengkap_\n`;
+                response += `\n> 💡 _Ketuk tombol di bawah untuk aksi cepat!_`;
 
                 // ── Kirim dengan single button, fallback ke teks biasa ────────────────
                 if (Button) {

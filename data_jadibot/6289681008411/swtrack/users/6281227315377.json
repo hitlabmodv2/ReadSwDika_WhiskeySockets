@@ -300,5 +300,28 @@
       }
     ],
     "processedAt": "2026-07-01T14:37:59.334Z"
+  },
+  "3EB007606DAF46A7938B17": {
+    "id": "3EB007606DAF46A7938B17",
+    "sender": "6281227315377@s.whatsapp.net",
+    "name": "Kyou.",
+    "type": "imageMessage",
+    "arrivedAt": "2026-07-01T15:08:19.212Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "Signal Lib ✓",
+    "source": "status",
+    "number": "6281227315377",
+    "resolvedPn": "6281227315377@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6281227315377@s.whatsapp.net",
+      "fromMe": false,
+      "id": "3EB007606DAF46A7938B17",
+      "participant": "113322762481669@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-01T15:08:19.212Z"
   }
 }
