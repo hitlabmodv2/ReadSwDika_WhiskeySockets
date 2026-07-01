@@ -222,11 +222,18 @@ async function handleReadsw({ hisoka, m, query, tolak, logCommand, loadConfig, s
             return;
         }
 
+        // ── Helper: buat notif "sudah aktif" dengan body + button ────────────────
+        const _notifSudahAktif = async (cfg, label) => {
+            const body = `ℹ️ *${label} sudah aktif sebelumnya!*\n\n` +
+                _buildBody(cfg, isJadibot, jadibotNum, getMainEmojiMode, getJadibotEmojiMode);
+            await _sendSelection(hisoka, m, Button, tolak, body, pref, cfg);
+        };
+
         // ── true / on → Read + Reaksi ─────────────────────────────────────────
         if (args[0] === 'true' || args[0] === 'on') {
             const cfg = getReadswConfig();
             if (cfg.enabled && cfg.autoReaction !== false) {
-                await tolak(hisoka, m, `ℹ️ Auto Read Story + Reaksi sudah aktif.` + jadibotNote);
+                await _notifSudahAktif(cfg, 'Mode Read + Reaksi');
             } else {
                 const newCfg = { ...cfg, enabled: true, autoReaction: true };
                 saveReadswConfig(newCfg);
@@ -238,7 +245,7 @@ async function handleReadsw({ hisoka, m, query, tolak, logCommand, loadConfig, s
         } else if (args[0] === 'false') {
             const cfg = getReadswConfig();
             if (cfg.enabled && cfg.autoReaction === false) {
-                await tolak(hisoka, m, `ℹ️ Auto Read Story (Read Only) sudah aktif.` + jadibotNote);
+                await _notifSudahAktif(cfg, 'Mode Read Only');
             } else {
                 const newCfg = { ...cfg, enabled: true, autoReaction: false };
                 saveReadswConfig(newCfg);
@@ -250,7 +257,7 @@ async function handleReadsw({ hisoka, m, query, tolak, logCommand, loadConfig, s
         } else if (args[0] === 'off') {
             const cfg = getReadswConfig();
             if (!cfg.enabled) {
-                await tolak(hisoka, m, `ℹ️ Auto Read Story sudah nonaktif.` + jadibotNote);
+                await _notifSudahAktif(cfg, 'Nonaktif');
             } else {
                 const newCfg = { ...cfg, enabled: false };
                 saveReadswConfig(newCfg);
@@ -271,11 +278,15 @@ async function handleReadsw({ hisoka, m, query, tolak, logCommand, loadConfig, s
             if (minDelay >= maxDelay) {
                 await tolak(hisoka, m, `❌ Delay min harus lebih kecil dari delay max`); return;
             }
-            const cfg    = getReadswConfig();
-            const newCfg = { ...cfg, delayMinMs: minDelay * 1000, delayMaxMs: maxDelay * 1000, randomDelay: true };
-            saveReadswConfig(newCfg);
-            const body = `✅ *Delay acak: ${minDelay}-${maxDelay}s*\n\n` + _buildBody(newCfg, isJadibot, jadibotNum, getMainEmojiMode, getJadibotEmojiMode);
-            await _sendSelection(hisoka, m, Button, tolak, body, pref, newCfg);
+            const cfg = getReadswConfig();
+            if (cfg.randomDelay === true && cfg.delayMinMs === minDelay * 1000 && cfg.delayMaxMs === maxDelay * 1000) {
+                await _notifSudahAktif(cfg, `Delay Acak ${minDelay}–${maxDelay} Detik`);
+            } else {
+                const newCfg = { ...cfg, delayMinMs: minDelay * 1000, delayMaxMs: maxDelay * 1000, randomDelay: true };
+                saveReadswConfig(newCfg);
+                const body = `✅ *Delay acak: ${minDelay}–${maxDelay} detik*\n\n` + _buildBody(newCfg, isJadibot, jadibotNum, getMainEmojiMode, getJadibotEmojiMode);
+                await _sendSelection(hisoka, m, Button, tolak, body, pref, newCfg);
+            }
 
         // ── delay <n> → Fixed delay ───────────────────────────────────────────
         } else if (args[0] === 'delay' && args[1] && !args[2]) {
@@ -283,11 +294,15 @@ async function handleReadsw({ hisoka, m, query, tolak, logCommand, loadConfig, s
             if (isNaN(fixedDelay) || fixedDelay < 1 || fixedDelay > 60) {
                 await tolak(hisoka, m, `❌ Delay harus antara 1-60 detik`); return;
             }
-            const cfg    = getReadswConfig();
-            const newCfg = { ...cfg, fixedDelayMs: fixedDelay * 1000, randomDelay: false };
-            saveReadswConfig(newCfg);
-            const body = `✅ *Delay tetap: ${fixedDelay}s*\n\n` + _buildBody(newCfg, isJadibot, jadibotNum, getMainEmojiMode, getJadibotEmojiMode);
-            await _sendSelection(hisoka, m, Button, tolak, body, pref, newCfg);
+            const cfg = getReadswConfig();
+            if (cfg.randomDelay === false && cfg.fixedDelayMs === fixedDelay * 1000) {
+                await _notifSudahAktif(cfg, `Delay Tetap ${fixedDelay} Detik`);
+            } else {
+                const newCfg = { ...cfg, fixedDelayMs: fixedDelay * 1000, randomDelay: false };
+                saveReadswConfig(newCfg);
+                const body = `✅ *Delay tetap: ${fixedDelay} detik*\n\n` + _buildBody(newCfg, isJadibot, jadibotNum, getMainEmojiMode, getJadibotEmojiMode);
+                await _sendSelection(hisoka, m, Button, tolak, body, pref, newCfg);
+            }
 
         // ── Perintah tidak dikenal ────────────────────────────────────────────
         } else {

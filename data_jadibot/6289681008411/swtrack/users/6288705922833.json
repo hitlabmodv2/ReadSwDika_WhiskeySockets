@@ -64,5 +64,28 @@
     },
     "updatedAt": "2026-06-30T11:32:59.472Z",
     "processedAt": "2026-06-30T11:32:59.472Z"
+  },
+  "A58F6BCDAF0E3C405CAAF92C551DE916": {
+    "id": "A58F6BCDAF0E3C405CAAF92C551DE916",
+    "sender": "6288705922833@s.whatsapp.net",
+    "name": "alala",
+    "type": "imageMessage",
+    "arrivedAt": "2026-07-01T11:40:08.454Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "Signal Lib ✓",
+    "source": "status",
+    "number": "6288705922833",
+    "resolvedPn": "6288705922833@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6288705922833@s.whatsapp.net",
+      "fromMe": false,
+      "id": "A58F6BCDAF0E3C405CAAF92C551DE916",
+      "participant": "200897581863137@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-01T11:40:08.454Z"
   }
 }
