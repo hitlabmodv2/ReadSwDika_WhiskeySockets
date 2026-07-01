@@ -41,8 +41,15 @@ _🔍 Masih dalam tahap pemantauan — informasi tanggal rilis akan diumumkan ke
 > Pilih preset mana pun, delay acak selalu mulai dari 1 detik, cuma batas atasnya yang berubah
 
 *2. 📊 Log `[MemoryMonitor]` Lebih Lengkap & Rapi*
-- Ditambahkan: nomor urutan cek, indikator tren RAM (↑ naik / ↓ turun / → stabil), Heap total, External memory, RAM free sistem
-- Ditambahkan: CPU Load Average (1/5/15 menit) + jumlah core, PID proses, versi Node.js, dan Uptime bot
+- Format output sekarang lengkap mencakup 8 baris data:
+  `Bot` — RAM proses dalam MB + persentase dari total RAM sistem + tren (↑ naik / ↓ turun / → stabil)
+  `Heap` — Heap used / Heap total (MB)
+  `Ext` — External memory + buffers (MB)
+  `Sys` — Persentase RAM sistem terpakai (used / total GB, free X GB)
+  `Load` — Progress bar visual CPU load + persentase
+  `CPU` — Load average 1/5/15 menit + jumlah core
+  `PID` — ID proses | versi Node.js | Uptime bot
+- Header menampilkan status (`✅ Normal` / `⚠️ Tinggi` / `🔴 Kritis`) + nomor urutan cek (`cek ke-N`)
 - Perubahan di `src/helper/memoryMonitor.js`
 
 *3. 🔧 `hotReload.js` — Auto-Discovery + Deteksi File Baru/Hapus Real-Time*
