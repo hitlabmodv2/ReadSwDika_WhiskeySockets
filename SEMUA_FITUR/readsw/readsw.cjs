@@ -150,14 +150,14 @@ async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, cfg) {
                 );
             }
 
-            // ── Section 3: Delay Tetap 1-15 detik ────────────────────────
-            btn.makeSections('⏱️ Delay Tetap (1–15 detik)');
+            // ── Section 3: Delay Tetap 1-20 detik ────────────────────────
+            btn.makeSections('⏱️ Delay Tetap (1–20 detik)');
 
-            for (let i = 1; i <= 15; i++) {
+            for (let i = 1; i <= 20; i++) {
                 let desc;
                 if (i <= 3)       desc = 'Sangat cepat — tidak disarankan';
                 else if (i <= 7)  desc = 'Cepat — cocok untuk banyak kontak';
-                else if (i <= 11) desc = 'Normal — aman dan stabil';
+                else if (i <= 13) desc = 'Normal — aman dan stabil';
                 else              desc = 'Lambat — paling aman dari ban';
                 btn.makeRow(
                     markFixed(i) + `${i} detik`,
