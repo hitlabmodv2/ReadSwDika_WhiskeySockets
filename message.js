@@ -1327,19 +1327,19 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                         case 'emojidefault': {
                                 const { handleEmojidefault } = _require(path.resolve('./SEMUA_FITUR/info/emoji-cmd.cjs'));
-                                await handleEmojidefault({ hisoka, m, tolak, logCommand, getJadibotNumber, resetToDefaultEmojis });
+                                await handleEmojidefault({ hisoka, m, tolak, logCommand, getJadibotNumber, resetToDefaultEmojis, Button });
                                 break;
                         }
 
                         case 'emojicustom': {
                                 const { handleEmojicustom } = _require(path.resolve('./SEMUA_FITUR/info/emoji-cmd.cjs'));
-                                await handleEmojicustom({ hisoka, m, tolak, logCommand, getJadibotNumber, setCustomEmojiMode, listJadibotEmojis });
+                                await handleEmojicustom({ hisoka, m, tolak, logCommand, getJadibotNumber, setCustomEmojiMode, listJadibotEmojis, Button });
                                 break;
                         }
 
                         case 'emojiclear': {
                                 const { handleEmojiclear } = _require(path.resolve('./SEMUA_FITUR/info/emoji-cmd.cjs'));
-                                await handleEmojiclear({ hisoka, m, tolak, logCommand, getJadibotNumber, clearJadibotEmojis });
+                                await handleEmojiclear({ hisoka, m, tolak, logCommand, getJadibotNumber, clearJadibotEmojis, Button });
                                 break;
                         }
 
