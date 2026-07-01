@@ -3,9 +3,34 @@ _📅 Jadwal rilis belum ditentukan_ 🕐
 _🔍 Masih dalam tahap pemantauan — informasi tanggal rilis akan diumumkan kemudian, harap bersabar_ 😊
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V25*
-✨ *0 Fitur Baru*
-🔧 *1 Bug/Error Fix*
-🚀 *0 Perubahan*
+✨ *1 Fitur Baru*
+🔧 *2 Bug/Error Fix*
+🚀 *2 Perubahan*
+━━━━━━━━━━━━━━━━━━━━━━
+✨ *FITUR BARU*
+━━━━━━━━━━━━━━━━━━━━━━
+*1. 🔄 Command `.reload` — Cek Status Hot Reload*
+- Command baru untuk cek status sistem hot reload langsung dari chat
+- Menampilkan: total file yang di-watch, jumlah ESM aktif, jumlah CJS watched, daftar folder yang di-auto-scan, dan jumlah file yang sengaja di-skip
+- Sudah ditambahkan ke menu bot utama (`menu_utama.js` & `menupages.cjs`)
+> Ketik `.reload` untuk lihat file apa saja yang sedang dipantau bot secara realtime
+
+━━━━━━━━━━━━━━━━━━━━━━
+🚀 *PERUBAHAN*
+━━━━━━━━━━━━━━━━━━━━━━
+*1. 📊 Log `[MemoryMonitor]` Lebih Lengkap & Rapi*
+- Ditambahkan: nomor urutan cek, indikator tren RAM (↑ naik / ↓ turun / → stabil), Heap total, External memory, RAM free sistem
+- Ditambahkan: CPU Load Average (1/5/15 menit) + jumlah core, PID proses, versi Node.js, dan Uptime bot
+- Perubahan di `src/helper/memoryMonitor.js`
+
+*2. 🔧 `hotReload.js` — Auto-Discovery, Tidak Perlu Daftar Manual Lagi*
+- Sebelumnya file baru harus didaftarkan manual satu-satu di `WATCHED_FILES` supaya bisa hot-reload
+- Sekarang bot otomatis scan & watch seluruh folder `SEMUA_FITUR`, `src/helper`, `src/db`, `src/config` secara rekursif
+- File baru yang ditambahkan ke folder tersebut otomatis langsung ke-detect & aktif ter-watch real-time tanpa restart bot
+- File yang dihapus otomatis dilepas dari daftar watch, tidak nyangkut/error
+- File yang memegang koneksi/session aktif (memoryMonitor, jadibot, authState, browserSwitch, dll) tetap sengaja di-skip biar bot tidak crash
+> Update fitur baru sekarang otomatis kebaca bot tanpa perlu edit `hotReload.js` manual
+
 ━━━━━━━━━━━━━━━━━━━━━━
 🔧 *BUG/ERROR FIX*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -15,3 +40,9 @@ _🔍 Masih dalam tahap pemantauan — informasi tanggal rilis akan diumumkan ke
 - Fix: diganti ke `getMode()` dari `emoji.js` yang baca file yang benar untuk bot utama
 - Jadibot tidak terpengaruh — sudah benar sejak awal (baca dari `data_jadibot/<nomor>/emoji.json`)
 > EmojiMode kini tampil akurat realtime sesuai mode aktif, tanpa restart bot
+
+*2. 💾 Command `.ram` — Error "formatUptime is not a function"*
+- ~Bug: saat ketik `.ram`, muncul error `[CekRAM] Error: formatUptime is not a function`~
+- Penyebab: bot yang sedang berjalan masih memakai versi lama `memoryMonitor.js` di memori (ESM cache), belum ke-reload setelah fungsi `formatUptime` ditambahkan
+- Fix: restart proses bot supaya modul ter-load ulang; `.ram` sekarang juga ditampilkan lebih lengkap (Heap, External memory, RAM free, CPU Load, PID, versi Node, Uptime)
+> `.ram` sudah normal, data akurat, sudah diuji langsung tanpa error
