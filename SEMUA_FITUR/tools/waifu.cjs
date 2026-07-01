@@ -73,11 +73,13 @@ const NSFW_TAGS = [
 // Cara dapat token: https://www.waifu.im/dashboard (login → Generate Token)
 // Simpan di config.json: { "waifu": { "token": "TOKEN_KAMU_DISINI" } }
 
+const WAIFU_TOKEN = 'lPcSc1Fh55RUQ6g3PSzm2YxCEVTUxhlsiRMSVajHCN8';
+
 function _getWaifuToken() {
     try {
         const cfg = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf-8'));
-        return cfg?.waifu?.token || null;
-    } catch (_) { return null; }
+        return cfg?.waifu?.token || WAIFU_TOKEN;
+    } catch (_) { return WAIFU_TOKEN; }
 }
 
 // ── HTTP helpers ───────────────────────────────────────────────────────────────
