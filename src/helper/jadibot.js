@@ -1629,11 +1629,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
       const isFreshPairing = pairingRequested.has(number)
       const _connectTs = Date.now()
 
-      // Always log connection status — fresh pairing or reconnect
-      const _LC = '\x1b[36m', _LR = '\x1b[0m', _LB = '\x1b[1m'
-      console.log(`${_LC}╠══════════════════════════════════╣${_LR}`)
-      console.log(`${_LC}║${_LR} ✅ ${_LB}+${number}${_LR} ${isFreshPairing ? 'CONNECTED (pairing berhasil)' : 'RECONNECTED ✔'}`)
-      console.log(`${_LC}╚══════════════════════════════════╝${_LR}`)
+      // Connection box ditampilkan SETELAH expiry diset (lihat di bawah)
 
       jadibotMap.set(number, sock)
       jadibotConnectedAt.set(number, _connectTs)
@@ -1680,6 +1676,22 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
         pairingTimeout.delete(number)
       }
 
+      // ── Combined connection + expiry box ──
+      {
+        const _LC2 = '\x1b[36m', _LR2 = '\x1b[0m', _LB2 = '\x1b[1m'
+        const _meta2 = getJadibotExpiry(number)
+        let _exIcon = '♾️ ', _exLabel = 'Permanent'
+        if (_meta2 && _meta2.permanent !== true && _meta2.expiresAt) {
+          const _ms2 = Number(_meta2.expiresAt) - Date.now()
+          if (_ms2 <= 0) { _exIcon = '💀'; _exLabel = 'kedaluwarsa' }
+          else { _exIcon = '🕐'; _exLabel = formatRemainingTime(_ms2) }
+        }
+        const _line2 = '─'.repeat(34)
+        console.log(`${_LC2}╭${_line2}╮${_LR2}`)
+        console.log(`${_LC2}│${_LR2} ✅ ${_LB2}+${number}${_LR2} ${isFreshPairing ? 'CONNECTED ✔' : 'RECONNECTED ✔'}`)
+        console.log(`${_LC2}│${_LR2} ${_exIcon} ${_exLabel}`)
+        console.log(`${_LC2}╰${_line2}╯${_LR2}`)
+      }
 
       // Edit pesan pairing secara realtime → tandai sudah terhubung
       if (pairingMsgKey && editMsg) {
@@ -2217,7 +2229,22 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
         setPermanentJadibot(number, 'active')
         console.log(`[JADIBOT QR] ⚠️ ${number} tidak ada data expiry → dijadikan permanent (auto-start/reconnect)`)
       }
-      console.log(`[JADIBOT QR] ✅ ${number} CONNECTED via QR`)
+      // ── Combined connection + expiry box (QR mode) ──
+      {
+        const _LC2 = '\x1b[36m', _LR2 = '\x1b[0m', _LB2 = '\x1b[1m'
+        const _meta2 = getJadibotExpiry(number)
+        let _exIcon = '♾️ ', _exLabel = 'Permanent'
+        if (_meta2 && _meta2.permanent !== true && _meta2.expiresAt) {
+          const _ms2 = Number(_meta2.expiresAt) - Date.now()
+          if (_ms2 <= 0) { _exIcon = '💀'; _exLabel = 'kedaluwarsa' }
+          else { _exIcon = '🕐'; _exLabel = formatRemainingTime(_ms2) }
+        }
+        const _line2 = '─'.repeat(34)
+        console.log(`${_LC2}╭${_line2}╮${_LR2}`)
+        console.log(`${_LC2}│${_LR2} ✅ ${_LB2}+${number}${_LR2} CONNECTED ✔`)
+        console.log(`${_LC2}│${_LR2} ${_exIcon} ${_exLabel}`)
+        console.log(`${_LC2}╰${_line2}╯${_LR2}`)
+      }
       try { if (reactFn) await reactFn('✅') } catch {}
 
       // Cek mode pairing — v2 = kirim welcome ke nomor tujuan, v1 = tidak

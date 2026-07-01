@@ -1,13 +1,13 @@
 {
-  "ACC3B8CCF9BFD9B1E6BA0842E0F92908": {
-    "id": "ACC3B8CCF9BFD9B1E6BA0842E0F92908",
+  "AC539C89E2D7E60970CE875339491B0C": {
+    "id": "AC539C89E2D7E60970CE875339491B0C",
     "sender": "6281374976765@s.whatsapp.net",
     "name": "tudtud",
     "type": "videoMessage",
-    "arrivedAt": "2026-06-29T03:42:47.245Z",
+    "arrivedAt": "2026-07-01T02:58:51.445Z",
     "read": true,
     "reacted": true,
-    "emoji": "🎭",
+    "emoji": "🧸",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6281374976765",
@@ -16,17 +16,17 @@
       "remoteJid": "status@broadcast",
       "remoteJidAlt": "6281374976765@s.whatsapp.net",
       "fromMe": false,
-      "id": "ACC3B8CCF9BFD9B1E6BA0842E0F92908",
+      "id": "AC539C89E2D7E60970CE875339491B0C",
       "participant": "195713338183899@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-29T03:43:21.295Z",
+    "updatedAt": "2026-07-01T02:59:01.445Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6281374976765@s.whatsapp.net",
         "fromMe": false,
-        "id": "ACC3B8CCF9BFD9B1E6BA0842E0F92908",
+        "id": "AC539C89E2D7E60970CE875339491B0C",
         "participant": "195713338183899@lid",
         "addressingMode": "lid"
       },
@@ -34,82 +34,11 @@
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6281374976765@s.whatsapp.net",
         "fromMe": false,
-        "id": "ACC3B8CCF9BFD9B1E6BA0842E0F92908",
+        "id": "AC539C89E2D7E60970CE875339491B0C",
         "participant": "6281374976765@s.whatsapp.net",
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-29T03:43:01.111Z",
-    "deleted": true,
-    "deletedAt": "2026-06-29T03:43:21.295Z"
-  },
-  "ACD06F297EE81D420AACDCC7C96FA8BC": {
-    "id": "ACD06F297EE81D420AACDCC7C96FA8BC",
-    "sender": "6281374976765@s.whatsapp.net",
-    "name": "tudtud",
-    "type": "videoMessage",
-    "arrivedAt": "2026-06-29T03:43:21.298Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
-    "resolve": "PN langsung ✓",
-    "source": "status",
-    "number": "6281374976765",
-    "resolvedPn": "6281374976765@s.whatsapp.net",
-    "messageKey": {
-      "remoteJid": "status@broadcast",
-      "remoteJidAlt": "6281374976765@s.whatsapp.net",
-      "fromMe": false,
-      "id": "ACD06F297EE81D420AACDCC7C96FA8BC",
-      "participant": "195713338183899@lid",
-      "addressingMode": "lid"
-    },
-    "updatedAt": "2026-06-29T03:43:33.524Z",
-    "deleted": true,
-    "deletedAt": "2026-06-29T03:43:33.524Z"
-  },
-  "ACCABBB8E4A46EA32C176583C99AB25B": {
-    "id": "ACCABBB8E4A46EA32C176583C99AB25B",
-    "sender": "6281374976765@s.whatsapp.net",
-    "name": "tudtud",
-    "type": "videoMessage",
-    "arrivedAt": "2026-06-29T03:43:26.350Z",
-    "read": true,
-    "reacted": true,
-    "emoji": "🐩",
-    "resolve": "PN langsung ✓",
-    "source": "status",
-    "number": "6281374976765",
-    "resolvedPn": "6281374976765@s.whatsapp.net",
-    "messageKey": {
-      "remoteJid": "status@broadcast",
-      "remoteJidAlt": "6281374976765@s.whatsapp.net",
-      "fromMe": false,
-      "id": "ACCABBB8E4A46EA32C176583C99AB25B",
-      "participant": "195713338183899@lid",
-      "addressingMode": "lid"
-    },
-    "updatedAt": "2026-06-29T03:43:33.521Z",
-    "receiptKeys": [
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6281374976765@s.whatsapp.net",
-        "fromMe": false,
-        "id": "ACCABBB8E4A46EA32C176583C99AB25B",
-        "participant": "195713338183899@lid",
-        "addressingMode": "lid"
-      },
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6281374976765@s.whatsapp.net",
-        "fromMe": false,
-        "id": "ACCABBB8E4A46EA32C176583C99AB25B",
-        "participant": "6281374976765@s.whatsapp.net",
-        "addressingMode": "lid"
-      }
-    ],
-    "processedAt": "2026-06-29T03:43:31.053Z",
-    "deleted": true,
-    "deletedAt": "2026-06-29T03:43:33.521Z"
+    "processedAt": "2026-07-01T02:59:01.445Z"
   }
 }

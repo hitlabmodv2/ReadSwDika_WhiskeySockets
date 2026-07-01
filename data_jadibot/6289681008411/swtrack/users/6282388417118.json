@@ -40,5 +40,72 @@
       }
     ],
     "processedAt": "2026-06-30T13:37:15.805Z"
+  },
+  "AC2D74C872847C4D55814A2154D107B4": {
+    "id": "AC2D74C872847C4D55814A2154D107B4",
+    "sender": "6282388417118@s.whatsapp.net",
+    "name": "Kaguya",
+    "type": "imageMessage",
+    "arrivedAt": "2026-07-01T03:29:14.884Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "Signal Lib ✓",
+    "source": "status",
+    "number": "6282388417118",
+    "resolvedPn": "6282388417118@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6282388417118@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC2D74C872847C4D55814A2154D107B4",
+      "participant": "20749339349072@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-01T03:29:18.478Z",
+    "deleted": true,
+    "deletedAt": "2026-07-01T03:29:18.478Z"
+  },
+  "ACB76B0D3CB18D207B9108D4FED198A3": {
+    "id": "ACB76B0D3CB18D207B9108D4FED198A3",
+    "sender": "6282388417118@s.whatsapp.net",
+    "name": "Kaguya",
+    "type": "imageMessage",
+    "arrivedAt": "2026-07-01T03:30:09.053Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🎳",
+    "resolve": "Signal Lib ✓",
+    "source": "status",
+    "number": "6282388417118",
+    "resolvedPn": "6282388417118@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6282388417118@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACB76B0D3CB18D207B9108D4FED198A3",
+      "participant": "20749339349072@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-01T03:30:15.178Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282388417118@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACB76B0D3CB18D207B9108D4FED198A3",
+        "participant": "20749339349072@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282388417118@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACB76B0D3CB18D207B9108D4FED198A3",
+        "participant": "6282388417118@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-01T03:30:15.178Z"
   }
 }

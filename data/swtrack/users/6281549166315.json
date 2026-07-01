@@ -1,13 +1,13 @@
 {
-  "AC26703D669499560BFA5958A67118DA": {
-    "id": "AC26703D669499560BFA5958A67118DA",
+  "ACB1237A33E517ECE8494CBDC24968EA": {
+    "id": "ACB1237A33E517ECE8494CBDC24968EA",
     "sender": "6281549166315@s.whatsapp.net",
     "name": "adien",
     "type": "videoMessage",
-    "arrivedAt": "2026-06-29T03:42:45.212Z",
-    "read": true,
-    "reacted": true,
-    "emoji": "🐺",
+    "arrivedAt": "2026-07-01T02:57:07.533Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6281549166315",
@@ -16,17 +16,42 @@
       "remoteJid": "status@broadcast",
       "remoteJidAlt": "6281549166315@s.whatsapp.net",
       "fromMe": false,
-      "id": "AC26703D669499560BFA5958A67118DA",
+      "id": "ACB1237A33E517ECE8494CBDC24968EA",
       "participant": "215693693821070@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-29T03:42:58.463Z",
+    "updatedAt": "2026-07-01T02:57:11.558Z",
+    "deleted": true,
+    "deletedAt": "2026-07-01T02:57:11.558Z"
+  },
+  "ACC64D235D3C9129969F7A03FEAB4620": {
+    "id": "ACC64D235D3C9129969F7A03FEAB4620",
+    "sender": "6281549166315@s.whatsapp.net",
+    "name": "adien",
+    "type": "videoMessage",
+    "arrivedAt": "2026-07-01T02:57:13.765Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "⚽",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6281549166315",
+    "resolvedPn": "6281549166315@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6281549166315@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACC64D235D3C9129969F7A03FEAB4620",
+      "participant": "215693693821070@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-01T03:05:52.403Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6281549166315@s.whatsapp.net",
         "fromMe": false,
-        "id": "AC26703D669499560BFA5958A67118DA",
+        "id": "ACC64D235D3C9129969F7A03FEAB4620",
         "participant": "215693693821070@lid",
         "addressingMode": "lid"
       },
@@ -34,11 +59,55 @@
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6281549166315@s.whatsapp.net",
         "fromMe": false,
-        "id": "AC26703D669499560BFA5958A67118DA",
+        "id": "ACC64D235D3C9129969F7A03FEAB4620",
         "participant": "6281549166315@s.whatsapp.net",
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-29T03:42:58.462Z"
+    "processedAt": "2026-07-01T02:57:24.834Z",
+    "deleted": true,
+    "deletedAt": "2026-07-01T03:05:52.403Z"
+  },
+  "ACE93B94A5D78B70CDB6CC58FB0BC4FC": {
+    "id": "ACE93B94A5D78B70CDB6CC58FB0BC4FC",
+    "sender": "6281549166315@s.whatsapp.net",
+    "name": "adien",
+    "type": "videoMessage",
+    "arrivedAt": "2026-07-01T02:57:48.569Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "𝖲𝖠𝖸𝖠 𝖠𝖪𝖠𝖭 𝖫𝖠𝖶𝖠𝖭 🤬",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6281549166315",
+    "resolvedPn": "6281549166315@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6281549166315@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACE93B94A5D78B70CDB6CC58FB0BC4FC",
+      "participant": "215693693821070@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-01T02:58:06.524Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281549166315@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACE93B94A5D78B70CDB6CC58FB0BC4FC",
+        "participant": "215693693821070@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281549166315@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACE93B94A5D78B70CDB6CC58FB0BC4FC",
+        "participant": "6281549166315@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-01T02:58:06.523Z"
   }
 }

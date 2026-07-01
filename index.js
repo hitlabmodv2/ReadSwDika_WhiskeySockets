@@ -979,36 +979,7 @@ async function main() {
                                 } catch (_) {}
                         }, 3000);
 
-                        // ── Ringkasan jadibot aktif setelah restart (muncul setelah semua konek) ──
-                        setTimeout(() => {
-                                try {
-                                        const _active = [...jadibotMap.keys()];
-                                        if (!_active.length) return;
-                                        const _C = '\x1b[36m', _G = '\x1b[32m', _Y = '\x1b[33m';
-                                        const _R = '\x1b[31m', _DIM = '\x1b[2m', _B = '\x1b[1m', _X = '\x1b[0m';
-                                        const _line = '─'.repeat(34);
-                                        console.log(`${_C}╭${_line}╮${_X}`);
-                                        console.log(`${_C}│${_X}  📋 ${_B}ꜱᴛᴀᴛᴜꜱ ᴊᴀᴅɪʙᴏᴛ ᴀᴋᴛɪꜰ${_X}${_DIM}  (${_active.length} sesi)${_X}`.padEnd(52) + `  ${_C}│${_X}`);
-                                        console.log(`${_C}├${_line}┤${_X}`);
-                                        for (const _num of _active) {
-                                                const _meta = getJadibotExpiry(_num);
-                                                let _icon, _label, _col;
-                                                if (!_meta) {
-                                                        _icon = '❓'; _col = _DIM; _label = 'tidak ada data';
-                                                } else if (_meta.permanent === true) {
-                                                        _icon = '♾️ '; _col = _C; _label = 'Permanent';
-                                                } else {
-                                                        const _ms = Number(_meta.expiresAt) - Date.now();
-                                                        if (_ms <= 0)                          { _icon = '💀'; _col = _R;   _label = 'kedaluwarsa'; }
-                                                        else if (_ms < 60 * 60 * 1000)         { _icon = '🔴'; _col = _R;   _label = formatRemainingTime(_ms); }
-                                                        else if (_ms < 24 * 60 * 60 * 1000)    { _icon = '🟡'; _col = _Y;   _label = formatRemainingTime(_ms); }
-                                                        else                                   { _icon = '🟢'; _col = _G;   _label = formatRemainingTime(_ms); }
-                                                }
-                                                console.log(`${_C}│${_X} ${_G}✅${_X} ${_B}+${_num}${_X}  ${_icon} ${_col}${_label}${_X}`);
-                                        }
-                                        console.log(`${_C}╰${_line}╯${_X}`);
-                                } catch (_) {}
-                        }, 15000);
+                        // ── Status per-jadibot sudah ditampilkan langsung saat connect (di jadibot.js) ──
 
                         const commands = await getCaseName(path.join(process.cwd(), 'message.js'));
                         hisoka.loadedCommands = commands;

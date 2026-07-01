@@ -42,7 +42,7 @@ import { getJadibotReadchat, getJadibotNumber, getJadibotEmojiMode } from '../..
 
 import { telegram } from '../../src/helper/index.js';
 import { isNumber } from '../../src/helper/text.js';
-import { getRandomEmoji, getStatusEmojis } from '../../src/helper/emoji.js';
+import { getRandomEmoji, getStatusEmojis, getMode } from '../../src/helper/emoji.js';
 import { getTmpPath } from '../../src/helper/cleaner.js';
 import {
         SW_TRACK_USER_DIR,
@@ -394,7 +394,7 @@ export default async function (m, hisoka) {
                                                                 resolve: (miss.resolve || 'PN ✓') + ' ♻️',
                                                                 delaySeconds: null,
                                                                 mode: 'Read+Reaction ✓',
-                                                                emojiMode: getJadibotEmojiMode(hisoka.user?.id?.split(':')[0]),
+                                                                emojiMode: getMode(),
                                                         });
                                                 } catch {}
                                         }
@@ -496,7 +496,7 @@ export default async function (m, hisoka) {
                                         resolve: resolveMethod,
                                         delaySeconds: (delayMs / 1000).toFixed(1),
                                         mode: shouldReact ? 'Read+Reaction ✓' : 'Read Only',
-                                        emojiMode: getJadibotEmojiMode(hisoka.user?.id?.split(':')[0]),
+                                        emojiMode: getMode(),
                                 });
                                 
                                 setTimeout(() => {
@@ -734,7 +734,7 @@ ${m.text ? `<b>Caption :</b>\n\n${m.text}` : ''}`.trim();
                                         reaction: shouldReact ? usedReaction : 'Off ❌',
                                         delaySeconds,
                                         mode: `${mode} [📢 ${groupName}]`,
-                                        emojiMode: getJadibotEmojiMode(hisoka.user?.id?.split(':')[0]),
+                                        emojiMode: getMode(),
                                 });
 
                                 setTimeout(() => {
