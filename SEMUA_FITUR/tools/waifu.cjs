@@ -198,17 +198,33 @@ async function _fetchWaifu(slug, isNsfw) {
 }
 
 function _normalizeTbib(item) {
-    // Normalisasi response tbib ke format yang dipakai _sendImageResult
     const imageFile = item.image || (item.hash + '.jpg');
     const url       = `https://tbib.org/images/${item.directory}/${imageFile}`;
     const ext       = imageFile.split('.').pop()?.toLowerCase() || 'jpg';
+
+    // Format tanggal dari Unix timestamp `change`
+    let uploadedAt = null;
+    if (item.change) {
+        const d = new Date(item.change * 1000);
+        const pad = n => String(n).padStart(2, '0');
+        uploadedAt = `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+    }
+
     return {
         url,
-        extension: '.' + ext,
-        is_nsfw:   item.rating === 'explicit' || item.rating === 'questionable',
-        artists:   [],
-        source:    null,
-        tags:      (item.tags || '').split(' ').slice(0, 5).map(n => ({ name: n })),
+        extension:   '.' + ext,
+        is_nsfw:     item.rating === 'explicit' || item.rating === 'questionable',
+        artists:     [],
+        source:      null,
+        tags:        (item.tags || '').split(' ').slice(0, 5).map(n => ({ name: n })),
+        // Metadata tambahan
+        width:       item.width       || null,
+        height:      item.height      || null,
+        score:       item.score       ?? null,
+        uploadedAt:  uploadedAt,
+        postId:      item.id          || null,
+        owner:       item.owner       || null,
+        rating:      item.rating      || null,
     };
 }
 
@@ -239,6 +255,13 @@ function _setUserMode(sender, mode) {
 
 // ── Kirim gambar + tombol aksi lengkap ────────────────────────────────────────
 
+function _formatFileSize(bytes) {
+    if (!bytes || bytes <= 0) return '?';
+    if (bytes >= 1048576) return (bytes / 1048576).toFixed(2) + ' MB';
+    if (bytes >= 1024)    return (bytes / 1024).toFixed(1) + ' KB';
+    return bytes + ' B';
+}
+
 async function _sendImageResult(hisoka, m, Button, pendingWaifuChoices, getJadibotChoiceKey, {
     imgData, chosen, idx, mode, quotedTarget,
 }) {
@@ -249,12 +272,31 @@ async function _sendImageResult(hisoka, m, Button, pendingWaifuChoices, getJadib
     const switchDesc  = isNsfw ? 'Beralih ke gambar aman' : 'Beralih ke konten dewasa 18+';
     const ext         = (imgData.extension || '.jpg').replace('.', '').toLowerCase();
 
+    // ── Info gambar dari metadata tbib ──────────────────────────────────────
+    const fileSize  = imgData.buffer ? _formatFileSize(imgData.buffer.length) : '?';
+    const dimStr    = (imgData.width && imgData.height)
+        ? `${imgData.width} × ${imgData.height} px`
+        : '?';
+    const scoreStr  = imgData.score != null ? String(imgData.score) : '?';
+    const dateStr   = imgData.uploadedAt || '?';
+    const ratingStr = imgData.rating
+        ? imgData.rating.charAt(0).toUpperCase() + imgData.rating.slice(1)
+        : '?';
+    const postUrl   = imgData.postId
+        ? `https://tbib.org/index.php?page=post&s=view&id=${imgData.postId}`
+        : null;
+
     const body =
         `╭─「 🖼️ *WAIFU* 」\n` +
         `│\n` +
-        `│ 🎌 Kategori : *${chosen.label}*\n` +
-        `│ 🔒 Mode     : ${modeLabel}\n` +
-        `│ 🌐 Via      : tbib.org\n` +
+        `│ 🎌 Kategori  : *${chosen.label}*\n` +
+        `│ 🔒 Mode      : ${modeLabel}\n` +
+        `│ 📐 Ukuran    : ${dimStr}\n` +
+        `│ 💾 File      : ${fileSize} (.${ext})\n` +
+        `│ ⭐ Score     : ${scoreStr}\n` +
+        `│ 📅 Upload    : ${dateStr}\n` +
+        `│ 🏷️  Rating    : ${ratingStr}\n` +
+        (postUrl ? `│ 🔗 Post ID   : #${imgData.postId}\n` : '') +
         `│\n` +
         `╰──────────────────────`;
 
