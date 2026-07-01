@@ -2,14 +2,20 @@
 _📅 Jadwal rilis belum ditentukan_ 🕐
 _🔍 Masih dalam tahap pemantauan — informasi tanggal rilis akan diumumkan kemudian, harap bersabar_ 😊
 ━━━━━━━━━━━━━━━━━━━━━━
-🤖 *WILY BOT — V27*
-✨ *2 Fitur Baru*
-🔧 *2 Bug/Error Fix*
-🚀 *2 Perubahan*
+🤖 *WILY BOT — V25*
+✨ *3 Fitur Baru*
+🔧 *5 Bug/Error Fix*
+🚀 *5 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
-*1. 🎛️ Button Single-Select di Semua Command Emoji*
+*1. 🔄 Command `.reload` — Cek Status Hot Reload*
+- Command baru untuk cek status sistem hot reload langsung dari chat
+- Menampilkan: total file yang di-watch, jumlah ESM aktif, jumlah CJS watched, daftar folder yang di-auto-scan, dan jumlah file yang sengaja di-skip
+- Sudah ditambahkan ke menu bot utama (`menu_utama.js` & `menupages.cjs`)
+> Ketik `.reload` untuk lihat file apa saja yang sedang dipantau bot secara realtime
+
+*2. 🎛️ Button Single-Select di Semua Command Emoji*
 - Semua command emoji kini menampilkan button navigasi interaktif dengan 2 section: Mode Emoji & Kelola Emoji
 - Command yang dapat button: `.emoji`, `.emojilist`, `.emojicustom`, `.emojidefault`, `.emojiclear`
 - Setiap baris button langsung menjalankan command tujuan saat dipilih (misal pilih "Mode Custom" → eksekusi `.emojicustom`)
@@ -17,7 +23,7 @@ _🔍 Masih dalam tahap pemantauan — informasi tanggal rilis akan diumumkan ke
 - Perubahan di `SEMUA_FITUR/info/info.cjs` dan `SEMUA_FITUR/info/emoji-cmd.cjs`
 > Tidak perlu ketik command manual — cukup pilih dari menu button
 
-*2. 🔗 Auto-Delete Pesan Emoji Lintas Command (Shared Map)*
+*3. 🔗 Auto-Delete Pesan Emoji Lintas Command (Shared Map)*
 - Sistem baru: satu Map bersama (`emoji-msgmap.cjs`) dipakai oleh semua handler emoji
 - Sebelumnya tiap file punya map sendiri — saat pindah antar command (misal pilih `.emojicustom` dari menu `.emoji`), pesan lama tidak terhapus karena map-nya beda
 - Sekarang setiap kali command emoji baru dikirim, pesan bot sebelumnya otomatis dihapus terlebih dahulu — tidak ada pesan menumpuk/spam
@@ -28,86 +34,36 @@ _🔍 Masih dalam tahap pemantauan — informasi tanggal rilis akan diumumkan ke
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *PERUBAHAN*
 ━━━━━━━━━━━━━━━━━━━━━━
-*1. 🧹 Hapus Semua Karakter Box-Drawing dari Respons Emoji*
-- Dihapus semua: │ ╭ ╰ ├ ─ dan sejenisnya dari output `.emoji`, `.emojilist`, dan `renderEmojiList`
-- Diganti dengan format WhatsApp proper: `*tebal*` untuk header, `_miring_` untuk deskripsi, `~coret~` untuk aksi destruktif, ` ```kode``` ` untuk contoh command, `>` untuk tip/quote, `•` untuk bullet
-- Perubahan di `SEMUA_FITUR/info/info.cjs` (handleEmoji, handleEmojilist, renderEmojiList)
-> Tampilan lebih bersih dan konsisten di semua perangkat WhatsApp
-
-*2. 🔤 Format WhatsApp Proper di Semua Command Emoji*
-- Semua respons emoji kini menggunakan format WA: header tebal, deskripsi miring, contoh command dalam backtick/code, tip dalam quote, aksi destruktif di-coret
-- Prefix command tidak lagi hardcoded `.` — semua pakai `${pref}` dari `m.prefix` sehingga ikut prefix pengguna
-- Berlaku di: `.emoji`, `.emojilist`, `.emojicustom`, `.emojidefault`, `.emojiclear`
-> Format konsisten dan sesuai standar formatting WhatsApp
-
-━━━━━━━━━━━━━━━━━━━━━━
-🔧 *BUG/ERROR FIX*
-━━━━━━━━━━━━━━━━━━━━━━
-*1. 📋 `InformasiBotCommand` Muncul Duplikat (Kadang 2x)*
-- ~Bug: kirim command sekali tapi log `InformasiBotCommand` muncul 2 kali dengan waktu identik~
-- Penyebab: ada 2 tempat logging — satu di `message.js` (terpusat, sebelum switch, hanya untuk command di `_commandSet`) dan satu lagi di dalam tiap handler — kalau command ada di `_commandSet`, ikut ter-log 2x
-- Fix: hapus blok `_logCmdBox` terpusat di `message.js` (baris 481–483) — logging diserahkan sepenuhnya ke tiap handler masing-masing yang sudah konsisten memanggil `logCommand`
-- Perubahan di `message.js`
-> `InformasiBotCommand` kini selalu muncul tepat 1x per command, tidak pernah dobel lagi
-
-*2. 🔤 Prefix Hardcoded `.` di Respons `.emojilist`*
-- ~Bug: di body text command `.emojilist`, semua contoh command pakai prefix hardcoded `.` (misal `.emojiadd`) — tidak ikut prefix yang diset pengguna~
-- Penyebab: string command di bodyText menggunakan literal `.` bukan variabel `${pref}`
-- Fix: semua contoh command di respons `.emojilist` diganti ke `${pref}emojiadd`, `${pref}emojidel`, dst.
-- Perubahan di `SEMUA_FITUR/info/info.cjs` (handleEmojilist)
-> Prefix command di respons sekarang selalu akurat sesuai prefix yang dipakai pengguna
-
-━━━━━━━━━━━━━━━━━━━━━━
-🤖 *WILY BOT — V26*
-✨ *1 Fitur Baru*
-🔧 *1 Bug/Error Fix*
-🚀 *1 Perubahan*
-━━━━━━━━━━━━━━━━━━━━━━
-✨ *FITUR BARU*
-━━━━━━━━━━━━━━━━━━━━━━
-*1. 🔄 Command `.reload` — Cek Status Hot Reload*
-- Command baru untuk cek status sistem hot reload langsung dari chat
-- Menampilkan: total file yang di-watch, jumlah ESM aktif, jumlah CJS watched, daftar folder yang di-auto-scan, dan jumlah file yang sengaja di-skip
-- Sudah ditambahkan ke menu bot utama (`menu_utama.js` & `menupages.cjs`)
-> Ketik `.reload` untuk lihat file apa saja yang sedang dipantau bot secara realtime
-
-━━━━━━━━━━━━━━━━━━━━━━
-🚀 *PERUBAHAN*
-━━━━━━━━━━━━━━━━━━━━━━
 *1. 🎲 Preset Delay Acak `.readsw` — Sekarang Kumulatif dari 1 Detik*
 - Sebelumnya preset berupa band terpisah: 1–5, 5–10, 10–15, 15–20 detik
 - Sekarang semua preset mulai dari 1 detik: 1–5, 1–10, 1–15, 1–20 detik (sesuai request user)
 - Perubahan di `SEMUA_FITUR/readsw/readsw.cjs` (`_RANDOM_PRESETS`)
 > Pilih preset mana pun, delay acak selalu mulai dari 1 detik, cuma batas atasnya yang berubah
 
-━━━━━━━━━━━━━━━━━━━━━━
-🔧 *BUG/ERROR FIX*
-━━━━━━━━━━━━━━━━━━━━━━
-*1. 🔁 Command Ke-Eksekusi 2x — Log `InformasiBotCommand` Muncul Duplikat*
-- Bug: kirim command sekali (misal `.readsw`), tapi log `InformasiBotCommand` muncul 2x dengan waktu identik — command ikut ke-eksekusi dobel
-- Penyebab: event `messages.upsert` dari WhatsApp kadang re-deliver pesan yang sama (msg ID sama) tanpa ada dedup guard, jadi handler pesan jalan 2x untuk 1 pesan
-- Fix: tambah dedup guard di `index.js` — tiap `message.key.id` yang sudah diproses langsung di-skip kalau muncul lagi dalam 60 detik
-> Semua command sekarang cuma jalan sekali per pesan, tidak ada lagi eksekusi/log dobel
-
-━━━━━━━━━━━━━━━━━━━━━━
-🤖 *WILY BOT — V25*
-🔧 *2 Bug/Error Fix*
-🚀 *2 Perubahan*
-━━━━━━━━━━━━━━━━━━━━━━
-🚀 *PERUBAHAN*
-━━━━━━━━━━━━━━━━━━━━━━
-*1. 📊 Log `[MemoryMonitor]` Lebih Lengkap & Rapi*
+*2. 📊 Log `[MemoryMonitor]` Lebih Lengkap & Rapi*
 - Ditambahkan: nomor urutan cek, indikator tren RAM (↑ naik / ↓ turun / → stabil), Heap total, External memory, RAM free sistem
 - Ditambahkan: CPU Load Average (1/5/15 menit) + jumlah core, PID proses, versi Node.js, dan Uptime bot
 - Perubahan di `src/helper/memoryMonitor.js`
 
-*2. 🔧 `hotReload.js` — Auto-Discovery, Tidak Perlu Daftar Manual Lagi*
+*3. 🔧 `hotReload.js` — Auto-Discovery, Tidak Perlu Daftar Manual Lagi*
 - Sebelumnya file baru harus didaftarkan manual satu-satu di `WATCHED_FILES` supaya bisa hot-reload
 - Sekarang bot otomatis scan & watch seluruh folder `SEMUA_FITUR`, `src/helper`, `src/db`, `src/config` secara rekursif
 - File baru yang ditambahkan ke folder tersebut otomatis langsung ke-detect & aktif ter-watch real-time tanpa restart bot
 - File yang dihapus otomatis dilepas dari daftar watch, tidak nyangkut/error
 - File yang memegang koneksi/session aktif (memoryMonitor, jadibot, authState, browserSwitch, dll) tetap sengaja di-skip biar bot tidak crash
 > Update fitur baru sekarang otomatis kebaca bot tanpa perlu edit `hotReload.js` manual
+
+*4. 🧹 Hapus Semua Karakter Box-Drawing dari Respons Emoji*
+- Dihapus semua: │ ╭ ╰ ├ ─ dan sejenisnya dari output `.emoji`, `.emojilist`, dan `renderEmojiList`
+- Diganti dengan format WhatsApp proper: `*tebal*` untuk header, `_miring_` untuk deskripsi, `~coret~` untuk aksi destruktif, ` ```kode``` ` untuk contoh command, `>` untuk tip/quote, `•` untuk bullet
+- Perubahan di `SEMUA_FITUR/info/info.cjs` (handleEmoji, handleEmojilist, renderEmojiList)
+> Tampilan lebih bersih dan konsisten di semua perangkat WhatsApp
+
+*5. 🔤 Format WhatsApp Proper di Semua Command Emoji*
+- Semua respons emoji kini menggunakan format WA: header tebal, deskripsi miring, contoh command dalam backtick/code, tip dalam quote, aksi destruktif di-coret
+- Prefix command tidak lagi hardcoded `.` — semua pakai `${pref}` dari `m.prefix` sehingga ikut prefix pengguna
+- Berlaku di: `.emoji`, `.emojilist`, `.emojicustom`, `.emojidefault`, `.emojiclear`
+> Format konsisten dan sesuai standar formatting WhatsApp
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🔧 *BUG/ERROR FIX*
@@ -124,3 +80,23 @@ _🔍 Masih dalam tahap pemantauan — informasi tanggal rilis akan diumumkan ke
 - Penyebab: bot yang sedang berjalan masih memakai versi lama `memoryMonitor.js` di memori (ESM cache), belum ke-reload setelah fungsi `formatUptime` ditambahkan
 - Fix: restart proses bot supaya modul ter-load ulang; `.ram` sekarang juga ditampilkan lebih lengkap (Heap, External memory, RAM free, CPU Load, PID, versi Node, Uptime)
 > `.ram` sudah normal, data akurat, sudah diuji langsung tanpa error
+
+*3. 🔁 Command Ke-Eksekusi 2x — Log `InformasiBotCommand` Muncul Duplikat (dedup guard)*
+- ~Bug: kirim command sekali (misal `.readsw`), tapi log `InformasiBotCommand` muncul 2x dengan waktu identik — command ikut ke-eksekusi dobel~
+- Penyebab: event `messages.upsert` dari WhatsApp kadang re-deliver pesan yang sama (msg ID sama) tanpa ada dedup guard, jadi handler pesan jalan 2x untuk 1 pesan
+- Fix: tambah dedup guard di `index.js` — tiap `message.key.id` yang sudah diproses langsung di-skip kalau muncul lagi dalam 60 detik
+> Semua command sekarang cuma jalan sekali per pesan, tidak ada lagi eksekusi/log dobel
+
+*4. 📋 `InformasiBotCommand` Muncul Duplikat — Double Logging di `message.js`*
+- ~Bug: kirim command sekali tapi log `InformasiBotCommand` muncul 2 kali dengan waktu identik~
+- Penyebab: ada 2 tempat logging — satu di `message.js` (terpusat, sebelum switch, hanya untuk command di `_commandSet`) dan satu lagi di dalam tiap handler — kalau command ada di `_commandSet`, ikut ter-log 2x
+- Fix: hapus blok `_logCmdBox` terpusat di `message.js` — logging diserahkan sepenuhnya ke tiap handler masing-masing yang sudah konsisten memanggil `logCommand`
+- Perubahan di `message.js`
+> `InformasiBotCommand` kini selalu muncul tepat 1x per command, tidak pernah dobel lagi
+
+*5. 🔤 Prefix Hardcoded `.` di Respons `.emojilist`*
+- ~Bug: di body text command `.emojilist`, semua contoh command pakai prefix hardcoded `.` (misal `.emojiadd`) — tidak ikut prefix yang diset pengguna~
+- Penyebab: string command di bodyText menggunakan literal `.` bukan variabel `${pref}`
+- Fix: semua contoh command di respons `.emojilist` diganti ke `${pref}emojiadd`, `${pref}emojidel`, dst.
+- Perubahan di `SEMUA_FITUR/info/info.cjs` (handleEmojilist)
+> Prefix command di respons sekarang selalu akurat sesuai prefix yang dipakai pengguna
