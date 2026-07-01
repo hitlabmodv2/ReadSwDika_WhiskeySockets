@@ -210,6 +210,7 @@ const WATCHED_FILES = [
     { key: 'cjs:flamingtext',  rel: 'SEMUA_FITUR/tools/flamingtext.cjs',   type: 'cjs' },
     { key: 'cjs:fontgenerator',rel: 'SEMUA_FITUR/tools/fontgenerator.cjs', type: 'cjs' },
     { key: 'cjs:fontuntik',    rel: 'SEMUA_FITUR/tools/fontuntik.cjs',     type: 'cjs' },
+    { key: 'cjs:waifu',        rel: 'SEMUA_FITUR/tools/waifu.cjs',         type: 'cjs' },
     // News
     { key: 'cjs:malnews',      rel: 'SEMUA_FITUR/news/malnews.cjs',        type: 'cjs' },
     { key: 'cjs:tvonenews',    rel: 'SEMUA_FITUR/news/tvonenews.cjs',      type: 'cjs' },
