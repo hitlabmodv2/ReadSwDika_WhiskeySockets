@@ -69,34 +69,41 @@ const NSFW_TAGS = [
     { label: '👄 Oral',    slug: 'oral',    count: 145  },
 ];
 
+// ── Ambil token waifu.im dari config.json ─────────────────────────────────────
+// Cara dapat token: https://www.waifu.im/dashboard (login → Generate Token)
+// Simpan di config.json: { "waifu": { "token": "TOKEN_KAMU_DISINI" } }
+
+function _getWaifuToken() {
+    try {
+        const cfg = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf-8'));
+        return cfg?.waifu?.token || null;
+    } catch (_) { return null; }
+}
+
 // ── HTTP helpers ───────────────────────────────────────────────────────────────
 
-function _httpGetJson(url) {
+function _httpGetJson(url, token) {
     return new Promise((resolve, reject) => {
-        const req = https.get(url, {
-            headers: {
-                'User-Agent':      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Accept':          'application/json, text/plain, */*',
-                'Accept-Language': 'en-US,en;q=0.9',
-                'Accept-Encoding': 'gzip, deflate, br',
-                'Referer':         'https://www.waifu.im/',
-                'Origin':          'https://www.waifu.im',
-                'Connection':      'keep-alive',
-            },
-        }, (res) => {
-            // Handle gzip/deflate dekompresi otomatis
-            let raw = '';
-            const zlib = require('zlib');
-            const encoding = res.headers['content-encoding'];
-            let stream = res;
+        const headers = {
+            'User-Agent':      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept':          'application/json, text/plain, */*',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Referer':         'https://www.waifu.im/',
+            'Origin':          'https://www.waifu.im',
+            'Connection':      'keep-alive',
+        };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
 
-            if (encoding === 'gzip') {
-                stream = res.pipe(zlib.createGunzip());
-            } else if (encoding === 'deflate') {
-                stream = res.pipe(zlib.createInflate());
-            } else if (encoding === 'br') {
-                stream = res.pipe(zlib.createBrotliDecompress());
-            }
+        const req = https.get(url, { headers }, (res) => {
+            const zlib    = require('zlib');
+            const enc     = res.headers['content-encoding'];
+            let   stream  = res;
+            let   raw     = '';
+
+            if (enc === 'gzip')    stream = res.pipe(zlib.createGunzip());
+            else if (enc === 'deflate') stream = res.pipe(zlib.createInflate());
+            else if (enc === 'br') stream = res.pipe(zlib.createBrotliDecompress());
 
             stream.on('data', d => raw += d);
             stream.on('end', () => {
@@ -135,19 +142,36 @@ function _downloadBuffer(url) {
 }
 
 // ── Fetch waifu.im /search ─────────────────────────────────────────────────────
-// Endpoint baru: /search (bukan /images yang sudah deprecated)
-// Response baru: { images: [...] } (bukan { items: [...] })
+// Endpoint: /search — Response: { images: [...] }
+// Token diperlukan jika VPS/server kena blokir Cloudflare (403)
+// Cara dapat token gratis: https://www.waifu.im/dashboard → Generate Token
+// Simpan di config.json: { "waifu": { "token": "ISI_TOKEN_DISINI" } }
 
 async function _fetchWaifu(slug, isNsfw) {
+    const token  = _getWaifuToken();
     const params = new URLSearchParams({
         included_tags: slug,
         is_nsfw:       String(isNsfw),
         many:          'false',
         order_by:      'RANDOM',
     });
-    const data = await _httpGetJson(`https://api.waifu.im/search?${params}`);
+    let data;
+    try {
+        data = await _httpGetJson(`https://api.waifu.im/search?${params}`, token);
+    } catch (err) {
+        if (err.message.includes('403')) {
+            throw new Error(
+                'Akses ditolak (403) oleh waifu.im.\n' +
+                'Solusi: Daftarkan Token API gratis di\n' +
+                'https://www.waifu.im/dashboard\n' +
+                'lalu simpan di config.json:\n' +
+                '{ "waifu": { "token": "TOKEN_KAMU" } }'
+            );
+        }
+        throw err;
+    }
     const images = data?.images;
-    if (!images || !images.length) throw new Error('Tidak ada gambar ditemukan');
+    if (!images || !images.length) throw new Error('Tidak ada gambar ditemukan untuk kategori ini');
     return images[0];
 }
 
