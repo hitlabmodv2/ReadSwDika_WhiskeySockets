@@ -639,11 +639,22 @@ module.exports.handleEmojidel = handleEmojidel;
 
 // ── HANDLER: emoji (panduan lengkap) ──────────────────────────────────────────
 
-async function handleEmoji({ hisoka, m, tolak, logCommand, getJadibotNumber, listJadibotEmojis }) {
+// ── Map: simpan key pesan terakhir per JID untuk auto-delete ─────────────────
+const _emojiLastMsgMap = new Map();
+
+async function _deleteEmojiLastMsg(hisoka, jid) {
+        const key = _emojiLastMsgMap.get(jid);
+        if (!key) return;
+        try { await hisoka.sendMessage(jid, { delete: key }); } catch (_) {}
+        _emojiLastMsgMap.delete(jid);
+}
+
+async function handleEmoji({ hisoka, m, tolak, logCommand, getJadibotNumber, listJadibotEmojis, Button }) {
         if (!m.isOwner && hisoka?.isMainBot !== false) return;
         try {
                 const _isJb = hisoka?.isMainBot === false;
                 const _jbNum = _isJb ? getJadibotNumber(hisoka) : null;
+                const pref   = m.prefix || '.';
 
                 let data;
                 if (_isJb) {
@@ -653,46 +664,123 @@ async function handleEmoji({ hisoka, m, tolak, logCommand, getJadibotNumber, lis
                         data = listEmojis();
                 }
 
-                const isCustom = data.mode === 'custom';
-                const _modeLabel = isCustom
+                const isCustom    = data.mode === 'custom';
+                const _modeLabel  = isCustom
                         ? (_isJb ? '🎨 Custom (emoji kamu sendiri)' : '🎨 Custom (kustom kamu)')
                         : (_isJb ? '🌐 Default (ikut bot utama)' : '🌐 Default (pool 1900 emoji)');
+                const modeNow     = isCustom ? 'custom' : 'default';
+                const markMode    = (key) => key === modeNow ? '✓ ' : '';
 
-                let response = `╭═══『 *🎭 EMOJI MANAGER* 』═══╮\n│\n`;
-                if (_isJb) response += `│ 👤 *Milik:* +${_jbNum}\n`;
-                response += `│ ⚙️ *Mode:* ${_modeLabel}\n`;
-                response += `│ 📊 *Total:* ${data.count} emoji aktif\n`;
-                response += renderEmojiList(data.emojis);
-                response += `│\n├──『 *➕ Tambah Emoji* 』──\n│\n`;
-                response += `│ .emojiadd 😊 — tambah 1 emoji\n`;
-                response += `│ .emojiadd 😊,😄,😁 — banyak pakai koma\n`;
-                response += `│ .emojiadd 😊 😄 😁 — banyak pakai spasi\n`;
-                response += `│\n│ 🔗 *Gabung jadi 1 (langsung tanpa pemisah):*\n`;
-                response += `│ .emojiadd 😊😄😁 → tersimpan sbg 1\n`;
-                response += `│ .emojiadd 😊😄😁,🍞🥯🥐 → 2 gabungan\n`;
-                response += `│\n├──『 *➖ Hapus Emoji* 』──\n│\n`;
-                response += `│ *Single:*\n`;
-                response += `│ .emojidel 😊 — hapus 1 emoji\n`;
-                response += `│ .emojidel 😊,😄 — hapus banyak pakai koma\n`;
-                response += `│\n│ *Gabung (pakai nomor dari .emojilist):*\n`;
-                response += `│ .emojidel 1 — hapus gabung nomor 1\n`;
-                response += `│ .emojidel 1,2 — hapus gabung nomor 1 dan 2\n`;
-                response += `│\n├──『 *⚙️ Mode & Lainnya* 』──\n│\n`;
+                let bodyText = `╭═══『 *🎭 EMOJI MANAGER* 』═══╮\n│\n`;
+                if (_isJb) bodyText += `│ 👤 *Milik:* +${_jbNum}\n`;
+                bodyText += `│ ⚙️ *Mode:* ${_modeLabel}\n`;
+                bodyText += `│ 📊 *Total:* ${data.count} emoji aktif\n`;
+                bodyText += renderEmojiList(data.emojis);
+                bodyText += `│\n├──『 *➕ Tambah Emoji* 』──\n│\n`;
+                bodyText += `│ .emojiadd 😊 — tambah 1 emoji\n`;
+                bodyText += `│ .emojiadd 😊,😄,😁 — banyak pakai koma\n`;
+                bodyText += `│ .emojiadd 😊 😄 😁 — banyak pakai spasi\n`;
+                bodyText += `│\n│ 🔗 *Gabung jadi 1 (langsung tanpa pemisah):*\n`;
+                bodyText += `│ .emojiadd 😊😄😁 → tersimpan sbg 1\n`;
+                bodyText += `│ .emojiadd 😊😄😁,🍞🥯🥐 → 2 gabungan\n`;
+                bodyText += `│\n├──『 *➖ Hapus Emoji* 』──\n│\n`;
+                bodyText += `│ *Single:*\n`;
+                bodyText += `│ .emojidel 😊 — hapus 1 emoji\n`;
+                bodyText += `│ .emojidel 😊,😄 — hapus banyak pakai koma\n`;
+                bodyText += `│\n│ *Gabung (pakai nomor dari .emojilist):*\n`;
+                bodyText += `│ .emojidel 1 — hapus gabung nomor 1\n`;
+                bodyText += `│ .emojidel 1,2 — hapus gabung nomor 1 dan 2\n`;
+                bodyText += `│\n├──『 *⚙️ Mode & Lainnya* 』──\n│\n`;
                 if (_isJb) {
-                        response += `│ .emojicustom → pakai emoji kamu sendiri\n`;
-                        response += `│ .emojidefault → ikut emoji bot utama\n`;
-                        response += `│ .emojiclear → reset emoji kamu ke awal\n`;
+                        bodyText += `│ .emojicustom → pakai emoji kamu sendiri\n`;
+                        bodyText += `│ .emojidefault → ikut emoji bot utama\n`;
+                        bodyText += `│ .emojiclear → reset emoji kamu ke awal\n`;
                 } else {
-                        response += `│ .emojicustom → aktifkan emoji kustom\n`;
-                        response += `│ .emojidefault → balik ke 1900 emoji default\n`;
-                        response += `│ .emojiclear → reset emoji kustom ke awal\n`;
+                        bodyText += `│ .emojicustom → aktifkan emoji kustom\n`;
+                        bodyText += `│ .emojidefault → balik ke 1900 emoji default\n`;
+                        bodyText += `│ .emojiclear → reset emoji kustom ke awal\n`;
                 }
-                response += `│ .emojilist → lihat daftar emoji aktif\n`;
-                response += `│ .emoji → tampilkan panduan ini\n`;
-                if (_isJb) response += `│\n│ 📁 *Data tersimpan di folder kamu sendiri*\n│ *tidak berpengaruh ke bot utama* ✅\n`;
-                response += `╰══════════════════════╯`;
+                bodyText += `│ .emojilist → lihat daftar emoji aktif\n`;
+                bodyText += `│ .emoji → tampilkan panduan ini\n`;
+                if (_isJb) bodyText += `│\n│ 📁 *Data tersimpan di folder kamu sendiri*\n│ *tidak berpengaruh ke bot utama* ✅\n`;
+                bodyText += `╰══════════════════════╯`;
 
-                await tolak(hisoka, m, response);
+                // ── Kirim dengan single button, fallback ke teks biasa ────────────────
+                if (Button) {
+                        let sent = false;
+                        try {
+                                const activeDesc = (base) => `⚡ Sedang Aktif — ${base}`;
+
+                                const btn = new Button()
+                                        .setBody(bodyText)
+                                        .setFooter('⚡ Wily Bot • Emoji Manager')
+                                        .addSelection('🎛️ Pilih Aksi Emoji')
+
+                                        // ── Section 1: Mode Emoji ─────────────────────────────────
+                                        .makeSections('⚙️ Mode Emoji');
+
+                                if (_isJb) {
+                                        btn
+                                                .makeRow(
+                                                        markMode('custom') + '🎨 Emoji Kustom',
+                                                        'Pakai emoji kamu sendiri',
+                                                        isCustom ? activeDesc('Reaksi SW pakai daftar emoji kamu sendiri') : 'Aktifkan mode reaksi pakai emoji kustom kamu',
+                                                        `${pref}emojicustom`
+                                                )
+                                                .makeRow(
+                                                        markMode('default') + '🌐 Emoji Default',
+                                                        'Ikut emoji bot utama',
+                                                        !isCustom ? activeDesc('Reaksi SW ikut pool emoji dari bot utama') : 'Ikut pool emoji dari bot utama',
+                                                        `${pref}emojidefault`
+                                                );
+                                } else {
+                                        btn
+                                                .makeRow(
+                                                        markMode('custom') + '🎨 Emoji Kustom',
+                                                        'Aktifkan emoji kustom',
+                                                        isCustom ? activeDesc('Reaksi SW pakai emoji kustom kamu') : 'Aktifkan mode reaksi pakai emoji kustom kamu',
+                                                        `${pref}emojicustom`
+                                                )
+                                                .makeRow(
+                                                        markMode('default') + '🌐 Emoji Default',
+                                                        'Balik ke 1900 emoji default',
+                                                        !isCustom ? activeDesc('Reaksi SW pakai pool 1900 emoji default') : 'Balik ke pool 1900 emoji default bawaan bot',
+                                                        `${pref}emojidefault`
+                                                );
+                                }
+
+                                // ── Section 2: Kelola Emoji ───────────────────────────────────
+                                btn
+                                        .makeSections('🛠️ Kelola Emoji')
+                                        .makeRow(
+                                                '🗑️ Reset Emoji',
+                                                _isJb ? 'Reset emoji kamu ke awal' : 'Reset emoji kustom ke awal',
+                                                _isJb ? 'Hapus semua emoji kustom, kembali ke seed awal' : 'Reset semua emoji kustom ke kondisi seed awal',
+                                                `${pref}emojiclear`
+                                        )
+                                        .makeRow(
+                                                '📋 Lihat Daftar Emoji',
+                                                'Tampilkan semua emoji aktif',
+                                                'Lihat daftar lengkap emoji yang sedang aktif saat ini',
+                                                `${pref}emojilist`
+                                        )
+                                        .makeRow(
+                                                '📖 Panduan Emoji',
+                                                'Tampilkan panduan ini lagi',
+                                                'Refresh panduan lengkap emoji manager',
+                                                `${pref}emoji`
+                                        );
+
+                                await _deleteEmojiLastMsg(hisoka, m.from);
+                                const result = await btn.run(m.from, hisoka, m);
+                                if (result?.key) _emojiLastMsgMap.set(m.from, result.key);
+                                sent = true;
+                        } catch (_) {}
+                        if (!sent) await tolak(hisoka, m, bodyText);
+                } else {
+                        await tolak(hisoka, m, bodyText);
+                }
+
                 logCommand(m, hisoka, 'emoji');
         } catch (error) {
                 console.error('\x1b[31m[Emoji] Error:\x1b[39m', error.message);
