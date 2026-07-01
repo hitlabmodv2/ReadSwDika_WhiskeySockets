@@ -31,12 +31,13 @@ const path  = require('path');
 const https = require('https');
 
 const _TTL        = 5 * 60 * 1000;  // 5 menit sesi aktif
-const _PFX_MODE   = 'waifu_mode_';   // waifu_mode_safe | waifu_mode_nsfw
-const _PFX_CHAR   = 'waifu_char_';   // waifu_char_0 … waifu_char_N
-const _PFX_NEXT   = 'waifu_next_';   // waifu_next_{idx}_{mode}
-const _PFX_BACK   = 'waifu_back_';   // waifu_back_{mode}
-const _PFX_SWITCH = 'waifu_switch_'; // waifu_switch_{newmode} — ganti mode
-const _PFX_RETRY  = 'waifu_retry_';  // waifu_retry_{idx}_{mode} — coba lagi setelah error
+const _PFX_MODE        = 'waifu_mode_';   // waifu_mode_safe | waifu_mode_nsfw
+const _PFX_CHAR        = 'waifu_char_';   // waifu_char_0 … waifu_char_N
+const _PFX_NEXT        = 'waifu_next_';   // waifu_next_{idx}_{mode}
+const _PFX_BACK        = 'waifu_back_';   // waifu_back_{mode}
+const _PFX_SWITCH      = 'waifu_switch_'; // waifu_switch_{newmode} — ganti mode
+const _PFX_RETRY       = 'waifu_retry_';  // waifu_retry_{idx}_{mode} — coba lagi setelah error
+const _PFX_SEARCH_NEXT = 'waifu_srch_';  // waifu_srch_{mode}_{keyword+encoded} — search lagi
 const CONFIG_PATH = path.join(process.cwd(), 'config.json');
 
 // ── Tag list ───────────────────────────────────────────────────────────────────
@@ -474,6 +475,24 @@ async function _sendCharButton(m, hisoka, Button, pendingWaifuChoices, getJadibo
 // ── Handler utama ──────────────────────────────────────────────────────────────
 
 async function handleWaifu(m, hisoka, { Button, logCommand, tolak, pendingWaifuChoices, getJadibotChoiceKey }) {
+    // Deteksi keyword setelah perintah, misal: .waifu ayaka
+    let keyword = '';
+    if (Array.isArray(m.args) && m.args.length > 0) {
+        keyword = m.args.join(' ').trim();
+    } else if (m.text) {
+        // Strip prefix perintah (.waifu / /waifu / !waifu dll) lalu ambil sisa teks
+        const stripped = m.text.replace(/^[.!/]?waifu\s*/i, '').trim();
+        // Jangan anggap prefix button sebagai keyword
+        if (stripped && !stripped.startsWith('waifu_')) keyword = stripped;
+    }
+
+    if (keyword) {
+        const mode = _getUserMode(m.sender) || 'safe';
+        return _doSearchAndSend(hisoka, m, Button, pendingWaifuChoices, getJadibotChoiceKey, tolak, logCommand, {
+            keyword, mode,
+        });
+    }
+
     const savedMode = _getUserMode(m.sender);
     await _sendModeButton(m, hisoka, Button, pendingWaifuChoices, getJadibotChoiceKey, savedMode);
     logCommand(m, hisoka, 'waifu');
@@ -528,6 +547,157 @@ async function _doFetchAndSend(hisoka, m, Button, pendingWaifuChoices, getJadibo
     return true;
 }
 
+// ── Helper: search keyword langsung + kirim gambar ────────────────────────────
+
+async function _doSearchAndSend(hisoka, m, Button, pendingWaifuChoices, getJadibotChoiceKey, tolak, logCommand, {
+    keyword, mode,
+}) {
+    const isNsfw    = mode === 'nsfw';
+    const ratingTag = isNsfw ? 'rating:explicit' : 'rating:safe';
+    const slug      = keyword + ' ' + ratingTag;
+
+    const loadMsg = await hisoka.sendMessage(
+        m.from,
+        { text: `⏳ Mencari *${keyword}* di tbib.org (mode: ${isNsfw ? 'NSFW' : 'Safe'})...` },
+        { quoted: m }
+    ).catch(() => null);
+
+    let imgData;
+    try {
+        imgData = await _fetchWaifu(slug, isNsfw);
+    } catch (err) {
+        if (loadMsg?.key) try { await hisoka.sendMessage(m.from, { delete: loadMsg.key }); } catch (_) {}
+        await _sendSearchErrorButton(hisoka, m, Button, pendingWaifuChoices, getJadibotChoiceKey, {
+            keyword, mode, errMsg: err.message,
+        });
+        return true;
+    }
+
+    let buffer;
+    try {
+        buffer = await _downloadBuffer(imgData.url);
+    } catch (err) {
+        if (loadMsg?.key) try { await hisoka.sendMessage(m.from, { delete: loadMsg.key }); } catch (_) {}
+        await _sendSearchErrorButton(hisoka, m, Button, pendingWaifuChoices, getJadibotChoiceKey, {
+            keyword, mode, errMsg: `Gagal download gambar: ${err.message}`,
+        });
+        return true;
+    }
+
+    if (loadMsg?.key) try { await hisoka.sendMessage(m.from, { delete: loadMsg.key }); } catch (_) {}
+
+    await _sendSearchResult(hisoka, m, Button, pendingWaifuChoices, getJadibotChoiceKey, {
+        imgData: { ...imgData, buffer }, keyword, mode,
+    });
+
+    logCommand(m, hisoka, 'waifu');
+    return true;
+}
+
+async function _sendSearchResult(hisoka, m, Button, pendingWaifuChoices, getJadibotChoiceKey, {
+    imgData, keyword, mode,
+}) {
+    const isNsfw      = mode === 'nsfw';
+    const modeLabel   = isNsfw ? '🔞 NSFW 18+' : '✅ Safe';
+    const switchMode  = isNsfw ? 'safe' : 'nsfw';
+    const switchLabel = isNsfw ? '✅ Ganti ke Safe' : '🔞 Ganti ke NSFW 18+';
+    const switchDesc  = isNsfw ? 'Beralih ke gambar aman' : 'Beralih ke konten dewasa 18+';
+    const ext         = (imgData.extension || '.jpg').replace('.', '').toLowerCase();
+
+    const fileSize  = imgData.buffer ? _formatFileSize(imgData.buffer.length) : '?';
+    const dimStr    = (imgData.width && imgData.height) ? `${imgData.width} × ${imgData.height} px` : '?';
+    const scoreStr  = imgData.score != null ? String(imgData.score) : '?';
+    const dateStr   = imgData.uploadedAt || '?';
+    const ratingStr = imgData.rating
+        ? imgData.rating.charAt(0).toUpperCase() + imgData.rating.slice(1)
+        : '?';
+
+    // Encode keyword untuk ID button (spasi → +)
+    const kwEncoded = keyword.replace(/ /g, '+');
+    const searchId  = `${_PFX_SEARCH_NEXT}${mode}_${kwEncoded}`;
+
+    const body =
+        `╭─「 🔍 *WAIFU SEARCH* 」\n` +
+        `│\n` +
+        `│ 🔑 Keyword   : *${keyword}*\n` +
+        `│ 🔒 Mode      : ${modeLabel}\n` +
+        `│ 📐 Ukuran    : ${dimStr}\n` +
+        `│ 💾 File      : ${fileSize} (.${ext})\n` +
+        `│ ⭐ Score     : ${scoreStr}\n` +
+        `│ 📅 Upload    : ${dateStr}\n` +
+        `│ 🏷️  Rating    : ${ratingStr}\n` +
+        (imgData.postId ? `│ 🔗 Post ID   : #${imgData.postId}\n` : '') +
+        `│\n` +
+        `╰──────────────────────`;
+
+    const btn = new Button()
+        .setBody(body)
+        .setFooter('🔍 tbib.org • WilyBot')
+        .addSelection('📋 Pilih Aksi');
+
+    if (ext === 'gif') {
+        btn.setVideo(imgData.buffer, { gifPlayback: true });
+    } else {
+        btn.setImage(imgData.buffer);
+    }
+
+    btn.makeSections('🎮 Aksi Gambar');
+    btn.makeRow('', '🔍 Cari Lagi', `Gambar lain dengan keyword "${keyword}"`, searchId);
+    btn.makeRow('', '🔙 Pilih Kategori', 'Kembali ke daftar kategori', `${_PFX_BACK}${mode}`);
+
+    btn.makeSections('🔄 Ganti Mode');
+    btn.makeRow('', switchLabel, switchDesc, `${_PFX_SWITCH}${switchMode}`);
+    btn.makeRow('', '🏠 Menu Utama', 'Kembali ke pilihan Safe / NSFW', `${_PFX_MODE}main`);
+
+    let sentBtn;
+    try { sentBtn = await btn.run(m.from, hisoka, m); } catch (_) {}
+
+    const choiceKey = getJadibotChoiceKey(m);
+    const old = pendingWaifuChoices.get(choiceKey);
+    if (old?.timeout) clearTimeout(old.timeout);
+
+    const timeout = setTimeout(() => pendingWaifuChoices.delete(choiceKey), _TTL);
+    pendingWaifuChoices.set(choiceKey, {
+        stage:     'search',
+        keyword,
+        mode,
+        botMsgKey: sentBtn?.key || null,
+        expiresAt: Date.now() + _TTL,
+        timeout,
+    });
+}
+
+async function _sendSearchErrorButton(hisoka, m, Button, pendingWaifuChoices, getJadibotChoiceKey, {
+    keyword, mode, errMsg,
+}) {
+    const isNsfw    = mode === 'nsfw';
+    const kwEncoded = keyword.replace(/ /g, '+');
+    const searchId  = `${_PFX_SEARCH_NEXT}${mode}_${kwEncoded}`;
+
+    const btn = new Button()
+        .setBody(
+            `╭─「 ❌ *TIDAK DITEMUKAN* 」\n` +
+            `│\n` +
+            `│ 🔑 Keyword  : *${keyword}*\n` +
+            `│ 🔒 Mode     : ${isNsfw ? '🔞 NSFW 18+' : '✅ Safe'}\n` +
+            `│\n` +
+            `│ ⚠️  ${errMsg.slice(0, 80)}\n` +
+            `│\n` +
+            `│ Pilih aksi di bawah:\n` +
+            `│\n` +
+            `╰──────────────────────`
+        )
+        .setFooter('🔍 tbib.org • WilyBot')
+        .addSelection('📋 Pilih Aksi');
+
+    btn.makeSections('🔄 Aksi');
+    btn.makeRow('', '🔍 Coba Lagi', `Ulangi pencarian "${keyword}"`, searchId);
+    btn.makeRow('', '🔙 Pilih Kategori', 'Kembali ke daftar kategori', `${_PFX_BACK}${mode}`);
+    btn.makeRow('', '🏠 Menu Utama', 'Kembali ke pilihan Safe / NSFW', `${_PFX_MODE}main`);
+
+    try { await btn.run(m.from, hisoka, m); } catch (_) {}
+}
+
 // ── Intercept semua pilihan waifu ──────────────────────────────────────────────
 
 async function handleWaifuChoice({
@@ -538,14 +708,15 @@ async function handleWaifuChoice({
 }) {
     const rawText = (m.text || '').trim();
 
-    const isMode   = rawText.startsWith(_PFX_MODE);
-    const isChar   = rawText.startsWith(_PFX_CHAR);
-    const isNext   = rawText.startsWith(_PFX_NEXT);
-    const isBack   = rawText.startsWith(_PFX_BACK);
-    const isSwitch = rawText.startsWith(_PFX_SWITCH);
-    const isRetry  = rawText.startsWith(_PFX_RETRY);
+    const isMode       = rawText.startsWith(_PFX_MODE);
+    const isChar       = rawText.startsWith(_PFX_CHAR);
+    const isNext       = rawText.startsWith(_PFX_NEXT);
+    const isBack       = rawText.startsWith(_PFX_BACK);
+    const isSwitch     = rawText.startsWith(_PFX_SWITCH);
+    const isRetry      = rawText.startsWith(_PFX_RETRY);
+    const isSearchNext = rawText.startsWith(_PFX_SEARCH_NEXT);
 
-    if (!isMode && !isChar && !isNext && !isBack && !isSwitch && !isRetry) return false;
+    if (!isMode && !isChar && !isNext && !isBack && !isSwitch && !isRetry && !isSearchNext) return false;
 
     // ── Helper: hapus button lama ─────────────────────────────────────────────
     const _clearSession = async (choiceKey) => {
@@ -585,6 +756,24 @@ async function handleWaifuChoice({
         await _clearSession(getJadibotChoiceKey(m));
         return _doFetchAndSend(hisoka, m, Button, pendingWaifuChoices, getJadibotChoiceKey, tolak, logCommand, {
             idx, mode, quotedTarget: null,
+        });
+    }
+
+    // ── SEARCH NEXT: cari lagi dengan keyword yang sama ──────────────────────
+    if (isSearchNext) {
+        // Format: waifu_srch_{mode}_{keyword+encoded}
+        const payload  = rawText.slice(_PFX_SEARCH_NEXT.length);
+        const firstUs  = payload.indexOf('_');
+        if (firstUs < 0) return false;
+        const mode     = payload.slice(0, firstUs);
+        const kwRaw    = payload.slice(firstUs + 1);
+        if (mode !== 'safe' && mode !== 'nsfw') return false;
+        const keyword  = kwRaw.replace(/\+/g, ' ').trim();
+        if (!keyword) return false;
+
+        await _clearSession(getJadibotChoiceKey(m));
+        return _doSearchAndSend(hisoka, m, Button, pendingWaifuChoices, getJadibotChoiceKey, tolak, logCommand, {
+            keyword, mode,
         });
     }
 
