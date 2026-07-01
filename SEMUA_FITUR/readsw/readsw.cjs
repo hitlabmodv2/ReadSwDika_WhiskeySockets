@@ -94,10 +94,9 @@ async function _deleteLastMsg(hisoka, jid) {
 const _RANDOM_PRESETS = [
     { min: 1,  max: 20, label: '1–20 detik',  desc: '🔰 Default — full range acak bawaan bot' },
     { min: 1,  max: 5,  label: '1–5 detik',   desc: 'Sangat cepat — tidak disarankan'         },
-    { min: 3,  max: 8,  label: '3–8 detik',   desc: 'Cepat — cocok untuk banyak kontak'       },
-    { min: 5,  max: 12, label: '5–12 detik',  desc: 'Normal — aman dan stabil'                },
-    { min: 8,  max: 15, label: '8–15 detik',  desc: 'Aman — disarankan untuk daily use'       },
-    { min: 10, max: 20, label: '10–20 detik', desc: 'Lambat — paling aman dari ban'           },
+    { min: 5,  max: 10, label: '5–10 detik',  desc: 'Cepat — cocok untuk banyak kontak'       },
+    { min: 10, max: 15, label: '10–15 detik', desc: 'Normal — aman dan stabil'                },
+    { min: 15, max: 20, label: '15–20 detik', desc: 'Lambat — paling aman dari ban'           },
 ];
 
 // ── Kirim selection button + fallback teks ─────────────────────────────────────
