@@ -1181,6 +1181,23 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 await handleRam({ hisoka, m, tolak, logCommand });
                                 break;
                         }
+                        case 'reload': {
+                                const { getReloadStats } = await import('./src/helper/hotReload.js');
+                                const stats = getReloadStats();
+                                const text = `╭═══『 *HOT RELOAD* 』═══╮\n`
+                                        + `│ ✅ Status: *Aktif*\n│\n`
+                                        + `│ Total watched : ${stats.total} file\n`
+                                        + `│ ESM aktif     : ${stats.esmCount}\n`
+                                        + `│ CJS watched   : ${stats.cjsCount}\n`
+                                        + `│ Folder auto   : ${stats.roots.length} (${stats.roots.join(', ')})\n`
+                                        + `│ Di-skip       : ${stats.excludedCount} file\n│\n`
+                                        + `│ ℹ️ File baru di folder di atas otomatis\n`
+                                        + `│    ke-detect & aktif tanpa restart bot.\n`
+                                        + `╰═════════════════════╯`;
+                                await tolak(hisoka, m, text);
+                                logCommand(m, hisoka, 'reload');
+                                break;
+                        }
                         case 'typing':
                         case 'typ': {
                                 const { handleTyp } = _require(path.resolve('./SEMUA_FITUR/setting/autotyprec.cjs'));

@@ -376,3 +376,24 @@ export function stopHotReload() {
 export function getWatchedFiles() {
     return Array.from(_trackedFiles);
 }
+
+export function getReloadStats() {
+    const files = Array.from(_trackedFiles);
+    let esmCount = 0;
+    let cjsCount = 0;
+
+    for (const rel of files) {
+        if (typeOf(rel) === 'cjs') cjsCount++;
+        else esmCount++;
+    }
+
+    const activeRoots = WATCH_ROOTS.filter((root) => fs.existsSync(path.join(ROOT, root)));
+
+    return {
+        total: files.length,
+        esmCount,
+        cjsCount,
+        roots: activeRoots,
+        excludedCount: EXCLUDED_FILES.size,
+    };
+}
