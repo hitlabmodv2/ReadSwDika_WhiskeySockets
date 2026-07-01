@@ -19,8 +19,8 @@
  * ───────────────────────────────
  *
  *  waifu.cjs — Anime Image Scraper (.waifu)
- *  Ambil gambar anime safe/NSFW18 via tombol interaktif.
- *  Source: nekos.best + nekos.life
+ *  Ambil gambar anime safe/NSFW18 dari waifu.im
+ *  via endpoint /images (bukan /search — tidak terblock CF).
  *  Preferensi mode tersimpan di config.json per user.
  * ───────────────────────────────
  */
@@ -30,46 +30,57 @@ const fs    = require('fs');
 const path  = require('path');
 const https = require('https');
 
-const _TTL      = 5 * 60 * 1000;
-const _PFX_MODE = 'waifu_mode_';
-const _PFX_CHAR = 'waifu_char_';
+const _TTL        = 5 * 60 * 1000;
+const _PFX_MODE   = 'waifu_mode_';
+const _PFX_CHAR   = 'waifu_char_';
 const CONFIG_PATH = path.join(process.cwd(), 'config.json');
 
-// ── Daftar tag ─────────────────────────────────────────────────────────────────
-// api: 'nekobest' → GET https://nekos.best/api/v2/<endpoint> → { results:[{url}] }
-// api: 'nekoslife' → GET https://nekos.life/api/v2/img/<endpoint> → { url }
+// ── Daftar tag waifu.im ────────────────────────────────────────────────────────
+// Endpoint: GET https://api.waifu.im/images?included_tags=<slug>&is_nsfw=<bool>&page_size=1&order_by=Random
 
 const SAFE_TAGS = [
-    { label: '🧕 Waifu',      api: 'nekobest',   ep: 'waifu',    src: 'nekos.best'  },
-    { label: '🐱 Neko',       api: 'nekobest',   ep: 'neko',     src: 'nekos.best'  },
-    { label: '🦊 Kitsune',    api: 'nekobest',   ep: 'kitsune',  src: 'nekos.best'  },
-    { label: '👨 Husbando',   api: 'nekobest',   ep: 'husbando', src: 'nekos.best'  },
-    { label: '🦊 Fox Girl',   api: 'nekoslife',  ep: 'fox_girl', src: 'nekos.life'  },
-    { label: '😏 Smug',       api: 'nekoslife',  ep: 'smug',     src: 'nekos.life'  },
-    { label: '🐶 Woof',       api: 'nekoslife',  ep: 'woof',     src: 'nekos.life'  },
-    { label: '🖼️ Wallpaper',  api: 'nekoslife',  ep: 'wallpaper',src: 'nekos.life'  },
-    { label: '🐾 Meow',       api: 'nekoslife',  ep: 'meow',     src: 'nekos.life'  },
-    { label: '😊 Avatar',     api: 'nekoslife',  ep: 'avatar',   src: 'nekos.life'  },
+    { label: '🧕 Waifu',           slug: 'waifu',           count: 4274 },
+    { label: '👗 Maid',             slug: 'maid',            count: 273  },
+    { label: '👕 Uniform',          slug: 'uniform',         count: 446  },
+    { label: '🍑 Oppai',            slug: 'oppai',           count: 1084 },
+    { label: '🤳 Selfies',          slug: 'selfies',         count: 181  },
+    { label: '🌸 Marin Kitagawa',   slug: 'marin-kitagawa',  count: 43   },
+    { label: '💀 Mori Calliope',    slug: 'mori-calliope',   count: 26   },
+    { label: '⚡ Raiden Shogun',    slug: 'raiden-shogun',   count: 69   },
+    { label: '🌸 Kamisato Ayaka',   slug: 'kamisato-ayaka',  count: 14   },
+    { label: '✨ Genshin Impact',   slug: 'genshin-impact',  count: 84   },
 ];
 
 const NSFW_TAGS = [
-    { label: '💋 Lewd',   api: 'nekoslife', ep: 'lewd',  src: 'nekos.life' },
-    { label: '🌶️ Gasm',   api: 'nekoslife', ep: 'gasm',  src: 'nekos.life' },
-    { label: '👋 Spank',  api: 'nekoslife', ep: 'spank', src: 'nekos.life' },
+    { label: '🌶️ Ero',     slug: 'ero',     count: 3012 },
+    { label: '💋 Ecchi',   slug: 'ecchi',   count: 2136 },
+    { label: '📖 Hentai',  slug: 'hentai',  count: 882  },
+    { label: '👩 Milf',    slug: 'milf',    count: 468  },
+    { label: '🍑 Ass',     slug: 'ass',     count: 413  },
+    { label: '🍈 Paizuri', slug: 'paizuri', count: 146  },
+    { label: '💋 Oral',    slug: 'oral',    count: 145  },
 ];
 
-// ── HTTP helper ────────────────────────────────────────────────────────────────
+// ── HTTP helpers ───────────────────────────────────────────────────────────────
 
-function _httpGet(url, headers = {}) {
+function _httpGetJson(url) {
     return new Promise((resolve, reject) => {
-        const req = https.get(url, { headers: { 'User-Agent': 'WilyBot/1.0', 'Accept': 'application/json', ...headers } }, (res) => {
+        const req = https.get(url, {
+            headers: {
+                'User-Agent': 'WilyBot/1.0',
+                'Accept':     'application/json',
+            },
+        }, (res) => {
             let raw = '';
             res.on('data', d => raw += d);
-            res.on('end', () => resolve({ status: res.statusCode, body: raw }));
+            res.on('end', () => {
+                if (res.statusCode !== 200) return reject(new Error(`HTTP ${res.statusCode}`));
+                try { resolve(JSON.parse(raw)); } catch (e) { reject(new Error('JSON parse error')); }
+            });
             res.on('error', reject);
         });
         req.on('error', reject);
-        req.setTimeout(10000, () => { req.destroy(); reject(new Error('Timeout')); });
+        req.setTimeout(12000, () => { req.destroy(); reject(new Error('Timeout')); });
     });
 }
 
@@ -79,41 +90,32 @@ function _downloadBuffer(url) {
             if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
                 return _downloadBuffer(res.headers.location).then(resolve).catch(reject);
             }
-            if (res.statusCode !== 200) return reject(new Error(`HTTP ${res.statusCode}`));
+            if (res.statusCode !== 200) return reject(new Error(`Download HTTP ${res.statusCode}`));
             const chunks = [];
             res.on('data', d => chunks.push(d));
             res.on('end', () => resolve(Buffer.concat(chunks)));
             res.on('error', reject);
         });
         req.on('error', reject);
-        req.setTimeout(15000, () => { req.destroy(); reject(new Error('Download timeout')); });
+        req.setTimeout(20000, () => { req.destroy(); reject(new Error('Download timeout')); });
     });
 }
 
-// ── Fetch per API ──────────────────────────────────────────────────────────────
+// ── Fetch dari waifu.im /images ───────────────────────────────────────────────
 
-async function _fetchNekobest(ep) {
-    const { status, body } = await _httpGet(`https://nekos.best/api/v2/${ep}`);
-    if (status !== 200) throw new Error(`nekos.best HTTP ${status}`);
-    const json = JSON.parse(body);
-    const results = json?.results;
-    if (!results || !results.length) throw new Error('Tidak ada hasil');
-    const item = results[Math.floor(Math.random() * results.length)];
-    return item.url; // langsung URL gambar
-}
-
-async function _fetchNekoslife(ep) {
-    const { status, body } = await _httpGet(`https://nekos.life/api/v2/img/${ep}`);
-    if (status !== 200) throw new Error(`nekos.life HTTP ${status}`);
-    const json = JSON.parse(body);
-    if (!json?.url) throw new Error('URL tidak ditemukan');
-    return json.url;
-}
-
-async function fetchWaifuUrl(tag) {
-    if (tag.api === 'nekobest') return _fetchNekobest(tag.ep);
-    if (tag.api === 'nekoslife') return _fetchNekoslife(tag.ep);
-    throw new Error('API tidak dikenal');
+async function fetchWaifu(slug, isNsfw) {
+    // Ambil total halaman dulu (page_size=1 efisien)
+    const params  = new URLSearchParams({
+        included_tags: slug,
+        is_nsfw:       isNsfw ? 'true' : 'false',
+        page_size:     '1',
+        order_by:      'Random',
+    });
+    const url  = `https://api.waifu.im/images?${params.toString()}`;
+    const data = await _httpGetJson(url);
+    const items = data?.items;
+    if (!items || !items.length) throw new Error('Tidak ada gambar ditemukan untuk tag ini');
+    return items[0]; // { id, url, extension, isNsfw, tags, source, artists, ... }
 }
 
 // ── Config helpers ─────────────────────────────────────────────────────────────
@@ -150,17 +152,19 @@ async function _sendModeButton(m, hisoka, Button, pendingWaifuChoices, getJadibo
 
     const btn = new Button()
         .setBody(
-            `╭─「 🖼️ *WAIFU* 」\n` +
+            `╭─「 🖼️ *WAIFU.IM* 」\n` +
             `│\n` +
-            `│ 📌 Pilih mode gambar yang kamu inginkan:\n` +
+            `│ 📌 Pilih mode gambar:\n` +
             `│\n` +
             `│ ✅ *Safe* — gambar aman untuk umum\n` +
             `│ 🔞 *NSFW 18+* — konten dewasa\n` +
             `│${modeInfo}\n` +
             `│\n` +
+            `│ 🌐 Source: waifu.im\n` +
+            `│\n` +
             `╰──────────────────────`
         )
-        .setFooter('🖼️ Waifu • WilyBot')
+        .setFooter('🖼️ Waifu.im • WilyBot')
         .addSelection('🖼️ Pilih Mode');
 
     btn.makeSections('🔒 Pilih Mode Gambar');
@@ -190,7 +194,7 @@ async function _sendCharButton(m, hisoka, Button, pendingWaifuChoices, getJadibo
 
     const btn = new Button()
         .setBody(
-            `╭─「 🖼️ *WAIFU* 」\n` +
+            `╭─「 🖼️ *WAIFU.IM* 」\n` +
             `│\n` +
             `│ Mode: *${modeLabel}*\n` +
             `│\n` +
@@ -199,12 +203,12 @@ async function _sendCharButton(m, hisoka, Button, pendingWaifuChoices, getJadibo
             `│\n` +
             `╰──────────────────────`
         )
-        .setFooter('🖼️ Waifu • WilyBot')
+        .setFooter('🖼️ Waifu.im • WilyBot')
         .addSelection('🎌 Pilih Karakter');
 
     btn.makeSections(isNsfw ? '🔞 Kategori NSFW 18+' : '✅ Karakter/Kategori Safe');
     tags.forEach((t, i) => {
-        btn.makeRow('', t.label, `via ${t.src}`, `${_PFX_CHAR}${i}`);
+        btn.makeRow('', t.label, `${t.count.toLocaleString()} gambar tersedia`, `${_PFX_CHAR}${i}`);
     });
 
     let sentMsg;
@@ -233,8 +237,8 @@ async function handleWaifu(m, hisoka, { Button, logCommand, tolak, pendingWaifuC
 }
 
 /**
- * Intercept reply pilihan waifu.
- * @returns {boolean} true jika sudah ditangani
+ * Intercept reply pilihan waifu — dipanggil dari message.js sebelum switch-case.
+ * @returns {boolean} true jika pesan sudah ditangani
  */
 async function handleWaifuChoice({
     hisoka, m,
@@ -280,15 +284,11 @@ async function handleWaifuChoice({
 
         const mode = rawText.slice(_PFX_MODE.length) === 'nsfw' ? 'nsfw' : 'safe';
 
-        // Hapus button mode sebelumnya
         if (pending.botMsgKey) {
             try { await hisoka.sendMessage(m.from, { delete: pending.botMsgKey }); } catch (_) {}
         }
 
-        // Simpan preferensi ke config.json
         setUserMode(m.sender, mode);
-
-        // Kirim button pilih karakter
         await _sendCharButton(m, hisoka, Button, pendingWaifuChoices, getJadibotChoiceKey, mode);
         logCommand(m, hisoka, 'waifu');
         return true;
@@ -305,52 +305,57 @@ async function handleWaifuChoice({
         const tags   = isNsfw ? NSFW_TAGS : SAFE_TAGS;
 
         if (isNaN(idx) || idx < 0 || idx >= tags.length) return false;
-
         const chosen = tags[idx];
 
-        // Hapus button karakter sebelumnya
         if (pending.botMsgKey) {
             try { await hisoka.sendMessage(m.from, { delete: pending.botMsgKey }); } catch (_) {}
         }
 
-        // Loading
         const loadMsg = await hisoka.sendMessage(
             m.from,
-            { text: `⏳ Mengambil gambar *${chosen.label}* dari ${chosen.src}...` },
+            { text: `⏳ Mengambil gambar *${chosen.label}* dari waifu.im...` },
             { quoted: m }
         ).catch(() => null);
 
-        // Fetch URL gambar
-        let imgUrl;
+        // Fetch data dari waifu.im /images
+        let imgData;
         try {
-            imgUrl = await fetchWaifuUrl(chosen);
+            imgData = await fetchWaifu(chosen.slug, isNsfw);
         } catch (err) {
             if (loadMsg?.key) try { await hisoka.sendMessage(m.from, { delete: loadMsg.key }); } catch (_) {}
-            await tolak(hisoka, m, `❌ Gagal mengambil gambar *${chosen.label}*.\nError: ${err.message}\nCoba lagi.`);
+            await tolak(hisoka, m,
+                `❌ Gagal mengambil gambar *${chosen.label}*.\n` +
+                `Error: ${err.message}\n` +
+                `Coba lagi beberapa saat.`
+            );
             return true;
         }
 
-        // Download buffer
+        // Download buffer gambar dari CDN
         let buffer;
         try {
-            buffer = await _downloadBuffer(imgUrl);
+            buffer = await _downloadBuffer(imgData.url);
         } catch (err) {
             if (loadMsg?.key) try { await hisoka.sendMessage(m.from, { delete: loadMsg.key }); } catch (_) {}
-            await tolak(hisoka, m, `❌ Gagal mendownload gambar.\nError: ${err.message}`);
+            await tolak(hisoka, m, `❌ Gagal download gambar.\nError: ${err.message}`);
             return true;
         }
 
-        // Hapus loading
         if (loadMsg?.key) try { await hisoka.sendMessage(m.from, { delete: loadMsg.key }); } catch (_) {}
 
-        const modeLabel = isNsfw ? '🔞 NSFW 18+' : '✅ Safe';
-        const ext       = (imgUrl.split('.').pop() || 'jpg').toLowerCase().split('?')[0];
-        const caption   =
-            `╭─「 🖼️ *WAIFU* 」\n` +
+        const modeLabel  = isNsfw ? '🔞 NSFW 18+' : '✅ Safe';
+        const ext        = (imgData.extension || '.jpg').replace('.', '').toLowerCase();
+        const artistName = imgData.artists?.[0]?.name || null;
+        const source     = imgData.source || null;
+
+        const caption =
+            `╭─「 🖼️ *WAIFU.IM* 」\n` +
             `│\n` +
             `│ 🎌 Kategori : *${chosen.label}*\n` +
             `│ 🔒 Mode     : ${modeLabel}\n` +
-            `│ 🌐 Source   : ${chosen.src}\n` +
+            (artistName ? `│ 🎨 Artist   : ${artistName}\n` : '') +
+            (source     ? `│ 🔗 Source   : ${source.slice(0, 45)}${source.length > 45 ? '…' : ''}\n` : '') +
+            `│ 🌐 Via      : waifu.im\n` +
             `│\n` +
             `│ 💡 Ketik *.waifu* untuk pilih lagi\n` +
             `│\n` +
