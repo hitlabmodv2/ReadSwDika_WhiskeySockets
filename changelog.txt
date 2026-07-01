@@ -4,8 +4,8 @@ _🔍 Masih dalam tahap pemantauan — informasi tanggal rilis akan diumumkan ke
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V25*
 ✨ *3 Fitur Baru*
-🔧 *5 Bug/Error Fix*
-🚀 *5 Perubahan*
+🔧 *6 Bug/Error Fix*
+🚀 *6 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -78,6 +78,13 @@ _🔍 Masih dalam tahap pemantauan — informasi tanggal rilis akan diumumkan ke
 - Berlaku di: `.emoji`, `.emojilist`, `.emojicustom`, `.emojidefault`, `.emojiclear`
 > Format konsisten dan sesuai standar formatting WhatsApp
 
+*6. 🔌 Bot Utama Logout dari Perangkat Tertautan — Jadibot Tetap Jalan*
+- Sebelumnya bila bot utama logout (dicabut dari perangkat tertautan / WhatsApp Web), semua koneksi ikut terganggu
+- Sekarang saat bot utama terdeteksi logout (`DisconnectReason.loggedOut`): sesi bot utama dihapus dan re-auth (tampil kode pairing / QR baru), namun semua *jadibot* yang sedang aktif tetap berjalan tanpa terganggu
+- Koneksi `forbidden (403)` juga ditangani terpisah: sesi TIDAK dihapus, bot langsung reconnect otomatis dengan backoff (maks 60 detik) tanpa harus scan ulang QR
+- Perubahan di `index.js` (`connection.update` handler, `DisconnectReason.loggedOut` & `DisconnectReason.forbidden`)
+> Logout bot utama tidak lagi mengganggu jadibot aktif — koneksi user lain tetap berjalan
+
 ━━━━━━━━━━━━━━━━━━━━━━
 🔧 *BUG/ERROR FIX*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -113,3 +120,12 @@ _🔍 Masih dalam tahap pemantauan — informasi tanggal rilis akan diumumkan ke
 - Fix: semua contoh command di respons `.emojilist` diganti ke `${pref}emojiadd`, `${pref}emojidel`, dst.
 - Perubahan di `SEMUA_FITUR/info/info.cjs` (handleEmojilist)
 > Prefix command di respons sekarang selalu akurat sesuai prefix yang dipakai pengguna
+
+*6. 🦖 `start-ptero.sh` — Bot Berhenti Diam Tanpa Restart di Panel Pterodactyl*
+- ~Bug: bot yang jalan di panel Pterodactyl bisa crash/berhenti diam-diam tanpa restart otomatis — panel menampilkan "Online" tapi bot tidak merespons~
+- Fix: script `start-ptero.sh` khusus untuk Pterodactyl — set *Startup Command* di panel ke `bash start-ptero.sh`, bot langsung terlindungi
+- Auto-restart loop: bot di-restart otomatis setiap kali crash/exit (maks 10x), dengan jeda 5 detik antar restart
+- Auto-install: jika `node_modules` belum ada saat panel pertama jalan, langsung `npm install` otomatis
+- Notifikasi Telegram: kirim pesan saat bot start, crash+restart, dan laporan harian (uptime, total restart, memori server) — aktif jika `telegram.enabled: true` di `config.json`
+- Bisa diterapkan di masing-masing panel secara independen
+> Bot tidak akan pernah diam diam-diam lagi — selalu restart sendiri dan lapor via Telegram
