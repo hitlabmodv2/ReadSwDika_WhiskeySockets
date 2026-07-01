@@ -2,6 +2,28 @@
 _📅 Jadwal rilis belum ditentukan_ 🕐
 _🔍 Masih dalam tahap pemantauan — informasi tanggal rilis akan diumumkan kemudian, harap bersabar_ 😊
 ━━━━━━━━━━━━━━━━━━━━━━
+🤖 *WILY BOT — V26*
+🔧 *1 Bug/Error Fix*
+🚀 *1 Perubahan*
+━━━━━━━━━━━━━━━━━━━━━━
+🚀 *PERUBAHAN*
+━━━━━━━━━━━━━━━━━━━━━━
+*1. 🎲 Preset Delay Acak `.readsw` — Sekarang Kumulatif dari 1 Detik*
+- Sebelumnya preset berupa band terpisah: 1–5, 5–10, 10–15, 15–20 detik
+- Sekarang semua preset mulai dari 1 detik: 1–5, 1–10, 1–15, 1–20 detik (sesuai request user)
+- Perubahan di `SEMUA_FITUR/readsw/readsw.cjs` (`_RANDOM_PRESETS`)
+> Pilih preset mana pun, delay acak selalu mulai dari 1 detik, cuma batas atasnya yang berubah
+
+━━━━━━━━━━━━━━━━━━━━━━
+🔧 *BUG/ERROR FIX*
+━━━━━━━━━━━━━━━━━━━━━━
+*1. 🔁 Command Ke-Eksekusi 2x — Log `InformasiBotCommand` Muncul Duplikat*
+- Bug: kirim command sekali (misal `.readsw`), tapi log `InformasiBotCommand` muncul 2x dengan waktu identik — command ikut ke-eksekusi dobel
+- Penyebab: event `messages.upsert` dari WhatsApp kadang re-deliver pesan yang sama (msg ID sama) tanpa ada dedup guard, jadi handler pesan jalan 2x untuk 1 pesan
+- Fix: tambah dedup guard di `index.js` — tiap `message.key.id` yang sudah diproses langsung di-skip kalau muncul lagi dalam 60 detik
+> Semua command sekarang cuma jalan sekali per pesan, tidak ada lagi eksekusi/log dobel
+
+━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V25*
 ✨ *1 Fitur Baru*
 🔧 *2 Bug/Error Fix*
