@@ -59,8 +59,18 @@ _🔍 Masih dalam tahap pemantauan — informasi tanggal rilis akan diumumkan ke
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V26*
+✨ *1 Fitur Baru*
 🔧 *1 Bug/Error Fix*
 🚀 *1 Perubahan*
+━━━━━━━━━━━━━━━━━━━━━━
+✨ *FITUR BARU*
+━━━━━━━━━━━━━━━━━━━━━━
+*1. 🔄 Command `.reload` — Cek Status Hot Reload*
+- Command baru untuk cek status sistem hot reload langsung dari chat
+- Menampilkan: total file yang di-watch, jumlah ESM aktif, jumlah CJS watched, daftar folder yang di-auto-scan, dan jumlah file yang sengaja di-skip
+- Sudah ditambahkan ke menu bot utama (`menu_utama.js` & `menupages.cjs`)
+> Ketik `.reload` untuk lihat file apa saja yang sedang dipantau bot secara realtime
+
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *PERUBAHAN*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -81,18 +91,8 @@ _🔍 Masih dalam tahap pemantauan — informasi tanggal rilis akan diumumkan ke
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V25*
-✨ *1 Fitur Baru*
 🔧 *2 Bug/Error Fix*
 🚀 *2 Perubahan*
-━━━━━━━━━━━━━━━━━━━━━━
-✨ *FITUR BARU*
-━━━━━━━━━━━━━━━━━━━━━━
-*1. 🔄 Command `.reload` — Cek Status Hot Reload*
-- Command baru untuk cek status sistem hot reload langsung dari chat
-- Menampilkan: total file yang di-watch, jumlah ESM aktif, jumlah CJS watched, daftar folder yang di-auto-scan, dan jumlah file yang sengaja di-skip
-- Sudah ditambahkan ke menu bot utama (`menu_utama.js` & `menupages.cjs`)
-> Ketik `.reload` untuk lihat file apa saja yang sedang dipantau bot secara realtime
-
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *PERUBAHAN*
 ━━━━━━━━━━━━━━━━━━━━━━
