@@ -24,7 +24,7 @@
  */
 export function buildMenuUtama({ pushName, isOwner, uptimeStr, tgl, jam, browserLabel, totalCmdCount, totalSemuaFitur, fiturAktif, fiturTidakAktif }) {
         return `╭═════════════════════╮
-║   🤖 *WILY BOT V24*   
+║   🤖 *WILY BOT V25*   
 ├═════════════════════┤
 │ 👤 » ${pushName} ${isOwner ? '👑' : ''}
 │ ⏱️ » ${uptimeStr}
