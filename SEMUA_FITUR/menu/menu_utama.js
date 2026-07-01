@@ -196,6 +196,7 @@ export function buildMenuUtama({ pushName, isOwner, uptimeStr, tgl, jam, browser
 │ .emojidel
 │ .emojilist
 │ .ram
+│ .reload
 │ .ceksize / .disksize
 │ .restart / .rebot / .rb
 │ .upbot
