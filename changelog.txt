@@ -2,6 +2,62 @@
 _📅 Jadwal rilis belum ditentukan_ 🕐
 _🔍 Masih dalam tahap pemantauan — informasi tanggal rilis akan diumumkan kemudian, harap bersabar_ 😊
 ━━━━━━━━━━━━━━━━━━━━━━
+🤖 *WILY BOT — V27*
+✨ *2 Fitur Baru*
+🔧 *2 Bug/Error Fix*
+🚀 *2 Perubahan*
+━━━━━━━━━━━━━━━━━━━━━━
+✨ *FITUR BARU*
+━━━━━━━━━━━━━━━━━━━━━━
+*1. 🎛️ Button Single-Select di Semua Command Emoji*
+- Semua command emoji kini menampilkan button navigasi interaktif dengan 2 section: Mode Emoji & Kelola Emoji
+- Command yang dapat button: `.emoji`, `.emojilist`, `.emojicustom`, `.emojidefault`, `.emojiclear`
+- Setiap baris button langsung menjalankan command tujuan saat dipilih (misal pilih "Mode Custom" → eksekusi `.emojicustom`)
+- Fallback otomatis ke teks biasa jika perangkat tidak support button
+- Perubahan di `SEMUA_FITUR/info/info.cjs` dan `SEMUA_FITUR/info/emoji-cmd.cjs`
+> Tidak perlu ketik command manual — cukup pilih dari menu button
+
+*2. 🔗 Auto-Delete Pesan Emoji Lintas Command (Shared Map)*
+- Sistem baru: satu Map bersama (`emoji-msgmap.cjs`) dipakai oleh semua handler emoji
+- Sebelumnya tiap file punya map sendiri — saat pindah antar command (misal pilih `.emojicustom` dari menu `.emoji`), pesan lama tidak terhapus karena map-nya beda
+- Sekarang setiap kali command emoji baru dikirim, pesan bot sebelumnya otomatis dihapus terlebih dahulu — tidak ada pesan menumpuk/spam
+- Berlaku lintas file: `info.cjs` (.emoji, .emojilist) ↔ `emoji-cmd.cjs` (.emojicustom, .emojidefault, .emojiclear)
+- File baru: `SEMUA_FITUR/helper/emoji-msgmap.cjs`
+> Selalu hanya 1 pesan bot emoji aktif per JID, tidak ada spam
+
+━━━━━━━━━━━━━━━━━━━━━━
+🚀 *PERUBAHAN*
+━━━━━━━━━━━━━━━━━━━━━━
+*1. 🧹 Hapus Semua Karakter Box-Drawing dari Respons Emoji*
+- Dihapus semua: │ ╭ ╰ ├ ─ dan sejenisnya dari output `.emoji`, `.emojilist`, dan `renderEmojiList`
+- Diganti dengan format WhatsApp proper: `*tebal*` untuk header, `_miring_` untuk deskripsi, `~coret~` untuk aksi destruktif, ` ```kode``` ` untuk contoh command, `>` untuk tip/quote, `•` untuk bullet
+- Perubahan di `SEMUA_FITUR/info/info.cjs` (handleEmoji, handleEmojilist, renderEmojiList)
+> Tampilan lebih bersih dan konsisten di semua perangkat WhatsApp
+
+*2. 🔤 Format WhatsApp Proper di Semua Command Emoji*
+- Semua respons emoji kini menggunakan format WA: header tebal, deskripsi miring, contoh command dalam backtick/code, tip dalam quote, aksi destruktif di-coret
+- Prefix command tidak lagi hardcoded `.` — semua pakai `${pref}` dari `m.prefix` sehingga ikut prefix pengguna
+- Berlaku di: `.emoji`, `.emojilist`, `.emojicustom`, `.emojidefault`, `.emojiclear`
+> Format konsisten dan sesuai standar formatting WhatsApp
+
+━━━━━━━━━━━━━━━━━━━━━━
+🔧 *BUG/ERROR FIX*
+━━━━━━━━━━━━━━━━━━━━━━
+*1. 📋 `InformasiBotCommand` Muncul Duplikat (Kadang 2x)*
+- ~Bug: kirim command sekali tapi log `InformasiBotCommand` muncul 2 kali dengan waktu identik~
+- Penyebab: ada 2 tempat logging — satu di `message.js` (terpusat, sebelum switch, hanya untuk command di `_commandSet`) dan satu lagi di dalam tiap handler — kalau command ada di `_commandSet`, ikut ter-log 2x
+- Fix: hapus blok `_logCmdBox` terpusat di `message.js` (baris 481–483) — logging diserahkan sepenuhnya ke tiap handler masing-masing yang sudah konsisten memanggil `logCommand`
+- Perubahan di `message.js`
+> `InformasiBotCommand` kini selalu muncul tepat 1x per command, tidak pernah dobel lagi
+
+*2. 🔤 Prefix Hardcoded `.` di Respons `.emojilist`*
+- ~Bug: di body text command `.emojilist`, semua contoh command pakai prefix hardcoded `.` (misal `.emojiadd`) — tidak ikut prefix yang diset pengguna~
+- Penyebab: string command di bodyText menggunakan literal `.` bukan variabel `${pref}`
+- Fix: semua contoh command di respons `.emojilist` diganti ke `${pref}emojiadd`, `${pref}emojidel`, dst.
+- Perubahan di `SEMUA_FITUR/info/info.cjs` (handleEmojilist)
+> Prefix command di respons sekarang selalu akurat sesuai prefix yang dipakai pengguna
+
+━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V26*
 🔧 *1 Bug/Error Fix*
 🚀 *1 Perubahan*
