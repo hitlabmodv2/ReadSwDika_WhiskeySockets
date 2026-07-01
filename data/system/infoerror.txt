@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 30/06/2026, 12.40.58  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 01/07/2026, 10.02.28  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  AniGame
+│  #001  —  console.error
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [AniGame] ❌ "Choices: Stories You Play (MOD, Free Choice)" GAGAL dikirim ke semua grup (1 gagal) — TIDAK ditandai terkirim, akan dicoba lagi nanti
+│  [31m[HotReload] Tidak bisa watch 'SEMUA_FITUR/tools/waifu.cjs':[39m ENOENT: no such file or directory, watch '/home/runner/workspace/SEMUA_FITUR/tools/waifu.cjs'
 │
 │  DETAIL
-│  Sumber      : AniGame
+│  Sumber      : console.error
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 30/06/2026, 12.40.58
-│  Terakhir    : 30/06/2026, 12.40.58
+│  Pertama     : 01/07/2026, 10.02.28
+│  Terakhir    : 01/07/2026, 10.02.28
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [AniGame] ❌ "Choices: Stories You Play (MOD, Free Choice)" GAGAL dikirim ke semua grup (1 gagal) — TIDAK ditandai terkirim, akan dicoba lagi nanti
+│  ▶  Error: [31m[HotReload] Tidak bisa watch 'SEMUA_FITUR/tools/waifu.cjs':[39m ENOENT: no such file or directory, watch '/home/runner/workspace/SEMUA_FITUR/tools/waifu.cjs'
 │     at console.error (file:///home/runner/workspace/index.js:433:27)
-│     at Timeout.runAnigame [as _onTimeout] (file:///home/runner/workspace/index.js:1529:73)
+│     at watchFile (file:///home/runner/workspace/src/helper/hotReload.js:317:17)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 30/06/2026, 12.40.58
+  Terakhir diperbarui: 01/07/2026, 10.02.28
 ════════════════════════════════════════════════════════════════════════

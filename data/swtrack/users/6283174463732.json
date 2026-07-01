@@ -89,9 +89,9 @@
     "name": "𝕱𝖆𝖑𝖑⛓️",
     "type": "videoMessage",
     "arrivedAt": "2026-07-01T09:57:53.848Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "🧸",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6283174463732",
@@ -104,6 +104,8 @@
       "participant": "71850927358101@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-07-01T09:57:53.848Z"
+    "updatedAt": "2026-07-01T10:01:57.795Z",
+    "retriedOnStartup": true,
+    "retriedAt": "2026-07-01T10:01:57.795Z"
   }
 }
