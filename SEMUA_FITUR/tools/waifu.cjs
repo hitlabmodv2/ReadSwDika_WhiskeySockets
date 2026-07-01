@@ -43,34 +43,51 @@ const CONFIG_PATH = path.join(process.cwd(), 'config.json');
 // API: tbib.org (gelbooru-based, tidak pakai Cloudflare, selalu bisa diakses)
 // Format URL: https://tbib.org/images/{directory}/{image}
 
-// Safe tags — konten aman (rating:safe atau tanpa rating filter)
+// Safe tags — konten aman (rating:safe) — count real dari tbib.org
 const SAFE_TAGS = [
-    { label: '🧕 Waifu',          slug: 'anime_girl rating:safe',                    count: 4274 },
-    { label: '👗 Maid',            slug: 'maid rating:safe',                          count: 273  },
-    { label: '👕 Uniform',         slug: 'uniform rating:safe',                       count: 446  },
-    { label: '🤳 Selfies',         slug: 'selfie rating:safe',                        count: 181  },
-    { label: '✨ Genshin Impact',  slug: 'genshin_impact rating:safe',                count: 84   },
-    { label: '⚡ Raiden Shogun',   slug: 'raiden_shogun_(genshin_impact) rating:safe', count: 69  },
-    { label: '🌸 Marin Kitagawa',  slug: 'marin_kitagawa rating:safe',                count: 43   },
-    { label: '💀 Mori Calliope',   slug: 'mori_calliope rating:safe',                 count: 26   },
-    { label: '🌸 Kamisato Ayaka',  slug: 'kamisato_ayaka rating:safe',                count: 14   },
-    { label: '💙 Rem',             slug: 'rem_(re:zero) rating:safe',                 count: 12   },
-    { label: '🍊 Nami',            slug: 'nami_(one_piece) rating:safe',              count: 10   },
-    { label: '⚓ One Piece',       slug: 'one_piece rating:safe',                     count: 50   },
+    { label: '🧕 Waifu',          slug: '1girl rating:safe',              count: 4278481 },
+    { label: '💃 Dress',           slug: 'dress rating:safe',              count: 1102668 },
+    { label: '💫 Twintails',       slug: 'twintails rating:safe',          count: 653335  },
+    { label: '🩱 Swimsuit',        slug: 'swimsuit rating:safe',           count: 600652  },
+    { label: '🏫 School Uniform',  slug: 'school_uniform rating:safe',     count: 549907  },
+    { label: '👙 Bikini',          slug: 'bikini rating:safe',             count: 482045  },
+    { label: '👓 Kacamata',        slug: 'glasses rating:safe',            count: 327354  },
+    { label: '👘 Kimono',          slug: 'kimono rating:safe',             count: 172580  },
+    { label: '🌑 Dark Skin',       slug: 'dark_skin rating:safe',          count: 167327  },
+    { label: '👕 Uniform',         slug: 'uniform rating:safe',            count: 155167  },
+    { label: '✨ Genshin Impact',  slug: 'genshin_impact rating:safe',     count: 128804  },
+    { label: '👗 Maid',            slug: 'maid rating:safe',               count: 114971  },
+    { label: '🐱 Cat Girl',        slug: 'cat_girl rating:safe',           count: 64269   },
+    { label: '😈 Demon Girl',      slug: 'demon_girl rating:safe',         count: 59330   },
+    { label: '🧝 Elf',             slug: 'elf rating:safe',                count: 44137   },
+    { label: '🎀 Gothic Lolita',   slug: 'gothic_lolita rating:safe',      count: 15312   },
+    { label: '🤳 Selfie',          slug: 'selfie rating:safe',             count: 15980   },
+    { label: '💀 Mori Calliope',   slug: 'mori_calliope rating:safe',      count: 7752    },
+    { label: '💙 Rem (Re:Zero)',   slug: 'rem_(re:zero) rating:safe',      count: 7298    },
+    { label: '🍊 Nami (One Piece)',slug: 'nami_(one_piece) rating:safe',   count: 6177    },
+    { label: '🌸 Kamisato Ayaka',  slug: 'kamisato_ayaka rating:safe',     count: 3174    },
 ];
 
-// NSFW tags — konten dewasa 18+ (rating:explicit)
+// NSFW tags — konten dewasa 18+ (rating:explicit) — count real dari tbib.org
 const NSFW_TAGS = [
-    { label: '🌶️ Ero',     slug: 'nude rating:explicit',              count: 3012 },
-    { label: '💋 Ecchi',   slug: 'ecchi rating:explicit',             count: 2136 },
-    { label: '🍈 Oppai',   slug: 'oppai large_breasts rating:explicit', count: 1084 },
-    { label: '📖 Hentai',  slug: 'hentai rating:explicit',            count: 882  },
-    { label: '👩 MILF',    slug: 'milf rating:explicit',              count: 468  },
-    { label: '👕 Uniform', slug: 'uniform rating:explicit',           count: 446  },
-    { label: '🍑 Ass',     slug: 'ass rating:explicit',               count: 413  },
-    { label: '👗 Maid',    slug: 'maid rating:explicit',              count: 273  },
-    { label: '💦 Paizuri', slug: 'paizuri rating:explicit',           count: 146  },
-    { label: '👄 Oral',    slug: 'oral rating:explicit',              count: 145  },
+    { label: '🔞 Nipples',         slug: 'nipples rating:explicit',                  count: 2038285 },
+    { label: '🌶️ Nude/Ero',       slug: 'nude rating:explicit',                     count: 1715697 },
+    { label: '💦 Cum',             slug: 'cum rating:explicit',                      count: 1252162 },
+    { label: '🍈 Large Breasts',   slug: 'large_breasts rating:explicit',            count: 492133  },
+    { label: '👄 Oral',            slug: 'oral rating:explicit',                     count: 482597  },
+    { label: '🍑 Ass',             slug: 'ass rating:explicit',                      count: 297261  },
+    { label: '👭 Group Sex',       slug: 'group_sex rating:explicit',                count: 202376  },
+    { label: '⛓️ Bondage',        slug: 'bondage rating:explicit',                  count: 184006  },
+    { label: '🐙 Tentacles',       slug: 'tentacles rating:explicit',                count: 96845   },
+    { label: '😵 Ahegao',          slug: 'ahegao rating:explicit',                   count: 86537   },
+    { label: '💦 Paizuri',         slug: 'paizuri rating:explicit',                  count: 74287   },
+    { label: '⚧ Futanari',        slug: 'futanari rating:explicit',                  count: 57965   },
+    { label: '🩷 Yuri',            slug: 'yuri rating:explicit',                     count: 55759   },
+    { label: '👊 Gangbang',        slug: 'gangbang rating:explicit',                 count: 52317   },
+    { label: '👕 Uniform 18+',     slug: 'uniform rating:explicit',                  count: 36873   },
+    { label: '👗 Maid 18+',        slug: 'maid rating:explicit',                     count: 20234   },
+    { label: '🍈 Oppai',           slug: 'oppai rating:explicit',                    count: 10153   },
+    { label: '👩 MILF',            slug: 'milf rating:explicit',                     count: 9602    },
 ];
 
 // ── Ambil token waifu.im dari config.json ─────────────────────────────────────

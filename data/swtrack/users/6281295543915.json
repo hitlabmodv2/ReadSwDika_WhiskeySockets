@@ -106,7 +106,7 @@
       "participant": "26547712958494@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-07-01T02:59:32.954Z",
+    "updatedAt": "2026-07-01T09:34:23.802Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -125,7 +125,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-07-01T02:59:32.954Z"
+    "processedAt": "2026-07-01T02:59:32.954Z",
+    "deleted": true,
+    "deletedAt": "2026-07-01T09:34:23.802Z"
   },
   "A56C45975E4877E8F48451BE0A7D36FB": {
     "id": "A56C45975E4877E8F48451BE0A7D36FB",
@@ -299,7 +301,7 @@
       "participant": "26547712958494@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-07-01T08:02:44.285Z",
+    "updatedAt": "2026-07-01T09:28:43.111Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -318,7 +320,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-07-01T08:02:44.285Z"
+    "processedAt": "2026-07-01T08:02:44.285Z",
+    "deleted": true,
+    "deletedAt": "2026-07-01T09:28:43.111Z"
   },
   "A56F8916C24889A0AFFAA6CC34DA0D6E": {
     "id": "A56F8916C24889A0AFFAA6CC34DA0D6E",
@@ -361,5 +365,91 @@
       }
     ],
     "processedAt": "2026-07-01T08:43:52.167Z"
+  },
+  "A5533E471B54BF3C4544D73FBBDF017B": {
+    "id": "A5533E471B54BF3C4544D73FBBDF017B",
+    "sender": "6281295543915@s.whatsapp.net",
+    "name": "Arthur.remi_kan",
+    "type": "imageMessage",
+    "arrivedAt": "2026-07-01T09:29:02.767Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "⚽",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6281295543915",
+    "resolvedPn": "6281295543915@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6281295543915@s.whatsapp.net",
+      "fromMe": false,
+      "id": "A5533E471B54BF3C4544D73FBBDF017B",
+      "participant": "26547712958494@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-01T09:29:15.160Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281295543915@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A5533E471B54BF3C4544D73FBBDF017B",
+        "participant": "26547712958494@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281295543915@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A5533E471B54BF3C4544D73FBBDF017B",
+        "participant": "6281295543915@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-01T09:29:04.933Z",
+    "deleted": true,
+    "deletedAt": "2026-07-01T09:29:15.160Z"
+  },
+  "A5E8AAA43FB67640400D067419AC224D": {
+    "id": "A5E8AAA43FB67640400D067419AC224D",
+    "sender": "6281295543915@s.whatsapp.net",
+    "name": "Arthur.remi_kan",
+    "type": "imageMessage",
+    "arrivedAt": "2026-07-01T09:29:35.235Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🏀",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6281295543915",
+    "resolvedPn": "6281295543915@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6281295543915@s.whatsapp.net",
+      "fromMe": false,
+      "id": "A5E8AAA43FB67640400D067419AC224D",
+      "participant": "26547712958494@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-01T09:29:51.313Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281295543915@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A5E8AAA43FB67640400D067419AC224D",
+        "participant": "26547712958494@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281295543915@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A5E8AAA43FB67640400D067419AC224D",
+        "participant": "6281295543915@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-01T09:29:51.313Z"
   }
 }

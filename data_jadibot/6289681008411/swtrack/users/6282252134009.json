@@ -40,5 +40,47 @@
       }
     ],
     "processedAt": "2026-07-01T09:25:34.876Z"
+  },
+  "AC7A8B99CC364AE5282128085F808B67": {
+    "id": "AC7A8B99CC364AE5282128085F808B67",
+    "sender": "6282252134009@s.whatsapp.net",
+    "name": "TIMELESS || SPIRITS",
+    "type": "videoMessage",
+    "arrivedAt": "2026-07-01T09:33:51.909Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "⚽",
+    "resolve": "Signal Lib ✓",
+    "source": "status",
+    "number": "6282252134009",
+    "resolvedPn": "6282252134009@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6282252134009@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC7A8B99CC364AE5282128085F808B67",
+      "participant": "76790290767977@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-01T09:33:55.484Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282252134009@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC7A8B99CC364AE5282128085F808B67",
+        "participant": "76790290767977@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282252134009@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC7A8B99CC364AE5282128085F808B67",
+        "participant": "6282252134009@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-01T09:33:55.484Z"
   }
 }
