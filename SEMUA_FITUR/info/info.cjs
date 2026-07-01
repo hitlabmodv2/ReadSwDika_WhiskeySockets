@@ -822,22 +822,22 @@ async function handleEmojilist({ hisoka, m, tolak, logCommand, getJadibotNumber,
                 response += renderEmojiList(data.emojis);
                 response += `\n*⚡ Aksi Cepat*\n\n`;
                 response += `*Tambah:*\n`;
-                response += `• \`\`\`.emojiadd 😊,😄\`\`\` — _tambah single_\n`;
-                response += `• \`\`\`.emojiadd 😊😄😁\`\`\` — _tambah gabungan_\n`;
+                response += `• \`\`\`${pref}emojiadd 😊,😄\`\`\` — _tambah single_\n`;
+                response += `• \`\`\`${pref}emojiadd 😊😄😁\`\`\` — _tambah gabungan_\n`;
                 response += `\n*Hapus:*\n`;
-                response += `• \`\`\`.emojidel 😊\`\`\` — _hapus single_\n`;
-                response += `• \`\`\`.emojidel 1,2\`\`\` — _hapus gabung by nomor_\n`;
+                response += `• \`\`\`${pref}emojidel 😊\`\`\` — _hapus single_\n`;
+                response += `• \`\`\`${pref}emojidel 1,2\`\`\` — _hapus gabung by nomor_\n`;
                 response += `\n*Mode & Lainnya:*\n`;
                 if (_isJb) {
-                        response += `• \`\`\`.emojicustom\`\`\` → _pakai emoji kamu sendiri_\n`;
-                        response += `• \`\`\`.emojidefault\`\`\` → _ikut emoji bot utama_\n`;
-                        response += `• \`\`\`.emojiclear\`\`\` → ~semua emoji~ _direset ke awal_ ⚠️\n`;
+                        response += `• \`\`\`${pref}emojicustom\`\`\` → _pakai emoji kamu sendiri_\n`;
+                        response += `• \`\`\`${pref}emojidefault\`\`\` → _ikut emoji bot utama_\n`;
+                        response += `• \`\`\`${pref}emojiclear\`\`\` → ~semua emoji~ _direset ke awal_ ⚠️\n`;
                 } else {
-                        response += `• \`\`\`.emojicustom\`\`\` → _aktifkan emoji kustom_\n`;
-                        response += `• \`\`\`.emojidefault\`\`\` → _balik ke 1900 default_\n`;
-                        response += `• \`\`\`.emojiclear\`\`\` → ~semua emoji~ _direset ke awal_ ⚠️\n`;
+                        response += `• \`\`\`${pref}emojicustom\`\`\` → _aktifkan emoji kustom_\n`;
+                        response += `• \`\`\`${pref}emojidefault\`\`\` → _balik ke 1900 default_\n`;
+                        response += `• \`\`\`${pref}emojiclear\`\`\` → ~semua emoji~ _direset ke awal_ ⚠️\n`;
                 }
-                response += `• \`\`\`.emoji\`\`\` → _lihat tutorial lengkap_\n`;
+                response += `• \`\`\`${pref}emoji\`\`\` → _lihat tutorial lengkap_\n`;
                 response += `\n> 💡 _Ketuk tombol di bawah untuk aksi cepat!_`;
 
                 // ── Kirim dengan single button, fallback ke teks biasa ────────────────
