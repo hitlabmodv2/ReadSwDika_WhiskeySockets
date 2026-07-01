@@ -80,23 +80,42 @@ function _buildBody(cfg, isJadibot, jadibotNum, getMainEmojiMode, getJadibotEmoj
     );
 }
 
+// ── Preset delay acak ─────────────────────────────────────────────────────────
+const _RANDOM_PRESETS = [
+    { min: 1,  max: 5,  label: '1–5 detik',   desc: 'Sangat cepat — tidak disarankan' },
+    { min: 3,  max: 8,  label: '3–8 detik',   desc: 'Cepat — cocok untuk banyak kontak' },
+    { min: 5,  max: 12, label: '5–12 detik',  desc: 'Normal — aman dan stabil' },
+    { min: 8,  max: 15, label: '8–15 detik',  desc: 'Aman — disarankan untuk daily use' },
+    { min: 10, max: 20, label: '10–20 detik', desc: 'Lambat — paling aman dari ban' },
+];
+
 // ── Kirim selection button + fallback teks ─────────────────────────────────────
 async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, cfg) {
     if (Button) {
         let sent = false;
         try {
+            // ── tanda ✓ Mode ─────────────────────────────────────────────
             const modeAktif = !cfg.enabled ? 'off'
                 : cfg.autoReaction !== false ? 'on' : 'false';
             const markMode = (key) => key === modeAktif ? '✓ ' : '';
 
-            const fixedDelay = (cfg.fixedDelayMs || 3000) / 1000;
-            const isRandom   = cfg.randomDelay !== false;
-            const activeDelay = isRandom ? null : fixedDelay;
+            // ── tanda ✓ Delay Tetap: strict ms comparison ─────────────────
+            const isRandom       = cfg.randomDelay === true;
+            const fixedMs        = cfg.fixedDelayMs || 3000;
+            const markFixed = (i) => !isRandom && fixedMs === i * 1000 ? '✓ ' : '';
+
+            // ── tanda ✓ Delay Acak: cek preset yang cocok ─────────────────
+            const markRandom = (preset) =>
+                isRandom &&
+                (cfg.delayMinMs || 1000)  === preset.min * 1000 &&
+                (cfg.delayMaxMs || 20000) === preset.max * 1000
+                    ? '✓ ' : '';
 
             const btn = new Button()
                 .setBody(bodyText)
                 .setFooter('⚡ Wily Bot • Auto Read Story')
                 .addSelection('🎛️ Pilih Pengaturan')
+
                 // ── Section 1: Mode ───────────────────────────────────────
                 .makeSections('⚙️ Mode')
                 .makeRow(
@@ -117,18 +136,34 @@ async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, cfg) {
                     'Bot tidak akan membaca story siapapun',
                     `${pref}readsw off`
                 )
-                // ── Section 2: Delay 1-20 detik ──────────────────────────
-                .makeSections('⏱️ Delay (1–20 detik)');
 
-            for (let i = 1; i <= 20; i++) {
-                const isActive = !isRandom && activeDelay === i;
-                const header   = isActive ? `✓ ${i} detik` : `${i} detik`;
+                // ── Section 2: Delay Acak (preset) ───────────────────────
+                .makeSections('🎲 Delay Acak (Preset)');
+
+            for (const p of _RANDOM_PRESETS) {
+                btn.makeRow(
+                    markRandom(p) + p.label,
+                    `Acak ${p.label}`,
+                    p.desc,
+                    `${pref}readsw delay ${p.min} ${p.max}`
+                );
+            }
+
+            // ── Section 3: Delay Tetap 1-15 detik ────────────────────────
+            btn.makeSections('⏱️ Delay Tetap (1–15 detik)');
+
+            for (let i = 1; i <= 15; i++) {
                 let desc;
                 if (i <= 3)       desc = 'Sangat cepat — tidak disarankan';
                 else if (i <= 7)  desc = 'Cepat — cocok untuk banyak kontak';
-                else if (i <= 13) desc = 'Normal — aman dan stabil';
+                else if (i <= 11) desc = 'Normal — aman dan stabil';
                 else              desc = 'Lambat — paling aman dari ban';
-                btn.makeRow(header, `Delay Tetap ${i} Detik`, desc, `${pref}readsw delay ${i}`);
+                btn.makeRow(
+                    markFixed(i) + `${i} detik`,
+                    `Delay Tetap ${i} Detik`,
+                    desc,
+                    `${pref}readsw delay ${i}`
+                );
             }
 
             await btn.run(m.from, hisoka, m);
