@@ -132,6 +132,7 @@ const pendingAntilinkChoices = new Map();
 const pendingCosplayChoices = new Map();
 const pendingKomikChoices = new Map();
 const pendingFontuntikChoices = new Map(); // key → { text, botMsgId, expiresAt, timeout }
+const pendingWaifuChoices     = new Map(); // key → { stage, mode, botMsgKey, expiresAt, timeout }
 
 const aiReplyCooldown = new Map(); // sender → last reply timestamp
 const AI_COOLDOWN_MS = 3000; // 3 detik cooldown per user
@@ -446,11 +447,13 @@ export default async function ({ message, type: messagesType }, hisoka) {
                             'del', 'd',
                             'font', 'fontgen',
                             'fontuntik',
+                            'waifu',
                             'logo'
                         ]);
                         const _rawText = (m.text || '').trim();
                         const _isFontuntikChoice = _rawText.startsWith('fu_');
-                        if (!_isFontuntikChoice && !jadibotAllowedCommands.has(m.command)) {
+                        const _isWaifuChoice = _rawText.startsWith('waifu_mode_') || _rawText.startsWith('waifu_char_');
+                        if (!_isFontuntikChoice && !_isWaifuChoice && !jadibotAllowedCommands.has(m.command)) {
                             return;
                         }
                 } else {
@@ -651,6 +654,12 @@ export default async function ({ message, type: messagesType }, hisoka) {
                 {
                         const { handleFontuntikChoice } = _require(path.resolve('./SEMUA_FITUR/tools/fontuntik.cjs'));
                         if (await handleFontuntikChoice({ hisoka, m, pendingFontuntikChoices, getJadibotChoiceKey, getQuotedStanzaId, Button, tolak, logCommand })) return;
+                }
+
+                // ── Handle pending waifu choice → waifu.cjs ──
+                {
+                        const { handleWaifuChoice } = _require(path.resolve('./SEMUA_FITUR/tools/waifu.cjs'));
+                        if (await handleWaifuChoice({ hisoka, m, pendingWaifuChoices, getJadibotChoiceKey, getQuotedStanzaId, Button, tolak, logCommand })) return;
                 }
 
                 // ── Handle pending play choice → play-cmd.cjs ──
@@ -1025,6 +1034,12 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'an1game': {
                                 const { handleAn1game } = _require(path.resolve('./SEMUA_FITUR/tools/an1game.cjs'));
                                 await handleAn1game({ hisoka, m, query, tolak, logCommand, sendConfirmWithButtons, fs, path, loadConfig, Button });
+                                break;
+                        }
+
+                        case 'waifu': {
+                                const { handleWaifu } = _require(path.resolve('./SEMUA_FITUR/tools/waifu.cjs'));
+                                await handleWaifu(m, hisoka, { Button, logCommand, tolak, pendingWaifuChoices, getJadibotChoiceKey });
                                 break;
                         }
 
