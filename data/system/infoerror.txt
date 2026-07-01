@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 01/07/2026, 10.02.28  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 01/07/2026, 10.02.44  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  console.error
+│  #001  —  command:?
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [31m[HotReload] Tidak bisa watch 'SEMUA_FITUR/tools/waifu.cjs':[39m ENOENT: no such file or directory, watch '/home/runner/workspace/SEMUA_FITUR/tools/waifu.cjs'
+│  ENOENT: no such file or directory, open '/home/runner/workspace/SEMUA_FITUR/tools/waifu.cjs'
 │
 │  DETAIL
-│  Sumber      : console.error
+│  Sumber      : command:?
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 01/07/2026, 10.02.28
-│  Terakhir    : 01/07/2026, 10.02.28
+│  Pertama     : 01/07/2026, 10.02.44
+│  Terakhir    : 01/07/2026, 10.02.44
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [31m[HotReload] Tidak bisa watch 'SEMUA_FITUR/tools/waifu.cjs':[39m ENOENT: no such file or directory, watch '/home/runner/workspace/SEMUA_FITUR/tools/waifu.cjs'
-│     at console.error (file:///home/runner/workspace/index.js:433:27)
-│     at watchFile (file:///home/runner/workspace/src/helper/hotReload.js:317:17)
+│  ▶  Error: ENOENT: no such file or directory, open '/home/runner/workspace/SEMUA_FITUR/tools/waifu.cjs'
+│     at Object.readFileSync (node:fs:448:20)
+│     at loadSource (node:internal/modules/cjs/loader:1548:17)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 01/07/2026, 10.02.28
+  Terakhir diperbarui: 01/07/2026, 10.02.44
 ════════════════════════════════════════════════════════════════════════

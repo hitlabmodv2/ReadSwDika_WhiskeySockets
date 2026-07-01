@@ -658,7 +658,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                 // ── Handle pending waifu choice → waifu.cjs ──
                 {
-                        const { handleWaifuChoice } = _require(path.resolve('./SEMUA_FITUR/tools/waifu.cjs'));
+                        const { handleWaifuChoice } = _require(path.resolve('./SEMUA_FITUR/anime/waifu.cjs'));
                         if (await handleWaifuChoice({ hisoka, m, pendingWaifuChoices, getJadibotChoiceKey, getQuotedStanzaId, Button, tolak, logCommand })) return;
                 }
 
@@ -1038,7 +1038,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         }
 
                         case 'waifu': {
-                                const { handleWaifu } = _require(path.resolve('./SEMUA_FITUR/tools/waifu.cjs'));
+                                const { handleWaifu } = _require(path.resolve('./SEMUA_FITUR/anime/waifu.cjs'));
                                 await handleWaifu(m, hisoka, { Button, logCommand, tolak, pendingWaifuChoices, getJadibotChoiceKey });
                                 break;
                         }
