@@ -150,7 +150,7 @@ async function _sendImageResult(hisoka, m, Button, pendingWaifuChoices, getJadib
     const artistName = imgData.artists?.[0]?.name || null;
     const source     = imgData.source || null;
 
-    const caption =
+    const body =
         `╭─「 🖼️ *WAIFU.IM* 」\n` +
         `│\n` +
         `│ 🎌 Kategori : *${chosen.label}*\n` +
@@ -161,31 +161,18 @@ async function _sendImageResult(hisoka, m, Button, pendingWaifuChoices, getJadib
         `│\n` +
         `╰──────────────────────`;
 
-    // Kirim gambar
-    try {
-        if (ext === 'gif') {
-            await hisoka.sendMessage(m.from, { video: imgData.buffer, gifPlayback: true, caption }, { quoted: quotedTarget || m });
-        } else {
-            await hisoka.sendMessage(m.from, { image: imgData.buffer, caption }, { quoted: quotedTarget || m });
-        }
-    } catch (_) {
-        // fallback: kirim sebagai URL text
-        await hisoka.sendMessage(m.from, { text: `${caption}\n\n🔗 ${imgData.url}` }, { quoted: quotedTarget || m });
-    }
-
-    // Kirim tombol Next/Back (satu list button)
+    // Gambar + tombol aksi dalam 1 pesan
     const btn = new Button()
-        .setBody(
-            `╭─「 🖼️ *WAIFU.IM* 」\n` +
-            `│\n` +
-            `│ 🎌 *${chosen.label}* — ${modeLabel}\n` +
-            `│\n` +
-            `│ 👇 Pilih aksi berikutnya:\n` +
-            `│\n` +
-            `╰──────────────────────`
-        )
+        .setBody(body)
         .setFooter('🖼️ Waifu.im • WilyBot')
         .addSelection('📋 Pilih Aksi');
+
+    // Embed gambar di header (gif pakai setVideo)
+    if (ext === 'gif') {
+        btn.setVideo(imgData.buffer, { gifPlayback: true });
+    } else {
+        btn.setImage(imgData.buffer);
+    }
 
     btn.makeSections('🎮 Aksi');
     btn.makeRow('', '➡️ Gambar Lagi', `Ambil gambar ${chosen.label} baru`, `${_PFX_NEXT}${idx}_${mode}`);
