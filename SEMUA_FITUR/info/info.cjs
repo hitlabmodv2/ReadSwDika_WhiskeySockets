@@ -639,15 +639,8 @@ module.exports.handleEmojidel = handleEmojidel;
 
 // ── HANDLER: emoji (panduan lengkap) ──────────────────────────────────────────
 
-// ── Map: simpan key pesan terakhir per JID untuk auto-delete ─────────────────
-const _emojiLastMsgMap = new Map();
-
-async function _deleteEmojiLastMsg(hisoka, jid) {
-        const key = _emojiLastMsgMap.get(jid);
-        if (!key) return;
-        try { await hisoka.sendMessage(jid, { delete: key }); } catch (_) {}
-        _emojiLastMsgMap.delete(jid);
-}
+// ── Shared map — auto-delete pesan emoji lintas command ──────────────────────
+const { emojiDeleteLast, emojiSaveLast } = require('../helper/emoji-msgmap.cjs');
 
 async function handleEmoji({ hisoka, m, tolak, logCommand, getJadibotNumber, listJadibotEmojis, Button }) {
         if (!m.isOwner && hisoka?.isMainBot !== false) return;
@@ -772,9 +765,9 @@ async function handleEmoji({ hisoka, m, tolak, logCommand, getJadibotNumber, lis
                                                 `${pref}emoji`
                                         );
 
-                                await _deleteEmojiLastMsg(hisoka, m.from);
+                                await emojiDeleteLast(hisoka, m.from);
                                 const result = await btn.run(m.from, hisoka, m);
-                                if (result?.key) _emojiLastMsgMap.set(m.from, result.key);
+                                if (result?.key) emojiSaveLast(m.from, result.key);
                                 sent = true;
                         } catch (_) {}
                         if (!sent) await tolak(hisoka, m, bodyText);
@@ -900,9 +893,9 @@ async function handleEmojilist({ hisoka, m, tolak, logCommand, getJadibotNumber,
                                                 `${pref}emoji`
                                         );
 
-                                await _deleteEmojiLastMsg(hisoka, m.from);
+                                await emojiDeleteLast(hisoka, m.from);
                                 const result = await btn.run(m.from, hisoka, m);
-                                if (result?.key) _emojiLastMsgMap.set(m.from, result.key);
+                                if (result?.key) emojiSaveLast(m.from, result.key);
                                 sent = true;
                         } catch (_) {}
                         if (!sent) await tolak(hisoka, m, response);
