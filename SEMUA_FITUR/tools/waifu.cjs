@@ -74,15 +74,36 @@ const NSFW_TAGS = [
 function _httpGetJson(url) {
     return new Promise((resolve, reject) => {
         const req = https.get(url, {
-            headers: { 'User-Agent': 'WilyBot/1.0', 'Accept': 'application/json' },
+            headers: {
+                'User-Agent':      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept':          'application/json, text/plain, */*',
+                'Accept-Language': 'en-US,en;q=0.9',
+                'Accept-Encoding': 'gzip, deflate, br',
+                'Referer':         'https://www.waifu.im/',
+                'Origin':          'https://www.waifu.im',
+                'Connection':      'keep-alive',
+            },
         }, (res) => {
+            // Handle gzip/deflate dekompresi otomatis
             let raw = '';
-            res.on('data', d => raw += d);
-            res.on('end', () => {
+            const zlib = require('zlib');
+            const encoding = res.headers['content-encoding'];
+            let stream = res;
+
+            if (encoding === 'gzip') {
+                stream = res.pipe(zlib.createGunzip());
+            } else if (encoding === 'deflate') {
+                stream = res.pipe(zlib.createInflate());
+            } else if (encoding === 'br') {
+                stream = res.pipe(zlib.createBrotliDecompress());
+            }
+
+            stream.on('data', d => raw += d);
+            stream.on('end', () => {
                 if (res.statusCode !== 200) return reject(new Error(`HTTP ${res.statusCode}`));
                 try { resolve(JSON.parse(raw)); } catch (_) { reject(new Error('JSON parse error')); }
             });
-            res.on('error', reject);
+            stream.on('error', reject);
         });
         req.on('error', reject);
         req.setTimeout(12000, () => { req.destroy(); reject(new Error('Timeout')); });
@@ -91,7 +112,14 @@ function _httpGetJson(url) {
 
 function _downloadBuffer(url) {
     return new Promise((resolve, reject) => {
-        const req = https.get(url, { headers: { 'User-Agent': 'WilyBot/1.0' } }, (res) => {
+        const req = https.get(url, {
+            headers: {
+                'User-Agent':      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept':          'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.9',
+                'Referer':         'https://www.waifu.im/',
+            },
+        }, (res) => {
             if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
                 return _downloadBuffer(res.headers.location).then(resolve).catch(reject);
             }
