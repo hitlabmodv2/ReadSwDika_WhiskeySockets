@@ -80,6 +80,20 @@ function getSystemMemoryInfo() {
         };
 }
 
+function formatUptime(ms) {
+        const totalSec = Math.floor(ms / 1000);
+        const days = Math.floor(totalSec / 86400);
+        const hours = Math.floor((totalSec % 86400) / 3600);
+        const minutes = Math.floor((totalSec % 3600) / 60);
+        const seconds = totalSec % 60;
+        const parts = [];
+        if (days > 0) parts.push(`${days}h`);
+        if (hours > 0) parts.push(`${hours}j`);
+        if (minutes > 0) parts.push(`${minutes}m`);
+        parts.push(`${seconds}d`);
+        return parts.join(' ');
+}
+
 export class MemoryMonitor {
         constructor(options = {}) {
                 const config = loadConfig();
@@ -104,6 +118,8 @@ export class MemoryMonitor {
                 this.config = config;
                 this.logIntervalMs = memConfig.logIntervalMs || 300000;
                 this._checkCount = 0;
+                this._lastUsage = null;
+                this._startTime = Date.now();
         }
 
         start() {
@@ -160,10 +176,24 @@ export class MemoryMonitor {
                         const sysPct = parseFloat(sysPercentage);
                         const sysColor = sysPct >= 90 ? '\x1b[31m' : sysPct >= 70 ? '\x1b[33m' : '\x1b[32m';
 
-                        const heapMB  = (memUsage.heapUsed  / (1024 * 1024)).toFixed(1);
-                        const limitGB = (this.memoryLimit    / (1024 * 1024 * 1024)).toFixed(2);
-                        const sysGB   = (systemMem.used      / (1024 * 1024 * 1024)).toFixed(2);
-                        const sysTGB  = (systemMem.total     / (1024 * 1024 * 1024)).toFixed(2);
+                        const heapMB     = (memUsage.heapUsed   / (1024 * 1024)).toFixed(1);
+                        const heapTotMB  = (memUsage.heapTotal  / (1024 * 1024)).toFixed(1);
+                        const extMB      = (memUsage.external   / (1024 * 1024)).toFixed(1);
+                        const limitGB    = (this.memoryLimit     / (1024 * 1024 * 1024)).toFixed(2);
+                        const sysFreeGB  = (systemMem.free       / (1024 * 1024 * 1024)).toFixed(2);
+                        const sysGB      = (systemMem.used       / (1024 * 1024 * 1024)).toFixed(2);
+                        const sysTGB     = (systemMem.total      / (1024 * 1024 * 1024)).toFixed(2);
+
+                        const loadAvg = os.loadavg().map((n) => n.toFixed(2)).join(', ');
+                        const cpuCount = os.cpus()?.length || 0;
+                        const uptime = formatUptime(Date.now() - this._startTime);
+
+                        let trendIcon = '→';
+                        if (this._lastUsage !== null) {
+                                if (currentUsage > this._lastUsage) trendIcon = '↑';
+                                else if (currentUsage < this._lastUsage) trendIcon = '↓';
+                        }
+                        this._lastUsage = currentUsage;
 
                         const cyan  = '\x1b[36m';
                         const reset = '\x1b[0m';
@@ -171,11 +201,14 @@ export class MemoryMonitor {
                         const gray  = '\x1b[90m';
 
                         console.log(`${gray}··················································${reset}`);
-                        console.log(`${cyan}[MemoryMonitor]${reset} ${icon} ${color}${bold}${status}${reset}`);
-                        console.log(`${gray}  Bot   :${reset} ${color}${bold}${formatBytes(currentUsage)}${reset} ${gray}(${percentage}% dari ${limitGB} GB)${reset}`);
-                        console.log(`${gray}  Heap  :${reset} ${heapMB} MB`);
-                        console.log(`${gray}  Sys   :${reset} ${sysColor}${bold}${sysPercentage}%${reset} ${gray}(${sysGB} / ${sysTGB} GB)${reset}`);
+                        console.log(`${cyan}[MemoryMonitor]${reset} ${icon} ${color}${bold}${status}${reset} ${gray}(cek ke-${this._checkCount})${reset}`);
+                        console.log(`${gray}  Bot   :${reset} ${color}${bold}${formatBytes(currentUsage)}${reset} ${gray}(${percentage}% dari ${limitGB} GB)${reset} ${trendIcon}`);
+                        console.log(`${gray}  Heap  :${reset} ${heapMB} MB ${gray}/ ${heapTotMB} MB total${reset}`);
+                        console.log(`${gray}  Ext   :${reset} ${extMB} MB ${gray}(external + buffers)${reset}`);
+                        console.log(`${gray}  Sys   :${reset} ${sysColor}${bold}${sysPercentage}%${reset} ${gray}(${sysGB} / ${sysTGB} GB, free ${sysFreeGB} GB)${reset}`);
                         console.log(`${gray}  Load  :${reset} [${color}${bar}${reset}] ${color}${percentage}%${reset}`);
+                        console.log(`${gray}  CPU   :${reset} ${loadAvg} ${gray}(avg 1/5/15m, ${cpuCount} core)${reset}`);
+                        console.log(`${gray}  PID   :${reset} ${process.pid} ${gray}| Node ${process.version} | Uptime ${uptime}${reset}`);
                         console.log(`${gray}··················································${reset}`);
                 }
 

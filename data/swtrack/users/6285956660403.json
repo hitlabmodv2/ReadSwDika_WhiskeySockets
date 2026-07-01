@@ -20,7 +20,7 @@
       "participant": "176549462564879@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-30T15:27:33.891Z",
+    "updatedAt": "2026-07-01T13:58:31.855Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -39,7 +39,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-30T15:27:33.890Z"
+    "processedAt": "2026-06-30T15:27:33.890Z",
+    "deleted": true,
+    "deletedAt": "2026-07-01T13:58:31.855Z"
   },
   "A5544BC21FAD12FD0B12D58A39958F6B": {
     "id": "A5544BC21FAD12FD0B12D58A39958F6B",
@@ -106,7 +108,7 @@
       "participant": "176549462564879@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-30T15:28:03.743Z",
+    "updatedAt": "2026-07-01T13:58:31.844Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -125,7 +127,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-30T15:28:03.743Z"
+    "processedAt": "2026-06-30T15:28:03.743Z",
+    "deleted": true,
+    "deletedAt": "2026-07-01T13:58:31.844Z"
   },
   "A5F16F005954118B921E210D2EC7578C": {
     "id": "A5F16F005954118B921E210D2EC7578C",
@@ -148,7 +152,7 @@
       "participant": "176549462564879@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-30T15:29:11.698Z",
+    "updatedAt": "2026-07-01T13:58:31.837Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -167,7 +171,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-30T15:29:11.698Z"
+    "processedAt": "2026-06-30T15:29:11.698Z",
+    "deleted": true,
+    "deletedAt": "2026-07-01T13:58:31.837Z"
   },
   "A584D6CA14AA394B228668E00DEDD232": {
     "id": "A584D6CA14AA394B228668E00DEDD232",
@@ -358,7 +364,7 @@
       "participant": "176549462564879@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-07-01T02:57:56.899Z",
+    "updatedAt": "2026-07-01T13:58:31.814Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -377,7 +383,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-07-01T02:57:56.899Z"
+    "processedAt": "2026-07-01T02:57:56.899Z",
+    "deleted": true,
+    "deletedAt": "2026-07-01T13:58:31.814Z"
   },
   "A5E3F8625F1671B6F63F8A749917C9E2": {
     "id": "A5E3F8625F1671B6F63F8A749917C9E2",

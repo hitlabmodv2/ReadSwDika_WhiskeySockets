@@ -214,5 +214,28 @@
     "processedAt": "2026-07-01T11:38:24.142Z",
     "deleted": true,
     "deletedAt": "2026-07-01T11:50:21.984Z"
+  },
+  "ACCE2AA98D7FD4EB0A3DF64A744B077D": {
+    "id": "ACCE2AA98D7FD4EB0A3DF64A744B077D",
+    "sender": "6281227315377@s.whatsapp.net",
+    "name": "Kyou.",
+    "type": "imageMessage",
+    "arrivedAt": "2026-07-01T14:10:00.177Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "Signal Lib ✓",
+    "source": "status",
+    "number": "6281227315377",
+    "resolvedPn": "6281227315377@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6281227315377@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACCE2AA98D7FD4EB0A3DF64A744B077D",
+      "participant": "113322762481669@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-01T14:10:00.177Z"
   }
 }
