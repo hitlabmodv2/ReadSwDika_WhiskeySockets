@@ -62,6 +62,7 @@ import { buildIgVisionPrompt, buildIgCaptionPrompt, buildIgFallbackCaption, pars
 import { buildFbVisionPrompt, buildFbCaptionPrompt, buildFbFallbackCaption, parseFbMetaHtml, formatFbCount } from './src/helper/AiPromptFb.js';
 import { hashSticker, lookupSticker, saveSticker, incrementStickerSeen, buildStickerContextHint, getStickerMemoryStats } from './src/helper/stickerMemory.js';
 import { getJadibotAntidel, getJadibotReadsw, getJadibotAnticall, getJadibotAnticallvid, getJadibotAutoOnline, getJadibotAutoTyping, getJadibotAutoRecording, getJadibotReadchat, setJadibotUserSetting, getJadibotNumber, addJadibotEmojis, deleteJadibotEmojis, listJadibotEmojis, getJadibotEmojiMode, setDefaultEmojiMode, setCustomEmojiMode, resetToDefaultEmojis, clearJadibotEmojis } from './src/helper/jadibotSettings.js';
+import { getMode as getMainEmojiMode } from './src/helper/emoji.js';
 import { pruneSwStatsAt, countActiveSW } from './src/helper/swtrack.js';
 import { getHandler } from './src/helper/hotReload.js';
 const { makeWmSticker, handleWmCommand } = _require('./SEMUA_FITUR/media/wm.cjs');
@@ -1219,7 +1220,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                         case 'readsw': {
                                 const { handleReadsw } = _require(path.resolve('./SEMUA_FITUR/readsw/readsw.cjs'));
-                                await handleReadsw({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, getJadibotNumber, getJadibotReadsw, setJadibotUserSetting, Button });
+                                await handleReadsw({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, getJadibotNumber, getJadibotReadsw, setJadibotUserSetting, Button, getMainEmojiMode, getJadibotEmojiMode });
                                 break;
                         }
 

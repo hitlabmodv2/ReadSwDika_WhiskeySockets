@@ -25,8 +25,24 @@
  */
 'use strict';
 
+// ── Helper: ambil mode reaction (Custom/Default) ───────────────────────────────
+function _getReactionModeLabel(isJadibot, jadibotNum, getMainEmojiMode, getJadibotEmojiMode) {
+    try {
+        let mode;
+        if (isJadibot && jadibotNum && getJadibotEmojiMode) {
+            mode = getJadibotEmojiMode(jadibotNum);
+        } else if (!isJadibot && getMainEmojiMode) {
+            mode = getMainEmojiMode();
+        }
+        if (String(mode).toLowerCase() === 'custom') return 'Custom 🟢';
+        return 'Default 🔵';
+    } catch (_) {
+        return 'Default 🔵';
+    }
+}
+
 // ── Helper bangun body status ──────────────────────────────────────────────────
-function _buildBody(cfg, isJadibot, jadibotNum) {
+function _buildBody(cfg, isJadibot, jadibotNum, getMainEmojiMode, getJadibotEmojiMode) {
     let statusIcon, statusText, modeText;
     if (!cfg.enabled) {
         statusIcon = '❌'; statusText = 'Nonaktif'; modeText = '-';
@@ -44,15 +60,20 @@ function _buildBody(cfg, isJadibot, jadibotNum) {
         ? (isRandom ? `${delayMin}-${delayMax}s (acak)` : `${fixedDelay}s (tetap)`)
         : '-';
 
+    const reactionMode = cfg.enabled && cfg.autoReaction !== false
+        ? _getReactionModeLabel(isJadibot, jadibotNum, getMainEmojiMode, getJadibotEmojiMode)
+        : '-';
+
     const jadibotNote = isJadibot ? `\n_⚙️ Setting jadibot +${jadibotNum}_` : '';
 
     return (
         `╭═══『 📖 *AUTO READ STORY* 』═══╮\n` +
         `│\n` +
-        `│ ${statusIcon} *Status  :* ${statusText}\n` +
-        `│ 🎭 *Mode    :* ${modeText}\n` +
-        `│ ⏱️ *Delay   :* ${delayInfo}\n` +
-        `│ 💬 *Reaksi  :* ${cfg.autoReaction !== false ? '✅ Aktif' : '❌ Nonaktif'}\n` +
+        `│ ${statusIcon} *Status    :* ${statusText}\n` +
+        `│ 🎭 *Mode      :* ${modeText}\n` +
+        `│ ⏱️ *Delay     :* ${delayInfo}\n` +
+        `│ 💬 *Reaksi    :* ${cfg.autoReaction !== false ? '✅ Aktif' : '❌ Nonaktif'}\n` +
+        `│ 🎨 *ModeReaksi:* ${reactionMode}\n` +
         `│\n` +
         `╰═════════════════════════╯` +
         jadibotNote
@@ -64,15 +85,11 @@ async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, cfg) {
     if (Button) {
         let sent = false;
         try {
-            // Tandai opsi aktif saat ini
             const modeAktif = !cfg.enabled ? 'off'
                 : cfg.autoReaction !== false ? 'on' : 'false';
-
             const markMode = (key) => key === modeAktif ? '✓ ' : '';
 
-            const delayMin   = (cfg.delayMinMs   || 1000)  / 1000;
-            const delayMax   = (cfg.delayMaxMs   || 20000) / 1000;
-            const fixedDelay = (cfg.fixedDelayMs || 3000)  / 1000;
+            const fixedDelay = (cfg.fixedDelayMs || 3000) / 1000;
             const isRandom   = cfg.randomDelay !== false;
             const activeDelay = isRandom ? null : fixedDelay;
 
@@ -125,19 +142,19 @@ async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, cfg) {
 
 // ── Fallback teks biasa ────────────────────────────────────────────────────────
 async function _sendFallback(tolak, hisoka, m, bodyText, pref) {
-    const fallback =
+    await tolak(hisoka, m,
         bodyText + `\n\n` +
         `*Penggunaan:*\n` +
         `${pref}readsw true — Read + Reaksi\n` +
         `${pref}readsw false — Read Only\n` +
         `${pref}readsw off — Nonaktifkan\n` +
         `${pref}readsw delay <1-20> — Delay tetap\n` +
-        `${pref}readsw delay <min> <max> — Delay acak`;
-    await tolak(hisoka, m, fallback);
+        `${pref}readsw delay <min> <max> — Delay acak`
+    );
 }
 
 // ── Handler utama ──────────────────────────────────────────────────────────────
-async function handleReadsw({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, getJadibotNumber, getJadibotReadsw, setJadibotUserSetting, Button }) {
+async function handleReadsw({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, getJadibotNumber, getJadibotReadsw, setJadibotUserSetting, Button, getMainEmojiMode, getJadibotEmojiMode }) {
     const _sn = (m.sender || '').split('@')[0].split(':')[0];
     const _jn = String(hisoka?.jadibotUserNumber || '').split('@')[0].split(':')[0];
     const _isJadibotUser = hisoka?.isMainBot === false && !!_jn && _sn === _jn;
@@ -147,6 +164,7 @@ async function handleReadsw({ hisoka, m, query, tolak, logCommand, loadConfig, s
         const pref       = m.prefix || '.';
         const isJadibot  = hisoka?.isMainBot === false;
         const jadibotNum = isJadibot ? getJadibotNumber(hisoka) : null;
+        const jadibotNote = isJadibot ? `\n_⚙️ Setting jadibot +${jadibotNum}_` : '';
 
         const getReadswConfig = () => isJadibot
             ? getJadibotReadsw(jadibotNum)
@@ -162,13 +180,11 @@ async function handleReadsw({ hisoka, m, query, tolak, logCommand, loadConfig, s
         // ── Tanpa argumen → tampil status + selection button ──────────────────
         if (args.length === 0) {
             const cfg      = getReadswConfig();
-            const bodyText = _buildBody(cfg, isJadibot, jadibotNum);
+            const bodyText = _buildBody(cfg, isJadibot, jadibotNum, getMainEmojiMode, getJadibotEmojiMode);
             await _sendSelection(hisoka, m, Button, tolak, bodyText, pref, cfg);
             logCommand(m, hisoka, 'readsw');
             return;
         }
-
-        const jadibotNote = isJadibot ? `\n_⚙️ Setting jadibot +${jadibotNum}_` : '';
 
         // ── true / on → Read + Reaksi ─────────────────────────────────────────
         if (args[0] === 'true' || args[0] === 'on') {
@@ -178,8 +194,8 @@ async function handleReadsw({ hisoka, m, query, tolak, logCommand, loadConfig, s
             } else {
                 const newCfg = { ...cfg, enabled: true, autoReaction: true };
                 saveReadswConfig(newCfg);
-                const bodyText = _buildBody(newCfg, isJadibot, jadibotNum);
-                await _sendSelection(hisoka, m, Button, tolak, `✅ *Diaktifkan! Read + Reaksi*\n\n` + bodyText, pref, newCfg);
+                const body = `✅ *Diaktifkan! Read + Reaksi*\n\n` + _buildBody(newCfg, isJadibot, jadibotNum, getMainEmojiMode, getJadibotEmojiMode);
+                await _sendSelection(hisoka, m, Button, tolak, body, pref, newCfg);
             }
 
         // ── false → Read Only ─────────────────────────────────────────────────
@@ -190,8 +206,8 @@ async function handleReadsw({ hisoka, m, query, tolak, logCommand, loadConfig, s
             } else {
                 const newCfg = { ...cfg, enabled: true, autoReaction: false };
                 saveReadswConfig(newCfg);
-                const bodyText = _buildBody(newCfg, isJadibot, jadibotNum);
-                await _sendSelection(hisoka, m, Button, tolak, `✅ *Diaktifkan! Read Only*\n\n` + bodyText, pref, newCfg);
+                const body = `✅ *Diaktifkan! Read Only*\n\n` + _buildBody(newCfg, isJadibot, jadibotNum, getMainEmojiMode, getJadibotEmojiMode);
+                await _sendSelection(hisoka, m, Button, tolak, body, pref, newCfg);
             }
 
         // ── off → Nonaktifkan ─────────────────────────────────────────────────
@@ -202,8 +218,8 @@ async function handleReadsw({ hisoka, m, query, tolak, logCommand, loadConfig, s
             } else {
                 const newCfg = { ...cfg, enabled: false };
                 saveReadswConfig(newCfg);
-                const bodyText = _buildBody(newCfg, isJadibot, jadibotNum);
-                await _sendSelection(hisoka, m, Button, tolak, `❌ *Dinonaktifkan!*\n\n` + bodyText, pref, newCfg);
+                const body = `❌ *Dinonaktifkan!*\n\n` + _buildBody(newCfg, isJadibot, jadibotNum, getMainEmojiMode, getJadibotEmojiMode);
+                await _sendSelection(hisoka, m, Button, tolak, body, pref, newCfg);
             }
 
         // ── delay <min> <max> → Random delay ──────────────────────────────────
@@ -211,35 +227,31 @@ async function handleReadsw({ hisoka, m, query, tolak, logCommand, loadConfig, s
             const minDelay = parseInt(args[1]);
             const maxDelay = parseInt(args[2]);
             if (isNaN(minDelay) || isNaN(maxDelay)) {
-                await tolak(hisoka, m, `❌ Delay harus angka. Contoh: ${pref}readsw delay 1 20`);
-                return;
+                await tolak(hisoka, m, `❌ Delay harus angka. Contoh: ${pref}readsw delay 1 20`); return;
             }
             if (minDelay < 1 || maxDelay > 60) {
-                await tolak(hisoka, m, `❌ Delay min ≥ 1 detik dan max ≤ 60 detik`);
-                return;
+                await tolak(hisoka, m, `❌ Delay min ≥ 1 detik dan max ≤ 60 detik`); return;
             }
             if (minDelay >= maxDelay) {
-                await tolak(hisoka, m, `❌ Delay min harus lebih kecil dari delay max`);
-                return;
+                await tolak(hisoka, m, `❌ Delay min harus lebih kecil dari delay max`); return;
             }
             const cfg    = getReadswConfig();
             const newCfg = { ...cfg, delayMinMs: minDelay * 1000, delayMaxMs: maxDelay * 1000, randomDelay: true };
             saveReadswConfig(newCfg);
-            const bodyText = _buildBody(newCfg, isJadibot, jadibotNum);
-            await _sendSelection(hisoka, m, Button, tolak, `✅ *Delay acak: ${minDelay}-${maxDelay}s*\n\n` + bodyText, pref, newCfg);
+            const body = `✅ *Delay acak: ${minDelay}-${maxDelay}s*\n\n` + _buildBody(newCfg, isJadibot, jadibotNum, getMainEmojiMode, getJadibotEmojiMode);
+            await _sendSelection(hisoka, m, Button, tolak, body, pref, newCfg);
 
         // ── delay <n> → Fixed delay ───────────────────────────────────────────
         } else if (args[0] === 'delay' && args[1] && !args[2]) {
             const fixedDelay = parseInt(args[1]);
             if (isNaN(fixedDelay) || fixedDelay < 1 || fixedDelay > 60) {
-                await tolak(hisoka, m, `❌ Delay harus antara 1-60 detik`);
-                return;
+                await tolak(hisoka, m, `❌ Delay harus antara 1-60 detik`); return;
             }
             const cfg    = getReadswConfig();
             const newCfg = { ...cfg, fixedDelayMs: fixedDelay * 1000, randomDelay: false };
             saveReadswConfig(newCfg);
-            const bodyText = _buildBody(newCfg, isJadibot, jadibotNum);
-            await _sendSelection(hisoka, m, Button, tolak, `✅ *Delay tetap: ${fixedDelay}s*\n\n` + bodyText, pref, newCfg);
+            const body = `✅ *Delay tetap: ${fixedDelay}s*\n\n` + _buildBody(newCfg, isJadibot, jadibotNum, getMainEmojiMode, getJadibotEmojiMode);
+            await _sendSelection(hisoka, m, Button, tolak, body, pref, newCfg);
 
         // ── Perintah tidak dikenal ────────────────────────────────────────────
         } else {
