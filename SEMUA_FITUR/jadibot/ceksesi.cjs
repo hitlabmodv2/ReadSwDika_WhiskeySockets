@@ -33,6 +33,7 @@
 
 const fs   = require('fs');
 const path = require('path');
+const os   = require('os');
 
 const SESSION_FILE = path.resolve('./sessions/hisoka.json');
 
@@ -202,13 +203,60 @@ module.exports.handleMemory = handleMemory;
 
 async function handleRam({ hisoka, m, tolak, logCommand }) {
         try {
-                const { formatBytes, getCurrentMemoryUsage, getSystemMemoryInfo } = await import('../../src/helper/memoryMonitor.js');
+                const { formatBytes, getCurrentMemoryUsage, getSystemMemoryInfo, formatUptime } = await import('../../src/helper/memoryMonitor.js');
+
                 const memUsage  = getCurrentMemoryUsage();
                 const systemMem = getSystemMemoryInfo();
                 const memLimit  = global.memoryMonitor?.memoryLimit || systemMem.total;
+
                 const percentage       = ((memUsage.rss / memLimit) * 100).toFixed(1);
                 const systemPercentage = ((systemMem.used / systemMem.total) * 100).toFixed(1);
-                let text = `╭═══『 *RAM STATUS* 』═══╮\n│\n│ *Process Memory*\n│ ${formatBytes(memUsage.rss)} / ${formatBytes(memLimit)}\n│ Usage: ${percentage}%\n│\n│ *System Memory*\n│ ${formatBytes(systemMem.used)} / ${formatBytes(systemMem.total)}\n│ Usage: ${systemPercentage}%\n│\n╰═════════════════════╯`;
+
+                let statusIcon = '✅', statusText = 'Normal';
+                const pct = parseFloat(percentage);
+                if (pct >= 80) { statusIcon = '🔴'; statusText = 'Kritis!'; }
+                else if (pct >= 60) { statusIcon = '⚠️'; statusText = 'Waspada'; }
+
+                const heapUsedMB  = (memUsage.heapUsed  / (1024 * 1024)).toFixed(1);
+                const heapTotalMB = (memUsage.heapTotal / (1024 * 1024)).toFixed(1);
+                const extMB       = (memUsage.external  / (1024 * 1024)).toFixed(1);
+
+                const loadAvg  = os.loadavg().map((n) => n.toFixed(2)).join(', ');
+                const cpuCount = os.cpus()?.length || 0;
+                const uptime   = formatUptime(process.uptime() * 1000);
+
+                const barLen  = 10;
+                const filled  = Math.round((pct / 100) * barLen);
+                const bar     = '█'.repeat(Math.min(filled, barLen)) + '░'.repeat(Math.max(barLen - filled, 0));
+
+                let text = `╭═══『 *RAM STATUS* 』═══╮\n`
+                        + `│ ${statusIcon} Status: *${statusText}*\n`
+                        + `│\n`
+                        + `│ *Process Memory (Bot)*\n`
+                        + `│ ${formatBytes(memUsage.rss)} / ${formatBytes(memLimit)}\n`
+                        + `│ Usage: ${percentage}% [${bar}]\n`
+                        + `│\n`
+                        + `│ *Heap Memory*\n`
+                        + `│ ${heapUsedMB} MB / ${heapTotalMB} MB total\n`
+                        + `│ External: ${extMB} MB\n`
+                        + `│\n`
+                        + `│ *System Memory*\n`
+                        + `│ ${formatBytes(systemMem.used)} / ${formatBytes(systemMem.total)}\n`
+                        + `│ Free: ${formatBytes(systemMem.free)}\n`
+                        + `│ Usage: ${systemPercentage}%\n`
+                        + `│\n`
+                        + `│ *CPU*\n`
+                        + `│ Load: ${loadAvg} (1/5/15m)\n`
+                        + `│ Core: ${cpuCount}\n`
+                        + `│\n`
+                        + `│ *Proses*\n`
+                        + `│ PID: ${process.pid}\n`
+                        + `│ Node: ${process.version}\n`
+                        + `│ Uptime: ${uptime}\n`
+                        + `╰═════════════════════╯`;
+
+                if (pct >= 80) text += `\n\n⚠️ *Warning:* Memory usage tinggi! Auto-restart akan terjadi jika mencapai limit.`;
+
                 await tolak(hisoka, m, text);
                 logCommand(m, hisoka, 'cekram');
         } catch (error) {

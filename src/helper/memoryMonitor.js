@@ -270,4 +270,4 @@ export class MemoryMonitor {
         }
 }
 
-export { loadConfig, saveConfig, formatBytes, getCurrentMemoryUsage, getSystemMemoryInfo };
+export { loadConfig, saveConfig, formatBytes, getCurrentMemoryUsage, getSystemMemoryInfo, formatUptime };

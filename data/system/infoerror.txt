@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 01/07/2026, 10.02.44  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 01/07/2026, 14.12.54  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  command:?
+│  #001  —  console.error
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  ENOENT: no such file or directory, open '/home/runner/workspace/SEMUA_FITUR/tools/waifu.cjs'
+│  [31m[CekRAM] Error:[39m formatUptime is not a function
 │
 │  DETAIL
-│  Sumber      : command:?
+│  Sumber      : console.error
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 01/07/2026, 10.02.44
-│  Terakhir    : 01/07/2026, 10.02.44
+│  Pertama     : 01/07/2026, 14.12.54
+│  Terakhir    : 01/07/2026, 14.12.54
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: ENOENT: no such file or directory, open '/home/runner/workspace/SEMUA_FITUR/tools/waifu.cjs'
-│     at Object.readFileSync (node:fs:448:20)
-│     at loadSource (node:internal/modules/cjs/loader:1548:17)
+│  ▶  Error: [31m[CekRAM] Error:[39m formatUptime is not a function
+│     at console.error (file:///home/runner/workspace/index.js:433:27)
+│     at handleRam (/home/runner/workspace/SEMUA_FITUR/jadibot/ceksesi.cjs:263:25)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 01/07/2026, 10.02.44
+  Terakhir diperbarui: 01/07/2026, 14.12.54
 ════════════════════════════════════════════════════════════════════════
