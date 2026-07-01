@@ -1321,7 +1321,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                         case 'emojilist': {
                                 const { handleEmojilist } = _require(path.resolve('./SEMUA_FITUR/info/info.cjs'));
-                                await handleEmojilist({ hisoka, m, tolak, logCommand, getJadibotNumber, listJadibotEmojis });
+                                await handleEmojilist({ hisoka, m, tolak, logCommand, getJadibotNumber, listJadibotEmojis, Button });
                                 break;
                         }
 
