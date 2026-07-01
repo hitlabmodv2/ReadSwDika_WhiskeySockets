@@ -630,5 +630,47 @@
       }
     ],
     "processedAt": "2026-07-01T10:06:03.575Z"
+  },
+  "A5BFC64C7E3836A534771469D40E9590": {
+    "id": "A5BFC64C7E3836A534771469D40E9590",
+    "sender": "6285956660403@s.whatsapp.net",
+    "name": "Cosmouz/Fadli",
+    "type": "imageMessage",
+    "arrivedAt": "2026-07-01T10:18:10.810Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "5️⃣➕3️⃣🟰8️⃣",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285956660403",
+    "resolvedPn": "6285956660403@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285956660403@s.whatsapp.net",
+      "fromMe": false,
+      "id": "A5BFC64C7E3836A534771469D40E9590",
+      "participant": "176549462564879@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-01T10:18:25.244Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285956660403@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A5BFC64C7E3836A534771469D40E9590",
+        "participant": "176549462564879@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285956660403@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A5BFC64C7E3836A534771469D40E9590",
+        "participant": "6285956660403@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-01T10:18:25.244Z"
   }
 }
