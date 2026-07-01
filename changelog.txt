@@ -45,13 +45,19 @@ _🔍 Masih dalam tahap pemantauan — informasi tanggal rilis akan diumumkan ke
 - Ditambahkan: CPU Load Average (1/5/15 menit) + jumlah core, PID proses, versi Node.js, dan Uptime bot
 - Perubahan di `src/helper/memoryMonitor.js`
 
-*3. 🔧 `hotReload.js` — Auto-Discovery, Tidak Perlu Daftar Manual Lagi*
-- Sebelumnya file baru harus didaftarkan manual satu-satu di `WATCHED_FILES` supaya bisa hot-reload
-- Sekarang bot otomatis scan & watch seluruh folder `SEMUA_FITUR`, `src/helper`, `src/db`, `src/config` secara rekursif
-- File baru yang ditambahkan ke folder tersebut otomatis langsung ke-detect & aktif ter-watch real-time tanpa restart bot
-- File yang dihapus otomatis dilepas dari daftar watch, tidak nyangkut/error
-- File yang memegang koneksi/session aktif (memoryMonitor, jadibot, authState, browserSwitch, dll) tetap sengaja di-skip biar bot tidak crash
-> Update fitur baru sekarang otomatis kebaca bot tanpa perlu edit `hotReload.js` manual
+*3. 🔧 `hotReload.js` — Auto-Discovery + Deteksi File Baru/Hapus Real-Time*
+- Sebelumnya file baru harus didaftarkan manual satu-satu supaya bisa hot-reload
+- Sekarang bot otomatis scan & watch seluruh folder `SEMUA_FITUR`, `src/helper`, `src/db`, `src/config` secara rekursif — file apapun di dalam folder tersebut langsung ter-cover
+- *File baru terdeteksi otomatis*: saat file `.js`/`.cjs` ditambahkan ke folder yang diawasi, langsung di-detect & di-watch — log tampil `[HotReload] File baru terdeteksi (CJS/ESM, auto-watched)`
+- *File dihapus terdeteksi otomatis*: saat file dihapus/di-rename, langsung dilepas dari daftar watch — log tampil `[HotReload] File dihapus, dilepas dari watch` — tidak ada nyangkut/error
+- *ESM* (`.js`): di-reload ulang via dynamic import dengan cache-busting URL (`?t=timestamp`) — modul langsung aktif versi terbaru
+- *CJS* (`.cjs`): lazy — `require.cache` dibersihkan saat file berubah, sehingga efektif di pemanggilan berikutnya tanpa restart
+- Debounce *600ms* — cegah trigger ganda saat file ditulis berulang cepat (misal auto-save editor)
+- `message.js` diwatch tersendiri (bukan lewat recursive folder) via `EXTRA_ESM_FILES`
+- `KEY_OVERRIDES` — key konsisten untuk file tertentu (antitagsw, event, emoji, menu, dll) walau path-nya berubah
+- `EXCLUDED_FILES` — file yang sengaja di-skip dari hot-reload: `crashGuard`, `memoryMonitor`, `jadibot`, `authState`, `browserSwitch`, `aiHistory`, dan CJS startup (wm, cekauto, musikai, dll) — kalau direload bisa bikin state ganda/crash
+- Export tambahan: `getReloadStats()` (total/ESM/CJS/folder aktif/excluded), `getWatchedFiles()` (semua file terlacak), `onReload(key, cb)` (callback pasca-reload), `stopHotReload()` (matikan semua watcher)
+> File baru/dihapus langsung terdeteksi real-time — tidak perlu edit `hotReload.js` manual sama sekali
 
 *4. 🧹 Hapus Semua Karakter Box-Drawing dari Respons Emoji*
 - Dihapus semua: │ ╭ ╰ ├ ─ dan sejenisnya dari output `.emoji`, `.emojilist`, dan `renderEmojiList`
