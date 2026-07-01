@@ -106,19 +106,21 @@ function _downloadBuffer(url) {
     });
 }
 
-// ── Fetch waifu.im /images ─────────────────────────────────────────────────────
+// ── Fetch waifu.im /search ─────────────────────────────────────────────────────
+// Endpoint baru: /search (bukan /images yang sudah deprecated)
+// Response baru: { images: [...] } (bukan { items: [...] })
 
 async function _fetchWaifu(slug, isNsfw) {
     const params = new URLSearchParams({
         included_tags: slug,
         is_nsfw:       String(isNsfw),
-        page_size:     '1',
-        order_by:      'Random',
+        many:          'false',
+        order_by:      'RANDOM',
     });
-    const data = await _httpGetJson(`https://api.waifu.im/images?${params}`);
-    const items = data?.items;
-    if (!items || !items.length) throw new Error('Tidak ada gambar ditemukan');
-    return items[0];
+    const data = await _httpGetJson(`https://api.waifu.im/search?${params}`);
+    const images = data?.images;
+    if (!images || !images.length) throw new Error('Tidak ada gambar ditemukan');
+    return images[0];
 }
 
 // ── Config helpers ─────────────────────────────────────────────────────────────
