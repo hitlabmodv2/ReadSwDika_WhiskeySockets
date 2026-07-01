@@ -1219,7 +1219,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                         case 'readsw': {
                                 const { handleReadsw } = _require(path.resolve('./SEMUA_FITUR/readsw/readsw.cjs'));
-                                await handleReadsw({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, getJadibotNumber, getJadibotReadsw, setJadibotUserSetting });
+                                await handleReadsw({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, getJadibotNumber, getJadibotReadsw, setJadibotUserSetting, Button });
                                 break;
                         }
 
