@@ -38,35 +38,37 @@ const _PFX_BACK   = 'waifu_back_';  // waifu_back_{mode}
 const CONFIG_PATH = path.join(process.cwd(), 'config.json');
 
 // ── Tag list ───────────────────────────────────────────────────────────────────
+// API: tbib.org (gelbooru-based, tidak pakai Cloudflare, selalu bisa diakses)
+// Format URL: https://tbib.org/images/{directory}/{image}
 
-// Safe tags — konten aman, tidak ada konten dewasa (is_nsfw=false)
+// Safe tags — konten aman (rating:safe atau tanpa rating filter)
 const SAFE_TAGS = [
-    { label: '🧕 Waifu',          slug: 'waifu',          count: 4274 },
-    { label: '👗 Maid',            slug: 'maid',           count: 273  },
-    { label: '👕 Uniform',         slug: 'uniform',        count: 446  },
-    { label: '🤳 Selfies',         slug: 'selfies',        count: 181  },
-    { label: '✨ Genshin Impact',  slug: 'genshin-impact', count: 84   },
-    { label: '⚡ Raiden Shogun',   slug: 'raiden-shogun',  count: 69   },
-    { label: '🌸 Marin Kitagawa',  slug: 'marin-kitagawa', count: 43   },
-    { label: '💀 Mori Calliope',   slug: 'mori-calliope',  count: 26   },
-    { label: '🌸 Kamisato Ayaka',  slug: 'kamisato-ayaka', count: 14   },
-    { label: '💙 Rem',             slug: 'rem',            count: 12   },
-    { label: '🍊 Nami',            slug: 'nami',           count: 1    },
-    { label: '⚓ One Piece',       slug: 'one-piece',      count: 1    },
+    { label: '🧕 Waifu',          slug: 'anime_girl rating:safe',                    count: 4274 },
+    { label: '👗 Maid',            slug: 'maid rating:safe',                          count: 273  },
+    { label: '👕 Uniform',         slug: 'uniform rating:safe',                       count: 446  },
+    { label: '🤳 Selfies',         slug: 'selfie rating:safe',                        count: 181  },
+    { label: '✨ Genshin Impact',  slug: 'genshin_impact rating:safe',                count: 84   },
+    { label: '⚡ Raiden Shogun',   slug: 'raiden_shogun_(genshin_impact) rating:safe', count: 69  },
+    { label: '🌸 Marin Kitagawa',  slug: 'marin_kitagawa rating:safe',                count: 43   },
+    { label: '💀 Mori Calliope',   slug: 'mori_calliope rating:safe',                 count: 26   },
+    { label: '🌸 Kamisato Ayaka',  slug: 'kamisato_ayaka rating:safe',                count: 14   },
+    { label: '💙 Rem',             slug: 'rem_(re:zero) rating:safe',                 count: 12   },
+    { label: '🍊 Nami',            slug: 'nami_(one_piece) rating:safe',              count: 10   },
+    { label: '⚓ One Piece',       slug: 'one_piece rating:safe',                     count: 50   },
 ];
 
-// NSFW tags — konten dewasa 18+, hanya untuk mode NSFW (is_nsfw=true)
+// NSFW tags — konten dewasa 18+ (rating:explicit)
 const NSFW_TAGS = [
-    { label: '🌶️ Ero',     slug: 'ero',     count: 3012 },
-    { label: '💋 Ecchi',   slug: 'ecchi',   count: 2136 },
-    { label: '🍈 Oppai',   slug: 'oppai',   count: 1084 },
-    { label: '📖 Hentai',  slug: 'hentai',  count: 882  },
-    { label: '👩 MILF',    slug: 'milf',    count: 468  },
-    { label: '👕 Uniform', slug: 'uniform', count: 446  },
-    { label: '🍑 Ass',     slug: 'ass',     count: 413  },
-    { label: '👗 Maid',    slug: 'maid',    count: 273  },
-    { label: '💦 Paizuri', slug: 'paizuri', count: 146  },
-    { label: '👄 Oral',    slug: 'oral',    count: 145  },
+    { label: '🌶️ Ero',     slug: 'nude rating:explicit',              count: 3012 },
+    { label: '💋 Ecchi',   slug: 'ecchi rating:explicit',             count: 2136 },
+    { label: '🍈 Oppai',   slug: 'oppai large_breasts rating:explicit', count: 1084 },
+    { label: '📖 Hentai',  slug: 'hentai rating:explicit',            count: 882  },
+    { label: '👩 MILF',    slug: 'milf rating:explicit',              count: 468  },
+    { label: '👕 Uniform', slug: 'uniform rating:explicit',           count: 446  },
+    { label: '🍑 Ass',     slug: 'ass rating:explicit',               count: 413  },
+    { label: '👗 Maid',    slug: 'maid rating:explicit',              count: 273  },
+    { label: '💦 Paizuri', slug: 'paizuri rating:explicit',           count: 146  },
+    { label: '👄 Oral',    slug: 'oral rating:explicit',              count: 145  },
 ];
 
 // ── Ambil token waifu.im dari config.json ─────────────────────────────────────
@@ -143,38 +145,52 @@ function _downloadBuffer(url) {
     });
 }
 
-// ── Fetch waifu.im /search ─────────────────────────────────────────────────────
-// Endpoint: /search — Response: { images: [...] }
-// Token diperlukan jika VPS/server kena blokir Cloudflare (403)
-// Cara dapat token gratis: https://www.waifu.im/dashboard → Generate Token
-// Simpan di config.json: { "waifu": { "token": "ISI_TOKEN_DISINI" } }
+// ── Fetch gambar dari tbib.org (gelbooru-compatible, tanpa Cloudflare) ─────────
+// API docs: https://tbib.org/index.php?page=help&topic=dapi
+// Response: array of { directory, image, hash, tags, rating, ... }
+// URL gambar: https://tbib.org/images/{directory}/{image}
 
 async function _fetchWaifu(slug, isNsfw) {
-    const token  = _getWaifuToken();
+    // Acak offset agar tiap request dapat gambar berbeda
+    const pid    = Math.floor(Math.random() * 20);
     const params = new URLSearchParams({
-        included_tags: slug,
-        is_nsfw:       String(isNsfw),
-        many:          'false',
-        order_by:      'RANDOM',
+        page:  'dapi',
+        s:     'post',
+        q:     'index',
+        json:  '1',
+        tags:  slug,
+        limit: '10',
+        pid:   String(pid),
     });
-    let data;
-    try {
-        data = await _httpGetJson(`https://api.waifu.im/search?${params}`, token);
-    } catch (err) {
-        if (err.message.includes('403')) {
-            throw new Error(
-                'Akses ditolak (403) oleh waifu.im.\n' +
-                'Solusi: Daftarkan Token API gratis di\n' +
-                'https://www.waifu.im/dashboard\n' +
-                'lalu simpan di config.json:\n' +
-                '{ "waifu": { "token": "TOKEN_KAMU" } }'
-            );
-        }
-        throw err;
+
+    const data = await _httpGetJson(`https://tbib.org/index.php?${params}`);
+
+    if (!Array.isArray(data) || data.length === 0) {
+        // Coba lagi tanpa pid jika tidak ada hasil
+        const params2 = new URLSearchParams({ page: 'dapi', s: 'post', q: 'index', json: '1', tags: slug, limit: '10' });
+        const data2   = await _httpGetJson(`https://tbib.org/index.php?${params2}`);
+        if (!Array.isArray(data2) || data2.length === 0) throw new Error('Tidak ada gambar ditemukan untuk kategori ini');
+        const pick = data2[Math.floor(Math.random() * data2.length)];
+        return _normalizeTbib(pick);
     }
-    const images = data?.images;
-    if (!images || !images.length) throw new Error('Tidak ada gambar ditemukan untuk kategori ini');
-    return images[0];
+
+    const pick = data[Math.floor(Math.random() * data.length)];
+    return _normalizeTbib(pick);
+}
+
+function _normalizeTbib(item) {
+    // Normalisasi response tbib ke format yang dipakai _sendImageResult
+    const imageFile = item.image || (item.hash + '.jpg');
+    const url       = `https://tbib.org/images/${item.directory}/${imageFile}`;
+    const ext       = imageFile.split('.').pop()?.toLowerCase() || 'jpg';
+    return {
+        url,
+        extension: '.' + ext,
+        is_nsfw:   item.rating === 'explicit' || item.rating === 'questionable',
+        artists:   [],
+        source:    null,
+        tags:      (item.tags || '').split(' ').slice(0, 5).map(n => ({ name: n })),
+    };
 }
 
 // ── Config helpers ─────────────────────────────────────────────────────────────
@@ -220,14 +236,14 @@ async function _sendImageResult(hisoka, m, Button, pendingWaifuChoices, getJadib
         `│ 🔒 Mode     : ${modeLabel}\n` +
         (artistName ? `│ 🎨 Artist   : ${artistName}\n` : '') +
         (source     ? `│ 🔗 Source   : ${source.slice(0, 45)}${source.length > 45 ? '…' : ''}\n` : '') +
-        `│ 🌐 Via      : waifu.im\n` +
+        `│ 🌐 Via      : tbib.org\n` +
         `│\n` +
         `╰──────────────────────`;
 
     // Gambar + tombol aksi dalam 1 pesan
     const btn = new Button()
         .setBody(body)
-        .setFooter('🖼️ Waifu.im • WilyBot')
+        .setFooter('🖼️ tbib.org • WilyBot')
         .addSelection('📋 Pilih Aksi');
 
     // Embed gambar di header (gif pakai setVideo)
@@ -276,11 +292,11 @@ async function _sendModeButton(m, hisoka, Button, pendingWaifuChoices, getJadibo
             `│ 🔞 *NSFW 18+* — konten dewasa\n` +
             `│${modeInfo}\n` +
             `│\n` +
-            `│ 🌐 Source: waifu.im\n` +
+            `│ 🌐 Source: tbib.org\n` +
             `│\n` +
             `╰──────────────────────`
         )
-        .setFooter('🖼️ Waifu.im • WilyBot')
+        .setFooter('🖼️ tbib.org • WilyBot')
         .addSelection('🖼️ Pilih Mode');
 
     btn.makeSections('🔒 Mode Gambar');
@@ -321,7 +337,7 @@ async function _sendCharButton(m, hisoka, Button, pendingWaifuChoices, getJadibo
             `│\n` +
             `╰──────────────────────`
         )
-        .setFooter('🖼️ Waifu.im • WilyBot')
+        .setFooter('🖼️ tbib.org • WilyBot')
         .addSelection('🎌 Pilih Karakter');
 
     btn.makeSections(isNsfw ? '🔞 Kategori NSFW 18+' : '✅ Karakter/Kategori Safe');
@@ -366,7 +382,7 @@ async function _doFetchAndSend(hisoka, m, Button, pendingWaifuChoices, getJadibo
 
     const loadMsg = await hisoka.sendMessage(
         m.from,
-        { text: `⏳ Mengambil gambar *${chosen.label}* dari waifu.im...` },
+        { text: `⏳ Mengambil gambar *${chosen.label}* dari tbib.org...` },
         { quoted: m }
     ).catch(() => null);
 
