@@ -173,7 +173,7 @@ async function _sendImageResult(hisoka, m, Button, pendingWaifuChoices, getJadib
         await hisoka.sendMessage(m.from, { text: `${caption}\n\n🔗 ${imgData.url}` }, { quoted: quotedTarget || m });
     }
 
-    // Kirim tombol Next/Back
+    // Kirim tombol Next/Back (satu list button)
     const btn = new Button()
         .setBody(
             `╭─「 🖼️ *WAIFU.IM* 」\n` +
@@ -185,8 +185,11 @@ async function _sendImageResult(hisoka, m, Button, pendingWaifuChoices, getJadib
             `╰──────────────────────`
         )
         .setFooter('🖼️ Waifu.im • WilyBot')
-        .addReply('➡️ Gambar Lagi', `${_PFX_NEXT}${idx}_${mode}`)
-        .addReply('🔙 Kembali ke List', `${_PFX_BACK}${mode}`);
+        .addSelection('📋 Pilih Aksi');
+
+    btn.makeSections('🎮 Aksi');
+    btn.makeRow('', '➡️ Gambar Lagi', `Ambil gambar ${chosen.label} baru`, `${_PFX_NEXT}${idx}_${mode}`);
+    btn.makeRow('', '🔙 Kembali ke List', 'Pilih kategori/karakter lain', `${_PFX_BACK}${mode}`);
 
     let sentBtn;
     try { sentBtn = await btn.run(m.from, hisoka, m); } catch (_) {}
