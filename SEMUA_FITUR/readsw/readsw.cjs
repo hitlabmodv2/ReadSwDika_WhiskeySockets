@@ -80,6 +80,16 @@ function _buildBody(cfg, isJadibot, jadibotNum, getMainEmojiMode, getJadibotEmoj
     );
 }
 
+// ── Map: simpan key pesan terakhir per JID untuk auto-delete ──────────────────
+const _lastMsgMap = new Map();
+
+async function _deleteLastMsg(hisoka, jid) {
+    const key = _lastMsgMap.get(jid);
+    if (!key) return;
+    try { await hisoka.sendMessage(jid, { delete: key }); } catch (_) {}
+    _lastMsgMap.delete(jid);
+}
+
 // ── Preset delay acak ─────────────────────────────────────────────────────────
 const _RANDOM_PRESETS = [
     { min: 1,  max: 20, label: '1–20 detik',  desc: '🔰 Default — full range acak bawaan bot' },
@@ -98,19 +108,21 @@ async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, cfg) {
             // ── tanda ✓ Mode ─────────────────────────────────────────────
             const modeAktif = !cfg.enabled ? 'off'
                 : cfg.autoReaction !== false ? 'on' : 'false';
-            const markMode = (key) => key === modeAktif ? '✓ ' : '';
+            const isMode   = (key) => key === modeAktif;
+            const markMode = (key) => isMode(key) ? '✓ ' : '';
 
-            // ── tanda ✓ Delay Tetap: strict ms comparison ─────────────────
-            const isRandom       = cfg.randomDelay === true;
-            const fixedMs        = cfg.fixedDelayMs || 3000;
-            const markFixed = (i) => !isRandom && fixedMs === i * 1000 ? '✓ ' : '';
-
-            // ── tanda ✓ Delay Acak: cek preset yang cocok ─────────────────
-            const markRandom = (preset) =>
-                isRandom &&
+            // ── tanda ✓ Delay Tetap & Acak ───────────────────────────────
+            const isRandom    = cfg.randomDelay === true;
+            const fixedMs     = cfg.fixedDelayMs || 3000;
+            const isFixed     = (i)      => !isRandom && fixedMs === i * 1000;
+            const isPreset    = (preset) => isRandom &&
                 (cfg.delayMinMs || 1000)  === preset.min * 1000 &&
-                (cfg.delayMaxMs || 20000) === preset.max * 1000
-                    ? '✓ ' : '';
+                (cfg.delayMaxMs || 20000) === preset.max * 1000;
+            const markFixed   = (i)      => isFixed(i)    ? '✓ ' : '';
+            const markRandom  = (preset) => isPreset(preset) ? '✓ ' : '';
+
+            // ── label desc tambahan untuk row yang aktif ──────────────────
+            const activeDesc = (base) => `⚡ Sedang Aktif — ${base}`;
 
             const btn = new Button()
                 .setBody(bodyText)
@@ -122,19 +134,19 @@ async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, cfg) {
                 .makeRow(
                     markMode('on') + '✅ Aktif',
                     'Read + Reaksi',
-                    'Baca story + kirim reaksi emoji otomatis',
+                    isMode('on')    ? activeDesc('Baca story + reaksi emoji otomatis') : 'Baca story + kirim reaksi emoji otomatis',
                     `${pref}readsw true`
                 )
                 .makeRow(
                     markMode('false') + '📖 Aktif',
                     'Read Only',
-                    'Hanya baca story, tanpa reaksi',
+                    isMode('false') ? activeDesc('Hanya baca story, tanpa reaksi')     : 'Hanya baca story, tanpa reaksi',
                     `${pref}readsw false`
                 )
                 .makeRow(
                     markMode('off') + '❌ Nonaktif',
                     'Matikan Auto Read Story',
-                    'Bot tidak akan membaca story siapapun',
+                    isMode('off')   ? activeDesc('Bot tidak membaca story siapapun')   : 'Bot tidak akan membaca story siapapun',
                     `${pref}readsw off`
                 )
 
@@ -142,10 +154,11 @@ async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, cfg) {
                 .makeSections('🎲 Delay Acak (Preset)');
 
             for (const p of _RANDOM_PRESETS) {
+                const aktif = isPreset(p);
                 btn.makeRow(
                     markRandom(p) + p.label,
                     `Acak ${p.label}`,
-                    p.desc,
+                    aktif ? activeDesc(p.desc) : p.desc,
                     `${pref}readsw delay ${p.min} ${p.max}`
                 );
             }
@@ -154,20 +167,24 @@ async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, cfg) {
             btn.makeSections('⏱️ Delay Tetap (1–20 detik)');
 
             for (let i = 1; i <= 20; i++) {
-                let desc;
-                if (i <= 3)       desc = 'Sangat cepat — tidak disarankan';
-                else if (i <= 7)  desc = 'Cepat — cocok untuk banyak kontak';
-                else if (i <= 13) desc = 'Normal — aman dan stabil';
-                else              desc = 'Lambat — paling aman dari ban';
+                let baseDesc;
+                if (i <= 3)       baseDesc = 'Sangat cepat — tidak disarankan';
+                else if (i <= 7)  baseDesc = 'Cepat — cocok untuk banyak kontak';
+                else if (i <= 13) baseDesc = 'Normal — aman dan stabil';
+                else              baseDesc = 'Lambat — paling aman dari ban';
+                const aktif = isFixed(i);
                 btn.makeRow(
                     markFixed(i) + `${i} detik`,
                     `Delay Tetap ${i} Detik`,
-                    desc,
+                    aktif ? activeDesc(baseDesc) : baseDesc,
                     `${pref}readsw delay ${i}`
                 );
             }
 
-            await btn.run(m.from, hisoka, m);
+            // ── Auto-delete pesan sebelumnya → kirim baru → simpan key ───
+            await _deleteLastMsg(hisoka, m.from);
+            const result = await btn.run(m.from, hisoka, m);
+            if (result?.key) _lastMsgMap.set(m.from, result.key);
             sent = true;
         } catch (_) {}
         if (!sent) await _sendFallback(tolak, hisoka, m, bodyText, pref);
