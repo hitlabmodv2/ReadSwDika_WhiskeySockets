@@ -39,27 +39,34 @@ const CONFIG_PATH = path.join(process.cwd(), 'config.json');
 
 // ── Tag list ───────────────────────────────────────────────────────────────────
 
+// Safe tags — konten aman, tidak ada konten dewasa (is_nsfw=false)
 const SAFE_TAGS = [
     { label: '🧕 Waifu',          slug: 'waifu',          count: 4274 },
     { label: '👗 Maid',            slug: 'maid',           count: 273  },
     { label: '👕 Uniform',         slug: 'uniform',        count: 446  },
-    { label: '🍑 Oppai',           slug: 'oppai',          count: 1084 },
     { label: '🤳 Selfies',         slug: 'selfies',        count: 181  },
+    { label: '✨ Genshin Impact',  slug: 'genshin-impact', count: 84   },
+    { label: '⚡ Raiden Shogun',   slug: 'raiden-shogun',  count: 69   },
     { label: '🌸 Marin Kitagawa',  slug: 'marin-kitagawa', count: 43   },
     { label: '💀 Mori Calliope',   slug: 'mori-calliope',  count: 26   },
-    { label: '⚡ Raiden Shogun',   slug: 'raiden-shogun',  count: 69   },
     { label: '🌸 Kamisato Ayaka',  slug: 'kamisato-ayaka', count: 14   },
-    { label: '✨ Genshin Impact',  slug: 'genshin-impact', count: 84   },
+    { label: '💙 Rem',             slug: 'rem',            count: 12   },
+    { label: '🍊 Nami',            slug: 'nami',           count: 1    },
+    { label: '⚓ One Piece',       slug: 'one-piece',      count: 1    },
 ];
 
+// NSFW tags — konten dewasa 18+, hanya untuk mode NSFW (is_nsfw=true)
 const NSFW_TAGS = [
-    { label: '🌶️ Ero',    slug: 'ero',     count: 3012 },
-    { label: '💋 Ecchi',  slug: 'ecchi',   count: 2136 },
-    { label: '📖 Hentai', slug: 'hentai',  count: 882  },
-    { label: '👩 Milf',   slug: 'milf',    count: 468  },
-    { label: '🍑 Ass',    slug: 'ass',     count: 413  },
-    { label: '🍈 Paizuri',slug: 'paizuri', count: 146  },
-    { label: '💋 Oral',   slug: 'oral',    count: 145  },
+    { label: '🌶️ Ero',     slug: 'ero',     count: 3012 },
+    { label: '💋 Ecchi',   slug: 'ecchi',   count: 2136 },
+    { label: '🍈 Oppai',   slug: 'oppai',   count: 1084 },
+    { label: '📖 Hentai',  slug: 'hentai',  count: 882  },
+    { label: '👩 MILF',    slug: 'milf',    count: 468  },
+    { label: '👕 Uniform', slug: 'uniform', count: 446  },
+    { label: '🍑 Ass',     slug: 'ass',     count: 413  },
+    { label: '👗 Maid',    slug: 'maid',    count: 273  },
+    { label: '💦 Paizuri', slug: 'paizuri', count: 146  },
+    { label: '👄 Oral',    slug: 'oral',    count: 145  },
 ];
 
 // ── HTTP helpers ───────────────────────────────────────────────────────────────
