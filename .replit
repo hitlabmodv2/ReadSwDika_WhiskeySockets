@@ -7,7 +7,7 @@ stack = "BEST_EFFORT_FALLBACK"
 channel = "stable-25_05"
 
 [workflows]
-runButton = "WhatsApp Bot"
+runButton = "Project"
 
 [[workflows.workflow]]
 name = "Project"
@@ -22,12 +22,12 @@ args = "WhatsApp Bot"
 name = "WhatsApp Bot"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "bash start-ptero.sh"
-
 [workflows.workflow.metadata]
 outputType = "console"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "bash start-replit.sh"
 
 [userenv]
 
