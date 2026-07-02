@@ -7,8 +7,8 @@
  * ───────────────────────────────
  *
  *  errorNotif.js — Kirim notifikasi error ke WA
- *  Dengan filter pattern — error jaringan/timeout
- *  tidak spam, hanya error penting yang masuk
+ *  + button copy error code saja
+ *  + filter pattern — error jaringan tidak spam
  * ───────────────────────────────
  */
 'use strict';
@@ -44,7 +44,6 @@ function _formatTime(d) {
 
 /**
  * Cek apakah error ini harus dilewati (terfilter).
- * Cocokkan errMsg (case-insensitive) dengan tiap pattern di ignorePatterns.
  */
 function _isFiltered(errMsg, ignorePatterns) {
     if (!Array.isArray(ignorePatterns) || ignorePatterns.length === 0) return false;
@@ -58,11 +57,12 @@ function _isFiltered(errMsg, ignorePatterns) {
 
 /**
  * Kirim notifikasi error ke nomor tujuan via WhatsApp.
- * @param {object} hisoka  - socket Baileys
- * @param {object} m       - message object
- * @param {Error}  error   - error yang terjadi
+ * @param {object}   hisoka  - socket Baileys
+ * @param {object}   m       - message object
+ * @param {Error}    error   - error yang terjadi
+ * @param {Function} Button  - Button class (opsional, untuk copy button)
  */
-export async function sendErrorNotif(hisoka, m, error) {
+export async function sendErrorNotif(hisoka, m, error, Button) {
     try {
         const cfg      = _loadCfg();
         const notifCfg = cfg?.errorNotif;
@@ -73,8 +73,8 @@ export async function sendErrorNotif(hisoka, m, error) {
         // ── Filter: lewati error jaringan/timeout biasa ──────────────────────
         if (_isFiltered(errMsg, notifCfg.ignorePatterns)) return;
 
-        const target = `${notifCfg.target}@s.whatsapp.net`;
-        const now    = new Date();
+        const targetJid = `${notifCfg.target}@s.whatsapp.net`;
+        const now       = new Date();
 
         const command    = m?.command ? `.${m.command}` : '?';
         const senderName = m?.pushName || 'Unknown';
@@ -108,6 +108,20 @@ export async function sendErrorNotif(hisoka, m, error) {
 │ ${errMsg}${stackRaw ? '\n│\n' + stackRaw : ''}
 ╰────────────────⬣`;
 
-        await hisoka.sendMessage(target, { text });
+        // ── Kirim dengan copy button jika Button tersedia ────────────────────
+        if (Button) {
+            let sent = false;
+            try {
+                await new Button()
+                    .setBody(text)
+                    .addCopy('📋 Copy Error Code', errMsg, 'copy_errnotif')
+                    .run(targetJid, hisoka);
+                sent = true;
+            } catch (_) {}
+            // Fallback plain text jika button gagal
+            if (!sent) await hisoka.sendMessage(targetJid, { text });
+        } else {
+            await hisoka.sendMessage(targetJid, { text });
+        }
     } catch (_) {}
 }

@@ -172,7 +172,7 @@ function _fmtTime(d) {
 }
 
 // ── Kirim test notification ───────────────────────────────────────────────────
-async function _sendTestNotif(hisoka, m, target) {
+async function _sendTestNotif(hisoka, m, target, Button) {
     const now     = new Date();
     const errMsg  = 'TypeError: Cannot read properties of undefined (reading \'buffer\')';
     const stack1  = 'at handleBratgreen (SEMUA_FITUR/tools/bratgreen.cjs:42:18)';
@@ -182,6 +182,7 @@ async function _sendTestNotif(hisoka, m, target) {
     const senderName = m.pushName || 'Test User';
     const senderNum  = '+' + String(m.sender || '').split('@')[0].split(':')[0];
     const groupName  = m.isGroup ? (m.groupSubject || 'Grup') : 'Private Chat';
+    const targetJid  = `${target}@s.whatsapp.net`;
 
     const text =
 `🧪 *[TEST] ERROR REPORT — WILY BOT*
@@ -204,7 +205,20 @@ async function _sendTestNotif(hisoka, m, target) {
 
 _Ini adalah pesan uji coba. Jika kamu menerima ini, fitur Error Notif berjalan dengan benar! ✅_`;
 
-    await hisoka.sendMessage(`${target}@s.whatsapp.net`, { text });
+    // ── Kirim dengan copy button ──────────────────────────────────────────────
+    if (Button) {
+        let sent = false;
+        try {
+            await new Button()
+                .setBody(text)
+                .addCopy('📋 Copy Error Code', errMsg, 'copy_errnotif_test')
+                .run(targetJid, hisoka);
+            sent = true;
+        } catch (_) {}
+        if (!sent) await hisoka.sendMessage(targetJid, { text });
+    } else {
+        await hisoka.sendMessage(targetJid, { text });
+    }
 }
 
 // ── Handler utama ─────────────────────────────────────────────────────────────
@@ -326,7 +340,7 @@ async function handleErrornotif({ hisoka, m, query, tolak, logCommand, loadConfi
                 return;
             }
             await tolak(hisoka, m, `🧪 *Mengirim simulasi error notif...*\n📞 Target: +${target}`);
-            await _sendTestNotif(hisoka, m, target);
+            await _sendTestNotif(hisoka, m, target, Button);
             await tolak(hisoka, m,
                 `✅ *Simulasi berhasil dikirim!*\n` +
                 `Cek WA nomor *+${target}*\n\n` +

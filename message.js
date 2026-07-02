@@ -1742,7 +1742,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                 console.error(`\x1b[31m[Handler] Error on command "${m?.command || '?'}":\x1b[39m`, errMsg);
                 if (isNoSpaceError(error)) cleanupWritePressure();
                 logError(error, cmdSrc);
-                if (isMainBot(hisoka)) { try { await sendErrorNotif(hisoka, m, error); } catch (_) {} }
+                if (isMainBot(hisoka)) { try { await sendErrorNotif(hisoka, m, error, Button); } catch (_) {} }
                 try {
                         if (m?.reply && m?.command) {
                                 const errorText = isNoSpaceError(error)
