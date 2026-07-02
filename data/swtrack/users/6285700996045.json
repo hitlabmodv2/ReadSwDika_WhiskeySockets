@@ -601,9 +601,9 @@
     "name": "yae",
     "type": "imageMessage",
     "arrivedAt": "2026-07-02T10:38:43.286Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "🎳",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6285700996045",
@@ -616,7 +616,7 @@
       "participant": "10436871233676@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-07-02T10:38:47.665Z",
+    "updatedAt": "2026-07-02T10:39:53.276Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -634,6 +634,8 @@
         "participant": "6285700996045@s.whatsapp.net",
         "addressingMode": "lid"
       }
-    ]
+    ],
+    "retriedOnStartup": true,
+    "retriedAt": "2026-07-02T10:39:53.276Z"
   }
 }
