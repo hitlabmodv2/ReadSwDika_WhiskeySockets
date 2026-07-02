@@ -387,7 +387,7 @@ async function handleSetwelgod({ hisoka, m, query, tolak, logCommand, loadConfig
         if (!cfgWg.welcomeGoodbye.groups) cfgWg.welcomeGoodbye.groups = {};
         if (!cfgWg.welcomeGoodbye.groups[m.from]) cfgWg.welcomeGoodbye.groups[m.from] = {};
 
-        if (!cfgWg.welcomeGoodbye.enabled && argWg === 'on') {
+        if (!cfgWg.welcomeGoodbye.enabled) {
                 return tolak(hisoka, m, `❌ Fitur Welcome/Goodbye dinonaktifkan secara global.\nUbah *welcomeGoodbye.enabled* di config.json menjadi *true*.`);
         }
 

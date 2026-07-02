@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 02/07/2026, 12.00.28  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 02/07/2026, 14.03.42  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -31,16 +31,16 @@
 │  DETAIL
 │  Sumber      : command:antitagsw
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 02/07/2026, 12.00.28
-│  Terakhir    : 02/07/2026, 12.00.28
+│  Pertama     : 02/07/2026, 14.03.42
+│  Terakhir    : 02/07/2026, 14.03.42
 │
 │  STACK TRACE (3 baris pertama)
 │  ▶  TypeError: toggleAntiTagSW is not a function
 │     at handleAntitagsw (file:///home/runner/workspace/SEMUA_FITUR/antitagsw/antitagsw.js:731:17)
-│     at default (file:///home/runner/workspace/message.js?t=1782993595846:1597:39)
+│     at default (file:///home/runner/workspace/message.js?t=1783000946283:1594:39)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 02/07/2026, 12.00.28
+  Terakhir diperbarui: 02/07/2026, 14.03.42
 ════════════════════════════════════════════════════════════════════════

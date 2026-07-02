@@ -57,7 +57,7 @@
     "whitelist": []
   },
   "antiTagSW": {
-    "enabled": true,
+    "enabled": false,
     "maxWarnings": 10
   },
   "antiLink": {
@@ -123,10 +123,6 @@
       },
       "120363383540766761@g.us": {
         "welcome": false
-      },
-      "120363408420466353@g.us": {
-        "welcome": false,
-        "goodbye": false
       }
     }
   },

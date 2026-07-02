@@ -119,9 +119,6 @@ const {
 } = _makeCekautoHelpers({
     loadConfig, saveConfig, getAllAntiTagSWGroups, toggleAntiTagSW, isAntiTagSWEnabled,
     sendConfirmWithButtons, tolak,
-    getJadibotAntidel, getJadibotReadsw, getJadibotAnticall,
-    getJadibotAnticallvid, getJadibotAutoOnline, getJadibotAutoTyping,
-    getJadibotAutoRecording, getJadibotNumber,
 });
 
 // ── AntiTagSW callbacks (button/session reply) — imported from antitagsw.js ──
@@ -1172,7 +1169,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 break;
                         }
 
-                        case 'ram1': {
+                        case 'ram': {
                                 const { handleRam } = _require(path.resolve('./SEMUA_FITUR/jadibot/ceksesi.cjs'));
                                 await handleRam({ hisoka, m, tolak, logCommand });
                                 break;
