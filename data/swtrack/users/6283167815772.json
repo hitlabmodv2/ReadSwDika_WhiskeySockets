@@ -40,5 +40,47 @@
       }
     ],
     "processedAt": "2026-07-01T02:57:48.012Z"
+  },
+  "ACAADEBBC1AC471B1513053F09D60925": {
+    "id": "ACAADEBBC1AC471B1513053F09D60925",
+    "sender": "6283167815772@s.whatsapp.net",
+    "name": "Døwn Fâll",
+    "type": "videoMessage",
+    "arrivedAt": "2026-07-02T03:06:30.286Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "⚽",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6283167815772",
+    "resolvedPn": "6283167815772@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6283167815772@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACAADEBBC1AC471B1513053F09D60925",
+      "participant": "127543868977315@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-02T03:06:34.660Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283167815772@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACAADEBBC1AC471B1513053F09D60925",
+        "participant": "127543868977315@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283167815772@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACAADEBBC1AC471B1513053F09D60925",
+        "participant": "6283167815772@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-02T03:06:34.660Z"
   }
 }

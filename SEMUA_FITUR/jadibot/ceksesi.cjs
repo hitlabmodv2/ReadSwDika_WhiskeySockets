@@ -225,37 +225,43 @@ async function handleRam({ hisoka, m, tolak, logCommand }) {
                 const cpuCount = os.cpus()?.length || 0;
                 const uptime   = formatUptime(process.uptime() * 1000);
 
-                const barLen  = 10;
-                const filled  = Math.round((pct / 100) * barLen);
-                const bar     = '█'.repeat(Math.min(filled, barLen)) + '░'.repeat(Math.max(barLen - filled, 0));
+                const barLen   = 10;
+                const filled   = Math.round((pct / 100) * barLen);
+                const bar      = '█'.repeat(Math.min(filled, barLen)) + '░'.repeat(Math.max(barLen - filled, 0));
+                const sysFill  = Math.round((parseFloat(systemPercentage) / 100) * barLen);
+                const sysBar   = '█'.repeat(Math.min(sysFill, barLen)) + '░'.repeat(Math.max(barLen - sysFill, 0));
 
-                let text = `╭═══『 *RAM STATUS* 』═══╮\n`
-                        + `│ ${statusIcon} Status: *${statusText}*\n`
-                        + `│\n`
-                        + `│ *Process Memory (Bot)*\n`
-                        + `│ ${formatBytes(memUsage.rss)} / ${formatBytes(memLimit)}\n`
-                        + `│ Usage: ${percentage}% [${bar}]\n`
-                        + `│\n`
-                        + `│ *Heap Memory*\n`
-                        + `│ ${heapUsedMB} MB / ${heapTotalMB} MB total\n`
-                        + `│ External: ${extMB} MB\n`
-                        + `│\n`
-                        + `│ *System Memory*\n`
-                        + `│ ${formatBytes(systemMem.used)} / ${formatBytes(systemMem.total)}\n`
-                        + `│ Free: ${formatBytes(systemMem.free)}\n`
-                        + `│ Usage: ${systemPercentage}%\n`
-                        + `│\n`
-                        + `│ *CPU*\n`
-                        + `│ Load: ${loadAvg} (1/5/15m)\n`
-                        + `│ Core: ${cpuCount}\n`
-                        + `│\n`
-                        + `│ *Proses*\n`
-                        + `│ PID: ${process.pid}\n`
-                        + `│ Node: ${process.version}\n`
-                        + `│ Uptime: ${uptime}\n`
-                        + `╰═════════════════════╯`;
+                const limitGB   = (memLimit          / (1024 ** 3)).toFixed(2);
+                const sysGB     = (systemMem.used    / (1024 ** 3)).toFixed(2);
+                const sysTGB    = (systemMem.total   / (1024 ** 3)).toFixed(2);
+                const sysFreeGB = (systemMem.free    / (1024 ** 3)).toFixed(2);
+                const botMB     = formatBytes(memUsage.rss);
 
-                if (pct >= 80) text += `\n\n⚠️ *Warning:* Memory usage tinggi! Auto-restart akan terjadi jika mencapai limit.`;
+                // Label rata kanan dengan lebar tetap
+                const L = (s) => s.padEnd(8);
+
+                let text = `╭─『 🖥️ *RAM STATUS* 』\n`
+                        + `│\n`
+                        + `│ ${statusIcon} *${statusText}*  ⏱ uptime ${uptime}\n`
+                        + `│\n`
+                        + `│ 🤖 *${L('Bot')}* : ${botMB} / ${limitGB} GB\n`
+                        + `│    ${L('Usage')} : [${bar}] *${percentage}%*\n`
+                        + `│\n`
+                        + `│ 🖥️ *${L('System')}* : ${sysGB} / ${sysTGB} GB\n`
+                        + `│    ${L('Usage')}   : [${sysBar}] *${systemPercentage}%*\n`
+                        + `│    ${L('Free')}    : ${sysFreeGB} GB\n`
+                        + `│\n`
+                        + `│ 🔧 *${L('Heap')}* : ${heapUsedMB} / ${heapTotalMB} MB\n`
+                        + `│    *${L('Ext')}*  : ${extMB} MB\n`
+                        + `│\n`
+                        + `│ ⚡ *${L('CPU')}*  : ${loadAvg}\n`
+                        + `│    *${L('Core')}* : ${cpuCount}\n`
+                        + `│    *${L('PID')}*  : ${process.pid}\n`
+                        + `│    *${L('Node')}* : ${process.version}\n`
+                        + `│\n`
+                        + `╰─────────────────────`;
+
+                if (pct >= 80) text += `\n\n⚠️ *Warning:* Memory tinggi! Auto-restart aktif jika limit tercapai.`;
 
                 await tolak(hisoka, m, text);
                 logCommand(m, hisoka, 'cekram');

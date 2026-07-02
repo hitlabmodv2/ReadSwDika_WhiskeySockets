@@ -169,10 +169,6 @@ export class MemoryMonitor {
                         if (pct >= 80) { color = '\x1b[31m'; icon = '🔴'; status = 'Kritis!'; }
                         else if (pct >= 60) { color = '\x1b[33m'; icon = '⚠️ '; status = 'Waspada'; }
 
-                        const barLen = 10;
-                        const filled = Math.round((pct / 100) * barLen);
-                        const bar = '█'.repeat(filled) + '░'.repeat(barLen - filled);
-
                         const sysPct = parseFloat(sysPercentage);
                         const sysColor = sysPct >= 90 ? '\x1b[31m' : sysPct >= 70 ? '\x1b[33m' : '\x1b[32m';
 
@@ -195,21 +191,32 @@ export class MemoryMonitor {
                         }
                         this._lastUsage = currentUsage;
 
-                        const cyan  = '\x1b[36m';
-                        const reset = '\x1b[0m';
-                        const bold  = '\x1b[1m';
-                        const gray  = '\x1b[90m';
+                        const R  = '\x1b[0m';
+                        const B  = '\x1b[1m';
+                        const CY = '\x1b[96m';   // cyan terang
+                        const WH = '\x1b[97m';   // putih terang
+                        const YL = '\x1b[93m';   // kuning terang
+                        const DM = '\x1b[37m';   // abu muda (bukan gelap)
 
-                        console.log(`${gray}··················································${reset}`);
-                        console.log(`${cyan}[MemoryMonitor]${reset} ${icon} ${color}${bold}${status}${reset} ${gray}(cek ke-${this._checkCount})${reset}`);
-                        console.log(`${gray}  Bot   :${reset} ${color}${bold}${formatBytes(currentUsage)}${reset} ${gray}(${percentage}% dari ${limitGB} GB)${reset} ${trendIcon}`);
-                        console.log(`${gray}  Heap  :${reset} ${heapMB} MB ${gray}/ ${heapTotMB} MB total${reset}`);
-                        console.log(`${gray}  Ext   :${reset} ${extMB} MB ${gray}(external + buffers)${reset}`);
-                        console.log(`${gray}  Sys   :${reset} ${sysColor}${bold}${sysPercentage}%${reset} ${gray}(${sysGB} / ${sysTGB} GB, free ${sysFreeGB} GB)${reset}`);
-                        console.log(`${gray}  Load  :${reset} [${color}${bar}${reset}] ${color}${percentage}%${reset}`);
-                        console.log(`${gray}  CPU   :${reset} ${loadAvg} ${gray}(avg 1/5/15m, ${cpuCount} core)${reset}`);
-                        console.log(`${gray}  PID   :${reset} ${process.pid} ${gray}| Node ${process.version} | Uptime ${uptime}${reset}`);
-                        console.log(`${gray}··················································${reset}`);
+                        // Bar RAM bot & sys (10 blok)
+                        const barFill = Math.round((pct / 100) * 10);
+                        const bar     = `${color}${'█'.repeat(barFill)}${'░'.repeat(10 - barFill)}${R}`;
+                        const sysFill = Math.round((sysPct / 100) * 10);
+                        const sysBar  = `${sysColor}${'█'.repeat(sysFill)}${'░'.repeat(10 - sysFill)}${R}`;
+
+                        // Padding nilai agar kolom rata
+                        const pctStr    = `${percentage}%`.padStart(6);
+                        const sysPctStr = `${sysPercentage}%`.padStart(6);
+                        const botVal    = `${formatBytes(currentUsage)} / ${limitGB} GB`;
+                        const sysVal    = `${sysGB} GB / ${sysTGB} GB  free ${sysFreeGB} GB`;
+
+                        console.log(`${B}${color}[MemoryMonitor] ${icon} ${status}${R}  ${DM}cek ke-${this._checkCount} | uptime ${uptime}${R}`);
+                        console.log(`  ${B}${CY}BOT ${R}  ${bar} ${B}${color}${pctStr}${R}  ${WH}${botVal} ${trendIcon}${R}`);
+                        console.log(`  ${B}${CY}SYS ${R}  ${sysBar} ${B}${sysColor}${sysPctStr}${R}  ${WH}${sysVal}${R}`);
+                        console.log(`  ${B}${YL}Heap${R}  ${WH}${heapMB} / ${heapTotMB} MB${R}`);
+                        console.log(`  ${B}${YL}Ext ${R}  ${WH}${extMB} MB${R}`);
+                        console.log(`  ${B}${YL}CPU ${R}  ${WH}${loadAvg}  ${DM}(${cpuCount} core)${R}`);
+                        console.log(`  ${B}${YL}PID ${R}  ${WH}${process.pid}  ${DM}Node ${process.version}${R}`);
                 }
 
                 if (currentUsage >= this.memoryLimit) {

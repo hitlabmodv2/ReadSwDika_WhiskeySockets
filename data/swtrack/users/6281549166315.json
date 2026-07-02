@@ -111,5 +111,47 @@
     "processedAt": "2026-07-01T02:58:06.523Z",
     "deleted": true,
     "deletedAt": "2026-07-01T13:58:56.428Z"
+  },
+  "AC9F582B2EB2F1FC61C298D2A7028476": {
+    "id": "AC9F582B2EB2F1FC61C298D2A7028476",
+    "sender": "6281549166315@s.whatsapp.net",
+    "name": "adien",
+    "type": "videoMessage",
+    "arrivedAt": "2026-07-01T16:29:54.732Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🎲",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6281549166315",
+    "resolvedPn": "6281549166315@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6281549166315@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC9F582B2EB2F1FC61C298D2A7028476",
+      "participant": "215693693821070@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-01T16:30:00.639Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281549166315@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC9F582B2EB2F1FC61C298D2A7028476",
+        "participant": "215693693821070@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281549166315@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC9F582B2EB2F1FC61C298D2A7028476",
+        "participant": "6281549166315@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-01T16:30:00.639Z"
   }
 }

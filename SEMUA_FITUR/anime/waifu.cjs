@@ -131,7 +131,12 @@ function _httpGetJson(url, token) {
 
             stream.on('data', d => raw += d);
             stream.on('end', () => {
-                if (res.statusCode !== 200) return reject(new Error(`HTTP ${res.statusCode}`));
+                if (res.statusCode !== 200) {
+                    // Attach statusCode ke error agar bisa dideteksi untuk fallback
+                    const err = new Error(`HTTP ${res.statusCode}`);
+                    err.statusCode = res.statusCode;
+                    return reject(err);
+                }
                 try { resolve(JSON.parse(raw)); } catch (_) { reject(new Error('JSON parse error')); }
             });
             stream.on('error', reject);
@@ -142,13 +147,17 @@ function _httpGetJson(url, token) {
 }
 
 function _downloadBuffer(url) {
+    // Support http:// dan https:// — pilih module sesuai protokol
+    const http = require('http');
+    const transport = url.startsWith('http://') ? http : https;
+
     return new Promise((resolve, reject) => {
-        const req = https.get(url, {
+        const req = transport.get(url, {
             headers: {
                 'User-Agent':      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
                 'Accept':          'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
                 'Accept-Language': 'en-US,en;q=0.9',
-                'Referer':         'https://www.waifu.im/',
+                'Referer':         'https://tbib.org/',
             },
         }, (res) => {
             if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
@@ -165,37 +174,175 @@ function _downloadBuffer(url) {
     });
 }
 
-// ── Fetch gambar dari tbib.org (gelbooru-compatible, tanpa Cloudflare) ─────────
-// API docs: https://tbib.org/index.php?page=help&topic=dapi
-// Response: array of { directory, image, hash, tags, rating, ... }
-// URL gambar: https://tbib.org/images/{directory}/{image}
+// ── Helper: cek apakah error perlu fallback (403, 401, timeout, dll) ──────────
+function _needsFallback(err) {
+    if (!err) return false;
+    const code = err.statusCode;
+    const msg  = err.message || '';
+    return code === 403 || code === 401 || code === 429 || code === 503
+        || msg.includes('403') || msg.includes('401')
+        || msg.includes('Timeout') || msg.includes('ECONNREFUSED')
+        || msg.includes('ENOTFOUND');
+}
+
+// ── Helper: build gelbooru-style params ────────────────────────────────────────
+function _booruParams(tags, pid = 0) {
+    return new URLSearchParams({ page: 'dapi', s: 'post', q: 'index', json: '1', tags, limit: '10', pid: String(pid) });
+}
+
+// ── Filter 2D anime: exclude konten 3D / real / cosplay ───────────────────────
+// Standar tag negatif booru (-tag = exclude). Dipasang di semua sumber.
+const _ANIME_EXCLUDE = '-3d -realistic -photorealistic -photo -cosplay -real_person -live_action';
+
+function _animeSlug(slug) {
+    return `${slug} ${_ANIME_EXCLUDE}`;
+}
+
+function _cleanSlug(slug) {
+    // Hapus rating tag (untuk sumber yang tidak pakai sistem rating tbib)
+    return slug.replace(/\brating:\S+/g, '').trim();
+}
+
+// ── Fetch gambar — chain: tbib.org → safebooru.org (safe) / xbooru.com (nsfw) ──
+// Semua sumber tidak perlu auth/API key.
+// Fallback otomatis jika IP VPS/Pterodactyl diblok (403/401).
+//
+// Hasil test dari Replit (simulasi IP datacenter):
+//   tbib.org     → 200 (blok di banyak VPS)
+//   safebooru.org→ 200 ✅ fallback safe
+//   xbooru.com   → 200 ✅ fallback nsfw
+//   rule34.xxx   → 401 minta auth ❌
+//   gelbooru.com → 401 minta auth ❌
 
 async function _fetchWaifu(slug, isNsfw) {
-    // Acak offset agar tiap request dapat gambar berbeda
-    const pid    = Math.floor(Math.random() * 20);
-    const params = new URLSearchParams({
-        page:  'dapi',
-        s:     'post',
-        q:     'index',
-        json:  '1',
-        tags:  slug,
-        limit: '10',
-        pid:   String(pid),
-    });
+    const pid      = Math.floor(Math.random() * 20);
+    const filtered = _animeSlug(slug); // tambah filter 2D anime
 
-    const data = await _httpGetJson(`https://tbib.org/index.php?${params}`);
-
-    if (!Array.isArray(data) || data.length === 0) {
-        // Coba lagi tanpa pid jika tidak ada hasil
-        const params2 = new URLSearchParams({ page: 'dapi', s: 'post', q: 'index', json: '1', tags: slug, limit: '10' });
-        const data2   = await _httpGetJson(`https://tbib.org/index.php?${params2}`);
-        if (!Array.isArray(data2) || data2.length === 0) throw new Error('Tidak ada gambar ditemukan untuk kategori ini');
-        const pick = data2[Math.floor(Math.random() * data2.length)];
-        return _normalizeTbib(pick);
+    // ── Sumber 1: tbib.org ──────────────────────────────────────────────────────
+    try {
+        const data = await _tryBooru(
+            `https://tbib.org/index.php?${_booruParams(filtered, pid)}`,
+            `https://tbib.org/index.php?${_booruParams(filtered, 0)}`,
+        );
+        if (data?.length) return _normalizeTbib(data[Math.floor(Math.random() * data.length)]);
+    } catch (err) {
+        if (!_needsFallback(err)) throw err;
+        // IP diblok → coba sumber berikutnya
     }
 
-    const pick = data[Math.floor(Math.random() * data.length)];
-    return _normalizeTbib(pick);
+    // ── Sumber 2 (fallback): safebooru.org (safe) / xbooru.com (nsfw) ──────────
+    return isNsfw ? _fetchXbooru(slug) : _fetchSafebooru(slug);
+}
+
+// ── safebooru.org — safe only, tanpa auth ──────────────────────────────────────
+async function _fetchSafebooru(slug) {
+    // Hapus rating tag + tambah filter 2D
+    const base      = _cleanSlug(slug);
+    const filtered  = _animeSlug(base);
+    const pid       = Math.floor(Math.random() * 20);
+
+    const data = await _tryBooru(
+        `https://safebooru.org/index.php?${_booruParams(filtered, pid)}`,
+        `https://safebooru.org/index.php?${_booruParams(filtered, 0)}`,
+    );
+    if (!data?.length) throw new Error('Tidak ada gambar ditemukan (tbib.org & safebooru.org)');
+    return _normalizeSafebooru(data[Math.floor(Math.random() * data.length)]);
+}
+
+// ── xbooru.com — nsfw, tanpa auth, gelbooru-compatible ────────────────────────
+async function _fetchXbooru(slug) {
+    // Hapus rating tag + tambah filter 2D
+    const base     = _cleanSlug(slug);
+    const filtered = _animeSlug(base);
+    const pid      = Math.floor(Math.random() * 20);
+
+    const data = await _tryBooru(
+        `https://xbooru.com/index.php?${_booruParams(filtered, pid)}`,
+        `https://xbooru.com/index.php?${_booruParams(filtered, 0)}`,
+    );
+    if (!data?.length) throw new Error('Tidak ada gambar ditemukan (tbib.org & xbooru.com)');
+    return _normalizeXbooru(data[Math.floor(Math.random() * data.length)]);
+}
+
+// ── Generic: coba url1 → url2 jika kosong/error ────────────────────────────────
+async function _tryBooru(url1, url2) {
+    let data = [];
+    try {
+        const raw = await _httpGetJson(url1);
+        data = Array.isArray(raw) ? raw : (raw?.post || []);
+    } catch (err) {
+        if (!_needsFallback(err) && !err.message?.includes('JSON')) throw err;
+    }
+    if (!data.length) {
+        const raw2 = await _httpGetJson(url2);
+        data = Array.isArray(raw2) ? raw2 : (raw2?.post || []);
+    }
+    return data;
+}
+
+// ── Normalize safebooru.org (sama seperti tbib, beda base URL) ─────────────────
+function _normalizeSafebooru(item) {
+    const imageFile = item.image || (item.hash + '.jpg');
+    const url       = `https://safebooru.org/images/${item.directory}/${imageFile}`;
+    const ext       = imageFile.split('.').pop()?.toLowerCase() || 'jpg';
+
+    let uploadedAt = null;
+    if (item.change) {
+        const d = new Date(item.change * 1000);
+        const pad = n => String(n).padStart(2, '0');
+        uploadedAt = `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+    }
+
+    return {
+        url,
+        extension:  '.' + ext,
+        is_nsfw:    false,
+        artists:    [],
+        source:     null,
+        tags:       (item.tags || '').split(' ').slice(0, 5).map(n => ({ name: n })),
+        width:      item.width  || null,
+        height:     item.height || null,
+        score:      Number(item.score) || 0,
+        uploadedAt,
+        postId:     item.id    || null,
+        owner:      item.owner || null,
+        rating:     'safe',
+    };
+}
+
+// ── Normalize xbooru.com (file_url-based, gelbooru-compatible) ────────────────
+function _normalizeXbooru(item) {
+    // xbooru kadang kasih http:// — paksa https agar _downloadBuffer tidak error
+    const url = (item.file_url || '').replace(/^http:\/\//i, 'https://');
+    const ext = url.split('.').pop()?.split('?')[0]?.toLowerCase() || 'jpg';
+
+    const ratingMap = { s: 'safe', q: 'questionable', e: 'explicit', g: 'general' };
+    const rating    = ratingMap[item.rating] || item.rating || 'explicit';
+
+    let uploadedAt = null;
+    if (item.change || item.created_at) {
+        try {
+            const d = item.change ? new Date(item.change * 1000) : new Date(item.created_at);
+            const pad = n => String(n).padStart(2, '0');
+            uploadedAt = `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+        } catch (_) {}
+    }
+
+    return {
+        url,
+        extension:  '.' + ext,
+        is_nsfw:    true,
+        artists:    [],
+        source:     item.source || null,
+        tags:       (item.tags || '').split(' ').slice(0, 5).map(n => ({ name: n })),
+        width:      item.width  || null,
+        height:     item.height || null,
+        score:      Number(item.score) || 0,
+        uploadedAt,
+        postId:     item.id    || null,
+        owner:      item.owner || null,
+        rating,
+    };
 }
 
 function _normalizeTbib(item) {

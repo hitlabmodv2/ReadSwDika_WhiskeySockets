@@ -124,5 +124,47 @@
       }
     ],
     "processedAt": "2026-07-01T03:41:54.477Z"
+  },
+  "AC18F42F3CAC072B41D3BBD4CD65A145": {
+    "id": "AC18F42F3CAC072B41D3BBD4CD65A145",
+    "sender": "6281342509401@s.whatsapp.net",
+    "name": "bosen femes",
+    "type": "imageMessage",
+    "arrivedAt": "2026-07-02T03:06:30.270Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🎃",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6281342509401",
+    "resolvedPn": "6281342509401@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6281342509401@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC18F42F3CAC072B41D3BBD4CD65A145",
+      "participant": "18180663689449@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-02T03:06:49.540Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281342509401@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC18F42F3CAC072B41D3BBD4CD65A145",
+        "participant": "18180663689449@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281342509401@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC18F42F3CAC072B41D3BBD4CD65A145",
+        "participant": "6281342509401@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-02T03:06:49.540Z"
   }
 }

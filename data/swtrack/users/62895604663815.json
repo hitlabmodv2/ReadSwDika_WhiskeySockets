@@ -62,7 +62,7 @@
       "participant": "230459506172039@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-07-01T08:02:28.921Z",
+    "updatedAt": "2026-07-02T03:07:16.663Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -81,6 +81,50 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-07-01T08:02:28.921Z"
+    "processedAt": "2026-07-01T08:02:28.921Z",
+    "deleted": true,
+    "deletedAt": "2026-07-02T03:07:16.663Z"
+  },
+  "ACBD52A55AAE30BA0F5CF4A9CED73B44": {
+    "id": "ACBD52A55AAE30BA0F5CF4A9CED73B44",
+    "sender": "62895604663815@s.whatsapp.net",
+    "name": "Sylph _df💕💕",
+    "type": "imageMessage",
+    "arrivedAt": "2026-07-02T03:07:16.477Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🎭",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "62895604663815",
+    "resolvedPn": "62895604663815@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "62895604663815@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACBD52A55AAE30BA0F5CF4A9CED73B44",
+      "participant": "230459506172039@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-02T03:07:30.811Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62895604663815@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACBD52A55AAE30BA0F5CF4A9CED73B44",
+        "participant": "230459506172039@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62895604663815@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACBD52A55AAE30BA0F5CF4A9CED73B44",
+        "participant": "62895604663815@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-02T03:07:30.811Z"
   }
 }

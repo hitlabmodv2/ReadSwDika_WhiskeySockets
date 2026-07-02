@@ -4,8 +4,8 @@ _🔍 Masih dalam tahap pemantauan — informasi tanggal rilis akan diumumkan ke
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V25*
 ✨ *3 Fitur Baru*
-🔧 *6 Bug/Error Fix*
-🚀 *6 Perubahan*
+🔧 *8 Bug/Error Fix*
+🚀 *9 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -40,50 +40,74 @@ _🔍 Masih dalam tahap pemantauan — informasi tanggal rilis akan diumumkan ke
 - Perubahan di `SEMUA_FITUR/readsw/readsw.cjs` (`_RANDOM_PRESETS`)
 > Pilih preset mana pun, delay acak selalu mulai dari 1 detik, cuma batas atasnya yang berubah
 
-*2. 📊 Log `[MemoryMonitor]` Lebih Lengkap & Rapi*
-- Format output sekarang lengkap mencakup 8 baris data:
-  `Bot` — RAM proses dalam MB + persentase dari total RAM sistem + tren (↑ naik / ↓ turun / → stabil)
-  `Heap` — Heap used / Heap total (MB)
-  `Ext` — External memory + buffers (MB)
-  `Sys` — Persentase RAM sistem terpakai (used / total GB, free X GB)
-  `Load` — Progress bar visual CPU load + persentase
-  `CPU` — Load average 1/5/15 menit + jumlah core
-  `PID` — ID proses | versi Node.js | Uptime bot
-- Header menampilkan status (`✅ Normal` / `⚠️ Tinggi` / `🔴 Kritis`) + nomor urutan cek (`cek ke-N`)
+*2. 📊 Log `[MemoryMonitor]` — Redesign Aligned, Tanpa Box, Dual Bar*
+- Format output sekarang 7 baris flat tanpa karakter box-drawing (tidak kepotong di panel Pterodactyl):
+  `BOT ` — progress bar + persentase + RAM proses (MB / GB) + tren ↑↓→
+  `SYS ` — progress bar + persentase + RAM sistem (used / total, free GB)
+  `Heap` — heap used / heap total (MB)
+  `Ext ` — external memory + buffers (MB)
+  `CPU ` — load average 1/5/15 menit + jumlah core
+  `PID ` — ID proses + versi Node.js
+- Label semua dipad ke lebar tetap (4 karakter) agar nilai rata di kolom yang sama
+- Persentase dipad ke 6 karakter (`padStart`) agar kolom bar & nilai selalu sejajar
+- Warna disesuaikan konteks: hijau (normal) / kuning (waspada ≥60%) / merah (kritis ≥80%)
+- Teks sekunder pakai abu muda (`\x1b[37m`) bukan abu gelap supaya terbaca di panel gelap
 - Perubahan di `src/helper/memoryMonitor.js`
+> Tidak ada lagi baris kepotong atau teks gelap yang sulit dibaca di panel Pterodactyl
 
-*3. 🔧 `hotReload.js` — Auto-Discovery + Deteksi File Baru/Hapus Real-Time*
+*3. 🖥️ Command `.ram` — Redesign Aligned + Dual Bar Chart*
+- Sebelumnya tampilan sederhana tanpa alignment, bar hanya untuk Bot RAM
+- Sekarang format baru dengan label rata menggunakan `padEnd(8)`:
+  Bar chart untuk Bot RAM dan System RAM secara terpisah
+  Persentase usage Bot + System masing-masing ditampilkan eksplisit
+  Heap, Ext, CPU load, core, PID, Node.js version — semua dalam satu blok rapi
+- Perubahan di `SEMUA_FITUR/jadibot/ceksesi.cjs` (`handleRam`)
+> `.ram` kini menampilkan info lengkap realtime dengan tampilan aligned dan mudah dibaca
+
+*4. 🎌 Fitur Waifu — Filter 2D Anime di Semua Sumber*
+- Sebelumnya hasil gambar bisa campur konten non-anime (foto, cosplay, 3D render, photorealistic)
+- Sekarang semua request ke tbib.org, safebooru.org, dan xbooru.com otomatis menyertakan tag negatif:
+  `-3d -realistic -photorealistic -photo -cosplay -real_person -live_action`
+- Filter diterapkan via fungsi `_animeSlug(slug)` yang dipakai di semua fetch function
+- Berlaku untuk mode Safe maupun NSFW 18+
+- Perubahan di `SEMUA_FITUR/anime/waifu.cjs`
+> Gambar yang muncul dijamin 2D anime — foto/cosplay/3D otomatis tersaring
+
+*5. 🔧 `hotReload.js` — Auto-Discovery + Deteksi File Baru/Hapus Real-Time*
 - Sebelumnya file baru harus didaftarkan manual satu-satu supaya bisa hot-reload
 - Sekarang bot otomatis scan & watch seluruh folder `SEMUA_FITUR`, `src/helper`, `src/db`, `src/config` secara rekursif — file apapun di dalam folder tersebut langsung ter-cover
-- *File baru terdeteksi otomatis*: saat file `.js`/`.cjs` ditambahkan ke folder yang diawasi, langsung di-detect & di-watch — log tampil `[HotReload] File baru terdeteksi (CJS/ESM, auto-watched)`
-- *File dihapus terdeteksi otomatis*: saat file dihapus/di-rename, langsung dilepas dari daftar watch — log tampil `[HotReload] File dihapus, dilepas dari watch` — tidak ada nyangkut/error
-- *ESM* (`.js`): di-reload ulang via dynamic import dengan cache-busting URL (`?t=timestamp`) — modul langsung aktif versi terbaru
-- *CJS* (`.cjs`): lazy — `require.cache` dibersihkan saat file berubah, sehingga efektif di pemanggilan berikutnya tanpa restart
-- Debounce *600ms* — cegah trigger ganda saat file ditulis berulang cepat (misal auto-save editor)
-- `message.js` diwatch tersendiri (bukan lewat recursive folder) via `EXTRA_ESM_FILES`
-- `KEY_OVERRIDES` — key konsisten untuk file tertentu (antitagsw, event, emoji, menu, dll) walau path-nya berubah
-- `EXCLUDED_FILES` — file yang sengaja di-skip dari hot-reload: `crashGuard`, `memoryMonitor`, `jadibot`, `authState`, `browserSwitch`, `aiHistory`, dan CJS startup (wm, cekauto, musikai, dll) — kalau direload bisa bikin state ganda/crash
-- Export tambahan: `getReloadStats()` (total/ESM/CJS/folder aktif/excluded), `getWatchedFiles()` (semua file terlacak), `onReload(key, cb)` (callback pasca-reload), `stopHotReload()` (matikan semua watcher)
+- File baru terdeteksi otomatis: saat file `.js`/`.cjs` ditambahkan ke folder yang diawasi, langsung di-detect & di-watch
+- File dihapus terdeteksi otomatis: saat file dihapus/di-rename, langsung dilepas dari daftar watch — tidak ada nyangkut/error
+- Debounce 600ms — cegah trigger ganda saat file ditulis berulang cepat
+- `KEY_OVERRIDES` — key konsisten untuk file tertentu walau path-nya berubah
+- `EXCLUDED_FILES` — file yang sengaja di-skip dari hot-reload: `crashGuard`, `memoryMonitor`, `jadibot`, `authState`, dll
+- Export tambahan: `getReloadStats()`, `getWatchedFiles()`, `onReload(key, cb)`, `stopHotReload()`
 > File baru/dihapus langsung terdeteksi real-time — tidak perlu edit `hotReload.js` manual sama sekali
 
-*4. 🧹 Hapus Semua Karakter Box-Drawing dari Respons Emoji*
+*6. 🧹 Hapus Semua Karakter Box-Drawing dari Respons Emoji*
 - Dihapus semua: │ ╭ ╰ ├ ─ dan sejenisnya dari output `.emoji`, `.emojilist`, dan `renderEmojiList`
-- Diganti dengan format WhatsApp proper: `*tebal*` untuk header, `_miring_` untuk deskripsi, `~coret~` untuk aksi destruktif, ` ```kode``` ` untuk contoh command, `>` untuk tip/quote, `•` untuk bullet
+- Diganti dengan format WhatsApp proper: `*tebal*`, `_miring_`, `~coret~`, ` ```kode``` `, `>` quote, `•` bullet
 - Perubahan di `SEMUA_FITUR/info/info.cjs` (handleEmoji, handleEmojilist, renderEmojiList)
 > Tampilan lebih bersih dan konsisten di semua perangkat WhatsApp
 
-*5. 🔤 Format WhatsApp Proper di Semua Command Emoji*
+*7. 🔤 Format WhatsApp Proper di Semua Command Emoji*
 - Semua respons emoji kini menggunakan format WA: header tebal, deskripsi miring, contoh command dalam backtick/code, tip dalam quote, aksi destruktif di-coret
-- Prefix command tidak lagi hardcoded `.` — semua pakai `${pref}` dari `m.prefix` sehingga ikut prefix pengguna
+- Prefix command tidak lagi hardcoded `.` — semua pakai `${pref}` dari `m.prefix`
 - Berlaku di: `.emoji`, `.emojilist`, `.emojicustom`, `.emojidefault`, `.emojiclear`
 > Format konsisten dan sesuai standar formatting WhatsApp
 
-*6. 🔌 Bot Utama Logout dari Perangkat Tertautan — Jadibot Tetap Jalan*
-- Sebelumnya bila bot utama logout (dicabut dari perangkat tertautan / WhatsApp Web), semua koneksi ikut terganggu
-- Sekarang saat bot utama terdeteksi logout (`DisconnectReason.loggedOut`): sesi bot utama dihapus dan re-auth (tampil kode pairing / QR baru), namun semua *jadibot* yang sedang aktif tetap berjalan tanpa terganggu
-- Koneksi `forbidden (403)` juga ditangani terpisah: sesi TIDAK dihapus, bot langsung reconnect otomatis dengan backoff (maks 60 detik) tanpa harus scan ulang QR
-- Perubahan di `index.js` (`connection.update` handler, `DisconnectReason.loggedOut` & `DisconnectReason.forbidden`)
+*8. 🔌 Bot Utama Logout dari Perangkat Tertautan — Jadibot Tetap Jalan*
+- Sebelumnya bila bot utama logout, semua koneksi ikut terganggu
+- Sekarang saat bot utama logout (`DisconnectReason.loggedOut`): sesi bot utama dihapus dan re-auth, namun semua jadibot yang sedang aktif tetap berjalan tanpa terganggu
+- Koneksi `forbidden (403)` juga ditangani terpisah: sesi TIDAK dihapus, bot langsung reconnect otomatis
+- Perubahan di `index.js` (`connection.update` handler)
 > Logout bot utama tidak lagi mengganggu jadibot aktif — koneksi user lain tetap berjalan
+
+*9. ▶️ Run Command Panel — Ganti ke `bash start-ptero.sh`*
+- Workflow "WhatsApp Bot" di Replit diubah dari `node index.js` menjadi `bash start-ptero.sh`
+- `start-ptero.sh` mencakup: auto-install `node_modules`, auto-restart loop (maks 10x, jeda 5 detik), notifikasi Telegram, dan laporan harian uptime
+- Perubahan di `.replit`
+> Bot otomatis restart saat crash dan lapor kondisi via Telegram
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🔧 *BUG/ERROR FIX*
@@ -92,40 +116,49 @@ _🔍 Masih dalam tahap pemantauan — informasi tanggal rilis akan diumumkan ke
 - ~Bug: di log AutoReadStoryWhatsApp, baris EmojiMode selalu tampil "Default 🔵" meskipun user sudah set mode Custom~
 - Penyebab: `event.js` pakai `getJadibotEmojiMode()` yang baca dari `data_jadibot/<nomor>/emoji.json` — padahal bot utama simpan mode di `src/helper/emoji.json`
 - Fix: diganti ke `getMode()` dari `emoji.js` yang baca file yang benar untuk bot utama
-- Jadibot tidak terpengaruh — sudah benar sejak awal (baca dari `data_jadibot/<nomor>/emoji.json`)
 > EmojiMode kini tampil akurat realtime sesuai mode aktif, tanpa restart bot
 
 *2. 💾 Command `.ram` — Error "formatUptime is not a function"*
 - ~Bug: saat ketik `.ram`, muncul error `[CekRAM] Error: formatUptime is not a function`~
-- Penyebab: bot yang sedang berjalan masih memakai versi lama `memoryMonitor.js` di memori (ESM cache), belum ke-reload setelah fungsi `formatUptime` ditambahkan
-- Fix: restart proses bot supaya modul ter-load ulang; `.ram` sekarang juga ditampilkan lebih lengkap (Heap, External memory, RAM free, CPU Load, PID, versi Node, Uptime)
+- Penyebab: bot yang sedang berjalan masih memakai versi lama `memoryMonitor.js` di memori (ESM cache)
+- Fix: restart proses bot supaya modul ter-load ulang; `.ram` sekarang juga ditampilkan lebih lengkap
 > `.ram` sudah normal, data akurat, sudah diuji langsung tanpa error
 
 *3. 🔁 Command Ke-Eksekusi 2x — Log `InformasiBotCommand` Muncul Duplikat (dedup guard)*
-- ~Bug: kirim command sekali (misal `.readsw`), tapi log `InformasiBotCommand` muncul 2x dengan waktu identik — command ikut ke-eksekusi dobel~
-- Penyebab: event `messages.upsert` dari WhatsApp kadang re-deliver pesan yang sama (msg ID sama) tanpa ada dedup guard, jadi handler pesan jalan 2x untuk 1 pesan
-- Fix: tambah dedup guard di `index.js` — tiap `message.key.id` yang sudah diproses langsung di-skip kalau muncul lagi dalam 60 detik
+- ~Bug: kirim command sekali, tapi log `InformasiBotCommand` muncul 2x dengan waktu identik~
+- Penyebab: event `messages.upsert` dari WhatsApp kadang re-deliver pesan yang sama tanpa dedup guard
+- Fix: tambah dedup guard di `index.js` — tiap `message.key.id` yang sudah diproses langsung di-skip dalam 60 detik
 > Semua command sekarang cuma jalan sekali per pesan, tidak ada lagi eksekusi/log dobel
 
 *4. 📋 `InformasiBotCommand` Muncul Duplikat — Double Logging di `message.js`*
-- ~Bug: kirim command sekali tapi log `InformasiBotCommand` muncul 2 kali dengan waktu identik~
-- Penyebab: ada 2 tempat logging — satu di `message.js` (terpusat, sebelum switch, hanya untuk command di `_commandSet`) dan satu lagi di dalam tiap handler — kalau command ada di `_commandSet`, ikut ter-log 2x
-- Fix: hapus blok `_logCmdBox` terpusat di `message.js` — logging diserahkan sepenuhnya ke tiap handler masing-masing yang sudah konsisten memanggil `logCommand`
-- Perubahan di `message.js`
-> `InformasiBotCommand` kini selalu muncul tepat 1x per command, tidak pernah dobel lagi
+- ~Bug: kirim command sekali tapi log `InformasiBotCommand` muncul 2 kali~
+- Penyebab: ada 2 tempat logging — satu terpusat di `message.js` dan satu di dalam tiap handler
+- Fix: hapus blok `_logCmdBox` terpusat di `message.js` — logging diserahkan ke tiap handler
+> `InformasiBotCommand` kini selalu muncul tepat 1x per command
 
 *5. 🔤 Prefix Hardcoded `.` di Respons `.emojilist`*
-- ~Bug: di body text command `.emojilist`, semua contoh command pakai prefix hardcoded `.` (misal `.emojiadd`) — tidak ikut prefix yang diset pengguna~
-- Penyebab: string command di bodyText menggunakan literal `.` bukan variabel `${pref}`
-- Fix: semua contoh command di respons `.emojilist` diganti ke `${pref}emojiadd`, `${pref}emojidel`, dst.
+- ~Bug: semua contoh command di respons `.emojilist` pakai prefix hardcoded `.` — tidak ikut prefix user~
+- Fix: semua contoh command diganti ke `${pref}emojiadd`, `${pref}emojidel`, dst.
 - Perubahan di `SEMUA_FITUR/info/info.cjs` (handleEmojilist)
 > Prefix command di respons sekarang selalu akurat sesuai prefix yang dipakai pengguna
 
 *6. 🦖 `start-ptero.sh` — Bot Berhenti Diam Tanpa Restart di Panel Pterodactyl*
-- ~Bug: bot yang jalan di panel Pterodactyl bisa crash/berhenti diam-diam tanpa restart otomatis — panel menampilkan "Online" tapi bot tidak merespons~
-- Fix: script `start-ptero.sh` khusus untuk Pterodactyl — set *Startup Command* di panel ke `bash start-ptero.sh`, bot langsung terlindungi
-- Auto-restart loop: bot di-restart otomatis setiap kali crash/exit (maks 10x), dengan jeda 5 detik antar restart
-- Auto-install: jika `node_modules` belum ada saat panel pertama jalan, langsung `npm install` otomatis
-- Notifikasi Telegram: kirim pesan saat bot start, crash+restart, dan laporan harian (uptime, total restart, memori server) — aktif jika `telegram.enabled: true` di `config.json`
-- Bisa diterapkan di masing-masing panel secara independen
-> Bot tidak akan pernah diam diam-diam lagi — selalu restart sendiri dan lapor via Telegram
+- ~Bug: bot di panel Pterodactyl bisa crash/berhenti diam-diam tanpa restart otomatis~
+- Fix: `start-ptero.sh` dengan auto-restart loop (maks 10x), auto-install, notifikasi Telegram
+> Bot tidak akan pernah diam-diam lagi — selalu restart sendiri dan lapor via Telegram
+
+*7. 🖼️ Fitur Waifu — Error HTTP 403/401 di Panel Pterodactyl*
+- ~Bug: pilih kategori Safe maupun NSFW di `.waifu`, semua gagal dengan error HTTP 403 atau 401~
+- Penyebab: tbib.org memblokir IP range VPS/Pterodactyl (OVH, Hetzner, dll) — IP Replit (Google Cloud) tidak diblok; gelbooru.com dan rule34.xxx juga terbukti minta auth (401)
+- Fix: sistem fallback bertingkat — tbib.org → safebooru.org (mode Safe) / xbooru.com (mode NSFW)
+  Kedua fallback terbukti HTTP 200 dari IP datacenter manapun, tidak perlu auth/API key
+  Fallback aktif otomatis jika tbib.org return 403, 401, 429, 503, timeout, atau ECONNREFUSED
+- Perubahan di `SEMUA_FITUR/anime/waifu.cjs` (`_fetchWaifu`, `_fetchSafebooru`, `_fetchXbooru`)
+> Fitur waifu kini work di Replit maupun panel Pterodactyl tanpa perlu konfigurasi tambahan
+
+*8. 🖼️ Fitur Waifu — Error "Protocol http: not supported. Expected https:"*
+- ~Bug: setelah fallback ke xbooru.com, gambar gagal diunduh dengan error protocol http~
+- Penyebab: xbooru.com kadang mengembalikan `file_url` dengan protokol `http://`, sedangkan `_downloadBuffer` menggunakan modul `https` Node.js yang hanya mendukung HTTPS
+- Fix: `_downloadBuffer` diubah untuk mendeteksi protokol URL secara otomatis — jika `http://` pakai modul `http`, jika `https://` pakai modul `https`
+- Perubahan di `SEMUA_FITUR/anime/waifu.cjs` (`_downloadBuffer`)
+> Download gambar dari sumber manapun (http maupun https) tidak akan error lagi
