@@ -1176,7 +1176,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 break;
                         }
 
-                        case 'ram1': {
+                        case 'ram': {
                                 const { handleRam } = _require(path.resolve('./SEMUA_FITUR/jadibot/ceksesi.cjs'));
                                 await handleRam({ hisoka, m, tolak, logCommand });
                                 break;
@@ -1519,7 +1519,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 break;
                         }
 
-                        case 'jadibot1': {
+                        case 'jadibot': {
                                 const { handleJadibot } = _require(path.resolve('./SEMUA_FITUR/jadibot/jadibot-cmd.cjs'));
                                 await handleJadibot({ hisoka, m, query, tolak, logCommand, isMainBot, path, fs, jadibotMap, parseJadibotDuration, startJadibot, maskNumber, getJadibotExpirySummary, scheduleJadibotExpiry, setPermanentJadibot, removeJadibotExpiry, ensureJadibotExpiry });
                                 break;
