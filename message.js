@@ -40,6 +40,7 @@ import { BROWSER_LIST } from './name_perangkat_tertautan.js';
 import { stopAutoCleaner, restartAutoCleaner, cleanStaleSessionFiles, clearOldFiles, clearTmpFolder } from './src/helper/cleaner.js';
 import { getUptimeFormatted, getBotStats } from './src/db/botStats.js';
 import { logError, formatErrorReport, clearErrors, generateErrorFileTxt, getInfoErrorTxtPath, getErrorStats } from './src/db/errorLog.js';
+import { sendErrorNotif } from './src/helper/errorNotif.js';
 import { startJadibot, startJadibotQR, stopJadibot, jadibotMap, jadibotClearSesiMap, jadibotSesiReportMap, jadibotConnectedAt, pendingJadibotChoices, formatPairingCode, maskNumber, parseJadibotDuration, getJadibotExpiry, formatRemainingTime, getJadibotExpirySummary, cleanupExpiredJadibots, removeJadibotExpiry, setPermanentJadibot, ensureJadibotExpiry, extendJadibotExpiry, scheduleJadibotExpiry, startJadibotAutoOnline } from './src/helper/jadibot.js';
 import { hasViewOnceCache, getViewOnceCache } from './src/helper/voCache.js';
 import { isAntiTagSWEnabled, toggleAntiTagSW, resetWarnings, getWarnings, getAllAntiTagSWGroups, getAntiTagSWLog, clearAntiTagSWLog, resolveLidFromContacts, handleAntitagsw as _handleAntitagswFn, handleAntitagswCallbacks as _handleAntitagswCallbacksFn } from './SEMUA_FITUR/antitagsw/antitagsw.js';
@@ -1350,6 +1351,34 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 await handleReadchat({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, getJadibotNumber, getJadibotReadchat, setJadibotUserSetting });
                                 break;
                         }
+
+                        case 'errornotif': {
+                                if (!m.isOwner) return tolak(hisoka, m, '❌ Perintah ini hanya untuk *owner* bot.');
+                                const _enCfg   = loadConfig();
+                                const _enState = _enCfg?.errorNotif?.enabled ?? true;
+                                const _enQ     = (query || '').toLowerCase().trim();
+                                if (_enQ === 'on') {
+                                        if (!_enCfg.errorNotif) _enCfg.errorNotif = {};
+                                        _enCfg.errorNotif.enabled = true;
+                                        saveConfig(_enCfg);
+                                        logCommand(m, 'errornotif on');
+                                        await tolak(hisoka, m,
+                                                `✅ *Error Notif* diaktifkan!\n\nSetiap error command akan dikirim ke nomor:\n📞 *+${_enCfg.errorNotif?.target || '-'}*`);
+                                } else if (_enQ === 'off') {
+                                        if (!_enCfg.errorNotif) _enCfg.errorNotif = {};
+                                        _enCfg.errorNotif.enabled = false;
+                                        saveConfig(_enCfg);
+                                        logCommand(m, 'errornotif off');
+                                        await tolak(hisoka, m, `🔕 *Error Notif* dimatikan.\nNotifikasi error tidak akan dikirim.`);
+                                } else {
+                                        const _enStatus = _enState ? '✅ ON' : '🔕 OFF';
+                                        const _enTarget = _enCfg?.errorNotif?.target || '-';
+                                        logCommand(m, 'errornotif');
+                                        await tolak(hisoka, m,
+                                                `╭─「 🐛 *Error Notif* 」\n│\n├➤ *Status*  : ${_enStatus}\n├➤ *Target*  : +${_enTarget}\n│\n╰➤ Gunakan: *.errornotif on/off*\n\n┗━➤ 🚀 *Powered By Wily Bot*`);
+                                }
+                                break;
+                        }
                         case 'anticall':
                         case 'ac': {
                                 const { handleAc } = _require(path.resolve('./SEMUA_FITUR/setting/anticall.cjs'));
@@ -1733,6 +1762,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                 console.error(`\x1b[31m[Handler] Error on command "${m?.command || '?'}":\x1b[39m`, errMsg);
                 if (isNoSpaceError(error)) cleanupWritePressure();
                 logError(error, cmdSrc);
+                try { await sendErrorNotif(hisoka, m, error); } catch (_) {}
                 try {
                         if (m?.reply && m?.command) {
                                 const errorText = isNoSpaceError(error)

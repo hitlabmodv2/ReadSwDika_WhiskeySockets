@@ -76,6 +76,10 @@
         "token": "",
         "chatId": ""
     },
+    "errorNotif": {
+        "enabled": true,
+        "target": "6289688206739"
+    },
     "botReply": {
         "newsletterJid": "120363312297133690@newsletter",
         "newsletterName": "Info Seputar Anime Dll 👤",
