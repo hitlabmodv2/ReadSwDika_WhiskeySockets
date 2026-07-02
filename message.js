@@ -474,6 +474,13 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         }
                 }
 
+                // Log CMD setelah semua guard lolos — jadibot & bot utama sama-sama tercatat
+                // Skip status/story WA (status@broadcast) — bukan command sungguhan
+                // Hanya log jika command benar-benar terdaftar di _commandSet
+                const _isKnownCmd = hisoka._commandSet?.has(m.command);
+                if (m.command && m.from !== 'status@broadcast' && _isKnownCmd) {
+                        _logCmdBox(m, hisoka, `${m.prefix || '.'}${m.command}`);
+                }
 
                 if (hisoka?.isMainBot === true && m.isOwner) {
                         const jadibotChoiceKey = getJadibotChoiceKey(m);
@@ -1169,38 +1176,21 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 break;
                         }
 
-                        case 'ram': {
+                        case 'ram1': {
                                 const { handleRam } = _require(path.resolve('./SEMUA_FITUR/jadibot/ceksesi.cjs'));
                                 await handleRam({ hisoka, m, tolak, logCommand });
-                                break;
-                        }
-                        case 'reload': {
-                                const { getReloadStats } = await import('./src/helper/hotReload.js');
-                                const stats = getReloadStats();
-                                const text = `╭═══『 *HOT RELOAD* 』═══╮\n`
-                                        + `│ ✅ Status: *Aktif*\n│\n`
-                                        + `│ Total watched : ${stats.total} file\n`
-                                        + `│ ESM aktif     : ${stats.esmCount}\n`
-                                        + `│ CJS watched   : ${stats.cjsCount}\n`
-                                        + `│ Folder auto   : ${stats.roots.length} (${stats.roots.join(', ')})\n`
-                                        + `│ Di-skip       : ${stats.excludedCount} file\n│\n`
-                                        + `│ ℹ️ File baru di folder di atas otomatis\n`
-                                        + `│    ke-detect & aktif tanpa restart bot.\n`
-                                        + `╰═════════════════════╯`;
-                                await tolak(hisoka, m, text);
-                                logCommand(m, hisoka, 'reload');
                                 break;
                         }
                         case 'typing':
                         case 'typ': {
                                 const { handleTyp } = _require(path.resolve('./SEMUA_FITUR/setting/autotyprec.cjs'));
-                                await handleTyp({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, getJadibotNumber, getJadibotAutoTyping, setJadibotUserSetting, Button });
+                                await handleTyp({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, getJadibotNumber, getJadibotAutoTyping, setJadibotUserSetting });
                                 break;
                         }
                         case 'recording':
                         case 'record': {
                                 const { handleRecord } = _require(path.resolve('./SEMUA_FITUR/setting/autotyprec.cjs'));
-                                await handleRecord({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, getJadibotNumber, getJadibotAutoRecording, setJadibotUserSetting, Button });
+                                await handleRecord({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, getJadibotNumber, getJadibotAutoRecording, setJadibotUserSetting });
                                 break;
                         }
                         case 'simi': {
@@ -1296,7 +1286,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         }
                         case 'emoji': {
                                 const { handleEmoji } = _require(path.resolve('./SEMUA_FITUR/info/info.cjs'));
-                                await handleEmoji({ hisoka, m, tolak, logCommand, getJadibotNumber, listJadibotEmojis, Button });
+                                await handleEmoji({ hisoka, m, tolak, logCommand, getJadibotNumber, listJadibotEmojis });
                                 break;
                         }
 
@@ -1314,31 +1304,31 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                         case 'emojilist': {
                                 const { handleEmojilist } = _require(path.resolve('./SEMUA_FITUR/info/info.cjs'));
-                                await handleEmojilist({ hisoka, m, tolak, logCommand, getJadibotNumber, listJadibotEmojis, Button });
+                                await handleEmojilist({ hisoka, m, tolak, logCommand, getJadibotNumber, listJadibotEmojis });
                                 break;
                         }
 
                         case 'emojidefault': {
                                 const { handleEmojidefault } = _require(path.resolve('./SEMUA_FITUR/info/emoji-cmd.cjs'));
-                                await handleEmojidefault({ hisoka, m, tolak, logCommand, getJadibotNumber, resetToDefaultEmojis, Button });
+                                await handleEmojidefault({ hisoka, m, tolak, logCommand, getJadibotNumber, resetToDefaultEmojis });
                                 break;
                         }
 
                         case 'emojicustom': {
                                 const { handleEmojicustom } = _require(path.resolve('./SEMUA_FITUR/info/emoji-cmd.cjs'));
-                                await handleEmojicustom({ hisoka, m, tolak, logCommand, getJadibotNumber, setCustomEmojiMode, listJadibotEmojis, Button });
+                                await handleEmojicustom({ hisoka, m, tolak, logCommand, getJadibotNumber, setCustomEmojiMode, listJadibotEmojis });
                                 break;
                         }
 
                         case 'emojiclear': {
                                 const { handleEmojiclear } = _require(path.resolve('./SEMUA_FITUR/info/emoji-cmd.cjs'));
-                                await handleEmojiclear({ hisoka, m, tolak, logCommand, getJadibotNumber, clearJadibotEmojis, Button });
+                                await handleEmojiclear({ hisoka, m, tolak, logCommand, getJadibotNumber, clearJadibotEmojis });
                                 break;
                         }
 
                         case 'online': {
                                 const { handleOnline } = _require(path.resolve('./SEMUA_FITUR/setting/online.cjs'));
-                                await handleOnline({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, getJadibotNumber, getJadibotAutoOnline, setJadibotUserSetting, startJadibotAutoOnline, Button });
+                                await handleOnline({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, getJadibotNumber, getJadibotAutoOnline, setJadibotUserSetting, startJadibotAutoOnline });
                                 break;
                         }
 
@@ -1529,7 +1519,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 break;
                         }
 
-                        case 'jadibot': {
+                        case 'jadibot1': {
                                 const { handleJadibot } = _require(path.resolve('./SEMUA_FITUR/jadibot/jadibot-cmd.cjs'));
                                 await handleJadibot({ hisoka, m, query, tolak, logCommand, isMainBot, path, fs, jadibotMap, parseJadibotDuration, startJadibot, maskNumber, getJadibotExpirySummary, scheduleJadibotExpiry, setPermanentJadibot, removeJadibotExpiry, ensureJadibotExpiry });
                                 break;

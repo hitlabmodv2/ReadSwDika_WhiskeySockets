@@ -191,7 +191,6 @@ async function handleOwnermenu({ hisoka, m, query, loadConfig, logCommand, fs, p
 ├➤ *.backup*  _→ Backup sesi bot_
 ├➤ *.ceksesi*  _→ Cek status sesi aktif_
 ├➤ *.ram*  _→ Cek penggunaan RAM & memori_
-├➤ *.reload*  _→ Cek status hot reload (file yg di-watch)_
 ├➤ *.ceksize / .disksize*  _→ Cek ukuran folder & disk_
 ├➤ *.credsjson*  _→ Export sesi ke creds.json_
 ├➤ *.autosholat on/off/test/status*  _→ Notif jadwal sholat_

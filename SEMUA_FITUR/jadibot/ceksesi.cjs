@@ -33,7 +33,6 @@
 
 const fs   = require('fs');
 const path = require('path');
-const os   = require('os');
 
 const SESSION_FILE = path.resolve('./sessions/hisoka.json');
 
@@ -203,66 +202,13 @@ module.exports.handleMemory = handleMemory;
 
 async function handleRam({ hisoka, m, tolak, logCommand }) {
         try {
-                const { formatBytes, getCurrentMemoryUsage, getSystemMemoryInfo, formatUptime } = await import('../../src/helper/memoryMonitor.js');
-
+                const { formatBytes, getCurrentMemoryUsage, getSystemMemoryInfo } = await import('../../src/helper/memoryMonitor.js');
                 const memUsage  = getCurrentMemoryUsage();
                 const systemMem = getSystemMemoryInfo();
                 const memLimit  = global.memoryMonitor?.memoryLimit || systemMem.total;
-
                 const percentage       = ((memUsage.rss / memLimit) * 100).toFixed(1);
                 const systemPercentage = ((systemMem.used / systemMem.total) * 100).toFixed(1);
-
-                let statusIcon = '✅', statusText = 'Normal';
-                const pct = parseFloat(percentage);
-                if (pct >= 80) { statusIcon = '🔴'; statusText = 'Kritis!'; }
-                else if (pct >= 60) { statusIcon = '⚠️'; statusText = 'Waspada'; }
-
-                const heapUsedMB  = (memUsage.heapUsed  / (1024 * 1024)).toFixed(1);
-                const heapTotalMB = (memUsage.heapTotal / (1024 * 1024)).toFixed(1);
-                const extMB       = (memUsage.external  / (1024 * 1024)).toFixed(1);
-
-                const loadAvg  = os.loadavg().map((n) => n.toFixed(2)).join(', ');
-                const cpuCount = os.cpus()?.length || 0;
-                const uptime   = formatUptime(process.uptime() * 1000);
-
-                const barLen   = 10;
-                const filled   = Math.round((pct / 100) * barLen);
-                const bar      = '█'.repeat(Math.min(filled, barLen)) + '░'.repeat(Math.max(barLen - filled, 0));
-                const sysFill  = Math.round((parseFloat(systemPercentage) / 100) * barLen);
-                const sysBar   = '█'.repeat(Math.min(sysFill, barLen)) + '░'.repeat(Math.max(barLen - sysFill, 0));
-
-                const limitGB   = (memLimit          / (1024 ** 3)).toFixed(2);
-                const sysGB     = (systemMem.used    / (1024 ** 3)).toFixed(2);
-                const sysTGB    = (systemMem.total   / (1024 ** 3)).toFixed(2);
-                const sysFreeGB = (systemMem.free    / (1024 ** 3)).toFixed(2);
-                const botMB     = formatBytes(memUsage.rss);
-
-                // Label rata kanan dengan lebar tetap
-                const L = (s) => s.padEnd(8);
-
-                let text = `╭─『 🖥️ *RAM STATUS* 』\n`
-                        + `│\n`
-                        + `│ ${statusIcon} *${statusText}*  ⏱ uptime ${uptime}\n`
-                        + `│\n`
-                        + `│ 🤖 *${L('Bot')}* : ${botMB} / ${limitGB} GB\n`
-                        + `│    ${L('Usage')} : [${bar}] *${percentage}%*\n`
-                        + `│\n`
-                        + `│ 🖥️ *${L('System')}* : ${sysGB} / ${sysTGB} GB\n`
-                        + `│    ${L('Usage')}   : [${sysBar}] *${systemPercentage}%*\n`
-                        + `│    ${L('Free')}    : ${sysFreeGB} GB\n`
-                        + `│\n`
-                        + `│ 🔧 *${L('Heap')}* : ${heapUsedMB} / ${heapTotalMB} MB\n`
-                        + `│    *${L('Ext')}*  : ${extMB} MB\n`
-                        + `│\n`
-                        + `│ ⚡ *${L('CPU')}*  : ${loadAvg}\n`
-                        + `│    *${L('Core')}* : ${cpuCount}\n`
-                        + `│    *${L('PID')}*  : ${process.pid}\n`
-                        + `│    *${L('Node')}* : ${process.version}\n`
-                        + `│\n`
-                        + `╰─────────────────────`;
-
-                if (pct >= 80) text += `\n\n⚠️ *Warning:* Memory tinggi! Auto-restart aktif jika limit tercapai.`;
-
+                let text = `╭═══『 *RAM STATUS* 』═══╮\n│\n│ *Process Memory*\n│ ${formatBytes(memUsage.rss)} / ${formatBytes(memLimit)}\n│ Usage: ${percentage}%\n│\n│ *System Memory*\n│ ${formatBytes(systemMem.used)} / ${formatBytes(systemMem.total)}\n│ Usage: ${systemPercentage}%\n│\n╰═════════════════════╯`;
                 await tolak(hisoka, m, text);
                 logCommand(m, hisoka, 'cekram');
         } catch (error) {

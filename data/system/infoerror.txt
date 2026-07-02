@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 02/07/2026, 14.03.42  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 01/07/2026, 10.02.44  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  command:antitagsw
+│  #001  —  command:?
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  toggleAntiTagSW is not a function
+│  ENOENT: no such file or directory, open '/home/runner/workspace/SEMUA_FITUR/tools/waifu.cjs'
 │
 │  DETAIL
-│  Sumber      : command:antitagsw
+│  Sumber      : command:?
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 02/07/2026, 14.03.42
-│  Terakhir    : 02/07/2026, 14.03.42
+│  Pertama     : 01/07/2026, 10.02.44
+│  Terakhir    : 01/07/2026, 10.02.44
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  TypeError: toggleAntiTagSW is not a function
-│     at handleAntitagsw (file:///home/runner/workspace/SEMUA_FITUR/antitagsw/antitagsw.js:731:17)
-│     at default (file:///home/runner/workspace/message.js?t=1783000946283:1594:39)
+│  ▶  Error: ENOENT: no such file or directory, open '/home/runner/workspace/SEMUA_FITUR/tools/waifu.cjs'
+│     at Object.readFileSync (node:fs:448:20)
+│     at loadSource (node:internal/modules/cjs/loader:1548:17)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 02/07/2026, 14.03.42
+  Terakhir diperbarui: 01/07/2026, 10.02.44
 ════════════════════════════════════════════════════════════════════════

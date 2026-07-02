@@ -20,13 +20,9 @@
       "privateChat": true,
       "groupChat": true
     },
-    "updatedAt": 1782980099326,
+    "updatedAt": 1781970501384,
     "readchat": {
       "enabled": false
-    },
-    "autoOnline": {
-      "enabled": true,
-      "intervalSeconds": 30
     }
   }
 }

@@ -40,47 +40,5 @@
       }
     ],
     "processedAt": "2026-07-01T07:22:52.936Z"
-  },
-  "AC76035E4841AFAC70F48CAD311404E1": {
-    "id": "AC76035E4841AFAC70F48CAD311404E1",
-    "sender": "6283121471949@s.whatsapp.net",
-    "name": "gatot",
-    "type": "imageMessage",
-    "arrivedAt": "2026-07-02T07:28:54.147Z",
-    "read": true,
-    "reacted": true,
-    "emoji": "5️⃣➕3️⃣🟰8️⃣",
-    "resolve": "PN langsung ✓",
-    "source": "status",
-    "number": "6283121471949",
-    "resolvedPn": "6283121471949@s.whatsapp.net",
-    "messageKey": {
-      "remoteJid": "status@broadcast",
-      "remoteJidAlt": "6283121471949@s.whatsapp.net",
-      "fromMe": false,
-      "id": "AC76035E4841AFAC70F48CAD311404E1",
-      "participant": "127461811601572@lid",
-      "addressingMode": "lid"
-    },
-    "updatedAt": "2026-07-02T07:29:13.228Z",
-    "receiptKeys": [
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6283121471949@s.whatsapp.net",
-        "fromMe": false,
-        "id": "AC76035E4841AFAC70F48CAD311404E1",
-        "participant": "127461811601572@lid",
-        "addressingMode": "lid"
-      },
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6283121471949@s.whatsapp.net",
-        "fromMe": false,
-        "id": "AC76035E4841AFAC70F48CAD311404E1",
-        "participant": "6283121471949@s.whatsapp.net",
-        "addressingMode": "lid"
-      }
-    ],
-    "processedAt": "2026-07-02T07:29:13.228Z"
   }
 }

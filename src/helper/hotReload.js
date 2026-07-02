@@ -19,20 +19,15 @@
  * ───────────────────────────────
  *
  *  hotReload.js — Hot reload modul tanpa restart
- *  Auto-discover file baru di folder yang diawasi (SEMUA_FITUR,
- *  src/helper, src/db, src/config) — tidak perlu daftar manual lagi.
- *  Watch file perubahan, reload ESM dengan cache-busting,
- *  clear require.cache untuk CJS.
+ *  Watch file perubahan, reload ESM dengan cache-busting
  * ───────────────────────────────
  */
 /**
  * ═══════════════════════════════════════════════════════════════
  *  Hot Reload — Reload Modul Tanpa Restart Bot
- *  Pantau perubahan file scraper/handler SECARA OTOMATIS (recursive
- *  directory watch), reload otomatis dengan cache-busting ESM —
- *  memungkinkan update fitur tanpa perlu mematikan/menyalakan bot,
- *  DAN file baru yang ditambahkan ke folder yang diawasi otomatis
- *  ikut ter-watch tanpa perlu didaftarkan manual.
+ *  Pantau perubahan file scraper/handler, reload otomatis
+ *  dengan cache-busting ESM — memungkinkan update fitur
+ *  tanpa perlu mematikan dan menyalakan bot kembali.
  * ═══════════════════════════════════════════════════════════════
  */
 import fs from 'fs';
@@ -47,113 +42,201 @@ const ROOT = process.cwd();
 const DEBOUNCE_MS = 600;
 
 const _handlers = {};
+const _watchers = {};
 const _debounceTimers = {};
 const _reloadCallbacks = {};
-const _trackedFiles = new Set(); // rel path yang sudah dikenal (sudah pernah di-load/watch)
-const _rootWatchers = {};
 
-// ── File tunggal di luar WATCH_ROOTS (root project) ──────────────
-const EXTRA_ESM_FILES = [
-    { key: 'message', rel: 'message.js' },
+// type: 'esm' → reload via ESM import() cache-busting (default)
+// type: 'cjs' → reload via require.cache deletion (untuk file .cjs yang di-require() lazy di message.js)
+// SKIP top-level CJS (diload saat startup, butuh restart): wm, cekauto-cmd, interactive-msg,
+//   media-helper, log-cmd, jadibot-cmd, alqolam-helpers, wily-helpers, autosimi-cmd,
+//   musikai-cmd, musikai2-cmd, alqanime-cmd, cosplay-cmd, komiktap-cmd, setbrowser-cmd, play-cmd
+const WATCHED_FILES = [
+    // ── Handler ESM ──────────────────────────────
+    { key: 'message',      rel: 'message.js' },
+    { key: 'antidelete',   rel: 'SEMUA_FITUR/antidel/antidelete.js' },
+    { key: 'antitagsw',    rel: 'SEMUA_FITUR/antitagsw/antitagsw.js' },
+    { key: 'antilink',     rel: 'SEMUA_FITUR/antilink/antilink.js' },
+    { key: 'antitagbot',   rel: 'SEMUA_FITUR/antitag/antitag.js' },
+    { key: 'event',        rel: 'SEMUA_FITUR/event/event.js' },
+    { key: 'featureEmoji', rel: 'SEMUA_FITUR/helper/emoji.js' },
+
+    // ── Helper ESM (aman di-reload) ───────────────
+    { key: 'utils',        rel: 'src/helper/utils.js' },
+    { key: 'inject',       rel: 'src/helper/inject.js' },
+    { key: 'text',         rel: 'src/helper/text.js' },
+    { key: 'emoji',        rel: 'src/helper/emoji.js' },
+    { key: 'telegram',     rel: 'src/helper/telegram.js' },
+    { key: 'phoneRegion',  rel: 'src/helper/phoneRegion.js' },
+    { key: 'voCache',      rel: 'src/helper/voCache.js' },
+    { key: 'cleaner',      rel: 'src/helper/cleaner.js' },
+    { key: 'helperIndex',  rel: 'src/helper/index.js' },
+    { key: 'socketCompat', rel: 'src/helper/socketCompat.js' },
+    { key: 'aiTools',      rel: 'src/helper/aiTools.js' },
+    { key: 'aiPrompt',     rel: 'src/helper/aiPrompt.js' },
+    { key: 'aiReact',      rel: 'src/helper/aiReact.js' },
+    { key: 'jadibotSettings', rel: 'src/helper/jadibotSettings.js' },
+    { key: 'swtrack',      rel: 'src/helper/swtrack.js' },
+    { key: 'aiPromptFb',   rel: 'src/helper/AiPromptFb.js' },
+    { key: 'aiPromptIg',   rel: 'src/helper/AiPromptIg.js' },
+    { key: 'aiStickerStory', rel: 'src/helper/aiStickerStory.js' },
+    { key: 'gemini',       rel: 'src/helper/gemini.js' },
+    { key: 'imageSearch',  rel: 'src/helper/imageSearch.js' },
+    { key: 'stickerMap',   rel: 'src/helper/stickerMap.js' },
+    { key: 'stickerMemory', rel: 'src/helper/stickerMemory.js' },
+    { key: 'userMemory',   rel: 'src/helper/userMemory.js' },
+    { key: 'zipParser',    rel: 'src/helper/zipParser.js' },
+
+    // ── Database ESM ─────────────────────────────
+    { key: 'botStats',     rel: 'src/db/botStats.js' },
+    { key: 'jsondb',       rel: 'src/db/json.js' },
+    { key: 'datadb',       rel: 'src/db/datadb.js' },
+    { key: 'errorLog',     rel: 'src/db/errorLog.js' },
+    { key: 'userDb',       rel: 'src/db/userDb.js' },
+
+    // ── Menu builders ESM ────────────────────────
+    { key: 'menuUtama',    rel: 'SEMUA_FITUR/menu/menu_utama.js' },
+    { key: 'menuJadibot',  rel: 'SEMUA_FITUR/menu/menu_jadibot.js' },
+
+    // ── CJS lazy-loaded (cache clear on change) ──
+    // Info / utilities
+    { key: 'cjs:info',         rel: 'SEMUA_FITUR/info/info.cjs',           type: 'cjs' },
+    { key: 'cjs:emojiCmd',     rel: 'SEMUA_FITUR/info/emoji-cmd.cjs',      type: 'cjs' },
+    { key: 'cjs:delCmd',       rel: 'SEMUA_FITUR/info/del-cmd.cjs',        type: 'cjs' },
+    { key: 'cjs:delbotCmd',    rel: 'SEMUA_FITUR/info/delbot-cmd.cjs',     type: 'cjs' },
+    { key: 'cjs:memoryCmd',    rel: 'SEMUA_FITUR/info/memory-cmd.cjs',     type: 'cjs' },
+    { key: 'cjs:memori',       rel: 'SEMUA_FITUR/info/memori.cjs',         type: 'cjs' },
+    { key: 'cjs:quoted',       rel: 'SEMUA_FITUR/info/quoted.cjs',         type: 'cjs' },
+    { key: 'cjs:quotedCmd',    rel: 'SEMUA_FITUR/info/quoted-cmd.cjs',     type: 'cjs' },
+    { key: 'cjs:ping',         rel: 'SEMUA_FITUR/info/ping.cjs',           type: 'cjs' },
+    { key: 'cjs:speedtest',    rel: 'SEMUA_FITUR/info/speedtest.cjs',      type: 'cjs' },
+    { key: 'cjs:ceksize',      rel: 'SEMUA_FITUR/info/ceksize.cjs',        type: 'cjs' },
+    { key: 'cjs:evalCmd',      rel: 'SEMUA_FITUR/info/eval-cmd.cjs',       type: 'cjs' },
+    { key: 'cjs:matiCmd',      rel: 'SEMUA_FITUR/info/mati-cmd.cjs',       type: 'cjs' },
+    { key: 'cjs:cekjidgc',     rel: 'SEMUA_FITUR/info/cekjidgc.cjs',      type: 'cjs' },
+    { key: 'cjs:cekjidgcall',  rel: 'SEMUA_FITUR/info/cekjidgcall.cjs',   type: 'cjs' },
+    // Group
+    { key: 'cjs:hidetag',      rel: 'SEMUA_FITUR/group/hidetag.cjs',       type: 'cjs' },
+    { key: 'cjs:sematkan',     rel: 'SEMUA_FITUR/group/sematkan.cjs',      type: 'cjs' },
+    { key: 'cjs:jpm',          rel: 'SEMUA_FITUR/group/jpm.cjs',           type: 'cjs' },
+    { key: 'cjs:pushkontakgc', rel: 'SEMUA_FITUR/group/pushkontakgc.cjs', type: 'cjs' },
+    { key: 'cjs:ghosttag',     rel: 'SEMUA_FITUR/group/ghosttag.cjs',      type: 'cjs' },
+    { key: 'cjs:sendstatus',   rel: 'SEMUA_FITUR/group/sendstatus.cjs',    type: 'cjs' },
+    { key: 'cjs:setgoodbye',   rel: 'SEMUA_FITUR/group/setgoodbye.cjs',    type: 'cjs' },
+    { key: 'cjs:upswgc',       rel: 'SEMUA_FITUR/group/upswgc.cjs',        type: 'cjs' },
+    { key: 'cjs:upswgcv2',     rel: 'SEMUA_FITUR/group/upswgcv2.cjs',      type: 'cjs' },
+    // Jadibot
+    { key: 'cjs:clearsesi',    rel: 'SEMUA_FITUR/jadibot/clearsesi.cjs',   type: 'cjs' },
+    { key: 'cjs:ceksesi',      rel: 'SEMUA_FITUR/jadibot/ceksesi.cjs',     type: 'cjs' },
+    { key: 'cjs:credsjson',    rel: 'SEMUA_FITUR/jadibot/credsjson.cjs',   type: 'cjs' },
+    { key: 'cjs:listbotCmd',   rel: 'SEMUA_FITUR/jadibot/listbot-cmd.cjs', type: 'cjs' },
+    // Setting
+    { key: 'cjs:anticall',     rel: 'SEMUA_FITUR/setting/anticall.cjs',    type: 'cjs' },
+    { key: 'cjs:aturbrowser',  rel: 'SEMUA_FITUR/setting/aturbrowser.cjs', type: 'cjs' },
+    { key: 'cjs:autosholat',   rel: 'SEMUA_FITUR/setting/autosholat.cjs',  type: 'cjs' },
+    { key: 'cjs:autotyprec',   rel: 'SEMUA_FITUR/setting/autotyprec.cjs',  type: 'cjs' },
+    { key: 'cjs:botadminCmd',  rel: 'SEMUA_FITUR/setting/botadmin-cmd.cjs',type: 'cjs' },
+    { key: 'cjs:cekerrorCmd',  rel: 'SEMUA_FITUR/setting/cekerror-cmd.cjs',type: 'cjs' },
+    { key: 'cjs:ceksetting',   rel: 'SEMUA_FITUR/setting/ceksetting.cjs',  type: 'cjs' },
+    { key: 'cjs:ceksw',        rel: 'SEMUA_FITUR/setting/ceksw.cjs',       type: 'cjs' },
+    { key: 'cjs:online',       rel: 'SEMUA_FITUR/setting/online.cjs',      type: 'cjs' },
+    { key: 'cjs:readchat',     rel: 'SEMUA_FITUR/setting/readchat.cjs',    type: 'cjs' },
+    { key: 'cjs:setlogsw',     rel: 'SEMUA_FITUR/setting/setlogsw.cjs',    type: 'cjs' },
+    // System
+    { key: 'cjs:shutdown',     rel: 'SEMUA_FITUR/system/shutdown.cjs',     type: 'cjs' },
+    { key: 'cjs:autocleaner',  rel: 'SEMUA_FITUR/system/autocleaner.cjs',  type: 'cjs' },
+    { key: 'cjs:backup',       rel: 'SEMUA_FITUR/system/backup.cjs',       type: 'cjs' },
+    { key: 'cjs:sessionclnr',  rel: 'SEMUA_FITUR/system/sessioncleaner.cjs',type:'cjs' },
+    { key: 'cjs:welcomeCard',  rel: 'SEMUA_FITUR/system/welcomeCard.cjs',  type: 'cjs' },
+    // Menu
+    { key: 'cjs:menuCmd',      rel: 'SEMUA_FITUR/menu/menu-cmd.cjs',       type: 'cjs' },
+    { key: 'cjs:menupages',    rel: 'SEMUA_FITUR/menu/menupages.cjs',      type: 'cjs' },
+    { key: 'cjs:menuPages2',   rel: 'SEMUA_FITUR/menu/menu-pages2.cjs',    type: 'cjs' },
+    // Media
+    { key: 'cjs:stickerCmd',   rel: 'SEMUA_FITUR/media/sticker-cmd.cjs',   type: 'cjs' },
+    { key: 'cjs:toImgCmd',     rel: 'SEMUA_FITUR/media/toimg-cmd.cjs',     type: 'cjs' },
+    { key: 'cjs:getsw',        rel: 'SEMUA_FITUR/media/getsw.cjs',         type: 'cjs' },
+    { key: 'cjs:audioconvert', rel: 'SEMUA_FITUR/media/audioconvert.cjs',  type: 'cjs' },
+    { key: 'cjs:viewonce',     rel: 'SEMUA_FITUR/media/viewonce.cjs',      type: 'cjs' },
+    // Download
+    { key: 'cjs:downloader',   rel: 'SEMUA_FITUR/download/downloader.cjs', type: 'cjs' },
+    { key: 'cjs:hdvid',        rel: 'SEMUA_FITUR/download/hdvid.cjs',      type: 'cjs' },
+    { key: 'cjs:stickerly',    rel: 'SEMUA_FITUR/download/stickerly.cjs',  type: 'cjs' },
+    { key: 'cjs:allunduh',     rel: 'SEMUA_FITUR/download/allunduh.cjs',   type: 'cjs' },
+    { key: 'cjs:facebookDl',   rel: 'SEMUA_FITUR/download/facebook-dl.cjs',type: 'cjs' },
+    { key: 'cjs:instagramDl',  rel: 'SEMUA_FITUR/download/instagram-dl.cjs',type:'cjs' },
+    { key: 'cjs:tiktokDl',     rel: 'SEMUA_FITUR/download/tiktok-dl.cjs', type: 'cjs' },
+    { key: 'cjs:twitterDl',    rel: 'SEMUA_FITUR/download/twitter-dl.cjs', type: 'cjs' },
+    { key: 'cjs:youtubeDl',    rel: 'SEMUA_FITUR/download/youtube-dl.cjs', type: 'cjs' },
+    // Music
+    { key: 'cjs:genius',       rel: 'SEMUA_FITUR/music/genius.cjs',        type: 'cjs' },
+    { key: 'cjs:infomusik',    rel: 'SEMUA_FITUR/music/infomusik.cjs',     type: 'cjs' },
+    { key: 'cjs:whatsmusik',   rel: 'SEMUA_FITUR/music/whatsmusik.cjs',    type: 'cjs' },
+    { key: 'cjs:chatmusic',    rel: 'SEMUA_FITUR/music/chatmusic.cjs',     type: 'cjs' },
+    { key: 'cjs:chatmusic2',   rel: 'SEMUA_FITUR/music/chatmusic2.cjs',    type: 'cjs' },
+    { key: 'cjs:whatgenre',    rel: 'SEMUA_FITUR/music/whatgenre.cjs',     type: 'cjs' },
+    // Anime
+    { key: 'cjs:alqanime',     rel: 'SEMUA_FITUR/anime/alqanime.cjs',      type: 'cjs' },
+    { key: 'cjs:alqanimeDl',   rel: 'SEMUA_FITUR/anime/alqanime-dl.cjs',   type: 'cjs' },
+    { key: 'cjs:alqanimeMonitor',rel:'SEMUA_FITUR/anime/alqanime-monitor.cjs',type:'cjs'},
+    { key: 'cjs:animasu',      rel: 'SEMUA_FITUR/anime/animasu.cjs',       type: 'cjs' },
+    { key: 'cjs:bluearchive',  rel: 'SEMUA_FITUR/anime/bluearchive.cjs',   type: 'cjs' },
+    { key: 'cjs:cosplaytele',  rel: 'SEMUA_FITUR/anime/cosplaytele.cjs',   type: 'cjs' },
+    { key: 'cjs:infowibu',     rel: 'SEMUA_FITUR/anime/infowibu.cjs',      type: 'cjs' },
+    { key: 'cjs:komiktap',     rel: 'SEMUA_FITUR/anime/komiktap.cjs',      type: 'cjs' },
+    { key: 'cjs:kusonime',     rel: 'SEMUA_FITUR/anime/kusonime.cjs',      type: 'cjs' },
+    { key: 'cjs:kusonimePdf',  rel: 'SEMUA_FITUR/anime/kusonime-pdf.cjs',  type: 'cjs' },
+    { key: 'cjs:tenorGif',     rel: 'SEMUA_FITUR/anime/tenor-gif.cjs',     type: 'cjs' },
+    { key: 'cjs:nhentai',      rel: 'SEMUA_FITUR/anime/nhentai.cjs',       type: 'cjs' },
+    { key: 'cjs:pixiv',        rel: 'SEMUA_FITUR/anime/pixiv.cjs',         type: 'cjs' },
+    { key: 'cjs:pixivr18',     rel: 'SEMUA_FITUR/anime/pixivr18.cjs',      type: 'cjs' },
+    // AI
+    { key: 'cjs:imageEdit',    rel: 'SEMUA_FITUR/ai/imageEdit.cjs',        type: 'cjs' },
+    { key: 'cjs:wilycmd',      rel: 'SEMUA_FITUR/ai/wilycmd.cjs',          type: 'cjs' },
+    { key: 'cjs:geminiAi',     rel: 'SEMUA_FITUR/ai/gemini.cjs',           type: 'cjs' },
+    { key: 'cjs:gemmyGemini',  rel: 'SEMUA_FITUR/ai/gemmyGemini.cjs',     type: 'cjs' },
+    { key: 'cjs:iloveimg',     rel: 'SEMUA_FITUR/ai/iloveimg.cjs',         type: 'cjs' },
+    { key: 'cjs:sparkpix',     rel: 'SEMUA_FITUR/ai/sparkpix.cjs',         type: 'cjs' },
+    // Tools
+    { key: 'cjs:cuaca',        rel: 'SEMUA_FITUR/tools/cuaca.cjs',         type: 'cjs' },
+    { key: 'cjs:tempmail',     rel: 'SEMUA_FITUR/tools/tempmail.cjs',      type: 'cjs' },
+    { key: 'cjs:tmail',        rel: 'SEMUA_FITUR/tools/tmail.cjs',         type: 'cjs' },
+    { key: 'cjs:cekhp',        rel: 'SEMUA_FITUR/tools/cekhp.cjs',         type: 'cjs' },
+    { key: 'cjs:bandingkanhp', rel: 'SEMUA_FITUR/tools/bandingkanhp.cjs',  type: 'cjs' },
+    { key: 'cjs:an1game',      rel: 'SEMUA_FITUR/tools/an1game.cjs',       type: 'cjs' },
+    { key: 'cjs:screenshot',   rel: 'SEMUA_FITUR/tools/screenshot.cjs',    type: 'cjs' },
+    { key: 'cjs:telegramTools',rel: 'SEMUA_FITUR/tools/telegram.cjs',      type: 'cjs' },
+    { key: 'cjs:wilyai',       rel: 'SEMUA_FITUR/tools/wilyai.cjs',        type: 'cjs' },
+    { key: 'cjs:flamingtext',  rel: 'SEMUA_FITUR/tools/flamingtext.cjs',   type: 'cjs' },
+    { key: 'cjs:fontgenerator',rel: 'SEMUA_FITUR/tools/fontgenerator.cjs', type: 'cjs' },
+    { key: 'cjs:fontuntik',    rel: 'SEMUA_FITUR/tools/fontuntik.cjs',     type: 'cjs' },
+    { key: 'cjs:waifu',        rel: 'SEMUA_FITUR/anime/waifu.cjs',         type: 'cjs' },
+    // News
+    { key: 'cjs:malnews',      rel: 'SEMUA_FITUR/news/malnews.cjs',        type: 'cjs' },
+    { key: 'cjs:tvonenews',    rel: 'SEMUA_FITUR/news/tvonenews.cjs',      type: 'cjs' },
+    // Reaction / Read
+    { key: 'cjs:reactapi',     rel: 'SEMUA_FITUR/reactionsw/reactapi.cjs', type: 'cjs' },
+    { key: 'cjs:readsw',       rel: 'SEMUA_FITUR/readsw/readsw.cjs',       type: 'cjs' },
+
+    // ── Config CJS (dependency file, bukan handler) ──────────────────────────
+    { key: 'cjs:logswColors', rel: 'src/config/logsw-colors.cjs', type: 'cjs' },
+
+    // ── SKIP ESM (memegang state/timer aktif) ────
+    // crashGuard.js    → handle signal proses, berbahaya
+    // hotReload.js     → dirinya sendiri
+    // memoryMonitor.js → timer RAM aktif
+    // jadibot.js       → sesi aktif user lain
+    // authState.js     → pegang creds/session WA di memory
+    // browserSwitch.js → manage koneksi socket aktif
+    // aiHistory.js     → punya _writeLock promise, bahaya direload saat menulis
+    // pm2Metrics.js    → punya _timer setInterval aktif + process.send() IPC
+
+    // ── SKIP CJS top-level (diload saat startup, butuh restart) ─
+    // wm.cjs, cekauto-cmd.cjs, interactive-msg.cjs, media-helper.cjs,
+    // log-cmd.cjs, jadibot-cmd.cjs, alqolam-helpers.cjs, wily-helpers.cjs,
+    // autosimi-cmd.cjs, musikai-cmd.cjs, musikai2-cmd.cjs, alqanime-cmd.cjs,
+    // cosplay-cmd.cjs, komiktap-cmd.cjs, setbrowser-cmd.cjs, play-cmd.cjs
 ];
-
-// ── Folder yang otomatis di-scan + di-watch (recursive) ──────────
-// Semua file .js (ESM) & .cjs (CJS) di dalam folder ini otomatis
-// terdaftar tanpa perlu ditambahkan manual satu-satu.
-const WATCH_ROOTS = ['SEMUA_FITUR', 'src/helper', 'src/db', 'src/config'];
-
-// ── Key override, supaya key lama (dipakai getHandler() di tempat
-//    lain) tetap konsisten walau sistemnya sekarang auto-discovery.
-const KEY_OVERRIDES = {
-    'SEMUA_FITUR/antidel/antidelete.js': 'antidelete',
-    'SEMUA_FITUR/antitagsw/antitagsw.js': 'antitagsw',
-    'SEMUA_FITUR/antilink/antilink.js': 'antilink',
-    'SEMUA_FITUR/antitag/antitag.js': 'antitagbot',
-    'SEMUA_FITUR/event/event.js': 'event',
-    'SEMUA_FITUR/helper/emoji.js': 'featureEmoji',
-    'SEMUA_FITUR/menu/menu_utama.js': 'menuUtama',
-    'SEMUA_FITUR/menu/menu_jadibot.js': 'menuJadibot',
-    'src/helper/index.js': 'helperIndex',
-    'src/helper/AiPromptFb.js': 'aiPromptFb',
-    'src/helper/AiPromptIg.js': 'aiPromptIg',
-};
-
-// ── SKIP — file yang TIDAK BOLEH di-hot-reload sama sekali ───────
-// ESM yang memegang state/timer/koneksi aktif → reload bisa bikin
-// state ganda / socket ganda / crash:
-//   crashGuard.js    → handle signal proses, berbahaya
-//   hotReload.js     → dirinya sendiri
-//   memoryMonitor.js → timer RAM aktif
-//   jadibot.js       → sesi aktif user lain
-//   authState.js     → pegang creds/session WA di memory
-//   browserSwitch.js → manage koneksi socket aktif
-//   aiHistory.js     → punya _writeLock promise, bahaya direload saat menulis
-// CJS top-level yang di-load saat startup (butuh restart bot):
-//   wm, cekauto-cmd, interactive-msg, media-helper, log-cmd, jadibot-cmd,
-//   alqolam-helpers, wily-helpers, autosimi-cmd, musikai-cmd, musikai2-cmd,
-//   alqanime-cmd, cosplay-cmd, komiktap-cmd, setbrowser-cmd, play-cmd
-const EXCLUDED_FILES = new Set([
-    'src/helper/crashGuard.js',
-    'src/helper/hotReload.js',
-    'src/helper/memoryMonitor.js',
-    'src/helper/jadibot.js',
-    'src/helper/authState.js',
-    'src/helper/browserSwitch.js',
-    'src/db/aiHistory.js',
-
-    'SEMUA_FITUR/media/wm.cjs',
-    'SEMUA_FITUR/setting/cekauto-cmd.cjs',
-    'SEMUA_FITUR/helper/interactive-msg.cjs',
-    'SEMUA_FITUR/helper/media-helper.cjs',
-    'SEMUA_FITUR/helper/log-cmd.cjs',
-    'SEMUA_FITUR/jadibot/jadibot-cmd.cjs',
-    'SEMUA_FITUR/anime/alqolam-helpers.cjs',
-    'SEMUA_FITUR/ai/wily-helpers.cjs',
-    'SEMUA_FITUR/ai/autosimi-cmd.cjs',
-    'SEMUA_FITUR/music/musikai-cmd.cjs',
-    'SEMUA_FITUR/music/musikai2-cmd.cjs',
-    'SEMUA_FITUR/music/play-cmd.cjs',
-    'SEMUA_FITUR/anime/alqanime-cmd.cjs',
-    'SEMUA_FITUR/anime/cosplay-cmd.cjs',
-    'SEMUA_FITUR/anime/komiktap-cmd.cjs',
-    'SEMUA_FITUR/setting/setbrowser-cmd.cjs',
-]);
-
-const WATCHABLE_EXT = new Set(['.js', '.cjs']);
-
-function toRel(abs) {
-    return path.relative(ROOT, abs).split(path.sep).join('/');
-}
-
-function typeOf(rel) {
-    return rel.endsWith('.cjs') ? 'cjs' : 'esm';
-}
-
-function deriveKey(rel, type) {
-    if (KEY_OVERRIDES[rel]) return KEY_OVERRIDES[rel];
-    return (type === 'cjs' ? 'cjs:' : 'auto:') + rel;
-}
-
-// Scan 1 folder secara rekursif, kembalikan semua rel path file
-// yang bisa diwatch (sudah dikurangi file yang di-exclude).
-function scanDir(dir, out = []) {
-    const abs = path.join(ROOT, dir);
-    if (!fs.existsSync(abs)) return out;
-
-    for (const entry of fs.readdirSync(abs, { withFileTypes: true })) {
-        const entryAbs = path.join(abs, entry.name);
-        const entryRel = toRel(entryAbs);
-
-        if (entry.isDirectory()) {
-            if (entry.name.startsWith('.') || entry.name === 'node_modules') continue;
-            scanDir(entryRel, out);
-        } else if (entry.isFile() && WATCHABLE_EXT.has(path.extname(entry.name))) {
-            if (EXCLUDED_FILES.has(entryRel)) continue;
-            out.push(entryRel);
-        }
-    }
-    return out;
-}
 
 async function loadModule(rel) {
     const abs = path.join(ROOT, rel);
@@ -180,110 +263,55 @@ function clearCjsCache(abs) {
     }
 }
 
-async function runCallback(key, rel) {
-    if (typeof _reloadCallbacks[key] === 'function') {
-        try {
-            await _reloadCallbacks[key](rel);
-        } catch (cbErr) {
-            console.error(`\x1b[31m[HotReload] Callback error for '${key}':\x1b[39m`, cbErr.message);
-        }
-    }
-}
-
-// Proses 1 file yang berubah/baru terdeteksi (dipakai oleh watcher
-// recursive folder maupun watcher file tunggal message.js).
-async function handleFileEvent(rel) {
-    if (EXCLUDED_FILES.has(rel)) return;
-    if (!WATCHABLE_EXT.has(path.extname(rel))) return;
-
+function watchFile(rel, key, type = 'esm') {
     const abs = path.join(ROOT, rel);
-    const type = typeOf(rel);
-    const key = deriveKey(rel, type);
-    const isNew = !_trackedFiles.has(rel);
 
-    if (!fs.existsSync(abs)) {
-        // File dihapus/di-rename keluar
-        if (isNew) return; // bukan file yang pernah dikenal, abaikan
-        _trackedFiles.delete(rel);
-        if (type === 'cjs') clearCjsCache(abs);
-        else delete _handlers[key];
-        console.log(`\x1b[33m[HotReload] File dihapus, dilepas dari watch: ${rel}\x1b[39m`);
-        return;
-    }
-
-    _trackedFiles.add(rel);
-
-    if (type === 'cjs') {
-        const cleared = clearCjsCache(abs);
-        if (isNew) {
-            console.log(`\x1b[36m[HotReload] File baru terdeteksi (CJS, auto-watched): ${rel}\x1b[39m`);
-        } else {
-            console.log(`\x1b[36m[HotReload] Perubahan terdeteksi: ${rel}\x1b[39m`);
-            if (cleared) {
-                console.log(`\x1b[32m[HotReload] ✓ CJS cache cleared: ${rel} — efektif di pemanggilan berikutnya!\x1b[39m`);
-            } else {
-                console.log(`\x1b[32m[HotReload] ✓ CJS watch aktif: ${rel}\x1b[39m`);
-            }
-        }
-        await runCallback(key, rel);
-    } else {
-        if (!isNew) console.log(`\x1b[36m[HotReload] Perubahan terdeteksi: ${rel}\x1b[39m`);
-        const mod = await loadModule(rel);
-        if (mod !== null) {
-            _handlers[key] = mod;
-            if (isNew) {
-                console.log(`\x1b[36m[HotReload] File baru terdeteksi (ESM, auto-watched): ${rel}\x1b[39m`);
-            } else {
-                console.log(`\x1b[32m[HotReload] ✓ '${rel}' berhasil di-reload tanpa restart bot!\x1b[39m`);
-            }
-            await runCallback(key, rel);
-        } else if (!isNew) {
-            console.error(`\x1b[31m[HotReload] ✗ Gagal reload '${rel}', pakai versi lama.\x1b[39m`);
-        }
-    }
-}
-
-function debouncedHandle(rel) {
-    clearTimeout(_debounceTimers[rel]);
-    _debounceTimers[rel] = setTimeout(() => {
-        handleFileEvent(rel).catch((err) => {
-            console.error(`\x1b[31m[HotReload] Error handling '${rel}':\x1b[39m`, err.message);
-        });
-    }, DEBOUNCE_MS);
-}
-
-// Watch 1 folder root secara recursive — meng-cover SEMUA file di
-// dalamnya termasuk file baru yang belum pernah ada saat startup.
-function watchRoot(rootRel) {
-    const abs = path.join(ROOT, rootRel);
-    if (!fs.existsSync(abs)) return;
-
-    if (_rootWatchers[rootRel]) {
-        try { _rootWatchers[rootRel].close(); } catch {}
+    if (_watchers[key]) {
+        try { _watchers[key].close(); } catch {}
     }
 
     try {
-        _rootWatchers[rootRel] = fs.watch(abs, { recursive: true, persistent: true }, (event, filename) => {
-            if (!filename) return;
-            const rel = toRel(path.join(abs, filename));
-            if (!WATCHABLE_EXT.has(path.extname(rel))) return;
-            debouncedHandle(rel);
-        });
-        return true;
-    } catch (err) {
-        console.error(`\x1b[31m[HotReload] Gagal watch folder '${rootRel}' (recursive):\x1b[39m`, err.message);
-        return false;
-    }
-}
-
-function watchSingleFile(rel) {
-    const abs = path.join(ROOT, rel);
-    if (!fs.existsSync(abs)) return;
-
-    try {
-        fs.watch(abs, { persistent: false }, (event) => {
+        _watchers[key] = fs.watch(abs, { persistent: false }, (event) => {
             if (event !== 'change' && event !== 'rename') return;
-            debouncedHandle(rel);
+
+            clearTimeout(_debounceTimers[key]);
+            _debounceTimers[key] = setTimeout(async () => {
+                console.log(`\x1b[36m[HotReload] Perubahan ter: ${rel}\x1b[39m`);
+
+                if (type === 'cjs') {
+                    // CJS: cukup hapus dari require.cache → _require() berikutnya load fresh
+                    const cleared = clearCjsCache(abs);
+                    if (cleared) {
+                        console.log(`\x1b[32m[HotReload] ✓ CJS cache cleared: ${rel} — efektif di pemanggilan berikutnya!\x1b[39m`);
+                    } else {
+                        // File belum pernah di-require, tidak masalah
+                        console.log(`\x1b[32m[HotReload] ✓ CJS watch aktif: ${rel}\x1b[39m`);
+                    }
+                    if (typeof _reloadCallbacks[key] === 'function') {
+                        try { await _reloadCallbacks[key](rel); } catch (cbErr) {
+                            console.error(`\x1b[31m[HotReload] Callback error for '${key}':\x1b[39m`, cbErr.message);
+                        }
+                    }
+                } else {
+                    // ESM: reload dengan cache-busting URL
+                    const mod = await loadModule(rel);
+                    if (mod !== null) {
+                        _handlers[key] = mod;
+                        console.log(`\x1b[32m[HotReload] ✓ '${rel}' berhasil di-reload tanpa restart bot!\x1b[39m`);
+                        if (typeof _reloadCallbacks[key] === 'function') {
+                            try { await _reloadCallbacks[key](rel); } catch (cbErr) {
+                                console.error(`\x1b[31m[HotReload] Callback error for '${key}':\x1b[39m`, cbErr.message);
+                            }
+                        }
+                    } else {
+                        console.error(`\x1b[31m[HotReload] ✗ Gagal reload '${rel}', pakai versi lama.\x1b[39m`);
+                    }
+                }
+
+                if (event === 'rename') {
+                    watchFile(rel, key, type);
+                }
+            }, DEBOUNCE_MS);
         });
     } catch (err) {
         console.error(`\x1b[31m[HotReload] Tidak bisa watch '${rel}':\x1b[39m`, err.message);
@@ -291,65 +319,38 @@ function watchSingleFile(rel) {
 }
 
 export async function initHotReload() {
-    let okEsm = 0;
-    let okCjs = 0;
+    let ok = 0;
     let fail = 0;
     const failed = [];
 
-    // 1) File tunggal di root project (message.js, dst)
-    for (const { key, rel } of EXTRA_ESM_FILES) {
+    let okCjs = 0;
+    for (const { key, rel, type = 'esm' } of WATCHED_FILES) {
         const abs = path.join(ROOT, rel);
-        if (!fs.existsSync(abs)) continue;
-        const mod = await loadModule(rel);
-        if (mod !== null) {
-            _handlers[key] = mod;
-            _trackedFiles.add(rel);
-            watchSingleFile(rel);
-            okEsm++;
-        } else {
-            failed.push(rel);
-            fail++;
-        }
-    }
-
-    // 2) Auto-discover semua file di WATCH_ROOTS
-    const discovered = [];
-    for (const root of WATCH_ROOTS) discovered.push(...scanDir(root));
-
-    for (const rel of discovered) {
-        const type = typeOf(rel);
-        const key = deriveKey(rel, type);
-
         if (type === 'cjs') {
-            // CJS: lazy — tidak perlu load sekarang, cukup ditandai known
-            // supaya nanti kalau berubah, cache-nya bisa dibersihkan.
-            _trackedFiles.add(rel);
-            okCjs++;
+            // CJS: tidak perlu load sekarang — cukup pasang watcher untuk clear cache saat berubah
+            if (fs.existsSync(abs)) {
+                watchFile(rel, key, 'cjs');
+                okCjs++;
+            }
+            // File tidak ada → skip diam-diam (mungkin fitur opsional)
             continue;
         }
-
+        // ESM: load sekarang + watch
         const mod = await loadModule(rel);
         if (mod !== null) {
             _handlers[key] = mod;
-            _trackedFiles.add(rel);
-            okEsm++;
+            watchFile(rel, key, 'esm');
+            ok++;
         } else {
             failed.push(rel);
             fail++;
         }
-    }
-
-    // 3) Pasang 1 recursive watcher per folder root — otomatis
-    //    mendeteksi file baru + perubahan file lama, real-time.
-    let watchedRoots = 0;
-    for (const root of WATCH_ROOTS) {
-        if (watchRoot(root)) watchedRoots++;
     }
 
     if (fail === 0) {
-        console.log(`\x1b[32m→ Reload   :\x1b[39m ${okEsm} ESM aktif, ${okCjs} CJS watched, ${watchedRoots} folder auto-scan`);
+        console.log(`\x1b[32m→ Reload   :\x1b[39m ${ok} ESM aktif, ${okCjs} CJS watched`);
     } else {
-        console.log(`\x1b[33m→ Reload   :\x1b[39m ${okEsm} ESM aktif, ${okCjs} CJS watched, ${watchedRoots} folder auto-scan, ${fail} gagal (${failed.join(', ')})`);
+        console.log(`\x1b[33m→ Reload   :\x1b[39m ${ok} ESM aktif, ${okCjs} CJS watched, ${fail} gagal (${failed.join(', ')})`);
     }
 }
 
@@ -362,38 +363,13 @@ export function onReload(key, callback) {
 }
 
 export function stopHotReload() {
-    for (const key of Object.keys(_rootWatchers)) {
-        try { _rootWatchers[key].close(); } catch {}
-        delete _rootWatchers[key];
+    for (const key of Object.keys(_watchers)) {
+        try { _watchers[key].close(); } catch {}
+        delete _watchers[key];
     }
     for (const key of Object.keys(_debounceTimers)) {
         clearTimeout(_debounceTimers[key]);
         delete _debounceTimers[key];
     }
     console.log('\x1b[33m[HotReload] Semua watcher dihentikan.\x1b[39m');
-}
-
-export function getWatchedFiles() {
-    return Array.from(_trackedFiles);
-}
-
-export function getReloadStats() {
-    const files = Array.from(_trackedFiles);
-    let esmCount = 0;
-    let cjsCount = 0;
-
-    for (const rel of files) {
-        if (typeOf(rel) === 'cjs') cjsCount++;
-        else esmCount++;
-    }
-
-    const activeRoots = WATCH_ROOTS.filter((root) => fs.existsSync(path.join(ROOT, root)));
-
-    return {
-        total: files.length,
-        esmCount,
-        cjsCount,
-        roots: activeRoots,
-        excludedCount: EXCLUDED_FILES.size,
-    };
 }

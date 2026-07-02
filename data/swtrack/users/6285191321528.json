@@ -40,47 +40,5 @@
       }
     ],
     "processedAt": "2026-07-01T09:15:52.250Z"
-  },
-  "AC78F8153B4B51B8D669EA3B0A71D76E": {
-    "id": "AC78F8153B4B51B8D669EA3B0A71D76E",
-    "sender": "6285191321528@s.whatsapp.net",
-    "name": "#safiraaaqqy💫",
-    "type": "videoMessage",
-    "arrivedAt": "2026-07-02T03:38:30.628Z",
-    "read": true,
-    "reacted": true,
-    "emoji": "🎭",
-    "resolve": "PN langsung ✓",
-    "source": "status",
-    "number": "6285191321528",
-    "resolvedPn": "6285191321528@s.whatsapp.net",
-    "messageKey": {
-      "remoteJid": "status@broadcast",
-      "remoteJidAlt": "6285191321528@s.whatsapp.net",
-      "fromMe": false,
-      "id": "AC78F8153B4B51B8D669EA3B0A71D76E",
-      "participant": "175054948139200@lid",
-      "addressingMode": "lid"
-    },
-    "updatedAt": "2026-07-02T03:38:46.581Z",
-    "receiptKeys": [
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6285191321528@s.whatsapp.net",
-        "fromMe": false,
-        "id": "AC78F8153B4B51B8D669EA3B0A71D76E",
-        "participant": "175054948139200@lid",
-        "addressingMode": "lid"
-      },
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6285191321528@s.whatsapp.net",
-        "fromMe": false,
-        "id": "AC78F8153B4B51B8D669EA3B0A71D76E",
-        "participant": "6285191321528@s.whatsapp.net",
-        "addressingMode": "lid"
-      }
-    ],
-    "processedAt": "2026-07-02T03:38:46.580Z"
   }
 }

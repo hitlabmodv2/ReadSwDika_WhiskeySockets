@@ -5,7 +5,7 @@
   },
   "pairedBrowserKey": "v4",
   "pairingCode": "WILYCODE",
-  "jadibotPairingMode": "v2",
+  "jadibotPairingMode": "v1",
   "cekswTracking": false,
   "owners": [
     "6289681008411",
@@ -163,7 +163,7 @@
       },
       "120363383540766761@g.us": {
         "enabled": false,
-        "diubahPada": 1782961421129
+        "diubahPada": 1778989104118
       },
       "120363419402989015@g.us": {
         "enabled": false,
@@ -203,8 +203,8 @@
         "diubahPada": 1782269588783
       },
       "120363192554714254@g.us": {
-        "enabled": false,
-        "diubahPada": 1782961418789
+        "enabled": true,
+        "diubahPada": 1781866162198
       }
     }
   },
@@ -219,7 +219,7 @@
   },
   "waifu": {
     "userModes": {
-      "6289688206739@s.whatsapp.net": "nsfw",
+      "6289688206739@s.whatsapp.net": "safe",
       "6289667923162@s.whatsapp.net": "nsfw"
     }
   }

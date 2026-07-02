@@ -1,0 +1,17 @@
+📢 *INFORMASI RILIS*
+_📅 Jadwal rilis belum ditentukan_ 🕐
+_🔍 Masih dalam tahap pemantauan — informasi tanggal rilis akan diumumkan kemudian, harap bersabar_ 😊
+━━━━━━━━━━━━━━━━━━━━━━
+🤖 *WILY BOT — V25*
+✨ *0 Fitur Baru*
+🔧 *1 Bug/Error Fix*
+🚀 *0 Perubahan*
+━━━━━━━━━━━━━━━━━━━━━━
+🔧 *BUG/ERROR FIX*
+━━━━━━━━━━━━━━━━━━━━━━
+*1. 🎭 EmojiMode Log SW — Selalu Tampil "Default 🔵" Padahal Sudah Custom*
+- ~Bug: di log AutoReadStoryWhatsApp, baris EmojiMode selalu tampil "Default 🔵" meskipun user sudah set mode Custom~
+- Penyebab: `event.js` pakai `getJadibotEmojiMode()` yang baca dari `data_jadibot/<nomor>/emoji.json` — padahal bot utama simpan mode di `src/helper/emoji.json`
+- Fix: diganti ke `getMode()` dari `emoji.js` yang baca file yang benar untuk bot utama
+- Jadibot tidak terpengaruh — sudah benar sejak awal (baca dari `data_jadibot/<nomor>/emoji.json`)
+> EmojiMode kini tampil akurat realtime sesuai mode aktif, tanpa restart bot

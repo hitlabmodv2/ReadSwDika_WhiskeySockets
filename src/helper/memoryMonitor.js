@@ -80,20 +80,6 @@ function getSystemMemoryInfo() {
         };
 }
 
-function formatUptime(ms) {
-        const totalSec = Math.floor(ms / 1000);
-        const days = Math.floor(totalSec / 86400);
-        const hours = Math.floor((totalSec % 86400) / 3600);
-        const minutes = Math.floor((totalSec % 3600) / 60);
-        const seconds = totalSec % 60;
-        const parts = [];
-        if (days > 0) parts.push(`${days}h`);
-        if (hours > 0) parts.push(`${hours}j`);
-        if (minutes > 0) parts.push(`${minutes}m`);
-        parts.push(`${seconds}d`);
-        return parts.join(' ');
-}
-
 export class MemoryMonitor {
         constructor(options = {}) {
                 const config = loadConfig();
@@ -118,8 +104,6 @@ export class MemoryMonitor {
                 this.config = config;
                 this.logIntervalMs = memConfig.logIntervalMs || 300000;
                 this._checkCount = 0;
-                this._lastUsage = null;
-                this._startTime = Date.now();
         }
 
         start() {
@@ -169,54 +153,30 @@ export class MemoryMonitor {
                         if (pct >= 80) { color = '\x1b[31m'; icon = '🔴'; status = 'Kritis!'; }
                         else if (pct >= 60) { color = '\x1b[33m'; icon = '⚠️ '; status = 'Waspada'; }
 
+                        const barLen = 10;
+                        const filled = Math.round((pct / 100) * barLen);
+                        const bar = '█'.repeat(filled) + '░'.repeat(barLen - filled);
+
                         const sysPct = parseFloat(sysPercentage);
                         const sysColor = sysPct >= 90 ? '\x1b[31m' : sysPct >= 70 ? '\x1b[33m' : '\x1b[32m';
 
-                        const heapMB     = (memUsage.heapUsed   / (1024 * 1024)).toFixed(1);
-                        const heapTotMB  = (memUsage.heapTotal  / (1024 * 1024)).toFixed(1);
-                        const extMB      = (memUsage.external   / (1024 * 1024)).toFixed(1);
-                        const limitGB    = (this.memoryLimit     / (1024 * 1024 * 1024)).toFixed(2);
-                        const sysFreeGB  = (systemMem.free       / (1024 * 1024 * 1024)).toFixed(2);
-                        const sysGB      = (systemMem.used       / (1024 * 1024 * 1024)).toFixed(2);
-                        const sysTGB     = (systemMem.total      / (1024 * 1024 * 1024)).toFixed(2);
+                        const heapMB  = (memUsage.heapUsed  / (1024 * 1024)).toFixed(1);
+                        const limitGB = (this.memoryLimit    / (1024 * 1024 * 1024)).toFixed(2);
+                        const sysGB   = (systemMem.used      / (1024 * 1024 * 1024)).toFixed(2);
+                        const sysTGB  = (systemMem.total     / (1024 * 1024 * 1024)).toFixed(2);
 
-                        const loadAvg = os.loadavg().map((n) => n.toFixed(2)).join(', ');
-                        const cpuCount = os.cpus()?.length || 0;
-                        const uptime = formatUptime(Date.now() - this._startTime);
+                        const cyan  = '\x1b[36m';
+                        const reset = '\x1b[0m';
+                        const bold  = '\x1b[1m';
+                        const gray  = '\x1b[90m';
 
-                        let trendIcon = '→';
-                        if (this._lastUsage !== null) {
-                                if (currentUsage > this._lastUsage) trendIcon = '↑';
-                                else if (currentUsage < this._lastUsage) trendIcon = '↓';
-                        }
-                        this._lastUsage = currentUsage;
-
-                        const R  = '\x1b[0m';
-                        const B  = '\x1b[1m';
-                        const CY = '\x1b[96m';   // cyan terang
-                        const WH = '\x1b[97m';   // putih terang
-                        const YL = '\x1b[93m';   // kuning terang
-                        const DM = '\x1b[37m';   // abu muda (bukan gelap)
-
-                        // Bar RAM bot & sys (10 blok)
-                        const barFill = Math.round((pct / 100) * 10);
-                        const bar     = `${color}${'█'.repeat(barFill)}${'░'.repeat(10 - barFill)}${R}`;
-                        const sysFill = Math.round((sysPct / 100) * 10);
-                        const sysBar  = `${sysColor}${'█'.repeat(sysFill)}${'░'.repeat(10 - sysFill)}${R}`;
-
-                        // Padding nilai agar kolom rata
-                        const pctStr    = `${percentage}%`.padStart(6);
-                        const sysPctStr = `${sysPercentage}%`.padStart(6);
-                        const botVal    = `${formatBytes(currentUsage)} / ${limitGB} GB`;
-                        const sysVal    = `${sysGB} GB / ${sysTGB} GB  free ${sysFreeGB} GB`;
-
-                        console.log(`${B}${color}[MemoryMonitor] ${icon} ${status}${R}  ${DM}cek ke-${this._checkCount} | uptime ${uptime}${R}`);
-                        console.log(`  ${B}${CY}BOT ${R}  ${bar} ${B}${color}${pctStr}${R}  ${WH}${botVal} ${trendIcon}${R}`);
-                        console.log(`  ${B}${CY}SYS ${R}  ${sysBar} ${B}${sysColor}${sysPctStr}${R}  ${WH}${sysVal}${R}`);
-                        console.log(`  ${B}${YL}Heap${R}  ${WH}${heapMB} / ${heapTotMB} MB${R}`);
-                        console.log(`  ${B}${YL}Ext ${R}  ${WH}${extMB} MB${R}`);
-                        console.log(`  ${B}${YL}CPU ${R}  ${WH}${loadAvg}  ${DM}(${cpuCount} core)${R}`);
-                        console.log(`  ${B}${YL}PID ${R}  ${WH}${process.pid}  ${DM}Node ${process.version}${R}`);
+                        console.log(`${gray}··················································${reset}`);
+                        console.log(`${cyan}[MemoryMonitor]${reset} ${icon} ${color}${bold}${status}${reset}`);
+                        console.log(`${gray}  Bot   :${reset} ${color}${bold}${formatBytes(currentUsage)}${reset} ${gray}(${percentage}% dari ${limitGB} GB)${reset}`);
+                        console.log(`${gray}  Heap  :${reset} ${heapMB} MB`);
+                        console.log(`${gray}  Sys   :${reset} ${sysColor}${bold}${sysPercentage}%${reset} ${gray}(${sysGB} / ${sysTGB} GB)${reset}`);
+                        console.log(`${gray}  Load  :${reset} [${color}${bar}${reset}] ${color}${percentage}%${reset}`);
+                        console.log(`${gray}··················································${reset}`);
                 }
 
                 if (currentUsage >= this.memoryLimit) {
@@ -277,4 +237,4 @@ export class MemoryMonitor {
         }
 }
 
-export { loadConfig, saveConfig, formatBytes, getCurrentMemoryUsage, getSystemMemoryInfo, formatUptime };
+export { loadConfig, saveConfig, formatBytes, getCurrentMemoryUsage, getSystemMemoryInfo };

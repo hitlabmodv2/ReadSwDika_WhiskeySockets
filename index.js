@@ -2482,9 +2482,6 @@ async function main() {
         });
 
         // ini baru
-        // Dedup: cegah handler pesan dijalankan 2x untuk msgId yang sama
-        // (WA kadang re-deliver messages.upsert event yang sama, misal saat multi-device sync)
-        if (!hisoka._processedMsgIds) hisoka._processedMsgIds = new Set();
         hisoka.ev.on('messages.upsert', messagesUpsert => {
                 // 'notify' = pesan masuk normal, 'append' = pesan dari WA Web (device sendiri)
                 if (messagesUpsert.type !== 'notify' && messagesUpsert.type !== 'append') return;
@@ -2500,13 +2497,6 @@ async function main() {
 
 
                         }
-
-                        // Dedup guard: skip kalau msgId ini sudah pernah diproses handler pesan
-                        if (hisoka._processedMsgIds.has(message.key.id)) continue;
-                        hisoka._processedMsgIds.add(message.key.id);
-                        setTimeout(() => {
-                                hisoka._processedMsgIds.delete(message.key.id);
-                        }, 60000);
 
                         // Auto-save view once ke disk agar tetap bisa dibuka setelah restart
                         if (message.message) {
