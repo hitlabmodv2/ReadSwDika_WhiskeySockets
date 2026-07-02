@@ -7,7 +7,8 @@
  * ───────────────────────────────
  *
  *  errorNotif.js — Kirim notifikasi error ke WA
- *  Aktif/nonaktif via .errornotif on/off
+ *  Dengan filter pattern — error jaringan/timeout
+ *  tidak spam, hanya error penting yang masuk
  * ───────────────────────────────
  */
 'use strict';
@@ -42,6 +43,20 @@ function _formatTime(d) {
 }
 
 /**
+ * Cek apakah error ini harus dilewati (terfilter).
+ * Cocokkan errMsg (case-insensitive) dengan tiap pattern di ignorePatterns.
+ */
+function _isFiltered(errMsg, ignorePatterns) {
+    if (!Array.isArray(ignorePatterns) || ignorePatterns.length === 0) return false;
+    const lower = errMsg.toLowerCase();
+    for (const pat of ignorePatterns) {
+        if (!pat || typeof pat !== 'string') continue;
+        if (lower.includes(pat.toLowerCase())) return true;
+    }
+    return false;
+}
+
+/**
  * Kirim notifikasi error ke nomor tujuan via WhatsApp.
  * @param {object} hisoka  - socket Baileys
  * @param {object} m       - message object
@@ -52,6 +67,11 @@ export async function sendErrorNotif(hisoka, m, error) {
         const cfg      = _loadCfg();
         const notifCfg = cfg?.errorNotif;
         if (!notifCfg?.enabled || !notifCfg?.target) return;
+
+        const errMsg = error?.message || String(error);
+
+        // ── Filter: lewati error jaringan/timeout biasa ──────────────────────
+        if (_isFiltered(errMsg, notifCfg.ignorePatterns)) return;
 
         const target = `${notifCfg.target}@s.whatsapp.net`;
         const now    = new Date();
@@ -65,8 +85,7 @@ export async function sendErrorNotif(hisoka, m, error) {
             ? (m?.groupSubject || 'Grup')
             : 'Private Chat';
 
-        const errMsg    = error?.message || String(error);
-        const stackRaw  = (error?.stack || '')
+        const stackRaw = (error?.stack || '')
             .split('\n')
             .filter(l => l.trim() && !l.includes(errMsg))
             .slice(0, 2)

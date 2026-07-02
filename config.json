@@ -78,7 +78,19 @@
     },
     "errorNotif": {
         "enabled": true,
-        "target": "6289688206739"
+        "target": "6289688206739",
+        "ignorePatterns": [
+            "timeout",
+            "ECONNREFUSED",
+            "ENOTFOUND",
+            "ETIMEDOUT",
+            "ECONNRESET",
+            "socket hang up",
+            "network error",
+            "getaddrinfo",
+            "Request failed with status code 4",
+            "Request failed with status code 5"
+        ]
     },
     "botReply": {
         "newsletterJid": "120363312297133690@newsletter",
