@@ -1,0 +1,67 @@
+{
+  "AC5D0FA52B66C8EF7028785610C83382": {
+    "id": "AC5D0FA52B66C8EF7028785610C83382",
+    "sender": "628812990988@s.whatsapp.net",
+    "name": "arina",
+    "type": "protocolMessage",
+    "arrivedAt": "2026-07-02T11:56:50.753Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🧸",
+    "source": "group",
+    "number": "628812990988",
+    "messageKey": {
+      "remoteJid": "120363405980349907@g.us",
+      "fromMe": false,
+      "id": "AC5D0FA52B66C8EF7028785610C83382",
+      "participant": "136653695910057@lid",
+      "participantAlt": "628812990988@s.whatsapp.net",
+      "addressingMode": "lid"
+    },
+    "resolvedPn": "628812990988@s.whatsapp.net",
+    "updatedAt": "2026-07-02T11:56:56.191Z",
+    "processedAt": "2026-07-02T11:56:56.191Z"
+  },
+  "ACA46F7B55D23CFB3FBFEA4F601C2283": {
+    "id": "ACA46F7B55D23CFB3FBFEA4F601C2283",
+    "sender": "628812990988@s.whatsapp.net",
+    "name": "arina",
+    "type": "videoMessage",
+    "arrivedAt": "2026-07-02T11:56:50.854Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🏀",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "628812990988",
+    "resolvedPn": "628812990988@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "628812990988@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACA46F7B55D23CFB3FBFEA4F601C2283",
+      "participant": "136653695910057@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-02T11:57:09.634Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "628812990988@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACA46F7B55D23CFB3FBFEA4F601C2283",
+        "participant": "136653695910057@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "628812990988@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACA46F7B55D23CFB3FBFEA4F601C2283",
+        "participant": "628812990988@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-02T11:57:09.634Z"
+  }
+}

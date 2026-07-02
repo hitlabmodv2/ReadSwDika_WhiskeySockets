@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 01/07/2026, 14.12.54  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 02/07/2026, 12.00.28  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  console.error
+│  #001  —  command:antitagsw
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [31m[CekRAM] Error:[39m formatUptime is not a function
+│  toggleAntiTagSW is not a function
 │
 │  DETAIL
-│  Sumber      : console.error
+│  Sumber      : command:antitagsw
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 01/07/2026, 14.12.54
-│  Terakhir    : 01/07/2026, 14.12.54
+│  Pertama     : 02/07/2026, 12.00.28
+│  Terakhir    : 02/07/2026, 12.00.28
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [31m[CekRAM] Error:[39m formatUptime is not a function
-│     at console.error (file:///home/runner/workspace/index.js:433:27)
-│     at handleRam (/home/runner/workspace/SEMUA_FITUR/jadibot/ceksesi.cjs:263:25)
+│  ▶  TypeError: toggleAntiTagSW is not a function
+│     at handleAntitagsw (file:///home/runner/workspace/SEMUA_FITUR/antitagsw/antitagsw.js:731:17)
+│     at default (file:///home/runner/workspace/message.js?t=1782993595846:1597:39)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 01/07/2026, 14.12.54
+  Terakhir diperbarui: 02/07/2026, 12.00.28
 ════════════════════════════════════════════════════════════════════════

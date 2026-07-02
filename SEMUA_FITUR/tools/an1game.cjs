@@ -588,16 +588,10 @@ function buatCaption(game, detail = null, { hideDownload = false } = {}) {
     }
 
     // Blok sinopsis Bahasa Indo (format > WhatsApp quote, tiap kalimat 1 baris)
-    // WA limit body/caption = 1024 char — batasi sinopsis agar tidak terpotong
-    // hideDownload:true  = mode button  → budget sinopsis lebih besar  (400 char)
-    // hideDownload:false = mode plain   → ada blok download, budget lebih kecil (300 char)
-    const SINOPSIS_LIMIT = hideDownload ? 400 : 300;
     let sinopsisBlok = '';
     if (d.sinopsis) {
         // Normalisasi spasi & newline jadi satu baris dulu
-        const rawFull = d.sinopsis.replace(/\n+/g, ' ').replace(/\s+/g, ' ').trim();
-        // Potong di word boundary sesuai budget
-        const raw = potongTeks(rawFull, SINOPSIS_LIMIT);
+        const raw = d.sinopsis.replace(/\n+/g, ' ').replace(/\s+/g, ' ').trim();
         // Pecah per kalimat berdasarkan . ! ? — tiap kalimat dipisah baris kosong
         const kalimatArr = raw
             .match(/[^.!?]+[.!?]*/g)

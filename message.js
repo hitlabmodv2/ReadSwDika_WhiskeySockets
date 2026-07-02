@@ -40,7 +40,6 @@ import { BROWSER_LIST } from './name_perangkat_tertautan.js';
 import { stopAutoCleaner, restartAutoCleaner, cleanStaleSessionFiles, clearOldFiles, clearTmpFolder } from './src/helper/cleaner.js';
 import { getUptimeFormatted, getBotStats } from './src/db/botStats.js';
 import { logError, formatErrorReport, clearErrors, generateErrorFileTxt, getInfoErrorTxtPath, getErrorStats } from './src/db/errorLog.js';
-import { sendErrorNotif } from './src/helper/errorNotif.js';
 import { startJadibot, startJadibotQR, stopJadibot, jadibotMap, jadibotClearSesiMap, jadibotSesiReportMap, jadibotConnectedAt, pendingJadibotChoices, formatPairingCode, maskNumber, parseJadibotDuration, getJadibotExpiry, formatRemainingTime, getJadibotExpirySummary, cleanupExpiredJadibots, removeJadibotExpiry, setPermanentJadibot, ensureJadibotExpiry, extendJadibotExpiry, scheduleJadibotExpiry, startJadibotAutoOnline } from './src/helper/jadibot.js';
 import { hasViewOnceCache, getViewOnceCache } from './src/helper/voCache.js';
 import { isAntiTagSWEnabled, toggleAntiTagSW, resetWarnings, getWarnings, getAllAntiTagSWGroups, getAntiTagSWLog, clearAntiTagSWLog, resolveLidFromContacts, handleAntitagsw as _handleAntitagswFn, handleAntitagswCallbacks as _handleAntitagswCallbacksFn } from './SEMUA_FITUR/antitagsw/antitagsw.js';
@@ -1173,7 +1172,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 break;
                         }
 
-                        case 'ram': {
+                        case 'ram1': {
                                 const { handleRam } = _require(path.resolve('./SEMUA_FITUR/jadibot/ceksesi.cjs'));
                                 await handleRam({ hisoka, m, tolak, logCommand });
                                 break;
@@ -1349,14 +1348,6 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'readchat': {
                                 const { handleReadchat } = _require(path.resolve('./SEMUA_FITUR/setting/readchat.cjs'));
                                 await handleReadchat({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, getJadibotNumber, getJadibotReadchat, setJadibotUserSetting });
-                                break;
-                        }
-
-                        case 'errornotif': {
-                                if (!isMainBot(hisoka)) return;
-                                if (!m.isOwner) return tolak(hisoka, m, '❌ Perintah ini hanya untuk *owner* bot.');
-                                const { handleErrornotif } = _require(path.resolve('./SEMUA_FITUR/setting/errornotif.cjs'));
-                                await handleErrornotif({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, Button });
                                 break;
                         }
                         case 'anticall':
@@ -1742,7 +1733,6 @@ export default async function ({ message, type: messagesType }, hisoka) {
                 console.error(`\x1b[31m[Handler] Error on command "${m?.command || '?'}":\x1b[39m`, errMsg);
                 if (isNoSpaceError(error)) cleanupWritePressure();
                 logError(error, cmdSrc);
-                if (isMainBot(hisoka)) { try { await sendErrorNotif(hisoka, m, error, Button); } catch (_) {} }
                 try {
                         if (m?.reply && m?.command) {
                                 const errorText = isNoSpaceError(error)

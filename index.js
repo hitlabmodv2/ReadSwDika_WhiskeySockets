@@ -89,7 +89,6 @@ import { saveViewOnceCache, cleanOldViewOnceCache, hasViewOnceCache } from './sr
 // ini baru - yg bawah pindah ke sini
 import { setupCrashGuard } from './src/helper/crashGuard.js';
 import { logError } from './src/db/errorLog.js';
-import { setErrorNotifSocket } from './src/helper/errorNotif.js';
 import { initHotReload, getHandler, stopHotReload, onReload } from './src/helper/hotReload.js';
 
 /* ================= VOONCE AUTO-SAVE ================= */
@@ -1210,7 +1209,6 @@ async function main() {
                         startAutoOnline();
                         global.startAutoOnline = startAutoOnline;
                         global.hisokaClient = hisoka;
-                        setErrorNotifSocket(hisoka);
 
                         ensureTmpDir();
                         startAutoCleaner(6); // ini tambahan
