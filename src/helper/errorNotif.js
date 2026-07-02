@@ -111,12 +111,14 @@ export async function sendErrorNotif(hisoka, m, error, Button) {
             command, senderName, senderNum, groupName, errMsg, stackRaw, now
         );
 
+        const copyCode = errMsg.replace(/\r?\n/g, ' ').replace(/\s{2,}/g, ' ').trim().slice(0, 200);
+
         if (Button) {
             let sent = false;
             try {
                 await new Button()
                     .setBody(text)
-                    .addCopy('📋 Copy Error Code', errMsg, 'copy_errnotif')
+                    .addCopy('📋 Copy Error Code', copyCode, 'copy_errnotif')
                     .run(targetJid, hisoka);
                 sent = true;
             } catch (_) {}
