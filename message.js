@@ -1355,29 +1355,8 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'errornotif': {
                                 if (!isMainBot(hisoka)) return;
                                 if (!m.isOwner) return tolak(hisoka, m, '❌ Perintah ini hanya untuk *owner* bot.');
-                                const _enCfg   = loadConfig();
-                                const _enState = _enCfg?.errorNotif?.enabled ?? true;
-                                const _enQ     = (query || '').toLowerCase().trim();
-                                if (_enQ === 'on') {
-                                        if (!_enCfg.errorNotif) _enCfg.errorNotif = {};
-                                        _enCfg.errorNotif.enabled = true;
-                                        saveConfig(_enCfg);
-                                        logCommand(m, 'errornotif on');
-                                        await tolak(hisoka, m,
-                                                `✅ *Error Notif* diaktifkan!\n\nSetiap error command akan dikirim ke nomor:\n📞 *+${_enCfg.errorNotif?.target || '-'}*`);
-                                } else if (_enQ === 'off') {
-                                        if (!_enCfg.errorNotif) _enCfg.errorNotif = {};
-                                        _enCfg.errorNotif.enabled = false;
-                                        saveConfig(_enCfg);
-                                        logCommand(m, 'errornotif off');
-                                        await tolak(hisoka, m, `🔕 *Error Notif* dimatikan.\nNotifikasi error tidak akan dikirim.`);
-                                } else {
-                                        const _enStatus = _enState ? '✅ ON' : '🔕 OFF';
-                                        const _enTarget = _enCfg?.errorNotif?.target || '-';
-                                        logCommand(m, 'errornotif');
-                                        await tolak(hisoka, m,
-                                                `╭─「 🐛 *Error Notif* 」\n│\n├➤ *Status*  : ${_enStatus}\n├➤ *Target*  : +${_enTarget}\n│\n╰➤ Gunakan: *.errornotif on/off*\n\n┗━➤ 🚀 *Powered By Wily Bot*`);
-                                }
+                                const { handleErrornotif } = _require(path.resolve('./SEMUA_FITUR/setting/errornotif.cjs'));
+                                await handleErrornotif({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, Button });
                                 break;
                         }
                         case 'anticall':
