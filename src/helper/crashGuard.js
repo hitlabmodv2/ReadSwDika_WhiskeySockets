@@ -24,6 +24,7 @@
  */
 import { logError } from '../db/errorLog.js';
 import { emergencyCleanup, getDiskUsage } from './cleaner.js';
+import { sendGlobalErrorNotif } from './errorNotif.js';
 
 const RESTART_DELAY_MS = 5000;
 const MAX_ERRORS_PER_MINUTE = 20;
@@ -106,6 +107,7 @@ export function setupCrashGuard(restartFn) {
         const count = trackError();
         console.error(`\x1b[31m[CrashGuard] UncaughtException (${count} this minute):\x1b[39m`, err?.message || err);
         logError(err instanceof Error ? err : new Error(String(err)), `uncaughtException`);
+        sendGlobalErrorNotif(err instanceof Error ? err : new Error(String(err)), 'uncaughtException').catch(() => {});
 
         if (isEnospc(err)) {
             handleEnospc(err);
@@ -134,6 +136,7 @@ export function setupCrashGuard(restartFn) {
         const msg = reason instanceof Error ? reason.message : String(reason);
         console.error(`\x1b[31m[CrashGuard] UnhandledRejection (${count} this minute):\x1b[39m`, msg);
         logError(reason instanceof Error ? reason : new Error(msg), `unhandledRejection`);
+        sendGlobalErrorNotif(reason instanceof Error ? reason : new Error(msg), 'unhandledRejection').catch(() => {});
 
         if (isEnospc(reason)) {
             handleEnospc(reason instanceof Error ? reason : new Error(msg));
