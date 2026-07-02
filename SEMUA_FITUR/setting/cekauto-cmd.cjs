@@ -33,6 +33,9 @@ function makeCekautoHelpers({
         loadConfig, saveConfig,
         getAllAntiTagSWGroups, toggleAntiTagSW, isAntiTagSWEnabled,
         sendConfirmWithButtons, tolak,
+        getJadibotAntidel, getJadibotReadsw, getJadibotAnticall,
+        getJadibotAnticallvid, getJadibotAutoOnline, getJadibotAutoTyping,
+        getJadibotAutoRecording, getJadibotNumber,
 }) {
         const CEKAUTO_FITUR_LIST = [
                 { key: 'antiCall',       nama: 'Anti Call',        cmd: '.anticall on/off',        type: 'global', toggleKey: 'antiCall',       toggleable: true  },
@@ -50,7 +53,7 @@ function makeCekautoHelpers({
                 { key: 'reactApi',       nama: 'React API',        cmd: '.setreactapi on/off',     type: 'global', toggleKey: 'reactApi',       toggleable: true  },
                 { key: 'sessionCleaner', nama: 'Session Cleaner',  cmd: '.sessioncleaner on/off',  type: 'global', toggleKey: 'sessionCleaner', toggleable: true  },
                 { key: 'telegram',       nama: 'Telegram Bridge',  cmd: '.telegram on/off',        type: 'global', toggleKey: 'telegram',       toggleable: true  },
-                { key: 'welcomeGoodbye', nama: 'Welcome/Goodbye',  cmd: '.welcome on/off',         type: 'global', toggleable: false, checkFn: (cfg) => { const g = cfg.welcomeGoodbye?.groups || {}; return Object.values(g).some(v => v?.welcome === true || v?.goodbye === true); } },
+                { key: 'welcomeGoodbye', nama: 'Welcome/Goodbye',  cmd: '.welcome on/off',         type: 'global', toggleable: false, checkFn: (cfg) => { if (!cfg.welcomeGoodbye?.enabled) return false; const g = cfg.welcomeGoodbye?.groups || {}; return Object.values(g).some(v => v?.welcome === true || v?.goodbye === true); } },
                 { key: 'wilyAI',         nama: 'Wily AI',          cmd: '.wilyai on/off',          type: 'global', toggleKey: 'wilyAI',         toggleable: true  },
                 { key: 'cekswTracking',  nama: 'Cek SW Tracking',  cmd: '.ceksw on/off',           type: 'custom', toggleKey: 'cekswTracking',  toggleable: true,  checkFn: (cfg) => cfg.cekswTracking !== false },
                 { key: 'alqanimenotif',  nama: 'Alqanime Notif',   cmd: '.alqanimenotif on/off',   type: 'group',  toggleable: false             },
@@ -89,12 +92,12 @@ function makeCekautoHelpers({
                 {
                         key: 'welcome', nama: 'Welcome', cmd: '.welcome on/off', toggleable: true,
                         desc: 'Kirim pesan sambutan otomatis saat member baru bergabung ke grup.',
-                        checkFn: (cfg, jid) => cfg.welcomeGoodbye?.groups?.[jid]?.welcome === true
+                        checkFn: (cfg, jid) => cfg.welcomeGoodbye?.enabled === true && cfg.welcomeGoodbye?.groups?.[jid]?.welcome === true
                 },
                 {
                         key: 'goodbye', nama: 'Goodbye', cmd: '.goodbye on/off', toggleable: true,
                         desc: 'Kirim pesan perpisahan otomatis saat member keluar atau dikick.',
-                        checkFn: (cfg, jid) => cfg.welcomeGoodbye?.groups?.[jid]?.goodbye === true
+                        checkFn: (cfg, jid) => cfg.welcomeGoodbye?.enabled === true && cfg.welcomeGoodbye?.groups?.[jid]?.goodbye === true
                 },
                 {
                         key: 'antiTagSWGrup', nama: 'Anti Tag SW (Grup)', cmd: '.antitagsw on/off', toggleable: true,
@@ -102,7 +105,7 @@ function makeCekautoHelpers({
                                 const globalOn = cfg.antiTagSW?.enabled === true;
                                 return `Cegah member mentag grup via SW. Global: ${globalOn ? '🟢 Aktif' : '🔴 Nonaktif → ketik .antitagsw global on'}`;
                         },
-                        checkFn: (_cfg, jid) => isAntiTagSWEnabled(jid)
+                        checkFn: (cfg, jid) => cfg.antiTagSW?.enabled === true && isAntiTagSWEnabled(jid)
                 },
                 {
                         key: 'autoSholat', nama: 'Auto Sholat', cmd: '.autosholat add/remove', toggleable: true,
@@ -142,14 +145,19 @@ function makeCekautoHelpers({
         function getActiveGroupsForFeature(featureKey) {
                 const cfg = loadConfig();
                 if (featureKey === 'welcome') {
+                        if (!cfg.welcomeGoodbye?.enabled) return [];
                         return Object.entries(cfg.welcomeGoodbye?.groups || {})
                                 .filter(([, v]) => v?.welcome === true).map(([jid]) => jid);
                 }
                 if (featureKey === 'goodbye') {
+                        if (!cfg.welcomeGoodbye?.enabled) return [];
                         return Object.entries(cfg.welcomeGoodbye?.groups || {})
                                 .filter(([, v]) => v?.goodbye === true).map(([jid]) => jid);
                 }
-                if (featureKey === 'antiTagSWGrup') return getAllAntiTagSWGroups();
+                if (featureKey === 'antiTagSWGrup') {
+                        if (!cfg.antiTagSW?.enabled) return [];
+                        return getAllAntiTagSWGroups();
+                }
                 return Object.entries(cfg[featureKey]?.groups || {})
                         .filter(([, v]) => v?.enabled === true).map(([jid]) => jid);
         }
@@ -371,13 +379,46 @@ function makeCekautoHelpers({
                 const aktif = [];
                 const nonaktif = [];
 
+                // Deteksi konteks jadibot
+                const isJadibot = hisoka?.isMainBot === false;
+                const jadibotNum = isJadibot && getJadibotNumber ? getJadibotNumber(hisoka) : null;
+
+                // Map key → getter khusus jadibot (semua getter return object { enabled: bool, ... })
+                const jadibotStatusMap = jadibotNum ? {
+                        antiDelete:    () => (getJadibotAntidel    ? getJadibotAntidel(jadibotNum)    : null)?.enabled === true,
+                        autoReadStory: () => (getJadibotReadsw     ? getJadibotReadsw(jadibotNum)     : null)?.enabled === true,
+                        antiCall:      () => (getJadibotAnticall   ? getJadibotAnticall(jadibotNum)   : null)?.enabled === true,
+                        antiCallVideo: () => (getJadibotAnticallvid ? getJadibotAnticallvid(jadibotNum) : null)?.enabled === true,
+                        autoOnline:    () => (getJadibotAutoOnline  ? getJadibotAutoOnline(jadibotNum) : null)?.enabled === true,
+                        autoTyping:    () => (getJadibotAutoTyping  ? getJadibotAutoTyping(jadibotNum) : null)?.enabled === true,
+                        autoRecording: () => (getJadibotAutoRecording ? getJadibotAutoRecording(jadibotNum) : null)?.enabled === true,
+                } : {};
+
                 for (const f of CEKAUTO_FITUR_LIST) {
                         const val = cfg[f.key];
                         let isOn = false;
                         if (f.checkFn) {
-                                isOn = f.checkFn(cfg);
+                                // cekswTracking di jadibot punya config sendiri di data_jadibot/<num>/ceksw/config.json
+                                if (isJadibot && jadibotNum && f.key === 'cekswTracking') {
+                                        try {
+                                                const jbCfgPath = require('path').join(process.cwd(), 'data_jadibot', jadibotNum, 'ceksw', 'config.json');
+                                                const jbCfg = require('fs').existsSync(jbCfgPath)
+                                                        ? JSON.parse(require('fs').readFileSync(jbCfgPath, 'utf8'))
+                                                        : { cekswTracking: true };
+                                                isOn = jbCfg.cekswTracking === true;
+                                        } catch (_) {
+                                                isOn = true; // default jadibot: ceksw aktif
+                                        }
+                                } else {
+                                        isOn = f.checkFn(cfg);
+                                }
                         } else if (f.type === 'global') {
-                                isOn = val?.enabled === true;
+                                // Fitur yang punya setting per-jadibot → baca dari jadibotStatusMap
+                                if (isJadibot && jadibotNum && jadibotStatusMap[f.key] !== undefined) {
+                                        isOn = jadibotStatusMap[f.key]();
+                                } else {
+                                        isOn = val?.enabled === true;
+                                }
                         } else {
                                 const groups = val?.groups || {};
                                 isOn = Object.values(groups).some(g => g?.enabled === true);

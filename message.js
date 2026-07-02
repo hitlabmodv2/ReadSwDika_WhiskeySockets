@@ -119,6 +119,9 @@ const {
 } = _makeCekautoHelpers({
     loadConfig, saveConfig, getAllAntiTagSWGroups, toggleAntiTagSW, isAntiTagSWEnabled,
     sendConfirmWithButtons, tolak,
+    getJadibotAntidel, getJadibotReadsw, getJadibotAnticall,
+    getJadibotAnticallvid, getJadibotAutoOnline, getJadibotAutoTyping,
+    getJadibotAutoRecording, getJadibotNumber,
 });
 
 // ── AntiTagSW callbacks (button/session reply) — imported from antitagsw.js ──
