@@ -1353,6 +1353,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         }
 
                         case 'errornotif': {
+                                if (!isMainBot(hisoka)) return;
                                 if (!m.isOwner) return tolak(hisoka, m, '❌ Perintah ini hanya untuk *owner* bot.');
                                 const _enCfg   = loadConfig();
                                 const _enState = _enCfg?.errorNotif?.enabled ?? true;
@@ -1762,7 +1763,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                 console.error(`\x1b[31m[Handler] Error on command "${m?.command || '?'}":\x1b[39m`, errMsg);
                 if (isNoSpaceError(error)) cleanupWritePressure();
                 logError(error, cmdSrc);
-                try { await sendErrorNotif(hisoka, m, error); } catch (_) {}
+                if (isMainBot(hisoka)) { try { await sendErrorNotif(hisoka, m, error); } catch (_) {} }
                 try {
                         if (m?.reply && m?.command) {
                                 const errorText = isNoSpaceError(error)
