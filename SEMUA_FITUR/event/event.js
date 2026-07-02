@@ -38,7 +38,7 @@ import { createRequire } from 'module';
 const _require = createRequire(import.meta.url);
 const { jidNormalizedUser, toNumber, jidDecode, proto, isJidGroup, delay } = _require('@whiskeysockets/baileys');
 import { isPnUser } from '../../src/helper/socketCompat.js';
-import { getJadibotReadchat, getJadibotNumber, getJadibotEmojiMode } from '../../src/helper/jadibotSettings.js';
+import { getJadibotReadchat, getJadibotNumber, getJadibotEmojiMode, getJadibotAutoTyping, getJadibotAutoRecording } from '../../src/helper/jadibotSettings.js';
 
 import { telegram } from '../../src/helper/index.js';
 import { isNumber } from '../../src/helper/text.js';
@@ -147,8 +147,16 @@ export default async function (m, hisoka) {
 
                 if (!m.isOwner && !m.isBot && !m.status && m.message && m.type && m.type !== 'protocolMessage' && m.type !== 'reactionMessage') {
                         const config = loadConfig();
-                        const autoTyping = config.autoTyping || {};
-                        const autoRecording = config.autoRecording || {};
+                        let autoTyping = {};
+                        let autoRecording = {};
+                        if (hisoka.isMainBot === false) {
+                                const jadibotNum = getJadibotNumber(hisoka);
+                                autoTyping = getJadibotAutoTyping(jadibotNum) || {};
+                                autoRecording = getJadibotAutoRecording(jadibotNum) || {};
+                        } else {
+                                autoTyping = config.autoTyping || {};
+                                autoRecording = config.autoRecording || {};
+                        }
                         
                         const isPrivate = isPnUser(m.from);
                         const isGroup = isJidGroup(m.from);

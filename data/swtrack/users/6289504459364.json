@@ -1,0 +1,67 @@
+{
+  "A5469B4D759B224EC3CCD40AD922E594": {
+    "id": "A5469B4D759B224EC3CCD40AD922E594",
+    "sender": "6289504459364@s.whatsapp.net",
+    "name": "REAL RGGAMING",
+    "type": "protocolMessage",
+    "arrivedAt": "2026-07-02T07:28:54.017Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🎃",
+    "source": "group",
+    "number": "6289504459364",
+    "messageKey": {
+      "remoteJid": "120363424557936431@g.us",
+      "fromMe": false,
+      "id": "A5469B4D759B224EC3CCD40AD922E594",
+      "participant": "88721793773725@lid",
+      "participantAlt": "6289504459364@s.whatsapp.net",
+      "addressingMode": "lid"
+    },
+    "resolvedPn": "6289504459364@s.whatsapp.net",
+    "updatedAt": "2026-07-02T07:29:00.469Z",
+    "processedAt": "2026-07-02T07:29:00.469Z"
+  },
+  "A5F6CBE727B4F6FCC9CB8C6BAD9BB30B": {
+    "id": "A5F6CBE727B4F6FCC9CB8C6BAD9BB30B",
+    "sender": "6289504459364@s.whatsapp.net",
+    "name": "REAL RGGAMING",
+    "type": "imageMessage",
+    "arrivedAt": "2026-07-02T07:28:54.131Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐩",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6289504459364",
+    "resolvedPn": "6289504459364@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6289504459364@s.whatsapp.net",
+      "fromMe": false,
+      "id": "A5F6CBE727B4F6FCC9CB8C6BAD9BB30B",
+      "participant": "88721793773725@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-02T07:29:02.489Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289504459364@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A5F6CBE727B4F6FCC9CB8C6BAD9BB30B",
+        "participant": "88721793773725@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289504459364@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A5F6CBE727B4F6FCC9CB8C6BAD9BB30B",
+        "participant": "6289504459364@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-02T07:29:02.489Z"
+  }
+}

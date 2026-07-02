@@ -3,7 +3,7 @@ _📅 Jadwal rilis belum ditentukan_ 🕐
 _🔍 Masih dalam tahap pemantauan — informasi tanggal rilis akan diumumkan kemudian, harap bersabar_ 😊
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V25*
-✨ *3 Fitur Baru*
+✨ *6 Fitur Baru*
 🔧 *8 Bug/Error Fix*
 🚀 *9 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -30,6 +30,30 @@ _🔍 Masih dalam tahap pemantauan — informasi tanggal rilis akan diumumkan ke
 - Berlaku lintas file: `info.cjs` (.emoji, .emojilist) ↔ `emoji-cmd.cjs` (.emojicustom, .emojidefault, .emojiclear)
 - File baru: `SEMUA_FITUR/helper/emoji-msgmap.cjs`
 > Selalu hanya 1 pesan bot emoji aktif per JID, tidak ada spam
+
+*4. 📡 Button Single-Select di `.online` — Mode + Interval*
+- Command `.online` kini menampilkan button navigasi dengan 2 section: Mode (Online/Offline) dan Interval Refresh (preset 10/15/30/60/120/300 detik)
+- Tanda ✓ otomatis muncul di pilihan yang sedang aktif, lengkap dengan status box (status, interval, catatan mode stealth)
+- Berlaku untuk bot utama maupun jadibot, masing-masing punya setting terpisah
+- Pesan lama otomatis terhapus setiap kali button baru dikirim (auto-delete via Map per JID), fallback ke teks biasa jika device tidak support button
+- Perubahan di `SEMUA_FITUR/setting/online.cjs`, dipanggil dengan parameter `Button` baru di `message.js`
+> Ketik `.online` — tinggal pilih mode & interval dari menu, tidak perlu hafal command manual
+
+*5. ⌨️ Button Single-Select di `.typing` — Mode + Delay + Target Chat*
+- Command `.typing` kini menampilkan button dengan 3 section: Mode (Aktif/Nonaktif), Delay dalam detik (preset 1/3/5/8/10/15/20/30/60), dan Target Chat (toggle Private/Group terpisah)
+- Tanda ✓ otomatis di pilihan yang sedang aktif untuk semua section
+- Berlaku untuk bot utama maupun jadibot dengan setting terpisah
+- Auto-delete pesan lama per JID (map terpisah dari `.record` agar tidak saling tabrak), fallback ke teks biasa jika button gagal dikirim
+- Perubahan di `SEMUA_FITUR/setting/autotyprec.cjs` (`handleTyp`), dipanggil dengan parameter `Button` baru di `message.js`
+> Ketik `.typing` — atur mode, delay, dan target chat langsung dari menu button
+
+*6. 🎙️ Button Single-Select di `.record` — Mode + Delay + Target Chat*
+- Command `.recording`/`.record` kini menampilkan button dengan struktur sama seperti `.typing`: Mode, Delay (preset 1-60 detik), dan Target Chat (Private/Group)
+- Tanda ✓ otomatis di pilihan aktif, status box menampilkan status, delay, dan target chat saat ini
+- Berlaku untuk bot utama maupun jadibot dengan setting terpisah, auto-delete pesan lama per JID (map terpisah dari `.typing`)
+- Fallback otomatis ke teks biasa jika perangkat tidak support button
+- Perubahan di `SEMUA_FITUR/setting/autotyprec.cjs` (`handleRecord`), dipanggil dengan parameter `Button` baru di `message.js`
+> Ketik `.recording` atau `.record` — atur mode, delay, dan target chat langsung dari menu button
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *PERUBAHAN*

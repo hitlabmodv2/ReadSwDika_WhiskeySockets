@@ -5,7 +5,7 @@
   },
   "pairedBrowserKey": "v4",
   "pairingCode": "WILYCODE",
-  "jadibotPairingMode": "v1",
+  "jadibotPairingMode": "v2",
   "cekswTracking": false,
   "owners": [
     "6289681008411",
@@ -17,7 +17,7 @@
     "author": "Anda Siapa?"
   },
   "autoOnline": {
-    "enabled": false,
+    "enabled": true,
     "intervalSeconds": 15
   },
   "autoTyping": {

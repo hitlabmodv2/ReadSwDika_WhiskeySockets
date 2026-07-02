@@ -59,23 +59,25 @@ async function handleInstagramDl(hisoka, m, query, ctx) {
 
     const loadingMsg = await tolak(hisoka, m, '⏳ Sedang mengunduh dari Instagram...');
 
-    async function fetchVdraw(url) {
-        const res = await fetch('https://vdraw.ai/api/v1/instagram/ins-info', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ url, type: 'video' }),
-            signal: AbortSignal.timeout(15000),
-        });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const json = await res.json();
-        if (json.code === 100000 && json.data) return json.data;
-        throw new Error('No data from vdraw');
+    async function fetchViaInstagramUrlDirect(url) {
+        const { instagramGetUrl } = require('instagram-url-direct');
+        const result = await instagramGetUrl(url, { retries: 2, delay: 800 });
+        if (!result?.url_list?.length) throw new Error('No data from instagram-url-direct');
+        return {
+            media_type: result.media_details?.[0]?.type === 'image' ? 'photo' : 'reel',
+            info: result.url_list.map((u, i) => ({
+                url: u,
+                media_format: result.media_details?.[i]?.type === 'image' ? 'image' : 'video',
+            })),
+            cover_url: result.media_details?.[0]?.thumbnail || null,
+            __postInfo: result.post_info || null,
+        };
     }
 
-    const [vdrawResult, archiveResult, metaHtmlResult] = await Promise.allSettled([
-        fetchVdraw(igUrl),
+    const [archiveResult, directResult, metaHtmlResult] = await Promise.allSettled([
         fetch(`https://archive.lick.eu.org/api/download/instagram?url=${encodeURIComponent(igUrl)}`, { signal: AbortSignal.timeout(12000) })
             .then(r => r.json()).catch(() => null),
+        fetchViaInstagramUrlDirect(igUrl),
         fetch(igUrl, {
             signal: AbortSignal.timeout(10000),
             headers: {
@@ -85,11 +87,13 @@ async function handleInstagramDl(hisoka, m, query, ctx) {
         }).then(r => r.text()).catch(() => ''),
     ]);
 
-    let igData = vdrawResult.status === 'fulfilled' ? vdrawResult.value : null;
     const archiveJson = archiveResult.status === 'fulfilled' ? archiveResult.value : null;
     const metaHtml = metaHtmlResult.status === 'fulfilled' ? metaHtmlResult.value : '';
 
-    if (!igData && archiveJson?.status && archiveJson?.result) {
+    let igData = null;
+    let directPostInfo = null;
+
+    if (archiveJson?.status && archiveJson?.result) {
         const r = archiveJson.result;
         igData = {
             media_type: r.isVideo ? 'reel' : 'photo',
@@ -100,8 +104,25 @@ async function handleInstagramDl(hisoka, m, query, ctx) {
         };
     }
 
+    if (!igData?.info?.length && directResult.status === 'fulfilled') {
+        igData = directResult.value;
+        directPostInfo = igData.__postInfo;
+    }
+
     if (!igData?.info?.length) {
-        await m.reply({ edit: loadingMsg.key, text: '❌ Gagal mengunduh. Pastikan link benar dan akun tidak private, lalu coba lagi.' });
+        const isPrivateAccount = directPostInfo?.is_private === true
+            || /this account is private|akun ini privat|account is private/i.test(metaHtml);
+        const isNotFound = /page not found|content isn.t available|halaman tidak ditemukan/i.test(metaHtml);
+
+        let failMsg;
+        if (isPrivateAccount) {
+            failMsg = '🔒 Akun Instagram ini private, tidak bisa diunduh.';
+        } else if (isNotFound) {
+            failMsg = '❌ Postingan tidak ditemukan. Cek lagi link-nya, mungkin sudah dihapus.';
+        } else {
+            failMsg = '❌ Gagal mengunduh. Server Instagram sedang membatasi akses (rate limit) atau provider scraper sedang gangguan. Coba lagi beberapa saat lagi.';
+        }
+        await m.reply({ edit: loadingMsg.key, text: failMsg });
         return;
     }
 
