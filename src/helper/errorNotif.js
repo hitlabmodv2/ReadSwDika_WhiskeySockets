@@ -111,14 +111,24 @@ export async function sendErrorNotif(hisoka, m, error, Button) {
             command, senderName, senderNum, groupName, errMsg, stackRaw, now
         );
 
-        const copyCode = errMsg.replace(/\r?\n/g, ' ').replace(/\s{2,}/g, ' ').trim().slice(0, 200);
+        // Compact copy: command + error + 1 stack line — semua dalam 200 char
+        const firstStack = (error?.stack || '')
+            .split('\n')
+            .filter(l => l.trim() && !l.includes(errMsg))
+            .map(l => l.trim())
+            .find(l => l.startsWith('at ')) || '';
+        const compactRaw =
+            `${command} | ${senderNum} | ${groupName}\n` +
+            `${errMsg}` +
+            (firstStack ? `\n${firstStack}` : '');
+        const copyCode = compactRaw.replace(/\s{2,}/g, ' ').trim().slice(0, 200);
 
         if (Button) {
             let sent = false;
             try {
                 await new Button()
                     .setBody(text)
-                    .addCopy('📋 Copy Error Code', copyCode, 'copy_errnotif')
+                    .addCopy('📋 Copy Semua', copyCode, 'copy_errnotif')
                     .run(targetJid, hisoka);
                 sent = true;
             } catch (_) {}

@@ -206,14 +206,20 @@ async function _sendTestNotif(hisoka, m, target, Button) {
 _Ini adalah pesan uji coba. Jika kamu menerima ini, fitur Error Notif berjalan dengan benar! ✅_`;
 
     // ── Kirim dengan copy button ──────────────────────────────────────────────
-    const copyCode = errMsg.replace(/\r?\n/g, ' ').replace(/\s{2,}/g, ' ').trim().slice(0, 200);
+    // Compact copy: command + error + stack dalam 200 char
+    const compactRaw =
+        `${command} | ${senderNum} | ${groupName}\n` +
+        `${errMsg}\n` +
+        `${stack1}\n` +
+        `${stack2}`;
+    const copyCode = compactRaw.trim().slice(0, 200);
 
     if (Button) {
         let sent = false;
         try {
             await new Button()
                 .setBody(text)
-                .addCopy('📋 Copy Error Code', copyCode, 'copy_errnotif_test')
+                .addCopy('📋 Copy Semua', copyCode, 'copy_errnotif_test')
                 .run(targetJid, hisoka);
             sent = true;
         } catch (_) {}
