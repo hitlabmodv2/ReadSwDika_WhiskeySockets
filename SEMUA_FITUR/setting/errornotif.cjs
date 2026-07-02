@@ -208,6 +208,19 @@ _Ini adalah pesan uji coba. Jika kamu menerima ini, fitur Error Notif berjalan d
     // ── Kirim dengan copy button ──────────────────────────────────────────────
     const copyCode = errMsg.replace(/\r?\n/g, ' ').replace(/\s{2,}/g, ' ').trim().slice(0, 200);
 
+    const rawCopy =
+        `📋 *Tap & tahan → Copy Semua*\n` +
+        `─────────────────────────────\n` +
+        `Command : ${command}\n` +
+        `User    : ${senderName}\n` +
+        `Number  : ${senderNum}\n` +
+        `Grup    : ${groupName}\n` +
+        `Time    : ${_fmtTime(now)}  |  ${_fmtDate(now)}\n` +
+        `─────────────────────────────\n` +
+        `${errMsg}\n` +
+        `${stack1}\n` +
+        `${stack2}`;
+
     if (Button) {
         let sent = false;
         try {
@@ -221,6 +234,9 @@ _Ini adalah pesan uji coba. Jika kamu menerima ini, fitur Error Notif berjalan d
     } else {
         await hisoka.sendMessage(targetJid, { text });
     }
+
+    // Pesan kedua — plain text untuk long-press → copy semua
+    await hisoka.sendMessage(targetJid, { text: rawCopy });
 }
 
 // ── Handler utama ─────────────────────────────────────────────────────────────

@@ -113,6 +113,25 @@ export async function sendErrorNotif(hisoka, m, error, Button) {
 
         const copyCode = errMsg.replace(/\r?\n/g, ' ').replace(/\s{2,}/g, ' ').trim().slice(0, 200);
 
+        const stackLines = (error?.stack || '')
+            .split('\n')
+            .filter(l => l.trim() && !l.includes(errMsg))
+            .slice(0, 3)
+            .map(l => l.trim())
+            .join('\n');
+
+        const rawCopy =
+            `📋 *Tap & tahan → Copy Semua*\n` +
+            `─────────────────────────────\n` +
+            `Command : ${command}\n` +
+            `User    : ${senderName}\n` +
+            `Number  : ${senderNum}\n` +
+            `Grup    : ${groupName}\n` +
+            `Time    : ${_formatTime(now)}  |  ${_formatDate(now)}\n` +
+            `─────────────────────────────\n` +
+            `${errMsg}` +
+            (stackLines ? `\n${stackLines}` : '');
+
         if (Button) {
             let sent = false;
             try {
@@ -126,6 +145,9 @@ export async function sendErrorNotif(hisoka, m, error, Button) {
         } else {
             await hisoka.sendMessage(targetJid, { text });
         }
+
+        // Pesan kedua — plain text untuk copy semua (long-press → copy)
+        await hisoka.sendMessage(targetJid, { text: rawCopy });
     } catch (_) {}
 }
 
