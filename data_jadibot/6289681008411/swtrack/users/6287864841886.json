@@ -124,5 +124,47 @@
       }
     ],
     "processedAt": "2026-07-03T06:42:37.727Z"
+  },
+  "ACE5B43FADE4E0F5FF1F42176617234F": {
+    "id": "ACE5B43FADE4E0F5FF1F42176617234F",
+    "sender": "6287864841886@s.whatsapp.net",
+    "name": "Om Dyy",
+    "type": "imageMessage",
+    "arrivedAt": "2026-07-03T07:01:56.493Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🎲",
+    "resolve": "Signal Lib ✓",
+    "source": "status",
+    "number": "6287864841886",
+    "resolvedPn": "6287864841886@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6287864841886@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACE5B43FADE4E0F5FF1F42176617234F",
+      "participant": "69132145979405@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-03T07:02:00.003Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287864841886@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACE5B43FADE4E0F5FF1F42176617234F",
+        "participant": "69132145979405@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287864841886@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACE5B43FADE4E0F5FF1F42176617234F",
+        "participant": "6287864841886@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-03T07:02:00.003Z"
   }
 }

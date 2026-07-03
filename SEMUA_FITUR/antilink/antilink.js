@@ -573,16 +573,15 @@ export async function handleAntilink({ hisoka, m, query, tolak, logCommand, load
         for (const gid of aktifGroups) toggleAntiLink(gid, false);
         logCommand(m, hisoka, 'antilink off all');
 
-        await tolak(hisoka, m,
+        const _offAllPrefix =
             `╭─〔 🔴 *Anti-Link — Off All* 〕\n│\n` +
             `│ ✅ *AntiLink dinonaktifkan di semua grup!*\n│\n` +
             `│ 🗑️ Total grup   : *${aktifGroups.length}*\n` +
             `│ 💾 Status       : _tersimpan realtime_\n│\n` +
-            `> Semua warning di grup tersebut\n> juga telah _direset otomatis_.\n│\n╰────────────────────`
-        );
+            `> Semua warning di grup tersebut\n> juga telah _direset otomatis_.\n│\n╰────────────────────`;
 
-        // Tampilkan status terbaru secara otomatis (realtime, tanpa reaksi ganda)
-        await sendAntilinkStatus({ hisoka, m, lc, pendingAntilinkChoices, logCommand, withReaction: false });
+        // Gabung jadi satu pesan: konfirmasi + status terbaru (realtime)
+        await sendAntilinkStatus({ hisoka, m, lc, pendingAntilinkChoices, logCommand, withReaction: false, prefixText: _offAllPrefix });
         return;
     }
 
@@ -612,16 +611,15 @@ export async function handleAntilink({ hisoka, m, query, tolak, logCommand, load
         for (const gid of disabledGroups) toggleAntiLink(gid, true);
         logCommand(m, hisoka, 'antilink on all');
 
-        await tolak(hisoka, m,
+        const _onAllPrefix =
             `╭─〔 🟢 *Anti-Link — On All* 〕\n│\n` +
             `│ ✅ *AntiLink diaktifkan kembali di semua grup!*\n│\n` +
             (globalAutoEnabled ? `│ 🌐 _Global juga diaktifkan otomatis!_\n│\n` : '') +
             `│ ➕ Total grup   : *${disabledGroups.length}*\n` +
-            `│ 💾 Status       : _tersimpan realtime_\n│\n╰────────────────────`
-        );
+            `│ 💾 Status       : _tersimpan realtime_\n│\n╰────────────────────`;
 
-        // Tampilkan status terbaru secara otomatis (realtime, tanpa reaksi ganda)
-        await sendAntilinkStatus({ hisoka, m, lc, pendingAntilinkChoices, logCommand, withReaction: false });
+        // Gabung jadi satu pesan: konfirmasi + status terbaru (realtime)
+        await sendAntilinkStatus({ hisoka, m, lc, pendingAntilinkChoices, logCommand, withReaction: false, prefixText: _onAllPrefix });
         return;
     }
 
@@ -852,7 +850,7 @@ export async function handleAntilink({ hisoka, m, query, tolak, logCommand, load
 //  Helper — Render & kirim STATUS ANTI-LINK (dipakai oleh .antilink status
 //  maupun otomatis setelah off all / on all agar hasilnya realtime)
 // ═══════════════════════════════════════════════════════════════
-async function sendAntilinkStatus({ hisoka, m, lc, pendingAntilinkChoices, logCommand, withReaction = true }) {
+async function sendAntilinkStatus({ hisoka, m, lc, pendingAntilinkChoices, logCommand, withReaction = true, prefixText = '' }) {
     if (withReaction) await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
     try {
         const config = lc();
@@ -895,7 +893,8 @@ async function sendAntilinkStatus({ hisoka, m, lc, pendingAntilinkChoices, logCo
 
         const totalNon = gcList.filter(g => g.ikon === '❌').length;
 
-        let txt = `╭─「 📋 *STATUS ANTI-LINK* 」\n│\n`;
+        let txt = prefixText ? `${prefixText}\n\n` : '';
+        txt += `╭─「 📋 *STATUS ANTI-LINK* 」\n│\n`;
         txt += `│ Total GC bot   : *${allGroups.length} grup*\n`;
         txt += `│ Terdaftar aktif: *${totalAktif} grup*\n`;
         if (totalNon) txt += `│ Nonaktif       : *${totalNon} grup*\n`;
@@ -921,6 +920,8 @@ async function sendAntilinkStatus({ hisoka, m, lc, pendingAntilinkChoices, logCo
         txt += `│ 📌 *Reply pesan ini:*\n`;
         txt += `│ • *add 1,2,3* — aktifkan GC nomor tsb\n`;
         txt += `│ • *del 2,4* — nonaktifkan GC nomor tsb\n`;
+        txt += `│ • *add all* — aktifkan SEMUA GC\n`;
+        txt += `│ • *del all* — nonaktifkan SEMUA GC\n`;
         txt += `│ ⏳ Menu berlaku *5 menit*\n`;
         txt += `╰──────────────────────`;
 
@@ -967,21 +968,31 @@ export async function handleAntilinkStatusReply({ hisoka, m, pendingAntilinkChoi
         return false;
     }
 
-    const teks  = (m.body || m.text || '').trim().toLowerCase();
-    const match = teks.match(/^(add|del)\s+([\d,\s]+)$/i);
-    if (!match) return false;
-
-    const aksi    = match[1].toLowerCase();
-    const nomor   = [...new Set(
-        match[2].split(/[,\s]+/).map(n => parseInt(n.trim())).filter(n => !isNaN(n) && n >= 1)
-    )];
-    if (!nomor.length) return false;
+    const teks     = (m.body || m.text || '').trim().toLowerCase();
+    const matchAll = teks.match(/^(add|del)\s+all$/i);
+    const match    = teks.match(/^(add|del)\s+([\d,\s]+)$/i);
+    if (!matchAll && !match) return false;
 
     const { gcList } = pending;
-    const dipilih   = nomor.map(n => gcList[n - 1]).filter(Boolean);
-    if (!dipilih.length) {
-        await tolak(hisoka, m, `❌ Nomor tidak valid. Pilih antara 1–${gcList.length}.`);
-        return true;
+    const aksi = (matchAll || match)[1].toLowerCase();
+
+    let dipilih;
+    if (matchAll) {
+        dipilih = gcList;
+        if (!dipilih.length) {
+            await tolak(hisoka, m, '❌ Tidak ada grup yang bisa diproses.');
+            return true;
+        }
+    } else {
+        const nomor = [...new Set(
+            match[2].split(/[,\s]+/).map(n => parseInt(n.trim())).filter(n => !isNaN(n) && n >= 1)
+        )];
+        if (!nomor.length) return false;
+        dipilih = nomor.map(n => gcList[n - 1]).filter(Boolean);
+        if (!dipilih.length) {
+            await tolak(hisoka, m, `❌ Nomor tidak valid. Pilih antara 1–${gcList.length}.`);
+            return true;
+        }
     }
 
     const config = loadConfig();
