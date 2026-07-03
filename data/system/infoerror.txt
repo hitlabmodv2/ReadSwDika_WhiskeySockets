@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 03/07/2026, 07.30.14  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 03/07/2026, 10.59.26  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -26,21 +26,21 @@
 │  #001  —  console.error
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [31m[HotReload] ✗ Gagal reload 'SEMUA_FITUR/menu/menu_jadibot.js', pakai versi lama.[39m
+│  [31m[CrashGuard] Too many errors, forcing restart...[39m
 │
 │  DETAIL
 │  Sumber      : console.error
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 03/07/2026, 07.30.14
-│  Terakhir    : 03/07/2026, 07.30.14
+│  Pertama     : 03/07/2026, 10.59.26
+│  Terakhir    : 03/07/2026, 10.59.26
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [31m[HotReload] ✗ Gagal reload 'SEMUA_FITUR/menu/menu_jadibot.js', pakai versi lama.[39m
+│  ▶  Error: [31m[CrashGuard] Too many errors, forcing restart...[39m
 │     at console.error (file:///home/runner/workspace/index.js:433:27)
-│     at Timeout._onTimeout (file:///home/runner/workspace/src/helper/hotReload.js:307:33)
+│     at process.<anonymous> (file:///home/runner/workspace/src/helper/crashGuard.js:115:21)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 03/07/2026, 07.30.14
+  Terakhir diperbarui: 03/07/2026, 10.59.26
 ════════════════════════════════════════════════════════════════════════
