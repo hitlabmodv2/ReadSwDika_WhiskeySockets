@@ -154,29 +154,48 @@ export class MemoryMonitor {
                         else if (pct >= 60) { color = '\x1b[33m'; icon = '⚠️ '; status = 'Waspada'; }
 
                         const barLen = 10;
-                        const filled = Math.round((pct / 100) * barLen);
-                        const bar = '█'.repeat(filled) + '░'.repeat(barLen - filled);
+                        const botFilled = Math.round((pct / 100) * barLen);
+                        const botBar = '█'.repeat(botFilled) + '░'.repeat(barLen - botFilled);
 
                         const sysPct = parseFloat(sysPercentage);
                         const sysColor = sysPct >= 90 ? '\x1b[31m' : sysPct >= 70 ? '\x1b[33m' : '\x1b[32m';
+                        const sysFilled = Math.round((sysPct / 100) * barLen);
+                        const sysBar = '█'.repeat(sysFilled) + '░'.repeat(barLen - sysFilled);
 
-                        const heapMB  = (memUsage.heapUsed  / (1024 * 1024)).toFixed(1);
-                        const limitGB = (this.memoryLimit    / (1024 * 1024 * 1024)).toFixed(2);
-                        const sysGB   = (systemMem.used      / (1024 * 1024 * 1024)).toFixed(2);
-                        const sysTGB  = (systemMem.total     / (1024 * 1024 * 1024)).toFixed(2);
+                        const heapUsedMB  = (memUsage.heapUsed  / (1024 * 1024)).toFixed(1);
+                        const heapTotalMB = (memUsage.heapTotal / (1024 * 1024)).toFixed(1);
+                        const extMB       = (memUsage.external  / (1024 * 1024)).toFixed(1);
+                        const limitFmt    = formatBytes(this.memoryLimit);
+                        const sysFreeFmt  = formatBytes(systemMem.free);
 
-                        const cyan  = '\x1b[36m';
-                        const reset = '\x1b[0m';
-                        const bold  = '\x1b[1m';
-                        const gray  = '\x1b[90m';
+                        const loadAvg  = os.loadavg();
+                        const cpuCores = os.cpus().length;
+                        const cpuColor = (v) => v >= 2 ? '\x1b[31m' : v >= 1 ? '\x1b[33m' : '\x1b[32m';
 
-                        console.log(`${gray}··················································${reset}`);
-                        console.log(`${cyan}[MemoryMonitor]${reset} ${icon} ${color}${bold}${status}${reset}`);
-                        console.log(`${gray}  Bot   :${reset} ${color}${bold}${formatBytes(currentUsage)}${reset} ${gray}(${percentage}% dari ${limitGB} GB)${reset}`);
-                        console.log(`${gray}  Heap  :${reset} ${heapMB} MB`);
-                        console.log(`${gray}  Sys   :${reset} ${sysColor}${bold}${sysPercentage}%${reset} ${gray}(${sysGB} / ${sysTGB} GB)${reset}`);
-                        console.log(`${gray}  Load  :${reset} [${color}${bar}${reset}] ${color}${percentage}%${reset}`);
-                        console.log(`${gray}··················································${reset}`);
+                        const uptimeSec = Math.floor(process.uptime());
+                        const uptimeDays  = Math.floor(uptimeSec / 86400);
+                        const uptimeHrs   = Math.floor((uptimeSec % 86400) / 3600);
+                        const uptimeMins  = Math.floor((uptimeSec % 3600) / 60);
+                        const uptimeStr   = uptimeDays > 0
+                                ? `${uptimeDays}d ${uptimeHrs}h ${uptimeMins}m`
+                                : uptimeHrs > 0
+                                        ? `${uptimeHrs}h ${uptimeMins}m`
+                                        : `${uptimeMins}m`;
+
+                        const cyan    = '\x1b[36m';
+                        const reset   = '\x1b[0m';
+                        const bold    = '\x1b[1m';
+                        const gray    = '\x1b[90m';
+                        const white   = '\x1b[97m';
+                        const magenta = '\x1b[35m';
+
+                        console.log(`${gray}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${reset}`);
+                        console.log(`${cyan}[MemoryMonitor]${reset} ${icon} ${color}${bold}${status}${reset}  ${gray}cek ke-${reset}${white}${bold}${this._checkCount}${reset} ${gray}|${reset} ${gray}uptime${reset} ${white}${bold}${uptimeStr}${reset}`);
+                        console.log(`${gray}  BOT ${reset}${color}${botBar}${reset} ${color}${bold}${percentage}%${reset}  ${white}${bold}${formatBytes(currentUsage)}${reset} ${gray}/${reset} ${white}${limitFmt}${reset}`);
+                        console.log(`${gray}  SYS ${reset}${sysColor}${sysBar}${reset} ${sysColor}${bold}${sysPercentage}%${reset}  ${white}${bold}${formatBytes(systemMem.used)}${reset} ${gray}/${reset} ${white}${formatBytes(systemMem.total)}${reset}  ${gray}free${reset} ${white}${bold}${sysFreeFmt}${reset}`);
+                        console.log(`${gray}  Heap ${reset}${cyan}${bold}${heapUsedMB}/${heapTotalMB} MB${reset}  ${gray}│  Ext ${reset}${cyan}${bold}${extMB} MB${reset}  ${gray}│  CPU ${reset}${cpuColor(loadAvg[0])}${bold}${loadAvg[0].toFixed(2)}${reset}${gray}, ${reset}${cpuColor(loadAvg[1])}${bold}${loadAvg[1].toFixed(2)}${reset}${gray}, ${reset}${cpuColor(loadAvg[2])}${bold}${loadAvg[2].toFixed(2)}${reset}  ${gray}(${reset}${white}${bold}${cpuCores} core${reset}${gray})${reset}`);
+                        console.log(`${gray}  PID ${reset}${white}${bold}${process.pid}${reset}  ${gray}│  Node ${reset}${white}${bold}${process.version}${reset}`);
+                        console.log(`${gray}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${reset}`);
                 }
 
                 if (currentUsage >= this.memoryLimit) {

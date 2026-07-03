@@ -202,13 +202,70 @@ module.exports.handleMemory = handleMemory;
 
 async function handleRam({ hisoka, m, tolak, logCommand }) {
         try {
+                const os = require('os');
                 const { formatBytes, getCurrentMemoryUsage, getSystemMemoryInfo } = await import('../../src/helper/memoryMonitor.js');
                 const memUsage  = getCurrentMemoryUsage();
                 const systemMem = getSystemMemoryInfo();
                 const memLimit  = global.memoryMonitor?.memoryLimit || systemMem.total;
-                const percentage       = ((memUsage.rss / memLimit) * 100).toFixed(1);
-                const systemPercentage = ((systemMem.used / systemMem.total) * 100).toFixed(1);
-                let text = `╭═══『 *RAM STATUS* 』═══╮\n│\n│ *Process Memory*\n│ ${formatBytes(memUsage.rss)} / ${formatBytes(memLimit)}\n│ Usage: ${percentage}%\n│\n│ *System Memory*\n│ ${formatBytes(systemMem.used)} / ${formatBytes(systemMem.total)}\n│ Usage: ${systemPercentage}%\n│\n╰═════════════════════╯`;
+
+                const botPct  = ((memUsage.rss / memLimit) * 100).toFixed(1);
+                const sysPct  = ((systemMem.used / systemMem.total) * 100).toFixed(1);
+
+                const barLen = 10;
+                const mkBar = (pct) => {
+                        const filled = Math.round((parseFloat(pct) / 100) * barLen);
+                        return '█'.repeat(filled) + '░'.repeat(barLen - filled);
+                };
+                const statusLabel = (pct) => parseFloat(pct) >= 80 ? '🔴 Kritis' : parseFloat(pct) >= 60 ? '⚠️ Waspada' : '✅ Normal';
+
+                const heapUsedMB  = (memUsage.heapUsed  / 1024 / 1024).toFixed(1);
+                const heapTotalMB = (memUsage.heapTotal / 1024 / 1024).toFixed(1);
+                const extMB       = (memUsage.external  / 1024 / 1024).toFixed(1);
+
+                const loadAvg  = os.loadavg();
+                const cpuCores = os.cpus().length;
+                const cpuModel = os.cpus()[0]?.model?.split('@')[0]?.trim() || 'Unknown';
+
+                const uptimeSec  = Math.floor(process.uptime());
+                const uptimeDays = Math.floor(uptimeSec / 86400);
+                const uptimeHrs  = Math.floor((uptimeSec % 86400) / 3600);
+                const uptimeMins = Math.floor((uptimeSec % 3600) / 60);
+                const uptimeStr  = uptimeDays > 0
+                        ? `${uptimeDays}d ${uptimeHrs}h ${uptimeMins}m`
+                        : uptimeHrs > 0
+                                ? `${uptimeHrs}h ${uptimeMins}m`
+                                : `${uptimeMins}m`;
+
+                const text =
+`╭═══『 *💾 RAM STATUS* 』═══╮
+│
+│ *🤖 BOT MEMORY*
+│ ${mkBar(botPct)} ${botPct}%
+│ Pakai  : *${formatBytes(memUsage.rss)}* / ${formatBytes(memLimit)}
+│ Status : ${statusLabel(botPct)}
+│
+│ *🖥️ SYSTEM MEMORY*
+│ ${mkBar(sysPct)} ${sysPct}%
+│ Pakai  : *${formatBytes(systemMem.used)}* / ${formatBytes(systemMem.total)}
+│ Bebas  : *${formatBytes(systemMem.free)}*
+│ Status : ${statusLabel(sysPct)}
+│
+│ *📊 DETAIL PROSES*
+│ Heap   : *${heapUsedMB} / ${heapTotalMB} MB*
+│ Ext    : *${extMB} MB*
+│
+│ *⚡ CPU*
+│ Load   : *${loadAvg[0].toFixed(2)}, ${loadAvg[1].toFixed(2)}, ${loadAvg[2].toFixed(2)}*
+│ Core   : *${cpuCores} core*
+│ Model  : ${cpuModel}
+│
+│ *🔧 SISTEM*
+│ Uptime : *${uptimeStr}*
+│ PID    : *${process.pid}*
+│ Node   : *${process.version}*
+│
+╰═════════════════════╯`;
+
                 await tolak(hisoka, m, text);
                 logCommand(m, hisoka, 'cekram');
         } catch (error) {
