@@ -5,7 +5,7 @@ _🔍 Masih dalam tahap pemantauan — informasi tanggal rilis akan diumumkan ke
 🤖 *WILY BOT — V25*
 ✨ *2 Fitur Baru*
 🔧 *3 Bug/Error Fix*
-🚀 *4 Perubahan*
+🚀 *6 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -75,3 +75,22 @@ _Biar tidak bingung mode kepencet ulang padahal sudah aktif:_
 2. Pilih *Default* saat sudah Default → bot balas _"Mode Default memang sudah aktif sebelumnya, tidak ada perubahan"_
 3. Kalau memang beda mode, bot balas *"berhasil diaktifkan"* seperti biasa
 > Berlaku untuk bot utama maupun jadibot, status dibaca akurat & realtime
+
+*5. 🖥️ MemoryMonitor Log — Tampilan & Warna Diperbaiki*
+_Log konsol sekarang lebih lengkap dan semua teks punya warna yang jelas sesuai konteks:_
+1. Baris header: `cek ke-N` dan `uptime Xd Xh Xm` kini *putih tebal* — sebelumnya abu-abu/tidak terbaca
+2. Baris BOT: nilai MB/GB kini *putih tebal*, bar & persentase warna sesuai status (hijau/kuning/merah)
+3. Baris SYS: nilai GB pakai, total, dan free kini *putih tebal*, warna bar/persen ikut beban sistem
+4. Tambah info: Heap used/total, External memory, CPU load average dengan warna per nilai (hijau<1, kuning<2, merah≥2), jumlah core
+5. Tambah info: PID dan versi Node kini tampil di baris bawah dengan teks putih tebal
+6. Garis pembatas diganti `━` agar lebih rapi
+> Format baru: `[MemoryMonitor] ✅ Normal  cek ke-1 | uptime 5m` → semua nilai kini terbaca jelas
+
+*6. 💾 .ram — Informasi Lebih Lengkap*
+_Output perintah `.ram` di WhatsApp diperluas dengan data sistem yang lebih detail:_
+1. BOT Memory — bar visual + persentase + pakai/limit + status otomatis (✅/⚠️/🔴)
+2. System Memory — bar visual + persentase + pakai/total + sisa bebas + status otomatis
+3. Detail Proses — Heap used/total dan External memory
+4. CPU — load average (1/5/15 mnt), jumlah core, model CPU
+5. Sistem — uptime proses, PID, versi Node
+> Sebelumnya hanya tampil 4 baris, sekarang info lengkap satu tampilan
