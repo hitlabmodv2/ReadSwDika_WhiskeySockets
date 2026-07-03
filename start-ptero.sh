@@ -97,17 +97,20 @@ RESTART_COUNT=0
 MAX_RESTARTS=10
 RESTART_DELAY=5
 
-echo "✅ Menjalankan bot dengan auto-restart..."
+echo -e "${C_CYAN}╭─────────────────────────╮${C_RESET}"
+echo -e "${C_CYAN}│${C_RESET} ${C_GREEN}✅ Auto-Restart Aktif${C_RESET}   ${C_CYAN}│${C_RESET}"
+echo -e "${C_CYAN}│${C_RESET} ${C_DIM}Max restart: ${MAX_RESTARTS}x${C_RESET}         ${C_CYAN}│${C_RESET}"
+echo -e "${C_CYAN}╰─────────────────────────╯${C_RESET}"
 while true; do
   node index.js
   EXIT_CODE=$?
   RESTART_COUNT=$((RESTART_COUNT + 1))
   NOW=$(date '+%Y-%m-%d %H:%M:%S')
 
-  echo "⚠️  [$NOW] Bot berhenti (exit code: $EXIT_CODE), restart ke-$RESTART_COUNT dalam ${RESTART_DELAY}s..."
+  echo -e "${C_YELLOW}⚠️  [$NOW]${C_RESET} Bot berhenti ${C_DIM}(exit: $EXIT_CODE)${C_RESET}, restart ke-${C_MAGENTA}$RESTART_COUNT${C_RESET} dalam ${RESTART_DELAY}s..."
 
   if [ "$RESTART_COUNT" -ge "$MAX_RESTARTS" ]; then
-    echo "❌ Terlalu banyak restart ($MAX_RESTARTS kali), bot dihentikan."
+    echo -e "\033[1;31m❌ Terlalu banyak restart ($MAX_RESTARTS kali), bot dihentikan.${C_RESET}"
     send_tg "❌ *Wily Bot - Pterodactyl*
 Bot dihentikan setelah $MAX_RESTARTS kali crash.
 Exit Code terakhir: \`$EXIT_CODE\`
