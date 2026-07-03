@@ -174,8 +174,8 @@ async function handleListcontact({ hisoka, m, tolak, logCommand }) {
 async function handleUpdate({ hisoka, m, tolak, logCommand, path, fs, isMainBot }) {
         if (!isMainBot(hisoka)) return;
         try {
-                const changelogPath = path.join(process.cwd(), 'changelog.txt');
-                if (!fs.existsSync(changelogPath)) { await tolak(hisoka, m, '❌ File changelog.txt tidak ditemukan.'); return; }
+                const changelogPath = path.join(process.cwd(), 'INFORMASI_UPDATE_V25.txt');
+                if (!fs.existsSync(changelogPath)) { await tolak(hisoka, m, '❌ File INFORMASI_UPDATE_V25.txt tidak ditemukan.'); return; }
                 const isiChangelog = fs.readFileSync(changelogPath, 'utf8').trim();
                 await hisoka.sendMessage(m.from, { react: { text: '📋', key: m.key } }).catch(() => {});
                 await hisoka.sendMessage(m.from, { text: isiChangelog }, { quoted: m });
