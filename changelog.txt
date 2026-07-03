@@ -10,44 +10,61 @@ _🔍 Masih dalam tahap pemantauan — informasi tanggal rilis akan diumumkan ke
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
 *1. 🔗 AntiLink — Bulk Toggle "off all" / "on all"*
-- Tambah perintah `.antilink off all` dan `.antilink on all` (khusus owner) untuk nonaktifkan/aktifkan AntiLink di SEMUA grup terdaftar sekaligus
-- Status langsung ditampilkan otomatis setelah toggle, digabung jadi satu pesan (tidak dobel)
+_Sekarang owner bisa atur AntiLink di semua grup sekaligus, tanpa satu-satu._
+1. Tambah perintah `.antilink off all` — nonaktifkan AntiLink di *semua grup terdaftar*, khusus owner
+2. Tambah perintah `.antilink on all` — aktifkan AntiLink di *semua grup terdaftar*, khusus owner
+3. Status langsung tampil otomatis setelah toggle, digabung jadi *satu pesan* _(tidak dobel)_
 
 *2. 🔗 AntiLink — "add all" / "del all" via Balas Status*
-- Saat membalas pesan status AntiLink, sekarang bisa ketik `add all` / `del all` untuk terapkan ke seluruh daftar grup, tidak perlu satu-satu
+_Saat membalas pesan status AntiLink, cukup ketik satu kata untuk terapkan ke semua grup:_
+• `add all` — tambahkan seluruh grup ke daftar aktif
+• `del all` — hapus seluruh grup dari daftar aktif
 ━━━━━━━━━━━━━━━━━━━━━━
 🔧 *BUG/ERROR FIX*
 ━━━━━━━━━━━━━━━━━━━━━━
 *1. 🎭 EmojiMode Log SW — Selalu Tampil "Default 🔵" Padahal Sudah Custom*
-- ~Bug: di log AutoReadStoryWhatsApp, baris EmojiMode selalu tampil "Default 🔵" meskipun user sudah set mode Custom~
-- Penyebab: `event.js` pakai `getJadibotEmojiMode()` yang baca dari `data_jadibot/<nomor>/emoji.json` — padahal bot utama simpan mode di `src/helper/emoji.json`
-- Fix: diganti ke `getMode()` dari `emoji.js` yang baca file yang benar untuk bot utama
-- Jadibot tidak terpengaruh — sudah benar sejak awal (baca dari `data_jadibot/<nomor>/emoji.json`)
+~Bug: di log AutoReadStoryWhatsApp, baris EmojiMode selalu tampil "Default 🔵" meskipun user sudah set mode Custom~
+1. _Penyebab:_ `event.js` pakai `getJadibotEmojiMode()` yang baca dari `data_jadibot/<nomor>/emoji.json` — padahal bot utama simpan mode di `src/helper/emoji.json`
+2. _Fix:_ diganti ke `getMode()` dari `emoji.js` yang baca file yang benar untuk bot utama
+3. _Catatan:_ jadibot tidak terpengaruh — sudah benar sejak awal _(baca dari `data_jadibot/<nomor>/emoji.json`)_
 > EmojiMode kini tampil akurat realtime sesuai mode aktif, tanpa restart bot
 
 *2. 🔗 AntiLink "off all" Tidak Sinkron dengan config.json*
-- ~Bug: setelah `.antilink off all`, `config.json` masih tampil `antiLink.enabled: true` walau tidak ada grup aktif tersisa~
-- Fix: `off all`, `off` (single, jika jadi grup aktif terakhir), dan `del`/`del all` via balas status sekarang otomatis set `antiLink.enabled: false` di `config.json` saat nol grup aktif tersisa
-- `on all`, `on`, `add`, `add all` tetap otomatis set `enabled: true` seperti sebelumnya
+~Bug: setelah `.antilink off all`, `config.json` masih tampil `antiLink.enabled: true` walau tidak ada grup aktif tersisa~
+1. _Fix:_ `off all` langsung set `antiLink.enabled: false` di `config.json` karena sudah pasti nol grup aktif
+2. _Fix:_ `off` (single grup) ikut set `enabled: false` kalau ternyata itu grup aktif terakhir
+3. _Fix:_ `del` / `del all` via balas status juga ikut set `enabled: false` saat hasilnya nol grup aktif
+4. _Tetap seperti semula:_ `on all`, `on`, `add`, `add all` otomatis set `enabled: true`
 > Status global AntiLink kini akurat realtime, selalu mencerminkan kondisi grup yang sebenarnya
 
 *3. ❌ AntiTagSW Error "isAntiTagSWEnabled is not a function"*
-- ~Bug: perintah `.antitagsw` selalu gagal dengan error tersebut~
-- Penyebab: `message.js` tidak meneruskan `isAntiTagSWEnabled` dan beberapa dependency lain (`saveCekautoTimestamp`, `getAllAntiTagSWGroups`, `getWarnings`, `resetWarnings`, `kvGet`, dll) ke handler `.antitagsw`
-- Fix: semua parameter yang dibutuhkan sudah dilengkapi di pemanggilan handler
+~Bug: perintah `.antitagsw` selalu gagal dengan error tersebut~
+1. _Penyebab:_ `message.js` tidak meneruskan beberapa dependency ke handler `.antitagsw`, di antaranya:
+   • `isAntiTagSWEnabled`
+   • `saveCekautoTimestamp`
+   • `getAllAntiTagSWGroups`, `getWarnings`, `resetWarnings`, `kvGet`, dll
+2. _Fix:_ semua parameter yang dibutuhkan sudah dilengkapi di pemanggilan handler
 > `.antitagsw` kini berjalan normal tanpa error
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *PERUBAHAN*
 ━━━━━━━━━━━━━━━━━━━━━━
 *1. 🟢 .online — Tampilan Tombol Single-Select*
-- Diubah dari teks polos menjadi tombol single-select seperti `.readsw` (section Mode Kehadiran + Interval Populer), lengkap tanda ✓ pada opsi aktif
-- Berlaku untuk bot utama maupun jadibot, status dibaca akurat & realtime
+_Tampilan diseragamkan dengan `.readsw` biar lebih enak dipakai:_
+1. Section *Mode Kehadiran* — Online / Offline
+2. Section *Interval Populer* — pilihan detik siap pakai
+3. Tanda ✓ otomatis muncul di opsi yang sedang aktif
+> Berlaku untuk bot utama maupun jadibot, status dibaca akurat & realtime
 
-*2. ⌨️ 🎙️ 👁️ .typing / .recording / .readchat — Tampilan Tombol Single-Select*
-- Ketiga fitur ini diseragamkan tampilannya dengan tombol single-select (Mode, Target Chat Private/Grup, Delay Populer untuk typing & recording)
-- Fallback teks tetap rapi dengan format WhatsApp (tebal, monospace, daftar bernomor, kutip)
-- Sudah disimulasikan 29 skenario command tanpa error sebelum diaktifkan
+*2. ⌨️🎙️👁️ .typing / .recording / .readchat — Tampilan Tombol Single-Select*
+_Ketiga fitur ini sekarang punya pengalaman yang konsisten:_
+• Section *Mode* — Aktif / Nonaktif
+• Section *Target Chat* — Private & Grup, bisa diatur terpisah _(khusus typing & recording)_
+• Section *Delay Populer* — pilihan detik siap pakai _(khusus typing & recording)_
+• Fallback teks tetap rapi dengan format WhatsApp: *tebal*, `monospace`, daftar bernomor, dan kutip
+> Sudah disimulasikan 29 skenario command tanpa error sebelum diaktifkan
 
 *3. 🔢 Versi Bot Tersentralisasi*
-- Tambah `botVersion` di `config.json` sebagai satu-satunya sumber versi bot
-- Menu utama, menu jadibot, dan pesan welcome jadibot sekarang otomatis ambil versi dari situ — tidak perlu edit banyak file lagi saat naik versi
+_Sekarang ganti versi bot tidak perlu cari-cari manual ke banyak file:_
+1. Tambah key `botVersion` di `config.json` sebagai satu-satunya sumber versi
+2. Menu utama, menu jadibot, dan pesan welcome jadibot otomatis ambil versi dari situ
+> Ganti versi cukup edit satu baris: `"botVersion": "V26"`
