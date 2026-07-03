@@ -1,39 +1,14 @@
 {
-  "AC2F5C60CB5B2EA35B0937E2A1CEF577": {
-    "id": "AC2F5C60CB5B2EA35B0937E2A1CEF577",
-    "sender": "6285731767059@s.whatsapp.net",
-    "name": "‎",
-    "type": "extendedTextMessage",
-    "arrivedAt": "2026-07-03T06:40:35.728Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
-    "resolve": "PN langsung ✓",
-    "source": "status",
-    "number": "6285731767059",
-    "resolvedPn": "6285731767059@s.whatsapp.net",
-    "messageKey": {
-      "remoteJid": "status@broadcast",
-      "remoteJidAlt": "6285731767059@s.whatsapp.net",
-      "fromMe": false,
-      "id": "AC2F5C60CB5B2EA35B0937E2A1CEF577",
-      "participant": "65365258334463@lid",
-      "addressingMode": "lid"
-    },
-    "updatedAt": "2026-07-03T06:54:32.013Z",
-    "deleted": true,
-    "deletedAt": "2026-07-03T06:54:32.013Z"
-  },
   "AC175AD570D20CED93501036746E96A3": {
     "id": "AC175AD570D20CED93501036746E96A3",
     "sender": "6285731767059@s.whatsapp.net",
     "name": "‎",
     "type": "videoMessage",
-    "arrivedAt": "2026-07-03T06:40:35.947Z",
+    "arrivedAt": "2026-07-03T06:54:34.414Z",
     "read": true,
     "reacted": true,
-    "emoji": "❤️",
-    "resolve": "PN langsung ✓",
+    "emoji": "🎃",
+    "resolve": "Signal Lib ✓",
     "source": "status",
     "number": "6285731767059",
     "resolvedPn": "6285731767059@s.whatsapp.net",
@@ -45,7 +20,7 @@
       "participant": "65365258334463@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-07-03T06:40:42.572Z",
+    "updatedAt": "2026-07-03T06:54:46.471Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -64,6 +39,6 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-07-03T06:40:42.572Z"
+    "processedAt": "2026-07-03T06:54:46.471Z"
   }
 }

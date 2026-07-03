@@ -556,6 +556,69 @@ export async function handleAntilink({ hisoka, m, query, tolak, logCommand, load
         );
     }
 
+    // ── off all — nonaktifkan AntiLink di SEMUA grup terdaftar (realtime) ───────
+    if (arg === 'off all' || arg === 'offall') {
+        if (!m.isOwner) return tolak(hisoka, m, '❌ Hanya owner bot yang bisa menonaktifkan AntiLink di semua grup!');
+
+        const aktifGroups = getAllAntiLinkGroups();
+        if (!aktifGroups.length) {
+            logCommand(m, hisoka, 'antilink off all');
+            return tolak(hisoka, m,
+                `╭─〔 🔴 *Anti-Link — Off All* 〕\n│\n` +
+                `│ ℹ️ *Tidak ada grup yang terdaftar aktif.*\n│\n` +
+                `> Semua grup memang sudah dalam\n> status *nonaktif (false)* secara default.\n│\n╰────────────────────`
+            );
+        }
+
+        for (const gid of aktifGroups) toggleAntiLink(gid, false);
+        logCommand(m, hisoka, 'antilink off all');
+
+        return tolak(hisoka, m,
+            `╭─〔 🔴 *Anti-Link — Off All* 〕\n│\n` +
+            `│ ✅ *AntiLink dinonaktifkan di semua grup!*\n│\n` +
+            `│ 🗑️ Total grup   : *${aktifGroups.length}*\n` +
+            `│ 💾 Status       : _tersimpan realtime_\n│\n` +
+            `> Semua warning di grup tersebut\n> juga telah _direset otomatis_.\n│\n` +
+            `│ 💡 Ketik *.antilink status* untuk cek ulang.\n│\n╰────────────────────`
+        );
+    }
+
+    // ── on all — aktifkan kembali AntiLink di semua grup yang pernah nonaktif ──
+    if (arg === 'on all' || arg === 'onall') {
+        if (!m.isOwner) return tolak(hisoka, m, '❌ Hanya owner bot yang bisa mengaktifkan AntiLink di semua grup!');
+
+        const config = lc();
+        let globalAutoEnabled = false;
+        if (!config.antiLink?.enabled) {
+            if (!config.antiLink) config.antiLink = {};
+            config.antiLink.enabled = true;
+            sc(config);
+            globalAutoEnabled = true;
+        }
+
+        const disabledGroups = getDisabledAntiLinkGroups();
+        if (!disabledGroups.length) {
+            logCommand(m, hisoka, 'antilink on all');
+            return tolak(hisoka, m,
+                `╭─〔 🟢 *Anti-Link — On All* 〕\n│\n` +
+                `│ ℹ️ *Tidak ada grup nonaktif yang bisa diaktifkan.*\n│\n` +
+                `> Gunakan \`.antilink add\` di grup baru\n> untuk mendaftarkannya.\n│\n╰────────────────────`
+            );
+        }
+
+        for (const gid of disabledGroups) toggleAntiLink(gid, true);
+        logCommand(m, hisoka, 'antilink on all');
+
+        return tolak(hisoka, m,
+            `╭─〔 🟢 *Anti-Link — On All* 〕\n│\n` +
+            `│ ✅ *AntiLink diaktifkan kembali di semua grup!*\n│\n` +
+            (globalAutoEnabled ? `│ 🌐 _Global juga diaktifkan otomatis!_\n│\n` : '') +
+            `│ ➕ Total grup   : *${disabledGroups.length}*\n` +
+            `│ 💾 Status       : _tersimpan realtime_\n│\n` +
+            `│ 💡 Ketik *.antilink status* untuk cek ulang.\n│\n╰────────────────────`
+        );
+    }
+
     // ── add ───────────────────────────────────────────────────────────────────
     if (arg === 'add') {
         const config = lc();
