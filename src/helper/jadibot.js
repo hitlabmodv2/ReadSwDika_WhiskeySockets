@@ -454,7 +454,8 @@ function extendJadibotExpiry(number, addedDurationMs, status = 'active') {
     addedDurationText: formatDurationMs(addMs),
     previousRemainingMs: oldRemainingMs,
     previousRemainingText: formatRemainingTime(oldRemainingMs),
-    status
+    status,
+    permanent: false,
   }
   data.bots[number] = meta
   saveJadibotRealtimeData(data)

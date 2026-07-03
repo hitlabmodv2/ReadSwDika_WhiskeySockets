@@ -98,17 +98,22 @@ _Log konsol dirombak agar muat & terbaca di layar mobile panel Pterodactyl:_
 10. CPU load: *hijau* < 1.0, *kuning* 1.0–2.0, *merah* ≥ 2.0
 > Format akhir 15 baris berurutan, bersih tanpa bar, pas di layar mobile Pterodactyl
 
-*7. 🌐 .ping — Upgrade ke SpeedTest.net Realtime*
-_Command `.ping` dirombak total — sekarang menjalankan speed test nyata ke server speedtest.net dan mengirim gambar hasil mirip tampilan speedtest.net/result:_
-1. Otomatis ambil 5 server speedtest.net terdekat, pilih yang ping-nya terkecil
-2. Ukur *Download* Mbps — unduh random JPEG (1500px–2500px) dari server terpilih
-3. Ukur *Upload* Mbps — POST data ke endpoint upload.php server speedtest.net
-4. Tampilkan *Ping* tiga nilai: idle (min) / download (avg) / upload (max)
-5. Ambil ISP, Kota, IP dari ipinfo.io secara paralel
-6. Hasilkan *gambar PNG 700×480px* dengan layout persis seperti speedtest.net/result (dark navy, angka besar DL/UL, 3 lingkaran ping berwarna, info ISP + Server + IP)
-7. Progress update realtime di WhatsApp: cari server → ukur DL → ukur UL → kirim gambar
-8. Caption WA lengkap: DL, UL, Ping (idle/DL/UL), Connections, ISP, Kota, Server, IP
-> Output simulasi dengan data `28.16 Mbps DL / 28.76 Mbps UL / Ping 7·8·7ms` terkonfirmasi render OK (700×480px, ~37KB)
+*7. 🌐 .ping — Gambar Hasil Didesain Ulang Total*
+_Command `.ping` kini menghasilkan gambar hasil yang jauh lebih rapi dan akurat, mirip tampilan speedtest.net/result:_
+1. *Gambar PNG 720×520px* — ~sebelumnya 700×480px, elemen tumpang tindih~
+2. _TopBar_ — logo ST·NET, brand `by Ookla`, timestamp WIB kanan atas
+3. _MainCard_ — angka besar *Download* (cyan) kiri & *Upload* (ungu) kanan, divider vertikal tengah
+4. _Ping Row_ — 3 lingkaran berwarna berlabel jelas: `IDLE` · `UNDUH` · `UNGGAH` (sebelumnya ~tanpa label, posisi tidak sejajar~)
+5. _InfoBar_ — 4 kolom rapi: `KONEKSI` · `ISP` · `SERVER` · `NEGARA` dengan separator (sebelumnya ~tumpang tindih~)
+6. _Footer_ — durasi test, `speedtest.net · WILY BOT`, `Powered by Ookla`
+7. _Fix bug:_ fungsi `xe()` ditambahkan — escape karakter `& < > " '` dari data API agar SVG tidak gagal parse
+8. ~IP server bot~ dihapus total dari gambar & caption — diganti kolom `NEGARA` — agar lokasi hosting tidak terbaca
+> Simulasi `45.73 Mbps DL / 18.21 Mbps UL / Ping 12·28·45ms` — render OK 720×520px ✅, IP tidak tampil
+
+*8. 🤖 .listbot — Fix Bug Perpanjang & Ubah Durasi Permanent*
+_Dua bug di reply `.listbot` saat bot berstatus Permanent:_
+1. _Fix bug:_ reply `1,p` memanggil `removeJadibotExpiry` (hapus data entri!) — harusnya `setPermanentJadibot` — kini `Sisa: Permanent` tersimpan & tampil benar
+2. _Fix bug:_ reply `1,1h` (atau durasi apapun) pada bot Permanent tidak membersihkan flag `permanent: true` di `extendJadibotExpiry` — bot tetap tampil "Permanent" meski sudah diubah ke waktu terbatas — kini flag dibersihkan eksplisit sehingga `Sisa` & `Expire` berubah realtime
 
 *6. 💾 .ram — Redesign Total, Format WA Native, Info Lengkap*
 _Output `.ram` di WhatsApp dirombak total — karakter kotak dihapus, diganti format WA yang proper:_

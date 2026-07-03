@@ -138,6 +138,17 @@ async function stGetIsp() {
 //  HELPER FORMAT
 // ─────────────────────────────────────────────────────────────────────────────
 
+// Escape karakter XML agar SVG tidak gagal parse saat ISP/server mengandung & < > " '
+function xe(str) {
+        if (!str) return '-';
+        return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&apos;');
+}
+
 function fmtNum(v) {
         if (v === null || v === undefined) return { num: 'N/A', unit: '' };
         if (v >= 1000) return { num: (v / 1000).toFixed(2), unit: 'Gbps' };
@@ -154,174 +165,196 @@ function pingClr(ms) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  SVG — layout akurat seperti speedtest.net/result
+//  SVG — layout bersih & akurat seperti speedtest.net/result
+//  Canvas: 720 × 520
+//  ┌─────────────────────────────────┐ y=0
+//  │  TOP BAR (logo + timestamp)     │ h=52
+//  ├─────────────────────────────────┤ y=60
+//  │  MAIN CARD  (DL | UL + Ping)    │ h=282 → y=342
+//  ├─────────────────────────────────┤ y=352
+//  │  INFO BAR  (ISP | Server | IP)  │ h=82  → y=434
+//  ├─────────────────────────────────┤ y=446
+//  │  FOOTER                         │ h=74  → y=520
+//  └─────────────────────────────────┘
 // ─────────────────────────────────────────────────────────────────────────────
 
 function buildSvg({ dl, ul, pingIdle, pingDl, pingUl, srv, isp, durasi }) {
         const dlF = fmtNum(dl);
         const ulF = fmtNum(ul);
 
-        // Speedtest.net pakai warna: DL = cyan (#00c8ff), UL = magenta (#be52f2)
-        // angka besar = putih/almost-white
-        const DL_CLR  = '#00c8ff';
-        const UL_CLR  = '#be52f2';
-        const NUM_CLR = '#f8fafc';  // hampir putih seperti di web
+        const DL_CLR  = '#00c8ff';   // cyan  ala speedtest.net
+        const UL_CLR  = '#be52f2';   // ungu  ala speedtest.net
+        const NUM_CLR = '#f8fafc';   // putih bersih angka besar
 
-        const piC  = pingClr(pingIdle);
-        const pdC  = pingClr(pingDl);
-        const puC  = pingClr(pingUl);
+        const piC = pingClr(pingIdle);
+        const pdC = pingClr(pingDl);
+        const puC = pingClr(pingUl);
 
-        const ispName    = (isp.isp   || '-').slice(0, 26);
-        const kotaName   = (isp.kota  || '-').slice(0, 18);
-        const srvSponsor = (srv?.sponsor || 'speedtest.net').slice(0, 26);
-        const srvCity    = (srv?.name    || '-').slice(0, 18);
-        const ipAddr     = isp.ip || '-';
-        const waktu      = new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' });
+        const ispName    = xe((isp.isp    || '-').slice(0, 24));
+        const kotaName   = xe((isp.kota   || '-').slice(0, 20));
+        const negaraName = xe((isp.negara || '-').slice(0, 10));
+        const srvSponsor = xe((srv?.sponsor || 'speedtest.net').slice(0, 24));
+        const srvCity    = xe((srv?.name    || '-').slice(0, 20));
+        const waktu      = xe(new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }));
 
-        // Ukuran: 720 x 460 — rasio mendekati hasil di speedtest.net
-        return `<svg width="720" height="460" xmlns="http://www.w3.org/2000/svg"
-        font-family="'Helvetica Neue',Helvetica,Arial,sans-serif">
+        return `<svg width="720" height="520" xmlns="http://www.w3.org/2000/svg"
+  font-family="'Helvetica Neue',Helvetica,Arial,sans-serif">
   <defs>
-    <!-- background gelap ala speedtest.net -->
     <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%"   stop-color="#141414"/>
-      <stop offset="100%" stop-color="#1a1a2e"/>
+      <stop offset="0%"   stop-color="#0d1117"/>
+      <stop offset="100%" stop-color="#161c26"/>
     </linearGradient>
-    <!-- panel card -->
     <linearGradient id="card" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%"   stop-color="#1f2d45"/>
-      <stop offset="100%" stop-color="#18253a"/>
+      <stop offset="0%"   stop-color="#1c2b42"/>
+      <stop offset="100%" stop-color="#152035"/>
     </linearGradient>
-    <!-- glow DL -->
     <radialGradient id="glowDL" cx="50%" cy="50%" r="50%">
-      <stop offset="0%"   stop-color="${DL_CLR}" stop-opacity="0.18"/>
+      <stop offset="0%"   stop-color="${DL_CLR}" stop-opacity="0.14"/>
       <stop offset="100%" stop-color="${DL_CLR}" stop-opacity="0"/>
     </radialGradient>
-    <!-- glow UL -->
     <radialGradient id="glowUL" cx="50%" cy="50%" r="50%">
-      <stop offset="0%"   stop-color="${UL_CLR}" stop-opacity="0.18"/>
+      <stop offset="0%"   stop-color="${UL_CLR}" stop-opacity="0.14"/>
       <stop offset="100%" stop-color="${UL_CLR}" stop-opacity="0"/>
     </radialGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.4"/>
+    </filter>
   </defs>
 
-  <!-- ── BACKGROUND ── -->
-  <rect width="720" height="460" fill="url(#bg)"/>
+  <!-- ══ BACKGROUND ══ -->
+  <rect width="720" height="520" fill="url(#bg)"/>
 
-  <!-- ── TOP BAR ── -->
-  <rect x="0" y="0" width="720" height="48" fill="#0f0f1a"/>
-  <!-- speedtest logo circle -->
-  <circle cx="32" cy="24" r="15" fill="#0f0f1a" stroke="${DL_CLR}" stroke-width="1.5"/>
-  <text x="32" y="20" text-anchor="middle" font-size="8"  fill="${DL_CLR}" font-weight="700">⚡</text>
-  <text x="32" y="31" text-anchor="middle" font-size="7"  fill="${DL_CLR}">ST</text>
-  <!-- speedtest by ookla -->
-  <text x="56" y="18" font-size="9"  fill="#94a3b8" font-weight="400" letter-spacing="1">SPEEDTEST</text>
-  <text x="56" y="33" font-size="14" fill="#f1f5f9" font-weight="700">by Ookla</text>
-  <!-- result timestamp -->
-  <text x="700" y="22" text-anchor="end" font-size="9"  fill="#475569">Result</text>
-  <text x="700" y="36" text-anchor="end" font-size="9"  fill="${DL_CLR}">${waktu} WIB</text>
+  <!-- ══ TOP BAR (y 0–52) ══ -->
+  <rect x="0" y="0" width="720" height="52" fill="#08080f"/>
+  <!-- Logo area -->
+  <circle cx="28" cy="26" r="17" fill="#08080f" stroke="${DL_CLR}" stroke-width="1.5"/>
+  <text x="28" y="22" text-anchor="middle" font-size="9"  fill="${DL_CLR}" font-weight="800">ST</text>
+  <text x="28" y="33" text-anchor="middle" font-size="8"  fill="${DL_CLR}">NET</text>
+  <!-- Brand text -->
+  <text x="54" y="20" font-size="9"  fill="#475569" font-weight="500" letter-spacing="2">SPEEDTEST</text>
+  <text x="54" y="37" font-size="15" fill="#f1f5f9" font-weight="700">by Ookla</text>
+  <!-- Timestamp kanan -->
+  <text x="700" y="20" text-anchor="end" font-size="9"  fill="#334155">HASIL TEST</text>
+  <text x="700" y="37" text-anchor="end" font-size="10" fill="${DL_CLR}" font-weight="600">${waktu} WIB</text>
 
-  <!-- ── MAIN CARD ── -->
-  <rect x="20" y="60" width="680" height="300" rx="12" fill="url(#card)" stroke="#2a3a56" stroke-width="1"/>
+  <!-- ══ MAIN CARD (y 60–342, h=282) ══ -->
+  <rect x="18" y="60" width="684" height="282" rx="14" fill="url(#card)" stroke="#243448" stroke-width="1.5"/>
 
-  <!-- glow DL kiri -->
-  <ellipse cx="195" cy="160" rx="160" ry="100" fill="url(#glowDL)"/>
-  <!-- glow UL kanan -->
-  <ellipse cx="525" cy="160" rx="160" ry="100" fill="url(#glowUL)"/>
+  <!-- Glow efek kiri-kanan -->
+  <ellipse cx="185" cy="170" rx="155" ry="95" fill="url(#glowDL)"/>
+  <ellipse cx="535" cy="170" rx="155" ry="95" fill="url(#glowUL)"/>
 
-  <!-- divider vertikal -->
-  <line x1="360" y1="75" x2="360" y2="295" stroke="#2a3a56" stroke-width="1"/>
+  <!-- Divider vertikal tengah -->
+  <line x1="360" y1="76" x2="360" y2="236" stroke="#243448" stroke-width="1"/>
 
-  <!-- ── DOWNLOAD KOLOM KIRI ── -->
-  <!-- ikon panah download -->
-  <circle cx="160" cy="98" r="12" fill="none" stroke="${DL_CLR}" stroke-width="1.5"/>
-  <text x="160" y="103" text-anchor="middle" font-size="12" fill="${DL_CLR}">↓</text>
-  <!-- label DOWNLOAD -->
-  <text x="225" y="95" font-size="11" fill="${DL_CLR}" font-weight="600" letter-spacing="1">DOWNLOAD</text>
-  <text x="225" y="110" font-size="9"  fill="#64748b">Mbps</text>
+  <!-- ── DOWNLOAD — kolom kiri ── -->
+  <!-- Ikon lingkaran + label -->
+  <circle cx="110" cy="96" r="15" fill="none" stroke="${DL_CLR}" stroke-width="2"/>
+  <text x="110" y="102" text-anchor="middle" font-size="15" fill="${DL_CLR}">↓</text>
+  <text x="134" y="91"  font-size="11" fill="${DL_CLR}" font-weight="700" letter-spacing="1.5">DOWNLOAD</text>
+  <text x="134" y="107" font-size="9"  fill="#3d5068">Megabits per second</text>
+  <!-- Angka besar DL — center kolom kiri (cx≈185) -->
+  <text x="185" y="196" text-anchor="middle" font-size="78" fill="${NUM_CLR}" font-weight="700"
+        textLength="270" lengthAdjust="spacingAndGlyphs">${dlF.num}</text>
+  <text x="185" y="220" text-anchor="middle" font-size="14" fill="#64748b">${dlF.unit}</text>
 
-  <!-- angka besar DL -->
-  <text x="200" y="190" text-anchor="middle" font-size="70" fill="${NUM_CLR}" font-weight="700"
-        style="letter-spacing:-2px">${dlF.num}</text>
-  <!-- unit Mbps/Gbps di bawah angka -->
-  <text x="200" y="212" text-anchor="middle" font-size="13" fill="#94a3b8">${dlF.unit}</text>
+  <!-- ── UPLOAD — kolom kanan ── -->
+  <circle cx="440" cy="96" r="15" fill="none" stroke="${UL_CLR}" stroke-width="2"/>
+  <text x="440" y="102" text-anchor="middle" font-size="15" fill="${UL_CLR}">↑</text>
+  <text x="464" y="91"  font-size="11" fill="${UL_CLR}" font-weight="700" letter-spacing="1.5">UPLOAD</text>
+  <text x="464" y="107" font-size="9"  fill="#3d5068">Megabits per second</text>
+  <!-- Angka besar UL — center kolom kanan (cx≈535) -->
+  <text x="535" y="196" text-anchor="middle" font-size="78" fill="${NUM_CLR}" font-weight="700"
+        textLength="270" lengthAdjust="spacingAndGlyphs">${ulF.num}</text>
+  <text x="535" y="220" text-anchor="middle" font-size="14" fill="#64748b">${ulF.unit}</text>
 
-  <!-- ── UPLOAD KOLOM KANAN ── -->
-  <!-- ikon panah upload -->
-  <circle cx="490" cy="98" r="12" fill="none" stroke="${UL_CLR}" stroke-width="1.5"/>
-  <text x="490" y="103" text-anchor="middle" font-size="12" fill="${UL_CLR}">↑</text>
-  <!-- label UPLOAD -->
-  <text x="555" y="95" font-size="11" fill="${UL_CLR}" font-weight="600" letter-spacing="1">UPLOAD</text>
-  <text x="555" y="110" font-size="9"  fill="#64748b">Mbps</text>
+  <!-- ── Divider horizontal dalam card ── -->
+  <line x1="34" y1="236" x2="686" y2="236" stroke="#1d2c40" stroke-width="1"/>
 
-  <!-- angka besar UL -->
-  <text x="525" y="190" text-anchor="middle" font-size="70" fill="${NUM_CLR}" font-weight="700"
-        style="letter-spacing:-2px">${ulF.num}</text>
-  <!-- unit -->
-  <text x="525" y="212" text-anchor="middle" font-size="13" fill="#94a3b8">${ulF.unit}</text>
+  <!-- ── PING ROW (y 236–342) ── -->
+  <!-- Label kiri -->
+  <text x="38"  y="262" font-size="10" fill="#475569" font-weight="700" letter-spacing="1.5">PING</text>
+  <text x="38"  y="277" font-size="9"  fill="#2d4060">ms</text>
 
-  <!-- ── PING ROW ── -->
-  <!-- "Ping ms" label -->
-  <text x="44" y="258" font-size="11" fill="#64748b">Ping  ms</text>
+  <!-- Lingkaran IDLE — x=185 -->
+  <circle cx="185" cy="272" r="26" fill="#09111e" stroke="${piC}" stroke-width="2.5"/>
+  <circle cx="185" cy="262" r="4"  fill="${piC}"/>
+  <text x="185" y="283" text-anchor="middle" font-size="15" fill="${piC}" font-weight="700">${pingIdle ?? '-'}</text>
+  <!-- Sub-label -->
+  <text x="185" y="314" text-anchor="middle" font-size="9" fill="#3d5068" letter-spacing="1">IDLE</text>
 
-  <!-- lingkaran ping IDLE -->
-  <circle cx="200" cy="252" r="22" fill="#111827" stroke="${piC}" stroke-width="2"/>
-  <!-- ikon titik idle -->
-  <circle cx="200" cy="244" r="3" fill="${piC}"/>
-  <text x="200" y="261" text-anchor="middle" font-size="13" fill="${piC}" font-weight="700">${pingIdle ?? '-'}</text>
+  <!-- Lingkaran DOWNLOAD — x=360 -->
+  <circle cx="360" cy="272" r="26" fill="#09111e" stroke="${pdC}" stroke-width="2.5"/>
+  <text x="360" y="267" text-anchor="middle" font-size="12" fill="${pdC}">↓</text>
+  <text x="360" y="284" text-anchor="middle" font-size="15" fill="${pdC}" font-weight="700">${pingDl ?? '-'}</text>
+  <text x="360" y="314" text-anchor="middle" font-size="9" fill="#3d5068" letter-spacing="1">UNDUH</text>
 
-  <!-- lingkaran ping DOWNLOAD -->
-  <circle cx="360" cy="252" r="22" fill="#111827" stroke="${pdC}" stroke-width="2"/>
-  <text x="360" y="248" text-anchor="middle" font-size="10" fill="${pdC}">↓</text>
-  <text x="360" y="263" text-anchor="middle" font-size="13" fill="${pdC}" font-weight="700">${pingDl ?? '-'}</text>
+  <!-- Lingkaran UPLOAD — x=535 -->
+  <circle cx="535" cy="272" r="26" fill="#09111e" stroke="${puC}" stroke-width="2.5"/>
+  <text x="535" y="267" text-anchor="middle" font-size="12" fill="${puC}">↑</text>
+  <text x="535" y="284" text-anchor="middle" font-size="15" fill="${puC}" font-weight="700">${pingUl ?? '-'}</text>
+  <text x="535" y="314" text-anchor="middle" font-size="9" fill="#3d5068" letter-spacing="1">UNGGAH</text>
 
-  <!-- lingkaran ping UPLOAD -->
-  <circle cx="525" cy="252" r="22" fill="#111827" stroke="${puC}" stroke-width="2"/>
-  <text x="525" y="248" text-anchor="middle" font-size="10" fill="${puC}">↑</text>
-  <text x="525" y="263" text-anchor="middle" font-size="13" fill="${puC}" font-weight="700">${pingUl ?? '-'}</text>
+  <!-- ══ INFO BAR (y 352–434, h=82) ══ -->
+  <rect x="18" y="352" width="684" height="82" rx="10" fill="#0c1520" stroke="#1c2b3e" stroke-width="1"/>
 
-  <!-- divider horizontal -->
-  <line x1="20" y1="308" x2="700" y2="308" stroke="#1e2d44" stroke-width="1"/>
+  <!-- Col 1: Koneksi (x=18 → x=150) -->
+  <text x="36"  y="378" font-size="8"  fill="#3d5068" letter-spacing="1.5">KONEKSI</text>
+  <text x="36"  y="397" font-size="13" fill="#94a3b8" font-weight="600">Multi</text>
+  <text x="36"  y="413" font-size="9"  fill="#2d4060">Threads</text>
 
-  <!-- ── INFO SECTION ── -->
-  <!-- Connections -->
-  <text x="44"  y="334" font-size="10" fill="#64748b">Connections</text>
-  <text x="44"  y="352" font-size="13" fill="#cbd5e1">Multi</text>
+  <!-- Sep 1 -->
+  <line x1="148" y1="360" x2="148" y2="426" stroke="#1c2b3e" stroke-width="1"/>
 
-  <!-- ISP kiri -->
-  <!-- globe icon -->
-  <circle cx="208" cy="325" r="10" fill="none" stroke="#334155" stroke-width="1"/>
-  <text x="208" y="329" text-anchor="middle" font-size="8" fill="#64748b">🌐</text>
-  <text x="225" y="330" font-size="13" fill="#f1f5f9" font-weight="600">${ispName}</text>
-  <text x="225" y="346" font-size="10" fill="#64748b">${kotaName}</text>
+  <!-- Col 2: ISP (x=160 → x=338) -->
+  <circle cx="172" cy="374" r="9" fill="none" stroke="#243448" stroke-width="1"/>
+  <text x="172" y="378" text-anchor="middle" font-size="8" fill="#3d5068">🌐</text>
+  <text x="188" y="378" font-size="8"  fill="#3d5068" letter-spacing="1.5">ISP</text>
+  <text x="160" y="397" font-size="13" fill="#e2e8f0" font-weight="600">${ispName}</text>
+  <text x="160" y="413" font-size="9"  fill="#3d5068">${kotaName}</text>
 
-  <!-- Server / Provider kanan -->
-  <!-- person icon -->
-  <circle cx="458" cy="325" r="10" fill="none" stroke="#334155" stroke-width="1"/>
-  <text x="458" y="329" text-anchor="middle" font-size="8" fill="#64748b">👤</text>
-  <text x="475" y="330" font-size="13" fill="#f1f5f9" font-weight="600">${srvSponsor}</text>
-  <text x="475" y="346" font-size="10" fill="#64748b">${srvCity}</text>
-  <!-- IP -->
-  <text x="475" y="360" font-size="10" fill="#38bdf8">${ipAddr}</text>
+  <!-- Sep 2 -->
+  <line x1="336" y1="360" x2="336" y2="426" stroke="#1c2b3e" stroke-width="1"/>
 
-  <!-- ── FOOTER BAR ── -->
-  <rect x="0" y="380" width="720" height="80" fill="#0a0a14"/>
-  <line x1="0" y1="380" x2="720" y2="380" stroke="#1e2a3a" stroke-width="1"/>
+  <!-- Col 3: Server (x=348 → x=530) -->
+  <circle cx="360" cy="374" r="9" fill="none" stroke="#243448" stroke-width="1"/>
+  <text x="360" y="378" text-anchor="middle" font-size="8" fill="#3d5068">📡</text>
+  <text x="376" y="378" font-size="8"  fill="#3d5068" letter-spacing="1.5">SERVER</text>
+  <text x="348" y="397" font-size="13" fill="#e2e8f0" font-weight="600">${srvSponsor}</text>
+  <text x="348" y="413" font-size="9"  fill="#3d5068">${srvCity}</text>
 
-  <text x="44"  y="404" font-size="9"  fill="#334155">DURASI TEST</text>
-  <text x="44"  y="420" font-size="12" fill="#64748b">${durasi}s</text>
+  <!-- Sep 3 -->
+  <line x1="528" y1="360" x2="528" y2="426" stroke="#1c2b3e" stroke-width="1"/>
 
-  <text x="360" y="408" text-anchor="middle" font-size="10" fill="#334155">speedtest.net · WILY BOT</text>
-  <text x="360" y="425" text-anchor="middle" font-size="9"  fill="#1e3a5f">${waktu} WIB</text>
+  <!-- Col 4: Negara (x=540 → x=702) -->
+  <text x="540" y="378" font-size="8"  fill="#3d5068" letter-spacing="1.5">NEGARA</text>
+  <text x="540" y="397" font-size="13" fill="#e2e8f0" font-weight="600">${negaraName}</text>
 
-  <text x="676" y="404" text-anchor="end" font-size="9"  fill="#334155">POWERED BY</text>
-  <text x="676" y="420" text-anchor="end" font-size="13" fill="${DL_CLR}" font-weight="700">Ookla</text>
+  <!-- ══ FOOTER (y 446–520, h=74) ══ -->
+  <rect x="0" y="446" width="720" height="74" fill="#060810"/>
+  <line x1="0" y1="446" x2="720" y2="446" stroke="#172030" stroke-width="1"/>
+
+  <!-- Durasi kiri -->
+  <text x="36"  y="470" font-size="8"  fill="#243448" letter-spacing="1.5">DURASI TEST</text>
+  <text x="36"  y="490" font-size="14" fill="#475569" font-weight="600">${durasi}s</text>
+
+  <!-- Center branding -->
+  <text x="360" y="468" text-anchor="middle" font-size="10" fill="#1e3050">speedtest.net · WILY BOT</text>
+  <text x="360" y="484" text-anchor="middle" font-size="10" fill="#172540">${waktu} WIB</text>
+  <text x="360" y="500" text-anchor="middle" font-size="9"  fill="#0e1a2a">www.speedtest.net</text>
+
+  <!-- Powered by kanan -->
+  <text x="684" y="470" text-anchor="end" font-size="8"  fill="#243448" letter-spacing="1.5">POWERED BY</text>
+  <text x="684" y="490" text-anchor="end" font-size="15" fill="${DL_CLR}" font-weight="700">Ookla</text>
 </svg>`;
 }
 
+// PNG penuh (dikirim sebagai gambar utama)
 async function buatGambar(data) {
         const sharp = require('sharp');
         return sharp(Buffer.from(buildSvg(data))).png().toBuffer();
 }
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  CAPTION WhatsApp — format lengkap (bold/italic/coret/mono/list/poin/kutip)
@@ -355,7 +388,6 @@ function buildCaption({ dl, ul, pingIdle, pingDl, pingUl, srv, isp, durasi, waLa
         const ulLbl = labelKecepatan(ul);
         const waLbl = labelWaLatency(waLatency);
 
-        // Format angka: bold nilai, italic label kualitas
         const dlTxt = dl
                 ? `*${dlF.num} ${dlF.unit}* — ${dlLbl.e} _${dlLbl.t}_`
                 : '~Gagal diukur~';
@@ -363,26 +395,20 @@ function buildCaption({ dl, ul, pingIdle, pingDl, pingUl, srv, isp, durasi, waLa
                 ? `*${ulF.num} ${ulF.unit}* — ${ulLbl.e} _${ulLbl.t}_`
                 : '~Gagal diukur~';
 
-        // Nilai ping: monospace supaya rata, pakai kutip jika ada catatan
         const pgI = pingIdle != null ? `\`${pingIdle} ms\`` : '`-`';
         const pgD = pingDl   != null ? `\`${pingDl} ms\``   : '`-`';
         const pgU = pingUl   != null ? `\`${pingUl} ms\``   : '`-`';
 
-        // Info server
-        const srvLine   = srv ? `_${srv.sponsor} — ${srv.name}, ${srv.country}_` : '_-_';
-        const kotaLine  = `_${isp.kota || '-'}, ${isp.negara || '-'}_`;
-        const ispLine   = `_${isp.isp  || '-'}_`;
-
-        // WA latency
-        const waMs = waLatency != null ? `\`${waLatency} ms\`` : '`-`';
-
-        const waktu = new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' });
+        const srvLine  = srv ? `_${srv.sponsor} — ${srv.name}, ${srv.country}_` : '_-_';
+        const kotaLine = `_${isp.kota || '-'}, ${isp.negara || '-'}_`;
+        const ispLine  = `_${isp.isp  || '-'}_`;
+        const waMs     = waLatency != null ? `\`${waLatency} ms\`` : '`-`';
+        const waktu    = new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' });
 
         return (
                 `🌐 *SPEEDTEST.NET — REALTIME*\n` +
                 `${SEP}\n\n` +
 
-                // ── Hasil kecepatan: daftar bernomor ─────────────────
                 `*📊 Hasil Kecepatan*\n\n` +
                 `1. 📥 *Download*\n` +
                 `   • Kecepatan : ${dlTxt}\n\n` +
@@ -390,26 +416,23 @@ function buildCaption({ dl, ul, pingIdle, pingDl, pingUl, srv, isp, durasi, waLa
                 `   • Kecepatan : ${ulTxt}\n\n` +
                 `3. 🏓 *Ping (ms)*\n` +
                 `   • ⚫ Idle     : ${pgI}\n` +
-                `   • ↓ Download : ${pgD}\n` +
-                `   • ↑ Upload   : ${pgU}\n\n` +
+                `   • ↓ Unduh   : ${pgD}\n` +
+                `   • ↑ Unggah  : ${pgU}\n\n` +
 
                 `${SEP}\n` +
 
-                // ── Info koneksi: daftar berpoint ──────────────────────
                 `*📋 Info Koneksi*\n` +
                 `${SEP2}\n` +
                 `• 🔗 Koneksi : Multi\n` +
                 `• 🏢 ISP     : ${ispLine}\n` +
                 `• 📍 Lokasi  : ${kotaLine}\n` +
                 `• 🌍 Server  : ${srvLine}\n` +
-                `• 🔌 IP      : \`${isp.ip || '-'}\`\n\n` +
+                `• 🌍 Negara  : _${isp.negara || '-'}_\n\n` +
 
-                // ── Catatan penting: kutip (blockquote) ─────────────────
                 `> ℹ️ Ini kecepatan *server bot*, ~bukan koneksi internet kamu~ — wajar berbeda dari speedtest.net di browser\n\n` +
 
                 `${SEP}\n` +
 
-                // ── Respons bot ke WA ──────────────────────────────────
                 `*⚡ Respons Bot ke WA*\n` +
                 `${SEP2}\n` +
                 `• Latensi : ${waMs} — ${waLbl.e} _${waLbl.t}_\n\n` +
@@ -426,7 +449,7 @@ function buildCaption({ dl, ul, pingIdle, pingDl, pingUl, srv, isp, durasi, waLa
 async function handlePing({ hisoka, m, tolak, logCommand }) {
         let statusMsg;
         try {
-                // Ukur WA latency sebelum apapun: selisih waktu pesan masuk vs sekarang
+                // Ukur WA latency sebelum apapun
                 const waLatency = Math.abs(Date.now() - m.messageTimestamp * 1000);
 
                 statusMsg = await m.reply('🌐 _Menghubungi speedtest.net..._');
@@ -464,19 +487,22 @@ async function handlePing({ hisoka, m, tolak, logCommand }) {
                 const ulMbps = await stUpload(srv.url);
 
                 const durasi = ((Date.now() - t0) / 1000).toFixed(1);
+                const hasil  = { dl: dlMbps, ul: ulMbps, pingIdle, pingDl, pingUl, srv, isp: ispInfo, durasi, waLatency };
 
-                const hasil = { dl: dlMbps, ul: ulMbps, pingIdle, pingDl, pingUl, srv, isp: ispInfo, durasi, waLatency };
-
-                // 5. Render gambar + caption paralel
+                // 5. Render gambar PNG + caption paralel
                 const [imgBuf, caption] = await Promise.all([
                         buatGambar(hasil),
                         Promise.resolve(buildCaption(hasil)),
                 ]);
 
-                // 6. Hapus status, kirim gambar
+                // 6. Hapus pesan status
                 await hisoka.sendMessage(m.from, { delete: statusMsg.key });
+
+                // 7. Kirim gambar PNG + caption
                 await hisoka.sendMessage(m.from, {
-                        image: imgBuf, mimetype: 'image/png', caption,
+                        image   : imgBuf,
+                        mimetype: 'image/png',
+                        caption,
                 }, { quoted: m });
 
                 logCommand(m, hisoka, 'ping');

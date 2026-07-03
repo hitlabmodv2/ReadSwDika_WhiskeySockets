@@ -546,7 +546,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                 const oldUpLabel = oldUpInfo?.remaining || 'Tidak ada data';
                                                 const oldUpExpire = oldUpInfo?.expiresAtText || '-';
                                                 if (upDurInfo.ms === 'permanent') {
-                                                        removeJadibotExpiry(targetNum);
+                                                        setPermanentJadibot(targetNum, 'active');
                                                         await hisoka.sendMessage(m.from, { react: { text: '♾️', key: m.key } });
                                                         await tolak(hisoka, m,
                                                                 `╔══════════════════════╗\n` +
