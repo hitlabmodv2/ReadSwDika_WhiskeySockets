@@ -1996,6 +1996,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
                 try {
                   const _d = JSON.parse(fs.readFileSync(_fp, 'utf-8'))
                   if (_d[_deletedId]) {
+                    if (_d[_deletedId].deleted) break // sudah pernah dicatat (persisted) → jangan log lagi
                     _d[_deletedId] = { ..._d[_deletedId], deleted: true, deletedAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
                     fs.writeFileSync(_fp, JSON.stringify(_d, null, 2), 'utf-8')
                     const _contactNum = _file.replace('.json', '')

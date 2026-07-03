@@ -60,9 +60,18 @@ import {
         getStoryCountToday,
 } from '../../src/helper/swtrack.js';
 
-// ── Dedup log "SW dihapus": revoke story bisa terkirim 2x (notify + append) ──
+// ── Dedup log "SW dihapus": revoke story bisa terkirim >1x (notify + append,
+// atau replay saat reconnect). Skip cepat via memori untuk hindari scan file
+// berulang; ground truth sebenarnya ada di flag `deleted` yg tersimpan di disk
+// (lihat pemakaian di bawah) sehingga tetap akurat 100% walau proses restart.
 const _recentSwRevoke = new Map();
-const _SW_REVOKE_DEDUPE_TTL = 60 * 1000;
+const _SW_REVOKE_DEDUPE_TTL = 10 * 60 * 1000; // bersihkan entri memori setelah 10 menit
+setInterval(() => {
+        const cutoff = Date.now() - _SW_REVOKE_DEDUPE_TTL;
+        for (const [k, ts] of _recentSwRevoke) {
+                if (ts < cutoff) _recentSwRevoke.delete(k);
+        }
+}, 5 * 60 * 1000).unref?.();
 
 function loadConfig() {
         try {
@@ -122,17 +131,13 @@ export default async function (m, hisoka) {
                                         const isStatusRevoke =
                                                 m.key?.remoteJid === 'status@broadcast' ||
                                                 key?.remoteJid === 'status@broadcast';
-                                        // Dedup: event revoke yang sama bisa terkirim 2x
-                                        // (via type 'notify' & 'append'), jangan diproses ulang
+                                        // Dedup 100% akurat: skip cepat via memori (hindari scan file
+                                        // berulang saat event sama datang beruntun dalam 1 proses),
+                                        // TAPI status "sudah dicatat" yg sebenarnya (ground truth)
+                                        // diambil dari flag `deleted` yg tersimpan di disk, jadi
+                                        // tetap tidak dobel walau bot restart/reconnect berkali-kali.
                                         if (isStatusRevoke && key?.id && _recentSwRevoke.has(key.id)) break;
                                         if (isStatusRevoke && key?.id) {
-                                                _recentSwRevoke.set(key.id, Date.now());
-                                                if (_recentSwRevoke.size > 500) {
-                                                        const cutoff = Date.now() - _SW_REVOKE_DEDUPE_TTL;
-                                                        for (const [k, ts] of _recentSwRevoke) {
-                                                                if (ts < cutoff) _recentSwRevoke.delete(k);
-                                                        }
-                                                }
                                                 // Scan semua file user, cari msgId ini, mark deleted
                                                 // (tidak pakai extractSwNumber karena bisa dapat LID bukan nomor HP)
                                                 try {
@@ -143,6 +148,8 @@ export default async function (m, hisoka) {
                                                                         try {
                                                                                 const d = JSON.parse(fs.readFileSync(fp, 'utf-8'));
                                                                                 if (d[key.id]) {
+                                                                                        _recentSwRevoke.set(key.id, Date.now());
+                                                                                        if (d[key.id].deleted) break; // sudah pernah dicatat (persisted) → jangan log lagi
                                                                                         d[key.id] = { ...d[key.id], deleted: true, deletedAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
                                                                                         fs.writeFileSync(fp, JSON.stringify(d, null, 2), 'utf-8');
                                                                                         const num = file.replace('.json', '');
