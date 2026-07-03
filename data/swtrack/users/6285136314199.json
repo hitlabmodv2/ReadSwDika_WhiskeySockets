@@ -289,5 +289,28 @@
     "processedAt": "2026-07-03T10:52:09.180Z",
     "deleted": true,
     "deletedAt": "2026-07-03T10:55:15.462Z"
+  },
+  "AC7EDE51F4C5E967A358ED87BA424051": {
+    "id": "AC7EDE51F4C5E967A358ED87BA424051",
+    "sender": "6285136314199@s.whatsapp.net",
+    "name": "Nurull",
+    "type": "imageMessage",
+    "arrivedAt": "2026-07-03T15:48:44.654Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285136314199",
+    "resolvedPn": "6285136314199@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285136314199@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC7EDE51F4C5E967A358ED87BA424051",
+      "participant": "90916371062907@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-03T15:48:44.655Z"
   }
 }

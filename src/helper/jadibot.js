@@ -2715,5 +2715,7 @@ export {
   scheduleJadibotExpiry,
   pauseAllJadibotTimers,
   resumeAllJadibotTimers,
-  restoreConnectedAtMap
+  restoreConnectedAtMap,
+  reconnectingJadibot,
+  startingSocketMap
 }

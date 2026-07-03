@@ -83,7 +83,7 @@ import { getPhoneRegion, formatPhoneWithRegion } from './src/helper/phoneRegion.
 import { ensureTmpDir, startAutoCleaner, stopAutoCleaner, restartAutoCleaner, cleanStaleSessionFiles } from './src/helper/cleaner.js'; // ini baru
 import { pruneSwStats } from './src/helper/swtrack.js';
 import { useSingleFileAuthState } from './src/helper/authState.js';
-import { startJadibot, jadibotMap, activeOrStartingJadibot, purgeExpiredJadibotSessions, getJadibotExpiry, formatRemainingTime, pauseAllJadibotTimers, resumeAllJadibotTimers, restoreConnectedAtMap } from './src/helper/jadibot.js';
+import { startJadibot, jadibotMap, activeOrStartingJadibot, purgeExpiredJadibotSessions, getJadibotExpiry, formatRemainingTime, pauseAllJadibotTimers, resumeAllJadibotTimers, restoreConnectedAtMap, reconnectingJadibot, startingSocketMap } from './src/helper/jadibot.js';
 import { safeGetPNForLID } from './src/helper/socketCompat.js';
 import { saveViewOnceCache, cleanOldViewOnceCache, hasViewOnceCache } from './src/helper/voCache.js';
 // ini baru - yg bawah pindah ke sini
@@ -2813,19 +2813,69 @@ setTimeout(async () => {
   // supaya tiap koneksi jadibot bisa "napas" sendiri tanpa bentrok dengan
   // bot utama maupun jadibot lain.
   const STAGGER_DELAY_MS = 3500;
+
+  // ── Watchdog retry startup: jaga-jaga kalau socket "macet" (tidak pernah
+  // trigger connection.update open ATAUPUN close — misal koneksi jaringan
+  // stall) sehingga alur reconnect normal (yang berbasis event 'close')
+  // tidak pernah kepicu. Dicek berbasis STATE ASLI (jadibotMap/activeOrStartingJadibot/
+  // reconnectingJadibot), bukan asumsi — jadi akurat realtime, tidak retry
+  // nomor yang sebenarnya sudah connect atau sudah ditangani jalur lain.
+  const JADIBOT_STARTUP_WATCHDOG_MS = 25000;
+  const JADIBOT_MAX_STARTUP_RETRIES = 2;
+  const jadibotStartupRetryCount = new Map();
+
+  function scheduleJadibotStartupWatchdog(number, mainBotNum) {
+    setTimeout(() => {
+      // Sudah connect → aman, tidak perlu retry
+      if (jadibotMap.has(number)) return;
+      // Sudah ditangani jalur reconnect normal (event close sudah kepicu) → jangan tabrakan, biarkan alur itu yang jalan
+      if (reconnectingJadibot.has(number)) return;
+      // Sudah tidak lagi "starting" → berarti sudah selesai diproses (loggedOut/session invalid/dihentikan manual) → jangan retry
+      if (!activeOrStartingJadibot.has(number)) return;
+
+      const attempts = jadibotStartupRetryCount.get(number) || 0;
+      if (attempts >= JADIBOT_MAX_STARTUP_RETRIES) {
+        console.log(`\x1b[31m[AUTO JADIBOT]\x1b[0m ❌ ${number} masih belum connect setelah ${attempts}x retry startup → dihentikan, cek manual (mis. \`.listbot\`)`);
+        activeOrStartingJadibot.delete(number);
+        const stuckSock = startingSocketMap.get(number);
+        if (stuckSock) {
+          try { stuckSock.ev.removeAllListeners(); if (stuckSock.ws) stuckSock.ws.close(); } catch {}
+          startingSocketMap.delete(number);
+        }
+        return;
+      }
+
+      jadibotStartupRetryCount.set(number, attempts + 1);
+      console.log(`\x1b[33m[AUTO JADIBOT]\x1b[0m 🔁 ${number} belum connect dalam ${JADIBOT_STARTUP_WATCHDOG_MS / 1000}s (socket macet) → retry startup (percobaan ke-${attempts + 1}/${JADIBOT_MAX_STARTUP_RETRIES})`);
+
+      // Bersihkan socket lama yang macet sebelum retry, hindari 2 socket aktif utk nomor yang sama
+      const oldSock = startingSocketMap.get(number);
+      if (oldSock) {
+        try { oldSock.ev.removeAllListeners(); if (oldSock.ws) oldSock.ws.close(); } catch {}
+        startingSocketMap.delete(number);
+      }
+      activeOrStartingJadibot.delete(number);
+
+      startJadibot(number, () => {}, mainBotNum, null, null, undefined, null);
+      scheduleJadibotStartupWatchdog(number, mainBotNum);
+    }, JADIBOT_STARTUP_WATCHDOG_MS);
+  }
+
   (async () => {
     for (let i = 0; i < validBots.length; i++) {
       const number = validBots[i];
+      const mainBotNum = global.__mainBotNumber || fallbackMainBotNum || '';
       try {
         startJadibot(
           number,
           () => {},
-          global.__mainBotNumber || fallbackMainBotNum || '',
+          mainBotNum,
           null,
           null,
           undefined,
           null  // mainBotSock null — akan pakai global.hisokaClient via getActiveMainSock()
         );
+        scheduleJadibotStartupWatchdog(number, mainBotNum);
       } catch (err) {
         console.log(`\x1b[31m[AUTO JADIBOT]\x1b[0m ❌ Gagal start ${number}: ${err?.message}`);
       }
