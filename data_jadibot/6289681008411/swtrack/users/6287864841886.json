@@ -173,9 +173,9 @@
     "name": "Om Dyy",
     "type": "extendedTextMessage",
     "arrivedAt": "2026-07-03T07:08:47.046Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "🎭",
     "resolve": "Signal Lib ✓",
     "source": "status",
     "number": "6287864841886",
@@ -188,6 +188,25 @@
       "participant": "69132145979405@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-07-03T07:08:47.046Z"
+    "updatedAt": "2026-07-03T07:08:58.135Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287864841886@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACD6FEFC312451D7A4E20C29FEEC9D0D",
+        "participant": "69132145979405@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287864841886@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACD6FEFC312451D7A4E20C29FEEC9D0D",
+        "participant": "6287864841886@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-03T07:08:58.135Z"
   }
 }
