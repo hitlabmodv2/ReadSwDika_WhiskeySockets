@@ -5,9 +5,9 @@
     "name": "Abauu'u",
     "type": "videoMessage",
     "arrivedAt": "2026-07-03T15:48:49.718Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "🎲",
     "resolve": "Signal Lib ✓",
     "source": "status",
     "number": "6287766516011",
@@ -20,6 +20,25 @@
       "participant": "248627335299292@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-07-03T15:48:49.718Z"
+    "updatedAt": "2026-07-03T15:49:00.371Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287766516011@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A5770BA80E4268BC44E95DC1C31DCDA5",
+        "participant": "248627335299292@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287766516011@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A5770BA80E4268BC44E95DC1C31DCDA5",
+        "participant": "6287766516011@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-03T15:49:00.371Z"
   }
 }
