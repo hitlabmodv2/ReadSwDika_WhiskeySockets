@@ -76,15 +76,15 @@ _Biar tidak bingung mode kepencet ulang padahal sudah aktif:_
 3. Kalau memang beda mode, bot balas *"berhasil diaktifkan"* seperti biasa
 > Berlaku untuk bot utama maupun jadibot, status dibaca akurat & realtime
 
-*5. 🖥️ MemoryMonitor Log — Tampilan & Warna Diperbaiki*
-_Log konsol sekarang lebih lengkap dan semua teks punya warna yang jelas sesuai konteks:_
-1. Baris header: `cek ke-N` dan `uptime Xd Xh Xm` kini *putih tebal* — sebelumnya abu-abu/tidak terbaca
-2. Baris BOT: nilai MB/GB kini *putih tebal*, bar & persentase warna sesuai status (hijau/kuning/merah)
-3. Baris SYS: nilai GB pakai, total, dan free kini *putih tebal*, warna bar/persen ikut beban sistem
-4. Tambah info: Heap used/total, External memory, CPU load average dengan warna per nilai (hijau<1, kuning<2, merah≥2), jumlah core
-5. Tambah info: PID dan versi Node kini tampil di baris bawah dengan teks putih tebal
-6. Garis pembatas diganti `━` agar lebih rapi
-> Format baru: `[MemoryMonitor] ✅ Normal  cek ke-1 | uptime 5m` → semua nilai kini terbaca jelas
+*5. 🖥️ MemoryMonitor Log — Tampilan Ringkas & Warna Sesuai Konteks*
+_Log konsol dirombak total agar muat di layar mobile panel Pterodactyl — setiap info di baris sendiri, rapi dan terbaca:_
+1. Garis separator panjang (`━━━`) dihapus — tidak perlu, makan lebar layar
+2. Header: `[MemoryMonitor] ✅ Normal cek ke-1 |` lalu *uptime* di baris berikutnya
+3. Setiap baris pakai format `label : nilai` — label abu-abu, nilai *putih tebal*
+4. BOT & SYS tetap satu baris masing-masing dengan bar visual + persentase warna status
+5. Heap, Ext, CPU, PID, Node — masing-masing baris sendiri, tidak digabung pakai `│`
+6. CPU load: *hijau* < 1.0, *kuning* 1.0–2.0, *merah* ≥ 2.0
+> Format akhir pas di layar sempit, tidak terpotong di panel Pterodactyl mobile
 
 *6. 💾 .ram — Informasi Lebih Lengkap*
 _Output perintah `.ram` di WhatsApp diperluas dengan data sistem yang lebih detail:_
