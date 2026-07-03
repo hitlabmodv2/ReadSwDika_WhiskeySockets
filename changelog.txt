@@ -86,7 +86,8 @@ _Log konsol dirombak agar muat & terbaca di layar mobile panel Pterodactyl:_
 6. Heap, Ext, CPU, PID, Node — masing-masing baris sendiri, tidak digabung `│`
 7. Bar visual (`░░░░░░░░░░`) dihapus dari baris BOT & SYS — diganti format bersih `label : nilai`
 8. Tambah baris baru berurutan: `ArrB` (ArrayBuffers MB), `Arch`, `Plat`, `Host` (hostname), `SysUp` (uptime OS), `FreeMem` (% + GB bebas)
-9. Label semua rata kiri 7 karakter — rapi berjejer di panel sempit
+9. Label berwarna per kategori — *kuning* (waktu), *hijau* (memori bot/sys), *cyan* (detail proses), *magenta* (info sistem)
+10. Label semua rata kiri 7 karakter — rapi berjejer di panel sempit
 10. CPU load: *hijau* < 1.0, *kuning* 1.0–2.0, *merah* ≥ 2.0
 > Format akhir 15 baris berurutan, bersih tanpa bar, pas di layar mobile Pterodactyl
 

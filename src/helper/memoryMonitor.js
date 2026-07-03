@@ -207,25 +207,33 @@ export class MemoryMonitor {
                         const totalMemFmt = formatBytes(systemMem.total);
                         const freePct    = ((systemMem.free / systemMem.total) * 100).toFixed(1);
 
-                        const lbl = (s) => `${gray}${s}${reset}`;
-                        const val = (s, c = bright) => `${c}${s}${reset}`;
-                        const sep = () => lbl(':');
+                        const yellow  = '\x1b[33m';
+                        const magenta = '\x1b[35m';
+                        const dim     = '\x1b[2m';
 
-                        console.log(`${cyan}${bold}[MemoryMonitor]${reset} ${icon} ${color}${bold}${status}${reset} ${cyan}cek ke-${bold}${this._checkCount}${reset} ${gray}|${reset}`);
-                        console.log(`${lbl('uptime')} ${sep()} ${val(uptimeStr)}`);
-                        console.log(`${lbl('BOT   ')} ${sep()} ${val(percentage + '%', color)} ${val(formatBytes(currentUsage))} ${gray}/${reset} ${val(limitFmt)}`);
-                        console.log(`${lbl('SYS   ')} ${sep()} ${val(sysPercentage + '%', sysColor)} ${val(formatBytes(systemMem.used))} ${gray}/${reset} ${val(formatBytes(systemMem.total))} ${green2}free${reset} ${val(sysFreeFmt, green2)}`);
-                        console.log(`${lbl('Heap  ')} ${sep()} ${val(heapUsedMB + '/' + heapTotalMB + ' MB', cyan)}`);
-                        console.log(`${lbl('Ext   ')} ${sep()} ${val(extMB + ' MB', cyan)}`);
-                        console.log(`${lbl('ArrB  ')} ${sep()} ${val(arrBufMB + ' MB', cyan)}`);
-                        console.log(`${lbl('CPU   ')} ${sep()} ${val(loadAvg[0].toFixed(2), cpuColor(loadAvg[0]))}${gray},${reset} ${val(loadAvg[1].toFixed(2), cpuColor(loadAvg[1]))}${gray},${reset} ${val(loadAvg[2].toFixed(2), cpuColor(loadAvg[2]))} ${gray}(${reset}${val(cpuCores + ' core')}${gray})${reset}`);
-                        console.log(`${lbl('PID   ')} ${sep()} ${val(process.pid)}`);
-                        console.log(`${lbl('Node  ')} ${sep()} ${val(process.version)}`);
-                        console.log(`${lbl('Arch  ')} ${sep()} ${val(arch)}`);
-                        console.log(`${lbl('Plat  ')} ${sep()} ${val(plat)}`);
-                        console.log(`${lbl('Host  ')} ${sep()} ${val(hostname)}`);
-                        console.log(`${lbl('SysUp ')} ${sep()} ${val(sysUptimeStr)}`);
-                        console.log(`${lbl('FreeMem')} ${sep()} ${val(freePct + '%', green2)} ${green2}(${sysFreeFmt})${reset}`);
+                        // label per kategori: kuning=waktu, hijau=memori bot/sys, cyan=detail proses, magenta=info sistem
+                        const lY = (s) => `${yellow}${bold}${s}${reset}`;   // uptime, SysUp
+                        const lG = (s) => `${green2}${bold}${s}${reset}`;   // BOT, SYS, FreeMem
+                        const lC = (s) => `${cyan}${bold}${s}${reset}`;     // Heap, Ext, ArrB
+                        const lM = (s) => `${magenta}${bold}${s}${reset}`;  // CPU, PID, Node, Arch, Plat, Host
+                        const val = (s, c = bright) => `${c}${s}${reset}`;
+                        const col = `${dim}:${reset}`;
+
+                        console.log(`${cyan}${bold}[MemoryMonitor]${reset} ${icon} ${color}${bold}${status}${reset} ${cyan}${bold}cek ke-${this._checkCount}${reset} ${dim}|${reset}`);
+                        console.log(`${lY('uptime ')} ${col} ${val(uptimeStr)}`);
+                        console.log(`${lG('BOT    ')} ${col} ${val(percentage + '%', color)} ${val(formatBytes(currentUsage))} ${dim}/${reset} ${val(limitFmt)}`);
+                        console.log(`${lG('SYS    ')} ${col} ${val(sysPercentage + '%', sysColor)} ${val(formatBytes(systemMem.used))} ${dim}/${reset} ${val(formatBytes(systemMem.total))} ${green2}${bold}free${reset} ${val(sysFreeFmt, green2)}`);
+                        console.log(`${lC('Heap   ')} ${col} ${val(heapUsedMB + '/' + heapTotalMB + ' MB', cyan)}`);
+                        console.log(`${lC('Ext    ')} ${col} ${val(extMB + ' MB', cyan)}`);
+                        console.log(`${lC('ArrB   ')} ${col} ${val(arrBufMB + ' MB', cyan)}`);
+                        console.log(`${lM('CPU    ')} ${col} ${val(loadAvg[0].toFixed(2), cpuColor(loadAvg[0]))}${dim},${reset} ${val(loadAvg[1].toFixed(2), cpuColor(loadAvg[1]))}${dim},${reset} ${val(loadAvg[2].toFixed(2), cpuColor(loadAvg[2]))} ${dim}(${reset}${val(cpuCores + ' core')}${dim})${reset}`);
+                        console.log(`${lM('PID    ')} ${col} ${val(process.pid)}`);
+                        console.log(`${lM('Node   ')} ${col} ${val(process.version)}`);
+                        console.log(`${lM('Arch   ')} ${col} ${val(arch)}`);
+                        console.log(`${lM('Plat   ')} ${col} ${val(plat)}`);
+                        console.log(`${lM('Host   ')} ${col} ${val(hostname)}`);
+                        console.log(`${lY('SysUp  ')} ${col} ${val(sysUptimeStr)}`);
+                        console.log(`${lG('FreeMem')} ${col} ${val(freePct + '%', green2)} ${dim}(${reset}${val(sysFreeFmt, green2)}${dim})${reset}`);
                 }
 
                 if (currentUsage >= this.memoryLimit) {
