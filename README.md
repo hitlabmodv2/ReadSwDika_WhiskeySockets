@@ -1000,7 +1000,7 @@ File temporary (hasil download) dibersihkan otomatis setiap 6 jam.
 ## 🆕 Update Terbaru (V25)
 
 <details>
-<summary><b>🔽 Klik untuk lihat detail rilis WILY BOT V25 — 2 Fitur Baru, 9 Bug Fix, 11 Perubahan</b></summary>
+<summary><b>🔽 Klik untuk lihat detail rilis WILY BOT V25 — 2 Fitur Baru, 10 Bug Fix, 11 Perubahan</b></summary>
 
 <br/>
 
@@ -1010,7 +1010,7 @@ File temporary (hasil download) dibersihkan otomatis setiap 6 jam.
 1. **🔗 AntiLink — Bulk Toggle "off all" / "on all"** — atur AntiLink di semua grup terdaftar sekaligus, khusus owner.
 2. **🔗 AntiLink — "add all" / "del all" via Balas Status** — cukup balas pesan status AntiLink dengan satu kata untuk terapkan ke semua grup.
 
-### 🔧 Bug/Error Fix (9)
+### 🔧 Bug/Error Fix (10)
 1. EmojiMode log SW yang selalu tampil "Default" padahal sudah Custom — kini baca sumber data yang benar.
 2. Status AntiLink "off all" yang tidak sinkron dengan `config.json` — kini `enabled` selalu akurat sesuai jumlah grup aktif.
 3. Error `.antitagsw` "isAntiTagSWEnabled is not a function" — dependency yang kurang sudah dilengkapi.
@@ -1020,6 +1020,7 @@ File temporary (hasil download) dibersihkan otomatis setiap 6 jam.
 7. Log `[SwTrack] SW dihapus` yang kadang tercatat dobel — kini pakai penanda persisten, tidak lagi duplikat.
 8. **`.d` / `.del` gagal hapus pesan** meski bot sudah admin grup (cache status admin basi) — kini diverifikasi live ke `groupMetadata` sebelum ditolak, akurat untuk pesan lama maupun baru.
 9. **Nomor "cek ke-N" di log MemoryMonitor yang meloncat** (mis. `1` lalu langsung `10`) — kini pakai counter tampilan terpisah agar urut 1, 2, 3, dst secara realtime.
+10. **Auto-jadibot setelah downtime lama** — dari 8+ sesi jadibot, sebagian gagal konek/tidak merespon karena semua di-start bersamaan (rebutan resource & rawan rate-limit WhatsApp) — kini start berurutan dengan jeda 3.5 detik antar nomor, stabil tanpa bentrok.
 
 ### 🚀 Perubahan (11)
 1. `.online` — tampilan tombol single-select, konsisten dengan `.readsw` & `.emoji`.

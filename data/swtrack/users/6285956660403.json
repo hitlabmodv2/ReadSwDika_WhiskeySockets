@@ -334,5 +334,28 @@
       }
     ],
     "processedAt": "2026-07-03T11:59:26.366Z"
+  },
+  "A51F98917030F818CF9A326DD9854206": {
+    "id": "A51F98917030F818CF9A326DD9854206",
+    "sender": "6285956660403@s.whatsapp.net",
+    "name": "Cosmouz/Fadli",
+    "type": "imageMessage",
+    "arrivedAt": "2026-07-03T15:36:53.767Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285956660403",
+    "resolvedPn": "6285956660403@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285956660403@s.whatsapp.net",
+      "fromMe": false,
+      "id": "A51F98917030F818CF9A326DD9854206",
+      "participant": "176549462564879@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-03T15:36:53.767Z"
   }
 }

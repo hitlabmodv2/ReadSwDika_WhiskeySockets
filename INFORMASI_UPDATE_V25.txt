@@ -4,7 +4,7 @@ _🔍 Masih dalam tahap pemantauan — informasi tanggal rilis akan diumumkan ke
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V25*
 ✨ *2 Fitur Baru*
-🔧 *9 Bug/Error Fix*
+🔧 *10 Bug/Error Fix*
 🚀 *11 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
@@ -85,6 +85,13 @@ _Saat membalas pesan status AntiLink, cukup ketik satu kata untuk terapkan ke se
 1. _Penyebab:_ counter yang ditampilkan (`_checkCount`) dihitung dari setiap siklus cek memori, padahal log cuma diprint 1 dari tiap 10 siklus
 2. _Fix:_ tambah counter terpisah (`_logCount`) yang hanya bertambah saat log benar-benar tampil di konsol
 > "cek ke-N" kini urut 1, 2, 3, dst sesuai realtime, tidak ada lagi lompatan angka
+
+*10. 🔌 Auto-Jadibot Setelah Downtime Lama — Sebagian Konek, Sebagian Tidak Merespon*
+~Bug: setelah bot mati 1+ jam lalu hidup lagi, dari 8+ jadibot tersimpan hanya sebagian yang konek & merespon, sisanya diam~
+1. _Penyebab:_ saat startup, semua sesi jadibot di-start *bersamaan dalam sekejap* (paralel tanpa jeda) — WhatsApp mendeteksi banyak koneksi baru dari 1 IP secara serentak dan sebagian di-reset/rate-limit, ditambah spike CPU/RAM saat baca banyak file sesi besar bersamaan
+2. _Fix:_ startup jadibot sekarang berjalan *berurutan dengan jeda 3.5 detik* antar nomor — tiap koneksi jadibot "napas" sendiri, tidak bentrok dengan bot utama maupun jadibot lain
+3. _Catatan:_ reconnect otomatis per-jadibot saat disconnect satuan (bukan saat startup massal) sudah aman sejak awal — sudah ada guard anti-duplikat dan delay 3 detik
+> Semua jadibot kini konek bergiliran & stabil setelah downtime, tidak ada lagi yang "diam" karena rebutan resource/koneksi
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *PERUBAHAN*
 ━━━━━━━━━━━━━━━━━━━━━━

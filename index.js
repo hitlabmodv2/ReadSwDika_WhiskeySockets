@@ -2803,15 +2803,33 @@ setTimeout(async () => {
   // Pakai BOT_NUMBER_PAIR sebagai fallback mainBotNumber —
   // akan di-override via global.__mainBotNumber saat bot utama konek
   const fallbackMainBotNum = (process.env.BOT_NUMBER_PAIR || '').replace(/[^0-9]/g, '');
-  for (const number of validBots) {
-    startJadibot(
-      number,
-      () => {},
-      global.__mainBotNumber || fallbackMainBotNum || '',
-      null,
-      null,
-      undefined,
-      null  // mainBotSock null — akan pakai global.hisokaClient via getActiveMainSock()
-    );
-  }
+
+  // ── Staggered start: jangan konek semua jadibot bersamaan ──────────────────
+  // Kalau semua nomor di-start serentak (paralel), WhatsApp bisa anggap
+  // mencurigakan (banyak koneksi dari 1 IP dalam sekejap) dan sebagian
+  // koneksi di-reset/rate-limit, ditambah spike CPU/RAM saat baca banyak
+  // file sesi besar bersamaan → sebagian jadibot gagal connect / tidak
+  // merespon setelah downtime lama. Solusinya: start satu-satu dengan jeda,
+  // supaya tiap koneksi jadibot bisa "napas" sendiri tanpa bentrok dengan
+  // bot utama maupun jadibot lain.
+  const STAGGER_DELAY_MS = 3500;
+  (async () => {
+    for (let i = 0; i < validBots.length; i++) {
+      const number = validBots[i];
+      try {
+        startJadibot(
+          number,
+          () => {},
+          global.__mainBotNumber || fallbackMainBotNum || '',
+          null,
+          null,
+          undefined,
+          null  // mainBotSock null — akan pakai global.hisokaClient via getActiveMainSock()
+        );
+      } catch (err) {
+        console.log(`\x1b[31m[AUTO JADIBOT]\x1b[0m ❌ Gagal start ${number}: ${err?.message}`);
+      }
+      if (i < validBots.length - 1) await delay(STAGGER_DELAY_MS);
+    }
+  })();
 }, 5000); // delay 5s agar state jadibot terbaca dengan benar

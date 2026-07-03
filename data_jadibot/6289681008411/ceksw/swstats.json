@@ -44,7 +44,6 @@
     "reactions": 35,
     "lastSeen": "2026-07-03T06:55:58.117Z",
     "activeSW": {
-      "AC18D54B187FA82111D7F98C15BCD3E5": 1783005327996,
       "AC3662437839F5356EDE8A76647FF42B": 1783061756599,
       "AC82C1EC0857E86DEB9E9746A88FD30E": 1783061758117
     }
@@ -56,7 +55,6 @@
     "reactions": 32,
     "lastSeen": "2026-07-03T06:54:56.127Z",
     "activeSW": {
-      "AC8EFBA3F97FEFCC8D7E96CEB8191F0A": 1783005916612,
       "ACF64DD515C00C232ACC7FAF23B5E31D": 1783061696127
     }
   },
@@ -67,7 +65,6 @@
     "reactions": 31,
     "lastSeen": "2026-07-03T09:20:25.935Z",
     "activeSW": {
-      "AC4D2CE00541DEAACC25F0EC3FE9C077": 1783005138017,
       "AC65FF4164207F3FFEA7E980F6AA7DC2": 1783070425935
     }
   },
@@ -239,7 +236,6 @@
     "reactions": 10,
     "lastSeen": "2026-07-03T11:38:13.948Z",
     "activeSW": {
-      "ACC7752B2A1340481C684E7A859E5362": 1783005318016,
       "AC8C51A3CA6AA868391A90D2D851CDE6": 1783078693948
     }
   },
@@ -410,9 +406,7 @@
     "reads": 5,
     "reactions": 5,
     "lastSeen": "2026-07-02T15:30:14.981Z",
-    "activeSW": {
-      "AC6DE5D3D3C61C10BE755851655A19A1": 1783006214981
-    }
+    "activeSW": {}
   },
   "6289654837567": {
     "name": "Olin 🌟✌",
