@@ -1296,7 +1296,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'd':
                         case 'del': {
                                 const { handleDel } = _require(path.resolve('./SEMUA_FITUR/info/del-cmd.cjs'));
-                                await handleDel({ hisoka, m, query, tolak, logCommand, isMainBot, kvGet });
+                                await handleDel({ hisoka, m, query, tolak, logCommand, isMainBot, kvGet, kvSet });
                                 break;
                         }
                         case 'delbot': {

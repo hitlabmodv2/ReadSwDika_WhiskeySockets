@@ -24,7 +24,39 @@
  */
 'use strict';
 
-async function handleDel({ hisoka, m, query, tolak, logCommand, isMainBot, kvGet }) {
+// Cek apakah bot admin di grup — cache dulu (kalau bilang admin, langsung percaya),
+// tapi kalau cache bilang bukan admin / belum ada data, verifikasi live ke groupMetadata
+// supaya cache basi (stale) tidak salah nolak perintah del.
+async function resolveIsBotGroupAdmin(hisoka, groupJid, kvGet, kvSet) {
+        try {
+                const botAdminData = kvGet('botadmin/botadmin', {});
+                if (botAdminData[groupJid] === true) return true;
+
+                const groupMeta = await hisoka.groupMetadata(groupJid);
+                const botRaw = hisoka.user?.id || '';
+                const botNum = botRaw.split('@')[0].split(':')[0];
+                const botP = (groupMeta?.participants || []).find(p => {
+                        const pNum = (p.id || p.jid || p.phoneNumber || '').split('@')[0].split(':')[0];
+                        return pNum === botNum;
+                });
+                const isAdmin = !!(botP?.admin);
+
+                if (typeof kvSet === 'function') {
+                        try {
+                                const updated = { ...botAdminData, [groupJid]: isAdmin };
+                                kvSet('botadmin/botadmin', updated);
+                        } catch (_) {}
+                }
+
+                return isAdmin;
+        } catch (error) {
+                console.error('\x1b[31m[Del] Gagal cek live admin status:\x1b[39m', error.message);
+                const botAdminData = kvGet('botadmin/botadmin', {});
+                return botAdminData[groupJid] === true;
+        }
+}
+
+async function handleDel({ hisoka, m, query, tolak, logCommand, isMainBot, kvGet, kvSet }) {
 
         if (m.isQuoted && !query) {
                 try {
@@ -33,8 +65,9 @@ async function handleDel({ hisoka, m, query, tolak, logCommand, isMainBot, kvGet
 
                         if (m.isGroup) {
                                 // Grup: boleh hapus kalau pesan bot sendiri ATAU bot adalah admin grup
-                                const botAdminData = kvGet('botadmin/botadmin', {});
-                                const isBotGroupAdmin = botAdminData[m.from] === true;
+                                const isBotGroupAdmin = isOwnMessage
+                                        ? true
+                                        : await resolveIsBotGroupAdmin(hisoka, m.from, kvGet, kvSet);
 
                                 if (!isOwnMessage && !isBotGroupAdmin) {
                                         await tolak(hisoka, m, '❌ Bot bukan admin di grup ini!\nHanya bisa hapus pesan bot sendiri.');
