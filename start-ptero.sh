@@ -40,14 +40,14 @@ C_MAGENTA='\033[1;35m'
 C_DIM='\033[2m'
 
 print_banner() {
-  echo -e "${C_CYAN}╭─────────────────────────╮${C_RESET}"
-  echo -e "${C_CYAN}│${C_RESET}   ${C_MAGENTA}✦ WILY BOT ✦${C_RESET}          ${C_CYAN}│${C_RESET}"
-  echo -e "${C_CYAN}│${C_RESET}   ${C_DIM}Pterodactyl Mode${C_RESET}       ${C_CYAN}│${C_RESET}"
-  echo -e "${C_CYAN}├─────────────────────────┤${C_RESET}"
-  echo -e "${C_CYAN}│${C_RESET} ${C_YELLOW}Dev${C_RESET}  : Bang Wily        ${C_CYAN}│${C_RESET}"
-  echo -e "${C_CYAN}│${C_RESET} ${C_YELLOW}WA${C_RESET}   : 6289688206739   ${C_CYAN}│${C_RESET}"
-  echo -e "${C_CYAN}│${C_RESET} ${C_YELLOW}Tele${C_RESET} : @Wilykun1994     ${C_CYAN}│${C_RESET}"
-  echo -e "${C_CYAN}╰─────────────────────────╯${C_RESET}"
+  echo -e "${C_CYAN}════════════════════════════${C_RESET}"
+  echo -e "  ${C_MAGENTA}✦ WILY BOT ✦${C_RESET}"
+  echo -e "  ${C_DIM}Pterodactyl Mode${C_RESET}"
+  echo -e "${C_CYAN}────────────────────────────${C_RESET}"
+  echo -e "  ${C_YELLOW}Dev${C_RESET}  : Bang Wily"
+  echo -e "  ${C_YELLOW}WA${C_RESET}   : 6289688206739"
+  echo -e "  ${C_YELLOW}Tele${C_RESET} : @Wilykun1994"
+  echo -e "${C_CYAN}════════════════════════════${C_RESET}"
 }
 
 print_banner
@@ -97,10 +97,10 @@ RESTART_COUNT=0
 MAX_RESTARTS=10
 RESTART_DELAY=5
 
-echo -e "${C_CYAN}╭─────────────────────────╮${C_RESET}"
-echo -e "${C_CYAN}│${C_RESET} ${C_GREEN}✅ Auto-Restart Aktif${C_RESET}   ${C_CYAN}│${C_RESET}"
-echo -e "${C_CYAN}│${C_RESET} ${C_DIM}Max restart: ${MAX_RESTARTS}x${C_RESET}         ${C_CYAN}│${C_RESET}"
-echo -e "${C_CYAN}╰─────────────────────────╯${C_RESET}"
+echo -e "${C_CYAN}────────────────────────────${C_RESET}"
+echo -e "  ${C_GREEN}✅ Auto-Restart Aktif${C_RESET}"
+echo -e "  ${C_DIM}Max restart: ${MAX_RESTARTS}x${C_RESET}"
+echo -e "${C_CYAN}────────────────────────────${C_RESET}"
 while true; do
   node index.js
   EXIT_CODE=$?
