@@ -4,7 +4,7 @@ _🔍 Masih dalam tahap pemantauan — informasi tanggal rilis akan diumumkan ke
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V25*
 ✨ *2 Fitur Baru*
-🔧 *3 Bug/Error Fix*
+🔧 *4 Bug/Error Fix*
 🚀 *6 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
@@ -45,6 +45,12 @@ _Saat membalas pesan status AntiLink, cukup ketik satu kata untuk terapkan ke se
    • `getAllAntiTagSWGroups`, `getWarnings`, `resetWarnings`, `kvGet`, dll
 2. _Fix:_ semua parameter yang dibutuhkan sudah dilengkapi di pemanggilan handler
 > `.antitagsw` kini berjalan normal tanpa error
+
+*4. 📋 InformasiBotCommand Duplikat di Semua Perintah*
+~Bug: setiap perintah (`.ram`, `.ping`, dll) selalu muncul dua kotak InformasiBotCommand di log konsol~
+1. _Penyebab:_ `message.js` punya pemanggilan `_logCmdBox` global tepat setelah guard lolos (log pertama), lalu setiap handler juga memanggil `logCommand` di dalamnya (log kedua)
+2. _Fix:_ hapus blok `_logCmdBox` global dari `message.js` — cukup log dari dalam handler masing-masing
+> InformasiBotCommand kini tampil tepat satu kali per perintah
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *PERUBAHAN*
 ━━━━━━━━━━━━━━━━━━━━━━

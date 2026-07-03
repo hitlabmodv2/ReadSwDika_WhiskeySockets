@@ -475,13 +475,6 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         }
                 }
 
-                // Log CMD setelah semua guard lolos — jadibot & bot utama sama-sama tercatat
-                // Skip status/story WA (status@broadcast) — bukan command sungguhan
-                // Hanya log jika command benar-benar terdaftar di _commandSet
-                const _isKnownCmd = hisoka._commandSet?.has(m.command);
-                if (m.command && m.from !== 'status@broadcast' && _isKnownCmd) {
-                        _logCmdBox(m, hisoka, `${m.prefix || '.'}${m.command}`);
-                }
 
                 if (hisoka?.isMainBot === true && m.isOwner) {
                         const jadibotChoiceKey = getJadibotChoiceKey(m);
