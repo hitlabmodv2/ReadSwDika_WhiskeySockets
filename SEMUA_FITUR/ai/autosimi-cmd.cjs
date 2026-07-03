@@ -121,6 +121,11 @@ async function handleAutoSimi({
                         if ((isBotMentioned || isReplyToBot) && !m.key?.fromMe) {
                                 if (isAICooldown(m.sender)) return false;
 
+                                // Typing dinyalakan dari sini (bukan cuma pas panggil Gemini) supaya akurat —
+                                // termasuk selama download media & cari gambar otomatis (bisa lama & bikin "diam").
+                                const stopTyping_p1 = startTyping(hisoka, m);
+                                try {
+
                                 let userMessage = m.text?.trim() || '';
                                 if (userMessage) {
                                         userMessage = userMessage.replace(/@\d+/g, '').replace(/@bot/gi, '').trim();
@@ -235,7 +240,6 @@ async function handleAutoSimi({
 
                                 const userName = getUserName(m.sender, m.pushName || 'Kak');
                                 const quotedBotText = isReplyToBot ? (m.quoted?.text || m.quoted?.caption || '') : '';
-                                const stopTyping_p1 = startTyping(hisoka, m);
                                 const userMemory = detectAndUpdateMemory(m.sender, userMessage);
                                 const systemPrompt = buildWilyAICommandPrompt({
                                         userName, currentTime, currentDate, timeOfDay,
@@ -317,6 +321,12 @@ async function handleAutoSimi({
                                                         } catch (_) {}
                                                 })();
                                         }
+                                }
+
+                                } finally {
+                                        // Jaminan: typing SELALU dimatikan di sini apapun jalur keluarnya
+                                        // (sukses, early return saat cari gambar, atau error).
+                                        stopTyping_p1();
                                 }
                         }
                 }
@@ -591,7 +601,6 @@ async function handleAutoSimi({
                                 const quotedBotText = (m.isQuoted && m.quoted?.key?.fromMe)
                                         ? (m.quoted?.text || m.quoted?.caption || m.quoted?.body || '')
                                         : '';
-                                const stopTyping_p2 = startTyping(hisoka, m);
                                 const userMemory = detectAndUpdateMemory(m.sender, userMessage);
                                 const systemPrompt = buildWilyAICommandPrompt({
                                         userName, currentTime, currentDate, timeOfDay,

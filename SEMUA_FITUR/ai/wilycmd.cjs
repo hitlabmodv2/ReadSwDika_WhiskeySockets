@@ -182,6 +182,12 @@ async function handleWily({
                 return;
         }
 
+        // Typing indicator dinyalakan di sini (bukan cuma pas panggil Gemini) supaya akurat merefleksikan
+        // bot sedang proses — termasuk saat download media, baca dokumen, dan cari gambar (semua bisa lama).
+        // Tanpa ini, user lihat bot "diam" tanpa typing selama proses-proses tsb padahal bot lagi kerja.
+        const stopTyping_cmd = startTyping(hisoka, m);
+        try {
+
         let imageBuffer = null;
         let imageMime = 'image/jpeg';
         let hasMedia = false;
@@ -627,7 +633,6 @@ async function handleWily({
         if (documentContext) extraContext += `\n\n${documentContext}`;
         if (quotedTextContext) extraContext += `\n${quotedTextContext}`;
 
-        const stopTyping_cmd = startTyping(hisoka, m);
         const aiCmdUserMemory = detectAndUpdateMemory(m.sender, userQuestion);
         const systemPrompt = buildWilyAICommandPrompt({
                 userName, currentTime, currentDate, timeOfDay,
@@ -726,8 +731,6 @@ async function handleWily({
                 response = await gemini.chat({ contents });
         }
 
-        stopTyping_cmd();
-
         if (response && response.trim()) {
                 let finalResponse = response.trim();
                 if (hasMedia) {
@@ -757,6 +760,13 @@ async function handleWily({
         }
 
         logCommand(m, hisoka, 'wily');
+
+        } finally {
+                // Jaminan: typing SELALU dimatikan di sini, apapun jalur keluarnya (sukses,
+                // early return di tengah proses, atau error) — supaya status typing akurat
+                // realtime dan tidak nyangkut nyala terus di WhatsApp user.
+                stopTyping_cmd();
+        }
 }
 
 module.exports = { handleWily };
