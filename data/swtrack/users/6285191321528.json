@@ -294,9 +294,9 @@
     "name": "#safiraaaqqy💫",
     "type": "extendedTextMessage",
     "arrivedAt": "2026-07-03T15:36:58.079Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "❤️",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6285191321528",
@@ -309,6 +309,67 @@
       "participant": "175054948139200@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-07-03T15:36:58.080Z"
+    "updatedAt": "2026-07-03T15:37:16.723Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285191321528@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC956085818E078E0C0B241A2E01CBD6",
+        "participant": "175054948139200@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285191321528@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC956085818E078E0C0B241A2E01CBD6",
+        "participant": "6285191321528@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-03T15:37:16.722Z"
+  },
+  "AC56C9B771DB7C46A06E6AF3C7FE044F": {
+    "id": "AC56C9B771DB7C46A06E6AF3C7FE044F",
+    "sender": "6285191321528@s.whatsapp.net",
+    "name": "#safiraaaqqy💫",
+    "type": "extendedTextMessage",
+    "arrivedAt": "2026-07-03T15:37:06.525Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "⏺️⏏️⏹️",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285191321528",
+    "resolvedPn": "6285191321528@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285191321528@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC56C9B771DB7C46A06E6AF3C7FE044F",
+      "participant": "175054948139200@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-03T15:37:15.269Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285191321528@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC56C9B771DB7C46A06E6AF3C7FE044F",
+        "participant": "175054948139200@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285191321528@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC56C9B771DB7C46A06E6AF3C7FE044F",
+        "participant": "6285191321528@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-03T15:37:15.269Z"
   }
 }
