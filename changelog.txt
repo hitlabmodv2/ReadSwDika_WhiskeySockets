@@ -4,8 +4,8 @@ _🔍 Masih dalam tahap pemantauan — informasi tanggal rilis akan diumumkan ke
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V25*
 ✨ *2 Fitur Baru*
-🔧 *6 Bug/Error Fix*
-🚀 *9 Perubahan*
+🔧 *7 Bug/Error Fix*
+🚀 *11 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -64,6 +64,14 @@ _Saat membalas pesan status AntiLink, cukup ketik satu kata untuk terapkan ke se
 1. _Penyebab:_ `extendJadibotExpiry` menyebarkan `permanent: true` dari data lama via spread `...existing` tanpa menimpanya
 2. _Fix:_ tambah `permanent: false` eksplisit di objek hasil — flag dibersihkan, `Sisa` & `Expire` berubah realtime sesuai durasi baru
 > Perubahan durasi dari/ke Permanent kini akurat dan langsung tercermin di `.listbot`
+
+*7. 📡 Log "[SwTrack] SW dihapus" Kadang Tercatat Dobel/Lebih*
+~Bug: saat sebuah status WhatsApp dihapus pengirimnya, log "SW dihapus" untuk ID story yang sama kadang muncul 2x bahkan lebih~
+1. _Penyebab:_ event revoke status bisa terkirim lebih dari sekali (tipe `notify` & `append`, atau terkirim ulang saat bot reconnect/restart), dan kode lama tidak punya penanda permanen kalau ID itu sudah pernah dicatat
+2. _Fix:_ penanda "sudah dicatat" sekarang diambil dari flag `deleted` yang tersimpan di file (persisted), bukan cuma di memori — jadi tetap akurat walau bot restart/reconnect berkali-kali
+3. _Tambahan:_ penjagaan cepat di memori untuk hindari scan file berulang saat event sama datang beruntun dalam hitungan milidetik, dengan pembersihan otomatis tiap 5 menit
+4. _Catatan:_ log dengan tag `[JB:<nomor>]` bukan duplikat — itu memang sesi jadibot terpisah yang independen mendeteksi story yang sama
+> Log "SW dihapus" kini 100% akurat, satu ID story hanya tercatat tepat satu kali
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *PERUBAHAN*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -151,3 +159,16 @@ _Reply `.listbot` kini mendukung stop lebih dari 1 bot dalam sekali ketik:_
 • Urutan tidak valid / bot tidak aktif dilewati, yang valid tetap diproses
 • Notif awal `🛑 Menghentikan N bot...` muncul sebelum proses, diikuti hasil tiap bot
 > Teks _Cara pakai_ di pesan `.listbot` diperbarui — tampilkan contoh multi-stop
+
+*10. 🚀 Startup Script (`start-ptero.sh`) — Tampilan Konsol Dirombak & `npm start` Alias*
+_Tampilan log saat bot pertama kali dijalankan dirombak total, dari teks polos jadi banner rapi berwarna:_
+1. Banner utama *WILY BOT* — info Dev, WA, Telegram, tanpa border kotak yang bisa geser/tidak sejajar di panel mobile
+2. Bagian *Auto-Restart Aktif* & pesan crash/restart diberi warna senada (kuning peringatan, merah saat berhenti total)
+3. Bagian instalasi `node_modules` diberi animasi *spinner realtime* (braille berputar) selagi `npm install` berjalan, output detail disembunyikan ke file log terpisah agar konsol tetap bersih
+4. Tambah `"start": "bash start-ptero.sh"` di `package.json` — di panel Pterodactyl cukup isi startup command `npm start`, tidak perlu ketik `bash start-ptero.sh` lagi
+> Konsol lebih enak dilihat di layar mobile, tidak ada teks/border yang terpotong atau geser
+
+*11. ⚙️ Workflow Replit — Jalankan via `start-ptero.sh`*
+_Workflow di editor Replit sebelumnya jalankan `node index.js` langsung, sekarang diseragamkan:_
+1. Workflow `WhatsApp Bot` sekarang menjalankan `bash start-ptero.sh` — dapat semua benefit auto-restart, daily report, dan banner baru
+> Perilaku sama persis antara mode development di Replit dan produksi di Pterodactyl
