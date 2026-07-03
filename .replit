@@ -27,7 +27,7 @@ outputType = "console"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "bash start-ptero.sh"
+args = "npm start"
 
 [userenv]
 

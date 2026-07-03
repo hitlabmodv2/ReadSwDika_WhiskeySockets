@@ -54,8 +54,12 @@ print_banner
 
 # Install node_modules jika belum ada
 if [ ! -d "node_modules" ]; then
-  echo -e "${C_GREEN}▶${C_RESET} node_modules tidak ditemukan, install dulu..."
+  echo -e "${C_CYAN}────────────────────────────${C_RESET}"
+  echo -e "  ${C_YELLOW}📦 node_modules belum ada${C_RESET}"
+  echo -e "  ${C_DIM}Menginstall dependencies...${C_RESET}"
+  echo -e "${C_CYAN}────────────────────────────${C_RESET}"
   npm install
+  echo -e "${C_GREEN}✅ Instalasi selesai${C_RESET}"
 fi
 
 BOT_START_TIME=$(date +%s)
