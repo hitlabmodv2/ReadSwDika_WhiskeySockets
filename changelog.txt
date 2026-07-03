@@ -3,9 +3,18 @@ _📅 Jadwal rilis belum ditentukan_ 🕐
 _🔍 Masih dalam tahap pemantauan — informasi tanggal rilis akan diumumkan kemudian, harap bersabar_ 😊
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V25*
-✨ *0 Fitur Baru*
-🔧 *1 Bug/Error Fix*
-🚀 *0 Perubahan*
+✨ *2 Fitur Baru*
+🔧 *3 Bug/Error Fix*
+🚀 *3 Perubahan*
+━━━━━━━━━━━━━━━━━━━━━━
+✨ *FITUR BARU*
+━━━━━━━━━━━━━━━━━━━━━━
+*1. 🔗 AntiLink — Bulk Toggle "off all" / "on all"*
+- Tambah perintah `.antilink off all` dan `.antilink on all` (khusus owner) untuk nonaktifkan/aktifkan AntiLink di SEMUA grup terdaftar sekaligus
+- Status langsung ditampilkan otomatis setelah toggle, digabung jadi satu pesan (tidak dobel)
+
+*2. 🔗 AntiLink — "add all" / "del all" via Balas Status*
+- Saat membalas pesan status AntiLink, sekarang bisa ketik `add all` / `del all` untuk terapkan ke seluruh daftar grup, tidak perlu satu-satu
 ━━━━━━━━━━━━━━━━━━━━━━
 🔧 *BUG/ERROR FIX*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -15,3 +24,30 @@ _🔍 Masih dalam tahap pemantauan — informasi tanggal rilis akan diumumkan ke
 - Fix: diganti ke `getMode()` dari `emoji.js` yang baca file yang benar untuk bot utama
 - Jadibot tidak terpengaruh — sudah benar sejak awal (baca dari `data_jadibot/<nomor>/emoji.json`)
 > EmojiMode kini tampil akurat realtime sesuai mode aktif, tanpa restart bot
+
+*2. 🔗 AntiLink "off all" Tidak Sinkron dengan config.json*
+- ~Bug: setelah `.antilink off all`, `config.json` masih tampil `antiLink.enabled: true` walau tidak ada grup aktif tersisa~
+- Fix: `off all`, `off` (single, jika jadi grup aktif terakhir), dan `del`/`del all` via balas status sekarang otomatis set `antiLink.enabled: false` di `config.json` saat nol grup aktif tersisa
+- `on all`, `on`, `add`, `add all` tetap otomatis set `enabled: true` seperti sebelumnya
+> Status global AntiLink kini akurat realtime, selalu mencerminkan kondisi grup yang sebenarnya
+
+*3. ❌ AntiTagSW Error "isAntiTagSWEnabled is not a function"*
+- ~Bug: perintah `.antitagsw` selalu gagal dengan error tersebut~
+- Penyebab: `message.js` tidak meneruskan `isAntiTagSWEnabled` dan beberapa dependency lain (`saveCekautoTimestamp`, `getAllAntiTagSWGroups`, `getWarnings`, `resetWarnings`, `kvGet`, dll) ke handler `.antitagsw`
+- Fix: semua parameter yang dibutuhkan sudah dilengkapi di pemanggilan handler
+> `.antitagsw` kini berjalan normal tanpa error
+━━━━━━━━━━━━━━━━━━━━━━
+🚀 *PERUBAHAN*
+━━━━━━━━━━━━━━━━━━━━━━
+*1. 🟢 .online — Tampilan Tombol Single-Select*
+- Diubah dari teks polos menjadi tombol single-select seperti `.readsw` (section Mode Kehadiran + Interval Populer), lengkap tanda ✓ pada opsi aktif
+- Berlaku untuk bot utama maupun jadibot, status dibaca akurat & realtime
+
+*2. ⌨️ 🎙️ 👁️ .typing / .recording / .readchat — Tampilan Tombol Single-Select*
+- Ketiga fitur ini diseragamkan tampilannya dengan tombol single-select (Mode, Target Chat Private/Grup, Delay Populer untuk typing & recording)
+- Fallback teks tetap rapi dengan format WhatsApp (tebal, monospace, daftar bernomor, kutip)
+- Sudah disimulasikan 29 skenario command tanpa error sebelum diaktifkan
+
+*3. 🔢 Versi Bot Tersentralisasi*
+- Tambah `botVersion` di `config.json` sebagai satu-satunya sumber versi bot
+- Menu utama, menu jadibot, dan pesan welcome jadibot sekarang otomatis ambil versi dari situ — tidak perlu edit banyak file lagi saat naik versi
