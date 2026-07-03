@@ -573,14 +573,17 @@ export async function handleAntilink({ hisoka, m, query, tolak, logCommand, load
         for (const gid of aktifGroups) toggleAntiLink(gid, false);
         logCommand(m, hisoka, 'antilink off all');
 
-        return tolak(hisoka, m,
+        await tolak(hisoka, m,
             `╭─〔 🔴 *Anti-Link — Off All* 〕\n│\n` +
             `│ ✅ *AntiLink dinonaktifkan di semua grup!*\n│\n` +
             `│ 🗑️ Total grup   : *${aktifGroups.length}*\n` +
             `│ 💾 Status       : _tersimpan realtime_\n│\n` +
-            `> Semua warning di grup tersebut\n> juga telah _direset otomatis_.\n│\n` +
-            `│ 💡 Ketik *.antilink status* untuk cek ulang.\n│\n╰────────────────────`
+            `> Semua warning di grup tersebut\n> juga telah _direset otomatis_.\n│\n╰────────────────────`
         );
+
+        // Tampilkan status terbaru secara otomatis (realtime, tanpa reaksi ganda)
+        await sendAntilinkStatus({ hisoka, m, lc, pendingAntilinkChoices, logCommand, withReaction: false });
+        return;
     }
 
     // ── on all — aktifkan kembali AntiLink di semua grup yang pernah nonaktif ──
@@ -609,14 +612,17 @@ export async function handleAntilink({ hisoka, m, query, tolak, logCommand, load
         for (const gid of disabledGroups) toggleAntiLink(gid, true);
         logCommand(m, hisoka, 'antilink on all');
 
-        return tolak(hisoka, m,
+        await tolak(hisoka, m,
             `╭─〔 🟢 *Anti-Link — On All* 〕\n│\n` +
             `│ ✅ *AntiLink diaktifkan kembali di semua grup!*\n│\n` +
             (globalAutoEnabled ? `│ 🌐 _Global juga diaktifkan otomatis!_\n│\n` : '') +
             `│ ➕ Total grup   : *${disabledGroups.length}*\n` +
-            `│ 💾 Status       : _tersimpan realtime_\n│\n` +
-            `│ 💡 Ketik *.antilink status* untuk cek ulang.\n│\n╰────────────────────`
+            `│ 💾 Status       : _tersimpan realtime_\n│\n╰────────────────────`
         );
+
+        // Tampilkan status terbaru secara otomatis (realtime, tanpa reaksi ganda)
+        await sendAntilinkStatus({ hisoka, m, lc, pendingAntilinkChoices, logCommand, withReaction: false });
+        return;
     }
 
     // ── add ───────────────────────────────────────────────────────────────────
@@ -839,23 +845,31 @@ export async function handleAntilink({ hisoka, m, query, tolak, logCommand, load
     }
 
     // ── status — list semua GC bot dengan ✅/❌/➕ + session add/del ────────────
-    await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
+    await sendAntilinkStatus({ hisoka, m, lc, pendingAntilinkChoices, logCommand });
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  Helper — Render & kirim STATUS ANTI-LINK (dipakai oleh .antilink status
+//  maupun otomatis setelah off all / on all agar hasilnya realtime)
+// ═══════════════════════════════════════════════════════════════
+async function sendAntilinkStatus({ hisoka, m, lc, pendingAntilinkChoices, logCommand, withReaction = true }) {
+    if (withReaction) await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
     try {
         const config = lc();
         const globalEnabled = config.antiLink?.enabled ?? false;
         const maxWarnings   = config.antiLink?.maxWarnings ?? 3;
 
-        // Ambil semua GC yang bot ikuti sekarang
+        // Ambil semua GC yang bot ikuti sekarang (fresh, realtime)
         const allGroupsRaw = await hisoka.groupFetchAllParticipating();
         const allGroups    = Object.values(allGroupsRaw || {});
 
+        // Ambil ulang data terbaru dari storage (bukan cache lama)
         const aktifGroups    = getAllAntiLinkGroups();
         const disabledGroups = getDisabledAntiLinkGroups();
         const aktifSet       = new Set(aktifGroups);
         const disabledSet    = new Set(disabledGroups);
 
         const totalAktif = aktifGroups.length;
-        const totalNon_  = disabledGroups.length;
 
         // ── Urutkan: ✅ Aktif → ❌ Nonaktif (pernah on, lalu di-off) → ➕ Belum daftar ──
         const _urutan = (g) => {
@@ -911,7 +925,7 @@ export async function handleAntilink({ hisoka, m, query, tolak, logCommand, load
         txt += `╰──────────────────────`;
 
         const statusMsg = await hisoka.sendMessage(m.from, { text: txt }, { quoted: m });
-        await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+        if (withReaction) await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
 
         // Simpan session untuk reply handler
         if (pendingAntilinkChoices) {
@@ -927,10 +941,11 @@ export async function handleAntilink({ hisoka, m, query, tolak, logCommand, load
             });
         }
         logCommand(m, hisoka, 'antilink status');
+        return true;
     } catch (err) {
         console.error('[AntiLink] status error:', err?.message);
-        await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
-        await tolak(hisoka, m, `❌ Gagal ambil list grup: ${err?.message || err}`);
+        if (withReaction) await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
+        return false;
     }
 }
 
