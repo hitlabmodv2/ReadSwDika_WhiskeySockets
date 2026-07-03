@@ -3,7 +3,7 @@ _📅 Jadwal rilis belum ditentukan_ 🕐
 _🔍 Masih dalam tahap pemantauan — informasi tanggal rilis akan diumumkan kemudian, harap bersabar_ 😊
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V25*
-✨ *2 Fitur Baru*
+✨ *3 Fitur Baru*
 🔧 *4 Bug/Error Fix*
 🚀 *6 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -19,6 +19,17 @@ _Sekarang owner bisa atur AntiLink di semua grup sekaligus, tanpa satu-satu._
 _Saat membalas pesan status AntiLink, cukup ketik satu kata untuk terapkan ke semua grup:_
 • `add all` — tambahkan seluruh grup ke daftar aktif
 • `del all` — hapus seluruh grup dari daftar aktif
+
+*3. 🌐 SpeedTest.net Realtime (.speedtestnet / .spdnet)*
+_Ukur kecepatan internet bot langsung dari server speedtest.net — akurat, realtime, tanpa binary eksternal._
+1. Otomatis pilih server speedtest.net terdekat (ping terbaik dari 5 kandidat)
+2. Ukur *Download* Mbps — download random JPEG dari server (1500px–2500px)
+3. Ukur *Upload* Mbps — POST data ke server upload.php speedtest.net
+4. Tampilkan *Ping* (idle/download/upload) + jitter
+5. Ambil info ISP, Kota, Negara, IP dari ipinfo.io
+6. Hasil dikirim sebagai *gambar PNG* (SVG rendered) + caption WA lengkap
+7. Status progress realtime saat proses: cari server → DL → UL
+> Gunakan `.speedtestnet` atau `.spdnet` — tampilan mirip hasil di speedtest.net
 ━━━━━━━━━━━━━━━━━━━━━━
 🔧 *BUG/ERROR FIX*
 ━━━━━━━━━━━━━━━━━━━━━━

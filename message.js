@@ -807,6 +807,12 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 await handleTestnet({ hisoka, m, tolak, logCommand });
                                 break;
                         }
+                        case 'speedtestnet':
+                        case 'spdnet': {
+                                const { handleSpeedtestnet } = _require(path.resolve('./SEMUA_FITUR/info/ping.cjs'));
+                                await handleSpeedtestnet({ hisoka, m, tolak, logCommand });
+                                break;
+                        }
                         case 'ceksize': {
                                 const { handleFilesize } = _require(path.resolve('./SEMUA_FITUR/info/ceksize.cjs'));
                                 await handleFilesize({ hisoka, m, tolak, logCommand, _require, path });
