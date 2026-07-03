@@ -121,26 +121,40 @@ daily_report &
 DAILY_PID=$!
 
 # ── Auto-restart loop ──
+# RESTART_COUNT di-reset ke 0 setiap kali bot sempat jalan STABIL minimal
+# STABLE_UPTIME_SEC detik sebelum crash lagi. Jadi batas MAX_RESTARTS cuma
+# berlaku untuk crash BERUNTUN CEPAT (indikasi bug fatal) — kalau crash-nya
+# jarang-jarang dan bot sempat pulih normal di antaranya, bot TIDAK akan
+# pernah kehabisan jatah restart dan mati permanen.
 RESTART_COUNT=0
 MAX_RESTARTS=10
 RESTART_DELAY=5
+STABLE_UPTIME_SEC=180
 
 echo -e "${C_CYAN}────────────────────────────${C_RESET}"
 echo -e "  ${C_GREEN}✅ Auto-Restart Aktif${C_RESET}"
-echo -e "  ${C_DIM}Max restart: ${MAX_RESTARTS}x${C_RESET}"
+echo -e "  ${C_DIM}Max restart beruntun: ${MAX_RESTARTS}x (reset jika stabil ${STABLE_UPTIME_SEC}s)${C_RESET}"
 echo -e "${C_CYAN}────────────────────────────${C_RESET}"
 while true; do
+  RUN_START=$(date +%s)
   node index.js
   EXIT_CODE=$?
-  RESTART_COUNT=$((RESTART_COUNT + 1))
+  RUN_ELAPSED=$(( $(date +%s) - RUN_START ))
   NOW=$(date '+%Y-%m-%d %H:%M:%S')
 
-  echo -e "${C_YELLOW}⚠️  [$NOW]${C_RESET} Bot berhenti ${C_DIM}(exit: $EXIT_CODE)${C_RESET}, restart ke-${C_MAGENTA}$RESTART_COUNT${C_RESET} dalam ${RESTART_DELAY}s..."
+  if [ "$RUN_ELAPSED" -ge "$STABLE_UPTIME_SEC" ] && [ "$RESTART_COUNT" -gt 0 ]; then
+    echo -e "${C_GREEN}✅ Bot sempat jalan stabil ${RUN_ELAPSED}s → hitungan restart di-reset${C_RESET}"
+    RESTART_COUNT=0
+  fi
+
+  RESTART_COUNT=$((RESTART_COUNT + 1))
+
+  echo -e "${C_YELLOW}⚠️  [$NOW]${C_RESET} Bot berhenti ${C_DIM}(exit: $EXIT_CODE, uptime: ${RUN_ELAPSED}s)${C_RESET}, restart ke-${C_MAGENTA}$RESTART_COUNT${C_RESET} dalam ${RESTART_DELAY}s..."
 
   if [ "$RESTART_COUNT" -ge "$MAX_RESTARTS" ]; then
-    echo -e "\033[1;31m❌ Terlalu banyak restart ($MAX_RESTARTS kali), bot dihentikan.${C_RESET}"
+    echo -e "\033[1;31m❌ Terlalu banyak restart beruntun cepat ($MAX_RESTARTS kali tanpa sempat stabil), bot dihentikan.${C_RESET}"
     send_tg "❌ *Wily Bot - Pterodactyl*
-Bot dihentikan setelah $MAX_RESTARTS kali crash.
+Bot dihentikan setelah $MAX_RESTARTS kali crash beruntun cepat (tidak sempat stabil ${STABLE_UPTIME_SEC}s).
 Exit Code terakhir: \`$EXIT_CODE\`
 🕐 $NOW"
     kill $DAILY_PID 2>/dev/null
@@ -148,7 +162,7 @@ Exit Code terakhir: \`$EXIT_CODE\`
   fi
 
   send_tg "⚠️ *Wily Bot - Pterodactyl*
-Bot crash (exit code: \`$EXIT_CODE\`), restart ke-$RESTART_COUNT dalam ${RESTART_DELAY}s...
+Bot crash (exit code: \`$EXIT_CODE\`, uptime: ${RUN_ELAPSED}s), restart ke-$RESTART_COUNT dalam ${RESTART_DELAY}s...
 🕐 $NOW"
 
   sleep $RESTART_DELAY
