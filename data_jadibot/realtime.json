@@ -5,18 +5,16 @@
       "permanent": false,
       "status": "active",
       "createdAt": 1781591126780,
-      "updatedAt": 1783073219677,
+      "updatedAt": 1783073970756,
       "durationText": "1 hari",
-      "connectedAt": 1783073021534,
-      "expiresAt": 1783159619677,
+      "connectedAt": 1783073970749,
+      "expiresAt": 1783160012864,
       "durationMs": 86400000,
       "addedDurationMs": 86400000,
       "addedDurationText": "1 hari",
       "previousRemainingMs": 0,
       "previousRemainingText": "kedaluwarsa",
-      "isPaused": true,
-      "pausedAt": 1783073457552,
-      "pausedRemainingMs": 86162125
+      "isPaused": false
     }
   }
 }

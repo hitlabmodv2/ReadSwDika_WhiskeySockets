@@ -31,11 +31,30 @@ format_uptime() {
   echo "${h}j ${m}m ${s}d"
 }
 
-echo "▶ Wily Bot - Pterodactyl Mode"
+# ── Warna ANSI ──
+C_RESET='\033[0m'
+C_CYAN='\033[1;36m'
+C_GREEN='\033[1;32m'
+C_YELLOW='\033[1;33m'
+C_MAGENTA='\033[1;35m'
+C_DIM='\033[2m'
+
+print_banner() {
+  echo -e "${C_CYAN}╭─────────────────────────╮${C_RESET}"
+  echo -e "${C_CYAN}│${C_RESET}   ${C_MAGENTA}✦ WILY BOT ✦${C_RESET}          ${C_CYAN}│${C_RESET}"
+  echo -e "${C_CYAN}│${C_RESET}   ${C_DIM}Pterodactyl Mode${C_RESET}       ${C_CYAN}│${C_RESET}"
+  echo -e "${C_CYAN}├─────────────────────────┤${C_RESET}"
+  echo -e "${C_CYAN}│${C_RESET} ${C_YELLOW}Dev${C_RESET}  : Bang Wily        ${C_CYAN}│${C_RESET}"
+  echo -e "${C_CYAN}│${C_RESET} ${C_YELLOW}WA${C_RESET}   : 6289688206739   ${C_CYAN}│${C_RESET}"
+  echo -e "${C_CYAN}│${C_RESET} ${C_YELLOW}Tele${C_RESET} : @Wilykun1994     ${C_CYAN}│${C_RESET}"
+  echo -e "${C_CYAN}╰─────────────────────────╯${C_RESET}"
+}
+
+print_banner
 
 # Install node_modules jika belum ada
 if [ ! -d "node_modules" ]; then
-  echo "▶ node_modules tidak ditemukan, install dulu..."
+  echo -e "${C_GREEN}▶${C_RESET} node_modules tidak ditemukan, install dulu..."
   npm install
 fi
 
