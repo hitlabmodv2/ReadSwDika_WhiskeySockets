@@ -144,11 +144,6 @@ while true; do
 
   if [ "$RUN_ELAPSED" -ge "$STABLE_UPTIME_SEC" ] && [ "$RESTART_COUNT" -gt 0 ]; then
     echo -e "${C_GREEN}✅ Bot sempat jalan stabil ${RUN_ELAPSED}s → hitungan restart di-reset${C_RESET}"
-    send_tg "✅ *Wily Bot - Pterodactyl*
-Bot pulih stabil setelah $RESTART_COUNT kali restart sebelumnya.
-⏱ Sempat jalan stabil: \`${RUN_ELAPSED}s\` (≥ ${STABLE_UPTIME_SEC}s)
-🔄 Hitungan restart beruntun di-reset ke 0
-🕐 $NOW"
     RESTART_COUNT=0
   fi
 
