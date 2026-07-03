@@ -549,9 +549,23 @@ export async function handleAntilink({ hisoka, m, query, tolak, logCommand, load
     // ── off ───────────────────────────────────────────────────────────────────
     if (arg === 'off') {
         toggleAntiLink(m.from, false);
+
+        // Grup aktif terakhir baru saja dimatikan → global ikut false (akurat & realtime)
+        let globalAutoDisabledOff = false;
+        if (!getAllAntiLinkGroups().length) {
+            const cfgOff = lc();
+            if (cfgOff.antiLink?.enabled) {
+                if (!cfgOff.antiLink) cfgOff.antiLink = {};
+                cfgOff.antiLink.enabled = false;
+                sc(cfgOff);
+                globalAutoDisabledOff = true;
+            }
+        }
+
         logCommand(m, hisoka, 'antilink off');
         return tolak(hisoka, m,
             `╭─〔 🔴 *Anti-Link* 〕\n│\n│ *Fitur AntiLink NONAKTIF!*\n│\n` +
+            (globalAutoDisabledOff ? `│ 🌐 _Global juga ikut dinonaktifkan_\n│ _(tidak ada grup aktif tersisa)_\n│\n` : '') +
             `> Semua warning di grup ini\n> juga telah _direset otomatis_.\n│\n╰────────────────────`
         );
     }
@@ -571,12 +585,20 @@ export async function handleAntilink({ hisoka, m, query, tolak, logCommand, load
         }
 
         for (const gid of aktifGroups) toggleAntiLink(gid, false);
+
+        // Tidak ada grup aktif tersisa → global enabled juga di-set false (akurat & realtime)
+        const configOffAll = lc();
+        if (!configOffAll.antiLink) configOffAll.antiLink = {};
+        configOffAll.antiLink.enabled = false;
+        sc(configOffAll);
+
         logCommand(m, hisoka, 'antilink off all');
 
         const _offAllPrefix =
             `╭─〔 🔴 *Anti-Link — Off All* 〕\n│\n` +
             `│ ✅ *AntiLink dinonaktifkan di semua grup!*\n│\n` +
             `│ 🗑️ Total grup   : *${aktifGroups.length}*\n` +
+            `│ 🌐 Global      : 🔴 _ikut dinonaktifkan (config.json)_\n` +
             `│ 💾 Status       : _tersimpan realtime_\n│\n` +
             `> Semua warning di grup tersebut\n> juga telah _direset otomatis_.\n│\n╰────────────────────`;
 
@@ -1012,11 +1034,24 @@ export async function handleAntilinkStatusReply({ hisoka, m, pendingAntilinkChoi
         namaList.push(nama);
     }
 
+    // Del all (atau del sisa terakhir) → tidak ada grup aktif tersisa, global ikut false
+    let globalAutoDisabled = false;
+    if (aksi === 'del' && !getAllAntiLinkGroups().length) {
+        const cfgAfterDel = loadConfig();
+        if (cfgAfterDel.antiLink?.enabled) {
+            if (!cfgAfterDel.antiLink) cfgAfterDel.antiLink = {};
+            cfgAfterDel.antiLink.enabled = false;
+            saveConfig(cfgAfterDel);
+            globalAutoDisabled = true;
+        }
+    }
+
     const ikon   = aksi === 'add' ? '✅' : '❌';
     const action = aksi === 'add' ? 'Diaktifkan' : 'Dinonaktifkan';
 
     let txt = `${ikon} *AntiLink ${action} (${dipilih.length} GC):*\n`;
     namaList.forEach((n, i) => { txt += `${i + 1}. ${n}\n`; });
+    if (globalAutoDisabled) txt += `\n🌐 _Global juga ikut dinonaktifkan (tidak ada grup aktif tersisa)._`;
     txt += `\n💡 Ketik *.antilink status* untuk cek ulang.`;
 
     await hisoka.sendMessage(m.from, { react: { text: ikon, key: m.key } });
