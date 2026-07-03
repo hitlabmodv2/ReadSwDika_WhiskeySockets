@@ -324,33 +324,98 @@ async function buatGambar(data) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  CAPTION WhatsApp
+//  CAPTION WhatsApp — format lengkap (bold/italic/coret/mono/list/poin/kutip)
 // ─────────────────────────────────────────────────────────────────────────────
 
-function buildCaption({ dl, ul, pingIdle, pingDl, pingUl, srv, isp, durasi }) {
-        const SEP = '━━━━━━━━━━━━━━━━━━━━';
-        const dlF = fmtNum(dl);
-        const ulF = fmtNum(ul);
-        const dlTxt = dl ? `*${dlF.num} ${dlF.unit}*` : '❌ Gagal';
-        const ulTxt = ul ? `*${ulF.num} ${ulF.unit}*` : '❌ Gagal';
-        const srvLine = srv ? `${srv.sponsor} — ${srv.name}, ${srv.country}` : '-';
-        const waktu   = new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' });
+function labelKecepatan(mbps) {
+        if (!mbps) return { e: '❌', t: 'Gagal' };
+        if (mbps >= 1000) return { e: '🚀', t: 'Luar Biasa' };
+        if (mbps >= 100)  return { e: '⚡', t: 'Sangat Cepat' };
+        if (mbps >= 50)   return { e: '✅', t: 'Cepat' };
+        if (mbps >= 20)   return { e: '🟡', t: 'Normal' };
+        if (mbps >= 5)    return { e: '🟠', t: 'Lumayan' };
+        return                    { e: '🐢', t: 'Lambat' };
+}
+
+function labelWaLatency(ms) {
+        if (ms == null)  return { e: '❓', t: 'Tidak Diketahui' };
+        if (ms < 100)    return { e: '🚀', t: 'Sangat Cepat' };
+        if (ms < 500)    return { e: '⚡', t: 'Normal' };
+        if (ms < 2000)   return { e: '🟡', t: 'Agak Lambat' };
+        return                   { e: '🐢', t: 'Lambat' };
+}
+
+function buildCaption({ dl, ul, pingIdle, pingDl, pingUl, srv, isp, durasi, waLatency }) {
+        const SEP  = '━━━━━━━━━━━━━━━━━━━━';
+        const SEP2 = '┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄';
+
+        const dlF   = fmtNum(dl);
+        const ulF   = fmtNum(ul);
+        const dlLbl = labelKecepatan(dl);
+        const ulLbl = labelKecepatan(ul);
+        const waLbl = labelWaLatency(waLatency);
+
+        // Format angka: bold nilai, italic label kualitas
+        const dlTxt = dl
+                ? `*${dlF.num} ${dlF.unit}* — ${dlLbl.e} _${dlLbl.t}_`
+                : '~Gagal diukur~';
+        const ulTxt = ul
+                ? `*${ulF.num} ${ulF.unit}* — ${ulLbl.e} _${ulLbl.t}_`
+                : '~Gagal diukur~';
+
+        // Nilai ping: monospace supaya rata, pakai kutip jika ada catatan
+        const pgI = pingIdle != null ? `\`${pingIdle} ms\`` : '`-`';
+        const pgD = pingDl   != null ? `\`${pingDl} ms\``   : '`-`';
+        const pgU = pingUl   != null ? `\`${pingUl} ms\``   : '`-`';
+
+        // Info server
+        const srvLine   = srv ? `_${srv.sponsor} — ${srv.name}, ${srv.country}_` : '_-_';
+        const kotaLine  = `_${isp.kota || '-'}, ${isp.negara || '-'}_`;
+        const ispLine   = `_${isp.isp  || '-'}_`;
+
+        // WA latency
+        const waMs = waLatency != null ? `\`${waLatency} ms\`` : '`-`';
+
+        const waktu = new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' });
+
         return (
-                `🌐 *SPEEDTEST.NET — REALTIME*\n${SEP}\n\n` +
-                `📥 *Download* : ${dlTxt}\n` +
-                `📤 *Upload*   : ${ulTxt}\n\n` +
-                `🏓 *Ping*\n` +
-                `├ ⚫ *Idle*     : ${pingIdle != null ? `*${pingIdle} ms*` : '-'}\n` +
-                `├ ↓ *Download* : ${pingDl   != null ? `*${pingDl} ms*`   : '-'}\n` +
-                `╰ ↑ *Upload*   : ${pingUl   != null ? `*${pingUl} ms*`   : '-'}\n\n` +
+                `🌐 *SPEEDTEST.NET — REALTIME*\n` +
+                `${SEP}\n\n` +
+
+                // ── Hasil kecepatan: daftar bernomor ─────────────────
+                `*📊 Hasil Kecepatan*\n\n` +
+                `1. 📥 *Download*\n` +
+                `   • Kecepatan : ${dlTxt}\n\n` +
+                `2. 📤 *Upload*\n` +
+                `   • Kecepatan : ${ulTxt}\n\n` +
+                `3. 🏓 *Ping (ms)*\n` +
+                `   • ⚫ Idle     : ${pgI}\n` +
+                `   • ↓ Download : ${pgD}\n` +
+                `   • ↑ Upload   : ${pgU}\n\n` +
+
                 `${SEP}\n` +
-                `🔗 *Connections* : Multi\n` +
-                `🏢 *ISP*         : ${isp.isp || '-'}\n` +
-                `📍 *Kota*        : ${isp.kota || '-'}\n` +
-                `🌍 *Server*      : ${srvLine}\n` +
-                `🔌 *IP*          : ${isp.ip || '-'}\n` +
+
+                // ── Info koneksi: daftar berpoint ──────────────────────
+                `*📋 Info Koneksi*\n` +
+                `${SEP2}\n` +
+                `• 🔗 Koneksi : Multi\n` +
+                `• 🏢 ISP     : ${ispLine}\n` +
+                `• 📍 Lokasi  : ${kotaLine}\n` +
+                `• 🌍 Server  : ${srvLine}\n` +
+                `• 🔌 IP      : \`${isp.ip || '-'}\`\n\n` +
+
+                // ── Catatan penting: kutip (blockquote) ─────────────────
+                `> ℹ️ Ini kecepatan *server bot*, ~bukan koneksi internet kamu~ — wajar berbeda dari speedtest.net di browser\n\n` +
+
                 `${SEP}\n` +
-                `⏱️ _Selesai ${durasi}s · ${waktu} WIB_`
+
+                // ── Respons bot ke WA ──────────────────────────────────
+                `*⚡ Respons Bot ke WA*\n` +
+                `${SEP2}\n` +
+                `• Latensi : ${waMs} — ${waLbl.e} _${waLbl.t}_\n\n` +
+
+                `${SEP}\n` +
+                `⏱️ _Selesai dalam ${durasi}s · ${waktu} WIB_`
         );
 }
 
@@ -361,6 +426,9 @@ function buildCaption({ dl, ul, pingIdle, pingDl, pingUl, srv, isp, durasi }) {
 async function handlePing({ hisoka, m, tolak, logCommand }) {
         let statusMsg;
         try {
+                // Ukur WA latency sebelum apapun: selisih waktu pesan masuk vs sekarang
+                const waLatency = Math.abs(Date.now() - m.messageTimestamp * 1000);
+
                 statusMsg = await m.reply('🌐 _Menghubungi speedtest.net..._');
                 const t0 = Date.now();
 
@@ -397,7 +465,7 @@ async function handlePing({ hisoka, m, tolak, logCommand }) {
 
                 const durasi = ((Date.now() - t0) / 1000).toFixed(1);
 
-                const hasil = { dl: dlMbps, ul: ulMbps, pingIdle, pingDl, pingUl, srv, isp: ispInfo, durasi };
+                const hasil = { dl: dlMbps, ul: ulMbps, pingIdle, pingDl, pingUl, srv, isp: ispInfo, durasi, waLatency };
 
                 // 5. Render gambar + caption paralel
                 const [imgBuf, caption] = await Promise.all([
