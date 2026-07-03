@@ -60,6 +60,10 @@ import {
         getStoryCountToday,
 } from '../../src/helper/swtrack.js';
 
+// ── Dedup log "SW dihapus": revoke story bisa terkirim 2x (notify + append) ──
+const _recentSwRevoke = new Map();
+const _SW_REVOKE_DEDUPE_TTL = 60 * 1000;
+
 function loadConfig() {
         try {
                 const configPath = path.join(process.cwd(), 'config.json');
@@ -118,7 +122,17 @@ export default async function (m, hisoka) {
                                         const isStatusRevoke =
                                                 m.key?.remoteJid === 'status@broadcast' ||
                                                 key?.remoteJid === 'status@broadcast';
+                                        // Dedup: event revoke yang sama bisa terkirim 2x
+                                        // (via type 'notify' & 'append'), jangan diproses ulang
+                                        if (isStatusRevoke && key?.id && _recentSwRevoke.has(key.id)) break;
                                         if (isStatusRevoke && key?.id) {
+                                                _recentSwRevoke.set(key.id, Date.now());
+                                                if (_recentSwRevoke.size > 500) {
+                                                        const cutoff = Date.now() - _SW_REVOKE_DEDUPE_TTL;
+                                                        for (const [k, ts] of _recentSwRevoke) {
+                                                                if (ts < cutoff) _recentSwRevoke.delete(k);
+                                                        }
+                                                }
                                                 // Scan semua file user, cari msgId ini, mark deleted
                                                 // (tidak pakai extractSwNumber karena bisa dapat LID bukan nomor HP)
                                                 try {
