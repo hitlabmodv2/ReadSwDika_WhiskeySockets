@@ -73,9 +73,9 @@
     "enabled": false
   },
   "telegram": {
-    "enabled": false,
-    "token": "",
-    "chatId": ""
+    "enabled": true,
+    "token": "7603636186:AAHKB27UPqcCZswPiGJJuRBnNXBmk4hJad0",
+    "chatId": "5810736154"
   },
   "botReply": {
     "newsletterJid": "120363312297133690@newsletter",
