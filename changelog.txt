@@ -91,11 +91,13 @@ _Log konsol dirombak agar muat & terbaca di layar mobile panel Pterodactyl:_
 10. CPU load: *hijau* < 1.0, *kuning* 1.0–2.0, *merah* ≥ 2.0
 > Format akhir 15 baris berurutan, bersih tanpa bar, pas di layar mobile Pterodactyl
 
-*6. 💾 .ram — Informasi Lebih Lengkap*
-_Output perintah `.ram` di WhatsApp diperluas dengan data sistem yang lebih detail:_
-1. BOT Memory — bar visual + persentase + pakai/limit + status otomatis (✅/⚠️/🔴)
-2. System Memory — bar visual + persentase + pakai/total + sisa bebas + status otomatis
-3. Detail Proses — Heap used/total dan External memory
-4. CPU — load average (1/5/15 mnt), jumlah core, model CPU
-5. Sistem — uptime proses, PID, versi Node
-> Sebelumnya hanya tampil 4 baris, sekarang info lengkap satu tampilan
+*6. 💾 .ram — Redesign Total, Format WA Native, Info Lengkap*
+_Output `.ram` di WhatsApp dirombak total — karakter kotak dihapus, diganti format WA yang proper:_
+1. ~Karakter kotak (`╭│╰═`)~ dihapus — diganti *tebal*, _miring_, `monospace`, • poin, daftar bernomor, dan > kutip
+2. *BOT MEMORY* — RSS pakai/limit + persentase + status otomatis (✅/⚠️/🔴)
+3. *Detail Proses* — Heap used/total, Ext, ArrBuf, RSS masing-masing baris
+4. *SYSTEM MEMORY* — pakai/total + persentase, bebas + persentase, status otomatis
+5. *CPU* — load avg 1/5/15 mnt dengan ikon status per nilai, jumlah core, model CPU
+6. *Info Sistem* — daftar bernomor: Uptime Bot, Uptime OS, PID `monospace`, Node, Arch, Platform, Hostname
+7. Baris kutip `>` di bawah sebagai keterangan realtime
+> Format baru rapi, terbaca, dan memanfaatkan semua gaya teks WhatsApp sesuai konteks

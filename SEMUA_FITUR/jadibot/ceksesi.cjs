@@ -210,61 +210,68 @@ async function handleRam({ hisoka, m, tolak, logCommand }) {
 
                 const botPct  = ((memUsage.rss / memLimit) * 100).toFixed(1);
                 const sysPct  = ((systemMem.used / systemMem.total) * 100).toFixed(1);
+                const freePct = ((systemMem.free / systemMem.total) * 100).toFixed(1);
 
-                const barLen = 10;
-                const mkBar = (pct) => {
-                        const filled = Math.round((parseFloat(pct) / 100) * barLen);
-                        return '█'.repeat(filled) + '░'.repeat(barLen - filled);
-                };
-                const statusLabel = (pct) => parseFloat(pct) >= 80 ? '🔴 Kritis' : parseFloat(pct) >= 60 ? '⚠️ Waspada' : '✅ Normal';
+                const statusIcon = (pct) => parseFloat(pct) >= 80 ? '🔴 *Kritis*' : parseFloat(pct) >= 60 ? '⚠️ *Waspada*' : '✅ *Normal*';
 
-                const heapUsedMB  = (memUsage.heapUsed  / 1024 / 1024).toFixed(1);
-                const heapTotalMB = (memUsage.heapTotal / 1024 / 1024).toFixed(1);
-                const extMB       = (memUsage.external  / 1024 / 1024).toFixed(1);
+                const heapUsedMB  = (memUsage.heapUsed   / 1024 / 1024).toFixed(1);
+                const heapTotalMB = (memUsage.heapTotal   / 1024 / 1024).toFixed(1);
+                const extMB       = (memUsage.external    / 1024 / 1024).toFixed(1);
+                const arrBufMB    = ((memUsage.arrayBuffers || 0) / 1024 / 1024).toFixed(1);
+                const rssMB       = (memUsage.rss          / 1024 / 1024).toFixed(1);
 
                 const loadAvg  = os.loadavg();
                 const cpuCores = os.cpus().length;
                 const cpuModel = os.cpus()[0]?.model?.split('@')[0]?.trim() || 'Unknown';
 
-                const uptimeSec  = Math.floor(process.uptime());
-                const uptimeDays = Math.floor(uptimeSec / 86400);
-                const uptimeHrs  = Math.floor((uptimeSec % 86400) / 3600);
-                const uptimeMins = Math.floor((uptimeSec % 3600) / 60);
-                const uptimeStr  = uptimeDays > 0
-                        ? `${uptimeDays}d ${uptimeHrs}h ${uptimeMins}m`
-                        : uptimeHrs > 0
-                                ? `${uptimeHrs}h ${uptimeMins}m`
-                                : `${uptimeMins}m`;
+                const fmtUptime = (sec) => {
+                        const d = Math.floor(sec / 86400);
+                        const h = Math.floor((sec % 86400) / 3600);
+                        const m = Math.floor((sec % 3600) / 60);
+                        return d > 0 ? `${d}d ${h}h ${m}m` : h > 0 ? `${h}h ${m}m` : `${m}m`;
+                };
+                const uptimeStr    = fmtUptime(Math.floor(process.uptime()));
+                const sysUptimeStr = fmtUptime(Math.floor(os.uptime()));
+                const hostname     = os.hostname();
+                const arch         = os.arch();
+                const plat         = os.platform();
+
+                const loadStatus = (v) => parseFloat(v) >= 2 ? '🔴' : parseFloat(v) >= 1 ? '⚠️' : '✅';
 
                 const text =
-`╭═══『 *💾 RAM STATUS* 』═══╮
-│
-│ *🤖 BOT MEMORY*
-│ ${mkBar(botPct)} ${botPct}%
-│ Pakai  : *${formatBytes(memUsage.rss)}* / ${formatBytes(memLimit)}
-│ Status : ${statusLabel(botPct)}
-│
-│ *🖥️ SYSTEM MEMORY*
-│ ${mkBar(sysPct)} ${sysPct}%
-│ Pakai  : *${formatBytes(systemMem.used)}* / ${formatBytes(systemMem.total)}
-│ Bebas  : *${formatBytes(systemMem.free)}*
-│ Status : ${statusLabel(sysPct)}
-│
-│ *📊 DETAIL PROSES*
-│ Heap   : *${heapUsedMB} / ${heapTotalMB} MB*
-│ Ext    : *${extMB} MB*
-│
-│ *⚡ CPU*
-│ Load   : *${loadAvg[0].toFixed(2)}, ${loadAvg[1].toFixed(2)}, ${loadAvg[2].toFixed(2)}*
-│ Core   : *${cpuCores} core*
-│ Model  : ${cpuModel}
-│
-│ *🔧 SISTEM*
-│ Uptime : *${uptimeStr}*
-│ PID    : *${process.pid}*
-│ Node   : *${process.version}*
-│
-╰═════════════════════╯`;
+`*💾 RAM STATUS*
+_Cek penggunaan memori & sistem realtime_
+
+*🤖 BOT MEMORY*
+• RSS    : *${formatBytes(memUsage.rss)}* _/ ${formatBytes(memLimit)}_ _(${botPct}%)_
+• Status : ${statusIcon(botPct)}
+
+*📊 Detail Proses Node.js*
+• Heap   : *${heapUsedMB} / ${heapTotalMB} MB*
+• Ext    : *${extMB} MB*
+• ArrBuf : *${arrBufMB} MB*
+• RSS    : *${rssMB} MB*
+
+*🖥️ SYSTEM MEMORY*
+• Pakai  : *${formatBytes(systemMem.used)}* _/ ${formatBytes(systemMem.total)}_ _(${sysPct}%)_
+• Bebas  : *${formatBytes(systemMem.free)}* _(${freePct}%)_
+• Status : ${statusIcon(sysPct)}
+
+*⚡ CPU*
+• Load   : ${loadStatus(loadAvg[0])} *${loadAvg[0].toFixed(2)}*, *${loadAvg[1].toFixed(2)}*, *${loadAvg[2].toFixed(2)}* _(1/5/15 mnt)_
+• Core   : *${cpuCores} core*
+• Model  : _${cpuModel}_
+
+*🔧 INFO SISTEM*
+1. Uptime Bot : *${uptimeStr}*
+2. Uptime OS  : *${sysUptimeStr}*
+3. PID        : \`${process.pid}\`
+4. Node       : \`${process.version}\`
+5. Arch       : \`${arch}\`
+6. Platform   : \`${plat}\`
+7. Hostname   : \`${hostname}\`
+
+> _Data diambil realtime saat perintah dikirim_`;
 
                 await tolak(hisoka, m, text);
                 logCommand(m, hisoka, 'cekram');
