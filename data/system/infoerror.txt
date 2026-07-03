@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 03/07/2026, 07.09.30  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 03/07/2026, 07.30.14  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  command:antitagsw
+│  #001  —  console.error
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  isAntiTagSWEnabled is not a function
+│  [31m[HotReload] ✗ Gagal reload 'SEMUA_FITUR/menu/menu_jadibot.js', pakai versi lama.[39m
 │
 │  DETAIL
-│  Sumber      : command:antitagsw
+│  Sumber      : console.error
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 03/07/2026, 07.09.30
-│  Terakhir    : 03/07/2026, 07.09.30
+│  Pertama     : 03/07/2026, 07.30.14
+│  Terakhir    : 03/07/2026, 07.30.14
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  TypeError: isAntiTagSWEnabled is not a function
-│     at handleAntitagsw (file:///home/runner/workspace/SEMUA_FITUR/antitagsw/antitagsw.js:1044:35)
-│     at default (file:///home/runner/workspace/message.js?t=1783062505286:1584:39)
+│  ▶  Error: [31m[HotReload] ✗ Gagal reload 'SEMUA_FITUR/menu/menu_jadibot.js', pakai versi lama.[39m
+│     at console.error (file:///home/runner/workspace/index.js:433:27)
+│     at Timeout._onTimeout (file:///home/runner/workspace/src/helper/hotReload.js:307:33)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 03/07/2026, 07.09.30
+  Terakhir diperbarui: 03/07/2026, 07.30.14
 ════════════════════════════════════════════════════════════════════════

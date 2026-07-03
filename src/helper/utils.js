@@ -49,6 +49,10 @@ export function loadConfig() {
         return {};
 }
 
+export function getBotVersion() {
+        return loadConfig().botVersion || 'V25';
+}
+
 export function saveConfig(config) {
         try {
                 fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf-8');

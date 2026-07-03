@@ -22,9 +22,11 @@
  *  Tampilkan semua command, info uptime, fitur aktif/nonaktif
  * ───────────────────────────────
  */
+import { getBotVersion } from '../../src/helper/utils.js';
+
 export function buildMenuUtama({ pushName, isOwner, uptimeStr, tgl, jam, browserLabel, totalCmdCount, totalSemuaFitur, fiturAktif, fiturTidakAktif }) {
         return `╭═════════════════════╮
-║   🤖 *WILY BOT V25*   
+║   🤖 *WILY BOT ${getBotVersion()}*   
 ├═════════════════════┤
 │ 👤 » ${pushName} ${isOwner ? '👑' : ''}
 │ ⏱️ » ${uptimeStr}
