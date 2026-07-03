@@ -214,5 +214,49 @@
       }
     ],
     "processedAt": "2026-07-03T09:37:41.608Z"
+  },
+  "A511C86EFD67510C1C51C82AF6081B10": {
+    "id": "A511C86EFD67510C1C51C82AF6081B10",
+    "sender": "6288705922833@s.whatsapp.net",
+    "name": "alala",
+    "type": "imageMessage",
+    "arrivedAt": "2026-07-03T15:38:12.270Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "❤️",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6288705922833",
+    "resolvedPn": "6288705922833@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6288705922833@s.whatsapp.net",
+      "fromMe": false,
+      "id": "A511C86EFD67510C1C51C82AF6081B10",
+      "participant": "200897581863137@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-03T15:38:21.117Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6288705922833@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A511C86EFD67510C1C51C82AF6081B10",
+        "participant": "200897581863137@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6288705922833@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A511C86EFD67510C1C51C82AF6081B10",
+        "participant": "6288705922833@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-03T15:38:14.658Z",
+    "deleted": true,
+    "deletedAt": "2026-07-03T15:38:21.117Z"
   }
 }

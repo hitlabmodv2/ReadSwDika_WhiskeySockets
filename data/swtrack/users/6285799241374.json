@@ -40,5 +40,47 @@
       }
     ],
     "processedAt": "2026-07-03T09:52:12.388Z"
+  },
+  "A599BEE5E6AD4BAB589D5A4C9B3BF389": {
+    "id": "A599BEE5E6AD4BAB589D5A4C9B3BF389",
+    "sender": "6285799241374@s.whatsapp.net",
+    "name": "𝕱𝖆𝖉𝖑𝖎𝕰𝖛𝖊𝖗𝖞𝖔𝖓𝖊",
+    "type": "videoMessage",
+    "arrivedAt": "2026-07-03T15:39:23.065Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "⏺️⏏️⏹️",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285799241374",
+    "resolvedPn": "6285799241374@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285799241374@s.whatsapp.net",
+      "fromMe": false,
+      "id": "A599BEE5E6AD4BAB589D5A4C9B3BF389",
+      "participant": "162160936263906@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-03T15:39:41.257Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285799241374@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A599BEE5E6AD4BAB589D5A4C9B3BF389",
+        "participant": "162160936263906@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285799241374@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A599BEE5E6AD4BAB589D5A4C9B3BF389",
+        "participant": "6285799241374@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-03T15:39:41.257Z"
   }
 }
