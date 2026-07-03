@@ -1285,44 +1285,44 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 break;
                         }
                         case 'emoji': {
-                                const { handleEmoji } = _require(path.resolve('./SEMUA_FITUR/info/info.cjs'));
-                                await handleEmoji({ hisoka, m, tolak, logCommand, getJadibotNumber, listJadibotEmojis });
+                                const { handleEmoji } = _require(path.resolve('./SEMUA_FITUR/info/emoji-cmd.cjs'));
+                                await handleEmoji({ hisoka, m, tolak, logCommand, getJadibotNumber, listJadibotEmojis, Button });
                                 break;
                         }
 
                         case 'emojiadd': {
-                                const { handleEmojiadd } = _require(path.resolve('./SEMUA_FITUR/info/info.cjs'));
-                                await handleEmojiadd({ hisoka, m, query, tolak, logCommand, getJadibotNumber, addJadibotEmojis, listJadibotEmojis });
+                                const { handleEmojiadd } = _require(path.resolve('./SEMUA_FITUR/info/emoji-cmd.cjs'));
+                                await handleEmojiadd({ hisoka, m, query, tolak, logCommand, getJadibotNumber, addJadibotEmojis, listJadibotEmojis, Button });
                                 break;
                         }
 
                         case 'emojidel': {
-                                const { handleEmojidel } = _require(path.resolve('./SEMUA_FITUR/info/info.cjs'));
-                                await handleEmojidel({ hisoka, m, query, tolak, logCommand, getJadibotNumber, deleteJadibotEmojis, listJadibotEmojis });
+                                const { handleEmojidel } = _require(path.resolve('./SEMUA_FITUR/info/emoji-cmd.cjs'));
+                                await handleEmojidel({ hisoka, m, query, tolak, logCommand, getJadibotNumber, deleteJadibotEmojis, listJadibotEmojis, Button });
                                 break;
                         }
 
                         case 'emojilist': {
-                                const { handleEmojilist } = _require(path.resolve('./SEMUA_FITUR/info/info.cjs'));
-                                await handleEmojilist({ hisoka, m, tolak, logCommand, getJadibotNumber, listJadibotEmojis });
+                                const { handleEmojilist } = _require(path.resolve('./SEMUA_FITUR/info/emoji-cmd.cjs'));
+                                await handleEmojilist({ hisoka, m, tolak, logCommand, getJadibotNumber, listJadibotEmojis, Button });
                                 break;
                         }
 
                         case 'emojidefault': {
                                 const { handleEmojidefault } = _require(path.resolve('./SEMUA_FITUR/info/emoji-cmd.cjs'));
-                                await handleEmojidefault({ hisoka, m, tolak, logCommand, getJadibotNumber, resetToDefaultEmojis });
+                                await handleEmojidefault({ hisoka, m, tolak, logCommand, getJadibotNumber, resetToDefaultEmojis, listJadibotEmojis, Button });
                                 break;
                         }
 
                         case 'emojicustom': {
                                 const { handleEmojicustom } = _require(path.resolve('./SEMUA_FITUR/info/emoji-cmd.cjs'));
-                                await handleEmojicustom({ hisoka, m, tolak, logCommand, getJadibotNumber, setCustomEmojiMode, listJadibotEmojis });
+                                await handleEmojicustom({ hisoka, m, tolak, logCommand, getJadibotNumber, setCustomEmojiMode, listJadibotEmojis, Button });
                                 break;
                         }
 
                         case 'emojiclear': {
                                 const { handleEmojiclear } = _require(path.resolve('./SEMUA_FITUR/info/emoji-cmd.cjs'));
-                                await handleEmojiclear({ hisoka, m, tolak, logCommand, getJadibotNumber, clearJadibotEmojis });
+                                await handleEmojiclear({ hisoka, m, tolak, logCommand, getJadibotNumber, clearJadibotEmojis, listJadibotEmojis, Button });
                                 break;
                         }
 
