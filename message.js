@@ -1185,13 +1185,13 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'typing':
                         case 'typ': {
                                 const { handleTyp } = _require(path.resolve('./SEMUA_FITUR/setting/autotyprec.cjs'));
-                                await handleTyp({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, getJadibotNumber, getJadibotAutoTyping, setJadibotUserSetting });
+                                await handleTyp({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, getJadibotNumber, getJadibotAutoTyping, setJadibotUserSetting, Button });
                                 break;
                         }
                         case 'recording':
                         case 'record': {
                                 const { handleRecord } = _require(path.resolve('./SEMUA_FITUR/setting/autotyprec.cjs'));
-                                await handleRecord({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, getJadibotNumber, getJadibotAutoRecording, setJadibotUserSetting });
+                                await handleRecord({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, getJadibotNumber, getJadibotAutoRecording, setJadibotUserSetting, Button });
                                 break;
                         }
                         case 'simi': {
@@ -1335,7 +1335,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                         case 'readchat': {
                                 const { handleReadchat } = _require(path.resolve('./SEMUA_FITUR/setting/readchat.cjs'));
-                                await handleReadchat({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, getJadibotNumber, getJadibotReadchat, setJadibotUserSetting });
+                                await handleReadchat({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, getJadibotNumber, getJadibotReadchat, setJadibotUserSetting, Button });
                                 break;
                         }
                         case 'anticall':
