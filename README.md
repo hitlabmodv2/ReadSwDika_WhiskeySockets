@@ -85,6 +85,7 @@
 - [🤖 Jadibot (Multi-Session)](#-jadibot-multi-session)
 - [🛡️ Fitur Keamanan](#️-fitur-keamanan)
 - [❓ Troubleshooting / FAQ](#-troubleshooting--faq)
+- [🆕 Update Terbaru (V25)](#-update-terbaru-v25)
 - [📝 Kredit](#-kredit)
 
 ---
@@ -991,6 +992,49 @@ File temporary (hasil download) dibersihkan otomatis setiap 6 jam.
 | Dapat error `forbidden 403` | Bot reconnect otomatis tanpa hapus sesi (sudah dihandle) |
 | Command tidak dikenali | Cek prefix, cek ejaan command dengan `.menu` |
 | Bot kirim pesan double | Cek apakah ada dua instance bot berjalan bersamaan |
+
+</details>
+
+---
+
+## 🆕 Update Terbaru (V25)
+
+<details>
+<summary><b>🔽 Klik untuk lihat detail rilis WILY BOT V25 — 2 Fitur Baru, 9 Bug Fix, 11 Perubahan</b></summary>
+
+<br/>
+
+> 📅 Jadwal rilis belum ditentukan — masih dalam tahap pemantauan. Detail lengkap ada di file [`INFORMASI_UPDATE_V25.txt`](./INFORMASI_UPDATE_V25.txt).
+
+### ✨ Fitur Baru
+1. **🔗 AntiLink — Bulk Toggle "off all" / "on all"** — atur AntiLink di semua grup terdaftar sekaligus, khusus owner.
+2. **🔗 AntiLink — "add all" / "del all" via Balas Status** — cukup balas pesan status AntiLink dengan satu kata untuk terapkan ke semua grup.
+
+### 🔧 Bug/Error Fix (9)
+1. EmojiMode log SW yang selalu tampil "Default" padahal sudah Custom — kini baca sumber data yang benar.
+2. Status AntiLink "off all" yang tidak sinkron dengan `config.json` — kini `enabled` selalu akurat sesuai jumlah grup aktif.
+3. Error `.antitagsw` "isAntiTagSWEnabled is not a function" — dependency yang kurang sudah dilengkapi.
+4. Kotak info command yang tampil dobel di log konsol — kini tepat satu kali per perintah.
+5. `.listbot` reply `1,p` yang salah menghapus data bot permanen — diperbaiki ke fungsi yang benar.
+6. `.listbot` bot Permanent yang tidak berubah statusnya saat diubah ke durasi terbatas — kini realtime akurat.
+7. Log `[SwTrack] SW dihapus` yang kadang tercatat dobel — kini pakai penanda persisten, tidak lagi duplikat.
+8. **`.d` / `.del` gagal hapus pesan** meski bot sudah admin grup (cache status admin basi) — kini diverifikasi live ke `groupMetadata` sebelum ditolak, akurat untuk pesan lama maupun baru.
+9. **Nomor "cek ke-N" di log MemoryMonitor yang meloncat** (mis. `1` lalu langsung `10`) — kini pakai counter tampilan terpisah agar urut 1, 2, 3, dst secara realtime.
+
+### 🚀 Perubahan (11)
+1. `.online` — tampilan tombol single-select, konsisten dengan `.readsw` & `.emoji`.
+2. `.typing` / `.recording` / `.readchat` — tampilan tombol single-select yang konsisten.
+3. Versi bot tersentralisasi — cukup ubah `botVersion` di `config.json`.
+4. `.emojicustom` / `.emojidefault` — kasih tahu kalau mode yang dipilih sudah aktif sebelumnya.
+5. MemoryMonitor log — tampilan ringkas, warna jelas, info lengkap (ArrB, Arch, Plat, Host, SysUp, FreeMem).
+6. `.ram` — redesign total dengan format WhatsApp native (tebal, miring, monospace, kutip).
+7. `.ping` — gambar hasil didesain ulang total (720×520px), IP server tidak lagi ditampilkan.
+8. `.listbot` — tampilan kartu per bot dengan badge status dan format WA native.
+9. `.listbot` — mendukung multi-stop bot sekaligus (`1,2,3` atau `1.2.3`).
+10. Startup script (`start-ptero.sh`) — tampilan konsol dirombak, alias `npm start` ditambahkan.
+11. Workflow Replit — dijalankan lewat `start-ptero.sh` agar perilaku sama dengan produksi Pterodactyl.
+
+> 📄 Lihat isi lengkap tiap perubahan (penyebab bug, detail fix) di [`INFORMASI_UPDATE_V25.txt`](./INFORMASI_UPDATE_V25.txt).
 
 </details>
 
