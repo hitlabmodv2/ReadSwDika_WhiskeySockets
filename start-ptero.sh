@@ -52,14 +52,38 @@ print_banner() {
 
 print_banner
 
+# ── Spinner animasi realtime ──
+run_with_spinner() {
+  local label="$1"; shift
+  "$@" > /tmp/wilybot_install.log 2>&1 &
+  local pid=$!
+  local frames='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
+  local i=0
+  tput civis 2>/dev/null
+  while kill -0 "$pid" 2>/dev/null; do
+    i=$(( (i + 1) % ${#frames} ))
+    printf "\r  ${C_CYAN}%s${C_RESET} ${C_DIM}%s${C_RESET}   " "${frames:$i:1}" "$label"
+    sleep 0.1
+  done
+  wait "$pid"
+  local exit_code=$?
+  tput cnorm 2>/dev/null
+  printf "\r\033[K"
+  return $exit_code
+}
+
 # Install node_modules jika belum ada
 if [ ! -d "node_modules" ]; then
   echo -e "${C_CYAN}────────────────────────────${C_RESET}"
   echo -e "  ${C_YELLOW}📦 node_modules belum ada${C_RESET}"
-  echo -e "  ${C_DIM}Menginstall dependencies...${C_RESET}"
   echo -e "${C_CYAN}────────────────────────────${C_RESET}"
-  npm install
-  echo -e "${C_GREEN}✅ Instalasi selesai${C_RESET}"
+  run_with_spinner "Menginstall dependencies..." npm install
+  if [ $? -eq 0 ]; then
+    echo -e "  ${C_GREEN}✅ Instalasi selesai${C_RESET}"
+  else
+    echo -e "  \033[1;31m❌ Instalasi gagal, cek /tmp/wilybot_install.log${C_RESET}"
+  fi
+  echo -e "${C_CYAN}────────────────────────────${C_RESET}"
 fi
 
 BOT_START_TIME=$(date +%s)
