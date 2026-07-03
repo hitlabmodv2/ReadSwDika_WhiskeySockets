@@ -5,9 +5,9 @@
     "name": "Kyou.",
     "type": "videoMessage",
     "arrivedAt": "2026-07-03T07:34:21.814Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "⚽",
     "resolve": "Signal Lib ✓",
     "source": "status",
     "number": "6281227315377",
@@ -20,6 +20,27 @@
       "participant": "113322762481669@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-07-03T07:34:21.814Z"
+    "updatedAt": "2026-07-03T07:35:52.898Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281227315377@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACF702569280E5CEA1CFA05463067CD8",
+        "participant": "113322762481669@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281227315377@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACF702569280E5CEA1CFA05463067CD8",
+        "participant": "6281227315377@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-03T07:34:36.425Z",
+    "deleted": true,
+    "deletedAt": "2026-07-03T07:35:52.898Z"
   }
 }
