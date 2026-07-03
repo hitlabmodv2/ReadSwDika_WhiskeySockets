@@ -3,9 +3,9 @@ _📅 Jadwal rilis belum ditentukan_ 🕐
 _🔍 Masih dalam tahap pemantauan — informasi tanggal rilis akan diumumkan kemudian, harap bersabar_ 😊
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V25*
-✨ *3 Fitur Baru*
+✨ *2 Fitur Baru*
 🔧 *4 Bug/Error Fix*
-🚀 *6 Perubahan*
+🚀 *7 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -20,16 +20,6 @@ _Saat membalas pesan status AntiLink, cukup ketik satu kata untuk terapkan ke se
 • `add all` — tambahkan seluruh grup ke daftar aktif
 • `del all` — hapus seluruh grup dari daftar aktif
 
-*3. 🌐 SpeedTest.net Realtime (.speedtestnet / .spdnet)*
-_Ukur kecepatan internet bot langsung dari server speedtest.net — akurat, realtime, tanpa binary eksternal._
-1. Otomatis pilih server speedtest.net terdekat (ping terbaik dari 5 kandidat)
-2. Ukur *Download* Mbps — download random JPEG dari server (1500px–2500px)
-3. Ukur *Upload* Mbps — POST data ke server upload.php speedtest.net
-4. Tampilkan *Ping* (idle/download/upload) + jitter
-5. Ambil info ISP, Kota, Negara, IP dari ipinfo.io
-6. Hasil dikirim sebagai *gambar PNG* (SVG rendered) + caption WA lengkap
-7. Status progress realtime saat proses: cari server → DL → UL
-> Gunakan `.speedtestnet` atau `.spdnet` — tampilan mirip hasil di speedtest.net
 ━━━━━━━━━━━━━━━━━━━━━━
 🔧 *BUG/ERROR FIX*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -107,6 +97,18 @@ _Log konsol dirombak agar muat & terbaca di layar mobile panel Pterodactyl:_
 10. Label semua rata kiri 7 karakter — rapi berjejer di panel sempit
 10. CPU load: *hijau* < 1.0, *kuning* 1.0–2.0, *merah* ≥ 2.0
 > Format akhir 15 baris berurutan, bersih tanpa bar, pas di layar mobile Pterodactyl
+
+*7. 🌐 .ping — Upgrade ke SpeedTest.net Realtime*
+_Command `.ping` dirombak total — sekarang menjalankan speed test nyata ke server speedtest.net dan mengirim gambar hasil mirip tampilan speedtest.net/result:_
+1. Otomatis ambil 5 server speedtest.net terdekat, pilih yang ping-nya terkecil
+2. Ukur *Download* Mbps — unduh random JPEG (1500px–2500px) dari server terpilih
+3. Ukur *Upload* Mbps — POST data ke endpoint upload.php server speedtest.net
+4. Tampilkan *Ping* tiga nilai: idle (min) / download (avg) / upload (max)
+5. Ambil ISP, Kota, IP dari ipinfo.io secara paralel
+6. Hasilkan *gambar PNG 700×480px* dengan layout persis seperti speedtest.net/result (dark navy, angka besar DL/UL, 3 lingkaran ping berwarna, info ISP + Server + IP)
+7. Progress update realtime di WhatsApp: cari server → ukur DL → ukur UL → kirim gambar
+8. Caption WA lengkap: DL, UL, Ping (idle/DL/UL), Connections, ISP, Kota, Server, IP
+> Output simulasi dengan data `28.16 Mbps DL / 28.76 Mbps UL / Ping 7·8·7ms` terkonfirmasi render OK (700×480px, ~37KB)
 
 *6. 💾 .ram — Redesign Total, Format WA Native, Info Lengkap*
 _Output `.ram` di WhatsApp dirombak total — karakter kotak dihapus, diganti format WA yang proper:_

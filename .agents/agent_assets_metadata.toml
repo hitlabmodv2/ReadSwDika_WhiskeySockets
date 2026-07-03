@@ -227,3 +227,9 @@ id = "7BBnzNW1e84qO5_sMTPOS"
 uri = "file://lagu_anime_dungeon.mp3"
 type = "audio"
 title = "Cahaya yang Kutitipkan — Anime OST Dungeon Sad Piano"
+
+[[outputs]]
+id = "2Sg2sGCzr1gzrdAHU49ZV"
+uri = "file://attached_assets/ping_preview.png"
+type = "image"
+title = "Preview Hasil .ping — mirip speedtest.net"
