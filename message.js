@@ -1329,7 +1329,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                         case 'online': {
                                 const { handleOnline } = _require(path.resolve('./SEMUA_FITUR/setting/online.cjs'));
-                                await handleOnline({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, getJadibotNumber, getJadibotAutoOnline, setJadibotUserSetting, startJadibotAutoOnline });
+                                await handleOnline({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, getJadibotNumber, getJadibotAutoOnline, setJadibotUserSetting, startJadibotAutoOnline, Button });
                                 break;
                         }
 
