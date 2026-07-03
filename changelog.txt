@@ -84,9 +84,11 @@ _Log konsol dirombak agar muat & terbaca di layar mobile panel Pterodactyl:_
 4. `free` di baris SYS kini warna *hijau* — kontras jelas, tidak buram
 5. Nilai default pakai `bold+white` (`\x1b[1m\x1b[37m`) — aman di semua terminal/panel
 6. Heap, Ext, CPU, PID, Node — masing-masing baris sendiri, tidak digabung `│`
-7. Tambah baris baru: `ArrB` (ArrayBuffers MB), `Arch` (x64/arm64), `Plat` (linux/win32)
-8. CPU load: *hijau* < 1.0, *kuning* 1.0–2.0, *merah* ≥ 2.0
-> Format akhir 12 baris ringkas, pas di layar sempit, tidak terpotong di panel Pterodactyl mobile
+7. Bar visual (`░░░░░░░░░░`) dihapus dari baris BOT & SYS — diganti format bersih `label : nilai`
+8. Tambah baris baru berurutan: `ArrB` (ArrayBuffers MB), `Arch`, `Plat`, `Host` (hostname), `SysUp` (uptime OS), `FreeMem` (% + GB bebas)
+9. Label semua rata kiri 7 karakter — rapi berjejer di panel sempit
+10. CPU load: *hijau* < 1.0, *kuning* 1.0–2.0, *merah* ≥ 2.0
+> Format akhir 15 baris berurutan, bersih tanpa bar, pas di layar mobile Pterodactyl
 
 *6. 💾 .ram — Informasi Lebih Lengkap*
 _Output perintah `.ram` di WhatsApp diperluas dengan data sistem yang lebih detail:_
