@@ -104,6 +104,7 @@ export class MemoryMonitor {
                 this.config = config;
                 this.logIntervalMs = memConfig.logIntervalMs || 300000;
                 this._checkCount = 0;
+                this._logCount = 0;
         }
 
         start() {
@@ -146,6 +147,7 @@ export class MemoryMonitor {
                 const shouldLog = this.logUsage && (this._checkCount === 1 || this._checkCount % logEveryN === 0);
 
                 if (shouldLog) {
+                        this._logCount++;
                         const pct = parseFloat(percentage);
                         let color = '\x1b[32m';
                         let icon = '✅';
@@ -219,7 +221,7 @@ export class MemoryMonitor {
                         const val = (s, c = bright) => `${c}${s}${reset}`;
                         const col = `${dim}:${reset}`;
 
-                        console.log(`${cyan}${bold}[MemoryMonitor]${reset} ${icon} ${color}${bold}${status}${reset} ${cyan}${bold}cek ke-${this._checkCount}${reset} ${dim}|${reset}`);
+                        console.log(`${cyan}${bold}[MemoryMonitor]${reset} ${icon} ${color}${bold}${status}${reset} ${cyan}${bold}cek ke-${this._logCount}${reset} ${dim}|${reset}`);
                         console.log(`${lY('uptime ')} ${col} ${val(uptimeStr)}`);
                         console.log(`${lG('BOT    ')} ${col} ${val(percentage + '%', color)} ${val(formatBytes(currentUsage))} ${dim}/${reset} ${val(limitFmt)}`);
                         console.log(`${lG('SYS    ')} ${col} ${val(sysPercentage + '%', sysColor)} ${val(formatBytes(systemMem.used))} ${dim}/${reset} ${val(formatBytes(systemMem.total))} ${green2}${bold}free${reset} ${val(sysFreeFmt, green2)}`);
