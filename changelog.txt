@@ -5,7 +5,7 @@ _🔍 Masih dalam tahap pemantauan — informasi tanggal rilis akan diumumkan ke
 🤖 *WILY BOT — V25*
 ✨ *2 Fitur Baru*
 🔧 *3 Bug/Error Fix*
-🚀 *3 Perubahan*
+🚀 *4 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -68,3 +68,10 @@ _Sekarang ganti versi bot tidak perlu cari-cari manual ke banyak file:_
 1. Tambah key `botVersion` di `config.json` sebagai satu-satunya sumber versi
 2. Menu utama, menu jadibot, dan pesan welcome jadibot otomatis ambil versi dari situ
 > Ganti versi cukup edit satu baris: `"botVersion": "V26"`
+
+*4. 🎨 .emojicustom / .emojidefault — Kasih Tahu Kalau Mode Sudah Aktif*
+_Biar tidak bingung mode kepencet ulang padahal sudah aktif:_
+1. Pilih *Custom* saat sudah Custom → bot balas _"Mode Custom memang sudah aktif sebelumnya, tidak ada perubahan"_
+2. Pilih *Default* saat sudah Default → bot balas _"Mode Default memang sudah aktif sebelumnya, tidak ada perubahan"_
+3. Kalau memang beda mode, bot balas *"berhasil diaktifkan"* seperti biasa
+> Berlaku untuk bot utama maupun jadibot, status dibaca akurat & realtime

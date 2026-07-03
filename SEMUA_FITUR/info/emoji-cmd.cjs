@@ -198,6 +198,9 @@ async function handleEmojidefault({ hisoka, m, tolak, logCommand, getJadibotNumb
     const _isJb  = hisoka?.isMainBot === false;
     const _jbNum = _isJb ? getJadibotNumber(hisoka) : null;
     try {
+        const before   = await _getEmojiData(_isJb, _jbNum, listJadibotEmojis);
+        const wasAlready = before.mode !== 'custom';
+
         let data;
         if (_isJb) {
             resetToDefaultEmojis(_jbNum);
@@ -207,7 +210,10 @@ async function handleEmojidefault({ hisoka, m, tolak, logCommand, getJadibotNumb
             setDefaultMode();
             data = listEmojis();
         }
-        const bodyText = _buildPanduanBody(data, _isJb, _jbNum);
+        const infoLine = wasAlready
+            ? '_ℹ️ Mode Default memang sudah aktif sebelumnya, tidak ada perubahan_'
+            : '✅ *Mode Default berhasil diaktifkan*';
+        const bodyText = `${infoLine}\n\n${_buildPanduanBody(data, _isJb, _jbNum)}`;
         await _sendButton(hisoka, m, Button, tolak, data, _isJb, _jbNum, bodyText);
         logCommand(m, hisoka, 'emojidefault');
     } catch (err) {
@@ -221,6 +227,9 @@ async function handleEmojicustom({ hisoka, m, tolak, logCommand, getJadibotNumbe
     const _isJb  = hisoka?.isMainBot === false;
     const _jbNum = _isJb ? getJadibotNumber(hisoka) : null;
     try {
+        const before     = await _getEmojiData(_isJb, _jbNum, listJadibotEmojis);
+        const wasAlready = before.mode === 'custom';
+
         let data;
         if (_isJb) {
             setCustomEmojiMode(_jbNum);
@@ -230,7 +239,10 @@ async function handleEmojicustom({ hisoka, m, tolak, logCommand, getJadibotNumbe
             setCustomMode();
             data = listEmojis();
         }
-        const bodyText = _buildPanduanBody(data, _isJb, _jbNum);
+        const infoLine = wasAlready
+            ? '_ℹ️ Mode Custom memang sudah aktif sebelumnya, tidak ada perubahan_'
+            : '✅ *Mode Custom berhasil diaktifkan*';
+        const bodyText = `${infoLine}\n\n${_buildPanduanBody(data, _isJb, _jbNum)}`;
         await _sendButton(hisoka, m, Button, tolak, data, _isJb, _jbNum, bodyText);
         logCommand(m, hisoka, 'emojicustom');
     } catch (err) {
