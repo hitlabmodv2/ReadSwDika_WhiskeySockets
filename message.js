@@ -497,45 +497,82 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                         // bukan reply ke pesan listbot, biarkan lanjut normal
                                 } else if (pendingJadibot.expiresAt && pendingJadibot.expiresAt <= now) {
                                         pendingJadibotChoices.delete(jadibotChoiceKey);
-                                        await tolak(hisoka, m, '⏳ Waktu pemilihan sudah habis. Ketik *.listbot* lagi.');
+                                        await tolak(hisoka, m, '⏳ *Waktu pemilihan sudah habis.*\n> _Ketik_ `.listbot` _lagi untuk refresh._');
                                         return;
                                 } else if (lowerChoice === 'batal' || lowerChoice === 'cancel') {
                                         if (pendingJadibot.timeout) clearTimeout(pendingJadibot.timeout);
                                         pendingJadibotChoices.delete(jadibotChoiceKey);
-                                        await tolak(hisoka, m, '✅ Dibatalkan. Bot tidak dihentikan.');
+                                        await tolak(hisoka, m, '✅ *Dibatalkan.*\n_Bot tidak dihentikan._');
                                         return;
                                 } else {
                                         await cleanupExpiredJadibots(async () => {});
                                         const activeList = [...jadibotMap.keys()];
                                         const maxNum = pendingJadibot.numbers.length;
 
+                                        // Cek format multi-stop: "1,2,3" atau "1.2.3"
+                                        // (semua bagian angka murni, min 2 bagian, pemisah , atau .)
+                                        const multiParts = rawChoice.split(/[,.]+/).map(s => s.trim()).filter(Boolean);
+                                        const isMultiStop = multiParts.length >= 2 && multiParts.every(s => /^\d{1,3}$/.test(s));
+                                        if (isMultiStop) {
+                                                const seen = new Set();
+                                                const validTargets = [];
+                                                for (const part of multiParts) {
+                                                        if (seen.has(part)) continue;
+                                                        seen.add(part);
+                                                        const idx = Number(part);
+                                                        if (idx < 1 || idx > pendingJadibot.numbers.length) continue;
+                                                        const tNum = pendingJadibot.numbers[idx - 1];
+                                                        if (!tNum || !activeList.includes(tNum)) continue;
+                                                        validTargets.push({ idx, num: tNum });
+                                                }
+                                                if (validTargets.length === 0) {
+                                                        await tolak(hisoka, m,
+                                                                `❌ *Tidak ada bot valid untuk dihentikan.*\n` +
+                                                                `_Urutan tidak ditemukan atau sudah tidak aktif._\n` +
+                                                                `> _Ketik_ \`.listbot\` _untuk refresh._`
+                                                        );
+                                                        return;
+                                                }
+                                                if (pendingJadibot.timeout) clearTimeout(pendingJadibot.timeout);
+                                                pendingJadibotChoices.delete(jadibotChoiceKey);
+                                                await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
+                                                const targetLabel = validTargets.map(t => `\`+${maskNumber(t.num)}\``).join(' · ');
+                                                await tolak(hisoka, m,
+                                                        `🛑 *Menghentikan ${validTargets.length} bot...*\n${targetLabel}`
+                                                );
+                                                for (const { num } of validTargets) {
+                                                        await stopJadibot(num, async (text) => { await tolak(hisoka, m, text); });
+                                                }
+                                                return;
+                                        }
+
                                         // Cek format perpanjang: "1,3j" atau "2,p" atau "1, 2h"
-                                        const upbotMatch = rawChoice.match(/^(\d{1,3})\s*,\s*(.+)$/);
+                                        const upbotMatch = rawChoice.match(/^(\d{1,3})\s*[,.]\s*(.+)$/);
                                         if (upbotMatch) {
                                                 const upIdx = Number(upbotMatch[1]);
                                                 const upDurStr = upbotMatch[2].trim();
                                                 const upDurInfo = parseJadibotDuration(upDurStr);
 
                                                 if (upIdx < 1 || upIdx > pendingJadibot.numbers.length) {
-                                                        await tolak(hisoka, m, `❌ Nomor urutan tidak valid.\nMasukkan angka *1* sampai *${maxNum}*.`);
+                                                        await tolak(hisoka, m, `❌ *Nomor urutan tidak valid.*\n_Masukkan angka_ *1* _sampai_ *${maxNum}*_._`);
                                                         return;
                                                 }
                                                 if (!upDurInfo) {
                                                         await tolak(hisoka, m,
                                                                 `❌ *Format durasi tidak valid!*\n\n` +
-                                                                `⏱️ Singkatan: *m*=menit, *j*=jam, *h*=hari, *p*=permanent\n\n` +
-                                                                `📌 Contoh:\n` +
-                                                                `• *${upIdx},30m* → 30 menit\n` +
-                                                                `• *${upIdx},2j* → 2 jam\n` +
-                                                                `• *${upIdx},3h* → 3 hari\n` +
-                                                                `• *${upIdx},p* → permanent`
+                                                                `📌 *Contoh:*\n` +
+                                                                `• \`${upIdx},30m\` → 30 menit\n` +
+                                                                `• \`${upIdx},2j\` → 2 jam\n` +
+                                                                `• \`${upIdx},3h\` → 3 hari\n` +
+                                                                `• \`${upIdx},p\` → permanent\n\n` +
+                                                                `> _Singkatan: m=menit · j=jam · h=hari · p=permanent_`
                                                         );
                                                         return;
                                                 }
 
                                                 const targetNum = pendingJadibot.numbers[upIdx - 1];
                                                 if (!targetNum || !activeList.includes(targetNum)) {
-                                                        await tolak(hisoka, m, `❌ Bot urutan *${upIdx}* tidak ditemukan atau sudah tidak aktif.\nKetik *.listbot* untuk refresh.`);
+                                                        await tolak(hisoka, m, `❌ *Bot urutan ${upIdx} tidak ditemukan atau sudah tidak aktif.*\n> _Ketik_ \`.listbot\` _untuk refresh._`);
                                                         return;
                                                 }
 
@@ -549,15 +586,12 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                         setPermanentJadibot(targetNum, 'active');
                                                         await hisoka.sendMessage(m.from, { react: { text: '♾️', key: m.key } });
                                                         await tolak(hisoka, m,
-                                                                `╔══════════════════════╗\n` +
-                                                                `║   ⏫  *U P B O T*   ║\n` +
-                                                                `╚══════════════════════╝\n\n` +
-                                                                `✅ *Durasi diperbarui!*\n` +
-                                                                `📱 +${maskNumber(targetNum)}\n\n` +
+                                                                `♾️ *Durasi diperbarui ke Permanent!*\n` +
+                                                                `📱 \`+${maskNumber(targetNum)}\`\n\n` +
                                                                 `📊 *Perubahan masa berlaku:*\n` +
-                                                                `⏮️ Sebelumnya : *${oldUpLabel}*\n` +
+                                                                `⏮️ Sebelumnya : ~${oldUpLabel}~\n` +
                                                                 `✨ Terbaru    : *Permanent* ♾️\n\n` +
-                                                                `Bot tetap aktif tanpa batas waktu.`
+                                                                `> _Bot tetap aktif tanpa batas waktu._`
                                                         );
                                                 } else {
                                                         extendJadibotExpiry(targetNum, upDurInfo.ms, 'active');
@@ -565,18 +599,15 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                         const upInfo = getJadibotExpirySummary(targetNum);
                                                         await hisoka.sendMessage(m.from, { react: { text: '⏫', key: m.key } });
                                                         await tolak(hisoka, m,
-                                                                `╔══════════════════════╗\n` +
-                                                                `║   ⏫  *U P B O T*   ║\n` +
-                                                                `╚══════════════════════╝\n\n` +
-                                                                `✅ *Durasi diperbarui!*\n` +
-                                                                `📱 +${maskNumber(targetNum)}\n\n` +
+                                                                `⏫ *Durasi diperbarui!*\n` +
+                                                                `📱 \`+${maskNumber(targetNum)}\`\n\n` +
                                                                 `📊 *Perubahan masa berlaku:*\n` +
-                                                                `⏮️ Sebelumnya : *${oldUpLabel}*\n` +
-                                                                `   Exp lama   : ${oldUpExpire}\n` +
-                                                                `➕ Ditambah   : *${upDurInfo.label}*\n` +
+                                                                `⏮️ Sebelumnya : ~${oldUpLabel}~\n` +
+                                                                `   _Exp lama_ : _${oldUpExpire}_\n` +
+                                                                `➕ Ditambah   : *+${upDurInfo.label}*\n` +
                                                                 `✨ Total baru : *${upInfo.remaining}*\n` +
-                                                                `   Exp baru   : ${upInfo.expiresAtText}\n\n` +
-                                                                `Bot tetap aktif, durasi diperpanjang.`
+                                                                `   _Exp baru_ : _${upInfo.expiresAtText}_\n\n` +
+                                                                `> _Bot tetap aktif, durasi diperpanjang._`
                                                         );
                                                 }
                                                 return;
@@ -603,13 +634,14 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                         await tolak(
                                                 hisoka,
                                                 m,
-                                                `❌ Pilihan tidak valid.\n\n` +
+                                                `❌ *Pilihan tidak valid.*\n\n` +
                                                 `📌 *Cara reply listbot:*\n` +
-                                                `• Ketik *1* → stop bot urutan 1\n` +
-                                                `• Ketik *1,3j* → perpanjang bot 1 selama 3 jam\n` +
-                                                `• Ketik *1,p* → ubah bot 1 ke permanent\n` +
-                                                `• Ketik *batal* → batalkan\n\n` +
-                                                `⏱️ Singkatan: m=menit, j=jam, h=hari, p=permanent`
+                                                `1. Ketik \`1\` → stop 1 bot\n` +
+                                                `2. Ketik \`1,2,3\` atau \`1.2.3\` → stop beberapa\n` +
+                                                `3. Ketik \`1,3j\` → perpanjang 3 jam\n` +
+                                                `4. Ketik \`1,p\` → ubah ke permanent\n` +
+                                                `5. Ketik \`batal\` → batalkan\n\n` +
+                                                `> _Singkatan: m=menit · j=jam · h=hari · p=permanent_`
                                         );
                                         return;
                                 }

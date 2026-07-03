@@ -58,8 +58,9 @@ async function handleListbot({ hisoka, m, tolak, logCommand, isMainBot, jadibotM
         const sortedList = [...list].sort((a, b) => {
                 const metaA = getJadibotExpiry(a);
                 const metaB = getJadibotExpiry(b);
-                const expA = metaA ? Number(metaA.expiresAt) : Infinity;
-                const expB = metaB ? Number(metaB.expiresAt) : Infinity;
+                // Permanent → Infinity (taruh paling bawah), timed → sort by expiresAt ascending
+                const expA = metaA?.permanent === true ? Infinity : (metaA ? Number(metaA.expiresAt) : Infinity);
+                const expB = metaB?.permanent === true ? Infinity : (metaB ? Number(metaB.expiresAt) : Infinity);
                 return expA - expB;
         });
 
@@ -73,13 +74,16 @@ async function handleListbot({ hisoka, m, tolak, logCommand, isMainBot, jadibotM
         const detailLines = sortedList.map((num, i) => {
                 const info = getJadibotExpirySummary(num);
                 const meta = getJadibotExpiry(num);
-                const remainingMs = meta ? Number(meta.expiresAt) - now : Infinity;
-                const isAlmostExpired = remainingMs !== Infinity && remainingMs < 30 * 60 * 1000;
-                const statusTag = isAlmostExpired ? ' (Hampir Habis)' : '';
+                const isPermanent = meta?.permanent === true;
+                const remainingMs = isPermanent ? Infinity : (meta ? Number(meta.expiresAt) - now : Infinity);
+                const isAlmostExpired = !isPermanent && remainingMs !== Infinity && remainingMs < 30 * 60 * 1000;
                 const namaUser = getUserName(`${num}@s.whatsapp.net`, '-');
 
+                // Badge status di samping nomor urut
+                const statusBadge = isAlmostExpired ? '⚠️' : isPermanent ? '♾️' : '🟢';
+
                 let expireText = 'Permanent';
-                if (meta && Number(meta.expiresAt) > 0) {
+                if (!isPermanent && meta && Number(meta.expiresAt) > 0) {
                         const expDate = new Date(Number(meta.expiresAt));
                         const expHari = expDate.toLocaleDateString('id-ID', { weekday: 'long', timeZone: 'Asia/Jakarta' });
                         const expTanggal = expDate.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta' });
@@ -103,36 +107,41 @@ async function handleListbot({ hisoka, m, tolak, logCommand, isMainBot, jadibotM
                         const sejakDate = new Date(connectedTs);
                         const sejakWaktu = sejakDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' }).replace(/\./g, ':');
                         const sejakTgl = sejakDate.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', timeZone: 'Asia/Jakarta' });
-                        onlineLine = `\n   Online : ${durasiStr} (sejak ${sejakTgl} ${sejakWaktu} WIB)`;
+                        onlineLine = `\n   🌐 _Online_ : ${durasiStr} _(sejak ${sejakTgl} ${sejakWaktu} WIB)_`;
                 }
 
+                const almostTag = isAlmostExpired ? '\n   > ⚠️ _Hampir habis — segera perpanjang!_' : '';
+
                 return (
-                        `${i + 1}. *+${num}*${statusTag}\n` +
-                        `   Nama   : ${namaUser}\n` +
-                        `   Sisa   : ${info.remaining}\n` +
-                        `   Expire : ${expireText}` +
-                        onlineLine
+                        `*⌗ ${i + 1}* ${statusBadge} *+${num}*\n` +
+                        `   👤 _Nama_   : ${namaUser}\n` +
+                        `   ⏳ *Sisa*   : *${info.remaining}*\n` +
+                        `   📅 _Expire_ : _${expireText}_` +
+                        onlineLine +
+                        almostTag
                 );
         }).join('\n\n');
 
         const ljBodyText =
                 `*LIST BOT AKTIF*\n` +
                 `━━━━━━━━━━━━━━━━━━━━━\n` +
-                `Total  : *${sortedList.length} bot aktif*\n` +
-                `Waktu  : ${ljHari}, ${ljTanggal} | ${ljWaktu} WIB\n` +
+                `📊 Total  : *${sortedList.length} bot aktif*\n` +
+                `🕐 Waktu  : _${ljHari}, ${ljTanggal} | ${ljWaktu} WIB_\n` +
                 `━━━━━━━━━━━━━━━━━━━━━\n\n` +
                 `${detailLines}\n\n` +
                 `━━━━━━━━━━━━━━━━━━━━━\n` +
                 `*Cara pakai — reply pesan ini:*\n\n` +
-                `Stop bot:\n` +
-                `   Ketik urutan → contoh: *1*\n\n` +
-                `Perpanjang durasi:\n` +
-                `   Ketik *urutan,durasi* → contoh:\n` +
-                `   • *1,3j*  → perpanjang bot 1 selama 3 jam\n` +
-                `   • *2,1h*  → perpanjang bot 2 selama 1 hari\n` +
-                `   • *1,p*   → ubah bot 1 ke permanent\n\n` +
-                `Singkatan: m=menit, j=jam, h=hari, p=permanent\n` +
-                `Pilihan berlaku *2 menit*`;
+                `1. *Stop bot* — ketik urutan, bisa beberapa:\n` +
+                `   • \`1\`      → stop 1 bot\n` +
+                `   • \`1,2,3\`  → stop beberapa (pisah koma)\n` +
+                `   • \`1.2.3\`  → stop beberapa (pisah titik)\n` +
+                `2. *Ubah/Perpanjang durasi* — \`urutan,durasi\` atau \`urutan.durasi\`:\n` +
+                `   • \`1,3j\` atau \`1.3j\`  → perpanjang 3 jam\n` +
+                `   • \`2,1h\` atau \`2.1h\`  → perpanjang 1 hari\n` +
+                `   • \`1,p\`  atau \`1.p\`   → ubah ke permanent\n` +
+                `3. *Batal* — ketik \`batal\`\n\n` +
+                `> _Singkatan: m=menit · j=jam · h=hari · p=permanent_\n` +
+                `> ⏱️ _Pilihan berlaku *2 menit*_`;
 
         const sentList = await hisoka.sendMessage(m.from, { text: ljBodyText }, { quoted: m });
         const botMsgId = sentList?.key?.id || '';
