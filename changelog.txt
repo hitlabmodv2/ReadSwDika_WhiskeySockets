@@ -76,15 +76,17 @@ _Biar tidak bingung mode kepencet ulang padahal sudah aktif:_
 3. Kalau memang beda mode, bot balas *"berhasil diaktifkan"* seperti biasa
 > Berlaku untuk bot utama maupun jadibot, status dibaca akurat & realtime
 
-*5. 🖥️ MemoryMonitor Log — Tampilan Ringkas & Warna Sesuai Konteks*
-_Log konsol dirombak total agar muat di layar mobile panel Pterodactyl — setiap info di baris sendiri, rapi dan terbaca:_
-1. Garis separator panjang (`━━━`) dihapus — tidak perlu, makan lebar layar
-2. Header: `[MemoryMonitor] ✅ Normal cek ke-1 |` lalu *uptime* di baris berikutnya
-3. Setiap baris pakai format `label : nilai` — label abu-abu, nilai *putih tebal*
-4. BOT & SYS tetap satu baris masing-masing dengan bar visual + persentase warna status
-5. Heap, Ext, CPU, PID, Node — masing-masing baris sendiri, tidak digabung pakai `│`
-6. CPU load: *hijau* < 1.0, *kuning* 1.0–2.0, *merah* ≥ 2.0
-> Format akhir pas di layar sempit, tidak terpotong di panel Pterodactyl mobile
+*5. 🖥️ MemoryMonitor Log — Tampilan Ringkas, Warna Jelas, Info Lengkap*
+_Log konsol dirombak agar muat & terbaca di layar mobile panel Pterodactyl:_
+1. Separator panjang (`━━━`) dihapus — hemat lebar layar
+2. Header: `[MemoryMonitor] ✅ Normal cek ke-1 |` — teks cyan+bold, tidak abu-abu lagi
+3. `cek ke-N` kini warna *cyan tebal* — sebelumnya abu-abu/tidak terbaca di panel
+4. `free` di baris SYS kini warna *hijau* — kontras jelas, tidak buram
+5. Nilai default pakai `bold+white` (`\x1b[1m\x1b[37m`) — aman di semua terminal/panel
+6. Heap, Ext, CPU, PID, Node — masing-masing baris sendiri, tidak digabung `│`
+7. Tambah baris baru: `ArrB` (ArrayBuffers MB), `Arch` (x64/arm64), `Plat` (linux/win32)
+8. CPU load: *hijau* < 1.0, *kuning* 1.0–2.0, *merah* ≥ 2.0
+> Format akhir 12 baris ringkas, pas di layar sempit, tidak terpotong di panel Pterodactyl mobile
 
 *6. 💾 .ram — Informasi Lebih Lengkap*
 _Output perintah `.ram` di WhatsApp diperluas dengan data sistem yang lebih detail:_
