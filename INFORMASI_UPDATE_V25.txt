@@ -4,7 +4,7 @@ _🔍 Masih dalam tahap pemantauan — informasi tanggal rilis akan diumumkan ke
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V25*
 ✨ *2 Fitur Baru*
-🔧 *7 Bug/Error Fix*
+🔧 *9 Bug/Error Fix*
 🚀 *11 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
@@ -72,6 +72,19 @@ _Saat membalas pesan status AntiLink, cukup ketik satu kata untuk terapkan ke se
 3. _Tambahan:_ penjagaan cepat di memori untuk hindari scan file berulang saat event sama datang beruntun dalam hitungan milidetik, dengan pembersihan otomatis tiap 5 menit
 4. _Catatan:_ log dengan tag `[JB:<nomor>]` bukan duplikat — itu memang sesi jadibot terpisah yang independen mendeteksi story yang sama
 > Log "SW dihapus" kini 100% akurat, satu ID story hanya tercatat tepat satu kali
+
+*8. 🗑️ .d / .del — Reply Hapus Pesan Gagal Padahal Bot Sudah Admin Grup*
+~Bug: reply pesan (lama maupun baru) dengan `.d` sering ditolak "Bot bukan admin di grup ini" walau bot sebenarnya sudah admin~
+1. _Penyebab:_ pengecekan admin cuma baca dari cache `botadmin/botadmin` — kalau cache basi/telat sync (event promote kelewat, dll), status yang kebaca tetap "bukan admin"
+2. _Fix:_ kalau cache bilang bukan admin/belum ada data, sekarang dicek ulang langsung (live) ke `groupMetadata` sebelum ditolak, lalu cache-nya otomatis diperbarui
+3. _Catatan:_ hapus pesan milik bot sendiri (`fromMe`) tidak terpengaruh — jalur itu sudah akurat sejak awal untuk pesan lama maupun baru
+> `.d` / `.del` kini akurat realtime, tidak lagi salah tolak gara-gara cache admin basi
+
+*9. 📊 MemoryMonitor Log — Nomor "cek ke-N" Meloncat, Tidak Urut*
+~Bug: log konsol tampil "cek ke-1" lalu langsung "cek ke-10", meloncat karena pakai nomor cek internal bukan nomor tampil~
+1. _Penyebab:_ counter yang ditampilkan (`_checkCount`) dihitung dari setiap siklus cek memori, padahal log cuma diprint 1 dari tiap 10 siklus
+2. _Fix:_ tambah counter terpisah (`_logCount`) yang hanya bertambah saat log benar-benar tampil di konsol
+> "cek ke-N" kini urut 1, 2, 3, dst sesuai realtime, tidak ada lagi lompatan angka
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *PERUBAHAN*
 ━━━━━━━━━━━━━━━━━━━━━━
