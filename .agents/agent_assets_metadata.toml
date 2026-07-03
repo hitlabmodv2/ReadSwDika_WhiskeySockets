@@ -233,3 +233,9 @@ id = "2Sg2sGCzr1gzrdAHU49ZV"
 uri = "file://attached_assets/ping_preview.png"
 type = "image"
 title = "Preview Hasil .ping — mirip speedtest.net"
+
+[[outputs]]
+id = "FkpshjAgGpAr5o61NuQeU"
+uri = "file://attached_assets/ping_v2.png"
+type = "image"
+title = "Preview .ping v2 — data real mesin bot (1049 Mbps DL / 444 Mbps UL / Ping 6ms)"

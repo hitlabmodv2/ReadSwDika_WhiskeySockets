@@ -6,21 +6,7 @@
  *  Telegram    : @Wilykun1994
  * ───────────────────────────────
  *  Script ini khusus donasi/VIP
- *  Support dari kalian bikin saya
- *  makin semangat update fitur,
- *  fix bug, dan rawat script ini.
- *
- *  Dilarang menjual ulang script ini
- *  Tanpa izin resmi dari developer.
- *  Jika ketahuan = NO UPDATE / NO FIX
- *
- *  Hargai karya, gunakan dengan bijak.
- *  Terima kasih sudah support.
- * ───────────────────────────────
- *
  *  ping.cjs — .ping via speedtest.net realtime
- *  Jalankan speed test nyata ke server speedtest.net,
- *  hasilkan gambar mirip tampilan speedtest.net/result.
  * ───────────────────────────────
  */
 'use strict';
@@ -45,28 +31,23 @@ const ST_HDR = {
 //  ENGINE SPEEDTEST.NET
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Ambil URL base dari URL server (buang trailing "/upload.php") */
 function stBase(url) {
         return url.replace(/\/upload\.php$/i, '/');
 }
 
-/** Ambil daftar server terdekat dari speedtest.net */
 async function stGetServers() {
         const { data } = await axios.get(ST_SERVERS_URL, { headers: ST_HDR, timeout: 10000 });
         if (!Array.isArray(data) || !data.length) throw new Error('Daftar server speedtest.net kosong');
         return data;
 }
 
-/** Ukur ping ke satu server — return { avg, min, max, jitter } */
 async function stPingServer(baseUrl, tries = 3) {
         const times = [];
         for (let i = 0; i < tries; i++) {
                 const t0 = Date.now();
                 try {
                         await axios.get(`${baseUrl}latency.txt`, {
-                                headers       : ST_HDR,
-                                timeout       : 5000,
-                                validateStatus: () => true,
+                                headers: ST_HDR, timeout: 5000, validateStatus: () => true,
                         });
                         times.push(Date.now() - t0);
                 } catch (_) {}
@@ -74,14 +55,14 @@ async function stPingServer(baseUrl, tries = 3) {
         }
         if (!times.length) return null;
         times.sort((a, b) => a - b);
-        const avg    = Math.round(times.reduce((s, v) => s + v, 0) / times.length);
-        const min    = times[0];
-        const max    = times[times.length - 1];
-        const jitter = max - min;
-        return { avg, min, max, jitter };
+        return {
+                min   : times[0],
+                avg   : Math.round(times.reduce((s, v) => s + v, 0) / times.length),
+                max   : times[times.length - 1],
+                jitter: times[times.length - 1] - times[0],
+        };
 }
 
-/** Pilih server terbaik (ping rata-rata terkecil) dari daftar */
 async function stPickBest(servers) {
         let best = null, bestAvg = Infinity;
         for (const srv of servers) {
@@ -95,9 +76,8 @@ async function stPickBest(servers) {
         return best;
 }
 
-/** Ukur download dari speedtest.net server (random JPEG, multi-ukuran) */
 async function stDownload(baseUrl) {
-        const sizes = [1500, 2000, 2500]; // pixel NxN random JPEG
+        const sizes = [1500, 2000, 2500];
         let totalBit = 0, totalMs = 0;
         for (const sz of sizes) {
                 try {
@@ -115,7 +95,6 @@ async function stDownload(baseUrl) {
         return (totalBit / (totalMs / 1000)) / 1_000_000;
 }
 
-/** Ukur upload ke speedtest.net server */
 async function stUpload(uploadUrl) {
         const uploadSizes = [1_000_000, 2_000_000];
         let totalBit = 0, totalMs = 0;
@@ -129,9 +108,7 @@ async function stUpload(uploadUrl) {
                                         'Content-Type'  : 'application/octet-stream',
                                         'Content-Length': bytes,
                                 },
-                                timeout      : 25000,
-                                maxBodyLength: Infinity,
-                                validateStatus: () => true,
+                                timeout: 25000, maxBodyLength: Infinity, validateStatus: () => true,
                         });
                         const ms = Date.now() - t0;
                         if (ms > 0) { totalBit += bytes * 8; totalMs += ms; }
@@ -141,184 +118,203 @@ async function stUpload(uploadUrl) {
         return (totalBit / (totalMs / 1000)) / 1_000_000;
 }
 
-/** Ambil info ISP / IP dari ipinfo.io */
 async function stGetIsp() {
         try {
                 const { data } = await axios.get('https://ipinfo.io/json', {
-                        headers: { ...ST_HDR, Accept: 'application/json' },
-                        timeout: 6000,
+                        headers: { ...ST_HDR, Accept: 'application/json' }, timeout: 6000,
                 });
                 return {
-                        ip      : data?.ip       || '-',
-                        ispRaw  : data?.org      || '-',
-                        isp     : (data?.org     || '-').replace(/^AS\d+\s*/i, '').trim().slice(0, 32),
-                        kota    : data?.city     || '-',
-                        negara  : data?.country  || '-',
-                        hostname: data?.hostname || '-',
+                        ip    : data?.ip     || '-',
+                        isp   : (data?.org   || '-').replace(/^AS\d+\s*/i, '').trim().slice(0, 30),
+                        kota  : data?.city   || '-',
+                        negara: data?.country || '-',
                 };
         } catch (_) {
-                return { ip: '-', ispRaw: '-', isp: '-', kota: '-', negara: '-', hostname: '-' };
+                return { ip: '-', isp: '-', kota: '-', negara: '-' };
         }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  FORMAT ANGKA
+//  HELPER FORMAT
 // ─────────────────────────────────────────────────────────────────────────────
 
-function fmtMbps(v) {
-        if (v === null || v === undefined) return null;
-        return v >= 1000
-                ? { num: (v / 1000).toFixed(2), unit: 'Gbps', raw: v }
-                : { num: v.toFixed(2),           unit: 'Mbps', raw: v };
+function fmtNum(v) {
+        if (v === null || v === undefined) return { num: 'N/A', unit: '' };
+        if (v >= 1000) return { num: (v / 1000).toFixed(2), unit: 'Gbps' };
+        return { num: v.toFixed(2), unit: 'Mbps' };
 }
 
-function pingColor(ms) {
-        if (!ms && ms !== 0) return '#94a3b8';
-        if (ms < 20)  return '#fbbf24'; // yellow  (excellent → kuning di speedtest.net)
-        if (ms < 50)  return '#22d3ee'; // cyan
-        if (ms < 100) return '#f97316'; // orange
-        return '#ef4444';               // red
-}
-
-function speedColor(mbps) {
-        if (!mbps) return '#64748b';
-        if (mbps >= 100) return '#22c55e';
-        if (mbps >= 50)  return '#84cc16';
-        if (mbps >= 20)  return '#38bdf8';
-        if (mbps >= 5)   return '#f59e0b';
-        return '#ef4444';
+// warna lingkaran ping persis speedtest.net: hijau < 20, kuning 20-50, oranye 50-100, merah >= 100
+function pingClr(ms) {
+        if (ms == null) return '#6b7280';
+        if (ms < 20)   return '#4ade80';   // hijau
+        if (ms < 50)   return '#facc15';   // kuning
+        if (ms < 100)  return '#fb923c';   // oranye
+        return '#f87171';                  // merah
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  SVG GENERATOR — mirip tampilan speedtest.net/result
+//  SVG — layout akurat seperti speedtest.net/result
 // ─────────────────────────────────────────────────────────────────────────────
 
 function buildSvg({ dl, ul, pingIdle, pingDl, pingUl, srv, isp, durasi }) {
-        const dlF = fmtMbps(dl);
-        const ulF = fmtMbps(ul);
+        const dlF = fmtNum(dl);
+        const ulF = fmtNum(ul);
 
-        const dlNum  = dlF ? dlF.num  : 'N/A';
-        const ulNum  = ulF ? ulF.num  : 'N/A';
-        const dlUnit = dlF ? dlF.unit : '';
-        const ulUnit = ulF ? ulF.unit : '';
+        // Speedtest.net pakai warna: DL = cyan (#00c8ff), UL = magenta (#be52f2)
+        // angka besar = putih/almost-white
+        const DL_CLR  = '#00c8ff';
+        const UL_CLR  = '#be52f2';
+        const NUM_CLR = '#f8fafc';  // hampir putih seperti di web
 
-        const dlC = speedColor(dl);
-        const ulC = speedColor(ul);
+        const piC  = pingClr(pingIdle);
+        const pdC  = pingClr(pingDl);
+        const puC  = pingClr(pingUl);
 
-        const pgIdleC = pingColor(pingIdle);
-        const pgDlC   = pingColor(pingDl);
-        const pgUlC   = pingColor(pingUl);
-
-        const ispName   = (isp.isp || '-').slice(0, 28);
-        const kotaName  = isp.kota || '-';
-        const srvSponsor = (srv?.sponsor || 'speedtest.net').slice(0, 28);
-        const srvCity    = (srv?.name    || '-').slice(0, 20);
+        const ispName    = (isp.isp   || '-').slice(0, 26);
+        const kotaName   = (isp.kota  || '-').slice(0, 18);
+        const srvSponsor = (srv?.sponsor || 'speedtest.net').slice(0, 26);
+        const srvCity    = (srv?.name    || '-').slice(0, 18);
         const ipAddr     = isp.ip || '-';
+        const waktu      = new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' });
 
-        const waktu = new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' });
-
-        // Warna background persis seperti speedtest.net (dark navy-gray)
-        return `<svg width="700" height="480" xmlns="http://www.w3.org/2000/svg" font-family="'Helvetica Neue',Arial,sans-serif">
+        // Ukuran: 720 x 460 — rasio mendekati hasil di speedtest.net
+        return `<svg width="720" height="460" xmlns="http://www.w3.org/2000/svg"
+        font-family="'Helvetica Neue',Helvetica,Arial,sans-serif">
   <defs>
+    <!-- background gelap ala speedtest.net -->
     <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%"   stop-color="#1a1a2e"/>
-      <stop offset="100%" stop-color="#16213e"/>
+      <stop offset="0%"   stop-color="#141414"/>
+      <stop offset="100%" stop-color="#1a1a2e"/>
     </linearGradient>
-    <linearGradient id="panel" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%"   stop-color="#1e2a45" stop-opacity="1"/>
-      <stop offset="100%" stop-color="#172035" stop-opacity="1"/>
+    <!-- panel card -->
+    <linearGradient id="card" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#1f2d45"/>
+      <stop offset="100%" stop-color="#18253a"/>
     </linearGradient>
-    <!-- circle clip for ping bubbles -->
-    <clipPath id="circ1"><circle cx="195" cy="235" r="26"/></clipPath>
-    <clipPath id="circ2"><circle cx="280" cy="235" r="26"/></clipPath>
-    <clipPath id="circ3"><circle cx="365" cy="235" r="26"/></clipPath>
+    <!-- glow DL -->
+    <radialGradient id="glowDL" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="${DL_CLR}" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="${DL_CLR}" stop-opacity="0"/>
+    </radialGradient>
+    <!-- glow UL -->
+    <radialGradient id="glowUL" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="${UL_CLR}" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="${UL_CLR}" stop-opacity="0"/>
+    </radialGradient>
   </defs>
 
-  <!-- background -->
-  <rect width="700" height="480" fill="url(#bg)"/>
+  <!-- ── BACKGROUND ── -->
+  <rect width="720" height="460" fill="url(#bg)"/>
 
-  <!-- top logo bar -->
-  <rect x="0" y="0" width="700" height="52" fill="#111827" opacity="0.9"/>
-  <!-- Speedtest logo text -->
-  <circle cx="32" cy="26" r="14" fill="#141d2e" stroke="#00c8ff" stroke-width="2"/>
-  <text x="32" y="31" text-anchor="middle" font-size="12" fill="#00c8ff" font-weight="bold">ST</text>
-  <text x="54" y="19" font-size="10" fill="#94a3b8">SPEEDTEST</text>
-  <text x="54" y="34" font-size="17" fill="white" font-weight="bold">by Ookla</text>
-  <!-- result id label -->
-  <text x="668" y="22" text-anchor="end" font-size="9" fill="#64748b">Result</text>
-  <text x="668" y="36" text-anchor="end" font-size="10" fill="#38bdf8">${waktu} WIB</text>
+  <!-- ── TOP BAR ── -->
+  <rect x="0" y="0" width="720" height="48" fill="#0f0f1a"/>
+  <!-- speedtest logo circle -->
+  <circle cx="32" cy="24" r="15" fill="#0f0f1a" stroke="${DL_CLR}" stroke-width="1.5"/>
+  <text x="32" y="20" text-anchor="middle" font-size="8"  fill="${DL_CLR}" font-weight="700">⚡</text>
+  <text x="32" y="31" text-anchor="middle" font-size="7"  fill="${DL_CLR}">ST</text>
+  <!-- speedtest by ookla -->
+  <text x="56" y="18" font-size="9"  fill="#94a3b8" font-weight="400" letter-spacing="1">SPEEDTEST</text>
+  <text x="56" y="33" font-size="14" fill="#f1f5f9" font-weight="700">by Ookla</text>
+  <!-- result timestamp -->
+  <text x="700" y="22" text-anchor="end" font-size="9"  fill="#475569">Result</text>
+  <text x="700" y="36" text-anchor="end" font-size="9"  fill="${DL_CLR}">${waktu} WIB</text>
 
-  <!-- main card -->
-  <rect x="24" y="68" width="652" height="330" rx="16" fill="url(#panel)" stroke="#2d3f60" stroke-width="1.2"/>
+  <!-- ── MAIN CARD ── -->
+  <rect x="20" y="60" width="680" height="300" rx="12" fill="url(#card)" stroke="#2a3a56" stroke-width="1"/>
 
-  <!-- ── DOWNLOAD / UPLOAD headers ─────────────────────── -->
-  <!-- DL arrow icon area -->
-  <text x="185" y="106" text-anchor="middle" font-size="11" fill="#38bdf8" letter-spacing="1">↓ DOWNLOAD</text>
-  <text x="185" y="120" text-anchor="middle" font-size="9"  fill="#94a3b8">Mbps</text>
+  <!-- glow DL kiri -->
+  <ellipse cx="195" cy="160" rx="160" ry="100" fill="url(#glowDL)"/>
+  <!-- glow UL kanan -->
+  <ellipse cx="525" cy="160" rx="160" ry="100" fill="url(#glowUL)"/>
 
-  <!-- UL arrow icon area -->
-  <text x="515" y="106" text-anchor="middle" font-size="11" fill="#a78bfa" letter-spacing="1">↑ UPLOAD</text>
-  <text x="515" y="120" text-anchor="middle" font-size="9"  fill="#94a3b8">Mbps</text>
+  <!-- divider vertikal -->
+  <line x1="360" y1="75" x2="360" y2="295" stroke="#2a3a56" stroke-width="1"/>
 
-  <!-- vertical divider between DL and UL -->
-  <line x1="350" y1="88" x2="350" y2="220" stroke="#2d3f60" stroke-width="1.2"/>
+  <!-- ── DOWNLOAD KOLOM KIRI ── -->
+  <!-- ikon panah download -->
+  <circle cx="160" cy="98" r="12" fill="none" stroke="${DL_CLR}" stroke-width="1.5"/>
+  <text x="160" y="103" text-anchor="middle" font-size="12" fill="${DL_CLR}">↓</text>
+  <!-- label DOWNLOAD -->
+  <text x="225" y="95" font-size="11" fill="${DL_CLR}" font-weight="600" letter-spacing="1">DOWNLOAD</text>
+  <text x="225" y="110" font-size="9"  fill="#64748b">Mbps</text>
 
-  <!-- ── BIG NUMBERS ──────────────────────────────────── -->
-  <text x="185" y="186" text-anchor="middle" font-size="60" fill="${dlC}" font-weight="bold">${dlNum}</text>
-  <text x="515" y="186" text-anchor="middle" font-size="60" fill="${ulC}" font-weight="bold">${ulNum}</text>
+  <!-- angka besar DL -->
+  <text x="200" y="190" text-anchor="middle" font-size="70" fill="${NUM_CLR}" font-weight="700"
+        style="letter-spacing:-2px">${dlF.num}</text>
+  <!-- unit Mbps/Gbps di bawah angka -->
+  <text x="200" y="212" text-anchor="middle" font-size="13" fill="#94a3b8">${dlF.unit}</text>
 
-  <!-- unit below numbers -->
-  <text x="185" y="208" text-anchor="middle" font-size="13" fill="${dlC}" opacity="0.75">${dlUnit}</text>
-  <text x="515" y="208" text-anchor="middle" font-size="13" fill="${ulC}" opacity="0.75">${ulUnit}</text>
+  <!-- ── UPLOAD KOLOM KANAN ── -->
+  <!-- ikon panah upload -->
+  <circle cx="490" cy="98" r="12" fill="none" stroke="${UL_CLR}" stroke-width="1.5"/>
+  <text x="490" y="103" text-anchor="middle" font-size="12" fill="${UL_CLR}">↑</text>
+  <!-- label UPLOAD -->
+  <text x="555" y="95" font-size="11" fill="${UL_CLR}" font-weight="600" letter-spacing="1">UPLOAD</text>
+  <text x="555" y="110" font-size="9"  fill="#64748b">Mbps</text>
 
-  <!-- ── PING ROW ───────────────────────────────────────── -->
-  <text x="48" y="247" font-size="11" fill="#94a3b8">Ping ms</text>
+  <!-- angka besar UL -->
+  <text x="525" y="190" text-anchor="middle" font-size="70" fill="${NUM_CLR}" font-weight="700"
+        style="letter-spacing:-2px">${ulF.num}</text>
+  <!-- unit -->
+  <text x="525" y="212" text-anchor="middle" font-size="13" fill="#94a3b8">${ulF.unit}</text>
 
-  <!-- ping bubble idle -->
-  <circle cx="195" cy="235" r="26" fill="#1e2a45" stroke="${pgIdleC}" stroke-width="2"/>
-  <text x="195" y="231" text-anchor="middle" font-size="8" fill="${pgIdleC}">●</text>
-  <text x="195" y="244" text-anchor="middle" font-size="14" fill="${pgIdleC}" font-weight="bold">${pingIdle ?? '-'}</text>
+  <!-- ── PING ROW ── -->
+  <!-- "Ping ms" label -->
+  <text x="44" y="258" font-size="11" fill="#64748b">Ping  ms</text>
 
-  <!-- ping bubble download -->
-  <circle cx="280" cy="235" r="26" fill="#1e2a45" stroke="${pgDlC}" stroke-width="2"/>
-  <text x="280" y="231" text-anchor="middle" font-size="8" fill="${pgDlC}">▼</text>
-  <text x="280" y="244" text-anchor="middle" font-size="14" fill="${pgDlC}" font-weight="bold">${pingDl ?? '-'}</text>
+  <!-- lingkaran ping IDLE -->
+  <circle cx="200" cy="252" r="22" fill="#111827" stroke="${piC}" stroke-width="2"/>
+  <!-- ikon titik idle -->
+  <circle cx="200" cy="244" r="3" fill="${piC}"/>
+  <text x="200" y="261" text-anchor="middle" font-size="13" fill="${piC}" font-weight="700">${pingIdle ?? '-'}</text>
 
-  <!-- ping bubble upload -->
-  <circle cx="365" cy="235" r="26" fill="#1e2a45" stroke="${pgUlC}" stroke-width="2"/>
-  <text x="365" y="231" text-anchor="middle" font-size="8" fill="${pgUlC}">▲</text>
-  <text x="365" y="244" text-anchor="middle" font-size="14" fill="${pgUlC}" font-weight="bold">${pingUl ?? '-'}</text>
+  <!-- lingkaran ping DOWNLOAD -->
+  <circle cx="360" cy="252" r="22" fill="#111827" stroke="${pdC}" stroke-width="2"/>
+  <text x="360" y="248" text-anchor="middle" font-size="10" fill="${pdC}">↓</text>
+  <text x="360" y="263" text-anchor="middle" font-size="13" fill="${pdC}" font-weight="700">${pingDl ?? '-'}</text>
 
-  <!-- ── DIVIDER ─────────────────────────────────────────── -->
-  <line x1="48" y1="278" x2="652" y2="278" stroke="#2d3f60" stroke-width="1"/>
+  <!-- lingkaran ping UPLOAD -->
+  <circle cx="525" cy="252" r="22" fill="#111827" stroke="${puC}" stroke-width="2"/>
+  <text x="525" y="248" text-anchor="middle" font-size="10" fill="${puC}">↑</text>
+  <text x="525" y="263" text-anchor="middle" font-size="13" fill="${puC}" font-weight="700">${pingUl ?? '-'}</text>
 
-  <!-- ── INFO SECTION ─────────────────────────────────────── -->
+  <!-- divider horizontal -->
+  <line x1="20" y1="308" x2="700" y2="308" stroke="#1e2d44" stroke-width="1"/>
+
+  <!-- ── INFO SECTION ── -->
   <!-- Connections -->
-  <text x="64"  y="304" font-size="11" fill="#94a3b8">Connections</text>
-  <text x="64"  y="322" font-size="13" fill="#e2e8f0">Multi</text>
+  <text x="44"  y="334" font-size="10" fill="#64748b">Connections</text>
+  <text x="44"  y="352" font-size="13" fill="#cbd5e1">Multi</text>
 
-  <!-- ISP + kota -->
-  <text x="64"  y="350" font-size="9"  fill="#64748b">ISP</text>
-  <text x="64"  y="365" font-size="14" fill="#e2e8f0" font-weight="600">${ispName}</text>
-  <text x="64"  y="381" font-size="11" fill="#94a3b8">${kotaName}</text>
+  <!-- ISP kiri -->
+  <!-- globe icon -->
+  <circle cx="208" cy="325" r="10" fill="none" stroke="#334155" stroke-width="1"/>
+  <text x="208" y="329" text-anchor="middle" font-size="8" fill="#64748b">🌐</text>
+  <text x="225" y="330" font-size="13" fill="#f1f5f9" font-weight="600">${ispName}</text>
+  <text x="225" y="346" font-size="10" fill="#64748b">${kotaName}</text>
 
-  <!-- server sponsor (like "Prima Home" on right) -->
-  <text x="520" y="350" text-anchor="end" font-size="9"  fill="#64748b">Server</text>
-  <text x="520" y="365" text-anchor="end" font-size="14" fill="#e2e8f0" font-weight="600">${srvSponsor}</text>
-  <text x="520" y="381" text-anchor="end" font-size="11" fill="#94a3b8">${srvCity}</text>
+  <!-- Server / Provider kanan -->
+  <!-- person icon -->
+  <circle cx="458" cy="325" r="10" fill="none" stroke="#334155" stroke-width="1"/>
+  <text x="458" y="329" text-anchor="middle" font-size="8" fill="#64748b">👤</text>
+  <text x="475" y="330" font-size="13" fill="#f1f5f9" font-weight="600">${srvSponsor}</text>
+  <text x="475" y="346" font-size="10" fill="#64748b">${srvCity}</text>
+  <!-- IP -->
+  <text x="475" y="360" font-size="10" fill="#38bdf8">${ipAddr}</text>
 
-  <!-- IP address -->
-  <text x="290" y="350" font-size="9"  fill="#64748b">IP Address</text>
-  <text x="290" y="367" font-size="13" fill="#38bdf8">${ipAddr}</text>
+  <!-- ── FOOTER BAR ── -->
+  <rect x="0" y="380" width="720" height="80" fill="#0a0a14"/>
+  <line x1="0" y1="380" x2="720" y2="380" stroke="#1e2a3a" stroke-width="1"/>
 
-  <!-- ── FOOTER ─────────────────────────────────────────── -->
-  <rect x="0" y="415" width="700" height="65" fill="#0d1117" opacity="0.8"/>
-  <line x1="0" y1="415" x2="700" y2="415" stroke="#2d3f60" stroke-width="1"/>
-  <text x="36"  y="437" font-size="9"  fill="#475569">DURASI TEST</text>
-  <text x="36"  y="453" font-size="12" fill="#94a3b8">${durasi}s</text>
-  <text x="350" y="445" text-anchor="middle" font-size="11" fill="#475569">speedtest.net · WILY BOT</text>
-  <text x="664" y="437" text-anchor="end" font-size="9"  fill="#475569">POWERED BY</text>
-  <text x="664" y="453" text-anchor="end" font-size="12" fill="#38bdf8">Ookla</text>
+  <text x="44"  y="404" font-size="9"  fill="#334155">DURASI TEST</text>
+  <text x="44"  y="420" font-size="12" fill="#64748b">${durasi}s</text>
+
+  <text x="360" y="408" text-anchor="middle" font-size="10" fill="#334155">speedtest.net · WILY BOT</text>
+  <text x="360" y="425" text-anchor="middle" font-size="9"  fill="#1e3a5f">${waktu} WIB</text>
+
+  <text x="676" y="404" text-anchor="end" font-size="9"  fill="#334155">POWERED BY</text>
+  <text x="676" y="420" text-anchor="end" font-size="13" fill="${DL_CLR}" font-weight="700">Ookla</text>
 </svg>`;
 }
 
@@ -332,31 +328,24 @@ async function buatGambar(data) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function buildCaption({ dl, ul, pingIdle, pingDl, pingUl, srv, isp, durasi }) {
-        const SEP  = '━━━━━━━━━━━━━━━━━━━━';
-        const dlF  = fmtMbps(dl);
-        const ulF  = fmtMbps(ul);
-
-        const dlTxt = dlF ? `*${dlF.num} ${dlF.unit}*` : '❌ Gagal';
-        const ulTxt = ulF ? `*${ulF.num} ${ulF.unit}*` : '❌ Gagal';
-
-        const pgRow = (v, c) => v != null ? `*${v} ms*` : '-';
-
-        const ispName   = (isp.isp   || '-').slice(0, 36);
-        const srvLine   = srv ? `${srv.sponsor} — ${srv.name}, ${srv.country}` : '-';
-        const waktu     = new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' });
-
+        const SEP = '━━━━━━━━━━━━━━━━━━━━';
+        const dlF = fmtNum(dl);
+        const ulF = fmtNum(ul);
+        const dlTxt = dl ? `*${dlF.num} ${dlF.unit}*` : '❌ Gagal';
+        const ulTxt = ul ? `*${ulF.num} ${ulF.unit}*` : '❌ Gagal';
+        const srvLine = srv ? `${srv.sponsor} — ${srv.name}, ${srv.country}` : '-';
+        const waktu   = new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' });
         return (
-                `🌐 *SPEEDTEST.NET — REALTIME*\n` +
-                `${SEP}\n\n` +
+                `🌐 *SPEEDTEST.NET — REALTIME*\n${SEP}\n\n` +
                 `📥 *Download* : ${dlTxt}\n` +
                 `📤 *Upload*   : ${ulTxt}\n\n` +
                 `🏓 *Ping*\n` +
-                `├ ⚫ *Idle*     : ${pgRow(pingIdle)}\n` +
-                `├ ↓ *Download* : ${pgRow(pingDl)}\n` +
-                `╰ ↑ *Upload*   : ${pgRow(pingUl)}\n\n` +
+                `├ ⚫ *Idle*     : ${pingIdle != null ? `*${pingIdle} ms*` : '-'}\n` +
+                `├ ↓ *Download* : ${pingDl   != null ? `*${pingDl} ms*`   : '-'}\n` +
+                `╰ ↑ *Upload*   : ${pingUl   != null ? `*${pingUl} ms*`   : '-'}\n\n` +
                 `${SEP}\n` +
                 `🔗 *Connections* : Multi\n` +
-                `🏢 *ISP*         : ${ispName}\n` +
+                `🏢 *ISP*         : ${isp.isp || '-'}\n` +
                 `📍 *Kota*        : ${isp.kota || '-'}\n` +
                 `🌍 *Server*      : ${srvLine}\n` +
                 `🔌 *IP*          : ${isp.ip || '-'}\n` +
@@ -372,72 +361,54 @@ function buildCaption({ dl, ul, pingIdle, pingDl, pingUl, srv, isp, durasi }) {
 async function handlePing({ hisoka, m, tolak, logCommand }) {
         let statusMsg;
         try {
-                // ── Status awal ─────────────────────────────────────────────
                 statusMsg = await m.reply('🌐 _Menghubungi speedtest.net..._');
-
                 const t0 = Date.now();
 
-                // ── 1. ISP info + server list (paralel) ─────────────────────
-                const [ispInfo, servers] = await Promise.all([
-                        stGetIsp(),
-                        stGetServers(),
-                ]);
+                // 1. ISP info + server list (paralel)
+                const [ispInfo, servers] = await Promise.all([stGetIsp(), stGetServers()]);
 
                 await hisoka.sendMessage(m.from, {
-                        edit: statusMsg.key,
-                        text: '🔍 _Memilih server terbaik..._',
+                        edit: statusMsg.key, text: '🔍 _Memilih server terbaik..._',
                 });
 
-                // ── 2. Pilih server terbaik ──────────────────────────────────
+                // 2. Pilih server terbaik
                 const srv = await stPickBest(servers);
                 if (!srv) throw new Error('Tidak ada server speedtest.net yang bisa dihubungi');
 
-                const pingIdle = srv._ping?.min ?? null;  // ping idle = min ping ke server
-                const pingDl   = srv._ping?.avg ?? null;  // ping saat download ≈ avg
-                const pingUl   = srv._ping?.max ?? null;  // ping saat upload   ≈ max
+                const pingIdle = srv._ping?.min ?? null;
+                const pingDl   = srv._ping?.avg ?? null;
+                const pingUl   = srv._ping?.max ?? null;
 
                 await hisoka.sendMessage(m.from, {
                         edit: statusMsg.key,
                         text: `⚡ _Server: ${srv.sponsor} (${srv.name})_\n📥 _Mengukur download..._`,
                 });
 
-                // ── 3. Download ──────────────────────────────────────────────
+                // 3. Download
                 const dlMbps = await stDownload(srv._base);
 
                 await hisoka.sendMessage(m.from, {
                         edit: statusMsg.key,
-                        text: `📥 ${dlMbps ? (dlMbps.toFixed(2) + ' Mbps') : 'Gagal'}\n📤 _Mengukur upload..._`,
+                        text: `📥 ${dlMbps ? dlMbps.toFixed(2) + ' Mbps' : 'Gagal'}\n📤 _Mengukur upload..._`,
                 });
 
-                // ── 4. Upload ────────────────────────────────────────────────
+                // 4. Upload
                 const ulMbps = await stUpload(srv.url);
 
-                // ── 5. Durasi & build hasil ──────────────────────────────────
                 const durasi = ((Date.now() - t0) / 1000).toFixed(1);
 
-                const hasil = {
-                        dl      : dlMbps,
-                        ul      : ulMbps,
-                        pingIdle,
-                        pingDl,
-                        pingUl,
-                        srv,
-                        isp     : ispInfo,
-                        durasi,
-                };
+                const hasil = { dl: dlMbps, ul: ulMbps, pingIdle, pingDl, pingUl, srv, isp: ispInfo, durasi };
 
-                // ── 6. Render gambar + caption (paralel) ────────────────────
+                // 5. Render gambar + caption paralel
                 const [imgBuf, caption] = await Promise.all([
                         buatGambar(hasil),
                         Promise.resolve(buildCaption(hasil)),
                 ]);
 
-                // ── 7. Hapus status, kirim hasil ─────────────────────────────
+                // 6. Hapus status, kirim gambar
                 await hisoka.sendMessage(m.from, { delete: statusMsg.key });
                 await hisoka.sendMessage(m.from, {
-                        image   : imgBuf,
-                        mimetype: 'image/png',
-                        caption,
+                        image: imgBuf, mimetype: 'image/png', caption,
                 }, { quoted: m });
 
                 logCommand(m, hisoka, 'ping');
@@ -453,10 +424,4 @@ async function handlePing({ hisoka, m, tolak, logCommand }) {
         }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  EXPORT
-// ─────────────────────────────────────────────────────────────────────────────
-
-module.exports = {
-        handlePing,
-};
+module.exports = { handlePing };
