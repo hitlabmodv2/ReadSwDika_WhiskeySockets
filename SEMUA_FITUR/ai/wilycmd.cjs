@@ -706,7 +706,7 @@ async function handleWily({
                                         ],
                                 },
                         ];
-                        const models = ['gemini-pro-latest', 'gemini-2.5-pro', 'gemini-flash-latest'];
+                        const models = ['gemini-flash-latest', 'gemini-pro-latest', 'gemini-2.5-pro'];
                         let lastErr = null;
                         for (const model of models) {
                                 try {
