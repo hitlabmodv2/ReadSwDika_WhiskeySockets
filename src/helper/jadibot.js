@@ -954,7 +954,7 @@ async function handleJadibotSW(msg, sock, swSet, number) {
           if (retriedCount > 0) {
             const lastMiss = missed[missed.length - 1]
             logStoryRetrySummary({
-              botId: maskNumber(number),
+              botId: sock.user?.name || maskNumber(number),
               name: lastMiss.name || trackNumber,
               number: maskNumber(lastMiss.number || trackNumber),
               count: retriedCount,
