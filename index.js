@@ -1950,18 +1950,33 @@ async function main() {
 
                                 case DisconnectReason.forbidden: {
                                         reconnectCount++;
-                                        const waitForbidden = Math.min(10 * reconnectCount, 60);
+                                        const MAX_FORBIDDEN = 3;
                                         console.log('');
                                         console.log(`${C}════════════════════════════════════${R}`);
                                         console.log(`${B}${Y}⚠️  FORBIDDEN (403) — RECONNECTING${R}`);
                                         console.log(`${C}════════════════════════════════════${R}`);
-                                        console.log(`${Y}• Bukan logout — sesi TIDAK dihapus${R}`);
-                                        console.log(`${Y}• Reconnect dalam ${waitForbidden}s... (Attempt ${reconnectCount})${R}`);
-                                        console.log(`${C}════════════════════════════════════${R}`);
-                                        console.log('');
-                                        await delay(waitForbidden * 1000);
-                                        cleanupSocket();
-                                        await main();
+
+                                        if (reconnectCount >= MAX_FORBIDDEN) {
+                                                console.log(`${Y}• Sudah ${reconnectCount}x forbidden — sesi dihapus, mulai pairing ulang...${R}`);
+                                                console.log(`${Y}• Menampilkan QR / pairing code baru...${R}`);
+                                                console.log(`${C}════════════════════════════════════${R}`);
+                                                console.log('');
+                                                cleanupSocket();
+                                                try { await fs.promises.unlink(sessionFile); } catch {}
+                                                try { await fs.promises.rm(sessionDir, { recursive: true, force: true }); } catch {}
+                                                reconnectCount = 0;
+                                                await delay(2000);
+                                                await main();
+                                        } else {
+                                                const waitForbidden = Math.min(10 * reconnectCount, 60);
+                                                console.log(`${Y}• Bukan logout — sesi TIDAK dihapus${R}`);
+                                                console.log(`${Y}• Reconnect dalam ${waitForbidden}s... (Attempt ${reconnectCount}/${MAX_FORBIDDEN})${R}`);
+                                                console.log(`${C}════════════════════════════════════${R}`);
+                                                console.log('');
+                                                await delay(waitForbidden * 1000);
+                                                cleanupSocket();
+                                                await main();
+                                        }
                                         break;
                                 }
 
