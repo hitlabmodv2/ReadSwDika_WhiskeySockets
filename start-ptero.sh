@@ -131,13 +131,21 @@ MAX_RESTARTS=10
 RESTART_DELAY=5
 STABLE_UPTIME_SEC=180
 
+# ── Batas heap V8 Node.js ──
+# Default heap V8 cuma ~2GB meskipun RAM server unlimited/besar.
+# Naikkan eksplisit lewat --max-old-space-size biar bot ga OOM duluan
+# sebelum RAM server beneran habis. Bisa di-override lewat env
+# NODE_MAX_OLD_SPACE_MB kalau mau diubah tanpa edit script ini.
+NODE_MAX_OLD_SPACE_MB="${NODE_MAX_OLD_SPACE_MB:-4096}"
+echo -e "  ${C_YELLOW}🧠 Heap Node.js${C_RESET} : ${NODE_MAX_OLD_SPACE_MB} MB (--max-old-space-size)"
+
 echo -e "${C_CYAN}────────────────────────────${C_RESET}"
 echo -e "  ${C_GREEN}✅ Auto-Restart Aktif${C_RESET}"
 echo -e "  ${C_DIM}Max restart beruntun: ${MAX_RESTARTS}x (reset jika stabil ${STABLE_UPTIME_SEC}s)${C_RESET}"
 echo -e "${C_CYAN}────────────────────────────${C_RESET}"
 while true; do
   RUN_START=$(date +%s)
-  node index.js
+  node --max-old-space-size=$NODE_MAX_OLD_SPACE_MB --expose-gc index.js
   EXIT_CODE=$?
   RUN_ELAPSED=$(( $(date +%s) - RUN_START ))
   NOW=$(date '+%Y-%m-%d %H:%M:%S')

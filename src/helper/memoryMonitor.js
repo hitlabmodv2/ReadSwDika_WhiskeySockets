@@ -119,6 +119,12 @@ export class MemoryMonitor {
                         `\x1b[32m→ Memory   :\x1b[39m ${formatBytes(this.memoryLimit)} limit (${limitLabel})`
                 );
 
+                if (typeof global.gc === 'function') {
+                        console.log('\x1b[32m→ GC       :\x1b[39m Manual GC aktif (--expose-gc terdeteksi)');
+                } else {
+                        console.log('\x1b[33m→ GC       :\x1b[39m Manual GC nonaktif (jalankan node dengan --expose-gc)');
+                }
+
                 this.checkMemory();
 
                 this.intervalId = setInterval(() => {
@@ -136,11 +142,22 @@ export class MemoryMonitor {
         checkMemory() {
                 if (this.isShuttingDown) return;
 
-                const memUsage = getCurrentMemoryUsage();
+                let memUsage = getCurrentMemoryUsage();
                 const systemMem = getSystemMemoryInfo();
-                const currentUsage = memUsage.rss;
-                const percentage = ((currentUsage / this.memoryLimit) * 100).toFixed(1);
+                let currentUsage = memUsage.rss;
+                let percentage = ((currentUsage / this.memoryLimit) * 100).toFixed(1);
                 const sysPercentage = ((systemMem.used / systemMem.total) * 100).toFixed(1);
+
+                // Kalau usage udah masuk zona waspada (>=60%) dan manual GC tersedia
+                // (node dijalankan dengan --expose-gc), paksa GC dulu sebelum sempat
+                // nyentuh limit heap V8 asli. Ini nolong buang garbage yg numpuk
+                // akibat koneksi Baileys/media yg lama-lama numpuk di old space.
+                if (parseFloat(percentage) >= 60 && typeof global.gc === 'function') {
+                        global.gc();
+                        memUsage = getCurrentMemoryUsage();
+                        currentUsage = memUsage.rss;
+                        percentage = ((currentUsage / this.memoryLimit) * 100).toFixed(1);
+                }
 
                 this._checkCount++;
                 const logEveryN = Math.max(1, Math.round(this.logIntervalMs / this.checkInterval));
