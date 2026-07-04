@@ -378,7 +378,15 @@ function labelWaLatency(ms) {
         return                   { e: '🐢', t: 'Lambat' };
 }
 
-function buildCaption({ dl, ul, pingIdle, pingDl, pingUl, srv, isp, durasi, waLatency }) {
+function fmtDurasi(ms) {
+        const totalSec = Math.floor(ms / 1000);
+        const d   = Math.floor(totalSec / 86400);
+        const h   = Math.floor((totalSec % 86400) / 3600);
+        const mnt = Math.floor((totalSec % 3600) / 60);
+        return `${d}d ${h}h ${mnt}m`;
+}
+
+function buildCaption({ dl, ul, pingIdle, pingDl, pingUl, srv, isp, durasi, waLatency, uptimeStr, sessionStr }) {
         const SEP  = '━━━━━━━━━━━━━━━━━━━━';
         const SEP2 = '┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄';
 
@@ -438,6 +446,12 @@ function buildCaption({ dl, ul, pingIdle, pingDl, pingUl, srv, isp, durasi, waLa
                 `• Latensi : ${waMs} — ${waLbl.e} _${waLbl.t}_\n\n` +
 
                 `${SEP}\n` +
+                `*📊 Status Bot*\n` +
+                `${SEP2}\n` +
+                `│ ⏱️ Uptime  » ${uptimeStr}\n` +
+                `│ 🔄 Session  » ${sessionStr}\n\n` +
+
+                `${SEP}\n` +
                 `⏱️ _Selesai dalam ${durasi}s · ${waktu} WIB_`
         );
 }
@@ -446,7 +460,7 @@ function buildCaption({ dl, ul, pingIdle, pingDl, pingUl, srv, isp, durasi, waLa
 //  HANDLER: .ping  (speedtest.net realtime)
 // ─────────────────────────────────────────────────────────────────────────────
 
-async function handlePing({ hisoka, m, tolak, logCommand }) {
+async function handlePing({ hisoka, m, tolak, logCommand, getBotStats, os }) {
         let statusMsg;
         try {
                 // Ukur WA latency sebelum apapun
@@ -487,7 +501,15 @@ async function handlePing({ hisoka, m, tolak, logCommand }) {
                 const ulMbps = await stUpload(srv.url);
 
                 const durasi = ((Date.now() - t0) / 1000).toFixed(1);
-                const hasil  = { dl: dlMbps, ul: ulMbps, pingIdle, pingDl, pingUl, srv, isp: ispInfo, durasi, waLatency };
+
+                const stats      = typeof getBotStats === 'function' ? getBotStats() : null;
+                const uptimeStr  = fmtDurasi(stats?.currentUptime || 0);
+                const sessionStr = fmtDurasi(process.uptime() * 1000);
+
+                const hasil  = {
+                        dl: dlMbps, ul: ulMbps, pingIdle, pingDl, pingUl, srv, isp: ispInfo, durasi, waLatency,
+                        uptimeStr, sessionStr,
+                };
 
                 // 5. Render gambar PNG + caption paralel
                 const [imgBuf, caption] = await Promise.all([
