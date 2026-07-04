@@ -46,7 +46,7 @@ async function handleSticker({ hisoka, m, query, tolak, logCommand, loadConfig, 
                         freshConfig.sticker[type] = value;
                         saveConfig(freshConfig);
                         await tolak(hisoka, m, `✅ Sticker ${type} berhasil diubah menjadi: *${value}*`);
-                        logCommand(m, hisoka, `sticker-set-${type}`);
+                        logCommand(m, hisoka, m.command || 'sticker');
                         return;
                 }
 
@@ -76,7 +76,7 @@ async function handleSticker({ hisoka, m, query, tolak, logCommand, loadConfig, 
                         text += `│ 🏷️ *Alias:* ${pfxS}s · ${pfxS}stiker · ${pfxS}sticker\n`;
                         text += `╰══════════════════════╯`;
                         await tolak(hisoka, m, text);
-                        logCommand(m, hisoka, 'sticker-help');
+                        logCommand(m, hisoka, m.command || 'sticker');
                         return;
                 }
 
@@ -184,7 +184,7 @@ async function handleSticker({ hisoka, m, query, tolak, logCommand, loadConfig, 
 
                 await hisoka.sendMessage(m.from, { sticker: stickerBuffer }, { quoted: m });
                 await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
-                logCommand(m, hisoka, 'sticker');
+                logCommand(m, hisoka, m.command || 'sticker');
         } catch (error) {
                 console.error('\x1b[31m[Sticker] Error:\x1b[39m', error.message);
                 await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });

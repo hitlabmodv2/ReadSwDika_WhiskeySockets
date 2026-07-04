@@ -1,10 +1,10 @@
 {
-  "ACD0F008D17A0AD58250085AE2529369": {
-    "id": "ACD0F008D17A0AD58250085AE2529369",
+  "AC055EFCB791DAD26FA7DC7E5D2F6805": {
+    "id": "AC055EFCB791DAD26FA7DC7E5D2F6805",
     "sender": "6281326870686@s.whatsapp.net",
     "name": "rixztar",
-    "type": "imageMessage",
-    "arrivedAt": "2026-06-30T11:51:30.543Z",
+    "type": "videoMessage",
+    "arrivedAt": "2026-07-04T06:37:14.871Z",
     "read": true,
     "reacted": true,
     "emoji": "5️⃣➕3️⃣🟰8️⃣",
@@ -16,17 +16,17 @@
       "remoteJid": "status@broadcast",
       "remoteJidAlt": "6281326870686@s.whatsapp.net",
       "fromMe": false,
-      "id": "ACD0F008D17A0AD58250085AE2529369",
+      "id": "AC055EFCB791DAD26FA7DC7E5D2F6805",
       "participant": "191323814494236@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-30T11:52:30.824Z",
+    "updatedAt": "2026-07-04T06:37:33.204Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6281326870686@s.whatsapp.net",
         "fromMe": false,
-        "id": "ACD0F008D17A0AD58250085AE2529369",
+        "id": "AC055EFCB791DAD26FA7DC7E5D2F6805",
         "participant": "191323814494236@lid",
         "addressingMode": "lid"
       },
@@ -34,13 +34,11 @@
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6281326870686@s.whatsapp.net",
         "fromMe": false,
-        "id": "ACD0F008D17A0AD58250085AE2529369",
+        "id": "AC055EFCB791DAD26FA7DC7E5D2F6805",
         "participant": "6281326870686@s.whatsapp.net",
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-30T11:51:39.699Z",
-    "deleted": true,
-    "deletedAt": "2026-06-30T11:52:30.824Z"
+    "processedAt": "2026-07-04T06:37:33.204Z"
   }
 }

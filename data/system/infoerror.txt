@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 03/07/2026, 10.59.26  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 04/07/2026, 06.34.12  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  console.error
+│  #001  —  unhandledRejection
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [31m[CrashGuard] Too many errors, forcing restart...[39m
+│  Connection Closed
 │
 │  DETAIL
-│  Sumber      : console.error
+│  Sumber      : unhandledRejection
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 03/07/2026, 10.59.26
-│  Terakhir    : 03/07/2026, 10.59.26
+│  Pertama     : 04/07/2026, 06.34.12
+│  Terakhir    : 04/07/2026, 06.34.12
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [31m[CrashGuard] Too many errors, forcing restart...[39m
-│     at console.error (file:///home/runner/workspace/index.js:433:27)
-│     at process.<anonymous> (file:///home/runner/workspace/src/helper/crashGuard.js:115:21)
+│  ▶  Error: Connection Closed
+│     at sendRawMessage (file:///home/runner/workspace/node_modules/@whiskeysockets/baileys/lib/Socket/socket.js:57:19)
+│     at sendNode (file:///home/runner/workspace/node_modules/@whiskeysockets/baileys/lib/Socket/socket.js:76:16)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 03/07/2026, 10.59.26
+  Terakhir diperbarui: 04/07/2026, 06.34.12
 ════════════════════════════════════════════════════════════════════════
