@@ -421,7 +421,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         const jadibotAllowedCommands = new Set([
                             'p', 'ping',
                             'menu',
-                            'rvo', 'viewonce', 'vo',
+                            'rvo', 'viewonce', 'vo', 'rvo2',
                             'antidel', 'ad',
                             'readsw',
                             'anticall', 'ac',
