@@ -103,7 +103,7 @@
     "apiUrl": ""
   },
   "memoryMonitor": {
-    "enabled": true,
+    "enabled": false,
     "limitMB": 8192,
     "checkIntervalMs": 30000,
     "logIntervalMs": 300000,
