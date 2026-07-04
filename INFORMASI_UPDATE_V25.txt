@@ -5,7 +5,7 @@ _🔍 Masih dalam tahap pemantauan — informasi tanggal rilis akan diumumkan ke
 🤖 *WILY BOT — V25*
 ✨ *3 Fitur Baru*
 🔧 *11 Bug/Error Fix*
-🚀 *12 Perubahan*
+🚀 *13 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -209,7 +209,15 @@ _Workflow di editor Replit sebelumnya jalankan `node index.js` langsung, sekaran
 1. Workflow `WhatsApp Bot` sekarang menjalankan `bash start-ptero.sh` — dapat semua benefit auto-restart, daily report, dan banner baru
 > Perilaku sama persis antara mode development di Replit dan produksi di Pterodactyl
 
-*12. 🏓 .ping — Tambah Baris Restart di Section Status Bot*
+*12. 🤖 WilyAI — Panggilan User Diganti "kamu", Perbaikan Prompt & First Meet*
+_AI tidak lagi nyebut nama WA asli user — lebih natural dan tidak aneh:_
+1. Sebelumnya AI panggil user pakai nama WA (pushName) → bisa terasa tidak nyaman dan bocor nama
+2. Sekarang AI selalu sebut user dengan kata *"kamu"* — lebih santai & konsisten di semua mode
+3. Instruksi prompt di 4 tempat diperbarui: `wilycmd.cjs`, `autosimi-cmd.cjs`, `aiPrompt.js`, `aiReact.js`
+4. Tambah *"first meeting" note* — jika belum ada history dengan user itu, AI tidak pura-pura sudah kenal
+> Percakapan per-nomor sudah berlaku sejak sebelumnya via `getSessionKey` — tidak ada perubahan di sisi ini
+
+*13. 🏓 .ping — Tambah Baris Restart di Section Status Bot*
 _Section Status Bot pada caption `.ping` kini memuat satu baris tambahan:_
 1. Sebelumnya hanya tampil: `⏱️ Uptime` dan `🔄 Session`
 2. Sekarang tampil tiga baris: `⏱️ Uptime`, `🔁 Restart » Nx`, `🔄 Session`

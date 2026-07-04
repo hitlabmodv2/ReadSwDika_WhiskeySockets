@@ -112,7 +112,7 @@ async function handleWily({
         const wilyAIConfig = loadConfig().wilyAI || {};
         if (wilyAIConfig.enabled === false) return;
 
-        const userName = getUserName(m.sender, m.pushName || 'Kak');
+        const userName = 'kamu';
         const now = new Date();
         const hours = parseInt(now.toLocaleString('en-US', { hour: 'numeric', hour12: false, timeZone: 'Asia/Jakarta' }));
         const timeOfDay = hours < 5 ? 'dini hari' : hours < 11 ? 'pagi' : hours < 15 ? 'siang' : hours < 18 ? 'sore' : 'malam';

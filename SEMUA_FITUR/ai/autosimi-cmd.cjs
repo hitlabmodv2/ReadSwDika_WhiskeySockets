@@ -207,7 +207,7 @@ async function handleAutoSimi({
                                         if (autoImgQuery) {
                                                 try {
                                                         await tolak(hisoka, m, await buildSmartImageWaitText({
-                                                                userName: getUserName(m.sender, m.pushName || 'Kak'),
+                                                                userName: 'kamu',
                                                                 userQuestion: userMessage,
                                                                 query: autoImgQuery,
                                                                 count: 1,
@@ -238,7 +238,7 @@ async function handleAutoSimi({
                                 const currentTime = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' });
                                 const currentDate = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta' });
 
-                                const userName = getUserName(m.sender, m.pushName || 'Kak');
+                                const userName = 'kamu';
                                 const quotedBotText = isReplyToBot ? (m.quoted?.text || m.quoted?.caption || '') : '';
                                 const userMemory = detectAndUpdateMemory(m.sender, userMessage);
                                 const systemPrompt = buildWilyAICommandPrompt({
@@ -416,7 +416,7 @@ async function handleAutoSimi({
 
                                 const _stopTypingWily = startTyping(hisoka, m);
 
-                                const userName = getUserName(m.sender, m.pushName || 'Kak');
+                                const userName = 'kamu';
                                 const now = new Date();
                                 const hours = parseInt(now.toLocaleString('en-US', { hour: 'numeric', hour12: false, timeZone: 'Asia/Jakarta' }));
                                 const timeOfDay = hours < 5 ? 'dini hari' : hours < 11 ? 'pagi' : hours < 15 ? 'siang' : hours < 18 ? 'sore' : 'malam';
