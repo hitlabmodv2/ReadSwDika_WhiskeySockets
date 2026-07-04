@@ -173,12 +173,16 @@ export class MemoryMonitor {
                         else if (pct >= 60) { color = '\x1b[33m'; icon = '⚠️ '; status = 'Waspada'; }
 
                         const barLen = 10;
-                        const botFilled = Math.round((pct / 100) * barLen);
+                        // Clamp 0..barLen — kalau usage lewat 100% dari limit (misal spike
+                        // mendadak sebelum sempat restart), botFilled/sysFilled bisa lebih
+                        // dari barLen dan bikin '░'.repeat(negatif) crash (RangeError).
+                        const clampBar = (v) => Math.max(0, Math.min(barLen, Math.round((v / 100) * barLen)));
+                        const botFilled = clampBar(pct);
                         const botBar = '█'.repeat(botFilled) + '░'.repeat(barLen - botFilled);
 
                         const sysPct = parseFloat(sysPercentage);
                         const sysColor = sysPct >= 90 ? '\x1b[31m' : sysPct >= 70 ? '\x1b[33m' : '\x1b[32m';
-                        const sysFilled = Math.round((sysPct / 100) * barLen);
+                        const sysFilled = clampBar(sysPct);
                         const sysBar = '█'.repeat(sysFilled) + '░'.repeat(barLen - sysFilled);
 
                         const heapUsedMB  = (memUsage.heapUsed  / (1024 * 1024)).toFixed(1);
