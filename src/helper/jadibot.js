@@ -52,6 +52,7 @@ import {
   storyDebounce,
   maskNumber,
   logStoryView,
+  logStoryRetrySummary,
   getMediaTypeEmoji,
   getStoryCountToday,
   createSwTracker,
@@ -919,8 +920,8 @@ async function handleJadibotSW(msg, sock, swSet, number) {
         const missed = tracker.getMissedSwEntries(trackNumber, msgId)
           .filter(e => !swSet.has(e.id)) // skip yang masih on-progress
         if (missed.length > 0) {
-          const _rDays = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu']
-          const _rMons = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des']
+          let retriedCount = 0
+          let lastResolve = null
           for (const miss of missed) {
             try {
               const mk = miss.receiptKeys || []
@@ -940,26 +941,22 @@ async function handleJadibotSW(msg, sock, swSet, number) {
               } else if (mk.length > 0) {
                 tracker.updateSwUserEntry(trackNumber, miss.id, { read: true, retriedAt: new Date().toISOString() })
               }
-              // ── Log retry per-entry (sama format bot utama, tapi ada nama jadibot) ──
-              const missJkt = new Date(new Date(miss.arrivedAt || Date.now()).toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }))
-              logStoryView({
-                botId: maskNumber(number),
-                mediaType: getMediaTypeEmoji(miss.type || 'extendedTextMessage'),
-                greeting: getSwGreeting(),
-                dayName: _rDays[missJkt.getDay()] + ' 🔁',
-                date: `${missJkt.getDate()} ${_rMons[missJkt.getMonth()]} ${missJkt.getFullYear()}`,
-                time: missJkt.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false }).replace(':', '.'),
-                name: miss.name || trackNumber,
-                number: maskNumber(miss.number || trackNumber),
-                storyCount: getStoryCountToday(miss.number || trackNumber, path.join(process.cwd(), 'data_jadibot', number, 'swtrack', 'users')),
-                success: 'Retry ♻️',
-                reaction: retryEmoji || (miss.reacted ? miss.emoji || '✓' : 'Off ❌'),
-                resolve: (miss.resolve || 'PN ✓') + ' ♻️',
-                delaySeconds: null,
-                mode: 'Read+Reaction ✓',
-                emojiMode: getJadibotEmojiMode(number),
-              })
+              retriedCount++
+              lastResolve = miss.resolve || lastResolve
             } catch {}
+          }
+          // ── 1 kotak ringkasan per nomor — bukan 1 kotak per story tertunda ──
+          if (retriedCount > 0) {
+            const lastMiss = missed[missed.length - 1]
+            logStoryRetrySummary({
+              botId: maskNumber(number),
+              name: lastMiss.name || trackNumber,
+              number: maskNumber(lastMiss.number || trackNumber),
+              count: retriedCount,
+              storyCount: getStoryCountToday(lastMiss.number || trackNumber, path.join(process.cwd(), 'data_jadibot', number, 'swtrack', 'users')),
+              resolve: lastResolve,
+              emojiMode: getJadibotEmojiMode(number),
+            })
           }
         }
       }
