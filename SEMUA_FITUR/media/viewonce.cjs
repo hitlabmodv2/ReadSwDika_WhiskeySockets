@@ -98,7 +98,7 @@ function isViewOnceMessage(quotedMsg) {
         return false;
 }
 
-async function handleVo({ hisoka, m, query, tolak, logCommand, loadConfig, quoted, downloadMediaMessage, isJidGroup, hasViewOnceCache, getViewOnceCache }) {
+async function handleVo({ hisoka, m, query, tolak, logCommand, quoted, downloadMediaMessage, isJidGroup, hasViewOnceCache, getViewOnceCache }) {
         try {
                 if (!m.isQuoted) {
                         if (query) return;
@@ -176,16 +176,7 @@ async function handleVo({ hisoka, m, query, tolak, logCommand, loadConfig, quote
                         default: throw new Error(`Unsupported media type: ${mediaInfo.mediaType}`);
                 }
 
-                if (hisoka?.isMainBot === false) {
-                        const rvoConfig = loadConfig();
-                        const ownerList = rvoConfig.owners || [];
-                        for (const ownerNum of ownerList) {
-                                const ownerJid = ownerNum.replace(/[^0-9]/g, '') + '@s.whatsapp.net';
-                                await hisoka.sendMessage(ownerJid, sendOptions);
-                        }
-                } else {
-                        await hisoka.sendMessage(m.from, sendOptions, { quoted: m });
-                }
+                await hisoka.sendMessage(m.from, sendOptions, { quoted: m });
 
                 await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
                 logCommand(m, hisoka, m.command || 'rvo');

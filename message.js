@@ -1191,7 +1191,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'viewonce':
                         case 'vo': {
                                 const { handleVo } = _require(path.resolve('./SEMUA_FITUR/media/viewonce.cjs'));
-                                await handleVo({ hisoka, m, query, tolak, logCommand, loadConfig, quoted, downloadMediaMessage, isJidGroup, hasViewOnceCache, getViewOnceCache });
+                                await handleVo({ hisoka, m, query, tolak, logCommand, quoted, downloadMediaMessage, isJidGroup, hasViewOnceCache, getViewOnceCache });
                                 break;
                         }
 
