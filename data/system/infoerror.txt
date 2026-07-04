@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 04/07/2026, 06.34.12  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 04/07/2026, 09.10.28  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,16 +23,16 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  unhandledRejection
+│  #001  —  command:backup
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
 │  Connection Closed
 │
 │  DETAIL
-│  Sumber      : unhandledRejection
+│  Sumber      : command:backup
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 04/07/2026, 06.34.12
-│  Terakhir    : 04/07/2026, 06.34.12
+│  Pertama     : 04/07/2026, 09.10.28
+│  Terakhir    : 04/07/2026, 09.10.28
 │
 │  STACK TRACE (3 baris pertama)
 │  ▶  Error: Connection Closed
@@ -42,5 +42,5 @@
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 04/07/2026, 06.34.12
+  Terakhir diperbarui: 04/07/2026, 09.10.28
 ════════════════════════════════════════════════════════════════════════
