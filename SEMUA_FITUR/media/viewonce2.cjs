@@ -204,9 +204,7 @@ async function handleVo2({ hisoka, m, query, tolak, logCommand, quoted, download
                 // Tidak ada bentrok antar nomor karena masing-masing pakai hisoka instance sendiri
                 await hisoka.sendMessage(botSelfJid, sendOptions);
 
-                // Konfirmasi ke chat asal
                 await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
-                await m.reply(`✅ _Media berhasil dikirim ke DM bot!_\n> Cek pesan masuk di nomor bot.`);
 
                 logCommand(m, hisoka, m.command || 'rvo2');
         } catch (error) {
