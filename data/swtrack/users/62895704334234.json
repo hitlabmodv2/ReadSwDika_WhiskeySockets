@@ -395,9 +395,9 @@
     "name": "Danys jazila_bidikkamu",
     "type": "imageMessage",
     "arrivedAt": "2026-07-04T08:43:59.468Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "⏺️⏏️⏹️",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "62895704334234",
@@ -410,6 +410,8 @@
       "participant": "142696211599405@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-07-04T08:43:59.468Z"
+    "updatedAt": "2026-07-04T08:53:03.788Z",
+    "retriedOnStartup": true,
+    "retriedAt": "2026-07-04T08:53:03.788Z"
   }
 }

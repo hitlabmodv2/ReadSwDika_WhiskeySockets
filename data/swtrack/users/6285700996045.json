@@ -587,9 +587,9 @@
     "name": "yae",
     "type": "videoMessage",
     "arrivedAt": "2026-07-04T08:43:59.613Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "⏺️⏏️⏹️",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6285700996045",
@@ -602,6 +602,8 @@
       "participant": "10436871233676@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-07-04T08:43:59.613Z"
+    "updatedAt": "2026-07-04T08:52:49.834Z",
+    "retriedOnStartup": true,
+    "retriedAt": "2026-07-04T08:52:49.834Z"
   }
 }
