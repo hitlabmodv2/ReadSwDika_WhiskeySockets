@@ -284,7 +284,7 @@
       "participant": "142696211599405@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-07-04T06:01:14.534Z",
+    "updatedAt": "2026-07-04T09:05:20.522Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -303,7 +303,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-07-04T06:01:14.534Z"
+    "processedAt": "2026-07-04T06:01:14.534Z",
+    "deleted": true,
+    "deletedAt": "2026-07-04T09:05:20.522Z"
   },
   "AC980E435B2907C2548B0E293C7EBF0E": {
     "id": "AC980E435B2907C2548B0E293C7EBF0E",
@@ -326,7 +328,7 @@
       "participant": "142696211599405@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-07-04T06:06:36.674Z",
+    "updatedAt": "2026-07-04T09:05:20.128Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -345,7 +347,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-07-04T06:06:36.674Z"
+    "processedAt": "2026-07-04T06:06:36.674Z",
+    "deleted": true,
+    "deletedAt": "2026-07-04T09:05:20.128Z"
   },
   "AC8143F23EEA6470C7CC61A82FE95F28": {
     "id": "AC8143F23EEA6470C7CC61A82FE95F28",
@@ -368,7 +372,7 @@
       "participant": "142696211599405@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-07-04T06:22:04.735Z",
+    "updatedAt": "2026-07-04T09:05:21.312Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -387,7 +391,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-07-04T06:22:04.735Z"
+    "processedAt": "2026-07-04T06:22:04.735Z",
+    "deleted": true,
+    "deletedAt": "2026-07-04T09:05:21.311Z"
   },
   "ACC3C7987527C485CA8884B0D56ABECB": {
     "id": "ACC3C7987527C485CA8884B0D56ABECB",
@@ -410,9 +416,11 @@
       "participant": "142696211599405@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-07-04T08:53:03.788Z",
+    "updatedAt": "2026-07-04T09:05:20.913Z",
     "retriedOnStartup": true,
-    "retriedAt": "2026-07-04T08:53:03.788Z"
+    "retriedAt": "2026-07-04T08:53:03.788Z",
+    "deleted": true,
+    "deletedAt": "2026-07-04T09:05:20.913Z"
   },
   "AC1807397605216D47D767159AE7E6A3": {
     "id": "AC1807397605216D47D767159AE7E6A3",

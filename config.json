@@ -112,7 +112,7 @@
     "autoDetectPercentage": 85
   },
   "diskMonitor": {
-    "enabled": true,
+    "enabled": false,
     "limitMB": 10240,
     "checkIntervalMs": 300000,
     "logIntervalMs": 300000,
