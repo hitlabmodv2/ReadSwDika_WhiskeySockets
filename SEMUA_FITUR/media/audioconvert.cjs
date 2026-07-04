@@ -235,6 +235,7 @@ async function handleTovn({ hisoka, m, tolak, logCommand, downloadMediaMessage, 
                 const isAudio = m.isQuoted && audioTypes.includes(quoted?.type);
                 if (!isAudio) {
                         await tolak(hisoka, m, `❌ Reply pesan audio/MP3 untuk dijadikan voice note!\n\nContoh: reply file MP3 lalu ketik *${pfx || '.'}tovn*`);
+                        logCommand(m, hisoka, m.command || 'tovn');
                         return;
                 }
 
@@ -269,7 +270,7 @@ async function handleTovn({ hisoka, m, tolak, logCommand, downloadMediaMessage, 
                 }, { quoted: m });
 
                 await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
-                logCommand(m, hisoka, 'tovn');
+                logCommand(m, hisoka, m.command || 'tovn');
         } catch (error) {
                 console.error('\x1b[31m[ToVN] Error:\x1b[39m', error.message);
                 await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
@@ -288,6 +289,7 @@ async function handleTomp3({ hisoka, m, tolak, logCommand, downloadMediaMessage,
                 const isAudio = m.isQuoted && audioTypes.includes(quoted?.type);
                 if (!isAudio) {
                         await tolak(hisoka, m, `❌ Reply voice note atau audio untuk dijadikan MP3!\n\nContoh: reply voice note lalu ketik *${pfx || '.'}tomp3*`);
+                        logCommand(m, hisoka, m.command || 'tomp3');
                         return;
                 }
 
@@ -322,7 +324,7 @@ async function handleTomp3({ hisoka, m, tolak, logCommand, downloadMediaMessage,
                 }, { quoted: m });
 
                 await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
-                logCommand(m, hisoka, 'tomp3');
+                logCommand(m, hisoka, m.command || 'tomp3');
         } catch (error) {
                 console.error('\x1b[31m[ToMP3] Error:\x1b[39m', error.message);
                 await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });

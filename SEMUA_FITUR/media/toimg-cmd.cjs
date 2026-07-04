@@ -39,6 +39,7 @@ async function handleToimg({ hisoka, m, query, tolak, logCommand, quoted, downlo
                 if (!m.isQuoted || quoted.type !== 'stickerMessage') {
                         if (query) return;
                         await tolak(hisoka, m, '❌ Reply sticker untuk dijadikan gambar!');
+                        logCommand(m, hisoka, m.command || 'toimg');
                         return;
                 }
                 
@@ -98,7 +99,7 @@ async function handleToimg({ hisoka, m, query, tolak, logCommand, quoted, downlo
                 }, { quoted: m });
                 
                 await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
-                logCommand(m, hisoka, 'toimg');
+                logCommand(m, hisoka, m.command || 'toimg');
         } catch (error) {
                 console.error('\x1b[31m[Toimg] Error:\x1b[39m', error.message);
                 await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
