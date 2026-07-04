@@ -386,7 +386,7 @@ function fmtDurasi(ms) {
         return `${d}d ${h}h ${mnt}m`;
 }
 
-function buildCaption({ dl, ul, pingIdle, pingDl, pingUl, srv, isp, durasi, waLatency, uptimeStr, sessionStr }) {
+function buildCaption({ dl, ul, pingIdle, pingDl, pingUl, srv, isp, durasi, waLatency, uptimeStr, sessionStr, restartCount }) {
         const SEP  = '━━━━━━━━━━━━━━━━━━━━';
         const SEP2 = '┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄';
 
@@ -449,6 +449,7 @@ function buildCaption({ dl, ul, pingIdle, pingDl, pingUl, srv, isp, durasi, waLa
                 `*📊 Status Bot*\n` +
                 `${SEP2}\n` +
                 `│ ⏱️ Uptime  » ${uptimeStr}\n` +
+                `│ 🔁 Restart » ${restartCount ?? 0}x\n` +
                 `│ 🔄 Session  » ${sessionStr}\n\n` +
 
                 `${SEP}\n` +
@@ -502,13 +503,14 @@ async function handlePing({ hisoka, m, tolak, logCommand, getBotStats, os }) {
 
                 const durasi = ((Date.now() - t0) / 1000).toFixed(1);
 
-                const stats      = typeof getBotStats === 'function' ? getBotStats() : null;
-                const uptimeStr  = fmtDurasi(stats?.currentUptime || 0);
-                const sessionStr = fmtDurasi(process.uptime() * 1000);
+                const stats        = typeof getBotStats === 'function' ? getBotStats() : null;
+                const uptimeStr    = fmtDurasi(stats?.currentUptime || 0);
+                const sessionStr   = fmtDurasi(process.uptime() * 1000);
+                const restartCount = stats?.totalRestarts ?? 0;
 
                 const hasil  = {
                         dl: dlMbps, ul: ulMbps, pingIdle, pingDl, pingUl, srv, isp: ispInfo, durasi, waLatency,
-                        uptimeStr, sessionStr,
+                        uptimeStr, sessionStr, restartCount,
                 };
 
                 // 5. Render gambar PNG + caption paralel
