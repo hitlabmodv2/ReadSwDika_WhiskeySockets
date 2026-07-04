@@ -56,6 +56,7 @@ import {
         storyDebounce,
         maskNumber,
         logStoryView,
+        logStoryRetrySummary,
         getMediaTypeEmoji,
         getStoryCountToday,
 } from '../../src/helper/swtrack.js';
@@ -375,8 +376,8 @@ export default async function (m, hisoka) {
                                         .filter(e => !swProcessingSet.has(e.id)); // skip yg masih on-progress
                                 if (missed.length > 0) {
                                         const isCC = (e) => { const s = e?.message || String(e); return s.includes('Connection Closed') || s.includes('Connection closed') || s.includes('EPIPE') || s.includes('Socket closed'); };
-                                        const _dayNamesR = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
-                                        const _monNamesR = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+                                        let retriedCount = 0;
+                                        let lastResolve = null;
                                         for (const miss of missed) {
                                                 try {
                                                         const mk = miss.receiptKeys || [];
@@ -387,8 +388,12 @@ export default async function (m, hisoka) {
                                                                 ]);
                                                         }
                                                         const mp = miss.resolvedPn;
+                                                        // Cek ulang setting mode SAAT INI — kalau sejak story ini masuk,
+                                                        // reaksi sudah dimatikan (Read Only), retry jangan tetap kirim
+                                                        // reaksi (data harus ikut kondisi realtime, bukan kondisi lama).
+                                                        const retryShouldReact = storyConfig.autoReaction !== false;
                                                         let retryEmoji = null;
-                                                        if (!miss.reacted && mp && miss.messageKey) {
+                                                        if (retryShouldReact && !miss.reacted && mp && miss.messageKey) {
                                                                 retryEmoji = getRandomEmoji('status') || '❤️';
                                                                 await hisoka.sendMessage('status@broadcast',
                                                                         { react: { key: miss.messageKey, text: retryEmoji } },
@@ -398,26 +403,23 @@ export default async function (m, hisoka) {
                                                         } else if (mk.length > 0) {
                                                                 updateSwUserEntry(trackNumber, miss.id, { read: true, retriedAt: new Date().toISOString() });
                                                         }
-                                                        // Box log per-entry retry
-                                                        const missJkt = new Date(new Date(miss.arrivedAt || Date.now()).toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }));
-                                                        logStoryView({
-                                                                botId: hisoka.isMainBot ? null : (hisoka.user.name || maskNumber(hisoka.user.id.split(':')[0])),
-                                                                mediaType: getMediaTypeEmoji(miss.type || 'extendedTextMessage'),
-                                                                greeting: getGreeting(),
-                                                                dayName: _dayNamesR[missJkt.getDay()] + ' 🔁',
-                                                                date: `${missJkt.getDate()} ${_monNamesR[missJkt.getMonth()]} ${missJkt.getFullYear()}`,
-                                                                time: missJkt.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false }).replace(':', '.'),
-                                                                name: miss.name || trackNumber,
-                                                                number: maskNumber(miss.number || trackNumber),
-                                                                storyCount: getStoryCountToday(miss.number || trackNumber),
-                                                                success: 'Retry ♻️',
-                                                                reaction: retryEmoji || (miss.reacted ? miss.emoji || '✓' : 'Off ❌'),
-                                                                resolve: (miss.resolve || 'PN ✓') + ' ♻️',
-                                                                delaySeconds: null,
-                                                                mode: 'Read+Reaction ✓',
-                                                                emojiMode: getMode(),
-                                                        });
+                                                        retriedCount++;
+                                                        lastResolve = miss.resolve || lastResolve;
                                                 } catch {}
+                                        }
+                                        // 1 kotak ringkasan per nomor — bukan 1 kotak per story tertunda,
+                                        // supaya retry beruntun tidak kelihatan spam/duplikat di log.
+                                        if (retriedCount > 0) {
+                                                const lastMiss = missed[missed.length - 1];
+                                                logStoryRetrySummary({
+                                                        botId: hisoka.isMainBot ? null : (hisoka.user.name || maskNumber(hisoka.user.id.split(':')[0])),
+                                                        name: lastMiss.name || trackNumber,
+                                                        number: maskNumber(lastMiss.number || trackNumber),
+                                                        count: retriedCount,
+                                                        storyCount: getStoryCountToday(lastMiss.number || trackNumber),
+                                                        resolve: lastResolve,
+                                                        emojiMode: getMode(),
+                                                });
                                         }
                                 }
                         }

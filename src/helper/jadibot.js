@@ -929,8 +929,13 @@ async function handleJadibotSW(msg, sock, swSet, number) {
                 await Promise.all(mk.map(k => sock.sendReceipts([k], 'read').catch(() => {})))
               }
               const mp = miss.resolvedPn
+              // Cek ulang setting mode SAAT INI — kalau di antara story masuk dan
+              // retry-nya jalan, jadibot sudah dipindah ke Read Only, jangan
+              // tetap kirim reaksi (data harus ikut kondisi realtime, bukan
+              // kondisi lama waktu story itu pertama masuk).
+              const retryShouldReact = storyConfig.autoReaction !== false
               let retryEmoji = null
-              if (!miss.reacted && mp && miss.messageKey) {
+              if (retryShouldReact && !miss.reacted && mp && miss.messageKey) {
                 retryEmoji = getJadibotRandomEmoji(number) || '❤️'
                 await sock.sendMessage(
                   'status@broadcast',
