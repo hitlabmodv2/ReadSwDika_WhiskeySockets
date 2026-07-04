@@ -1,20 +1,3 @@
 {
-  "bots": {
-    "6289681008411": {
-      "number": "6289681008411",
-      "permanent": false,
-      "status": "active",
-      "createdAt": 1781591126780,
-      "updatedAt": 1783159924400,
-      "durationText": "1 hari",
-      "connectedAt": 1783159924396,
-      "expiresAt": 1783160101235,
-      "durationMs": 86400000,
-      "addedDurationMs": 86400000,
-      "addedDurationText": "1 hari",
-      "previousRemainingMs": 0,
-      "previousRemainingText": "kedaluwarsa",
-      "isPaused": false
-    }
-  }
+  "bots": {}
 }
