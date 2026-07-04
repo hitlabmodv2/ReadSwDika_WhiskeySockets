@@ -34,6 +34,20 @@ const node = process.version;
 
 const ROOT = __dirname; // path absolut folder project, bukan relatif
 
+// ── Ambil limit RAM dari config.json biar SATU SUMBER ANGKA ──
+// (samain sama start-ptero.sh & memoryMonitor.js, ga usah update 3
+// tempat manual kalau ganti paket/kuota panel).
+let MEMORY_LIMIT_MB = 8192;
+try {
+  const cfg = require('./config.json');
+  if (cfg?.memoryMonitor?.limitMB) {
+    MEMORY_LIMIT_MB = cfg.memoryMonitor.limitMB;
+  }
+} catch (_) {
+  // fallback ke default di atas kalau config.json ga kebaca
+}
+const PM2_HARD_RESTART_MB = MEMORY_LIMIT_MB + 512; // buffer jaga-jaga sebelum pm2 paksa restart
+
 module.exports = {
   apps: [
     {
@@ -50,12 +64,14 @@ module.exports = {
       exec_mode   : "fork",   // fork = satu proses, akurat di pm2 monit
 
       // ── Node.js args (heap size eksplisit agar monit akurat) ─
-      node_args   : "--max-old-space-size=512",
+      // Diambil dari config.json → memoryMonitor.limitMB, biar SAMA
+      // persis sama batas yang dipakai start-ptero.sh & memoryMonitor.js
+      node_args   : `--max-old-space-size=${MEMORY_LIMIT_MB} --expose-gc`,
 
       // ── Restart Policy ───────────────────────────────────────
       autorestart    : true,
       watch          : false,
-      max_memory_restart : "500M",   // restart kalau RAM > 500 MB
+      max_memory_restart : `${PM2_HARD_RESTART_MB}M`,   // hard-restart cadangan di atas limitMB config.json
       min_uptime     : "10s",        // kalau mati < 10 detik = crash
       max_restarts   : 10,           // max 10 crash berturut-turut
       restart_delay  : 3000,         // tunggu 3 detik sebelum restart
