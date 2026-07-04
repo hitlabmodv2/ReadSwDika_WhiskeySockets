@@ -75,7 +75,9 @@ async function handleGroupmenu({ hisoka, m, tolak, logCommand, loadConfig }) {
 ├➤ *.stickerpack [query]*
 │   _Download satu pack sticker_
 ├➤ *.rvo / .viewonce*
-│   _Buka pesan sekali lihat_
+│   _Buka pesan sekali lihat (kirim ke chat asal)_
+├➤ *.rvo2*
+│   _Buka pesan sekali lihat (kirim ke DM bot sendiri)_
 ├➤ *.quoted / .q*
 │   _Ambil pesan yang di-reply_
 ├➤ *.react / .reaksi [reply pesan]*

@@ -196,6 +196,7 @@ async function handleMenu({
                                 `.ghosttag\n` +
                                 `.quoted\n` +
                                 `.rvo\n` +
+                                `.rvo2\n` +
                                 `.s\n` +
                                 `.toimg\n` +
                                 `.stickerly\n` +

@@ -3,9 +3,9 @@ _📅 Jadwal rilis belum ditentukan_ 🕐
 _🔍 Masih dalam tahap pemantauan — informasi tanggal rilis akan diumumkan kemudian, harap bersabar_ 😊
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V25*
-✨ *2 Fitur Baru*
-🔧 *10 Bug/Error Fix*
-🚀 *11 Perubahan*
+✨ *3 Fitur Baru*
+🔧 *11 Bug/Error Fix*
+🚀 *12 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -19,6 +19,14 @@ _Sekarang owner bisa atur AntiLink di semua grup sekaligus, tanpa satu-satu._
 _Saat membalas pesan status AntiLink, cukup ketik satu kata untuk terapkan ke semua grup:_
 • `add all` — tambahkan seluruh grup ke daftar aktif
 • `del all` — hapus seluruh grup dari daftar aktif
+
+*3. 👁️ .rvo2 — View Once Kirim ke DM Bot Sendiri*
+_Varian baru dari `.rvo` — media view once dikirim langsung ke DM nomor bot, bukan ke chat asal:_
+1. `.rvo` → media dikirim ke chat asal (GC tetap di GC, PM tetap di PM) — seperti sebelumnya
+2. `.rvo2` → media dikirim ke *DM nomor bot itu sendiri* — aman & privat, tidak muncul di GC
+3. Berlaku akurat untuk bot utama maupun jadibot — masing-masing kirim ke DM nomor bot-nya sendiri, tidak ada bentrok antar nomor
+4. Konfirmasi ✅ + notif teks muncul di chat asal setelah media berhasil dikirim ke DM bot
+> Berguna saat view once di GC tapi tidak mau media muncul ulang di GC — cukup ketik `.rvo2`, media langsung masuk DM bot
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🔧 *BUG/ERROR FIX*
@@ -92,6 +100,14 @@ _Saat membalas pesan status AntiLink, cukup ketik satu kata untuk terapkan ke se
 2. _Fix:_ startup jadibot sekarang berjalan *berurutan dengan jeda 3.5 detik* antar nomor — tiap koneksi jadibot "napas" sendiri, tidak bentrok dengan bot utama maupun jadibot lain
 3. _Catatan:_ reconnect otomatis per-jadibot saat disconnect satuan (bukan saat startup massal) sudah aman sejak awal — sudah ada guard anti-duplikat dan delay 3 detik
 > Semua jadibot kini konek bergiliran & stabil setelah downtime, tidak ada lagi yang "diam" karena rebutan resource/koneksi
+
+*11. 👁️ .rvo — Jadibot Kirim ke Owner, Bukan ke Chat Asal*
+~Bug: saat user jadibot pakai `.rvo` di GC atau PM, media view once malah dikirim ke semua nomor owner, bukan ke chat tempat perintah dikirim~
+1. _Penyebab:_ handler punya cabang `if (hisoka.isMainBot === false)` yang loop ke semua owner JID alih-alih kirim ke `m.from`
+2. _Fix:_ cabang jadibot dihapus — handler kini selalu `sendMessage(m.from, ...)` tanpa pengecualian
+3. _Catatan:_ bot utama tidak terpengaruh — jalurnya sudah benar sejak awal
+> `.rvo` kini akurat di semua kondisi: GC → reply di GC, PM → reply di PM, jadibot → reply di chat jadibot masing-masing tanpa bentrok
+
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *PERUBAHAN*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -192,3 +208,10 @@ _Tampilan log saat bot pertama kali dijalankan dirombak total, dari teks polos j
 _Workflow di editor Replit sebelumnya jalankan `node index.js` langsung, sekarang diseragamkan:_
 1. Workflow `WhatsApp Bot` sekarang menjalankan `bash start-ptero.sh` — dapat semua benefit auto-restart, daily report, dan banner baru
 > Perilaku sama persis antara mode development di Replit dan produksi di Pterodactyl
+
+*12. 🏓 .ping — Tambah Baris Restart di Section Status Bot*
+_Section Status Bot pada caption `.ping` kini memuat satu baris tambahan:_
+1. Sebelumnya hanya tampil: `⏱️ Uptime` dan `🔄 Session`
+2. Sekarang tampil tiga baris: `⏱️ Uptime`, `🔁 Restart » Nx`, `🔄 Session`
+3. Data restart diambil dari `getBotStats().totalRestarts` — persistent ke disk, akurat walau bot restart berkali-kali
+> Informasi restart kini langsung terlihat di output `.ping` tanpa perlu cek log terpisah

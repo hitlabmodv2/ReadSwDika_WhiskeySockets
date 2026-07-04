@@ -1195,6 +1195,12 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 break;
                         }
 
+                        case 'rvo2': {
+                                const { handleVo2 } = _require(path.resolve('./SEMUA_FITUR/media/viewonce2.cjs'));
+                                await handleVo2({ hisoka, m, query, tolak, logCommand, quoted, downloadMediaMessage, isJidGroup, hasViewOnceCache, getViewOnceCache });
+                                break;
+                        }
+
                         case 'getsw':
                         case 'sw': {
                                 const { handleSw } = _require(path.resolve('./SEMUA_FITUR/media/getsw.cjs'));

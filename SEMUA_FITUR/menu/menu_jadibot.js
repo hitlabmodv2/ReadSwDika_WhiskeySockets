@@ -76,7 +76,8 @@ export function getMenuJadibotBody() {
 ╰➤ *.anticallvid list*
 
 ╭─「 👁️ *VIEW ONCE* 」
-╰➤ *.rvo / .viewonce / .vo*
+├➤ *.rvo / .viewonce / .vo*
+╰➤ *.rvo2*
 
 ╭─「 🗑️ *HAPUS PESAN* 」
 ├➤ *.del / .d*
