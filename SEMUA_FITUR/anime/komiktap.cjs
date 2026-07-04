@@ -341,6 +341,7 @@ async function handleKomik({ hisoka, m, query, tolak, logCommand, logError, path
                                 `│ *Download chapter jadi PDF:*\n│ ${pfx}komikget <url chapter>\n│ ${pfx}komikget <url chapter> <jumlah hal>\n│\n` +
                                 `│ *Contoh:*\n│ ${pfx}komik naruto\n│ ${pfx}komikinfo https://komiktap.info/manga/naruto/\n│ ${pfx}komikget https://komiktap.info/naruto-chapter-1/\n│ ${pfx}komikget https://komiktap.info/naruto-chapter-1/ 15\n│\n│ ℹ️ Default 20 hal, max 50 hal\n╰──────────────────────`
                         );
+                        logCommand(m, hisoka, m.command || 'komik');
                         return;
                 }
 

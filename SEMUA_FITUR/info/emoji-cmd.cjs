@@ -323,6 +323,7 @@ async function handleEmojiadd({ hisoka, m, query, tolak, logCommand, getJadibotN
             const data     = await _getEmojiData(_isJb, _jbNum, listJadibotEmojis);
             const bodyText = _buildPanduanBody(data, _isJb, _jbNum);
             await _sendButton(hisoka, m, Button, tolak, data, _isJb, _jbNum, bodyText);
+            logCommand(m, hisoka, m.command || 'emojiadd');
             return;
         }
 
@@ -370,6 +371,7 @@ async function handleEmojidel({ hisoka, m, query, tolak, logCommand, getJadibotN
             const data     = await _getEmojiData(_isJb, _jbNum, listJadibotEmojis);
             const bodyText = _buildListBody(data, _isJb, _jbNum);
             await _sendButton(hisoka, m, Button, tolak, data, _isJb, _jbNum, bodyText);
+            logCommand(m, hisoka, m.command || 'emojidel');
             return;
         }
 

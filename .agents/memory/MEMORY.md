@@ -2,3 +2,4 @@
 - [WilyBot cekauto factory](wilybot-cekauto-factory.md) — makeCekautoHelpers: hanya CEKAUTO_FITUR_LIST + handleCekauto + handleCekautoCallbacks yg dipakai message.js; antitagsw callbacks ada di handleAntitagswCallbacks (antitagsw.cjs)
 - [WilyBot scrape folder structure](wilybot-scrape-structure.md) — src/scrape/ sudah direorg jadi 14 folder; tools/ dipecah ke group/ setting/ jadibot/ media/ info/; sisa misc tetap di tools/
 - [WilyBot changelog.txt format](wilybot-changelog-format.md) — update habitually per session; WA inline formatting (bold/italic/strike/mono/lists/quote) applied contextually
+- [WilyBot logCommand missing in help branches](wilybot-logcommand-help-branch.md) — empty-input/help early-returns often skip logCommand entirely; check every early-return, not just the success path

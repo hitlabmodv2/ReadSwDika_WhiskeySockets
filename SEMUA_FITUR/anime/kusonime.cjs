@@ -424,6 +424,7 @@ async function handleAnime({ hisoka, m, query, tolak, logCommand, logError, path
                                 `│ ${pfx}anime one piece\n│ ${pfx}anime attack on titan\n│\n` +
                                 `│ 📄 TXT: info + semua link download\n│ 🎨 PDF: desain keren + poster anime\n│ 🌐 Source: kusonime.com\n╰──────────────────────`
                         );
+                        logCommand(m, hisoka, m.command || 'anime');
                         return;
                 }
 

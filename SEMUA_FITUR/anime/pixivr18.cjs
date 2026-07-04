@@ -293,6 +293,7 @@ async function handlePixiv18({ hisoka, m, query, tolak, logCommand, logError }) 
                         await tolak(hisoka, m,
                                 `╭─「 🔞 *PIXIV R18 SEARCH* 」\n│\n│ Cari ilustrasi R18 dari Pixiv.\n│\n│ *Format:*\n│ • ${pfx}pixivr18 <query>\n│ • ${pfx}pixivr18 <query>,<jumlah>\n│\n│ *Contoh 1 gambar:*\n│ • ${pfx}pixivr18 megumin\n│ • ${pfx}pixivr18 rem re:zero\n│\n│ *Contoh banyak gambar (max 10):*\n│ • ${pfx}pixivr18 megumin,5\n│ • ${pfx}pixivr18 naruto,10\n│\n│ ⚠️ Konten dewasa (R18). 18+ only.\n╰──────────────────────`
                         );
+                        logCommand(m, hisoka, m.command || 'pixivr18');
                         return;
                 }
 

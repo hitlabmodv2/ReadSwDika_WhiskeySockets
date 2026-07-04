@@ -56,6 +56,7 @@ async function handleFacebookDl(hisoka, m, query, ctx) {
             '.fb https://www.facebook.com/reel/xxx\n' +
             '.fb https://www.facebook.com/stories/xxx'
         );
+        logCommand(m, hisoka, m.command || 'facebook');
         return;
     }
 

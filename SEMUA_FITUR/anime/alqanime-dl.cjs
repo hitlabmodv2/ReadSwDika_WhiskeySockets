@@ -220,6 +220,7 @@ async function handleAlqdownload({ hisoka, m, query, tolak, logCommand, logError
                                 `│ *Contoh:*\n│ ${pfx}alqdl https://pixeldrain.com/u/xxx\n│ ${pfx}alqdl https://pixeldrain.com/u/xxx zip\n│ ${pfx}alqdl https://mediafire.com/...\n│\n` +
                                 `│ 💡 Salin link dari hasil ${pfx}alq <judul>\n╰──────────────────────`
                         );
+                        logCommand(m, hisoka, m.command || 'alqdl');
                         return;
                 }
 

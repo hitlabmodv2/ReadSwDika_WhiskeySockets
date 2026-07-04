@@ -38,6 +38,7 @@ async function handleTiktokDl(hisoka, m, query, ctx) {
 
     if (!query) {
         await tolak(hisoka, m, '❌ Masukkan link TikTok!\n\nContoh: .tt https://vt.tiktok.com/xxx\nAtau: .tt https://www.tiktok.com/@user/video/xxx');
+        logCommand(m, hisoka, m.command || 'tiktok');
         return;
     }
 

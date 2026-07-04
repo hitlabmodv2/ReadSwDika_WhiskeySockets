@@ -42,6 +42,7 @@ async function handleInstagramDl(hisoka, m, query, ctx) {
 
     if (!query) {
         await tolak(hisoka, m, '❌ Masukkan link Instagram!\n\nContoh: .ig https://www.instagram.com/reel/xxx');
+        logCommand(m, hisoka, m.command || 'instagram');
         return;
     }
 

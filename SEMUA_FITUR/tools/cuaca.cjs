@@ -727,6 +727,7 @@ async function handleWeather({ hisoka, m, query, tolak, logCommand, logError }) 
                         await tolak(hisoka, m,
                                 `╭─「 🌦️ *CUACA REALTIME* 」\n│\n│ Cek cuaca daerah secara realtime.\n│\n│ *Contoh:*\n│ • ${pfx}cuaca Subang Jawa Barat\n│ • ${pfx}cuaca Bandung Jawa Barat\n│ • ${pfx}cuaca Jakarta Selatan\n╰────────────────────`
                         );
+                        logCommand(m, hisoka, m.command || 'cuaca');
                         return;
                 }
                 await hisoka.sendMessage(m.from, { react: { text: '🔎', key: m.key } });

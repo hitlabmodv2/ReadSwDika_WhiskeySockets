@@ -233,6 +233,7 @@ async function handlePixiv({ hisoka, m, query, tolak, logCommand, logError }) {
                         await tolak(hisoka, m,
                                 `╭─「 🎨 *PIXIV SEARCH* 」\n│\n│ Cari ilustrasi anime dari Pixiv.\n│\n│ *Format:*\n│ • ${pfx}pixiv <query>\n│ • ${pfx}pixiv <query>,<jumlah>\n│\n│ *Contoh 1 gambar:*\n│ • ${pfx}pixiv megumin\n│ • ${pfx}pixiv rem re:zero\n│\n│ *Contoh banyak gambar (max 10):*\n│ • ${pfx}pixiv megumin chan,5\n│ • ${pfx}pixiv naruto,10\n│\n│ ℹ️ Hanya konten aman (safe).\n╰──────────────────────`
                         );
+                        logCommand(m, hisoka, m.command || 'pixiv');
                         return;
                 }
 

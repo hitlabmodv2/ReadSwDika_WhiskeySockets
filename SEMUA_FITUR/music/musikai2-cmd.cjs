@@ -154,6 +154,7 @@ async function handleMusikai2Cmd({
                         `│ ✨ AI pilih genre + judul + lirik otomatis!\n` +
                         `╰──────────────────────────────`;
                 await hisoka.sendMessage(m.from, { text: menuTxt }, { quoted: m }).catch(() => {});
+                logCommand(m, hisoka, m.command || 'musikai2');
                 return;
         }
 

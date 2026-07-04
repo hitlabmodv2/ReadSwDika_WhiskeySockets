@@ -349,6 +349,7 @@ async function handleNhdl({ hisoka, m, query, tolak, logCommand, logError, path 
                                 `╭─「 📥 *NHENTAI DOWNLOAD* 」\n│\n│ *Format:*\n│ ${pfx}nhget <id>\n│ ${pfx}nhget <id> <jumlah hal>\n│ ${pfx}nhdl random\n│\n` +
                                 `│ *Contoh:*\n│ ${pfx}nhget 177013\n│ ${pfx}nhget 489922 10\n│ ${pfx}nhdl random\n│\n│ ℹ️ Default 20 hal, max 50 hal.\n│ ⏳ Proses ~30–60 detik.\n╰──────────────────────`
                         );
+                        logCommand(m, hisoka, m.command || 'nhdl');
                         return;
                 }
 
@@ -433,6 +434,7 @@ async function handleNh({ hisoka, m, query, tolak, logError }) {
                         await tolak(hisoka, m,
                                 `╭─「 📖 *NHENTAI* 」\n│\n│ *Search:*\n│ ${pfx}nh <judul/tag>\n│ ${pfx}nh naruto\n│ ${pfx}nh english translated\n│\n│ *Random:*\n│ ${pfx}nh random\n│ ${pfx}nhrand\n│\n│ *Download PDF:*\n│ ${pfx}nhget <id>\n│ ${pfx}nhget <id> <hal>\n│ ${pfx}nhdl random\n╰──────────────────────`
                         );
+                        logCommand(m, hisoka, m.command || 'nh');
                         return;
                 }
                 const { nhentaiSearch, nhentaiRandom, nhentaiCover, formatSearchResults, formatGalleryInfo } = module.exports;

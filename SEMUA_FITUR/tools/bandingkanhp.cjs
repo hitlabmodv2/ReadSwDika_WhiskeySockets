@@ -957,6 +957,7 @@ async function handleVsbandingkan({ hisoka, m, query, tolak, logCommand, logErro
                         await tolak(hisoka, m,
                                 `╭─「 📱 *BANDINGKAN HP* 」\n│\n│ Bandingkan spesifikasi 2 HP secara\n│ side-by-side dari database GSMArena.\n│\n│ *Format:*\n│ ${pfx}bandingkan <HP1> vs <HP2>\n│\n│ *Contoh:*\n│ • ${pfx}bandingkan Redmi Note 13 Pro vs Poco X6 Pro\n│ • ${pfx}bandingkan iPhone 15 vs Samsung S24\n│ • ${pfx}bandingkan Xiaomi 14 vs Pixel 8 Pro\n╰────────────────────`
                         );
+                        logCommand(m, hisoka, m.command || 'compare');
                         return;
                 }
 

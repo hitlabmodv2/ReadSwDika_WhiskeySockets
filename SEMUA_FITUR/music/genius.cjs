@@ -195,6 +195,7 @@ async function handleCarilagu({ hisoka, m, query, tolak, logCommand, logError })
                         await tolak(hisoka, m,
                                 `╭─「 🎵 *GENIUS SEARCH* 」\n│\n│ Cari info lagu dari Genius.\n│\n│ *Contoh:*\n│ • ${pfx}genius lucid dreams\n│ • ${pfx}genius eminem lose yourself\n│ • ${pfx}geniusdetail 11513410\n╰────────────────────`
                         );
+                        logCommand(m, hisoka, m.command || 'genius');
                         return;
                 }
                 const { geniusSearch: _search, formatGeniusSearch: _fmt } = module.exports;

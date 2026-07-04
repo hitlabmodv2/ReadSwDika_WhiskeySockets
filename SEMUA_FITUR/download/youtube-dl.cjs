@@ -79,6 +79,7 @@ async function handlePlay(hisoka, m, query, ctx) {
 
     if (!query) {
         await tolak(hisoka, m, '❌ Masukkan judul lagu!\n\nContoh: .play shape of you ed sheeran');
+        logCommand(m, hisoka, m.command || 'play');
         return;
     }
 
@@ -169,6 +170,7 @@ async function handleYtmp3(hisoka, m, query, ctx) {
 
     if (!query) {
         await tolak(hisoka, m, '❌ Masukkan link YouTube!\n\nContoh: .ytmp3 https://youtu.be/xxx\nAtau: .ytmp3 https://www.youtube.com/watch?v=xxx');
+        logCommand(m, hisoka, m.command || 'ytmp3');
         return;
     }
 
@@ -283,6 +285,7 @@ async function handleYtmp4(hisoka, m, query, ctx) {
 
     if (!query) {
         await tolak(hisoka, m, '❌ Masukkan link YouTube!\n\nContoh: .ytmp4 https://youtu.be/xxx\nAtau: .ytmp4 https://www.youtube.com/watch?v=xxx');
+        logCommand(m, hisoka, m.command || 'ytmp4');
         return;
     }
 

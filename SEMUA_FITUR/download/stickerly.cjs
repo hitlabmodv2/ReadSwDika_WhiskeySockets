@@ -293,6 +293,7 @@ async function handleStikerpack({ hisoka, m, query, tolak, logCommand, path }) {
                                 `│ • ${pfx}stickerly search kucing\n│\n│ Jika pakai keyword, bot ambil pack hasil teratas.\n` +
                                 `│ Default: kirim sticker langsung agar pasti masuk.\n│ Eksperimen kartu: ${pfx}stickerly native anime\n╰══════════════════════╯`
                         );
+                        logCommand(m, hisoka, m.command || 'stickerly');
                         return;
                 }
 

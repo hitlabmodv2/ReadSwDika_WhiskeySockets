@@ -515,6 +515,7 @@ async function handleCekhp({ hisoka, m, query, tolak, logCommand, logError, _req
         `│ • ${pfx}cekhp Redmi Note 13 Pro\n` +
         `╰────────────────────`
       );
+      logCommand(m, hisoka, m.command || 'cekhp');
       return;
     }
 

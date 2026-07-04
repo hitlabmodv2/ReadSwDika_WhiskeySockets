@@ -170,6 +170,7 @@ async function handleBa({ hisoka, m, query, tolak, logCommand, logError }) {
                         await tolak(hisoka, m,
                                 `╭─「 🎮 *BLUE ARCHIVE* 」\n│\n│ Cek info lengkap karakter Blue\n│ Archive secara realtime.\n│ Total: *227 karakter* tersedia.\n│\n├─「 📌 *Cara Pakai* 」\n│ ${pfx}ba <nama karakter>\n│\n├─「 🎯 *Contoh Karakter* 」\n│ • ${pfx}ba shiroko\n│ • ${pfx}ba hina\n│ • ${pfx}ba aru\n│ • ${pfx}ba hoshino\n│ • ${pfx}ba iori\n│ • ${pfx}ba yuuka\n│\n├─「 👙 *Versi Alternatif* 」\n│ Tambah kata di belakang nama:\n│ • ${pfx}ba hina swimsuit\n│ • ${pfx}ba neru bunnygirl\n│ • ${pfx}ba aru newyear\n│ • ${pfx}ba serika swimsuit\n│ • ${pfx}ba chinatsu onsen\n│\n├─「 📊 *Info yang Ditampilkan* 」\n│ 💬 Quote suara karakter (random)\n│ 🏫 Sekolah, Role, Tipe, Posisi\n│ 📋 Profil (usia, hobi, CV, dll)\n│ 🔫 Senjata + stats\n│ 🔥 Skills lengkap\n│ 🎯 Skill priority & investasi\n│ 📖 Bio karakter\n│\n├─「 🔰 *Tipe Karakter* 」\n│ Striker (155) • Special (72)\n│\n├─「 ⚔️ *Role* 」\n│ DPS (122) • Supporter (61)\n│ Tank (20) • Healer (18) • T.S.\n╰────────────────────`
                         );
+                        logCommand(m, hisoka, m.command || 'bluearchive');
                         return;
                 }
 

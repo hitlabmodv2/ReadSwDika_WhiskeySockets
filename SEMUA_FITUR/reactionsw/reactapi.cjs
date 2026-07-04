@@ -71,6 +71,7 @@ async function handleReactapi({ hisoka, m, query, tolak, logCommand, loadConfig,
                         const currentKey  = process.env.REACT_API_KEY || reactConfig.apiKey;
                         const maskedKey   = currentKey ? currentKey.slice(0, 10) + '...' + currentKey.slice(-5) : 'Belum diatur';
                         await tolak(hisoka, m, `╭═══ *SETTING REACT API* ═══╮\n│\n│ 📌 *Cara Penggunaan:*\n│ .setreactapi [api_key]\n│\n│ 📊 *Status Saat Ini:*\n│ ├ Status: ${reactConfig.enabled ? '✅ Aktif' : '❌ Nonaktif'}\n│ ├ API Key: ${maskedKey}\n│ └ Server: Default\n│\n╰════════════════════════════╯`);
+                        logCommand(m, hisoka, m.command || 'setreactapi');
                         return;
                 }
                 const newApiKey = query.trim();
@@ -107,6 +108,7 @@ async function handleReaksi({ hisoka, m, query, tolak, logCommand, loadConfig })
 
                 if (!query) {
                         await tolak(hisoka, m, `╭═══ *REACT CHANNEL* ═══╮\n│\n│ 📌 *Kirim Reaksi ke Saluran/Channel*\n│\n│ *Format:*\n│ .react [link] [emoji]\n│\n│ *Contoh Penggunaan:*\n│ .react https://whatsapp.com/\n│ channel/0029xxx/264 ♥️ 🙏🏻\n│\n│ *Keterangan:*\n│ • Link: URL postingan channel\n│ • Emoji: Reaksi (bisa lebih dari 1)\n│\n│ *Command Lainnya:*\n│ • .cekreact - Cek saldo coin\n│ • .setreactapi - Atur API key\n│\n╰══════════════════════╯`);
+                        logCommand(m, hisoka, m.command || 'react');
                         return;
                 }
 

@@ -490,6 +490,7 @@ async function handleTempmail({ hisoka, m, query, tolak, logCommand, logError, p
         if (sub === 'tmread') {
                 if (!input) {
                         await tolak(hisoka, m, `❌ Sertakan ID pesan.\nContoh: *${pfx}tmread 12345*`);
+                        logCommand(m, hisoka, m.command || 'tmread');
                         return;
                 }
                 const s = getSess();
