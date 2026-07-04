@@ -94,6 +94,12 @@ function cleanupClient() {
         }
     } catch {}
     try {
+        if (global.diskMonitor) {
+            global.diskMonitor.stop();
+            global.diskMonitor = null;
+        }
+    } catch {}
+    try {
         if (global.cacheCleaner) {
             clearInterval(global.cacheCleaner);
             global.cacheCleaner = null;

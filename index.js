@@ -79,6 +79,7 @@ import { injectClient } from './src/helper/inject.js';
 import { getCaseName, loadConfig, saveConfig } from './src/helper/utils.js';
 import { getStatusEmojis, getRandomEmoji } from './src/helper/emoji.js';
 import { MemoryMonitor } from './src/helper/memoryMonitor.js';
+import { DiskMonitor } from './src/helper/diskMonitor.js';
 import { getPhoneRegion, formatPhoneWithRegion } from './src/helper/phoneRegion.js';
 import { ensureTmpDir, startAutoCleaner, stopAutoCleaner, restartAutoCleaner, cleanStaleSessionFiles } from './src/helper/cleaner.js'; // ini baru
 import { pruneSwStats } from './src/helper/swtrack.js';
@@ -462,6 +463,7 @@ process.stderr.write = (chunk, encoding, callback) => {
 
 let reconnectCount = 0;
 let memoryMonitor = null;
+let diskMonitor = null;
 
 /* ================= AUTH TIMER LOG ================= */
 function saveAuthTimerLog(entry) {
@@ -518,6 +520,17 @@ async function main() {
         }); // sampe sini
         memoryMonitor.start();
         global.memoryMonitor = memoryMonitor;
+
+        if (diskMonitor) {
+                diskMonitor.stop();
+        }
+        diskMonitor = new DiskMonitor({
+                onLimitReached: () => {
+                        console.log('\x1b[31m[DiskMonitor] Disk hampir penuh, cek/hapus file yang tidak perlu.\x1b[0m');
+                }
+        });
+        diskMonitor.start();
+        global.diskMonitor = diskMonitor;
 
         if (reconnectCount > 0) {
                 console.warn(`\x1b[33mReconnecting... Attempt ${reconnectCount}\x1b[39m`);

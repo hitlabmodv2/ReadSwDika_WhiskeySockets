@@ -132,15 +132,16 @@ RESTART_DELAY=5
 STABLE_UPTIME_SEC=180
 
 # ── Batas heap V8 Node.js ──
-# Node.js/V8 TIDAK punya opsi "unlimited" beneran — RAM fisik server
-# tetap terbatas walau paket Pterodactyl-nya "unlimited" (artinya cuma
-# tidak ada limit BUATAN dari panel). Default V8 kalau tidak di-set
-# cuma ~2GB, jauh di bawah RAM server yang sebenarnya lebih besar.
-# Solusinya: pasang angka besar (32GB) biar heap V8 praktis TIDAK
-# PERNAH jadi penghalang — batas nyata tetap RAM fisik server itu
-# sendiri. Override lewat env NODE_MAX_OLD_SPACE_MB kalau perlu.
-NODE_MAX_OLD_SPACE_MB="${NODE_MAX_OLD_SPACE_MB:-32768}"
-echo -e "  ${C_YELLOW}🧠 Heap Node.js${C_RESET} : ${NODE_MAX_OLD_SPACE_MB} MB (--max-old-space-size, praktis unlimited)"
+# Sesuai kuota beneran di panel Pterodactyl (cek tab overview server:
+# Memory X / Y GiB). Default di bawah ini disamakan ke paket 10 GiB
+# RAM. KALAU PAKET KAMU BEDA, ubah NODE_MAX_OLD_SPACE_MB (env di panel
+# Startup → Variables) SESUAI ANGKA DI PANEL, jangan asal besar —
+# soalnya kalau heap disetel lebih gede dari RAM asli container,
+# nanti malah kena OOM-killer container (mati mendadak tanpa log GC).
+# Disisakan ~2GB dari total buat overhead non-heap (native module
+# Baileys/sharp, OS, dsb).
+NODE_MAX_OLD_SPACE_MB="${NODE_MAX_OLD_SPACE_MB:-8192}"
+echo -e "  ${C_YELLOW}🧠 Heap Node.js${C_RESET} : ${NODE_MAX_OLD_SPACE_MB} MB (--max-old-space-size, disamakan kuota panel)"
 
 echo -e "${C_CYAN}────────────────────────────${C_RESET}"
 echo -e "  ${C_GREEN}✅ Auto-Restart Aktif${C_RESET}"

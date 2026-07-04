@@ -42,5 +42,47 @@
     "processedAt": "2026-07-03T15:39:43.450Z",
     "deleted": true,
     "deletedAt": "2026-07-04T06:34:29.922Z"
+  },
+  "ACD71BF212933B9B6123B16A88296061": {
+    "id": "ACD71BF212933B9B6123B16A88296061",
+    "sender": "6281549166315@s.whatsapp.net",
+    "name": "tama",
+    "type": "videoMessage",
+    "arrivedAt": "2026-07-04T08:58:51.621Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "⏺️⏏️⏹️",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6281549166315",
+    "resolvedPn": "6281549166315@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6281549166315@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACD71BF212933B9B6123B16A88296061",
+      "participant": "215693693821070@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-04T08:58:55.222Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281549166315@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACD71BF212933B9B6123B16A88296061",
+        "participant": "215693693821070@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281549166315@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACD71BF212933B9B6123B16A88296061",
+        "participant": "6281549166315@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-04T08:58:55.222Z"
   }
 }
