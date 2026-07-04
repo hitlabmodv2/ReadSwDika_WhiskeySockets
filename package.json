@@ -6,6 +6,7 @@
   "types": "index.d.ts",
   "scripts": {
     "start": "bash start-ptero.sh",
+    "start-pm2": "bash start-pm2.sh",
     "dev": "node --watch-path=./src --watch-path=./.env src/index.js",
     "pm2": "pm2 delete wily-bot 2>/dev/null; pm2 start ecosystem.config.cjs && pm2 monit",
     "pm2:stop": "pm2 stop wily-bot",
