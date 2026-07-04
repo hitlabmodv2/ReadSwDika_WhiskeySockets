@@ -562,7 +562,7 @@ async function handleCekhp({ hisoka, m, query, tolak, logCommand, logError, _req
     }
 
     await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
-    logCommand(m, hisoka, 'cekhp');
+    logCommand(m, hisoka, m.command || 'cekhp');
   } catch (error) {
     console.error('\x1b[31m[CekHP] Error:\x1b[39m', error.message);
     logError(error, 'command:cekhp');

@@ -377,7 +377,7 @@ async function handleStikerpack({ hisoka, m, query, tolak, logCommand, path }) {
                         const doneText = `✅ Kartu paket Stickerly eksperimen sudah dikirim.\n\n📦 *${pack.name}*\n🧩 *${pack.stickerCount}* sticker\n\nCatatan: beberapa WhatsApp menolak kartu pack custom. Kalau panel tidak bisa dibuka, pakai:\n${pfx}stickerly ${pack.url}`;
                         if (loadingMsg?.key) await m.reply({ edit: loadingMsg.key, text: doneText }); else await tolak(hisoka, m, doneText);
                         await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
-                        logCommand(m, hisoka, 'stickerly');
+                        logCommand(m, hisoka, m.command || 'stickerly');
                         return;
                 }
 
@@ -402,7 +402,7 @@ async function handleStikerpack({ hisoka, m, query, tolak, logCommand, path }) {
                         : `✅ Stickerly selesai. *${sent}* sticker berhasil dikirim.`;
                 if (loadingMsg?.key) await m.reply({ edit: loadingMsg.key, text: doneText }); else await tolak(hisoka, m, doneText);
                 await hisoka.sendMessage(m.from, { react: { text: sent ? '✅' : '❌', key: m.key } });
-                logCommand(m, hisoka, 'stickerly');
+                logCommand(m, hisoka, m.command || 'stickerly');
         } catch (error) {
                 console.error('\x1b[31m[StickerLy] Error:\x1b[39m', error.message);
                 await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });

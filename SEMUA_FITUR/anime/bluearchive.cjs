@@ -191,7 +191,7 @@ async function handleBa({ hisoka, m, query, tolak, logCommand, logError }) {
                 if (!imgSent) await tolak(hisoka, m, report);
 
                 await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
-                logCommand(m, hisoka, 'bluearchive');
+                logCommand(m, hisoka, m.command || 'bluearchive');
         } catch (error) {
                 console.error('\x1b[31m[BlueArchive] Error:\x1b[39m', error.message);
                 logError(error, 'command:ba');

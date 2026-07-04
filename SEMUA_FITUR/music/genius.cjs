@@ -205,7 +205,7 @@ async function handleCarilagu({ hisoka, m, query, tolak, logCommand, logError })
                 if (loadingMsg?.key) { try { await hisoka.sendMessage(m.from, { delete: loadingMsg.key }); } catch (_) {} }
                 await tolak(hisoka, m, report);
                 await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
-                logCommand(m, hisoka, 'genius');
+                logCommand(m, hisoka, m.command || 'genius');
         } catch (error) {
                 console.error('\x1b[31m[Genius] Error:\x1b[39m', error.message);
                 logError(error, 'command:genius');
@@ -239,7 +239,7 @@ async function handleDetailgenius({ hisoka, m, query, tolak, logCommand, logErro
                 }
                 if (!sent) await tolak(hisoka, m, report);
                 await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
-                logCommand(m, hisoka, 'geniusdetail');
+                logCommand(m, hisoka, m.command || 'geniusdetail');
         } catch (error) {
                 console.error('\x1b[31m[GeniusDetail] Error:\x1b[39m', error.message);
                 logError(error, 'command:geniusdetail');

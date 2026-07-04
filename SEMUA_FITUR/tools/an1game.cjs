@@ -985,10 +985,10 @@ async function handleAn1game({ hisoka, m, query, tolak, logCommand, sendConfirmW
                         if (thumbL) {
                                 const imgL = await require('axios').get(thumbL, { responseType: 'arraybuffer', timeout: 10000, headers: { 'Referer': 'https://an1.com/', 'User-Agent': 'Mozilla/5.0' } })
                                         .then(r => Buffer.from(r.data)).catch(() => null);
-                                if (imgL) { await hisoka.sendMessage(m.from, { image: imgL, caption: teksL }, { quoted: m }); logCommand(m, hisoka, 'anigame'); return; }
+                                if (imgL) { await hisoka.sendMessage(m.from, { image: imgL, caption: teksL }, { quoted: m }); logCommand(m, hisoka, m.command || 'anigame'); return; }
                         }
                         await tolak(hisoka, m, teksL);
-                        logCommand(m, hisoka, 'anigame');
+                        logCommand(m, hisoka, m.command || 'anigame');
                         return;
                 }
 
@@ -1015,10 +1015,10 @@ async function handleAn1game({ hisoka, m, query, tolak, logCommand, sendConfirmW
                 if (thumbS) {
                         const imgS = await require('axios').get(thumbS, { responseType: 'arraybuffer', timeout: 10000, headers: { 'Referer': 'https://an1.com/', 'User-Agent': 'Mozilla/5.0' } })
                                 .then(r => Buffer.from(r.data)).catch(() => null);
-                        if (imgS) { await hisoka.sendMessage(m.from, { image: imgS, caption: teksCariS }, { quoted: m }); logCommand(m, hisoka, 'anigame'); return; }
+                        if (imgS) { await hisoka.sendMessage(m.from, { image: imgS, caption: teksCariS }, { quoted: m }); logCommand(m, hisoka, m.command || 'anigame'); return; }
                 }
                 await tolak(hisoka, m, teksCariS);
-                logCommand(m, hisoka, 'anigame');
+                logCommand(m, hisoka, m.command || 'anigame');
 
         } catch (error) {
                 console.error('\x1b[31m[AniGame Cmd] Error:\x1b[39m', error.message);

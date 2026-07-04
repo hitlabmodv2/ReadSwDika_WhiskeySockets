@@ -304,7 +304,7 @@ async function handleCosplay({ hisoka, m, query, tolak, logCommand, logError, _r
                     }, { quoted: m });
                 }
                 await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
-                logCommand(m, hisoka, 'cosplayrand');
+                logCommand(m, hisoka, m.command || 'cosplayrand');
             } catch (err) {
                 console.error('[CosplayRandom] Error:', err.message);
                 logError(err, 'command:cosplayrand');
@@ -356,7 +356,7 @@ async function handleCosplay({ hisoka, m, query, tolak, logCommand, logError, _r
             loading: false,
         });
 
-        logCommand(m, hisoka, 'cosplay');
+        logCommand(m, hisoka, m.command || 'cosplay');
     } catch (error) {
         console.error('\x1b[31m[Cosplay] Error:\x1b[39m', error.message);
         logError(error, 'command:cosplay');

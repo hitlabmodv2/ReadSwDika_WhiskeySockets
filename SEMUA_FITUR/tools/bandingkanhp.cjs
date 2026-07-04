@@ -1003,7 +1003,7 @@ async function handleVsbandingkan({ hisoka, m, query, tolak, logCommand, logErro
                 }
 
                 await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
-                logCommand(m, hisoka, 'bandingkan');
+                logCommand(m, hisoka, m.command || 'compare');
         } catch (error) {
                 console.error('\x1b[31m[BandingkanHP] Error:\x1b[39m', error.message);
                 logError(error, 'command:bandingkan');

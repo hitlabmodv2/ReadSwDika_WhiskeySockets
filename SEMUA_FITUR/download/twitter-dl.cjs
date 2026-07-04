@@ -278,7 +278,7 @@ async function handleTwitterDl(hisoka, m, query, ctx = {}) {
                 }
             }
 
-            logCommand && logCommand(m, hisoka, 'twdl');
+            logCommand && logCommand(m, hisoka, m.command || 'twdl');
             return;
         }
 
@@ -294,7 +294,7 @@ async function handleTwitterDl(hisoka, m, query, ctx = {}) {
                 }, { quoted: m }).catch(() => {});
                 await new Promise(r => setTimeout(r, 600));
             }
-            logCommand && logCommand(m, hisoka, 'twdl');
+            logCommand && logCommand(m, hisoka, m.command || 'twdl');
             return;
         }
 

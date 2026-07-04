@@ -102,7 +102,7 @@ async function handleAturBrowser({ hisoka, m, query, tolak, logCommand, loadConf
                                 `🔄 Bot lama tetap aktif sampai koneksi baru berhasil.\n` +
                                 `📲 *${_abExecHasPair ? 'Pairing code' : 'QR Code'} akan dikirim ke chat ini.*`
                         );
-                        logCommand(m, hisoka, 'setbrowser');
+                        logCommand(m, hisoka, m.command || 'setbrowser');
                         const { startBrowserSwitch: _abSwitch } = await import('../../src/helper/browserSwitch.js');
                         _abSwitch(hisoka, pilihan.value, m.from, _edit, pilihan.key).catch(async (e) => {
                                 await hisoka.sendMessage(m.from, { text: `❌ *Error browser switch:* ${e?.message}` }).catch(() => {});

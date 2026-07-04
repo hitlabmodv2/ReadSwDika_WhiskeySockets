@@ -243,7 +243,7 @@ async function handleAlq({ hisoka, m, query, tolak, logCommand, logError, path, 
                         latestText += `📌 *Cari anime spesifik:* ${pfx}alq <judul>`;
                         await tolak(hisoka, m, latestText);
                         await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
-                        logCommand(m, hisoka, 'alqanime');
+                        logCommand(m, hisoka, m.command || 'alqanime');
                         return;
                 }
 

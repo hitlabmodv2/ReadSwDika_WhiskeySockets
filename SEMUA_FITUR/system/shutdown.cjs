@@ -81,7 +81,7 @@ async function handleRb({ hisoka, m, tolak, logCommand }) {
                 const { kvSet: _rstKvSet } = await import('../../src/db/datadb.js');
                 _rstKvSet('system/restart_notify', { from: m.from, key: _rstSent?.key || null, by: m.sender, time: Date.now() });
         } catch (_) {}
-        logCommand(m, hisoka, 'restart');
+        logCommand(m, hisoka, m.command || 'restart');
         restartBot(2000);
 }
 

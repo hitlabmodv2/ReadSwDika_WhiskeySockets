@@ -55,7 +55,7 @@ async function handleReactinfo({ hisoka, m, tolak, logCommand, loadConfig }) {
                         let hasil = `╭═══ *INFO REACT API* ═══╮\n│\n│ 🔑 *API Key:* ${maskedKey}\n│ ✅ *Status:* ${reactConfig.enabled ? 'Aktif' : 'Nonaktif'}\n│ 🌐 *Server:* Terhubung\n│\n│ ℹ️ *Info:*\n│ Endpoint cek saldo tidak tersedia\n│ atau sedang dalam pemeliharaan.\n│ Silakan coba fitur .react\n│\n╰════════════════════════╯`;
                         await m.reply({ edit: loadingMsg.key, text: hasil.trim() });
                 }
-                logCommand(m, hisoka, 'cekreact');
+                logCommand(m, hisoka, m.command || 'cekreact');
         } catch (error) {
                 console.error('\x1b[31m[CekReact] Error:\x1b[39m', error.message);
                 await tolak(hisoka, m, `Mohon maaf, terjadi kesalahan saat mengecek saldo: ${error.message}`);
@@ -80,7 +80,7 @@ async function handleReactapi({ hisoka, m, query, tolak, logCommand, loadConfig,
                 saveConfig(config);
                 const maskedKey = newApiKey.slice(0, 10) + '...' + newApiKey.slice(-5);
                 await tolak(hisoka, m, `╭═══ *API KEY UPDATED* ═══╮\n│\n│ ✅ *Berhasil Diperbarui!*\n│\n│ 🔑 Key: ${maskedKey}\n│ 📊 Status: Aktif\n│\n│ 💡 Fitur react siap digunakan\n│\n╰═════════════════════════╯`);
-                logCommand(m, hisoka, 'setreactapi');
+                logCommand(m, hisoka, m.command || 'setreactapi');
         } catch (error) {
                 console.error('\x1b[31m[SetReactAPI] Error:\x1b[39m', error.message);
                 await tolak(hisoka, m, `Mohon maaf, terjadi kesalahan saat mengatur API key: ${error.message}`);
@@ -142,7 +142,7 @@ async function handleReaksi({ hisoka, m, query, tolak, logCommand, loadConfig })
                 hasil += `│\n╰══════════════════════╯`;
 
                 await m.reply({ edit: loadingMsg.key, text: hasil.trim() });
-                logCommand(m, hisoka, 'react');
+                logCommand(m, hisoka, m.command || 'react');
         } catch (error) {
                 console.error('\x1b[31m[React API] Error:\x1b[39m', error.message);
                 let errorMessage = '';

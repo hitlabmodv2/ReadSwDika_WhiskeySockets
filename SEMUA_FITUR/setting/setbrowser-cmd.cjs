@@ -116,7 +116,7 @@ async function handleSetbrowserConfirmReply({
                         `🔄 Bot lama tetap aktif sampai koneksi baru berhasil.\n` +
                         `📲 *${_cabHasPair ? 'Pairing code' : 'QR Code'} akan dikirim ke chat ini.*`
                 );
-                logCommand(m, hisoka, 'setbrowser');
+                logCommand(m, hisoka, m.command || 'setbrowser');
                 const { startBrowserSwitch: _cabSwitch } = await import('../../src/helper/browserSwitch.js');
                 _cabSwitch(hisoka, _cabPilihan.value, m.from, _cabEdit, _cabPilihan.key).catch(async (e) => {
                         await hisoka.sendMessage(m.from, { text: `❌ *Error browser switch:* ${e?.message}` }).catch(() => {});

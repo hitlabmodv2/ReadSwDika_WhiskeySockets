@@ -336,7 +336,7 @@ async function handlePixiv18({ hisoka, m, query, tolak, logCommand, logError }) 
                 }
 
                 await hisoka.sendMessage(m.from, { react: { text: '🔞', key: m.key } });
-                logCommand(m, hisoka, 'pixivr18');
+                logCommand(m, hisoka, m.command || 'pixivr18');
         } catch (error) {
                 console.error('\x1b[31m[PixivR18] Error:\x1b[39m', error.message);
                 logError(error, 'command:pixivr18');

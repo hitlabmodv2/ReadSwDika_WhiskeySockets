@@ -111,7 +111,7 @@ function _makeGenerateMusik({ hisoka, m, logCommand }) {
                                 }
                         }
 
-                        logCommand(m, hisoka, 'musikai');
+                        logCommand(m, hisoka, m.command || 'musikai');
                 } catch (err) {
                         if (loadingMsg?.key) {
                                 try { await hisoka.sendMessage(m.from, { delete: loadingMsg.key }); } catch (_) {}

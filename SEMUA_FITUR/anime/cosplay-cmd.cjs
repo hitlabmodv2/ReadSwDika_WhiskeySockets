@@ -153,7 +153,7 @@ async function handleCosplayChoice({
                 }
 
                 await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
-                logCommand(m, hisoka, 'cosplay');
+                logCommand(m, hisoka, m.command || 'cosplay');
 
                 // Tampilkan ulang menu agar bisa pilih lagi
                 const _reResults = pendingCos.results;

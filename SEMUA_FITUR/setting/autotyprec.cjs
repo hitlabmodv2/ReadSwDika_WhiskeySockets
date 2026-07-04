@@ -198,7 +198,7 @@ async function handleTyp({ hisoka, m, query, tolak, logCommand, loadConfig, save
 
         if (args.length === 0) {
             await _send(getTyping());
-            logCommand(m, hisoka, 'typing');
+            logCommand(m, hisoka, m.command || 'typing');
             return;
         }
 
@@ -229,7 +229,7 @@ async function handleTyp({ hisoka, m, query, tolak, logCommand, loadConfig, save
         } else {
             await tolak(hisoka, m, `❌ Perintah tidak valid. Ketik \`${pref}typing\` untuk bantuan.`);
         }
-        logCommand(m, hisoka, 'typing');
+        logCommand(m, hisoka, m.command || 'typing');
     } catch (error) {
         console.error('\x1b[31m[Typing] Error:\x1b[39m', error.message);
         await tolak(hisoka, m, `Error: ${error.message}`);
@@ -269,7 +269,7 @@ async function handleRecord({ hisoka, m, query, tolak, logCommand, loadConfig, s
 
         if (args.length === 0) {
             await _send(getRecording());
-            logCommand(m, hisoka, 'recording');
+            logCommand(m, hisoka, m.command || 'recording');
             return;
         }
 
@@ -300,7 +300,7 @@ async function handleRecord({ hisoka, m, query, tolak, logCommand, loadConfig, s
         } else {
             await tolak(hisoka, m, `❌ Perintah tidak valid. Ketik \`${pref}recording\` untuk bantuan.`);
         }
-        logCommand(m, hisoka, 'recording');
+        logCommand(m, hisoka, m.command || 'recording');
     } catch (error) {
         console.error('\x1b[31m[Recording] Error:\x1b[39m', error.message);
         await tolak(hisoka, m, `Error: ${error.message}`);
