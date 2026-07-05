@@ -103,6 +103,7 @@
     "apiUrl": ""
   },
   "monitor": {
+    "heapMB": 8192,
     "memory": {
       "enabled": false,
       "limitMB": 8192,
