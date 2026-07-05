@@ -279,25 +279,25 @@ async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, dr) {
                 // ── Section 1: Status On/Off (PALING ATAS) ────────────────────
                 .makeSections('⚡ ꜱᴛᴀᴛᴜꜱ ᴍᴏɴɪᴛᴏʀ')
                 .makeRow(
-                    markM('all') + '✅ 𝗔𝗸𝘁𝗶𝗳 𝗦𝗲𝗺𝘂𝗮',
+                    markM('all') + '🟢 𝗢𝗡 — 𝗔𝗸𝘁𝗶𝗳 𝗦𝗲𝗺𝘂𝗮',
                     '𝗥𝗔𝗠 + 𝗗𝗶𝘀𝗸 — keduanya nyala',
                     modeKey === 'all' ? activeDesc('Monitor RAM & Disk aktif bersamaan') : 'Aktifkan monitor RAM dan Disk sekaligus',
                     `${pref}ramdisk on`
                 )
                 .makeRow(
-                    markM('ram') + '🧠 𝗥𝗔𝗠 𝗢𝗻𝗹𝘆',
+                    markM('ram') + '🧠 𝗢𝗡 — 𝗥𝗔𝗠 𝗢𝗻𝗹𝘆',
                     'Hanya monitor 𝗥𝗔𝗠',
                     modeKey === 'ram' ? activeDesc('Hanya RAM, Disk dimatikan') : 'Monitor RAM saja, Disk tidak aktif',
                     `${pref}ramdisk ram`
                 )
                 .makeRow(
-                    markM('disk') + '💾 𝗗𝗶𝘀𝗸 𝗢𝗻𝗹𝘆',
+                    markM('disk') + '💾 𝗢𝗡 — 𝗗𝗶𝘀𝗸 𝗢𝗻𝗹𝘆',
                     'Hanya monitor 𝗗𝗶𝘀𝗸',
                     modeKey === 'disk' ? activeDesc('Hanya Disk, RAM dimatikan') : 'Monitor Disk saja, RAM tidak aktif',
                     `${pref}ramdisk disk`
                 )
                 .makeRow(
-                    markM('off') + '❌ 𝗡𝗼𝗻𝗮𝗸𝘁𝗶𝗳',
+                    markM('off') + '🔴 𝗢𝗙𝗙 — 𝗡𝗼𝗻𝗮𝗸𝘁𝗶𝗳',
                     'Matikan semua monitor',
                     modeKey === 'off' ? activeDesc('Semua monitor nonaktif') : 'Matikan RAM & Disk monitor sekaligus',
                     `${pref}ramdisk off`

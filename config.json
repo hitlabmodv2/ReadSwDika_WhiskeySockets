@@ -101,19 +101,19 @@
     "heapMB": "auto",
     "heapAutoPercent": 80,
     "DisRam": {
-      "ramEnabled": true,
-      "ramLimitMB": 8192,
+      "ramEnabled": false,
+      "ramLimitMB": 6771,
       "ramCheckIntervalMs": 30000,
       "ramLogIntervalMs": 300000,
       "ramLogUsage": true,
       "ramAutoDetect": false,
       "ramAutoDetectPercent": 85,
-      "diskEnabled": true,
-      "diskLimitMB": 10240,
+      "diskEnabled": false,
+      "diskLimitMB": 262144,
       "diskCheckIntervalMs": 300000,
       "diskLogIntervalMs": 300000,
       "diskLogUsage": true,
-      "diskWarnPercent": 80
+      "diskWarnPercent": 90
     }
   },
   "welcomeGoodbye": {
