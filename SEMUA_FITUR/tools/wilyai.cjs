@@ -20,7 +20,7 @@
  *
  *  wilyai.cjs — WilyAI settings command
  *  Perintah .wilyai untuk atur mode, scope, auto reply, dan history
- *  Single-select button realtime — notif fitur belum aktif otomatis
+ *  Single-select button realtime — tanda ✓ bergeser ke pilihan aktif
  * ───────────────────────────────
  */
 'use strict';
@@ -35,37 +35,17 @@ async function _deleteLastMsg(hisoka, jid) {
     _lastMsgMap.delete(jid);
 }
 
-// ── Helper: hitung fitur wilyai yang belum aktif ─────────────────────────────
-function _getBelumAktif(w) {
-    const list = [];
-    if (w.enabled === false)   list.push('❌ Fitur .wily / .ai / .tanya');
-    if (w.autoReply === false) list.push('❌ Auto Reply AI');
-    return list;
-}
-
 // ── Helper: bangun body status terkini ───────────────────────────────────────
 function _buildBody(w, totalSesi) {
     const scopeLabel = (s) => s === 'pm' ? '📩 Private (PM)' : s === 'gc' ? '👥 Grup (GC)' : '🌐 Semua (PM + GC)';
     const curScope   = w.scope || 'all';
-    const belumAktif = _getBelumAktif(w);
-
-    let peringatan = '';
-    if (belumAktif.length > 0) {
-        peringatan =
-            `│\n` +
-            `│ ⚠️ *${belumAktif.length} fitur belum aktif:*\n` +
-            belumAktif.map(f => `│   ${f}`).join('\n') + '\n' +
-            `│ _(Pilih di button untuk aktifkan)_\n`;
-    }
-
     return (
-        `╭═══『 *⚙️ WILY AI SETTING* 』═══╮\n` +
+        `╭═══『 ⚙️ *WILY AI SETTING* 』═══╮\n` +
         `│\n` +
         `│ 🤖 *.wily / .ai*   : ${w.enabled !== false ? '✅ Aktif' : '❌ Nonaktif'}\n` +
         `│ 💬 *Auto reply*    : ${w.autoReply !== false ? '✅ Aktif' : '❌ Nonaktif'}\n` +
         `│ 🎯 *Scope*         : ${scopeLabel(curScope)}\n` +
         `│ 🗂️ *Sesi tersimpan*: ${totalSesi} sesi\n` +
-        peringatan +
         `│\n` +
         `╰══════════════════════════════╯`
     );
@@ -82,9 +62,6 @@ async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, w, total
 
             const mark       = (cond) => cond ? '✓ ' : '';
             const activeDesc = (base) => `⚡ Sedang Aktif — ${base}`;
-            // Label & deskripsi baris "aktifkan" saat fitur sedang OFF — lebih mencolok
-            const offLabel   = (label) => `🔴 ${label}`;
-            const offDesc    = (base)  => `⬆️ Belum aktif — ${base}. Tap untuk aktifkan!`;
 
             const btn = new Button()
                 .setBody(bodyText)
@@ -92,52 +69,36 @@ async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, w, total
                 .addSelection('🎛️ Pilih Pengaturan')
 
                 // ── Section 1: Status .wily / .ai / .tanya ───────────────
-                .makeSections('🤖 Status .wily / .ai / .tanya')
+                .makeSections('⚙️ Status .wily')
                 .makeRow(
-                    isEnabled
-                        ? mark(true)  + '✅ Aktif'
-                        : offLabel('Aktifkan Sekarang'),
-                    'Fitur .wily ON',
-                    isEnabled
-                        ? activeDesc('User bisa pakai .wily, .ai, .tanya')
-                        : offDesc('User belum bisa pakai AI'),
+                    mark(isEnabled)  + '✅ Aktifkan',
+                    'Nyalakan fitur .wily / .ai / .tanya',
+                    isEnabled  ? activeDesc('User bisa pakai .wily, .ai, .tanya') : 'Aktifkan perintah AI untuk semua user',
                     `${pref}wilyai on`
                 )
                 .makeRow(
-                    !isEnabled
-                        ? mark(true)  + '🚫 Nonaktif'
-                        : '🚫 Matikan',
-                    'Fitur .wily OFF',
-                    !isEnabled
-                        ? activeDesc('Perintah AI dinonaktifkan')
-                        : 'Matikan perintah AI — user tidak bisa pakai',
+                    mark(!isEnabled) + '❌ Matikan',
+                    'Matikan fitur .wily / .ai / .tanya',
+                    !isEnabled ? activeDesc('Perintah AI dinonaktifkan') : 'Matikan — user tidak bisa pakai AI',
                     `${pref}wilyai off`
                 )
 
                 // ── Section 2: Auto Reply ─────────────────────────────────
                 .makeSections('💬 Auto Reply AI')
                 .makeRow(
-                    isAutoReply
-                        ? mark(true)  + '✅ Aktif'
-                        : offLabel('Aktifkan Auto Reply'),
-                    'Auto Reply ON',
-                    isAutoReply
-                        ? activeDesc('Bot otomatis balas pesan sesuai scope')
-                        : offDesc('Bot belum auto balas'),
+                    mark(isAutoReply)  + '✅ Aktifkan',
+                    'Bot auto balas dengan AI',
+                    isAutoReply  ? activeDesc('Bot otomatis balas pesan sesuai scope') : 'Aktifkan auto reply AI sesuai scope',
                     `${pref}wilyai replay on`
                 )
                 .makeRow(
-                    !isAutoReply
-                        ? mark(true)  + '🚫 Nonaktif'
-                        : '🚫 Matikan',
-                    'Auto Reply OFF',
-                    !isAutoReply
-                        ? activeDesc('.wily masih bisa dipakai manual')
-                        : 'Matikan auto reply, .wily tetap bisa dipakai manual',
+                    mark(!isAutoReply) + '❌ Matikan',
+                    'Matikan auto reply',
+                    !isAutoReply ? activeDesc('.wily masih bisa dipakai manual') : 'Matikan — .wily tetap bisa dipakai manual',
                     `${pref}wilyai replay off`
                 )
 
-                // ── Section 3: Scope ─────────────────────────────────────
+                // ── Section 3: Scope ──────────────────────────────────────
                 .makeSections('🎯 Scope Auto Reply')
                 .makeRow(
                     mark(scope === 'all') + '🌐 Semua (PM + GC)',
@@ -148,13 +109,13 @@ async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, w, total
                 .makeRow(
                     mark(scope === 'pm') + '📩 Private Only',
                     'Hanya Private Chat (DM)',
-                    scope === 'pm' ? activeDesc('Auto reply hanya di private chat') : 'Auto reply hanya di private chat (DM)',
+                    scope === 'pm' ? activeDesc('Auto reply hanya di private chat') : 'Hanya auto reply di private chat (DM)',
                     `${pref}wilyai pm`
                 )
                 .makeRow(
                     mark(scope === 'gc') + '👥 Grup Only',
                     'Hanya Grup',
-                    scope === 'gc' ? activeDesc('Auto reply hanya di grup') : 'Auto reply hanya di grup',
+                    scope === 'gc' ? activeDesc('Auto reply hanya di grup') : 'Hanya auto reply di grup',
                     `${pref}wilyai gc`
                 )
 
@@ -163,9 +124,7 @@ async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, w, total
                 .makeRow(
                     '🗑️ Reset Semua History',
                     `Hapus ${totalSesi} sesi + semua memori user`,
-                    totalSesi > 0
-                        ? `Ada ${totalSesi} sesi aktif — tap untuk hapus semua`
-                        : 'Tidak ada sesi tersimpan saat ini',
+                    totalSesi > 0 ? `Ada ${totalSesi} sesi — tap untuk hapus semua` : 'Tidak ada sesi tersimpan',
                     `${pref}wilyai reset`
                 );
 
