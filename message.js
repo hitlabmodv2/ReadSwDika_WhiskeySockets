@@ -1213,6 +1213,13 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 await handleRam({ hisoka, m, tolak, logCommand });
                                 break;
                         }
+                        case 'ramdisk':
+                        case 'diskram': {
+                                const { handleRamdisk } = _require(path.resolve('./SEMUA_FITUR/setting/diskram.cjs'));
+                                await handleRamdisk({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, Button });
+                                break;
+                        }
+
                         case 'typing':
                         case 'typ': {
                                 const { handleTyp } = _require(path.resolve('./SEMUA_FITUR/setting/autotyprec.cjs'));
