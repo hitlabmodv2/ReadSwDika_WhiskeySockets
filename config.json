@@ -103,7 +103,8 @@
     "apiUrl": ""
   },
   "monitor": {
-    "heapMB": 6144,
+    "heapMB": "auto",
+    "heapAutoPercent": 80,
     "memory": {
       "enabled": false,
       "limitMB": 8192,

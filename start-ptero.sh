@@ -132,22 +132,48 @@ RESTART_DELAY=5
 STABLE_UPTIME_SEC=180
 
 # ── Batas heap V8 Node.js (baca dari config.json → monitor.heapMB) ──
-CONFIG_HEAP=$(node -e "try{const c=JSON.parse(require('fs').readFileSync('./config.json','utf8'));const v=c.monitor?.heapMB;if(v&&Number.isFinite(Number(v))&&Number(v)>0)console.log(Number(v));}catch(e){}" 2>/dev/null)
-NODE_MAX_OLD_SPACE_MB="${CONFIG_HEAP:-${NODE_MAX_OLD_SPACE_MB:-8192}}"
-echo -e "  ${C_YELLOW}🧠 Heap Node.js${C_RESET} : ${NODE_MAX_OLD_SPACE_MB} MB (--max-old-space-size)"
-
-# ── Validasi heap vs RAM fisik ──
 RAM_TOTAL_KB=$(grep -m1 '^MemTotal:' /proc/meminfo 2>/dev/null | awk '{print $2}')
+RAM_TOTAL_MB=0
 if [ -n "$RAM_TOTAL_KB" ] && [ "$RAM_TOTAL_KB" -gt 0 ] 2>/dev/null; then
   RAM_TOTAL_MB=$(( RAM_TOTAL_KB / 1024 ))
-  HEAP_MB_NUM=$(( NODE_MAX_OLD_SPACE_MB + 0 ))
-  if [ "$HEAP_MB_NUM" -ge "$RAM_TOTAL_MB" ] 2>/dev/null; then
-    echo -e "  \033[1;31m⚠️  PERINGATAN: heapMB (${NODE_MAX_OLD_SPACE_MB}MB) ≥ RAM fisik (${RAM_TOTAL_MB}MB)!\033[0m"
-    echo -e "  \033[1;31m   Kurangi monitor.heapMB di config.json agar tidak kena OOM-killer.\033[0m"
-  elif [ "$HEAP_MB_NUM" -gt $(( RAM_TOTAL_MB * 90 / 100 )) ] 2>/dev/null; then
-    echo -e "  \033[1;33m⚠️  Heap (${NODE_MAX_OLD_SPACE_MB}MB) > 90% RAM fisik (${RAM_TOTAL_MB}MB) — berisiko OOM.\033[0m"
+fi
+
+# Baca heapMB & heapAutoPercent dari config.json
+HEAP_CFG=$(node -e "
+try {
+  const c = JSON.parse(require('fs').readFileSync('./config.json','utf8'));
+  const m = c.monitor || {};
+  console.log(String(m.heapMB ?? 'auto') + '|' + String(m.heapAutoPercent ?? 80));
+} catch(e) { console.log('auto|80'); }
+" 2>/dev/null)
+HEAP_RAW="${HEAP_CFG%%|*}"
+HEAP_PCT="${HEAP_CFG##*|}"
+# Pastikan persen valid angka 1-99
+if ! echo "$HEAP_PCT" | grep -qE '^[1-9][0-9]?$'; then HEAP_PCT=80; fi
+
+if [ "$HEAP_RAW" = "auto" ]; then
+  if [ "$RAM_TOTAL_MB" -gt 0 ] 2>/dev/null; then
+    NODE_MAX_OLD_SPACE_MB=$(( RAM_TOTAL_MB * HEAP_PCT / 100 ))
+    echo -e "  ${C_YELLOW}🧠 Heap Node.js${C_RESET} : ${NODE_MAX_OLD_SPACE_MB} MB (auto ${HEAP_PCT}% dari ${RAM_TOTAL_MB} MB RAM)"
   else
-    echo -e "  ${C_GREEN}✅ Heap aman${C_RESET} — RAM fisik server: ${RAM_TOTAL_MB} MB"
+    NODE_MAX_OLD_SPACE_MB="${NODE_MAX_OLD_SPACE_MB:-4096}"
+    echo -e "  ${C_YELLOW}🧠 Heap Node.js${C_RESET} : ${NODE_MAX_OLD_SPACE_MB} MB (auto fallback — RAM tidak terdeteksi)"
+  fi
+else
+  # Nilai manual dari config.json atau env
+  HEAP_NUM=$(echo "$HEAP_RAW" | grep -oE '^[0-9]+$')
+  NODE_MAX_OLD_SPACE_MB="${HEAP_NUM:-${NODE_MAX_OLD_SPACE_MB:-4096}}"
+  echo -e "  ${C_YELLOW}🧠 Heap Node.js${C_RESET} : ${NODE_MAX_OLD_SPACE_MB} MB (manual)"
+  # Validasi: peringatkan jika terlalu besar
+  if [ "$RAM_TOTAL_MB" -gt 0 ] 2>/dev/null; then
+    if [ "$NODE_MAX_OLD_SPACE_MB" -ge "$RAM_TOTAL_MB" ] 2>/dev/null; then
+      echo -e "  \033[1;31m⚠️  PERINGATAN: heapMB (${NODE_MAX_OLD_SPACE_MB}MB) ≥ RAM fisik (${RAM_TOTAL_MB}MB) — berisiko OOM!\033[0m"
+      echo -e "  \033[1;31m   Gunakan heapMB: \"auto\" di config.json untuk deteksi otomatis.\033[0m"
+    elif [ "$NODE_MAX_OLD_SPACE_MB" -gt $(( RAM_TOTAL_MB * 90 / 100 )) ] 2>/dev/null; then
+      echo -e "  \033[1;33m⚠️  Heap > 90% RAM fisik (${RAM_TOTAL_MB}MB) — berisiko OOM.\033[0m"
+    else
+      echo -e "  ${C_GREEN}✅ Heap aman${C_RESET} — RAM fisik server: ${RAM_TOTAL_MB} MB"
+    fi
   fi
 fi
 
