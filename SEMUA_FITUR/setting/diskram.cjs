@@ -585,8 +585,9 @@ async function handleRamdisk({ hisoka, m, query, tolak, logCommand, loadConfig, 
                 }
                 const limitMB = Math.round(rt.totalRamMB * adPct / 100);
                 patch.ramLimitMB    = limitMB;
-                patch.ramAutoDetect = false; // simpan sebagai nilai fixed dari detect
-                parts.push(`🧠 RAM Limit → ${_fmtMB(limitMB)} (${adPct}% × ${_fmtMB(rt.totalRamMB)})`);
+                patch.ramAutoDetect = false;
+                patch.ramEnabled    = true;   // ← aktifkan RAM monitor
+                parts.push(`🧠 RAM → Aktif, Limit ${_fmtMB(limitMB)} (${adPct}% × ${_fmtMB(rt.totalRamMB)})`);
             }
 
             if (sub === 'disk' || sub === 'all') {
@@ -596,11 +597,11 @@ async function handleRamdisk({ hisoka, m, query, tolak, logCommand, loadConfig, 
                         logCommand(m, hisoka, 'ramdisk');
                         return;
                     }
-                    // kalau 'all' dan disk gagal → skip disk, lanjut yang lain
                     parts.push(`💾 Disk → ⚠️ tidak terdeteksi, dilewati`);
                 } else {
-                    patch.diskLimitMB = rt.totalDiskMB;
-                    parts.push(`💾 Disk Limit → ${_fmtMB(rt.totalDiskMB)}`);
+                    patch.diskLimitMB  = rt.totalDiskMB;
+                    patch.diskEnabled  = true;  // ← aktifkan Disk monitor
+                    parts.push(`💾 Disk → Aktif, Limit ${_fmtMB(rt.totalDiskMB)}`);
                 }
             }
 
@@ -615,7 +616,7 @@ async function handleRamdisk({ hisoka, m, query, tolak, logCommand, loadConfig, 
                 } else {
                     const warnPct = _calcAutoWarn(rt);
                     patch.diskWarnPercent = warnPct;
-                    parts.push(`⚠️ Warn → ${warnPct}% (total disk ${_fmtMB(rt.totalDiskMB)}, sisa aman ${_fmtMB(Math.max(2048, Math.round(rt.totalDiskMB * 0.10)))})`);
+                    parts.push(`⚠️ Warn → ${warnPct}% (sisakan min 10% atau 2 GB bebas dari ${_fmtMB(rt.totalDiskMB)})`);
                 }
             }
 
