@@ -39,7 +39,7 @@ async function handleAllmenu({ hisoka, m, query, loadConfig, logCommand, fs, pat
         hisoka.sendMessage(m.from, { react: { text: `⏱️`, key: m.key } });
         const allTeks =
 `「 🤖 *AUTO FITUR* 」
-typing | recording | online | readsw
+typing | recording | online | readsw | ramdisk
 telegram | autocleaner | sessioncleaner
 
 「 🛡️ *ANTI FITUR* 」

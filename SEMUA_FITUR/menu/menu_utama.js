@@ -47,6 +47,7 @@ export function buildMenuUtama({ pushName, isOwner, uptimeStr, tgl, jam, browser
 │ .recording
 │ .online
 │ .readsw
+│ .ramdisk
 │ .readchat
 │ .telegram
 │ .autocleaner

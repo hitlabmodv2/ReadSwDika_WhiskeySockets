@@ -157,6 +157,8 @@ async function handleSettingmenu({ hisoka, m, tolak, logCommand, loadConfig }) {
 │   _Bot selalu tampil online_
 ├➤ *.readsw on/off*
 │   _Auto baca & kasih reaksi ke story_
+├➤ *.ramdisk on/off*
+│   _Monitor penggunaan RAM & Disk bot_
 ├➤ *.telegram on/off*
 │   _Forward pesan/story ke Telegram_
 ├➤ *.autocleaner on/off*

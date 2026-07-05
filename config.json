@@ -101,7 +101,7 @@
     "heapMB": "auto",
     "heapAutoPercent": 80,
     "DisRam": {
-      "ramEnabled": false,
+      "ramEnabled": true,
       "ramLimitMB": 8192,
       "ramCheckIntervalMs": 30000,
       "ramLogIntervalMs": 300000,
