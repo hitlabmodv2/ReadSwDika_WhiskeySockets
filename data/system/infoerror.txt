@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 05/07/2026, 06.06.10  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 05/07/2026, 06.44.17  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  console.error
+│  #001  —  unhandledRejection
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [31m[HotReload] Tidak bisa watch 'SEMUA_FITUR/reactionsw/reactapi.cjs':[39m ENOENT: no such file or directory, watch '/home/runner/workspace/SEMUA_FITUR/reactionsw/reactapi.cjs'
+│  Connection Closed
 │
 │  DETAIL
-│  Sumber      : console.error
+│  Sumber      : unhandledRejection
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 05/07/2026, 06.06.10
-│  Terakhir    : 05/07/2026, 06.06.10
+│  Pertama     : 05/07/2026, 06.44.17
+│  Terakhir    : 05/07/2026, 06.44.17
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [31m[HotReload] Tidak bisa watch 'SEMUA_FITUR/reactionsw/reactapi.cjs':[39m ENOENT: no such file or directory, watch '/home/runner/workspace/SEMUA_FITUR/reactionsw/reactapi.cjs'
-│     at console.error (file:///home/runner/workspace/index.js:434:27)
-│     at watchFile (file:///home/runner/workspace/src/helper/hotReload.js:317:17)
+│  ▶  Error: Connection Closed
+│     at sendRawMessage (file:///home/runner/workspace/node_modules/@whiskeysockets/baileys/lib/Socket/socket.js:57:19)
+│     at sendNode (file:///home/runner/workspace/node_modules/@whiskeysockets/baileys/lib/Socket/socket.js:76:16)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 05/07/2026, 06.06.10
+  Terakhir diperbarui: 05/07/2026, 06.44.17
 ════════════════════════════════════════════════════════════════════════
