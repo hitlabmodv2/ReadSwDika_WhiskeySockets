@@ -3,9 +3,9 @@ _📅 Jadwal rilis belum ditentukan_ 🕐
 _🔍 Masih dalam tahap pemantauan — informasi tanggal rilis akan diumumkan kemudian, harap bersabar_ 😊
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V25*
-✨ *3 Fitur Baru*
+✨ *4 Fitur Baru*
 🔧 *11 Bug/Error Fix*
-🚀 *13 Perubahan*
+🚀 *14 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -27,6 +27,20 @@ _Varian baru dari `.rvo` — media view once dikirim langsung ke DM nomor bot, b
 3. Berlaku akurat untuk bot utama maupun jadibot — masing-masing kirim ke DM nomor bot-nya sendiri, tidak ada bentrok antar nomor
 4. Konfirmasi ✅ + notif teks muncul di chat asal setelah media berhasil dikirim ke DM bot
 > Berguna saat view once di GC tapi tidak mau media muncul ulang di GC — cukup ketik `.rvo2`, media langsung masuk DM bot
+
+*4. 🖥️ .ramdisk / .diskram — Auto-Detect RAM & Disk Realtime, Simpan ke Config*
+_Bot kini baca langsung RAM & disk dari server tempat bot jalan — bukan dari preset manual:_
+1. Tambah fungsi `_getRealtimeStats()` — baca `os.totalmem()` / `os.freemem()` untuk RAM, dan `df -Pk` untuk disk
+2. Disk dicari berurutan: `/home/container` _(Pterodactyl)_ → `process.cwd()` _(Replit/Railway/Fly)_ → `/` — otomatis cocok di semua hosting
+3. Hasil tampil realtime di body pesan: bar visual `█░░░░░░░`, persentase, used/total/sisa, ikon 🟢🟡🔴 sesuai level
+4. Saat `ramAutoDetect ON` — limit dihitung langsung `total RAM × persentase`, bukan angka tetap
+5. Section baru *🤖 ᴀᴜᴛᴏ-ᴅᴇᴛᴇᴋꜱɪ & ꜱɪᴍᴘᴀɴ* ditambah di button single-select — posisi *paling atas* agar langsung terlihat:
+   • _⚡ Save Semua Sekaligus_ — simpan RAM limit + disk limit + warn otomatis ke `config.json` dalam sekali klik
+   • _🧠 Save RAM Limit_ — simpan `total RAM × persentase` ke config
+   • _💾 Save Disk Limit_ — simpan total disk terdeteksi ke config
+   • _⚠️ Save Warn Oto_ — set warn = usage disk sekarang + 10%, dibulatkan ke kelipatan 5 (max 95%)
+6. Tombol Save Disk & Save Warn muncul dinamis — hanya tampil kalau disk berhasil terdeteksi
+> Berlaku akurat di semua server: Pterodactyl, Replit, Railway, Fly.io — tanpa perlu config manual
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🔧 *BUG/ERROR FIX*
@@ -223,3 +237,12 @@ _Section Status Bot pada caption `.ping` kini memuat satu baris tambahan:_
 2. Sekarang tampil tiga baris: `⏱️ Uptime`, `🔁 Restart » Nx`, `🔄 Session`
 3. Data restart diambil dari `getBotStats().totalRestarts` — persistent ke disk, akurat walau bot restart berkali-kali
 > Informasi restart kini langsung terlihat di output `.ping` tanpa perlu cek log terpisah
+
+*14. 🖥️ .ramdisk / .diskram — Redesign Tampilan Body & Urutan Button Single-Select*
+_Tampilan pesan dan susunan tombol dirombak agar lebih jelas dan informatif:_
+1. Label preset RAM & Disk berubah ke *bold Unicode* — contoh: `𝟴𝟭𝟵𝟮 𝗠𝗕 (𝟴 𝗚𝗕)`, `𝟭𝟬 𝗚𝗕`
+2. Judul section di button pakai *small-caps Unicode* — contoh: `ꜱᴛᴀᴛᴜꜱ ᴍᴏɴɪᴛᴏʀ`, `ᴀᴜᴛᴏ-ᴅᴇᴛᴇᴋꜱɪ & ꜱɪᴍᴘᴀɴ`
+3. Body pesan sekarang tampilkan *Realtime RAM* dan *Realtime Disk* langsung dari server — bar visual `█░`, persentase, used/total/sisa, ikon 🟢🟡🔴
+4. Urutan section button diubah — *🤖 Auto-Deteksi & Simpan* dipindah ke *posisi paling atas* agar langsung terlihat saat button dibuka
+5. Save Disk & Save Warn juga muncul terintegrasi di dalam section Disk Limit & Warn — pilihan auto dan manual berdampingan
+> Tampilan lebih konsisten dengan gaya button fitur lain (`.online`, `.typing`, dll) dan langsung terbaca tanpa scroll
