@@ -303,85 +303,89 @@ async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, dr) {
                     `${pref}ramdisk off`
                 )
 
-                // ── Section 2: Auto-Detect & Simpan ───────────────────────────
+                // ── Section 2: Auto-Detect & Simpan (semua dikumpulkan di sini) ──
                 .makeSections('🤖 ᴀᴜᴛᴏ-ᴅᴇᴛᴇᴋꜱɪ & ꜱɪᴍᴘᴀɴ')
                 .makeRow(
                     `⚡ 𝗦𝗮𝘃𝗲 𝗦𝗲𝗺𝘂𝗮 𝗦𝗲𝗸𝗮𝗹𝗶𝗴𝘂𝘀`,
                     rt.diskOk
-                        ? `RAM ${_fmtMB(autoRamMB)} + Disk ${_fmtMB(rt.totalDiskMB)} + Warn ${autoWarnPct}%`
-                        : `RAM ${_fmtMB(autoRamMB)} (disk tidak terdeteksi)`,
-                    `Simpan semua nilai terdeteksi realtime ke config sekaligus`,
+                        ? `RAM ${_fmtMB(autoRamMB)} · Disk ${_fmtMB(rt.totalDiskMB)} · Warn ${autoWarnPct}%`
+                        : `RAM ${_fmtMB(autoRamMB)} — disk tidak terdeteksi`,
+                    `Simpan RAM + Disk + Warn sekaligus ke config dari hasil deteksi realtime`,
                     `${pref}ramdisk autodetect all`
                 )
                 .makeRow(
                     `🧠 𝗦𝗮𝘃𝗲 𝗥𝗔𝗠 𝗟𝗶𝗺𝗶𝘁`,
                     `${_fmtMB(rt.totalRamMB)} × ${adPct}% = ${_fmtMB(autoRamMB)}`,
-                    `Simpan limit RAM ${_fmtMB(autoRamMB)} ke config (terdeteksi dari server sekarang)`,
+                    `Simpan limit RAM ${_fmtMB(autoRamMB)} — terdeteksi realtime dari server`,
                     `${pref}ramdisk autodetect ram`
                 )
+                .makeRow(
+                    `💾 𝗦𝗮𝘃𝗲 𝗗𝗶𝘀𝗸 𝗟𝗶𝗺𝗶𝘁`,
+                    rt.diskOk ? `Total terdeteksi: ${_fmtMB(rt.totalDiskMB)}` : `Disk tidak terdeteksi`,
+                    rt.diskOk
+                        ? `Simpan limit disk ${_fmtMB(rt.totalDiskMB)} — terdeteksi realtime dari server`
+                        : `Disk tidak dapat terdeteksi di server ini`,
+                    `${pref}ramdisk autodetect disk`
+                )
+                .makeRow(
+                    `⚠️ 𝗦𝗮𝘃𝗲 𝗪𝗮𝗿𝗻 𝗢𝘁𝗼`,
+                    rt.diskOk ? `${_fmtMB(rt.totalDiskMB)} → Warn ${autoWarnPct}%` : `Disk tidak terdeteksi`,
+                    rt.diskOk
+                        ? `Warn otomatis ${autoWarnPct}% — sisakan min 10% atau 2 GB bebas`
+                        : `Disk tidak dapat terdeteksi di server ini`,
+                    `${pref}ramdisk autodetect warn`
+                )
 
-                // ── Section 3: RAM — Auto Detect ──────────────────────────────
+                // ── Section 3: RAM — Mode Limit ───────────────────────────────
                 .makeSections('🧠 ʀᴀᴍ — ᴍᴏᴅᴇ ʟɪᴍɪᴛ')
                 .makeRow(
-                    markAD(true) + '🔍 𝗔𝘂𝘁𝗼 𝗗𝗲𝘁𝗲𝗰𝘁 𝗢𝗡',
-                    `Otomatis dari RAM fisik (${dr.ramAutoDetectPercent ?? 85}%)`,
-                    autoDetect ? activeDesc(`${dr.ramAutoDetectPercent ?? 85}% dari total RAM terdeteksi`) : `Limit = ${dr.ramAutoDetectPercent ?? 85}% dari total RAM fisik panel`,
+                    markAD(true)  + `🔍 𝗔𝘂𝘁𝗼 𝗗𝗲𝘁𝗲𝗰𝘁 𝗢𝗡`,
+                    `Otomatis ${adPct}% dari RAM fisik server`,
+                    autoDetect
+                        ? activeDesc(`Limit = ${_fmtMB(autoRamMB)} dari total ${_fmtMB(rt.totalRamMB)}`)
+                        : `Limit dihitung otomatis saat bot jalan`,
                     `${pref}ramdisk ram autodetect on`
                 )
                 .makeRow(
-                    markAD(false) + '✏️ 𝗠𝗮𝗻𝘂𝗮𝗹 𝗟𝗶𝗺𝗶𝘁',
-                    `Pakai nilai 𝗠𝗕 dari pilihan bawah`,
-                    !autoDetect ? activeDesc(`Saat ini ${curRamMB} MB`) : 'Pilih salah satu nilai MB di bawah ini',
+                    markAD(false) + `✏️ 𝗠𝗮𝗻𝘂𝗮𝗹 𝗟𝗶𝗺𝗶𝘁`,
+                    `Pilih nilai MB dari daftar bawah`,
+                    !autoDetect
+                        ? activeDesc(`Saat ini ${_fmtMB(curRamMB)}`)
+                        : `Tentukan sendiri batas RAM dalam MB`,
                     `${pref}ramdisk ram autodetect off`
                 );
 
-            // ── Section 4: RAM — Pilih Limit Manual (loop) ───────────────────
+            // ── Section 4: RAM — Pilih Limit (loop) ──────────────────────────
             btn.makeSections('🧠 ʀᴀᴍ — ᴘɪʟɪʜ ʟɪᴍɪᴛ (ᴍʙ)');
             for (const r of RAM_PRESETS) {
                 const aktif = !autoDetect && curRamMB === r.mb;
                 btn.makeRow(
                     markRL(r.mb) + r.label,
-                    `𝗥𝗔𝗠 𝗟𝗶𝗺𝗶𝘁 ${r.label}`,
+                    `𝗟𝗶𝗺𝗶𝘁 ${r.label}`,
                     aktif ? activeDesc(r.desc) : r.desc,
                     `${pref}ramdisk ram limit ${r.mb}`
                 );
             }
 
             // ── Section 5: Disk — Pilih Limit (loop) ─────────────────────────
-            btn.makeSections('💾 ᴅɪꜱᴋ — ᴘɪʟɪʜ ʟɪᴍɪᴛ');
-            if (rt.diskOk) {
-                btn.makeRow(
-                    `💾 𝗦𝗮𝘃𝗲 𝗗𝗶𝘀𝗸 𝗟𝗶𝗺𝗶𝘁`,
-                    `Total disk terdeteksi: ${_fmtMB(rt.totalDiskMB)}`,
-                    `Simpan limit disk ${_fmtMB(rt.totalDiskMB)} ke config (dari server sekarang)`,
-                    `${pref}ramdisk autodetect disk`
-                );
-            }
+            btn.makeSections('💾 ᴅɪꜱᴋ — ᴘɪʟɪʜ ʟɪᴍɪᴛ (ᴍʙ)');
             for (const d of DISK_PRESETS) {
                 const aktif = curDiskMB === d.mb;
                 btn.makeRow(
                     markDL(d.mb) + d.label,
-                    `𝗗𝗶𝘀𝗸 𝗟𝗶𝗺𝗶𝘁 ${d.label}`,
+                    `𝗟𝗶𝗺𝗶𝘁 ${d.label}`,
                     aktif ? activeDesc(d.desc) : d.desc,
                     `${pref}ramdisk disk limit ${d.mb}`
                 );
             }
 
-            // ── Section 6: Disk — Warning % (loop) ───────────────────────────
+            // ── Section 6: Disk — Batas Peringatan (loop) ────────────────────
             btn.makeSections('⚠️ ᴅɪꜱᴋ — ʙᴀᴛᴀꜱ ᴘᴇʀɪɴɢᴀᴛᴀɴ (%)');
-            if (rt.diskOk) {
-                btn.makeRow(
-                    `⚠️ 𝗦𝗮𝘃𝗲 𝗪𝗮𝗿𝗻 𝗢𝘁𝗼`,
-                    `Disk total ${_fmtMB(rt.totalDiskMB)} → Warn ${autoWarnPct}%`,
-                    `Sisakan min 10% atau 2 GB bebas — warn otomatis ${autoWarnPct}% dari total ${_fmtMB(rt.totalDiskMB)}`,
-                    `${pref}ramdisk autodetect warn`
-                );
-            }
             for (const w of WARN_PRESETS) {
                 const aktif = curWarn === w.pct;
                 btn.makeRow(
                     markDW(w.pct) + `⚠️ 𝗪𝗮𝗿𝗻 ${w.boldPct}%`,
-                    `ᴘᴇʀɪɴɢᴀᴛᴀɴ saat disk ≥ ${w.boldPct}%`,
+                    `Peringatan saat disk ≥ ${w.boldPct}%`,
                     aktif ? activeDesc(w.desc) : w.desc,
                     `${pref}ramdisk disk warn ${w.pct}`
                 );
