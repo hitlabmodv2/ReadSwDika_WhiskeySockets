@@ -268,6 +268,7 @@ async function _sendFallback(tolak, hisoka, m, bodyText, pref) {
 // ── Handler utama ──────────────────────────────────────────────────────────────
 async function handleRamdisk({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, Button }) {
     if (!m.isOwner) return;
+    if (hisoka?.isMainBot === false) return;
 
     try {
         const pref = m.prefix || '.';
