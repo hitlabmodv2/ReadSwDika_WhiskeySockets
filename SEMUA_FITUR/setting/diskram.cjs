@@ -169,7 +169,8 @@ async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, dr) {
                 { pct: 80, desc: '🔰 Default — standar umum Pterodactyl®'         },
                 { pct: 85, desc: '85% — Sedikit mepet, masih aman'               },
                 { pct: 90, desc: '90% — Hampir penuh, hati-hati'                  },
-                { pct: 95, desc: '95% — Kritis! Hanya untuk monitoring pasif'     },
+                { pct: 95,  desc: '95% — Kritis! Hanya untuk monitoring pasif'    },
+                { pct: 100, desc: '100% — Penuh total, peringatan saat disk habis' },
             ];
 
             const btn = new Button()
