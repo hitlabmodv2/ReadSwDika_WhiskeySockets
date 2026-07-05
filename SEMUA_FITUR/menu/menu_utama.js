@@ -193,7 +193,6 @@ export function buildMenuUtama({ pushName, isOwner, uptimeStr, tgl, jam, browser
 │ .ceksw
 │ .wilyai
 │ .wily / .simi
-│ .setreactapi / .cekreact
 │ .emojiadd
 │ .emojidel
 │ .emojilist

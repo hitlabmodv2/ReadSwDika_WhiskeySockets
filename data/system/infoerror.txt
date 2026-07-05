@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 04/07/2026, 09.10.28  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 05/07/2026, 06.06.10  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  command:backup
+│  #001  —  console.error
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  Connection Closed
+│  [31m[HotReload] Tidak bisa watch 'SEMUA_FITUR/reactionsw/reactapi.cjs':[39m ENOENT: no such file or directory, watch '/home/runner/workspace/SEMUA_FITUR/reactionsw/reactapi.cjs'
 │
 │  DETAIL
-│  Sumber      : command:backup
+│  Sumber      : console.error
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 04/07/2026, 09.10.28
-│  Terakhir    : 04/07/2026, 09.10.28
+│  Pertama     : 05/07/2026, 06.06.10
+│  Terakhir    : 05/07/2026, 06.06.10
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: Connection Closed
-│     at sendRawMessage (file:///home/runner/workspace/node_modules/@whiskeysockets/baileys/lib/Socket/socket.js:57:19)
-│     at sendNode (file:///home/runner/workspace/node_modules/@whiskeysockets/baileys/lib/Socket/socket.js:76:16)
+│  ▶  Error: [31m[HotReload] Tidak bisa watch 'SEMUA_FITUR/reactionsw/reactapi.cjs':[39m ENOENT: no such file or directory, watch '/home/runner/workspace/SEMUA_FITUR/reactionsw/reactapi.cjs'
+│     at console.error (file:///home/runner/workspace/index.js:434:27)
+│     at watchFile (file:///home/runner/workspace/src/helper/hotReload.js:317:17)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 04/07/2026, 09.10.28
+  Terakhir diperbarui: 05/07/2026, 06.06.10
 ════════════════════════════════════════════════════════════════════════

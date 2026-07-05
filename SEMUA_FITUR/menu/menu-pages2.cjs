@@ -80,10 +80,7 @@ async function handleGroupmenu({ hisoka, m, tolak, logCommand, loadConfig }) {
 │   _Buka pesan sekali lihat (kirim ke DM bot sendiri)_
 ├➤ *.quoted / .q*
 │   _Ambil pesan yang di-reply_
-├➤ *.react / .reaksi [reply pesan]*
-│   _Kirim reaksi emoji ke pesan_
-╰➤ *.cekreact*
-   _Cek reaksi pada suatu pesan_
+
 
 `;
         await _sendMenuMsg(hisoka, m, teks);

@@ -1408,24 +1408,6 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 break;
                         }
 
-                        case 'react':
-                        case 'reaksi': {
-                                const { handleReaksi } = _require(path.resolve('./SEMUA_FITUR/reactionsw/reactapi.cjs'));
-                                await handleReaksi({ hisoka, m, query, tolak, logCommand, loadConfig });
-                                break;
-                        }
-                        case 'cekreact':
-                        case 'reactinfo': {
-                                const { handleReactinfo } = _require(path.resolve('./SEMUA_FITUR/reactionsw/reactapi.cjs'));
-                                await handleReactinfo({ hisoka, m, tolak, logCommand, loadConfig });
-                                break;
-                        }
-                        case 'setreactapi':
-                        case 'reactapi': {
-                                const { handleReactapi } = _require(path.resolve('./SEMUA_FITUR/reactionsw/reactapi.cjs'));
-                                await handleReactapi({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig });
-                                break;
-                        }
                         case 'setpairing': {
                                 const { handleSetpairing } = _require(path.resolve('./SEMUA_FITUR/info/info.cjs'));
                                 await handleSetpairing({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, isMainBot });

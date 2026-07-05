@@ -215,7 +215,6 @@ const WATCHED_FILES = [
     { key: 'cjs:malnews',      rel: 'SEMUA_FITUR/news/malnews.cjs',        type: 'cjs' },
     { key: 'cjs:tvonenews',    rel: 'SEMUA_FITUR/news/tvonenews.cjs',      type: 'cjs' },
     // Reaction / Read
-    { key: 'cjs:reactapi',     rel: 'SEMUA_FITUR/reactionsw/reactapi.cjs', type: 'cjs' },
     { key: 'cjs:readsw',       rel: 'SEMUA_FITUR/readsw/readsw.cjs',       type: 'cjs' },
 
     // ── Config CJS (dependency file, bukan handler) ──────────────────────────

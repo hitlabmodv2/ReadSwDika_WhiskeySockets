@@ -97,11 +97,6 @@
     "enabled": false,
     "apiKey": ""
   },
-  "reactApi": {
-    "enabled": false,
-    "apiKey": "",
-    "apiUrl": ""
-  },
   "monitor": {
     "heapMB": "auto",
     "heapAutoPercent": 80,

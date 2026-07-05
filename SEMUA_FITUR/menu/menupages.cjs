@@ -51,7 +51,7 @@ antitagsw | antitagsw global on/off | antitagsw status/reset
 
 「 💬 *PESAN & STICKER* 」
 s/sticker | toimg | tovn | tomp3 | stickerly | stickerpack
-rvo | rvo2 | quoted | react/reaksi | cekreact
+rvo | rvo2 | quoted
 
 「 👥 *FITUR GRUP* 」
 hidetag (.ht) | ghosttag (.gt)
@@ -97,7 +97,7 @@ jadibot [nomor] [durasi] | stopbot | listbot | setpairing v1/v2
 listowner | addowner | delowner
 all | swgrup/statusgroup | infowibu | animasu | tvone | alqanimenotif | malnews | ceksw | cekauto | cekauto gc
 wily | simi | wilyai on/off | wilyai pm/gc/all | wilyai reset
-setreactapi | emoji | emojiadd | emojidel | emojiclear | emojilist | emojidefault | emojicustom
+emoji | emojiadd | emojidel | emojiclear | emojilist | emojidefault | emojicustom
 upbot | restart/rebot | backup | ceksesi | clearsesi/cs | eval | bash
 ram | ceksize/disksize | autosholat | credsjson
 dbstats | sessiondb | listcontact
@@ -143,8 +143,7 @@ async function handleOwnermenu({ hisoka, m, query, loadConfig, logCommand, fs, p
 │   ├ *.wilyai pm/gc/all*  _→ Mode target_
 │   ├ *.wilyai replay on/off*
 │   ╰ *.wilyai reset*
-╰➤ *.setreactapi [key]*
-   _Set API key untuk fitur react_
+
 
 ╭─「 📨 *BROADCAST GRUP* 」
 │
