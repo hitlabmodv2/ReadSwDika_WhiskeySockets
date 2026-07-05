@@ -18,359 +18,193 @@
  *  Terima kasih sudah support.
  * ───────────────────────────────
  *
- *  imageEdit.cjs — AI Image Editor + Generator
- *  • Kirim gambar + prompt → edit via StableHorde (img2img)
- *  • Cuma prompt saja      → generate via NanaBanana (txt2img)
+ *  imageEdit.cjs — Editor gambar via AI
+ *  Crop, resize, filter, dan enhance gambar dengan AI
  * ───────────────────────────────
+ */
+/**
+ * 【 DeepAI Image Editor 】
+ * Category : AI / Image Editing
+ * Base     : https://deepai.org/api/image-editor
+ * Desc     : Edit gambar dengan prompt teks via DeepAI (gratis, tanpa API key)
+ * Recode   : CJS + Buffer support
  */
 
 'use strict';
 
-const axios = require('axios');
+const crypto = require('crypto');
+const { basename, extname } = require('path');
 
-const delay = ms => new Promise(r => setTimeout(r, ms));
+const AGENT = 'Mozilla/5.0 (Linux; Android 8.0; Pixel 2 Build/OPD3.170816.012) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Mobile Safari/537.36';
+const SALT  = 'hackers_become_a_little_stinkier_every_time_they_hack';
 
-// ═══════════════════════════════════════════════════════
-//  BAGIAN 1 — StableHorde img2img (edit gambar existing)
-// ═══════════════════════════════════════════════════════
+const md5     = s => crypto.createHash('md5').update(s).digest('hex');
+const reverse = s => s.split('').reverse().join('');
+const generateRandomIP = () =>
+    Array.from({ length: 4 }, () => 1 + Math.floor(Math.random() * 254)).join('.');
 
-const HORDE_API  = 'https://stablehorde.net/api/v2';
-const HORDE_KEY  = '0000000000'; // anonymous free key
+function mimeFromExt(ext = '') {
+    const map = {
+        '.jpg'  : 'image/jpeg',
+        '.jpeg' : 'image/jpeg',
+        '.png'  : 'image/png',
+        '.webp' : 'image/webp',
+    };
+    return map[ext.toLowerCase()] || 'image/jpeg';
+}
+
+function genKEY() {
+    const r  = String(Math.floor(Math.random() * 1e11));
+    const h1 = reverse(md5(AGENT + r  + SALT));
+    const h2 = reverse(md5(AGENT + h1));
+    const h3 = reverse(md5(AGENT + h2));
+    return `tryit-${r}-${h3}`;
+}
 
 /**
- * Edit gambar dengan prompt via StableHorde (img2img, gratis, tanpa API key)
+ * Edit gambar menggunakan DeepAI Image Editor.
  *
- * @param {Buffer} imageBuffer  - Buffer gambar input
- * @param {string} prompt       - Instruksi edit
- * @param {object} opts         - { denoise, steps, model, maxPoll }
- * @returns {Promise<{status:boolean, buffer?:Buffer, error?:string}>}
+ * @param {Buffer|string} input  - Buffer gambar ATAU URL https://...
+ * @param {string}        prompt - Instruksi edit, contoh: "make it cinematic"
+ * @param {object}        opts   - { mimeType, fileName, retries }
+ * @returns {Promise<{status:boolean, result_url?:string, id?:string, error?:string}>}
  */
-async function stablehordeImg2img(imageBuffer, prompt, opts = {}) {
-    const denoise  = opts.denoise  ?? 0.7;
-    const steps    = opts.steps    ?? 20;
-    const model    = opts.model    ?? 'Deliberate';
-    const maxPoll  = opts.maxPoll  ?? 40;
+async function deepaiEditImage(input, prompt = 'make it cinematic', opts = {}) {
+    let imgBuf;
+    let mimeType = opts.mimeType || 'image/jpeg';
+    let fileName = opts.fileName || 'image.jpg';
 
-    const b64 = imageBuffer.toString('base64');
-
-    // Submit job
-    const submitRes = await fetch(`${HORDE_API}/generate/async`, {
-        method  : 'POST',
-        headers : { 'content-type': 'application/json', 'apikey': HORDE_KEY },
-        body    : JSON.stringify({
-            prompt,
-            params: {
-                width              : 512,
-                height             : 512,
-                steps,
-                sampler_name       : 'k_euler',
-                cfg_scale          : 7,
-                denoising_strength : denoise,
-            },
-            source_image      : b64,
-            source_processing : 'img2img',
-            models            : [model],
-            r2                : true,
-            shared            : false,
-        }),
-    });
-
-    if (!submitRes.ok) {
-        const err = await submitRes.text().catch(() => submitRes.status);
-        throw new Error(`StableHorde submit gagal: ${err}`);
-    }
-
-    const { id: jobId } = await submitRes.json();
-    if (!jobId) throw new Error('StableHorde tidak mengembalikan job ID.');
-
-    // Poll status
-    for (let i = 0; i < maxPoll; i++) {
-        await delay(5000);
-
-        const checkRes  = await fetch(`${HORDE_API}/generate/check/${jobId}`, {
-            headers: { 'apikey': HORDE_KEY },
+    if (Buffer.isBuffer(input)) {
+        imgBuf = input;
+    } else if (/^https?:\/\//i.test(String(input))) {
+        const res = await fetch(String(input), {
+            headers: { 'user-agent': AGENT, accept: 'image/*,*/*;q=0.8' }
         });
-        const checkData = await checkRes.json();
-
-        if (checkData.faulted) throw new Error('StableHorde: job gagal (faulted).');
-
-        if (checkData.done) {
-            const statusRes  = await fetch(`${HORDE_API}/generate/status/${jobId}`, {
-                headers: { 'apikey': HORDE_KEY },
-            });
-            const statusData = await statusRes.json();
-            const gen        = statusData.generations?.[0];
-
-            if (!gen?.img) throw new Error('StableHorde: hasil gambar tidak ada.');
-
-            // Download hasil
-            const imgRes = await fetch(gen.img);
-            if (!imgRes.ok) throw new Error(`Gagal download hasil: ${imgRes.status}`);
-            const buf = Buffer.from(await imgRes.arrayBuffer());
-            return { status: true, buffer: buf };
-        }
+        if (!res.ok) throw new Error(`Gagal fetch image URL: ${res.status}`);
+        imgBuf = Buffer.from(await res.arrayBuffer());
+        const ct = res.headers.get('content-type');
+        if (ct) mimeType = ct.split(';')[0].trim();
+    } else {
+        const { readFile } = require('fs/promises');
+        imgBuf   = await readFile(String(input));
+        mimeType = mimeFromExt(extname(String(input)));
+        fileName = basename(String(input));
     }
 
-    throw new Error('Timeout menunggu hasil edit dari StableHorde.');
-}
+    const maxTries = opts.retries ?? 6;
+    let lastError  = 'request failed';
 
-// ═══════════════════════════════════════════════════════
-//  BAGIAN 2 — NanaBanana txt2img (generate gambar baru)
-// ═══════════════════════════════════════════════════════
-
-const NB_HEADERS = {
-    'user-agent'      : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36',
-    'accept'          : 'application/json, text/plain, */*',
-    'accept-language' : 'id,en;q=0.9',
-    'origin'          : 'https://nanobanana.im',
-};
-
-function updateCookies(oldCk, newSetCookies) {
-    if (!newSetCookies) return oldCk || '';
-    const map = new Map();
-    if (oldCk) oldCk.split(';').forEach(c => {
-        const p = c.trim().split('=');
-        if (p[0]) map.set(p[0].trim(), p.slice(1).join('='));
-    });
-    newSetCookies.forEach(c => {
-        const p = c.split(';')[0].trim().split('=');
-        if (p[0]) map.set(p[0].trim(), p.slice(1).join('='));
-    });
-    return Array.from(map.entries()).map(([k, v]) => `${k}=${v}`).join('; ');
-}
-
-async function followRedirects(session, url, ck, maxHops = 10) {
-    let currentUrl = url;
-    let currentCk  = ck;
-    for (let hop = 0; hop < maxHops; hop++) {
-        const res = await session.get(currentUrl, {
-            headers        : { ...NB_HEADERS, Cookie: currentCk },
-            maxRedirects   : 0,
-            validateStatus : s => s >= 200 && s < 400,
-            timeout        : 12000,
-        });
-        currentCk = updateCookies(currentCk, res.headers['set-cookie']);
-        if (res.status < 300) break;
-        const loc = res.headers['location'];
-        if (!loc) break;
-        currentUrl = loc.startsWith('http') ? loc : 'https://nanobanana.im' + loc;
-    }
-    return currentCk;
-}
-
-async function waitMagicLink(email, maxAttempts = 20) {
-    for (let i = 0; i < maxAttempts; i++) {
-        await delay(3000);
+    for (let i = 0; i < maxTries; i++) {
         try {
-            const res = await axios.get(
-                `https://api.tempmail.ing/api/emails/${encodeURIComponent(email)}`,
-                { headers: NB_HEADERS, timeout: 10000 }
-            );
-            if (res.data?.emails?.length > 0) {
-                const text  = res.data.emails[0].text || res.data.emails[0].html || '';
-                const match = text.match(
-                    /https:\/\/nanobanana\.im\/api\/auth\/magic-link\/verify\?token=[^\s"'<>&]+/
-                );
-                if (match) return match[0];
+            const form = new FormData();
+            form.append('image', new Blob([imgBuf], { type: mimeType }), fileName);
+            form.append('text', prompt);
+            form.append('image_generator_version', 'standard');
+
+            const res = await fetch('https://api.deepai.org/api/image-editor', {
+                method : 'POST',
+                headers: {
+                    accept            : '*/*',
+                    origin            : 'https://deepai.org',
+                    referer           : 'https://deepai.org/',
+                    'user-agent'      : AGENT,
+                    'api-key'         : genKEY(),
+                    'x-forwarded-for' : generateRandomIP(),
+                },
+                body: form,
+            });
+
+            const json = await res.json().catch(() => null);
+
+            if (json?.output_url) {
+                return {
+                    status     : true,
+                    result_url : json.output_url,
+                    id         : json.id || null,
+                };
             }
-        } catch (_) {}
-    }
-    throw new Error('Magic link tidak ditemukan, coba lagi.');
-}
 
-/**
- * Generate gambar baru dari teks via NanaBanana (txt2img, gratis, tanpa API key)
- *
- * @param {string} prompt       - Deskripsi gambar
- * @param {object} opts         - { maxPollAttempts }
- * @returns {Promise<{status:boolean, buffer?:Buffer, error?:string}>}
- */
-async function nanobananaGenerate(prompt, opts = {}) {
-    const maxPoll = opts.maxPollAttempts ?? 24;
-
-    const mailRes = await axios.post(
-        'https://api.tempmail.ing/api/generate', {},
-        { headers: NB_HEADERS, timeout: 10000 }
-    );
-    if (!mailRes.data?.success) throw new Error('Gagal buat tempmail.');
-    const email = mailRes.data.email.address;
-
-    const session = axios.create({ headers: NB_HEADERS });
-    let ck = '';
-
-    const initRes = await session.get('https://nanobanana.im/', {
-        maxRedirects: 0, validateStatus: s => s < 400, timeout: 10000,
-    });
-    ck = updateCookies(ck, initRes.headers['set-cookie']);
-
-    const magicRes = await session.post(
-        'https://nanobanana.im/api/auth/sign-in/magic-link',
-        { email, callbackURL: '/' },
-        { headers: { ...NB_HEADERS, Cookie: ck }, timeout: 10000 }
-    );
-    if (!magicRes.data?.status) throw new Error('Gagal kirim magic link.');
-
-    const link = await waitMagicLink(email);
-    ck = await followRedirects(session, link, ck);
-
-    const homeRes = await session.get('https://nanobanana.im/', {
-        headers: { ...NB_HEADERS, Cookie: ck },
-        maxRedirects: 0, validateStatus: s => s < 400, timeout: 10000,
-    });
-    ck = updateCookies(ck, homeRes.headers['set-cookie']);
-    if (!ck) throw new Error('Gagal login ke NanaBanana, session kosong.');
-
-    const taskRes = await session.post(
-        'https://nanobanana.im/api/img/nano-banana5',
-        {
-            prompt,
-            dimension        : 'auto',
-            aspect_ratio     : 'auto',
-            image_urls       : [],
-            num_images       : '1',
-            batchSize        : 1,
-            turnstileToken   : '',
-            skipVerification : false,
-            image_path       : 'hero',
-            size             : '2K',
-            resolution       : '2K',
-            output_format    : 'png',
-        },
-        { headers: { ...NB_HEADERS, Cookie: ck, 'content-type': 'application/json' }, timeout: 15000 }
-    );
-
-    if (!taskRes.data?.taskId) {
-        throw new Error('Gagal buat task: ' + JSON.stringify(taskRes.data));
-    }
-    const taskId = taskRes.data.taskId;
-
-    for (let i = 0; i < maxPoll; i++) {
-        await delay(5000);
-        const checkRes = await session.post(
-            'https://nanobanana.im/api/img/nano-banana5/taskResult',
-            { taskId },
-            { headers: { ...NB_HEADERS, Cookie: ck }, timeout: 10000 }
-        );
-        const d = checkRes.data;
-        if (d?.status === 1 && d?.imgAfterSrc) {
-            const imgFetch = await axios.get(d.imgAfterSrc, { responseType: 'arraybuffer', timeout: 20000 });
-            return { status: true, buffer: Buffer.from(imgFetch.data) };
-        }
-        if (d?.status === -1 || d?.status === 2 ||
-            (typeof d?.message === 'string' && /fail|error|rejected/i.test(d.message))) {
-            throw new Error(`NanaBanana error: ${d?.message || 'unknown'}`);
+            lastError = json?.status || `http ${res.status}`;
+        } catch (e) {
+            lastError = e.message;
         }
     }
 
-    throw new Error('Timeout menunggu hasil gambar dari NanaBanana.');
+    return { status: false, error: lastError };
 }
 
-module.exports = { stablehordeImg2img, nanobananaGenerate };
+module.exports = { deepaiEditImage };
 
-// ═══════════════════════════════════════════════════════
-//  HANDLER: .editgambar / .editai / .aiedit
-// ═══════════════════════════════════════════════════════
+// ── HANDLER: aiedit ───────────────────────────────────────────────────────────
 
 async function handleAiedit({ hisoka, m, query, tolak, logCommand, downloadMediaMessage }) {
-    try {
-        const isMediaMsg  = m.isMedia && m.type === 'imageMessage';
-        const quoted      = m.quoted;
-        const isQuotedImg = m.isQuoted && quoted?.isMedia && quoted?.type === 'imageMessage';
-        const hasImage    = isMediaMsg || isQuotedImg;
-        const prompt      = query?.trim();
+        try {
+                const isMediaMsg  = m.isMedia && m.type === 'imageMessage';
+                const quoted = m.quoted;
+                const isQuotedImg = m.isQuoted && quoted?.isMedia && quoted?.type === 'imageMessage';
 
-        // ── Help / no prompt ──────────────────────────────
-        if (!prompt) {
-            await tolak(hisoka, m,
-                `╭═══『 🎨 *AI Image Editor* 』═══╮\n│\n` +
-                `│ *Dua mode tersedia:*\n│\n` +
-                `│ 🖼 *Mode Edit Gambar (img2img):*\n` +
-                `│ Kirim/reply gambar + caption:\n` +
-                `│ *.editgambar* [deskripsi edit]\n│\n` +
-                `│ Contoh:\n` +
-                `│ *.editgambar* ganti jadi gaya anime\n` +
-                `│ *.editgambar* ubah jadi malam hari\n│\n` +
-                `│ ✨ *Mode Generate Gambar (txt2img):*\n` +
-                `│ Ketik tanpa gambar:\n` +
-                `│ *.editgambar* [deskripsi gambar]\n│\n` +
-                `│ Contoh:\n` +
-                `│ *.editgambar* anime girl cyberpunk\n` +
-                `│ *.editgambar* sunset at beach 4K\n│\n` +
-                `│ Alias: *.editai* / *.aiedit*\n│\n` +
-                `│ ⏱ Estimasi: ~30-90 detik\n│\n` +
-                `╰══════════════════════════════╯`
-            );
-            return;
-        }
+                if (!isMediaMsg && !isQuotedImg) {
+                        await tolak(hisoka, m,
+                                `╭═══『 🎨 *AI Image Editor* 』═══╮\n│\n` +
+                                `│ Edit gambar pakai teks prompt!\n│\n` +
+                                `│ *Cara Pakai:*\n` +
+                                `│ Kirim/reply gambar dengan caption:\n│\n` +
+                                `│ *.editgambar* [deskripsi edit]\n│\n` +
+                                `│ *Contoh:*\n` +
+                                `│ *.editgambar* make it cinematic\n` +
+                                `│ *.editgambar* ubah jadi malam hari\n` +
+                                `│ *.editgambar* tambahkan salju\n│\n` +
+                                `│ Alias: *.editai* / *.aiedit*\n│\n` +
+                                `╰══════════════════════════╯`
+                        );
+                        return;
+                }
 
-        // ── Mode img2img: ada gambar + prompt ────────────
-        if (hasImage) {
-            await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
-            await tolak(hisoka, m,
-                `⏳ Sedang mengedit gambar...\n` +
-                `✏️ Prompt: _"${prompt}"_\n` +
-                `🔄 Menggunakan StableHorde AI (~30-90 detik), mohon tunggu.`
-            );
+                const prompt = query?.trim() || 'make it look more cinematic';
 
-            // Download gambar
-            let mediaBuffer;
-            if (isMediaMsg) {
-                mediaBuffer = await m.downloadMedia();
-            } else {
-                mediaBuffer = await downloadMediaMessage(
-                    { ...m.quoted, message: m.quoted.raw },
-                    'buffer', {},
-                    { logger: hisoka.logger, reuploadRequest: hisoka.updateMediaMessage }
-                );
-            }
+                let mediaBuffer;
+                if (isMediaMsg) {
+                        mediaBuffer = await m.downloadMedia();
+                } else {
+                        mediaBuffer = await downloadMediaMessage(
+                                { ...m.quoted, message: m.quoted.raw },
+                                'buffer',
+                                {},
+                                { logger: hisoka.logger, reuploadRequest: hisoka.updateMediaMessage }
+                        );
+                }
 
-            if (!mediaBuffer || mediaBuffer.length === 0) {
+                if (!mediaBuffer || mediaBuffer.length === 0) {
+                        await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
+                        await tolak(hisoka, m, '❌ Gagal download gambar. Coba lagi!');
+                        return;
+                }
+
+                await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
+                await tolak(hisoka, m, `⏳ Sedang mengedit gambar...\nPrompt: _"${prompt}"_\nMohon tunggu sebentar.`);
+
+                const result = await deepaiEditImage(mediaBuffer, prompt);
+
+                if (!result.status || !result.result_url) {
+                        throw new Error(result.error || 'DeepAI gagal memproses gambar');
+                }
+
+                const imgFetch = await fetch(result.result_url);
+                if (!imgFetch.ok) throw new Error('Gagal download hasil edit');
+                const imgBuffer = Buffer.from(await imgFetch.arrayBuffer());
+
+                await hisoka.sendMessage(m.from, {
+                        image  : imgBuffer,
+                        caption: `✅ *Gambar berhasil diedit!*\n✏️ Prompt: _"${prompt}"_\n🔗 Powered by DeepAI`,
+                }, { quoted: m });
+
+                await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+                logCommand(m, hisoka, 'editgambar');
+        } catch (error) {
+                console.error('\x1b[31m[EditGambar] Error:\x1b[39m', error.message);
                 await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
-                await tolak(hisoka, m, '❌ Gagal download gambar. Coba lagi!');
-                return;
-            }
-
-            const result = await stablehordeImg2img(mediaBuffer, prompt);
-
-            await hisoka.sendMessage(m.from, {
-                image  : result.buffer,
-                caption:
-                    `✅ *Gambar berhasil diedit!*\n` +
-                    `✏️ Prompt: _"${prompt}"_\n` +
-                    `🔗 Powered by StableHorde AI`,
-            }, { quoted: m });
-
-            await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
-            logCommand(m, hisoka, 'editgambar');
-            return;
+                await tolak(hisoka, m, `❌ Gagal mengedit gambar: ${error.message}`);
         }
-
-        // ── Mode txt2img: cuma prompt, tanpa gambar ───────
-        await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
-        await tolak(hisoka, m,
-            `⏳ Sedang membuat gambar...\n` +
-            `📝 Prompt: _"${prompt}"_\n` +
-            `🔄 Menggunakan NanaBanana AI (~30-60 detik), mohon tunggu.`
-        );
-
-        const result = await nanobananaGenerate(prompt);
-
-        await hisoka.sendMessage(m.from, {
-            image  : result.buffer,
-            caption:
-                `✅ *Gambar berhasil dibuat!*\n` +
-                `📝 Prompt: _"${prompt}"_\n` +
-                `🔗 Powered by NanaBanana AI`,
-        }, { quoted: m });
-
-        await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
-        logCommand(m, hisoka, 'editgambar');
-
-    } catch (error) {
-        console.error('\x1b[31m[EditGambar] Error:\x1b[39m', error.message);
-        await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
-        await tolak(hisoka, m, `❌ Gagal proses gambar: ${error.message}`);
-    }
 }
 
 module.exports.handleAiedit = handleAiedit;

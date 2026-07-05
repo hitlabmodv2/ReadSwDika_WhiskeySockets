@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 05/07/2026, 11.09.23  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 05/07/2026, 06.44.17  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  console.error
+│  #001  —  unhandledRejection
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [31m[EditGambar] Error:[39m Request failed with status code 460
+│  Connection Closed
 │
 │  DETAIL
-│  Sumber      : console.error
+│  Sumber      : unhandledRejection
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 05/07/2026, 11.09.23
-│  Terakhir    : 05/07/2026, 11.09.23
+│  Pertama     : 05/07/2026, 06.44.17
+│  Terakhir    : 05/07/2026, 06.44.17
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [31m[EditGambar] Error:[39m Request failed with status code 460
-│     at console.error (file:///home/runner/workspace/index.js:434:27)
-│     at handleAiedit (/home/runner/workspace/SEMUA_FITUR/ai/imageEdit.cjs:250:17)
+│  ▶  Error: Connection Closed
+│     at sendRawMessage (file:///home/runner/workspace/node_modules/@whiskeysockets/baileys/lib/Socket/socket.js:57:19)
+│     at sendNode (file:///home/runner/workspace/node_modules/@whiskeysockets/baileys/lib/Socket/socket.js:76:16)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 05/07/2026, 11.09.23
+  Terakhir diperbarui: 05/07/2026, 06.44.17
 ════════════════════════════════════════════════════════════════════════
