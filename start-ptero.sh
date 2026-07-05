@@ -136,6 +136,21 @@ CONFIG_HEAP=$(node -e "try{const c=JSON.parse(require('fs').readFileSync('./conf
 NODE_MAX_OLD_SPACE_MB="${CONFIG_HEAP:-${NODE_MAX_OLD_SPACE_MB:-8192}}"
 echo -e "  ${C_YELLOW}🧠 Heap Node.js${C_RESET} : ${NODE_MAX_OLD_SPACE_MB} MB (--max-old-space-size)"
 
+# ── Validasi heap vs RAM fisik ──
+RAM_TOTAL_KB=$(grep -m1 '^MemTotal:' /proc/meminfo 2>/dev/null | awk '{print $2}')
+if [ -n "$RAM_TOTAL_KB" ] && [ "$RAM_TOTAL_KB" -gt 0 ] 2>/dev/null; then
+  RAM_TOTAL_MB=$(( RAM_TOTAL_KB / 1024 ))
+  HEAP_MB_NUM=$(( NODE_MAX_OLD_SPACE_MB + 0 ))
+  if [ "$HEAP_MB_NUM" -ge "$RAM_TOTAL_MB" ] 2>/dev/null; then
+    echo -e "  \033[1;31m⚠️  PERINGATAN: heapMB (${NODE_MAX_OLD_SPACE_MB}MB) ≥ RAM fisik (${RAM_TOTAL_MB}MB)!\033[0m"
+    echo -e "  \033[1;31m   Kurangi monitor.heapMB di config.json agar tidak kena OOM-killer.\033[0m"
+  elif [ "$HEAP_MB_NUM" -gt $(( RAM_TOTAL_MB * 90 / 100 )) ] 2>/dev/null; then
+    echo -e "  \033[1;33m⚠️  Heap (${NODE_MAX_OLD_SPACE_MB}MB) > 90% RAM fisik (${RAM_TOTAL_MB}MB) — berisiko OOM.\033[0m"
+  else
+    echo -e "  ${C_GREEN}✅ Heap aman${C_RESET} — RAM fisik server: ${RAM_TOTAL_MB} MB"
+  fi
+fi
+
 echo -e "${C_CYAN}────────────────────────────${C_RESET}"
 echo -e "  ${C_GREEN}✅ Auto-Restart Aktif${C_RESET}"
 echo -e "  ${C_DIM}Max restart beruntun: ${MAX_RESTARTS}x (reset jika stabil ${STABLE_UPTIME_SEC}s)${C_RESET}"
