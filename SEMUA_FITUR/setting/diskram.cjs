@@ -276,24 +276,7 @@ async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, dr) {
                 .setFooter('⚡ 𝗪𝗶𝗹𝘆 𝗕𝗼𝘁 • ᴍᴏɴɪᴛᴏʀ ʀᴀᴍ & ᴅɪꜱᴋ  |  🦕 Pterodactyl®')
                 .addSelection('🎛️ ᴘɪʟɪʜ ᴘᴇɴɢᴀᴛᴜʀᴀɴ')
 
-                // ── Section 1: Auto-Detect & Simpan (PALING ATAS) ─────────────
-                .makeSections('🤖 ᴀᴜᴛᴏ-ᴅᴇᴛᴇᴋꜱɪ & ꜱɪᴍᴘᴀɴ')
-                .makeRow(
-                    `⚡ 𝗦𝗮𝘃𝗲 𝗦𝗲𝗺𝘂𝗮 𝗦𝗲𝗸𝗮𝗹𝗶𝗴𝘂𝘀`,
-                    rt.diskOk
-                        ? `RAM ${_fmtMB(autoRamMB)} + Disk ${_fmtMB(rt.totalDiskMB)} + Warn ${autoWarnPct}%`
-                        : `RAM ${_fmtMB(autoRamMB)} (disk tidak terdeteksi)`,
-                    `Simpan semua nilai terdeteksi realtime ke config sekaligus`,
-                    `${pref}ramdisk autodetect all`
-                )
-                .makeRow(
-                    `🧠 𝗦𝗮𝘃𝗲 𝗥𝗔𝗠 𝗟𝗶𝗺𝗶𝘁`,
-                    `${_fmtMB(rt.totalRamMB)} × ${adPct}% = ${_fmtMB(autoRamMB)}`,
-                    `Simpan limit RAM ${_fmtMB(autoRamMB)} ke config (terdeteksi dari server sekarang)`,
-                    `${pref}ramdisk autodetect ram`
-                )
-
-                // ── Section 2: Status On/Off ───────────────────────────────────
+                // ── Section 1: Status On/Off (PALING ATAS) ────────────────────
                 .makeSections('⚡ ꜱᴛᴀᴛᴜꜱ ᴍᴏɴɪᴛᴏʀ')
                 .makeRow(
                     markM('all') + '✅ 𝗔𝗸𝘁𝗶𝗳 𝗦𝗲𝗺𝘂𝗮',
@@ -318,6 +301,23 @@ async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, dr) {
                     'Matikan semua monitor',
                     modeKey === 'off' ? activeDesc('Semua monitor nonaktif') : 'Matikan RAM & Disk monitor sekaligus',
                     `${pref}ramdisk off`
+                )
+
+                // ── Section 2: Auto-Detect & Simpan ───────────────────────────
+                .makeSections('🤖 ᴀᴜᴛᴏ-ᴅᴇᴛᴇᴋꜱɪ & ꜱɪᴍᴘᴀɴ')
+                .makeRow(
+                    `⚡ 𝗦𝗮𝘃𝗲 𝗦𝗲𝗺𝘂𝗮 𝗦𝗲𝗸𝗮𝗹𝗶𝗴𝘂𝘀`,
+                    rt.diskOk
+                        ? `RAM ${_fmtMB(autoRamMB)} + Disk ${_fmtMB(rt.totalDiskMB)} + Warn ${autoWarnPct}%`
+                        : `RAM ${_fmtMB(autoRamMB)} (disk tidak terdeteksi)`,
+                    `Simpan semua nilai terdeteksi realtime ke config sekaligus`,
+                    `${pref}ramdisk autodetect all`
+                )
+                .makeRow(
+                    `🧠 𝗦𝗮𝘃𝗲 𝗥𝗔𝗠 𝗟𝗶𝗺𝗶𝘁`,
+                    `${_fmtMB(rt.totalRamMB)} × ${adPct}% = ${_fmtMB(autoRamMB)}`,
+                    `Simpan limit RAM ${_fmtMB(autoRamMB)} ke config (terdeteksi dari server sekarang)`,
+                    `${pref}ramdisk autodetect ram`
                 )
 
                 // ── Section 3: RAM — Auto Detect ──────────────────────────────
