@@ -247,16 +247,20 @@ _Tampilan pesan dan susunan tombol dirombak agar lebih jelas dan informatif:_
 5. Save Disk & Save Warn juga muncul terintegrasi di dalam section Disk Limit & Warn — pilihan auto dan manual berdampingan
 > Tampilan lebih konsisten dengan gaya button fitur lain (`.online`, `.typing`, dll) dan langsung terbaca tanpa scroll
 
-*15. 🤖 .wilyai — Tampilan Tombol Single-Select*
-_Perintah `.wilyai` kini tampil dengan button interaktif single-select, persis pola `.online` & `.readsw`:_
+*15. 🤖 .wilyai — Tombol Single-Select Realtime + Notif Fitur Belum Aktif*
+_Perintah `.wilyai` kini tampil dengan button interaktif single-select, realtime status per fitur, persis pola `.online` & `.readsw`:_
 1. Ketik `.wilyai` tanpa argumen → langsung muncul button pilihan, tidak lagi teks statis
-2. Button punya *4 section* yang merangkum semua pengaturan AI:
-   • *🤖 Status .wily / .ai / .tanya* — pilih ✅ Aktifkan atau 🚫 Matikan perintah AI
+2. Button punya *5 section* yang merangkum semua pengaturan AI:
+   • *🤖 Status .wily / .ai / .tanya* — pilih Aktifkan atau Matikan perintah AI
    • *💬 Auto Reply AI* — pilih ON atau OFF untuk auto balas
+   • *🤖 Auto Simi (AI Mention / Reply)* — pilih ON atau OFF untuk auto balas saat di-mention/reply
    • *🎯 Scope Auto Reply* — pilih 🌐 Semua, 📩 Private Only, atau 👥 Grup Only
    • *🗑️ History & Memori* — Reset semua sesi + memori user sekaligus
-3. Pilihan yang *sedang aktif* diberi tanda `✓` di depannya dan deskripsi `⚡ Sedang Aktif — ...`
-4. Setiap aksi (on/off, replay, scope, reset) → button *terupdate otomatis* setelah berhasil — tanda `✓` berpindah ke pilihan baru
-5. Auto-delete pesan button sebelumnya sebelum kirim yang baru — tidak tumpuk-tumpuk di chat
-6. Fallback ke teks biasa otomatis jika device tidak support button
-> Semua pengaturan WilyAI kini bisa diakses dari satu button tanpa perlu hafal sub-perintah
+3. *Notif realtime fitur belum aktif* — jika ada fitur yang OFF, body button langsung tampil:
+   _⚠️ X fitur belum aktif: ❌ Fitur .wily / ❌ Auto Reply AI / ❌ Auto Simi_
+4. Baris pilihan yang fiturnya *OFF* langsung berubah label → `🔴 Aktifkan Sekarang` dengan deskripsi `⬆️ Belum aktif — Tap untuk aktifkan!` — tidak perlu tebak-tebak mana yang perlu dinyalakan
+5. Pilihan yang *sedang aktif* diberi tanda `✓` di depannya dan deskripsi `⚡ Sedang Aktif — ...`
+6. Setiap aksi (on/off, replay, scope, autosimi, reset) → button *terupdate otomatis* setelah berhasil, baca config fresh — status selalu akurat
+7. Auto-delete pesan button sebelumnya sebelum kirim yang baru — tidak tumpuk-tumpuk di chat
+8. Fallback ke teks biasa otomatis jika device tidak support button
+> Semua pengaturan WilyAI kini bisa diakses dari satu button; fitur yang mati langsung kelihatan dan bisa dinyalakan dari sana

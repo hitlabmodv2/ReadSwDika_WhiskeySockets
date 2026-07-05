@@ -19,8 +19,8 @@
  * ───────────────────────────────
  *
  *  wilyai.cjs — WilyAI settings command
- *  Perintah .wilyai untuk atur mode, scope, auto reply, dan history AI bot
- *  Menggunakan single_select button dengan section fitur lengkap
+ *  Perintah .wilyai untuk atur mode, scope, auto reply, autosimi, dan history
+ *  Single-select button realtime — notif fitur belum aktif otomatis
  * ───────────────────────────────
  */
 'use strict';
@@ -35,70 +35,135 @@ async function _deleteLastMsg(hisoka, jid) {
     _lastMsgMap.delete(jid);
 }
 
+// ── Helper: hitung fitur yang belum aktif ────────────────────────────────────
+function _getBelumAktif(w, autoSimi) {
+    const list = [];
+    if (w.enabled === false)          list.push('❌ Fitur .wily / .ai / .tanya');
+    if (w.autoReply === false)        list.push('❌ Auto Reply AI');
+    if (!autoSimi || !autoSimi.enabled) list.push('❌ Auto Simi (AI mention/reply)');
+    return list;
+}
+
 // ── Helper: bangun body status terkini ───────────────────────────────────────
-function _buildBody(w, totalSesi) {
+function _buildBody(w, totalSesi, autoSimi) {
     const scopeLabel = (s) => s === 'pm' ? '📩 Private (PM)' : s === 'gc' ? '👥 Grup (GC)' : '🌐 Semua (PM + GC)';
     const curScope   = w.scope || 'all';
+    const belumAktif = _getBelumAktif(w, autoSimi);
+
+    let peringatan = '';
+    if (belumAktif.length > 0) {
+        peringatan =
+            `│\n` +
+            `│ ⚠️ *${belumAktif.length} fitur belum aktif:*\n` +
+            belumAktif.map(f => `│   ${f}`).join('\n') + '\n' +
+            `│ _(Pilih di button untuk aktifkan)_\n`;
+    }
+
     return (
         `╭═══『 *⚙️ WILY AI SETTING* 』═══╮\n` +
         `│\n` +
-        `│ 🤖 *.wily command* : ${w.enabled !== false ? '✅ Aktif' : '❌ Nonaktif'}\n` +
+        `│ 🤖 *.wily / .ai*   : ${w.enabled !== false ? '✅ Aktif' : '❌ Nonaktif'}\n` +
         `│ 💬 *Auto reply*    : ${w.autoReply !== false ? '✅ Aktif' : '❌ Nonaktif'}\n` +
+        `│ 🤖 *Auto Simi*     : ${autoSimi?.enabled ? '✅ Aktif' : '❌ Nonaktif'}\n` +
         `│ 🎯 *Scope*         : ${scopeLabel(curScope)}\n` +
         `│ 🗂️ *Sesi tersimpan*: ${totalSesi} sesi\n` +
+        peringatan +
         `│\n` +
         `╰══════════════════════════════╯`
     );
 }
 
 // ── Kirim selection button ────────────────────────────────────────────────────
-async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, w, totalSesi) {
+async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, w, totalSesi, autoSimi) {
     if (Button) {
         let sent = false;
         try {
             const isEnabled   = w.enabled !== false;
             const isAutoReply = w.autoReply !== false;
+            const isAutoSimi  = !!(autoSimi?.enabled);
             const scope       = w.scope || 'all';
 
-            const mark = (cond) => cond ? '✓ ' : '';
+            const mark       = (cond) => cond ? '✓ ' : '';
             const activeDesc = (base) => `⚡ Sedang Aktif — ${base}`;
+            // Label & deskripsi baris "aktifkan" saat fitur sedang OFF — lebih mencolok
+            const offLabel   = (label) => `🔴 ${label}`;
+            const offDesc    = (base)  => `⬆️ Belum aktif — ${base}. Tap untuk aktifkan!`;
 
             const btn = new Button()
                 .setBody(bodyText)
                 .setFooter('⚡ Wily Bot • Wily AI Setting')
                 .addSelection('🎛️ Pilih Pengaturan')
 
-                // ── Section 1: Status .wily ───────────────────────────────
+                // ── Section 1: Status .wily / .ai / .tanya ───────────────
                 .makeSections('🤖 Status .wily / .ai / .tanya')
                 .makeRow(
-                    mark(isEnabled) + '✅ Aktifkan',
+                    isEnabled
+                        ? mark(true)  + '✅ Aktif'
+                        : offLabel('Aktifkan Sekarang'),
                     'Fitur .wily ON',
-                    isEnabled  ? activeDesc('User bisa pakai .wily, .ai, .tanya') : 'Aktifkan perintah AI untuk semua user',
+                    isEnabled
+                        ? activeDesc('User bisa pakai .wily, .ai, .tanya')
+                        : offDesc('User belum bisa pakai AI'),
                     `${pref}wilyai on`
                 )
                 .makeRow(
-                    mark(!isEnabled) + '🚫 Matikan',
+                    !isEnabled
+                        ? mark(true)  + '🚫 Nonaktif'
+                        : '🚫 Matikan',
                     'Fitur .wily OFF',
-                    !isEnabled ? activeDesc('Perintah AI dinonaktifkan') : 'Matikan perintah AI — user tidak bisa pakai',
+                    !isEnabled
+                        ? activeDesc('Perintah AI dinonaktifkan')
+                        : 'Matikan perintah AI — user tidak bisa pakai',
                     `${pref}wilyai off`
                 )
 
                 // ── Section 2: Auto Reply ─────────────────────────────────
                 .makeSections('💬 Auto Reply AI')
                 .makeRow(
-                    mark(isAutoReply) + '✅ Auto Reply ON',
-                    'Bot auto balas dengan AI',
-                    isAutoReply  ? activeDesc('Bot otomatis balas pesan sesuai scope') : 'Aktifkan auto reply AI sesuai scope',
+                    isAutoReply
+                        ? mark(true)  + '✅ Aktif'
+                        : offLabel('Aktifkan Auto Reply'),
+                    'Auto Reply ON',
+                    isAutoReply
+                        ? activeDesc('Bot otomatis balas pesan sesuai scope')
+                        : offDesc('Bot belum auto balas'),
                     `${pref}wilyai replay on`
                 )
                 .makeRow(
-                    mark(!isAutoReply) + '🚫 Auto Reply OFF',
-                    'Matikan auto reply',
-                    !isAutoReply ? activeDesc('.wily masih bisa dipakai manual') : 'Matikan auto reply, .wily tetap bisa dipakai manual',
+                    !isAutoReply
+                        ? mark(true)  + '🚫 Nonaktif'
+                        : '🚫 Matikan',
+                    'Auto Reply OFF',
+                    !isAutoReply
+                        ? activeDesc('.wily masih bisa dipakai manual')
+                        : 'Matikan auto reply, .wily tetap bisa dipakai manual',
                     `${pref}wilyai replay off`
                 )
 
-                // ── Section 3: Scope ─────────────────────────────────────
+                // ── Section 3: Auto Simi ──────────────────────────────────
+                .makeSections('🤖 Auto Simi (AI Mention / Reply)')
+                .makeRow(
+                    isAutoSimi
+                        ? mark(true)  + '✅ Aktif'
+                        : offLabel('Aktifkan Auto Simi'),
+                    'Auto Simi ON',
+                    isAutoSimi
+                        ? activeDesc('AI balas otomatis saat di-mention atau di-reply')
+                        : offDesc('Bot belum balas otomatis saat di-mention'),
+                    `${pref}simi on`
+                )
+                .makeRow(
+                    !isAutoSimi
+                        ? mark(true)  + '🚫 Nonaktif'
+                        : '🚫 Matikan',
+                    'Auto Simi OFF',
+                    !isAutoSimi
+                        ? activeDesc('Bot tidak auto balas mention/reply')
+                        : 'Matikan auto simi — bot tidak balas mention/reply',
+                    `${pref}simi off`
+                )
+
+                // ── Section 4: Scope ──────────────────────────────────────
                 .makeSections('🎯 Scope Auto Reply')
                 .makeRow(
                     mark(scope === 'all') + '🌐 Semua (PM + GC)',
@@ -119,12 +184,14 @@ async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, w, total
                     `${pref}wilyai gc`
                 )
 
-                // ── Section 4: History ────────────────────────────────────
+                // ── Section 5: History ────────────────────────────────────
                 .makeSections('🗑️ History & Memori')
                 .makeRow(
                     '🗑️ Reset Semua History',
                     `Hapus ${totalSesi} sesi + semua memori user`,
-                    'Hapus semua percakapan & memori — AI mulai dari awal',
+                    totalSesi > 0
+                        ? `Ada ${totalSesi} sesi aktif — tap untuk hapus semua`
+                        : 'Tidak ada sesi tersimpan saat ini',
                     `${pref}wilyai reset`
                 );
 
@@ -146,6 +213,7 @@ async function _sendFallback(tolak, hisoka, m, bodyText, pref) {
         `📋 *Cara pakai:*\n` +
         `${pref}wilyai on/off        → nyala/matikan .wily\n` +
         `${pref}wilyai replay on/off → toggle auto reply\n` +
+        `${pref}simi on/off          → toggle auto simi\n` +
         `${pref}wilyai pm            → hanya private chat\n` +
         `${pref}wilyai gc            → hanya grup\n` +
         `${pref}wilyai all           → private + grup\n` +
@@ -160,18 +228,28 @@ async function handleWilyai({ hisoka, m, query, tolak, logCommand, loadConfig, s
     try {
         const cfg  = loadConfig();
         if (!cfg.wilyAI) cfg.wilyAI = { enabled: true, autoReply: true, scope: 'all' };
-        const w    = cfg.wilyAI;
-        const args = (query || '').trim().toLowerCase().split(/\s+/);
-        const sub  = args[0];
-        const val  = args[1];
+        const w         = cfg.wilyAI;
+        const autoSimi  = cfg.autoSimi || { enabled: false };
+        const args      = (query || '').trim().toLowerCase().split(/\s+/);
+        const sub       = args[0];
+        const val       = args[1];
+        const pref      = m.prefix || '.';
 
-        const pref = m.prefix || '.';
+        // ── Helper lokal: ambil snapshot terkini & tampilkan button ───────
+        const showButton = async (extraPrefix = '') => {
+            const totalSesi = countHistory();
+            const freshCfg  = loadConfig();
+            const freshW    = freshCfg.wilyAI  || { enabled: true, autoReply: true, scope: 'all' };
+            const freshSimi = freshCfg.autoSimi || { enabled: false };
+            const bodyText  = extraPrefix
+                ? extraPrefix + '\n\n' + _buildBody(freshW, totalSesi, freshSimi)
+                : _buildBody(freshW, totalSesi, freshSimi);
+            await _sendSelection(hisoka, m, Button, tolak, bodyText, pref, freshW, totalSesi, freshSimi);
+        };
 
         // ── Tanpa sub-command → tampilkan button ─────────────────────────
         if (!sub) {
-            const totalSesi = countHistory();
-            const bodyText  = _buildBody(w, totalSesi);
-            await _sendSelection(hisoka, m, Button, tolak, bodyText, pref, w, totalSesi);
+            await showButton();
             logCommand(m, hisoka, 'wilyai');
             return;
         }
@@ -180,17 +258,12 @@ async function handleWilyai({ hisoka, m, query, tolak, logCommand, loadConfig, s
         if (sub === 'on' || sub === 'off') {
             const aktif = sub === 'on';
             if (w.enabled === aktif || (w.enabled !== false && aktif)) {
-                // no-op: tetap tampilkan button dengan status terkini
-                const totalSesi = countHistory();
-                const bodyText  = `ℹ️ Fitur .wily sudah ${aktif ? 'aktif' : 'nonaktif'} sebelumnya.\n\n` + _buildBody(w, totalSesi);
-                await _sendSelection(hisoka, m, Button, tolak, bodyText, pref, w, totalSesi);
+                await showButton(`ℹ️ Fitur .wily sudah ${aktif ? 'aktif' : 'nonaktif'} sebelumnya.`);
             } else {
                 cfg.wilyAI.enabled = aktif;
                 saveConfig(cfg);
                 await hisoka.sendMessage(m.from, { react: { text: aktif ? '✅' : '🚫', key: m.key } });
-                const totalSesi = countHistory();
-                const bodyText  = _buildBody(cfg.wilyAI, totalSesi);
-                await _sendSelection(hisoka, m, Button, tolak, bodyText, pref, cfg.wilyAI, totalSesi);
+                await showButton();
             }
             logCommand(m, hisoka, 'wilyai');
             return;
@@ -207,9 +280,7 @@ async function handleWilyai({ hisoka, m, query, tolak, logCommand, loadConfig, s
             cfg.wilyAI.autoReply = aktif;
             saveConfig(cfg);
             await hisoka.sendMessage(m.from, { react: { text: aktif ? '✅' : '🚫', key: m.key } });
-            const totalSesi = countHistory();
-            const bodyText  = _buildBody(cfg.wilyAI, totalSesi);
-            await _sendSelection(hisoka, m, Button, tolak, bodyText, pref, cfg.wilyAI, totalSesi);
+            await showButton();
             logCommand(m, hisoka, 'wilyai');
             return;
         }
@@ -219,9 +290,7 @@ async function handleWilyai({ hisoka, m, query, tolak, logCommand, loadConfig, s
             cfg.wilyAI.scope = sub;
             saveConfig(cfg);
             await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
-            const totalSesi = countHistory();
-            const bodyText  = _buildBody(cfg.wilyAI, totalSesi);
-            await _sendSelection(hisoka, m, Button, tolak, bodyText, pref, cfg.wilyAI, totalSesi);
+            await showButton();
             logCommand(m, hisoka, 'wilyai');
             return;
         }
@@ -232,16 +301,18 @@ async function handleWilyai({ hisoka, m, query, tolak, logCommand, loadConfig, s
             await clearAllHistory();
             const totalMemori = clearAllUserMemory();
             await hisoka.sendMessage(m.from, { react: { text: '🗑️', key: m.key } });
-            const resetInfo = `🗑️ *Reset AI selesai!*\n\n• 💬 *${totalSesi} sesi* percakapan dihapus\n• 🧠 *${totalMemori} memori* user dihapus\n\nSemua user mulai dari awal — AI tidak ingat percakapan maupun preferensi siapapun.`;
-            const totalSesiNow = countHistory(); // selalu 0 setelah reset
-            const bodyText     = resetInfo + '\n\n' + _buildBody(w, totalSesiNow);
-            await _sendSelection(hisoka, m, Button, tolak, bodyText, pref, w, totalSesiNow);
+            await showButton(
+                `🗑️ *Reset AI selesai!*\n\n` +
+                `• 💬 *${totalSesi} sesi* percakapan dihapus\n` +
+                `• 🧠 *${totalMemori} memori* user dihapus\n\n` +
+                `Semua user mulai dari awal — AI tidak ingat percakapan maupun preferensi siapapun.`
+            );
             logCommand(m, hisoka, 'wilyai');
             return;
         }
 
-        // ── Sub-command tidak dikenal ────────────────────────────────────
-        await tolak(hisoka, m, `⚠️ Sub-perintah tidak dikenal.\n\nGunakan:\n${pref}wilyai on/off\n${pref}wilyai replay on/off\n${pref}wilyai pm | gc | all\n${pref}wilyai reset`);
+        // ── Sub-command tidak dikenal → tetap tampilkan button + pesan error ─
+        await showButton(`⚠️ Sub-perintah _"${sub}"_ tidak dikenal. Gunakan pilihan di bawah:`);
         logCommand(m, hisoka, 'wilyai');
 
     } catch (e) {
@@ -262,7 +333,7 @@ async function handleSimi({ hisoka, m, query, tolak, logCommand, loadConfig, sav
         const autoSimi = config.autoSimi || { enabled: false };
         const args     = query ? query.split(' ') : [];
         if (args.length === 0) {
-            let text = `╭═══『 *🤖 WILY AI AUTO* 』═══╮\n│\n│ *Status:* ${autoSimi.enabled ? '✅ Aktif' : '❌ Nonaktif'}\n│ *AI Engine:* Gemini Vision (Gratis)\n│ *Mode:* Grup & Private Chat\n│ *Trigger:* Mention bot / Reply pesan bot\n│\n│ *Kemampuan AI:*\n│ ✅ Analisis gambar & sticker\n│ ✅ Baca teks di dalam gambar\n│ ✅ Tahu judul anime/film/series\n│ ✅ Kenali karakter anime/game\n│ ✅ Ingat nama pengguna\n│ ✅ Ngobrol santai & cerdas\n│\n│ *Perintah Manual AI:*\n│ .wily [pertanyaan]\n│ .wily (reply gambar/sticker)\n│\n│ *Pengaturan:*\n│ .autosimi on  - Aktifkan\n│ .autosimi off - Nonaktifkan\n│\n╰══════════════════════════╯`;
+            let text = `╭═══『 *🤖 WILY AI AUTO* 』═══╮\n│\n│ *Status:* ${autoSimi.enabled ? '✅ Aktif' : '❌ Nonaktif'}\n│ *AI Engine:* Gemini Vision (Gratis)\n│ *Mode:* Grup & Private Chat\n│ *Trigger:* Mention bot / Reply pesan bot\n│\n│ *Kemampuan AI:*\n│ ✅ Analisis gambar & sticker\n│ ✅ Baca teks di dalam gambar\n│ ✅ Tahu judul anime/film/series\n│ ✅ Kenali karakter anime/game\n│ ✅ Ingat nama pengguna\n│ ✅ Ngobrol santai & cerdas\n│\n│ *Perintah Manual AI:*\n│ .wily [pertanyaan]\n│ .wily (reply gambar/sticker)\n│\n│ *Pengaturan:*\n│ .simi on  - Aktifkan\n│ .simi off - Nonaktifkan\n│\n╰══════════════════════════╯`;
             await tolak(hisoka, m, text);
             return;
         }
