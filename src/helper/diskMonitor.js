@@ -62,23 +62,20 @@ function getDirSizeBytes(dirPath) {
 export class DiskMonitor {
         constructor(options = {}) {
                 const config = loadConfig();
+                const dr = config?.monitor?.DisRam || {};
                 const diskConfig = config?.monitor?.disk || config?.diskMonitor || {};
 
-                this.enabled = diskConfig.enabled !== false;
-                this.checkIntervalMs = diskConfig.checkIntervalMs || 300000;
-                this.logIntervalMs = diskConfig.logIntervalMs || 300000;
-                this.logUsage = diskConfig.logUsage !== false;
-                // Limit HARUS diisi manual sesuai kuota disk beneran di panel
-                // (Pterodactyl/VPS), karena tidak bisa dideteksi otomatis dari
-                // dalam container. Default 10240 MB (10 GiB) — sesuaikan di
-                // config.json kalau paket kamu beda.
-                this.limitMB = diskConfig.limitMB || 10240;
-                this.limitBytes = this.limitMB * 1024 * 1024;
-                this.watchPath = diskConfig.watchPath
+                this.enabled         = (dr.diskEnabled         ?? diskConfig.enabled)         !== false;
+                this.checkIntervalMs = dr.diskCheckIntervalMs  ?? diskConfig.checkIntervalMs  ?? 300000;
+                this.logIntervalMs   = dr.diskLogIntervalMs    ?? diskConfig.logIntervalMs    ?? 300000;
+                this.logUsage        = (dr.diskLogUsage        ?? diskConfig.logUsage)        !== false;
+                this.limitMB         = (dr.diskLimitMB         ?? diskConfig.limitMB)         || 10240;
+                this.limitBytes      = this.limitMB * 1024 * 1024;
+                this.watchPath       = diskConfig.watchPath
                         ? path.resolve(diskConfig.watchPath)
                         : process.cwd();
 
-                this.warnPercentage = diskConfig.warnPercentage || 80;
+                this.warnPercentage  = dr.diskWarnPercent ?? diskConfig.warnPercentage ?? 80;
                 this.onLimitReached = options.onLimitReached || (() => {});
                 this.intervalId = null;
                 this._checkCount = 0;

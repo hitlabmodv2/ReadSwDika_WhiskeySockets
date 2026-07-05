@@ -83,26 +83,27 @@ function getSystemMemoryInfo() {
 export class MemoryMonitor {
         constructor(options = {}) {
                 const config = loadConfig();
+                const dr = config?.monitor?.DisRam || {};
                 const memConfig = config?.monitor?.memory || config?.memoryMonitor || {};
 
-                this.enabled = memConfig.enabled !== false;
-                this.checkInterval = memConfig.checkIntervalMs || 30000;
-                this.logUsage = memConfig.logUsage !== false;
-                this.autoDetect = memConfig.autoDetectLimit !== false;
-                this.autoDetectPercentage = memConfig.autoDetectPercentage || 80;
+                this.enabled           = (dr.ramEnabled           ?? memConfig.enabled)           !== false;
+                this.checkInterval     = dr.ramCheckIntervalMs    ?? memConfig.checkIntervalMs    ?? 30000;
+                this.logUsage          = (dr.ramLogUsage          ?? memConfig.logUsage)          !== false;
+                this.autoDetect        = (dr.ramAutoDetect        ?? memConfig.autoDetectLimit)   !== false;
+                this.autoDetectPercentage = dr.ramAutoDetectPercent ?? memConfig.autoDetectPercentage ?? 80;
 
                 if (this.autoDetect) {
                         const systemTotal = os.totalmem();
                         this.memoryLimit = Math.floor(systemTotal * (this.autoDetectPercentage / 100));
                 } else {
-                        this.memoryLimit = (memConfig.limitMB || 500) * 1024 * 1024;
+                        this.memoryLimit = ((dr.ramLimitMB ?? memConfig.limitMB) || 500) * 1024 * 1024;
                 }
 
                 this.onLimitReached = options.onLimitReached || (() => process.exit(1));
                 this.intervalId = null;
                 this.isShuttingDown = false;
                 this.config = config;
-                this.logIntervalMs = memConfig.logIntervalMs || 300000;
+                this.logIntervalMs = dr.ramLogIntervalMs ?? memConfig.logIntervalMs ?? 300000;
                 this._checkCount = 0;
                 this._logCount = 0;
         }
