@@ -83,7 +83,7 @@ function getSystemMemoryInfo() {
 export class MemoryMonitor {
         constructor(options = {}) {
                 const config = loadConfig();
-                const memConfig = config?.memoryMonitor || {};
+                const memConfig = config?.monitor?.memory || config?.memoryMonitor || {};
 
                 this.enabled = memConfig.enabled !== false;
                 this.checkInterval = memConfig.checkIntervalMs || 30000;
@@ -109,7 +109,6 @@ export class MemoryMonitor {
 
         start() {
                 if (!this.enabled) {
-                        console.log('\x1b[33m[Memory Monitor] Disabled in config.json\x1b[39m');
                         return;
                 }
 

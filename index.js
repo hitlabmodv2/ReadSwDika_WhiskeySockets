@@ -532,6 +532,10 @@ async function main() {
         diskMonitor.start();
         global.diskMonitor = diskMonitor;
 
+        const _memStatus  = memoryMonitor.enabled ? '\x1b[32mON\x1b[39m'  : '\x1b[33mOFF\x1b[39m';
+        const _diskStatus = diskMonitor.enabled   ? '\x1b[32mON\x1b[39m'  : '\x1b[33mOFF\x1b[39m';
+        console.log(`\x1b[36m→ Monitor  :\x1b[39m Memory ${_memStatus}  Disk ${_diskStatus}`);
+
         if (reconnectCount > 0) {
                 console.warn(`\x1b[33mReconnecting... Attempt ${reconnectCount}\x1b[39m`);
         }

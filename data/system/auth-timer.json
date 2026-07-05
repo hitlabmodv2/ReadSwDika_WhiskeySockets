@@ -1,12 +1,20 @@
 {
   "events": [
     {
+      "type": "connected",
+      "connectedAt": "2026-07-05T04:57:53.936Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-05T04:54:02.469Z"
+    },
+    {
       "type": "qr_session_start",
-      "startAt": "2026-07-04T11:46:50.530Z",
-      "expireAt": "2026-07-04T11:49:50.530Z",
+      "startAt": "2026-07-05T04:53:45.340Z",
+      "expireAt": "2026-07-05T04:56:45.340Z",
       "durationSeconds": 180
     }
   ],
-  "lastUpdated": "2026-07-04T11:46:50.643Z",
-  "sessionStart": "2026-07-04T11:46:50.643Z"
+  "lastUpdated": "2026-07-05T04:57:53.937Z",
+  "sessionStart": "2026-07-05T04:53:45.372Z"
 }
