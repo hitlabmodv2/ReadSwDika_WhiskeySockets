@@ -125,6 +125,21 @@ const JADIBOT_EXPIRY_WARNING_THRESHOLDS = [
   { ms: 30 * 1000, label: '30 detik' }
 ]
 
+/* ================= BAILEYS VERSION CACHE ================= */
+// Fetch sekali saja — reconnect berikutnya pakai cache, tidak request internet lagi
+let _cachedBaileysVersion = null
+async function getJadibotVersion() {
+  if (_cachedBaileysVersion) return _cachedBaileysVersion
+  try {
+    const result = await fetchLatestBaileysVersion()
+    _cachedBaileysVersion = result
+    return result
+  } catch {
+    // Fallback ke versi stabil jika fetch gagal
+    return { version: [2, 3000, 1015901307], isLatest: false }
+  }
+}
+
 /* ================= STATE ================= */
 const jadibotMap = new Map()
 const jadibotClearSesiMap = new Map()    // number → clearCacheInPlace fn
@@ -1383,7 +1398,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
   const { state, saveCreds, contacts: jbContacts, groups: jbGroups, settings: jbSettings, clearCacheInPlace: jbClearCache, getSizeReport: jbSizeReport } = await useSingleFileAuthState(sessionFile)
   if (jbClearCache)   jadibotClearSesiMap.set(number, jbClearCache)
   if (jbSizeReport)   jadibotSesiReportMap.set(number, jbSizeReport)
-  const { version } = await fetchLatestBaileysVersion()
+  const { version } = await getJadibotVersion()
 
   const sock = makeWASocket({
     version,
@@ -2101,7 +2116,7 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
   const { state, saveCreds, contacts: jbContacts, groups: jbGroups, settings: jbSettings, clearCacheInPlace: jbClearCache, getSizeReport: jbSizeReport } = await useSingleFileAuthState(sessionFile)
   if (jbClearCache)   jadibotClearSesiMap.set(number, jbClearCache)
   if (jbSizeReport)   jadibotSesiReportMap.set(number, jbSizeReport)
-  const { version } = await fetchLatestBaileysVersion()
+  const { version } = await getJadibotVersion()
 
   const sock = makeWASocket({
     version,
