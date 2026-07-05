@@ -335,6 +335,45 @@ async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, dr) {
                 );
             }
 
+            // ── Section 6: Auto-Detect & Simpan ke config.json ───────────────
+            const rt = _getRealtimeStats();
+            const adPct     = dr.ramAutoDetectPercent ?? 85;
+            const autoRamMB = Math.round(rt.totalRamMB * adPct / 100);
+            // warn otomatis: usage sekarang + 10%, dibulatkan ke kelipatan 5, max 95
+            const autoWarnPct = rt.diskOk
+                ? Math.min(95, Math.max(50, Math.ceil((rt.diskPct + 10) / 5) * 5))
+                : 80;
+
+            btn.makeSections('🤖 ᴀᴜᴛᴏ-ᴅᴇᴛᴇᴋꜱɪ & ꜱɪᴍᴘᴀɴ');
+            btn.makeRow(
+                `🧠 𝗦𝗮𝘃𝗲 𝗥𝗔𝗠 𝗟𝗶𝗺𝗶𝘁`,
+                `${_fmtMB(rt.totalRamMB)} × ${adPct}% = ${_fmtMB(autoRamMB)}`,
+                `Simpan limit RAM ${_fmtMB(autoRamMB)} ke config (terdeteksi dari server sekarang)`,
+                `${pref}ramdisk autodetect ram`
+            );
+            if (rt.diskOk) {
+                btn.makeRow(
+                    `💾 𝗦𝗮𝘃𝗲 𝗗𝗶𝘀𝗸 𝗟𝗶𝗺𝗶𝘁`,
+                    `Total disk terdeteksi: ${_fmtMB(rt.totalDiskMB)}`,
+                    `Simpan limit disk ${_fmtMB(rt.totalDiskMB)} ke config (dari server sekarang)`,
+                    `${pref}ramdisk autodetect disk`
+                );
+                btn.makeRow(
+                    `⚠️ 𝗦𝗮𝘃𝗲 𝗪𝗮𝗿𝗻 𝗢𝘁𝗼`,
+                    `Disk ${rt.diskPct}% → Warn ${autoWarnPct}%`,
+                    `Set peringatan disk ${autoWarnPct}% (usage sekarang ${rt.diskPct}%, +10% margin keamanan)`,
+                    `${pref}ramdisk autodetect warn`
+                );
+            }
+            btn.makeRow(
+                `⚡ 𝗦𝗮𝘃𝗲 𝗦𝗲𝗺𝘂𝗮 𝗦𝗲𝗸𝗮𝗹𝗶𝗴𝘂𝘀`,
+                rt.diskOk
+                    ? `RAM ${_fmtMB(autoRamMB)} + Disk ${_fmtMB(rt.totalDiskMB)} + Warn ${autoWarnPct}%`
+                    : `RAM ${_fmtMB(autoRamMB)} (disk tidak terdeteksi)`,
+                `Simpan semua nilai terdeteksi realtime ke config sekaligus`,
+                `${pref}ramdisk autodetect all`
+            );
+
             await _deleteLastMsg(hisoka, m.from);
             const result = await btn.run(m.from, hisoka, m);
             if (result?.key) _lastMsgMap.set(m.from, result.key);
@@ -505,6 +544,75 @@ async function handleRamdisk({ hisoka, m, query, tolak, logCommand, loadConfig, 
             } else {
                 await _saveAndReply({ diskWarnPercent: pct }, `Disk Warn Di-set ${pct}%`);
             }
+
+        // ── autodetect ram/disk/warn/all → deteksi realtime + simpan config ─────
+        } else if (a0 === 'autodetect') {
+            const sub = a1; // ram | disk | warn | all
+            if (!sub || !['ram', 'disk', 'warn', 'all'].includes(sub)) {
+                await tolak(hisoka, m, `❌ Format: ${pref}ramdisk autodetect ram/disk/warn/all`);
+                logCommand(m, hisoka, 'ramdisk');
+                return;
+            }
+
+            const rt    = _getRealtimeStats();
+            const dr    = _getDr(loadConfig);
+            const adPct = dr.ramAutoDetectPercent ?? 85;
+            const patch = {};
+            const parts = [];
+
+            if (sub === 'ram' || sub === 'all') {
+                if (rt.totalRamMB < 64) {
+                    await tolak(hisoka, m, `❌ RAM tidak terdeteksi dengan benar (${rt.totalRamMB} MB). Coba lagi.`);
+                    logCommand(m, hisoka, 'ramdisk');
+                    return;
+                }
+                const limitMB = Math.round(rt.totalRamMB * adPct / 100);
+                patch.ramLimitMB    = limitMB;
+                patch.ramAutoDetect = false; // simpan sebagai nilai fixed dari detect
+                parts.push(`🧠 RAM Limit → ${_fmtMB(limitMB)} (${adPct}% × ${_fmtMB(rt.totalRamMB)})`);
+            }
+
+            if (sub === 'disk' || sub === 'all') {
+                if (!rt.diskOk || rt.totalDiskMB < 512) {
+                    if (sub === 'disk') {
+                        await tolak(hisoka, m, `❌ Disk tidak terdeteksi. Pastikan bot berjalan di server dengan disk yang terpasang.`);
+                        logCommand(m, hisoka, 'ramdisk');
+                        return;
+                    }
+                    // kalau 'all' dan disk gagal → skip disk, lanjut yang lain
+                    parts.push(`💾 Disk → ⚠️ tidak terdeteksi, dilewati`);
+                } else {
+                    patch.diskLimitMB = rt.totalDiskMB;
+                    parts.push(`💾 Disk Limit → ${_fmtMB(rt.totalDiskMB)}`);
+                }
+            }
+
+            if (sub === 'warn' || sub === 'all') {
+                if (!rt.diskOk) {
+                    if (sub === 'warn') {
+                        await tolak(hisoka, m, `❌ Disk tidak terdeteksi, tidak bisa hitung warn otomatis.`);
+                        logCommand(m, hisoka, 'ramdisk');
+                        return;
+                    }
+                    parts.push(`⚠️ Warn → tidak terdeteksi, dilewati`);
+                } else {
+                    const warnPct = Math.min(95, Math.max(50, Math.ceil((rt.diskPct + 10) / 5) * 5));
+                    patch.diskWarnPercent = warnPct;
+                    parts.push(`⚠️ Warn → ${warnPct}% (disk sekarang ${rt.diskPct}%)`);
+                }
+            }
+
+            if (Object.keys(patch).length === 0) {
+                await tolak(hisoka, m, `❌ Tidak ada nilai yang bisa disimpan karena deteksi gagal semua.`);
+                logCommand(m, hisoka, 'ramdisk');
+                return;
+            }
+
+            const label = `✅ *Auto-Deteksi Tersimpan!*\n\n` + parts.map(p => `• ${p}`).join('\n');
+            _saveDr(loadConfig, saveConfig, patch);
+            const drNew  = _getDr(loadConfig);
+            const body   = label + `\n\n` + _buildBody(drNew);
+            await _sendSelection(hisoka, m, Button, tolak, body, pref, drNew);
 
         // ── Perintah tidak dikenal ─────────────────────────────────────────────
         } else {
