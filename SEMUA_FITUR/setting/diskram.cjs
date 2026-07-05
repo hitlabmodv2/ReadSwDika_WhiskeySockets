@@ -41,10 +41,10 @@ function _saveDr(loadConfig, saveConfig, patch) {
 
 // ── Helper: label status ──────────────────────────────────────────────────────
 function _statusLabel(ramOn, diskOn) {
-    if (ramOn && diskOn)  return '✅ Aktif Semua (RAM + Disk)';
-    if (ramOn)            return '🧠 RAM Only';
-    if (diskOn)           return '💾 Disk Only';
-    return '❌ Nonaktif';
+    if (ramOn && diskOn)  return '✅ *Aktif Semua* _(RAM + Disk)_';
+    if (ramOn)            return '🧠 *RAM Only* _— Disk mati_';
+    if (diskOn)           return '💾 *Disk Only* _— RAM mati_';
+    return '❌ *Nonaktif* _— semua monitor mati_';
 }
 
 // ── Helper: bangun body status ────────────────────────────────────────────────
@@ -52,25 +52,35 @@ function _buildBody(dr) {
     const ramOn  = dr.ramEnabled  === true;
     const diskOn = dr.diskEnabled === true;
 
-    const ramLimit  = dr.ramAutoDetect === true
-        ? `Auto Detect (${dr.ramAutoDetectPercent ?? 85}%)`
+    const ramLimitRaw = dr.ramAutoDetect === true
+        ? `Auto Detect ${dr.ramAutoDetectPercent ?? 85}%`
         : `${dr.ramLimitMB ?? 8192} MB`;
-    const diskLimit = `${dr.diskLimitMB ?? 10240} MB`;
-    const diskWarn  = `${dr.diskWarnPercent ?? 80}%`;
+    const diskLimitRaw = `${dr.diskLimitMB ?? 10240} MB`;
+    const diskWarnRaw  = `${dr.diskWarnPercent ?? 80}%`;
+    const ramCheckRaw  = `${(dr.ramCheckIntervalMs  ?? 30000)  / 1000}s`;
+    const diskCheckRaw = `${(dr.diskCheckIntervalMs ?? 300000) / 1000}s`;
+
+    const ramStatus  = ramOn  ? '_Aktif_ ✅' : '~Nonaktif~ ❌';
+    const diskStatus = diskOn ? '_Aktif_ ✅' : '~Nonaktif~ ❌';
 
     return (
         `╭═══『 🖥️ *MONITOR RAM & DISK* 』═══╮\n` +
         `│\n` +
-        `│ ⚡ *Status   :* ${_statusLabel(ramOn, diskOn)}\n` +
+        `│ ⚡ *Status :* ${_statusLabel(ramOn, diskOn)}\n` +
         `│\n` +
-        `│ 🧠 *RAM Monitor*\n` +
-        `│   ${ramOn ? '✅' : '❌'} ${ramOn ? 'Aktif' : 'Nonaktif'} — Limit: ${ramLimit}\n` +
-        `│   ⏱️ Check: ${(dr.ramCheckIntervalMs ?? 30000) / 1000}s\n` +
+        `│ *🧠 RAM Monitor*\n` +
+        `│ • Status  : ${ramStatus}\n` +
+        `│ • Limit   : \`${ramLimitRaw}\`\n` +
+        `│ • Interval: \`${ramCheckRaw}\` sekali cek\n` +
         `│\n` +
-        `│ 💾 *Disk Monitor*\n` +
-        `│   ${diskOn ? '✅' : '❌'} ${diskOn ? 'Aktif' : 'Nonaktif'} — Limit: ${diskLimit}\n` +
-        `│   ⚠️ Warn: ${diskWarn}\n` +
-        `│   ⏱️ Check: ${(dr.diskCheckIntervalMs ?? 300000) / 1000}s\n` +
+        `│ *💾 Disk Monitor*\n` +
+        `│ • Status  : ${diskStatus}\n` +
+        `│ • Limit   : \`${diskLimitRaw}\`\n` +
+        `│ • Warn    : \`${diskWarnRaw}\` pemakaian\n` +
+        `│ • Interval: \`${diskCheckRaw}\` sekali cek\n` +
+        `│\n` +
+        `│ > 🦕 Panel *Pterodactyl®*\n` +
+        `│ > _Sesuaikan limit dengan kuota panel kamu_\n` +
         `│\n` +
         `╰══════════════════════════════╯`
     );
@@ -251,17 +261,27 @@ async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, dr) {
 
 // ── Fallback teks biasa ────────────────────────────────────────────────────────
 async function _sendFallback(tolak, hisoka, m, bodyText, pref) {
+    const p = pref;
     await tolak(hisoka, m,
         bodyText + `\n\n` +
-        `*Penggunaan:*\n` +
-        `${pref}ramdisk on — Aktifkan RAM + Disk\n` +
-        `${pref}ramdisk ram — RAM Only\n` +
-        `${pref}ramdisk disk — Disk Only\n` +
-        `${pref}ramdisk off — Nonaktifkan semua\n` +
-        `${pref}ramdisk ram autodetect on/off — Auto detect RAM\n` +
-        `${pref}ramdisk ram limit <MB> — Set limit RAM manual\n` +
-        `${pref}ramdisk disk limit <MB> — Set limit Disk\n` +
-        `${pref}ramdisk disk warn <pct> — Set warn % Disk`
+        `*📋 Cara Penggunaan .ramdisk*\n` +
+        `\n` +
+        `*⚡ Status Monitor*\n` +
+        `1. \`${p}ramdisk on\` — _Aktifkan RAM + Disk sekaligus_\n` +
+        `2. \`${p}ramdisk ram\` — _Hanya monitor RAM_\n` +
+        `3. \`${p}ramdisk disk\` — _Hanya monitor Disk_\n` +
+        `4. \`${p}ramdisk off\` — _Matikan semua monitor_\n` +
+        `\n` +
+        `*🧠 Pengaturan RAM*\n` +
+        `5. \`${p}ramdisk ram autodetect on\` — _Limit otomatis dari sistem_\n` +
+        `6. \`${p}ramdisk ram autodetect off\` — _Pakai limit manual_\n` +
+        `7. \`${p}ramdisk ram limit <MB>\` — _Contoh:_ \`${p}ramdisk ram limit 2048\`\n` +
+        `\n` +
+        `*💾 Pengaturan Disk*\n` +
+        `8. \`${p}ramdisk disk limit <MB>\` — _Contoh:_ \`${p}ramdisk disk limit 10240\`\n` +
+        `9. \`${p}ramdisk disk warn <persen>\` — _Contoh:_ \`${p}ramdisk disk warn 80\`\n` +
+        `\n` +
+        `> 🦕 Panel *Pterodactyl®* — sesuaikan limit dengan kuota panel kamu`
     );
 }
 
