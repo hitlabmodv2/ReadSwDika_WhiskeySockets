@@ -108,7 +108,7 @@
       "ramLogUsage": true,
       "ramAutoDetect": false,
       "ramAutoDetectPercent": 85,
-      "diskEnabled": false,
+      "diskEnabled": true,
       "diskLimitMB": 10240,
       "diskCheckIntervalMs": 300000,
       "diskLogIntervalMs": 300000,

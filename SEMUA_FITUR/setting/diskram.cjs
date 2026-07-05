@@ -128,129 +128,129 @@ async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, dr) {
 
             // ── preset data ───────────────────────────────────────────────────
             const RAM_PRESETS = [
-                { mb: 256,   label: '256 MB',         desc: 'Sangat kecil — bot ringan banget'          },
-                { mb: 512,   label: '512 MB',          desc: 'Kecil — cocok VPS mini / free tier'        },
-                { mb: 768,   label: '768 MB',          desc: 'Standar kecil — VPS basic'                 },
-                { mb: 1024,  label: '1024 MB  (1 GB)', desc: 'Standar — paket VPS entry'                 },
-                { mb: 1536,  label: '1536 MB',         desc: 'Menengah — 1.5 GB'                         },
-                { mb: 2048,  label: '2048 MB  (2 GB)', desc: 'Nyaman — paket VPS umum'                   },
-                { mb: 3072,  label: '3072 MB  (3 GB)', desc: 'Lega — 3 GB'                               },
-                { mb: 4096,  label: '4096 MB  (4 GB)', desc: 'Besar — bot aktif banyak fitur'            },
-                { mb: 6144,  label: '6144 MB  (6 GB)', desc: 'Lega sekali — 6 GB'                        },
-                { mb: 7168,  label: '7168 MB  (7 GB)', desc: '7 GB — hampir full 8 GB'                   },
-                { mb: 8192,  label: '8192 MB  (8 GB)', desc: '🔰 Default — umum di panel Pterodactyl®'   },
-                { mb: 10240, label: '10240 MB (10 GB)', desc: 'Besar — panel premium 10 GB'              },
-                { mb: 12288, label: '12288 MB (12 GB)', desc: '12 GB — VPS kelas menengah atas'          },
-                { mb: 16384, label: '16384 MB (16 GB)', desc: '16 GB — VPS dedicated / high spec'        },
+                { mb: 256,   label: '𝟮𝟱𝟲 𝗠𝗕',           desc: 'Sangat kecil — bot ringan banget'        },
+                { mb: 512,   label: '𝟱𝟭𝟮 𝗠𝗕',           desc: 'Kecil — cocok VPS mini / free tier'      },
+                { mb: 768,   label: '𝟳𝟲𝟴 𝗠𝗕',           desc: 'Standar kecil — VPS basic'               },
+                { mb: 1024,  label: '𝟭𝟬𝟮𝟰 𝗠𝗕 (𝟭 𝗚𝗕)',   desc: 'Standar — paket VPS entry'               },
+                { mb: 1536,  label: '𝟭𝟱𝟯𝟲 𝗠𝗕',          desc: 'Menengah — 1.5 GB'                       },
+                { mb: 2048,  label: '𝟮𝟬𝟰𝟴 𝗠𝗕 (𝟮 𝗚𝗕)',   desc: 'Nyaman — paket VPS umum'                 },
+                { mb: 3072,  label: '𝟯𝟬𝟳𝟮 𝗠𝗕 (𝟯 𝗚𝗕)',   desc: 'Lega — 3 GB'                             },
+                { mb: 4096,  label: '𝟰𝟬𝟵𝟲 𝗠𝗕 (𝟰 𝗚𝗕)',   desc: 'Besar — bot aktif banyak fitur'          },
+                { mb: 6144,  label: '𝟲𝟭𝟰𝟰 𝗠𝗕 (𝟲 𝗚𝗕)',   desc: 'Lega sekali — 6 GB'                      },
+                { mb: 7168,  label: '𝟳𝟭𝟲𝟴 𝗠𝗕 (𝟳 𝗚𝗕)',   desc: '7 GB — hampir full 8 GB'                 },
+                { mb: 8192,  label: '𝟴𝟭𝟵𝟮 𝗠𝗕 (𝟴 𝗚𝗕)',   desc: '🔰 Default — umum di panel Pterodactyl®' },
+                { mb: 10240, label: '𝟭𝟬𝟮𝟰𝟬 𝗠𝗕 (𝟭𝟬 𝗚𝗕)', desc: 'Besar — panel premium 10 GB'            },
+                { mb: 12288, label: '𝟭𝟮𝟮𝟴𝟴 𝗠𝗕 (𝟭𝟮 𝗚𝗕)', desc: '12 GB — VPS kelas menengah atas'        },
+                { mb: 16384, label: '𝟭𝟲𝟯𝟴𝟰 𝗠𝗕 (𝟭𝟲 𝗚𝗕)', desc: '16 GB — VPS dedicated / high spec'      },
             ];
 
             const DISK_PRESETS = [
-                { mb: 1024,   label: '1 GB',   desc: 'Sangat kecil — hanya untuk testing'               },
-                { mb: 2048,   label: '2 GB',   desc: 'Kecil — bot minimal tanpa media besar'             },
-                { mb: 5120,   label: '5 GB',   desc: 'Kecil-sedang — free tier / VPS mini'               },
-                { mb: 10240,  label: '10 GB',  desc: '🔰 Default — umum di panel Pterodactyl®'           },
-                { mb: 15360,  label: '15 GB',  desc: 'Sedang — cukup untuk bot aktif'                    },
-                { mb: 20480,  label: '20 GB',  desc: 'Lega — cocok dengan banyak cache media'            },
-                { mb: 25600,  label: '25 GB',  desc: '25 GB — paket menengah'                            },
-                { mb: 30720,  label: '30 GB',  desc: '30 GB — storage nyaman'                            },
-                { mb: 51200,  label: '50 GB',  desc: 'Besar — VPS storage kelas atas'                    },
-                { mb: 76800,  label: '75 GB',  desc: '75 GB — dedicated storage'                         },
-                { mb: 102400, label: '100 GB', desc: '100 GB — server / panel dedicated penuh'           },
-                { mb: 153600, label: '150 GB', desc: '150 GB — server besar'                             },
-                { mb: 204800, label: '200 GB', desc: '200 GB — storage sangat besar'                     },
-                { mb: 512000, label: '500 GB', desc: '500 GB — dedicated server skala penuh'             },
+                { mb: 1024,   label: '𝟭 𝗚𝗕',    desc: 'Sangat kecil — hanya untuk testing'              },
+                { mb: 2048,   label: '𝟮 𝗚𝗕',    desc: 'Kecil — bot minimal tanpa media besar'            },
+                { mb: 5120,   label: '𝟱 𝗚𝗕',    desc: 'Kecil-sedang — free tier / VPS mini'              },
+                { mb: 10240,  label: '𝟭𝟬 𝗚𝗕',   desc: '🔰 Default — umum di panel Pterodactyl®'          },
+                { mb: 15360,  label: '𝟭𝟱 𝗚𝗕',   desc: 'Sedang — cukup untuk bot aktif'                   },
+                { mb: 20480,  label: '𝟮𝟬 𝗚𝗕',   desc: 'Lega — cocok dengan banyak cache media'           },
+                { mb: 25600,  label: '𝟮𝟱 𝗚𝗕',   desc: '25 GB — paket menengah'                           },
+                { mb: 30720,  label: '𝟯𝟬 𝗚𝗕',   desc: '30 GB — storage nyaman'                           },
+                { mb: 51200,  label: '𝟱𝟬 𝗚𝗕',   desc: 'Besar — VPS storage kelas atas'                   },
+                { mb: 76800,  label: '𝟳𝟱 𝗚𝗕',   desc: '75 GB — dedicated storage'                        },
+                { mb: 102400, label: '𝟭𝟬𝟬 𝗚𝗕',  desc: '100 GB — server / panel dedicated penuh'          },
+                { mb: 153600, label: '𝟭𝟱𝟬 𝗚𝗕',  desc: '150 GB — server besar'                            },
+                { mb: 204800, label: '𝟮𝟬𝟬 𝗚𝗕',  desc: '200 GB — storage sangat besar'                    },
+                { mb: 512000, label: '𝟱𝟬𝟬 𝗚𝗕',  desc: '500 GB — dedicated server skala penuh'            },
             ];
 
             const WARN_PRESETS = [
-                { pct: 50, desc: '50% — Sangat dini, cocok untuk pantau ketat'    },
-                { pct: 60, desc: '60% — Dini, beri waktu luang cukup'             },
-                { pct: 70, desc: '70% — Cukup awal untuk ambil tindakan'          },
-                { pct: 75, desc: '75% — Titik tengah yang seimbang'               },
-                { pct: 80, desc: '🔰 Default — standar umum Pterodactyl®'         },
-                { pct: 85, desc: '85% — Sedikit mepet, masih aman'               },
-                { pct: 90, desc: '90% — Hampir penuh, hati-hati'                  },
-                { pct: 95,  desc: '95% — Kritis! Hanya untuk monitoring pasif'    },
-                { pct: 100, desc: '100% — Penuh total, peringatan saat disk habis' },
+                { pct: 50,  boldPct: '𝟱𝟬',  desc: '50% — Sangat dini, cocok untuk pantau ketat'     },
+                { pct: 60,  boldPct: '𝟲𝟬',  desc: '60% — Dini, beri waktu luang cukup'              },
+                { pct: 70,  boldPct: '𝟳𝟬',  desc: '70% — Cukup awal untuk ambil tindakan'           },
+                { pct: 75,  boldPct: '𝟳𝟱',  desc: '75% — Titik tengah yang seimbang'                },
+                { pct: 80,  boldPct: '𝟴𝟬',  desc: '🔰 Default — standar umum Pterodactyl®'          },
+                { pct: 85,  boldPct: '𝟴𝟱',  desc: '85% — Sedikit mepet, masih aman'                },
+                { pct: 90,  boldPct: '𝟵𝟬',  desc: '90% — Hampir penuh, hati-hati'                   },
+                { pct: 95,  boldPct: '𝟵𝟱',  desc: '95% — Kritis! Hanya untuk monitoring pasif'     },
+                { pct: 100, boldPct: '𝟭𝟬𝟬', desc: '100% — Penuh total, peringatan saat disk habis'  },
             ];
 
             const btn = new Button()
                 .setBody(bodyText)
-                .setFooter('⚡ Wily Bot • Monitor RAM & Disk  |  🦕 Pterodactyl®')
-                .addSelection('🎛️ Pilih Pengaturan')
+                .setFooter('⚡ 𝗪𝗶𝗹𝘆 𝗕𝗼𝘁 • ᴍᴏɴɪᴛᴏʀ ʀᴀᴍ & ᴅɪꜱᴋ  |  🦕 Pterodactyl®')
+                .addSelection('🎛️ ᴘɪʟɪʜ ᴘᴇɴɢᴀᴛᴜʀᴀɴ')
 
                 // ── Section 1: Status On/Off ──────────────────────────────────
-                .makeSections('⚡ Status Monitor')
+                .makeSections('⚡ ꜱᴛᴀᴛᴜꜱ ᴍᴏɴɪᴛᴏʀ')
                 .makeRow(
-                    markM('all') + '✅ Aktif Semua',
-                    'RAM + Disk — keduanya nyala',
+                    markM('all') + '✅ 𝗔𝗸𝘁𝗶𝗳 𝗦𝗲𝗺𝘂𝗮',
+                    '𝗥𝗔𝗠 + 𝗗𝗶𝘀𝗸 — keduanya nyala',
                     modeKey === 'all' ? activeDesc('Monitor RAM & Disk aktif bersamaan') : 'Aktifkan monitor RAM dan Disk sekaligus',
                     `${pref}ramdisk on`
                 )
                 .makeRow(
-                    markM('ram') + '🧠 RAM Only',
-                    'Hanya monitor RAM',
+                    markM('ram') + '🧠 𝗥𝗔𝗠 𝗢𝗻𝗹𝘆',
+                    'Hanya monitor 𝗥𝗔𝗠',
                     modeKey === 'ram' ? activeDesc('Hanya RAM, Disk dimatikan') : 'Monitor RAM saja, Disk tidak aktif',
                     `${pref}ramdisk ram`
                 )
                 .makeRow(
-                    markM('disk') + '💾 Disk Only',
-                    'Hanya monitor Disk',
+                    markM('disk') + '💾 𝗗𝗶𝘀𝗸 𝗢𝗻𝗹𝘆',
+                    'Hanya monitor 𝗗𝗶𝘀𝗸',
                     modeKey === 'disk' ? activeDesc('Hanya Disk, RAM dimatikan') : 'Monitor Disk saja, RAM tidak aktif',
                     `${pref}ramdisk disk`
                 )
                 .makeRow(
-                    markM('off') + '❌ Nonaktif',
+                    markM('off') + '❌ 𝗡𝗼𝗻𝗮𝗸𝘁𝗶𝗳',
                     'Matikan semua monitor',
                     modeKey === 'off' ? activeDesc('Semua monitor nonaktif') : 'Matikan RAM & Disk monitor sekaligus',
                     `${pref}ramdisk off`
                 )
 
                 // ── Section 2: RAM — Auto Detect ──────────────────────────────
-                .makeSections('🧠 RAM — Mode Limit')
+                .makeSections('🧠 ʀᴀᴍ — ᴍᴏᴅᴇ ʟɪᴍɪᴛ')
                 .makeRow(
-                    markAD(true) + '🔍 Auto Detect ON',
+                    markAD(true) + '🔍 𝗔𝘂𝘁𝗼 𝗗𝗲𝘁𝗲𝗰𝘁 𝗢𝗡',
                     `Otomatis dari RAM fisik (${dr.ramAutoDetectPercent ?? 85}%)`,
                     autoDetect ? activeDesc(`${dr.ramAutoDetectPercent ?? 85}% dari total RAM terdeteksi`) : `Limit = ${dr.ramAutoDetectPercent ?? 85}% dari total RAM fisik panel`,
                     `${pref}ramdisk ram autodetect on`
                 )
                 .makeRow(
-                    markAD(false) + '✏️ Manual Limit',
-                    `Pakai nilai MB dari pilihan bawah`,
+                    markAD(false) + '✏️ 𝗠𝗮𝗻𝘂𝗮𝗹 𝗟𝗶𝗺𝗶𝘁',
+                    `Pakai nilai 𝗠𝗕 dari pilihan bawah`,
                     !autoDetect ? activeDesc(`Saat ini ${curRamMB} MB`) : 'Pilih salah satu nilai MB di bawah ini',
                     `${pref}ramdisk ram autodetect off`
                 );
 
             // ── Section 3: RAM — Pilih Limit Manual (loop) ───────────────────
-            btn.makeSections('🧠 RAM — Pilih Limit (MB)');
+            btn.makeSections('🧠 ʀᴀᴍ — ᴘɪʟɪʜ ʟɪᴍɪᴛ (ᴍʙ)');
             for (const r of RAM_PRESETS) {
                 const aktif = !autoDetect && curRamMB === r.mb;
                 btn.makeRow(
                     markRL(r.mb) + r.label,
-                    `RAM Limit ${r.label}`,
+                    `𝗥𝗔𝗠 𝗟𝗶𝗺𝗶𝘁 ${r.label}`,
                     aktif ? activeDesc(r.desc) : r.desc,
                     `${pref}ramdisk ram limit ${r.mb}`
                 );
             }
 
             // ── Section 4: Disk — Pilih Limit (loop) ─────────────────────────
-            btn.makeSections('💾 Disk — Pilih Limit');
+            btn.makeSections('💾 ᴅɪꜱᴋ — ᴘɪʟɪʜ ʟɪᴍɪᴛ');
             for (const d of DISK_PRESETS) {
                 const aktif = curDiskMB === d.mb;
                 btn.makeRow(
                     markDL(d.mb) + d.label,
-                    `Disk Limit ${d.label}`,
+                    `𝗗𝗶𝘀𝗸 𝗟𝗶𝗺𝗶𝘁 ${d.label}`,
                     aktif ? activeDesc(d.desc) : d.desc,
                     `${pref}ramdisk disk limit ${d.mb}`
                 );
             }
 
             // ── Section 5: Disk — Warning % (loop) ───────────────────────────
-            btn.makeSections('⚠️ Disk — Batas Peringatan (%)');
+            btn.makeSections('⚠️ ᴅɪꜱᴋ — ʙᴀᴛᴀꜱ ᴘᴇʀɪɴɢᴀᴛᴀɴ (%)');
             for (const w of WARN_PRESETS) {
                 const aktif = curWarn === w.pct;
                 btn.makeRow(
-                    markDW(w.pct) + `⚠️ Warn ${w.pct}%`,
-                    `Peringatan saat disk ≥ ${w.pct}%`,
+                    markDW(w.pct) + `⚠️ 𝗪𝗮𝗿𝗻 ${w.boldPct}%`,
+                    `ᴘᴇʀɪɴɢᴀᴛᴀɴ saat disk ≥ ${w.boldPct}%`,
                     aktif ? activeDesc(w.desc) : w.desc,
                     `${pref}ramdisk disk warn ${w.pct}`
                 );
