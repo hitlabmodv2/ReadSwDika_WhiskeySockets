@@ -1239,7 +1239,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         }
                         case 'wilyai': {
                                 const { handleWilyai } = _require(path.resolve('./SEMUA_FITUR/tools/wilyai.cjs'));
-                                await handleWilyai({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, isMainBot, countHistory, clearAllHistory, clearAllUserMemory });
+                                await handleWilyai({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, isMainBot, countHistory, clearAllHistory, clearAllUserMemory, Button });
                                 break;
                         }
 
