@@ -24,6 +24,51 @@
  */
 'use strict';
 
+const os            = require('os');
+const { execSync }  = require('child_process');
+
+// ── Real-time stats: baca RAM + Disk langsung dari server saat ini ─────────────
+function _getRealtimeStats() {
+    // ─ RAM ─────────────────────────────────────────────────────────────────────
+    const totalRamMB = Math.round(os.totalmem() / 1024 / 1024);
+    const freeRamMB  = Math.round(os.freemem()  / 1024 / 1024);
+    const usedRamMB  = totalRamMB - freeRamMB;
+    const ramPct     = Math.round((usedRamMB / totalRamMB) * 100);
+
+    // ─ Disk — coba path berurutan: Pterodactyl → cwd → / ──────────────────────
+    let totalDiskMB = 0, usedDiskMB = 0, freeDiskMB = 0, diskPct = 0, diskOk = false;
+    const diskPaths = ['/home/container', process.cwd(), '/'];
+    for (const p of diskPaths) {
+        try {
+            const raw  = execSync(`df -Pk "${p}" 2>/dev/null`, { timeout: 3000 }).toString().trim().split('\n');
+            const cols = raw[1].trim().split(/\s+/);
+            const tKB  = parseInt(cols[1]);
+            if (!isNaN(tKB) && tKB > 1024) {   // skip overlay kecil (<1 MB)
+                totalDiskMB = Math.round(tKB / 1024);
+                usedDiskMB  = Math.round(parseInt(cols[2]) / 1024);
+                freeDiskMB  = Math.round(parseInt(cols[3]) / 1024);
+                diskPct     = Math.round(parseInt(cols[2]) / tKB * 100);
+                diskOk      = true;
+                break;
+            }
+        } catch (_) {}
+    }
+
+    return { totalRamMB, usedRamMB, freeRamMB, ramPct, totalDiskMB, usedDiskMB, freeDiskMB, diskPct, diskOk };
+}
+
+// ── Helper: mini bar (10 blok) ─────────────────────────────────────────────────
+function _bar(pct, len = 8) {
+    const filled = Math.max(0, Math.min(len, Math.round((pct / 100) * len)));
+    return '█'.repeat(filled) + '░'.repeat(len - filled);
+}
+
+// ── Helper: format MB → tampil singkat ────────────────────────────────────────
+function _fmtMB(mb) {
+    if (mb >= 1024) return (mb / 1024).toFixed(1) + ' GB';
+    return mb + ' MB';
+}
+
 // ── Helper: ambil config DisRam dari config.json ───────────────────────────────
 function _getDr(loadConfig) {
     const cfg = loadConfig();
@@ -47,15 +92,25 @@ function _statusLabel(ramOn, diskOn) {
     return '❌ *Nonaktif* _— semua monitor mati_';
 }
 
-// ── Helper: bangun body status ────────────────────────────────────────────────
+// ── Helper: bangun body status + realtime ─────────────────────────────────────
 function _buildBody(dr) {
     const ramOn  = dr.ramEnabled  === true;
     const diskOn = dr.diskEnabled === true;
 
-    const ramLimitRaw = dr.ramAutoDetect === true
-        ? `Auto Detect ${dr.ramAutoDetectPercent ?? 85}%`
-        : `${dr.ramLimitMB ?? 8192} MB`;
-    const diskLimitRaw = `${dr.diskLimitMB ?? 10240} MB`;
+    // ── Realtime baca langsung dari server ──────────────────────────────────
+    const rt = _getRealtimeStats();
+
+    // ── Hitung limit RAM (autodetect pakai % dari total real) ───────────────
+    const autoDetect   = dr.ramAutoDetect === true;
+    const autoDetectPct = dr.ramAutoDetectPercent ?? 85;
+    const ramLimitMB   = autoDetect
+        ? Math.round(rt.totalRamMB * autoDetectPct / 100)
+        : (dr.ramLimitMB ?? 8192);
+    const ramLimitRaw  = autoDetect
+        ? `Auto ${autoDetectPct}% → ${_fmtMB(ramLimitMB)}`
+        : _fmtMB(ramLimitMB);
+
+    const diskLimitRaw = _fmtMB(dr.diskLimitMB ?? 10240);
     const diskWarnRaw  = `${dr.diskWarnPercent ?? 80}%`;
     const ramCheckRaw  = `${(dr.ramCheckIntervalMs  ?? 30000)  / 1000}s`;
     const diskCheckRaw = `${(dr.diskCheckIntervalMs ?? 300000) / 1000}s`;
@@ -63,10 +118,34 @@ function _buildBody(dr) {
     const ramStatus  = ramOn  ? '_Aktif_ ✅' : '~Nonaktif~ ❌';
     const diskStatus = diskOn ? '_Aktif_ ✅' : '~Nonaktif~ ❌';
 
+    // ── Bar realtime ────────────────────────────────────────────────────────
+    const ramBar  = _bar(rt.ramPct);
+    const ramIcon = rt.ramPct >= 90 ? '🔴' : rt.ramPct >= 70 ? '🟡' : '🟢';
+
+    let diskLine = '';
+    if (rt.diskOk) {
+        const diskBar  = _bar(rt.diskPct);
+        const diskIcon = rt.diskPct >= 90 ? '🔴' : rt.diskPct >= 70 ? '🟡' : '🟢';
+        diskLine =
+            `│\n` +
+            `│ 📊 *Realtime Disk*\n` +
+            `│ • ${diskIcon} \`${diskBar}\` ${rt.diskPct}%\n` +
+            `│ • Pakai : \`${_fmtMB(rt.usedDiskMB)}\` / \`${_fmtMB(rt.totalDiskMB)}\`\n` +
+            `│ • Sisa  : \`${_fmtMB(rt.freeDiskMB)}\`\n`;
+    } else {
+        diskLine = `│\n│ 📊 *Realtime Disk* : _tidak terdeteksi_\n`;
+    }
+
     return (
         `╭═══『 🖥️ *MONITOR RAM & DISK* 』═══╮\n` +
         `│\n` +
         `│ ⚡ *Status :* ${_statusLabel(ramOn, diskOn)}\n` +
+        `│\n` +
+        `│ 📊 *Realtime RAM* _(server saat ini)_\n` +
+        `│ • ${ramIcon} \`${ramBar}\` ${rt.ramPct}%\n` +
+        `│ • Pakai : \`${_fmtMB(rt.usedRamMB)}\` / \`${_fmtMB(rt.totalRamMB)}\`\n` +
+        `│ • Sisa  : \`${_fmtMB(rt.freeRamMB)}\`\n` +
+        diskLine +
         `│\n` +
         `│ *🧠 RAM Monitor*\n` +
         `│ • Status  : ${ramStatus}\n` +
@@ -80,7 +159,7 @@ function _buildBody(dr) {
         `│ • Interval: \`${diskCheckRaw}\` sekali cek\n` +
         `│\n` +
         `│ > 🦕 Panel *Pterodactyl®*\n` +
-        `│ > _Sesuaikan limit dengan kuota panel kamu_\n` +
+        `│ > _Limit menyesuaikan server tempat bot jalan_\n` +
         `│\n` +
         `╰══════════════════════════════╯`
     );
