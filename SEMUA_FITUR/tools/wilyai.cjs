@@ -25,6 +25,9 @@
  */
 'use strict';
 
+const path = require('path');
+const { sendListMessage } = require(path.resolve('./SEMUA_FITUR/helper/interactive-msg.cjs'));
+
 // ── Map: simpan key pesan terakhir per JID untuk auto-delete ─────────────────
 const _lastMsgMap = new Map();
 
@@ -51,92 +54,92 @@ function _buildBody(w, totalSesi) {
     );
 }
 
-// ── Kirim selection button ────────────────────────────────────────────────────
-async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, w, totalSesi) {
-    if (Button) {
-        let sent = false;
-        try {
-            const isEnabled   = w.enabled !== false;
-            const isAutoReply = w.autoReply !== false;
-            const scope       = w.scope || 'all';
+// ── Kirim selection list ──────────────────────────────────────────────────────
+// Pakai sendListMessage (interactiveMessage + fallback listMessage proto)
+// → tidak pakai additionalNodes v:'9' name:'mixed' yang trigger Gemmy di WA lama
+async function _sendSelection(hisoka, m, tolak, bodyText, pref, w, totalSesi) {
+    const mark       = (cond) => cond ? '✓ ' : '';
+    const activeDesc = (base) => `⚡ Sedang Aktif — ${base}`;
 
-            const mark       = (cond) => cond ? '✓ ' : '';
-            const activeDesc = (base) => `⚡ Sedang Aktif — ${base}`;
+    const isEnabled   = w.enabled !== false;
+    const isAutoReply = w.autoReply !== false;
+    const scope       = w.scope || 'all';
 
-            const btn = new Button()
-                .setBody(bodyText)
-                .setFooter('⚡ Wily Bot • Wily AI Setting')
-                .addSelection('🎛️ Pilih Pengaturan')
+    await _deleteLastMsg(hisoka, m.from);
 
-                // ── Section 1: Status .wily / .ai / .tanya ───────────────
-                .makeSections('⚙️ Status .wily')
-                .makeRow(
-                    mark(isEnabled)  + '✅ Aktifkan',
-                    'Nyalakan fitur .wily / .ai / .tanya',
-                    isEnabled  ? activeDesc('User bisa pakai .wily, .ai, .tanya') : 'Aktifkan perintah AI untuk semua user',
-                    `${pref}wilyai on`
-                )
-                .makeRow(
-                    mark(!isEnabled) + '❌ Matikan',
-                    'Matikan fitur .wily / .ai / .tanya',
-                    !isEnabled ? activeDesc('Perintah AI dinonaktifkan') : 'Matikan — user tidak bisa pakai AI',
-                    `${pref}wilyai off`
-                )
-
-                // ── Section 2: Auto Reply ─────────────────────────────────
-                .makeSections('💬 Auto Reply AI')
-                .makeRow(
-                    mark(isAutoReply)  + '✅ Aktifkan',
-                    'Bot auto balas dengan AI',
-                    isAutoReply  ? activeDesc('Bot otomatis balas pesan sesuai scope') : 'Aktifkan auto reply AI sesuai scope',
-                    `${pref}wilyai replay on`
-                )
-                .makeRow(
-                    mark(!isAutoReply) + '❌ Matikan',
-                    'Matikan auto reply',
-                    !isAutoReply ? activeDesc('.wily masih bisa dipakai manual') : 'Matikan — .wily tetap bisa dipakai manual',
-                    `${pref}wilyai replay off`
-                )
-
-                // ── Section 3: Scope ──────────────────────────────────────
-                .makeSections('🎯 Scope Auto Reply')
-                .makeRow(
-                    mark(scope === 'all') + '🌐 Semua (PM + GC)',
-                    'Private + Grup',
-                    scope === 'all' ? activeDesc('Auto reply aktif di PM dan Grup') : 'Auto reply di private chat dan grup',
-                    `${pref}wilyai all`
-                )
-                .makeRow(
-                    mark(scope === 'pm') + '📩 Private Only',
-                    'Hanya Private Chat (DM)',
-                    scope === 'pm' ? activeDesc('Auto reply hanya di private chat') : 'Hanya auto reply di private chat (DM)',
-                    `${pref}wilyai pm`
-                )
-                .makeRow(
-                    mark(scope === 'gc') + '👥 Grup Only',
-                    'Hanya Grup',
-                    scope === 'gc' ? activeDesc('Auto reply hanya di grup') : 'Hanya auto reply di grup',
-                    `${pref}wilyai gc`
-                )
-
-                // ── Section 4: History ────────────────────────────────────
-                .makeSections('🗑️ History & Memori')
-                .makeRow(
-                    '🗑️ Reset Semua History',
-                    `Hapus ${totalSesi} sesi + semua memori user`,
-                    totalSesi > 0 ? `Ada ${totalSesi} sesi — tap untuk hapus semua` : 'Tidak ada sesi tersimpan',
-                    `${pref}wilyai reset`
-                );
-
-            await _deleteLastMsg(hisoka, m.from);
-            const result = await btn.run(m.from, hisoka, m);
-            if (result?.key) _lastMsgMap.set(m.from, result.key);
-            sent = true;
-        } catch (_) {}
-        if (!sent) await _sendFallback(tolak, hisoka, m, bodyText, pref);
-    } else {
-        await _sendFallback(tolak, hisoka, m, bodyText, pref);
-    }
+    // sendListMessage sudah punya fallback: interactiveMessage → listMessage → plain text
+    // tidak akan throw, tidak perlu try-catch di sini
+    await sendListMessage(hisoka, m.from, m, {
+        body:       bodyText,
+        buttonText: '🎛️ Pilih Pengaturan',
+        footer:     '⚡ Wily Bot • Wily AI Setting',
+        sections: [
+            // ── Section 1: Status .wily ──────────────────────────────────
+            {
+                title: '⚙️ Status .wily',
+                rows: [
+                    {
+                        rowId:       `${pref}wilyai on`,
+                        title:       mark(isEnabled)  + '✅ Aktifkan .wily',
+                        description: isEnabled  ? activeDesc('User bisa pakai .wily, .ai, .tanya') : 'Aktifkan perintah AI untuk semua user',
+                    },
+                    {
+                        rowId:       `${pref}wilyai off`,
+                        title:       mark(!isEnabled) + '❌ Matikan .wily',
+                        description: !isEnabled ? activeDesc('Perintah AI dinonaktifkan') : 'Matikan — user tidak bisa pakai AI',
+                    },
+                ],
+            },
+            // ── Section 2: Auto Reply ─────────────────────────────────────
+            {
+                title: '💬 Auto Reply AI',
+                rows: [
+                    {
+                        rowId:       `${pref}wilyai replay on`,
+                        title:       mark(isAutoReply)  + '✅ Aktifkan Auto Reply',
+                        description: isAutoReply  ? activeDesc('Bot otomatis balas pesan sesuai scope') : 'Aktifkan auto reply AI sesuai scope',
+                    },
+                    {
+                        rowId:       `${pref}wilyai replay off`,
+                        title:       mark(!isAutoReply) + '❌ Matikan Auto Reply',
+                        description: !isAutoReply ? activeDesc('.wily masih bisa dipakai manual') : 'Matikan — .wily tetap bisa manual',
+                    },
+                ],
+            },
+            // ── Section 3: Scope ──────────────────────────────────────────
+            {
+                title: '🎯 Scope Auto Reply',
+                rows: [
+                    {
+                        rowId:       `${pref}wilyai all`,
+                        title:       mark(scope === 'all') + '🌐 Semua (PM + GC)',
+                        description: scope === 'all' ? activeDesc('Auto reply aktif di PM dan Grup') : 'Auto reply di private chat dan grup',
+                    },
+                    {
+                        rowId:       `${pref}wilyai pm`,
+                        title:       mark(scope === 'pm')  + '📩 Private Only',
+                        description: scope === 'pm'  ? activeDesc('Auto reply hanya di private chat') : 'Hanya auto reply di private chat (DM)',
+                    },
+                    {
+                        rowId:       `${pref}wilyai gc`,
+                        title:       mark(scope === 'gc')  + '👥 Grup Only',
+                        description: scope === 'gc'  ? activeDesc('Auto reply hanya di grup') : 'Hanya auto reply di grup',
+                    },
+                ],
+            },
+            // ── Section 4: History ────────────────────────────────────────
+            {
+                title: '🗑️ History & Memori',
+                rows: [
+                    {
+                        rowId:       `${pref}wilyai reset`,
+                        title:       '🗑️ Reset Semua History',
+                        description: totalSesi > 0 ? `Ada ${totalSesi} sesi — tap untuk hapus semua` : 'Tidak ada sesi tersimpan',
+                    },
+                ],
+            },
+        ],
+    });
 }
 
 // ── Fallback teks biasa ───────────────────────────────────────────────────────
@@ -154,7 +157,7 @@ async function _sendFallback(tolak, hisoka, m, bodyText, pref) {
 }
 
 // ── HANDLER: wilyai ───────────────────────────────────────────────────────────
-async function handleWilyai({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, isMainBot, countHistory, clearAllHistory, clearAllUserMemory, Button }) {
+async function handleWilyai({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, isMainBot, countHistory, clearAllHistory, clearAllUserMemory }) {
     if (!isMainBot(hisoka)) return;
     if (!m.isOwner) return;
     try {
@@ -174,7 +177,7 @@ async function handleWilyai({ hisoka, m, query, tolak, logCommand, loadConfig, s
             const bodyText  = extraPrefix
                 ? extraPrefix + '\n\n' + _buildBody(freshW, totalSesi)
                 : _buildBody(freshW, totalSesi);
-            await _sendSelection(hisoka, m, Button, tolak, bodyText, pref, freshW, totalSesi);
+            await _sendSelection(hisoka, m, tolak, bodyText, pref, freshW, totalSesi);
         };
 
         // ── Tanpa sub-command → tampilkan button ─────────────────────────
