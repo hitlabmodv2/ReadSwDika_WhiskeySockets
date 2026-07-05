@@ -69,6 +69,19 @@ function _fmtMB(mb) {
     return mb + ' MB';
 }
 
+// ── Helper: hitung warn otomatis dari total disk terdeteksi ───────────────────
+// Logika: sisakan minimal 10% total disk ATAU 2 GB (mana lebih besar)
+// lalu konversi ke persentase warn, bulatkan ke kelipatan 5, pastikan
+// di atas usage sekarang, clamp 50–95
+function _calcAutoWarn(rt) {
+    if (!rt.diskOk || rt.totalDiskMB < 512) return 80;
+    const safeFreeMB = Math.max(2048, Math.round(rt.totalDiskMB * 0.10));
+    const rawPct     = Math.round((1 - safeFreeMB / rt.totalDiskMB) * 100);
+    const byDisk     = Math.ceil(rawPct / 5) * 5;           // bulatkan ke atas ke kelipatan 5
+    const byUsage    = Math.ceil((rt.diskPct + 5) / 5) * 5; // minimal 5% di atas usage sekarang
+    return Math.min(95, Math.max(50, Math.max(byDisk, byUsage)));
+}
+
 // ── Helper: ambil config DisRam dari config.json ───────────────────────────────
 function _getDr(loadConfig) {
     const cfg = loadConfig();
@@ -256,9 +269,7 @@ async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, dr) {
             const rt = _getRealtimeStats();
             const adPct     = dr.ramAutoDetectPercent ?? 85;
             const autoRamMB = Math.round(rt.totalRamMB * adPct / 100);
-            const autoWarnPct = rt.diskOk
-                ? Math.min(95, Math.max(50, Math.ceil((rt.diskPct + 10) / 5) * 5))
-                : 80;
+            const autoWarnPct = _calcAutoWarn(rt);
 
             const btn = new Button()
                 .setBody(bodyText)
@@ -361,8 +372,8 @@ async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, dr) {
             if (rt.diskOk) {
                 btn.makeRow(
                     `⚠️ 𝗦𝗮𝘃𝗲 𝗪𝗮𝗿𝗻 𝗢𝘁𝗼`,
-                    `Disk ${rt.diskPct}% → Warn ${autoWarnPct}%`,
-                    `Set peringatan disk ${autoWarnPct}% (usage sekarang ${rt.diskPct}%, +10% margin keamanan)`,
+                    `Disk total ${_fmtMB(rt.totalDiskMB)} → Warn ${autoWarnPct}%`,
+                    `Sisakan min 10% atau 2 GB bebas — warn otomatis ${autoWarnPct}% dari total ${_fmtMB(rt.totalDiskMB)}`,
                     `${pref}ramdisk autodetect warn`
                 );
             }
@@ -598,9 +609,9 @@ async function handleRamdisk({ hisoka, m, query, tolak, logCommand, loadConfig, 
                     }
                     parts.push(`⚠️ Warn → tidak terdeteksi, dilewati`);
                 } else {
-                    const warnPct = Math.min(95, Math.max(50, Math.ceil((rt.diskPct + 10) / 5) * 5));
+                    const warnPct = _calcAutoWarn(rt);
                     patch.diskWarnPercent = warnPct;
-                    parts.push(`⚠️ Warn → ${warnPct}% (disk sekarang ${rt.diskPct}%)`);
+                    parts.push(`⚠️ Warn → ${warnPct}% (total disk ${_fmtMB(rt.totalDiskMB)}, sisa aman ${_fmtMB(Math.max(2048, Math.round(rt.totalDiskMB * 0.10)))})`);
                 }
             }
 
