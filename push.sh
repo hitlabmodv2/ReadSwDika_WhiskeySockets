@@ -6259,6 +6259,7 @@ action_delete_file_folder() {
   local -A _dfb_isdir=()
   local _search_mode=0
   local _search_term=""
+  local _recent_mode=0
 
   while true; do
     clear >/dev/tty 2>/dev/null || true
@@ -6307,6 +6308,49 @@ action_delete_file_folder() {
       echo -e "  ${C_DIM}• Ketik kode untuk langsung dihapus, boleh gabung spasi (misal: ${C_RESET}${C_BOLD}1 2${C_RESET}${C_DIM}).${C_RESET}"
       echo -e "  ${C_DIM}• Ketik ${C_RESET}${C_BOLD}/kata${C_RESET}${C_DIM} lagi untuk cari ulang dengan kata kunci lain.${C_RESET}"
       echo -e "  ${C_DIM}• ${C_RESET}${C_BOLD}b${C_RESET}${C_DIM} = keluar dari mode pencarian, kembali browsing folder.${C_RESET}"
+      echo -e "  ${C_DIM}0 = kembali ke menu${C_RESET}"
+    elif [ "$_recent_mode" -eq 1 ]; then
+      echo -e "  ${C_DIM}branch : ${C_RESET}${C_GREEN}${DEFAULT_BRANCH}${C_RESET}   ${C_DIM}mode : ${C_RESET}${C_BOLD}File terbaru diubah${C_RESET}"
+      echo -e "${C_DIM}  ──────────────────────────────────${C_RESET}"
+
+      local -a _recent_list=()
+      mapfile -t _recent_list < <(
+        find . -path ./.git -prune -o -type f -printf '%T@ %p\n' -print 2>/dev/null \
+          | grep -v '^\.git$' \
+          | sort -rn \
+          | awk '{ $1=""; sub(/^ /,""); print }' \
+          | sed 's#^\./##' \
+          | awk '!seen[$0]++' \
+          | head -n 20
+      )
+
+      local i=0
+      for _te in "${_recent_list[@]}"; do
+        [ -z "$_te" ] && continue
+        _code="$((i + 1))"
+        _dfb_path["$_code"]="$_te"
+        if [ -d "$_te" ]; then
+          _dfb_isdir["$_code"]=1
+          _dirs+=("$_te")
+          echo -e "     ${C_YELLOW}${C_BOLD}${_code}${C_RESET} › ${C_YELLOW}📁 ${_te}/${C_RESET}"
+        else
+          _dfb_isdir["$_code"]=0
+          _files+=("$_te")
+          local _mt
+          _mt=$(date -r "$_te" '+%d-%m %H:%M' 2>/dev/null)
+          echo -e "     ${C_CYAN}${C_BOLD}${_code}${C_RESET} › ${C_RESET}📄 ${_te}${C_RESET} ${C_DIM}(${_mt})${C_RESET}"
+        fi
+        i=$((i + 1))
+      done
+
+      if [ "$i" -eq 0 ]; then
+        echo -e "     ${C_DIM}(tidak ada file ditemukan)${C_RESET}"
+      fi
+      echo -e "${C_DIM}  ──────────────────────────────────${C_RESET}"
+      echo -e "  ${C_DIM}Menampilkan ${i} file yang paling baru diubah${C_RESET}"
+      echo ""
+      echo -e "  ${C_DIM}• Ketik kode untuk langsung dihapus, boleh gabung spasi (misal: ${C_RESET}${C_BOLD}1 2${C_RESET}${C_DIM}).${C_RESET}"
+      echo -e "  ${C_DIM}• ${C_RESET}${C_BOLD}b${C_RESET}${C_DIM} = keluar dari mode ini, kembali browsing folder.${C_RESET}"
       echo -e "  ${C_DIM}0 = kembali ke menu${C_RESET}"
     else
       echo -e "  ${C_DIM}branch : ${C_RESET}${C_GREEN}${DEFAULT_BRANCH}${C_RESET}   ${C_DIM}folder : ${C_RESET}${C_BOLD}/${_cur_rel}${C_RESET}"
@@ -6362,6 +6406,7 @@ action_delete_file_folder() {
       echo -e "  ${C_DIM}• Ketik kode file/folder untuk dihapus, boleh gabung spasi (misal: ${C_RESET}${C_BOLD}2 1a 1b${C_RESET}${C_DIM}).${C_RESET}"
       echo -e "  ${C_DIM}• Kalau mau hapus folder langsung tanpa masuk, kasih awalan ${C_RESET}${C_BOLD}x${C_RESET}${C_DIM} (misal: ${C_RESET}${C_BOLD}x1${C_RESET}${C_DIM}).${C_RESET}"
       echo -e "  ${C_DIM}• Ketik ${C_RESET}${C_BOLD}/kata${C_RESET}${C_DIM} untuk cari file/folder di seluruh repo (misal: ${C_RESET}${C_BOLD}/push.sh${C_RESET}${C_DIM}).${C_RESET}"
+      echo -e "  ${C_DIM}• Ketik ${C_RESET}${C_BOLD}@${C_RESET}${C_DIM} untuk lihat file yang paling baru diubah.${C_RESET}"
       if [ "${#_nav_stack[@]}" -gt 0 ]; then
         echo -e "  ${C_DIM}• ${C_RESET}${C_BOLD}b${C_RESET}${C_DIM} = kembali ke folder sebelumnya.${C_RESET}"
       fi
@@ -6384,14 +6429,22 @@ action_delete_file_folder() {
       /?*)
         _search_term="${raw_input:1}"
         _search_mode=1
+        _recent_mode=0
+        continue
+        ;;
+      @)
+        _recent_mode=1
+        _search_mode=0
+        _search_term=""
         continue
         ;;
     esac
 
     if [ "$raw_input" = "b" ] || [ "$raw_input" = "B" ] || [ "$raw_input" = ".." ]; then
-      if [ "$_search_mode" -eq 1 ]; then
+      if [ "$_search_mode" -eq 1 ] || [ "$_recent_mode" -eq 1 ]; then
         _search_mode=0
         _search_term=""
+        _recent_mode=0
       elif [ "${#_nav_stack[@]}" -gt 0 ]; then
         _cur_rel="${_nav_stack[-1]}"
         unset '_nav_stack[-1]'
@@ -6404,8 +6457,8 @@ action_delete_file_folder() {
     read -r -a _tokens <<< "$raw_input"
 
     # Kalau input cuma 1 token dan itu kode folder tanpa awalan "x" → masuk folder
-    # (tidak berlaku di mode pencarian, karena hasil pencarian bukan hierarki lokal)
-    if [ "$_search_mode" -eq 0 ] && [ "${#_tokens[@]}" -eq 1 ]; then
+    # (tidak berlaku di mode pencarian/recent, karena hasil listnya bukan hierarki lokal)
+    if [ "$_search_mode" -eq 0 ] && [ "$_recent_mode" -eq 0 ] && [ "${#_tokens[@]}" -eq 1 ]; then
       local _t="${_tokens[0]}"
       if [ -n "${_dfb_isdir[$_t]+x}" ] && [ "${_dfb_isdir[$_t]}" -eq 1 ]; then
         _nav_stack+=("$_cur_rel")
