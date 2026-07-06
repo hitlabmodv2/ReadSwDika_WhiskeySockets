@@ -57,6 +57,7 @@ import {
   getStoryCountToday,
   createSwTracker,
   initJadibotCekswConfig,
+  lookupSwMsgOwner,
 } from './swtrack.js'
 import { injectClient } from '../helper/inject.js'
 import { useSingleFileAuthState } from './authState.js'
@@ -2006,18 +2007,42 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
         if (_isStatusRevoke && _deletedId) {
           try {
             const _jadibotUserDir = path.join(process.cwd(), 'data_jadibot', number, 'swtrack', 'users')
-            if (fs.existsSync(_jadibotUserDir)) {
+            const _color = getJadibotLogColor(number)
+            let _handled = false
+            // ── Fast path: LRU lookup (O(1), tanpa disk scan) ──
+            const _lruOwner = lookupSwMsgOwner(_deletedId, number)
+            if (_lruOwner) {
+              const _fp = path.join(_jadibotUserDir, `${_lruOwner}.json`)
+              if (fs.existsSync(_fp)) {
+                try {
+                  const _d = JSON.parse(fs.readFileSync(_fp, 'utf-8'))
+                  if (_d[_deletedId]) {
+                    _handled = true
+                    if (!_d[_deletedId].deleted) {
+                      _d[_deletedId] = { ..._d[_deletedId], deleted: true, deletedAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
+                      const _tmpFp = _fp + '.tmp'
+                      fs.writeFileSync(_tmpFp, JSON.stringify(_d, null, 2), 'utf-8')
+                      fs.renameSync(_tmpFp, _fp)
+                      console.log(`${_color}[SwTrack][JB:${number}] SW dihapus (LRU): ${_lruOwner} → ${_deletedId}\x1b[39m`)
+                    }
+                  }
+                } catch {}
+              }
+            }
+            // ── Slow path: full scan (LRU miss / file hilang / entry tidak ketemu) ──
+            if (!_handled && fs.existsSync(_jadibotUserDir)) {
               const _files = fs.readdirSync(_jadibotUserDir).filter(f => f.endsWith('.json'))
               for (const _file of _files) {
                 const _fp = path.join(_jadibotUserDir, _file)
                 try {
                   const _d = JSON.parse(fs.readFileSync(_fp, 'utf-8'))
                   if (_d[_deletedId]) {
-                    if (_d[_deletedId].deleted) break // sudah pernah dicatat (persisted) → jangan log lagi
+                    if (_d[_deletedId].deleted) break
                     _d[_deletedId] = { ..._d[_deletedId], deleted: true, deletedAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
-                    fs.writeFileSync(_fp, JSON.stringify(_d, null, 2), 'utf-8')
+                    const _tmpFp = _fp + '.tmp'
+                    fs.writeFileSync(_tmpFp, JSON.stringify(_d, null, 2), 'utf-8')
+                    fs.renameSync(_tmpFp, _fp)
                     const _contactNum = _file.replace('.json', '')
-                    const _color = getJadibotLogColor(number)
                     console.log(`${_color}[SwTrack][JB:${number}] SW dihapus: ${_contactNum} → ${_deletedId}\x1b[39m`)
                     break
                   }

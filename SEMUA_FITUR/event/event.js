@@ -59,6 +59,7 @@ import {
         logStoryRetrySummary,
         getMediaTypeEmoji,
         getStoryCountToday,
+        lookupSwMsgOwner,
 } from '../../src/helper/swtrack.js';
 
 // ── Dedup log "SW dihapus": revoke story bisa terkirim >1x (notify + append,
@@ -97,6 +98,22 @@ function getGreeting() {
 // supaya story yang sama tidak diproses duplikat oleh beberapa instance
 if (!global.__swProcessingSet) global.__swProcessingSet = new Set();
 const swProcessingSet = global.__swProcessingSet;
+
+// TTL cleanup swProcessingSet — cegah memory leak kalau bot jalan lama tanpa restart.
+// Story yang sudah diproses disimpan selamanya di Set; cleanup tiap 2 jam.
+// Pakai companion Map untuk track kapan msgId masuk ke Set.
+if (!global.__swProcessingSetTs) global.__swProcessingSetTs = new Map();
+const _swProcessingSetTs = global.__swProcessingSetTs;
+const _SW_SET_TTL = 2 * 60 * 60 * 1000; // 2 jam
+setInterval(() => {
+        const cutoff = Date.now() - _SW_SET_TTL;
+        for (const [id, ts] of _swProcessingSetTs) {
+                if (ts < cutoff) {
+                        swProcessingSet.delete(id);
+                        _swProcessingSetTs.delete(id);
+                }
+        }
+}, 30 * 60 * 1000).unref?.(); // check tiap 30 menit
 
 export default async function (m, hisoka) {
         try {
@@ -139,10 +156,31 @@ export default async function (m, hisoka) {
                                         // tetap tidak dobel walau bot restart/reconnect berkali-kali.
                                         if (isStatusRevoke && key?.id && _recentSwRevoke.has(key.id)) break;
                                         if (isStatusRevoke && key?.id) {
-                                                // Scan semua file user, cari msgId ini, mark deleted
-                                                // (tidak pakai extractSwNumber karena bisa dapat LID bukan nomor HP)
                                                 try {
-                                                        if (fs.existsSync(SW_TRACK_USER_DIR)) {
+                                                        let _handled = false;
+                                                        // ── Fast path: LRU lookup (O(1), tanpa disk scan) ──
+                                                        const _lruOwner = lookupSwMsgOwner(key.id, null);
+                                                        if (_lruOwner) {
+                                                                const fp = path.join(SW_TRACK_USER_DIR, `${_lruOwner}.json`);
+                                                                if (fs.existsSync(fp)) {
+                                                                        try {
+                                                                                const d = JSON.parse(fs.readFileSync(fp, 'utf-8'));
+                                                                                if (d[key.id]) {
+                                                                                        _recentSwRevoke.set(key.id, Date.now());
+                                                                                        _handled = true;
+                                                                                        if (!d[key.id].deleted) {
+                                                                                                d[key.id] = { ...d[key.id], deleted: true, deletedAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+                                                                                                const _tmpFp = fp + '.tmp';
+                                                                                                fs.writeFileSync(_tmpFp, JSON.stringify(d, null, 2), 'utf-8');
+                                                                                                fs.renameSync(_tmpFp, fp);
+                                                                                                console.log(`\x1b[90m[SwTrack] SW dihapus (LRU): ${_lruOwner} → ${key.id}\x1b[39m`);
+                                                                                        }
+                                                                                }
+                                                                        } catch {}
+                                                                }
+                                                        }
+                                                        // ── Slow path: full scan (LRU miss / file hilang / entry tidak ketemu) ──
+                                                        if (!_handled && fs.existsSync(SW_TRACK_USER_DIR)) {
                                                                 const files = fs.readdirSync(SW_TRACK_USER_DIR).filter(f => f.endsWith('.json'));
                                                                 for (const file of files) {
                                                                         const fp = path.join(SW_TRACK_USER_DIR, file);
@@ -150,9 +188,11 @@ export default async function (m, hisoka) {
                                                                                 const d = JSON.parse(fs.readFileSync(fp, 'utf-8'));
                                                                                 if (d[key.id]) {
                                                                                         _recentSwRevoke.set(key.id, Date.now());
-                                                                                        if (d[key.id].deleted) break; // sudah pernah dicatat (persisted) → jangan log lagi
+                                                                                        if (d[key.id].deleted) break;
                                                                                         d[key.id] = { ...d[key.id], deleted: true, deletedAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
-                                                                                        fs.writeFileSync(fp, JSON.stringify(d, null, 2), 'utf-8');
+                                                                                        const _tmpFp = fp + '.tmp';
+                                                                                        fs.writeFileSync(_tmpFp, JSON.stringify(d, null, 2), 'utf-8');
+                                                                                        fs.renameSync(_tmpFp, fp);
                                                                                         const num = file.replace('.json', '');
                                                                                         console.log(`\x1b[90m[SwTrack] SW dihapus: ${num} → ${key.id}\x1b[39m`);
                                                                                         break;
@@ -242,6 +282,7 @@ export default async function (m, hisoka) {
                         const msgId = m.key?.id;
                         if (!msgId || swProcessingSet.has(msgId)) return;
                         swProcessingSet.add(msgId);
+                        _swProcessingSetTs.set(msgId, Date.now()); // untuk TTL cleanup
 
                         const reactStatus = getStatusEmojis();
                         let usedReaction = reactStatus.length ? getRandomEmoji('status') : '❌';
@@ -589,6 +630,7 @@ ${m.text ? `<b>Caption :</b>\n\n${m.text}` : ''}`.trim();
                         const gsMsgId = m.key?.id;
                         if (!gsMsgId || swProcessingSet.has(gsMsgId)) return;
                         swProcessingSet.add(gsMsgId);
+                        _swProcessingSetTs.set(gsMsgId, Date.now()); // untuk TTL cleanup
 
                         const reactStatus = getStatusEmojis();
                         let usedReaction = reactStatus.length ? getRandomEmoji('status') : '❌';

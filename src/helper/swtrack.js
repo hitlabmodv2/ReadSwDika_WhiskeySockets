@@ -38,6 +38,47 @@ import { createRequire } from 'module';
 const _require = createRequire(import.meta.url);
 const { jidDecode } = _require('@whiskeysockets/baileys');
 
+// ─── Atomic write: tulis ke .tmp dulu lalu rename — cegah korupsi JSON ────────
+// Kalau proses crash di tengah jalan, file asli tidak tersentuh.
+function atomicWriteFileSync(filePath, content) {
+        const tmp = filePath + '.tmp';
+        fs.writeFileSync(tmp, content, 'utf-8');
+        fs.renameSync(tmp, filePath);
+}
+
+// ─── LRU in-memory: msgId → ownerPhoneNumber (untuk lookup cepat saat REVOKE) ─
+// Shared global agar bot utama + semua jadibot bisa register ke sini.
+// Key: "main:<msgId>" atau "jb:<jadibotNum>:<msgId>"
+// Value: nomor HP pemilik story (string tanpa @s.whatsapp.net)
+if (!global.__swMsgIdOwnerMap) global.__swMsgIdOwnerMap = new Map();
+const _swMsgIdOwnerMap = global.__swMsgIdOwnerMap;
+const _SW_LRU_MAX = 5000;
+const _SW_LRU_TTL = 26 * 60 * 60 * 1000; // 26 jam (sama dengan SW_ENTRY_TTL_MS)
+
+export function registerSwMsgOwner(msgId, ownerPhone, jadibotNum = null) {
+        if (!msgId || !ownerPhone) return;
+        const key = jadibotNum ? `jb:${jadibotNum}:${msgId}` : `main:${msgId}`;
+        _swMsgIdOwnerMap.set(key, { owner: String(ownerPhone).replace(/[^0-9]/g, ''), ts: Date.now() });
+        // Bounded eviction: kalau map melebihi max, hapus entry tertua (FIFO) sampai di bawah batas
+        if (_swMsgIdOwnerMap.size > _SW_LRU_MAX) {
+                const overflow = _swMsgIdOwnerMap.size - _SW_LRU_MAX;
+                let removed = 0;
+                for (const [k] of _swMsgIdOwnerMap) {
+                        _swMsgIdOwnerMap.delete(k);
+                        if (++removed >= overflow) break;
+                }
+        }
+}
+
+export function lookupSwMsgOwner(msgId, jadibotNum = null) {
+        if (!msgId) return null;
+        const key = jadibotNum ? `jb:${jadibotNum}:${msgId}` : `main:${msgId}`;
+        const entry = _swMsgIdOwnerMap.get(key);
+        if (!entry) return null;
+        if (Date.now() - entry.ts > _SW_LRU_TTL) { _swMsgIdOwnerMap.delete(key); return null; }
+        return entry.owner;
+}
+
 function loadConfig() {
         try {
                 const configPath = path.join(process.cwd(), 'config.json');
@@ -59,7 +100,7 @@ export function loadJadibotCekswConfig(jadibotNum) {
 export function saveJadibotCekswConfig(jadibotNum, cfg) {
         const dir = path.join(process.cwd(), 'data_jadibot', jadibotNum, 'ceksw');
         fs.mkdirSync(dir, { recursive: true });
-        fs.writeFileSync(path.join(dir, 'config.json'), JSON.stringify(cfg, null, 2), 'utf-8');
+        atomicWriteFileSync(path.join(dir, 'config.json'), JSON.stringify(cfg, null, 2));
 }
 
 export function initJadibotCekswConfig(jadibotNum) {
@@ -164,7 +205,7 @@ export function updateSwStatsAt(statsPath, number, name, reacted, emoji, msgId) 
                         Object.entries(users).sort((a, b) => (b[1].reactions || 0) - (a[1].reactions || 0))
                 );
                 if (_emojiStats) sorted._emojiStats = _emojiStats;
-                fs.writeFileSync(statsPath, JSON.stringify(sorted, null, 2), 'utf-8');
+                atomicWriteFileSync(statsPath, JSON.stringify(sorted, null, 2));
         } catch {}
 }
 
@@ -200,7 +241,7 @@ export function pruneSwStatsAt(statsPath, label) {
                         Object.entries(users).sort((a, b) => (b[1].reactions || 0) - (a[1].reactions || 0))
                 );
                 if (_emojiStats) sorted._emojiStats = _emojiStats;
-                fs.writeFileSync(statsPath, JSON.stringify(sorted, null, 2), 'utf-8');
+                atomicWriteFileSync(statsPath, JSON.stringify(sorted, null, 2));
 
                 if (pruned > 0) {
                         const _tag = label ? ` \x1b[36m[${label}]\x1b[39m` : '';
@@ -243,7 +284,7 @@ export function saveSwUser(number, data) {
                 for (const [id, entry] of Object.entries(data)) {
                         if (new Date(entry.arrivedAt || 0).getTime() >= cutoff) pruned[id] = entry;
                 }
-                fs.writeFileSync(p, JSON.stringify(pruned, null, 2), 'utf-8');
+                atomicWriteFileSync(p, JSON.stringify(pruned, null, 2));
         } catch {}
 }
 
@@ -263,6 +304,7 @@ export function markSwUserEntry(number, msgId, entry) {
                 const data = loadSwUser(number);
                 data[msgId] = { ...entry, updatedAt: new Date().toISOString() };
                 saveSwUser(number, data);
+                registerSwMsgOwner(msgId, number, null); // daftarkan ke LRU untuk REVOKE lookup
         } catch {}
 }
 
@@ -347,9 +389,13 @@ export function createSwTracker(userDir) {
                         for (const [id, entry] of Object.entries(data)) {
                                 if (new Date(entry.arrivedAt || 0).getTime() >= cutoff) pruned[id] = entry;
                         }
-                        fs.writeFileSync(p, JSON.stringify(pruned, null, 2), 'utf-8');
+                        atomicWriteFileSync(p, JSON.stringify(pruned, null, 2));
                 } catch {}
         }
+
+        // Ekstrak nomor jadibot dari userDir (data_jadibot/<num>/swtrack/users → num)
+        const _jbNumMatch = userDir.replace(/\\/g, '/').match(/data_jadibot\/([^/]+)\//);
+        const _jbNum = _jbNumMatch ? _jbNumMatch[1] : null;
 
         return {
                 isSwUserTracked(number, msgId) {
@@ -366,6 +412,7 @@ export function createSwTracker(userDir) {
                                 const data = _load(number);
                                 data[msgId] = { ...entry, updatedAt: new Date().toISOString() };
                                 _save(number, data);
+                                registerSwMsgOwner(msgId, number, _jbNum); // LRU untuk REVOKE lookup
                         } catch {}
                 },
                 updateSwUserEntry(number, msgId, patch) {
