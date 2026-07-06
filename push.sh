@@ -6203,6 +6203,41 @@ action_delete_file_folder() {
   echo -e "${C_BOLD}│   🗑️   HAPUS FILE / FOLDER        │${C_RESET}"
   echo -e "${C_BOLD}╰──────────────────────────────────╯${C_RESET}"
   echo ""
+  echo -e "  ${C_DIM}branch target : ${C_RESET}${C_GREEN}${C_BOLD}${DEFAULT_BRANCH}${C_RESET}"
+  echo ""
+
+  # ── Realtime: pastikan working tree ada di branch default & up-to-date ──
+  # Ini WAJIB biar hapus file selalu nyambung ke branch yang benar (tidak nyasar
+  # ke branch lain) dan tidak menyebabkan push gagal (non-fast-forward / conflict).
+  mini_bar_start "Sinkronisasi ke branch ${DEFAULT_BRANCH} ..." 0.02
+  local _sync_log; _sync_log=$(mktemp)
+  local _cur_branch_df
+  _cur_branch_df=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
+
+  if [ "$_cur_branch_df" != "$DEFAULT_BRANCH" ]; then
+    if git checkout -q "$DEFAULT_BRANCH" >"$_sync_log" 2>&1; then
+      :
+    elif git checkout -q -B "$DEFAULT_BRANCH" "origin/${DEFAULT_BRANCH}" >"$_sync_log" 2>&1; then
+      :
+    else
+      mini_bar_fail "Gagal pindah ke ${DEFAULT_BRANCH}"
+      echo -e "  ${C_RED}❌ Tidak bisa checkout branch ${C_BOLD}${DEFAULT_BRANCH}${C_RESET}${C_RED}.${C_RESET}"
+      echo -e "  ${C_DIM}$(tail -3 "$_sync_log" 2>/dev/null)${C_RESET}"
+      echo -e "  ${C_YELLOW}💡 Ada perubahan belum di-commit? Simpan/push dulu, lalu coba lagi.${C_RESET}"
+      rm -f "$_sync_log"
+      prompt_back_or_exit
+      return
+    fi
+  fi
+
+  git fetch origin "$DEFAULT_BRANCH" --quiet >>"$_sync_log" 2>&1 || true
+  if git rev-parse --verify -q "refs/remotes/origin/${DEFAULT_BRANCH}" >/dev/null 2>&1; then
+    git merge -q --ff-only "origin/${DEFAULT_BRANCH}" >>"$_sync_log" 2>&1 || true
+  fi
+  mini_bar_ok "Siap di branch ${DEFAULT_BRANCH}"
+  rm -f "$_sync_log"
+  echo ""
+
   echo -e "  ${C_DIM}Ketik path file/folder yang mau dihapus (relatif dari root project).${C_RESET}"
   echo -e "  ${C_DIM}Pisahkan dengan spasi kalau lebih dari satu. Contoh:${C_RESET}"
   echo -e "  ${C_DIM}    zuhur.jpg PR.TXT folder_lama${C_RESET}"
@@ -6327,7 +6362,7 @@ action_delete_file_folder() {
   local ok_count=0 fail_count=0
   local -a deleted_list=()
   for v in "${valid_paths[@]}"; do
-    printf "  ${C_CYAN}▸${C_RESET} menghapus %s ... " "$v"
+    mini_bar_start "Menghapus ${v} ..." 0.015
     if git ls-files --error-unmatch -- "$v" >/dev/null 2>&1; then
       git rm -r -q -f -- "$v" >/dev/null 2>&1
     else
@@ -6337,11 +6372,11 @@ action_delete_file_folder() {
     [ -e "$v" ] && rm -rf -- "$v" 2>/dev/null
 
     if [ ! -e "$v" ]; then
-      echo -e "${C_GREEN}✅${C_RESET}"
+      mini_bar_ok "${v} terhapus"
       ok_count=$(( ok_count + 1 ))
       deleted_list+=("$v")
     else
-      echo -e "${C_RED}❌ (gagal, cek permission)${C_RESET}"
+      mini_bar_fail "${v} gagal (cek permission)"
       fail_count=$(( fail_count + 1 ))
     fi
   done
@@ -6374,6 +6409,35 @@ action_delete_file_folder() {
         local _push_out _push_ok=0
         _push_out=$(git push "${REMOTE_URL:-origin}" "HEAD:${DEFAULT_BRANCH}" 2>&1)
         [ $? -eq 0 ] && _push_ok=1
+
+        # Push ditolak (non-fast-forward) → branch remote sudah maju duluan.
+        # Realtime fix: sambung histori remote tanpa menimpa commit orang lain.
+        if [ "$_push_ok" -ne 1 ]; then
+          echo -e "  ${C_YELLOW}⚠️  Branch divergent, sambung histori remote...${C_RESET}"
+          mini_bar_start "Fetch remote ${DEFAULT_BRANCH} ..." 0.02
+          git fetch origin "$DEFAULT_BRANCH" --quiet 2>/dev/null || true
+          mini_bar_ok "Fetch selesai"
+
+          local _tree _remote_parent _new_commit
+          _tree=$(git rev-parse "HEAD^{tree}" 2>/dev/null)
+          _remote_parent=$(git rev-parse "refs/remotes/origin/${DEFAULT_BRANCH}" 2>/dev/null)
+
+          if [ -n "$_tree" ] && [ -n "$_remote_parent" ]; then
+            mini_bar_start "Sambung histori remote ..." 0.01
+            _new_commit=$(GIT_AUTHOR_NAME="$(git log -1 --format='%an')" \
+                          GIT_AUTHOR_EMAIL="$(git log -1 --format='%ae')" \
+                          GIT_COMMITTER_NAME="$(git log -1 --format='%cn')" \
+                          GIT_COMMITTER_EMAIL="$(git log -1 --format='%ce')" \
+                          git commit-tree "$_tree" -p "$_remote_parent" -m "$_msg" 2>/dev/null)
+            mini_bar_ok "Histori tersambung"
+          fi
+
+          if [ -n "${_new_commit:-}" ]; then
+            git update-ref "refs/heads/${DEFAULT_BRANCH}" "$_new_commit" 2>/dev/null || true
+            _push_out=$(git push "${REMOTE_URL:-origin}" "HEAD:${DEFAULT_BRANCH}" 2>&1)
+            [ $? -eq 0 ] && _push_ok=1
+          fi
+        fi
 
         if [ "$_push_ok" -eq 1 ]; then
           echo -e "  ${C_GREEN}✅ Push berhasil!${C_RESET}"
