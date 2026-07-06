@@ -2575,11 +2575,12 @@ show_main_menu() {
   printf "  ${C_GREEN} p${C_RESET} › %-16s  ${C_MAGENTA} l${C_RESET} › %s\n" "Quick Push"     "Riwayat push"
   printf "  ${C_YELLOW} c${C_RESET} › %-16s  ${C_CYAN} n${C_RESET} › %-16s  %b\n" \
     "Bersihkan history" "$_nm_label" "$_nm_status_str"
-  printf "  ${C_RED} d${C_RESET} › %-16s  ${C_RED} 0${C_RESET} › %s\n" "Hapus file/folder" "Keluar"
+  printf "  ${C_RED} d${C_RESET} › %-16s  ${C_MAGENTA} r${C_RESET} › %s\n" "Hapus file/folder" "Restore/undo hapus"
   if [ -n "$_upd_ver" ]; then
     printf "  ${C_GREEN} u${C_RESET} › ${C_BOLD}%-16s${C_RESET}  ${C_DIM}versi sekarang: %s → baru: %s${C_RESET}\n" \
       "Update script" "$SCRIPT_VERSION" "$_upd_ver"
   fi
+  printf "  ${C_RED} 0${C_RESET} › %s\n" "Keluar"
   echo -e "  ${C_DIM}──────────────────────────────────${C_RESET}"
   printf "  ${C_BOLD}▸ ${C_RESET}"
 
@@ -2607,6 +2608,7 @@ show_main_menu() {
     c|C) action_cleanup_node_modules ;;
     n|N) action_install_node_modules ;;
     d|D) action_delete_file_folder ;;
+    r|R) action_restore_deleted ;;
     u|U) action_self_update "$_upd_ver" "$_upd_url" ;;
     0|q|Q|exit) goodbye_prompt ;;
     *)
@@ -6582,6 +6584,197 @@ ${_del_list_txt}
         echo -e "  ${C_RED}❌ Gagal staging perubahan. Cek error di atas.${C_RESET}"
       fi
     }
+  fi
+
+  prompt_back_or_exit
+}
+
+# ===== Action: Restore/undo file/folder yang terhapus =====
+action_restore_deleted() {
+  clear >/dev/tty 2>/dev/null || true
+  echo -e "${C_BOLD}╭──────────────────────────────────╮${C_RESET}"
+  echo -e "${C_BOLD}│   ♻️   RESTORE FILE TERHAPUS      │${C_RESET}"
+  echo -e "${C_BOLD}╰──────────────────────────────────╯${C_RESET}"
+  echo ""
+  echo -e "  ${C_DIM}branch : ${C_RESET}${C_GREEN}${DEFAULT_BRANCH}${C_RESET}"
+  echo ""
+
+  # ── Realtime: sync dulu ke branch default biar histori commit akurat ──
+  mini_bar_start "Sinkronisasi ke branch ${DEFAULT_BRANCH} ..." 0.02
+  local _sync_log; _sync_log=$(mktemp)
+  local _cur_branch_rf
+  _cur_branch_rf=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
+  if [ "$_cur_branch_rf" != "$DEFAULT_BRANCH" ]; then
+    if ! git checkout -q "$DEFAULT_BRANCH" >"$_sync_log" 2>&1; then
+      git checkout -q -B "$DEFAULT_BRANCH" "origin/${DEFAULT_BRANCH}" >"$_sync_log" 2>&1
+    fi
+  fi
+  git fetch origin "$DEFAULT_BRANCH" --quiet >>"$_sync_log" 2>&1 || true
+  if git rev-parse --verify -q "refs/remotes/origin/${DEFAULT_BRANCH}" >/dev/null 2>&1; then
+    git merge -q --ff-only "origin/${DEFAULT_BRANCH}" >>"$_sync_log" 2>&1 || true
+  fi
+  mini_bar_ok "Siap di branch ${DEFAULT_BRANCH}"
+  rm -f "$_sync_log"
+  echo ""
+
+  # ── Cari commit hasil hapus dari menu ini (pesan diawali "chore: hapus") ──
+  local -a _del_hashes=() _del_msgs=() _del_dates=()
+  local _line=""
+  while IFS=$'\t' read -r _h _s _d; do
+    [ -z "$_h" ] && continue
+    _del_hashes+=("$_h")
+    _del_msgs+=("$_s")
+    _del_dates+=("$_d")
+  done < <(git log "$DEFAULT_BRANCH" --grep='^chore: hapus' --pretty=format:'%H%x09%s%x09%ad' --date=format:'%d %b %Y %H:%M' -n 15 2>/dev/null)
+
+  if [ "${#_del_hashes[@]}" -eq 0 ]; then
+    echo -e "  ${C_YELLOW}📭 Tidak ada riwayat penghapusan file/folder yang tercatat.${C_RESET}"
+    prompt_back_or_exit
+    return
+  fi
+
+  echo -e "  ${C_BOLD}Riwayat penghapusan terakhir:${C_RESET}"
+  echo -e "${C_DIM}  ──────────────────────────────────${C_RESET}"
+  local idx=0
+  for idx in "${!_del_hashes[@]}"; do
+    printf "  ${C_GREEN}%2d${C_RESET} › ${C_RESET}%s ${C_DIM}(%s, %s)${C_RESET}\n" \
+      "$((idx + 1))" "${_del_msgs[$idx]}" "${_del_dates[$idx]}" "${_del_hashes[$idx]:0:7}"
+  done
+  echo -e "${C_DIM}  ──────────────────────────────────${C_RESET}"
+  echo -e "  ${C_DIM}0 = kembali ke menu${C_RESET}"
+  echo ""
+  printf "  ${C_BOLD}▸ Pilih nomor untuk restore: ${C_RESET}"
+  local _pick_r=""
+  read -r _pick_r </dev/tty
+  _pick_r=$(printf '%s' "$_pick_r" | tr -d '\r')
+
+  if [ -z "$_pick_r" ] || [ "$_pick_r" = "0" ]; then
+    echo -e "  ${C_YELLOW}↩ Dibatalkan.${C_RESET}"
+    sleep 1
+    return
+  fi
+
+  case "$_pick_r" in
+    ''|*[!0-9]*)
+      echo -e "  ${C_RED}✖ Input tidak valid.${C_RESET}"
+      sleep 1
+      return
+      ;;
+  esac
+
+  local _sel_idx=$((_pick_r - 1))
+  if [ "$_sel_idx" -lt 0 ] || [ "$_sel_idx" -ge "${#_del_hashes[@]}" ]; then
+    echo -e "  ${C_RED}✖ Nomor tidak ada di daftar.${C_RESET}"
+    sleep 1
+    return
+  fi
+
+  local _target_hash="${_del_hashes[$_sel_idx]}"
+  local _target_msg="${_del_msgs[$_sel_idx]}"
+
+  # ── Ambil daftar file yang dihapus di commit itu (diff-filter=D) ──
+  local -a _restore_files=()
+  mapfile -t _restore_files < <(git show --diff-filter=D --name-only --pretty=format: "$_target_hash" 2>/dev/null | sed '/^$/d')
+
+  if [ "${#_restore_files[@]}" -eq 0 ]; then
+    echo -e "  ${C_YELLOW}⚠️  Tidak ditemukan file yang dihapus di commit ini (mungkin sudah pernah di-restore).${C_RESET}"
+    prompt_back_or_exit
+    return
+  fi
+
+  echo ""
+  echo -e "  ${C_BOLD}File/folder yang akan di-restore (${#_restore_files[@]} item):${C_RESET}"
+  local _rf=""
+  for _rf in "${_restore_files[@]}"; do
+    echo -e "     ${C_GREEN}📄 ${_rf}${C_RESET}"
+  done
+  echo ""
+  echo -e "  ${C_YELLOW}Ketik ${C_RESET}${C_BOLD}RESTORE${C_RESET}${C_YELLOW} untuk konfirmasi, atau 0 untuk batal:${C_RESET}"
+  printf "  ${C_BOLD}▸ ${C_RESET}"
+  local _confirm_r=""
+  read -r _confirm_r </dev/tty
+  if [ "$_confirm_r" != "RESTORE" ]; then
+    echo -e "  ${C_YELLOW}↩ Dibatalkan.${C_RESET}"
+    sleep 1
+    return
+  fi
+
+  echo ""
+  local _ok_r=0 _fail_r=0
+  local -a _restored_list=()
+  for _rf in "${_restore_files[@]}"; do
+    mini_bar_start "Restore ${_rf} ..." 0.015
+    if git checkout "${_target_hash}~1" -- "$_rf" >/dev/null 2>&1; then
+      mini_bar_ok "${_rf} dikembalikan"
+      _ok_r=$((_ok_r + 1))
+      _restored_list+=("$_rf")
+    else
+      mini_bar_fail "${_rf} gagal di-restore"
+      _fail_r=$((_fail_r + 1))
+    fi
+  done
+
+  echo ""
+  echo -e "  ${C_GREEN}✅ Berhasil restore: ${_ok_r}${C_RESET}   ${C_RED}❌ Gagal: ${_fail_r}${C_RESET}"
+
+  if [ "$_ok_r" -gt 0 ]; then
+    echo ""
+    echo -e "  ${C_CYAN}▸ Commit & push hasil restore secara realtime...${C_RESET}"
+    echo -e "  ${C_CYAN}▸ Staging perubahan...${C_RESET}"
+    if prepare_stage; then
+      local _msg_r
+      _msg_r="revert: restore $(printf '%s, ' "${_restored_list[@]}" | sed 's/, $//')"
+      if [ "${#_msg_r}" -gt 200 ]; then
+        _msg_r="revert: restore ${_ok_r} file/folder (dari ${_target_hash:0:7})"
+      fi
+      git commit -m "$_msg_r" --allow-empty >/dev/null 2>&1 || true
+
+      echo -e "  ${C_CYAN}▸ Push ke ${C_RESET}${C_GREEN}${DEFAULT_BRANCH}${C_RESET}${C_CYAN}...${C_RESET}"
+      local _push_out_r _push_ok_r=0
+      _push_out_r=$(git push "${REMOTE_URL:-origin}" "HEAD:${DEFAULT_BRANCH}" 2>&1)
+      [ $? -eq 0 ] && _push_ok_r=1
+
+      if [ "$_push_ok_r" -ne 1 ]; then
+        echo -e "  ${C_YELLOW}⚠️  Branch divergent, sambung histori remote...${C_RESET}"
+        git fetch origin "$DEFAULT_BRANCH" --quiet 2>/dev/null || true
+        local _tree_r _remote_parent_r _new_commit_r
+        _tree_r=$(git rev-parse "HEAD^{tree}" 2>/dev/null)
+        _remote_parent_r=$(git rev-parse "refs/remotes/origin/${DEFAULT_BRANCH}" 2>/dev/null)
+        if [ -n "$_tree_r" ] && [ -n "$_remote_parent_r" ]; then
+          _new_commit_r=$(GIT_AUTHOR_NAME="$(git log -1 --format='%an')" \
+                        GIT_AUTHOR_EMAIL="$(git log -1 --format='%ae')" \
+                        GIT_COMMITTER_NAME="$(git log -1 --format='%cn')" \
+                        GIT_COMMITTER_EMAIL="$(git log -1 --format='%ce')" \
+                        git commit-tree "$_tree_r" -p "$_remote_parent_r" -m "$_msg_r" 2>/dev/null)
+        fi
+        if [ -n "${_new_commit_r:-}" ]; then
+          git update-ref "refs/heads/${DEFAULT_BRANCH}" "$_new_commit_r" 2>/dev/null || true
+          _push_out_r=$(git push "${REMOTE_URL:-origin}" "HEAD:${DEFAULT_BRANCH}" 2>&1)
+          [ $? -eq 0 ] && _push_ok_r=1
+        fi
+      fi
+
+      if [ "$_push_ok_r" -eq 1 ]; then
+        echo -e "  ${C_GREEN}✅ Push berhasil!${C_RESET}"
+        log_push_event "$DEFAULT_BRANCH" "OK" "$_msg_r" "$_ok_r"
+        local _ts_r; _ts_r=$(date '+%H:%M:%S %d %b %Y')
+        local _restore_list_txt; _restore_list_txt=$(printf '  • %s\n' "${_restored_list[@]}")
+        local _btn_r='{"inline_keyboard":[[{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"},{"text":"📊 Commits","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commits/'"${DEFAULT_BRANCH}"'"}]]}'
+        send_telegram_photo "https://w.wallhaven.cc/full/v9/wallhaven-v9jz53.png" "♻️ <b>FILE/FOLDER DI-RESTORE</b>
+━━━━━━━━━━━━━━━━━━━━
+📁 <code>${USER}/${REPO}</code>
+🌿 Branch: <code>${DEFAULT_BRANCH}</code>
+♻️ ${_ok_r} item dikembalikan:
+${_restore_list_txt}
+🕐 ${_ts_r}" "$_btn_r" 2>/dev/null &
+      else
+        echo -e "  ${C_RED}❌ Push gagal.${C_RESET}"
+        echo -e "  ${C_DIM}$(printf '%s' "$_push_out_r" | tail -3)${C_RESET}"
+        log_push_event "$DEFAULT_BRANCH" "FAIL" "$_msg_r" "$_ok_r"
+      fi
+    else
+      echo -e "  ${C_RED}❌ Gagal staging perubahan. Cek error di atas.${C_RESET}"
+    fi
   fi
 
   prompt_back_or_exit
