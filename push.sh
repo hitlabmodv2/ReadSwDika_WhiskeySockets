@@ -6237,58 +6237,155 @@ action_delete_file_folder() {
   rm -f "$_sync_log"
   echo ""
 
-  # ── Realtime: tampilkan isi repo persis seperti di GitHub (branch ini) ──
-  echo -e "  ${C_BOLD}📂 Isi repo saat ini (branch ${C_RESET}${C_GREEN}${DEFAULT_BRANCH}${C_RESET}${C_BOLD}):${C_RESET}"
-  echo -e "${C_DIM}  ──────────────────────────────────${C_RESET}"
+  # ── Realtime browser bernomor/abjad, persis isi repo di branch ini ──
+  # Level ganjil pakai abjad (a,b,c...), level genap pakai angka (1,2,3...)
+  # supaya kayak "1" (root) -> masuk -> "1a","1b" -> masuk lagi -> "1a1","1a2" dst.
+  _dfb_idx_to_letter() {
+    local n=$(( $1 + 1 )) s=""
+    while [ "$n" -gt 0 ]; do
+      local rem=$(( (n - 1) % 26 ))
+      s="$(printf "\\$(printf '%03o' $((97 + rem)))")$s"
+      n=$(( (n - 1) / 26 ))
+    done
+    printf '%s' "$s"
+  }
 
-  local -a _entries=()
-  mapfile -t _entries < <(git ls-tree -r --name-only HEAD 2>/dev/null | awk -F/ '{print $1}' | sort -u)
-  if [ "${#_entries[@]}" -eq 0 ]; then
-    mapfile -t _entries < <(ls -A -- . 2>/dev/null | grep -v '^\.git$' | sort)
-  fi
-
-  # Pisah dulu: folder di atas (urut abjad), baru file (urut abjad) — rapi kayak GitHub
-  local -a _dirs=() _files=()
-  local _te=""
-  for _te in "${_entries[@]}"; do
-    [ -z "$_te" ] && continue
-    if [ -d "$_te" ]; then
-      _dirs+=("$_te")
-    else
-      _files+=("$_te")
-    fi
-  done
-
-  for _te in "${_dirs[@]}"; do
-    echo -e "     ${C_YELLOW}📁 ${C_BOLD}${_te}/${C_RESET}"
-  done
-  for _te in "${_files[@]}"; do
-    echo -e "     ${C_RESET}📄 ${_te}${C_RESET}"
-  done
-  echo -e "${C_DIM}  ──────────────────────────────────${C_RESET}"
-  echo -e "  ${C_DIM}Total: ${#_dirs[@]} folder, ${#_files[@]} file${C_RESET}"
-  echo ""
-
-  echo -e "  ${C_DIM}Ketik path file/folder yang mau dihapus (relatif dari root project).${C_RESET}"
-  echo -e "  ${C_DIM}Pisahkan dengan spasi kalau lebih dari satu. Contoh:${C_RESET}"
-  echo -e "  ${C_DIM}    zuhur.jpg PR.TXT folder_lama${C_RESET}"
-  echo ""
-  echo -e "  ${C_DIM}0 = kembali ke menu${C_RESET}"
-  echo ""
-  printf "  ${C_BOLD}▸ ${C_RESET}"
-  local raw_input=""
-  read -r raw_input </dev/tty
-  raw_input=$(printf '%s' "$raw_input" | tr -d '\r')
-
-  if [ -z "$raw_input" ] || [ "$raw_input" = "0" ]; then
-    echo -e "  ${C_YELLOW}↩ Dibatalkan.${C_RESET}"
-    sleep 1
-    return
-  fi
-
-  # Pecah input jadi array path (dipisah spasi — aman untuk nama file umum)
   local -a paths=()
-  read -r -a paths <<< "$raw_input"
+  local _cur_rel="" _depth=0
+  local -a _nav_stack=()
+  local -A _dfb_path=()
+  local -A _dfb_isdir=()
+
+  while true; do
+    clear >/dev/tty 2>/dev/null || true
+    echo -e "${C_BOLD}╭──────────────────────────────────╮${C_RESET}"
+    echo -e "${C_BOLD}│   🗑️   HAPUS FILE / FOLDER        │${C_RESET}"
+    echo -e "${C_BOLD}╰──────────────────────────────────╯${C_RESET}"
+    echo ""
+    echo -e "  ${C_DIM}branch : ${C_RESET}${C_GREEN}${DEFAULT_BRANCH}${C_RESET}   ${C_DIM}folder : ${C_RESET}${C_BOLD}/${_cur_rel}${C_RESET}"
+    echo -e "${C_DIM}  ──────────────────────────────────${C_RESET}"
+
+    local -a _entries=()
+    if [ -z "$_cur_rel" ]; then
+      mapfile -t _entries < <(ls -A -- . 2>/dev/null | grep -v '^\.git$' | sort)
+    else
+      mapfile -t _entries < <(ls -A -- "$_cur_rel" 2>/dev/null | sort)
+    fi
+
+    local -a _dirs=() _files=()
+    local _te=""
+    for _te in "${_entries[@]}"; do
+      [ -z "$_te" ] && continue
+      local _full="$_te"
+      [ -n "$_cur_rel" ] && _full="${_cur_rel}/${_te}"
+      if [ -d "$_full" ]; then
+        _dirs+=("$_te")
+      else
+        _files+=("$_te")
+      fi
+    done
+
+    _dfb_path=(); _dfb_isdir=()
+    local -a _ordered=("${_dirs[@]}" "${_files[@]}")
+    local i=0 _code="" _full=""
+    for _te in "${_ordered[@]}"; do
+      if [ $((_depth % 2)) -eq 0 ]; then
+        _code="$((i + 1))"
+      else
+        _code="$(_dfb_idx_to_letter "$i")"
+      fi
+      _full="$_te"
+      [ -n "$_cur_rel" ] && _full="${_cur_rel}/${_te}"
+      _dfb_path["$_code"]="$_full"
+      if [ -d "$_full" ]; then
+        _dfb_isdir["$_code"]=1
+        echo -e "     ${C_YELLOW}${C_BOLD}${_code}${C_RESET} › ${C_YELLOW}📁 ${_te}/${C_RESET}"
+      else
+        _dfb_isdir["$_code"]=0
+        echo -e "     ${C_CYAN}${C_BOLD}${_code}${C_RESET} › ${C_RESET}📄 ${_te}${C_RESET}"
+      fi
+      i=$((i + 1))
+    done
+
+    if [ "${#_ordered[@]}" -eq 0 ]; then
+      echo -e "     ${C_DIM}(folder kosong)${C_RESET}"
+    fi
+
+    echo -e "${C_DIM}  ──────────────────────────────────${C_RESET}"
+    echo -e "  ${C_DIM}Total: ${#_dirs[@]} folder, ${#_files[@]} file${C_RESET}"
+    echo ""
+    echo -e "  ${C_DIM}• Ketik kode folder (misal ${C_RESET}${C_BOLD}1${C_RESET}${C_DIM}) untuk masuk ke folder itu.${C_RESET}"
+    echo -e "  ${C_DIM}• Ketik kode file/folder untuk dihapus, boleh gabung spasi (misal: ${C_RESET}${C_BOLD}2 1a 1b${C_RESET}${C_DIM}).${C_RESET}"
+    echo -e "  ${C_DIM}• Kalau mau hapus folder langsung tanpa masuk, kasih awalan ${C_RESET}${C_BOLD}x${C_RESET}${C_DIM} (misal: ${C_RESET}${C_BOLD}x1${C_RESET}${C_DIM}).${C_RESET}"
+    if [ "${#_nav_stack[@]}" -gt 0 ]; then
+      echo -e "  ${C_DIM}• ${C_RESET}${C_BOLD}b${C_RESET}${C_DIM} = kembali ke folder sebelumnya.${C_RESET}"
+    fi
+    echo -e "  ${C_DIM}0 = kembali ke menu${C_RESET}"
+    echo ""
+    printf "  ${C_BOLD}▸ ${C_RESET}"
+    local raw_input=""
+    read -r raw_input </dev/tty
+    raw_input=$(printf '%s' "$raw_input" | tr -d '\r')
+
+    if [ -z "$raw_input" ] || [ "$raw_input" = "0" ]; then
+      echo -e "  ${C_YELLOW}↩ Dibatalkan.${C_RESET}"
+      sleep 1
+      return
+    fi
+
+    if [ "$raw_input" = "b" ] || [ "$raw_input" = "B" ] || [ "$raw_input" = ".." ]; then
+      if [ "${#_nav_stack[@]}" -gt 0 ]; then
+        _cur_rel="${_nav_stack[-1]}"
+        unset '_nav_stack[-1]'
+        _depth=$((_depth - 1))
+      fi
+      continue
+    fi
+
+    local -a _tokens=()
+    read -r -a _tokens <<< "$raw_input"
+
+    # Kalau input cuma 1 token dan itu kode folder tanpa awalan "x" → masuk folder
+    if [ "${#_tokens[@]}" -eq 1 ]; then
+      local _t="${_tokens[0]}"
+      if [ -n "${_dfb_isdir[$_t]+x}" ] && [ "${_dfb_isdir[$_t]}" -eq 1 ]; then
+        _nav_stack+=("$_cur_rel")
+        _cur_rel="${_dfb_path[$_t]}"
+        _depth=$((_depth + 1))
+        continue
+      fi
+    fi
+
+    # Selain itu: kumpulkan jadi daftar path untuk dihapus
+    local -a _bad_tokens=()
+    paths=()
+    local _tok=""
+    for _tok in "${_tokens[@]}"; do
+      local _key="$_tok"
+      case "$_tok" in
+        x*|X*) _key="${_tok:1}" ;;
+      esac
+      if [ -n "${_dfb_path[$_key]+x}" ]; then
+        paths+=("${_dfb_path[$_key]}")
+      else
+        _bad_tokens+=("$_tok")
+      fi
+    done
+
+    if [ "${#_bad_tokens[@]}" -gt 0 ]; then
+      echo -e "  ${C_RED}⚠️  Kode tidak dikenal: ${_bad_tokens[*]}${C_RESET}"
+      sleep 1.2
+      continue
+    fi
+
+    if [ "${#paths[@]}" -eq 0 ]; then
+      echo -e "  ${C_YELLOW}⚠️  Tidak ada yang dipilih.${C_RESET}"
+      sleep 1
+      continue
+    fi
+
+    break
+  done
 
   # ── Daftar path/pattern yang WAJIB dilindungi — tidak boleh dihapus ─────
   local -a FORBIDDEN=(
