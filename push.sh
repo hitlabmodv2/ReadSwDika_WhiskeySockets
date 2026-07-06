@@ -2575,12 +2575,11 @@ show_main_menu() {
   printf "  ${C_GREEN} p${C_RESET} › %-16s  ${C_MAGENTA} l${C_RESET} › %s\n" "Quick Push"     "Riwayat push"
   printf "  ${C_YELLOW} c${C_RESET} › %-16s  ${C_CYAN} n${C_RESET} › %-16s  %b\n" \
     "Bersihkan history" "$_nm_label" "$_nm_status_str"
-  printf "  ${C_RED}15${C_RESET} › %-16s\n" "Hapus file/folder"
+  printf "  ${C_RED}15${C_RESET} › %-16s  ${C_RED} 0${C_RESET} › %s\n" "Hapus file/folder" "Keluar"
   if [ -n "$_upd_ver" ]; then
     printf "  ${C_GREEN} u${C_RESET} › ${C_BOLD}%-16s${C_RESET}  ${C_DIM}versi sekarang: %s → baru: %s${C_RESET}\n" \
       "Update script" "$SCRIPT_VERSION" "$_upd_ver"
   fi
-  printf "  ${C_RED} 0${C_RESET} › %s\n"                                      "Keluar"
   echo -e "  ${C_DIM}──────────────────────────────────${C_RESET}"
   printf "  ${C_BOLD}▸ ${C_RESET}"
 
