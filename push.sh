@@ -2575,6 +2575,7 @@ show_main_menu() {
   printf "  ${C_GREEN} p${C_RESET} › %-16s  ${C_MAGENTA} l${C_RESET} › %s\n" "Quick Push"     "Riwayat push"
   printf "  ${C_YELLOW} c${C_RESET} › %-16s  ${C_CYAN} n${C_RESET} › %-16s  %b\n" \
     "Bersihkan history" "$_nm_label" "$_nm_status_str"
+  printf "  ${C_RED} d${C_RESET} › %-16s\n" "Hapus file/folder"
   if [ -n "$_upd_ver" ]; then
     printf "  ${C_GREEN} u${C_RESET} › ${C_BOLD}%-16s${C_RESET}  ${C_DIM}versi sekarang: %s → baru: %s${C_RESET}\n" \
       "Update script" "$SCRIPT_VERSION" "$_upd_ver"
@@ -2606,6 +2607,7 @@ show_main_menu() {
     l|L) action_view_push_log ;;
     c|C) action_cleanup_node_modules ;;
     n|N) action_install_node_modules ;;
+    d|D) action_delete_file_folder ;;
     u|U) action_self_update "$_upd_ver" "$_upd_url" ;;
     0|q|Q|exit) goodbye_prompt ;;
     *)
@@ -6190,6 +6192,214 @@ action_cleanup_node_modules() {
 💾 Pack: ${pack_size} → ${pack_size_after}
 ✅ ${_ok} branch ter-force-push
 🕐 ${_ts_cl}" "$_btn_cl" 2>/dev/null &
+
+  prompt_back_or_exit
+}
+
+# ===== Action: Hapus file/folder (lokal + git) =====
+action_delete_file_folder() {
+  clear >/dev/tty 2>/dev/null || true
+  echo -e "${C_BOLD}╭──────────────────────────────────╮${C_RESET}"
+  echo -e "${C_BOLD}│   🗑️   HAPUS FILE / FOLDER        │${C_RESET}"
+  echo -e "${C_BOLD}╰──────────────────────────────────╯${C_RESET}"
+  echo ""
+  echo -e "  ${C_DIM}Ketik path file/folder yang mau dihapus (relatif dari root project).${C_RESET}"
+  echo -e "  ${C_DIM}Pisahkan dengan spasi kalau lebih dari satu. Contoh:${C_RESET}"
+  echo -e "  ${C_DIM}    zuhur.jpg PR.TXT folder_lama${C_RESET}"
+  echo ""
+  echo -e "  ${C_DIM}0 = kembali ke menu${C_RESET}"
+  echo ""
+  printf "  ${C_BOLD}▸ ${C_RESET}"
+  local raw_input=""
+  read -r raw_input </dev/tty
+  raw_input=$(printf '%s' "$raw_input" | tr -d '\r')
+
+  if [ -z "$raw_input" ] || [ "$raw_input" = "0" ]; then
+    echo -e "  ${C_YELLOW}↩ Dibatalkan.${C_RESET}"
+    sleep 1
+    return
+  fi
+
+  # Pecah input jadi array path (dipisah spasi — aman untuk nama file umum)
+  local -a paths=()
+  read -r -a paths <<< "$raw_input"
+
+  # ── Daftar path/pattern yang WAJIB dilindungi — tidak boleh dihapus ─────
+  local -a FORBIDDEN=(
+    "." ".." "" "/"
+    ".git" ".git/"
+    ".token" ".token.secret"
+    "push.sh" ".gitignore" ".env"
+    "node_modules" "sessions"
+    "package.json" "package-lock.json"
+  )
+
+  local -a valid_paths=()
+  local -a skipped_paths=()
+  local total_size_kb=0
+
+  for p in "${paths[@]}"; do
+    [ -z "$p" ] && continue
+    # Normalisasi: buang trailing slash & prefix "./" untuk perbandingan
+    local p_norm="${p%/}"
+    p_norm="${p_norm#./}"
+
+    # Cegah path absolut atau path traversal keluar folder project
+    case "$p" in
+      /*)
+        skipped_paths+=("$p  (path absolut tidak diizinkan)")
+        continue
+        ;;
+    esac
+    case "$p_norm" in
+      *..*)
+        skipped_paths+=("$p  (path traversal tidak diizinkan)")
+        continue
+        ;;
+    esac
+
+    local is_forbidden=0
+    local f=""
+    for f in "${FORBIDDEN[@]}"; do
+      [ -n "$f" ] && [ "$p_norm" = "$f" ] && is_forbidden=1 && break
+    done
+    if [ "$is_forbidden" -eq 1 ]; then
+      skipped_paths+=("$p  (dilindungi — tidak boleh dihapus lewat menu ini)")
+      continue
+    fi
+
+    if [ ! -e "$p" ]; then
+      skipped_paths+=("$p  (tidak ditemukan)")
+      continue
+    fi
+
+    valid_paths+=("$p")
+    local _sz
+    _sz=$(du -sk -- "$p" 2>/dev/null | awk '{print $1}')
+    total_size_kb=$(( total_size_kb + ${_sz:-0} ))
+  done
+
+  echo ""
+  if [ "${#skipped_paths[@]}" -gt 0 ]; then
+    echo -e "  ${C_YELLOW}⚠️  Dilewati:${C_RESET}"
+    local s=""
+    for s in "${skipped_paths[@]}"; do
+      echo -e "     ${C_DIM}- ${s}${C_RESET}"
+    done
+    echo ""
+  fi
+
+  if [ "${#valid_paths[@]}" -eq 0 ]; then
+    echo -e "  ${C_RED}❌ Tidak ada path valid untuk dihapus.${C_RESET}"
+    prompt_back_or_exit
+    return
+  fi
+
+  local size_human
+  if [ "$total_size_kb" -ge 1024 ]; then
+    size_human="$(awk "BEGIN{printf \"%.1f\", ${total_size_kb}/1024}") MB"
+  else
+    size_human="${total_size_kb} KB"
+  fi
+
+  echo -e "  ${C_BOLD}Akan dihapus (${#valid_paths[@]} item, total ~${size_human}):${C_RESET}"
+  local v=""
+  for v in "${valid_paths[@]}"; do
+    if [ -d "$v" ]; then
+      echo -e "     ${C_RED}📁 ${v}/${C_RESET}"
+    else
+      echo -e "     ${C_RED}📄 ${v}${C_RESET}"
+    fi
+  done
+  echo ""
+  echo -e "  ${C_RED}⚠️  File/folder akan dihapus permanen dari disk (dan dari git kalau ter-track).${C_RESET}"
+  echo -e "  ${C_YELLOW}   Ketik ${C_RESET}${C_BOLD}HAPUS${C_RESET}${C_YELLOW} untuk konfirmasi, atau 0 untuk batal:${C_RESET}"
+  printf "  ${C_BOLD}▸ ${C_RESET}"
+  local confirm_word=""
+  read -r confirm_word </dev/tty
+  if [ "$confirm_word" != "HAPUS" ]; then
+    echo -e "  ${C_YELLOW}↩ Dibatalkan.${C_RESET}"
+    sleep 1
+    return
+  fi
+
+  echo ""
+  local ok_count=0 fail_count=0
+  local -a deleted_list=()
+  for v in "${valid_paths[@]}"; do
+    printf "  ${C_CYAN}▸${C_RESET} menghapus %s ... " "$v"
+    if git ls-files --error-unmatch -- "$v" >/dev/null 2>&1; then
+      git rm -r -q -f -- "$v" >/dev/null 2>&1
+    else
+      rm -rf -- "$v" 2>/dev/null
+    fi
+    # Kalau folder ter-track sebagian (bukan file tunggal), pastikan bersih dari disk juga
+    [ -e "$v" ] && rm -rf -- "$v" 2>/dev/null
+
+    if [ ! -e "$v" ]; then
+      echo -e "${C_GREEN}✅${C_RESET}"
+      ok_count=$(( ok_count + 1 ))
+      deleted_list+=("$v")
+    else
+      echo -e "${C_RED}❌ (gagal, cek permission)${C_RESET}"
+      fail_count=$(( fail_count + 1 ))
+    fi
+  done
+
+  echo ""
+  echo -e "  ${C_GREEN}✅ Berhasil dihapus: ${ok_count}${C_RESET}   ${C_RED}❌ Gagal: ${fail_count}${C_RESET}"
+
+  if [ "$ok_count" -gt 0 ]; then
+    echo ""
+    echo -e "${C_DIM}  ──────────────────────────────────${C_RESET}"
+    echo -e "  ${C_GREEN}1${C_RESET} ${C_BOLD}›${C_RESET} Commit & push sekarang"
+    echo -e "  ${C_DIM}0${C_RESET} ${C_BOLD}›${C_RESET} Nanti saja (push manual lewat Quick Push)"
+    echo -e "${C_DIM}  ──────────────────────────────────${C_RESET}"
+    printf "  ${C_BOLD}▸ ${C_RESET}"
+    local push_now=""
+    read -r push_now </dev/tty
+
+    if [ "$push_now" = "1" ]; then
+      echo ""
+      echo -e "  ${C_CYAN}▸ Staging perubahan...${C_RESET}"
+      if prepare_stage; then
+        local _msg
+        _msg="chore: hapus $(printf '%s, ' "${deleted_list[@]}" | sed 's/, $//')"
+        if [ "${#_msg}" -gt 200 ]; then
+          _msg="chore: hapus ${ok_count} file/folder"
+        fi
+        git commit -m "$_msg" --allow-empty >/dev/null 2>&1 || true
+
+        echo -e "  ${C_CYAN}▸ Push ke ${C_RESET}${C_GREEN}${DEFAULT_BRANCH}${C_RESET}${C_CYAN}...${C_RESET}"
+        local _push_out _push_ok=0
+        _push_out=$(git push "${REMOTE_URL:-origin}" "HEAD:${DEFAULT_BRANCH}" 2>&1)
+        [ $? -eq 0 ] && _push_ok=1
+
+        if [ "$_push_ok" -eq 1 ]; then
+          echo -e "  ${C_GREEN}✅ Push berhasil!${C_RESET}"
+          log_push_event "$DEFAULT_BRANCH" "OK" "$_msg" "$ok_count"
+          local _ts_del; _ts_del=$(date '+%H:%M:%S %d %b %Y')
+          local _del_list_txt; _del_list_txt=$(printf '  • %s\n' "${deleted_list[@]}")
+          local _btn_del='{"inline_keyboard":[[{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"},{"text":"📊 Commits","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commits/'"${DEFAULT_BRANCH}"'"}]]}'
+          send_telegram_photo "https://w.wallhaven.cc/full/v9/wallhaven-v9jz53.png" "🗑 <b>FILE/FOLDER DIHAPUS</b>
+━━━━━━━━━━━━━━━━━━━━
+📁 <code>${USER}/${REPO}</code>
+🌿 Branch: <code>${DEFAULT_BRANCH}</code>
+🗑 ${ok_count} item dihapus:
+${_del_list_txt}
+🕐 ${_ts_del}" "$_btn_del" 2>/dev/null &
+        else
+          echo -e "  ${C_RED}❌ Push gagal.${C_RESET}"
+          echo -e "  ${C_DIM}$(printf '%s' "$_push_out" | tail -3)${C_RESET}"
+          log_push_event "$DEFAULT_BRANCH" "FAIL" "$_msg" "$ok_count"
+        fi
+      else
+        echo -e "  ${C_RED}❌ Gagal staging perubahan. Cek error di atas.${C_RESET}"
+      fi
+    else
+      echo -e "  ${C_DIM}↩ Perubahan disimpan di working tree — jalankan Quick Push kapan saja.${C_RESET}"
+    fi
+  fi
 
   prompt_back_or_exit
 }
