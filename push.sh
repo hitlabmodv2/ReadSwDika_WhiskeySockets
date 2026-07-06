@@ -6238,6 +6238,26 @@ action_delete_file_folder() {
   rm -f "$_sync_log"
   echo ""
 
+  # ── Realtime: tampilkan isi repo persis seperti di GitHub (branch ini) ──
+  echo -e "  ${C_BOLD}📂 Isi repo saat ini (branch ${C_RESET}${C_GREEN}${DEFAULT_BRANCH}${C_RESET}${C_BOLD}):${C_RESET}"
+  echo -e "${C_DIM}  ──────────────────────────────────${C_RESET}"
+  local -a _tree_entries=()
+  mapfile -t _tree_entries < <(git ls-tree -r --name-only HEAD 2>/dev/null | awk -F/ '{print $1}' | sort -u)
+  if [ "${#_tree_entries[@]}" -eq 0 ]; then
+    mapfile -t _tree_entries < <(ls -A -- . 2>/dev/null | grep -v '^\.git$')
+  fi
+  local _te=""
+  for _te in "${_tree_entries[@]}"; do
+    [ -z "$_te" ] && continue
+    if [ -d "$_te" ]; then
+      echo -e "     ${C_CYAN}📁 ${_te}/${C_RESET}"
+    else
+      echo -e "     ${C_DIM}📄 ${_te}${C_RESET}"
+    fi
+  done
+  echo -e "${C_DIM}  ──────────────────────────────────${C_RESET}"
+  echo ""
+
   echo -e "  ${C_DIM}Ketik path file/folder yang mau dihapus (relatif dari root project).${C_RESET}"
   echo -e "  ${C_DIM}Pisahkan dengan spasi kalau lebih dari satu. Contoh:${C_RESET}"
   echo -e "  ${C_DIM}    zuhur.jpg PR.TXT folder_lama${C_RESET}"
