@@ -6471,11 +6471,43 @@ action_delete_file_folder() {
   local v=""
   for v in "${valid_paths[@]}"; do
     if [ -d "$v" ]; then
-      echo -e "     ${C_RED}📁 ${v}/${C_RESET}"
+      local _sub_count
+      _sub_count=$(find "$v" -type f 2>/dev/null | wc -l | tr -d ' ')
+      echo -e "     ${C_RED}📁 ${v}/${C_RESET} ${C_DIM}(${_sub_count} file di dalamnya)${C_RESET}"
     else
-      echo -e "     ${C_RED}📄 ${v}${C_RESET}"
+      local _fsz_h
+      _fsz_h=$(du -sh -- "$v" 2>/dev/null | awk '{print $1}')
+      echo -e "     ${C_RED}📄 ${v}${C_RESET} ${C_DIM}(${_fsz_h:-?})${C_RESET}"
     fi
   done
+
+  # ── Preview isi file teks (bukan folder/binary) sebelum benar-benar hapus ──
+  local -a _preview_files=()
+  for v in "${valid_paths[@]}"; do
+    [ -f "$v" ] && _preview_files+=("$v")
+  done
+  if [ "${#_preview_files[@]}" -gt 0 ]; then
+    echo ""
+    echo -e "  ${C_DIM}──────────────────────────────────${C_RESET}"
+    echo -e "  ${C_BOLD}👁  Preview isi file (sebelum dihapus):${C_RESET}"
+    local _pv=""
+    for _pv in "${_preview_files[@]}"; do
+      echo -e "  ${C_DIM}──────────────────────────────────${C_RESET}"
+      echo -e "  ${C_CYAN}${_pv}${C_RESET}"
+      if grep -qI '' -- "$_pv" 2>/dev/null; then
+        local _pv_lines
+        _pv_lines=$(wc -l < "$_pv" 2>/dev/null | tr -d ' ')
+        head -n 5 -- "$_pv" 2>/dev/null | sed 's/^/     /'
+        if [ -n "$_pv_lines" ] && [ "$_pv_lines" -gt 5 ]; then
+          echo -e "     ${C_DIM}... ($((_pv_lines - 5)) baris lagi)${C_RESET}"
+        fi
+      else
+        echo -e "     ${C_DIM}(file biner, tidak bisa ditampilkan sebagai teks)${C_RESET}"
+      fi
+    done
+    echo -e "  ${C_DIM}──────────────────────────────────${C_RESET}"
+  fi
+
   echo ""
   echo -e "  ${C_RED}⚠️  File/folder akan dihapus permanen dari disk (dan dari git kalau ter-track).${C_RESET}"
   echo -e "  ${C_YELLOW}   Ketik ${C_RESET}${C_BOLD}HAPUS${C_RESET}${C_YELLOW} untuk konfirmasi, atau 0 untuk batal:${C_RESET}"
