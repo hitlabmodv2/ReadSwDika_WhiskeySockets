@@ -2575,7 +2575,7 @@ show_main_menu() {
   printf "  ${C_GREEN} p${C_RESET} › %-16s  ${C_MAGENTA} l${C_RESET} › %s\n" "Quick Push"     "Riwayat push"
   printf "  ${C_YELLOW} c${C_RESET} › %-16s  ${C_CYAN} n${C_RESET} › %-16s  %b\n" \
     "Bersihkan history" "$_nm_label" "$_nm_status_str"
-  printf "  ${C_RED}15${C_RESET} › %-16s  ${C_RED} 0${C_RESET} › %s\n" "Hapus file/folder" "Keluar"
+  printf "  ${C_RED} d${C_RESET} › %-16s  ${C_RED} 0${C_RESET} › %s\n" "Hapus file/folder" "Keluar"
   if [ -n "$_upd_ver" ]; then
     printf "  ${C_GREEN} u${C_RESET} › ${C_BOLD}%-16s${C_RESET}  ${C_DIM}versi sekarang: %s → baru: %s${C_RESET}\n" \
       "Update script" "$SCRIPT_VERSION" "$_upd_ver"
@@ -2606,7 +2606,7 @@ show_main_menu() {
     l|L) action_view_push_log ;;
     c|C) action_cleanup_node_modules ;;
     n|N) action_install_node_modules ;;
-    15) action_delete_file_folder ;;
+    d|D) action_delete_file_folder ;;
     u|U) action_self_update "$_upd_ver" "$_upd_url" ;;
     0|q|Q|exit) goodbye_prompt ;;
     *)
@@ -6240,21 +6240,33 @@ action_delete_file_folder() {
   # ── Realtime: tampilkan isi repo persis seperti di GitHub (branch ini) ──
   echo -e "  ${C_BOLD}📂 Isi repo saat ini (branch ${C_RESET}${C_GREEN}${DEFAULT_BRANCH}${C_RESET}${C_BOLD}):${C_RESET}"
   echo -e "${C_DIM}  ──────────────────────────────────${C_RESET}"
-  local -a _tree_entries=()
-  mapfile -t _tree_entries < <(git ls-tree -r --name-only HEAD 2>/dev/null | awk -F/ '{print $1}' | sort -u)
-  if [ "${#_tree_entries[@]}" -eq 0 ]; then
-    mapfile -t _tree_entries < <(ls -A -- . 2>/dev/null | grep -v '^\.git$')
+
+  local -a _entries=()
+  mapfile -t _entries < <(git ls-tree -r --name-only HEAD 2>/dev/null | awk -F/ '{print $1}' | sort -u)
+  if [ "${#_entries[@]}" -eq 0 ]; then
+    mapfile -t _entries < <(ls -A -- . 2>/dev/null | grep -v '^\.git$' | sort)
   fi
+
+  # Pisah dulu: folder di atas (urut abjad), baru file (urut abjad) — rapi kayak GitHub
+  local -a _dirs=() _files=()
   local _te=""
-  for _te in "${_tree_entries[@]}"; do
+  for _te in "${_entries[@]}"; do
     [ -z "$_te" ] && continue
     if [ -d "$_te" ]; then
-      echo -e "     ${C_CYAN}📁 ${_te}/${C_RESET}"
+      _dirs+=("$_te")
     else
-      echo -e "     ${C_DIM}📄 ${_te}${C_RESET}"
+      _files+=("$_te")
     fi
   done
+
+  for _te in "${_dirs[@]}"; do
+    echo -e "     ${C_YELLOW}📁 ${C_BOLD}${_te}/${C_RESET}"
+  done
+  for _te in "${_files[@]}"; do
+    echo -e "     ${C_RESET}📄 ${_te}${C_RESET}"
+  done
   echo -e "${C_DIM}  ──────────────────────────────────${C_RESET}"
+  echo -e "  ${C_DIM}Total: ${#_dirs[@]} folder, ${#_files[@]} file${C_RESET}"
   echo ""
 
   echo -e "  ${C_DIM}Ketik path file/folder yang mau dihapus (relatif dari root project).${C_RESET}"
