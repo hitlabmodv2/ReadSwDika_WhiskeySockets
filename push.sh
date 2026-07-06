@@ -6386,15 +6386,8 @@ action_delete_file_folder() {
 
   if [ "$ok_count" -gt 0 ]; then
     echo ""
-    echo -e "${C_DIM}  ──────────────────────────────────${C_RESET}"
-    echo -e "  ${C_GREEN}1${C_RESET} ${C_BOLD}›${C_RESET} Commit & push sekarang"
-    echo -e "  ${C_DIM}0${C_RESET} ${C_BOLD}›${C_RESET} Nanti saja (push manual lewat Quick Push)"
-    echo -e "${C_DIM}  ──────────────────────────────────${C_RESET}"
-    printf "  ${C_BOLD}▸ ${C_RESET}"
-    local push_now=""
-    read -r push_now </dev/tty
-
-    if [ "$push_now" = "1" ]; then
+    echo -e "  ${C_CYAN}▸ Langsung dorong ke GitHub (branch ${C_RESET}${C_GREEN}${DEFAULT_BRANCH}${C_RESET}${C_CYAN}) secara realtime...${C_RESET}"
+    {
       echo ""
       echo -e "  ${C_CYAN}▸ Staging perubahan...${C_RESET}"
       if prepare_stage; then
@@ -6460,9 +6453,7 @@ ${_del_list_txt}
       else
         echo -e "  ${C_RED}❌ Gagal staging perubahan. Cek error di atas.${C_RESET}"
       fi
-    else
-      echo -e "  ${C_DIM}↩ Perubahan disimpan di working tree — jalankan Quick Push kapan saja.${C_RESET}"
-    fi
+    }
   fi
 
   prompt_back_or_exit
