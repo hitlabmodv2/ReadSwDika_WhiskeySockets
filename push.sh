@@ -2575,7 +2575,7 @@ show_main_menu() {
   printf "  ${C_GREEN} p${C_RESET} › %-16s  ${C_MAGENTA} l${C_RESET} › %s\n" "Quick Push"     "Riwayat push"
   printf "  ${C_YELLOW} c${C_RESET} › %-16s  ${C_CYAN} n${C_RESET} › %-16s  %b\n" \
     "Bersihkan history" "$_nm_label" "$_nm_status_str"
-  printf "  ${C_RED} d${C_RESET} › %-16s\n" "Hapus file/folder"
+  printf "  ${C_RED}15${C_RESET} › %-16s\n" "Hapus file/folder"
   if [ -n "$_upd_ver" ]; then
     printf "  ${C_GREEN} u${C_RESET} › ${C_BOLD}%-16s${C_RESET}  ${C_DIM}versi sekarang: %s → baru: %s${C_RESET}\n" \
       "Update script" "$SCRIPT_VERSION" "$_upd_ver"
@@ -2607,7 +2607,7 @@ show_main_menu() {
     l|L) action_view_push_log ;;
     c|C) action_cleanup_node_modules ;;
     n|N) action_install_node_modules ;;
-    d|D) action_delete_file_folder ;;
+    15) action_delete_file_folder ;;
     u|U) action_self_update "$_upd_ver" "$_upd_url" ;;
     0|q|Q|exit) goodbye_prompt ;;
     *)
