@@ -5,7 +5,7 @@ _🔍 Masih dalam tahap pemantauan — informasi tanggal rilis akan diumumkan ke
 🤖 *WILY BOT — V25*
 ✨ *4 Fitur Baru*
 🔧 *11 Bug/Error Fix*
-🚀 *15 Perubahan*
+🚀 *17 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -246,6 +246,20 @@ _Tampilan pesan dan susunan tombol dirombak agar lebih jelas dan informatif:_
 4. Urutan section button diubah — *🤖 Auto-Deteksi & Simpan* dipindah ke *posisi paling atas* agar langsung terlihat saat button dibuka
 5. Save Disk & Save Warn juga muncul terintegrasi di dalam section Disk Limit & Warn — pilihan auto dan manual berdampingan
 > Tampilan lebih konsisten dengan gaya button fitur lain (`.online`, `.typing`, dll) dan langsung terbaca tanpa scroll
+
+*16. 🟢 CekSW — Default ON Saat Pertama Konek (Bot Utama & Jadibot)*
+_Sebelumnya bot utama butuh manual nyalain ceksw dulu setelah pertama konek:_
+1. `cekswTracking` di `config.json` diubah default jadi `true` — bot utama langsung ON saat pertama jalan
+2. Jadibot sudah ON by default sejak sebelumnya via `initJadibotCekswConfig` — tidak ada perubahan di sisi ini
+3. Data statistik tetap terisolasi penuh: bot utama → `data/ceksw/`, tiap jadibot → `data_jadibot/<nomor>/ceksw/`
+> Bot utama & jadibot kini seragam — ceksw langsung aktif begitu konek, tidak perlu setting manual lagi
+
+*17. ⚙️ SW Tracking — 3 Optimisasi Internal (Atomic Write, TTL Cleanup, REVOKE LRU)*
+_Tiga perbaikan internal di sistem SwTrack agar lebih stabil & efisien di produksi jangka panjang:_
+1. *Atomic Write* — semua penulisan JSON (swstats, swtrack user, config jadibot, dan REVOKE) kini tulis ke `.tmp` dulu lalu rename — kalau proses crash di tengah, file asli tidak pernah korup
+2. *swProcessingSet TTL Cleanup* — Set dedup story sebelumnya hanya di-add, tidak pernah dibersihkan → lama-lama tumbuh tak terbatas; sekarang ada cleanup otomatis tiap 30 menit, entry >2 jam dihapus — memory tetap terkendali walau bot jalan berhari-hari tanpa restart
+3. *REVOKE LRU Fast Path* — saat story dihapus pengirim, sistem tidak lagi scan semua file user satu-satu (O(n)); sekarang ada LRU map `msgId → nomor HP` di memori (max 5000 entry, FIFO eviction), lookup O(1) langsung ke file pemilik — kalau LRU miss tetap fallback ke full scan otomatis, tidak ada regresi
+> Tidak ada perubahan di tampilan/perintah pengguna — semua transparan di dalam sistem
 
 *15. 🤖 .wilyai — Tombol Single-Select Realtime + Notif Fitur Belum Aktif*
 _Perintah `.wilyai` kini tampil dengan button interaktif single-select, realtime status per fitur, persis pola `.online` & `.readsw`:_
