@@ -6667,6 +6667,89 @@ action_delete_file_folder() {
 🗑 ${ok_count} item dihapus:
 ${_del_list_txt}
 🕐 ${_ts_del}" "$_btn_del" 2>/dev/null &
+
+          # ── Quick undo: tawarkan restore langsung tanpa masuk menu terpisah ──
+          local _del_commit_hash; _del_commit_hash=$(git rev-parse HEAD 2>/dev/null)
+          echo ""
+          echo -e "  ${C_DIM}──────────────────────────────────${C_RESET}"
+          echo -e "  ${C_YELLOW}↩️  Salah hapus? Ketik ${C_RESET}${C_BOLD}undo${C_RESET}${C_YELLOW} sekarang untuk langsung restore, atau Enter untuk lanjut.${C_RESET}"
+          printf "  ${C_BOLD}▸ ${C_RESET}"
+          local _undo_now=""
+          read -r _undo_now </dev/tty
+          _undo_now=$(printf '%s' "$_undo_now" | tr -d '\r')
+
+          if [ "$_undo_now" = "undo" ] || [ "$_undo_now" = "UNDO" ]; then
+            if [ -n "$_del_commit_hash" ]; then
+              echo ""
+              echo -e "  ${C_CYAN}▸ Restore ${ok_count} item dari commit ${_del_commit_hash:0:7} ...${C_RESET}"
+              local _ok_u=0 _fail_u=0
+              local -a _restored_list_u=()
+              local _uf=""
+              for _uf in "${deleted_list[@]}"; do
+                mini_bar_start "Restore ${_uf} ..." 0.015
+                if git checkout "${_del_commit_hash}~1" -- "$_uf" >/dev/null 2>&1; then
+                  mini_bar_ok "${_uf} dikembalikan"
+                  _ok_u=$((_ok_u + 1))
+                  _restored_list_u+=("$_uf")
+                else
+                  mini_bar_fail "${_uf} gagal di-restore"
+                  _fail_u=$((_fail_u + 1))
+                fi
+              done
+
+              echo ""
+              echo -e "  ${C_GREEN}✅ Berhasil restore: ${_ok_u}${C_RESET}   ${C_RED}❌ Gagal: ${_fail_u}${C_RESET}"
+
+              if [ "$_ok_u" -gt 0 ]; then
+                echo -e "  ${C_CYAN}▸ Commit & push hasil undo secara realtime...${C_RESET}"
+                if prepare_stage; then
+                  local _msg_u
+                  _msg_u="revert: undo hapus $(printf '%s, ' "${_restored_list_u[@]}" | sed 's/, $//')"
+                  if [ "${#_msg_u}" -gt 200 ]; then
+                    _msg_u="revert: undo hapus ${_ok_u} file/folder (dari ${_del_commit_hash:0:7})"
+                  fi
+                  git commit -m "$_msg_u" --allow-empty >/dev/null 2>&1 || true
+
+                  local _push_out_u _push_ok_u=0
+                  _push_out_u=$(git push "${REMOTE_URL:-origin}" "HEAD:${DEFAULT_BRANCH}" 2>&1)
+                  [ $? -eq 0 ] && _push_ok_u=1
+
+                  if [ "$_push_ok_u" -ne 1 ]; then
+                    echo -e "  ${C_YELLOW}⚠️  Branch divergent, sambung histori remote...${C_RESET}"
+                    git fetch origin "$DEFAULT_BRANCH" --quiet 2>/dev/null || true
+                    local _tree_u _remote_parent_u _new_commit_u
+                    _tree_u=$(git rev-parse "HEAD^{tree}" 2>/dev/null)
+                    _remote_parent_u=$(git rev-parse "refs/remotes/origin/${DEFAULT_BRANCH}" 2>/dev/null)
+                    if [ -n "$_tree_u" ] && [ -n "$_remote_parent_u" ]; then
+                      _new_commit_u=$(GIT_AUTHOR_NAME="$(git log -1 --format='%an')" \
+                                    GIT_AUTHOR_EMAIL="$(git log -1 --format='%ae')" \
+                                    GIT_COMMITTER_NAME="$(git log -1 --format='%cn')" \
+                                    GIT_COMMITTER_EMAIL="$(git log -1 --format='%ce')" \
+                                    git commit-tree "$_tree_u" -p "$_remote_parent_u" -m "$_msg_u" 2>/dev/null)
+                    fi
+                    if [ -n "${_new_commit_u:-}" ]; then
+                      git update-ref "refs/heads/${DEFAULT_BRANCH}" "$_new_commit_u" 2>/dev/null || true
+                      _push_out_u=$(git push "${REMOTE_URL:-origin}" "HEAD:${DEFAULT_BRANCH}" 2>&1)
+                      [ $? -eq 0 ] && _push_ok_u=1
+                    fi
+                  fi
+
+                  if [ "$_push_ok_u" -eq 1 ]; then
+                    echo -e "  ${C_GREEN}✅ Undo berhasil di-push!${C_RESET}"
+                    log_push_event "$DEFAULT_BRANCH" "OK" "$_msg_u" "$_ok_u"
+                  else
+                    echo -e "  ${C_RED}❌ Push undo gagal.${C_RESET}"
+                    echo -e "  ${C_DIM}$(printf '%s' "$_push_out_u" | tail -3)${C_RESET}"
+                    log_push_event "$DEFAULT_BRANCH" "FAIL" "$_msg_u" "$_ok_u"
+                  fi
+                else
+                  echo -e "  ${C_RED}❌ Gagal staging perubahan undo. Cek error di atas.${C_RESET}"
+                fi
+              fi
+            else
+              echo -e "  ${C_RED}❌ Tidak bisa undo, commit hapus tidak ditemukan.${C_RESET}"
+            fi
+          fi
         else
           echo -e "  ${C_RED}❌ Push gagal.${C_RESET}"
           echo -e "  ${C_DIM}$(printf '%s' "$_push_out" | tail -3)${C_RESET}"
