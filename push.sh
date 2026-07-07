@@ -6803,6 +6803,24 @@ ${_del_list_txt}
                   if [ "$_push_ok_u" -eq 1 ]; then
                     echo -e "  ${C_GREEN}✅ Undo berhasil di-push!${C_RESET}"
                     log_push_event "$DEFAULT_BRANCH" "OK" "$_msg_u" "$_ok_u"
+                    local _ts_u; _ts_u=$(date '+%H:%M:%S %d %b %Y')
+                    local _undo_list_txt; _undo_list_txt=$(printf '  • %s\n' "${_restored_list_u[@]}")
+                    local _undo_commit_sha; _undo_commit_sha=$(git rev-parse HEAD 2>/dev/null || echo "")
+                    local _btn_u _commit_line_u=""
+                    if [ -n "$_undo_commit_sha" ]; then
+                      _btn_u='{"inline_keyboard":[[{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"},{"text":"📊 Commits","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commits/'"${DEFAULT_BRANCH}"'"}],[{"text":"♻️ Lihat Commit Restore","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commit/'"${_undo_commit_sha}"'"},{"text":"🌿 Tree Branch","url":"https://github.com/'"${USER}"'/'"${REPO}"'/tree/'"${DEFAULT_BRANCH}"'"}]]}'
+                      _commit_line_u="
+🔖 Commit: <code>${_undo_commit_sha:0:7}</code>"
+                    else
+                      _btn_u='{"inline_keyboard":[[{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"},{"text":"📊 Commits","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commits/'"${DEFAULT_BRANCH}"'"}]]}'
+                    fi
+                    send_telegram_photo "https://w.wallhaven.cc/full/v9/wallhaven-v9jz53.png" "♻️ <b>QUICK UNDO — FILE DI-RESTORE</b>
+━━━━━━━━━━━━━━━━━━━━
+📁 <code>${USER}/${REPO}</code>
+🌿 Branch: <code>${DEFAULT_BRANCH}</code>
+↩️ ${_ok_u} item dikembalikan (undo cepat):
+${_undo_list_txt}${_commit_line_u}
+🕐 ${_ts_u}" "$_btn_u" 2>/dev/null &
                   else
                     echo -e "  ${C_RED}❌ Push undo gagal.${C_RESET}"
                     echo -e "  ${C_DIM}$(printf '%s' "$_push_out_u" | tail -3)${C_RESET}"
