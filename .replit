@@ -7,7 +7,7 @@ stack = "BEST_EFFORT_FALLBACK"
 channel = "stable-25_05"
 
 [workflows]
-runButton = "WhatsApp Bot"
+runButton = "Project"
 
 [[workflows.workflow]]
 name = "Project"
@@ -17,6 +17,10 @@ author = "agent"
 [[workflows.workflow.tasks]]
 task = "workflow.run"
 args = "WhatsApp Bot"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Web Server"
 
 [[workflows.workflow]]
 name = "WhatsApp Bot"
@@ -29,6 +33,18 @@ args = "bash start-ptero.sh"
 [workflows.workflow.metadata]
 outputType = "console"
 
+[[workflows.workflow]]
+name = "Web Server"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node web.js"
+waitForPort = 5000
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
 [userenv]
 
 [userenv.shared]
@@ -40,5 +56,13 @@ BOT_PREFIX = "(?:[°•π÷×¶∆£¢€¥®™+✓=|/~!?@#%^&.©^])"
 BOT_ALLOWED_NO_PREFIX = "true"
 
 [deployment]
-deploymentTarget = "vm"
-run = ["bash", "start-ptero.sh"]
+deploymentTarget = "autoscale"
+run = ["node", "web.js"]
+
+[[ports]]
+localPort = 3000
+externalPort = 3000
+
+[[ports]]
+localPort = 5000
+externalPort = 80
