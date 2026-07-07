@@ -2760,6 +2760,19 @@ action_view_push_log() {
   _force=$(grep -c 'OK(force)' "$PUSH_LOG_FILE" 2>/dev/null; true)
   _fail=$(grep -c  ' FAIL '    "$PUSH_LOG_FILE" 2>/dev/null; true)
 
+  local _ts_vpl; _ts_vpl=$(date '+%H:%M:%S %d %b %Y')
+  local _btn_vpl='{"inline_keyboard":[[{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"},{"text":"📊 Commits","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commits/'"${DEFAULT_BRANCH}"'"}],[{"text":"🟢 GitHub Actions","url":"https://github.com/'"${USER}"'/'"${REPO}"'/actions"},{"text":"📋 Semua Branch","url":"https://github.com/'"${USER}"'/'"${REPO}"'/branches"}]]}'
+  send_telegram_photo "https://cdn.myanimelist.net/images/anime/1337/99013.jpg" "📋 <b>RIWAYAT PUSH DILIHAT</b>
+━━━━━━━━━━━━━━━━━━━━
+👤 <code>${USER}</code>
+📁 <code>${USER}/${REPO}</code>
+📊 Total push  : <b>${_total}</b>
+✅ Berhasil    : <b>${_ok}</b>
+⚡ Force push  : <b>${_force}</b>
+❌ Gagal       : <b>${_fail}</b>
+━━━━━━━━━━━━━━━━━━━━
+🕐 ${_ts_vpl}" "$_btn_vpl" 2>/dev/null &
+
   clear >/dev/tty 2>/dev/null || true
   echo -e "${C_BOLD}╭──────────────────────────────────╮${C_RESET}"
   echo -e "${C_BOLD}│  📋  RIWAYAT PUSH — BANG WILY    │${C_RESET}"
@@ -3046,6 +3059,18 @@ action_check_token() {
     [ -n "$rate_limit" ]     && echo -e "  ${C_DIM}Limit    ${C_RESET}${rate_limit} req/jam"
     [ -n "$rate_remaining" ] && echo -e "  ${C_DIM}Sisa     ${C_RESET}${C_CYAN}${rate_remaining}${C_RESET}"
     [ -n "$rate_reset_fmt" ] && echo -e "  ${C_DIM}Reset    ${C_RESET}${rate_reset_fmt}"
+    local _ts_ct; _ts_ct=$(date '+%H:%M:%S %d %b %Y')
+    local _btn_ct='{"inline_keyboard":[[{"text":"🔑 Kelola Token","url":"https://github.com/settings/tokens"},{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"}],[{"text":"🔐 Security","url":"https://github.com/settings/security"},{"text":"👤 Profile","url":"https://github.com/'"${gh_login}"'"}]]}'
+    send_telegram_photo "https://cdn.myanimelist.net/images/anime/1517/100633.jpg" "🔍 <b>CEK TOKEN — VALID ✅</b>
+━━━━━━━━━━━━━━━━━━━━
+👤 Login    : <code>${gh_login}</code>
+🏷 Nama     : ${gh_name}
+🔑 Token    : <code>${tok_masked}</code>
+📋 Jenis    : ${tok_type_label}
+⚡ Rate sisa: <b>${rate_remaining}/${rate_limit}</b>
+📁 <code>${USER}/${REPO}</code>
+━━━━━━━━━━━━━━━━━━━━
+🕐 ${_ts_ct}" "$_btn_ct" 2>/dev/null &
   else
     local api_msg
     api_msg=$(echo "$body" | grep -o '"message": *"[^"]*"' | head -1 | sed 's/"message": *"//;s/"//')
@@ -3053,6 +3078,17 @@ action_check_token() {
     [ -n "$api_msg" ] && echo -e "  ${C_DIM}   GitHub: ${api_msg}${C_RESET}"
     echo ""
     echo -e "  ${C_YELLOW}💡 Pilih opsi 1/2/3 di menu token untuk menyimpan token baru.${C_RESET}"
+    local _ts_ct_fail; _ts_ct_fail=$(date '+%H:%M:%S %d %b %Y')
+    local _btn_ct_fail='{"inline_keyboard":[[{"text":"🔑 Buat Token Baru","url":"https://github.com/settings/tokens/new"},{"text":"⚙️ Settings","url":"https://github.com/settings/profile"}],[{"text":"🔐 Security","url":"https://github.com/settings/security"},{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"}]]}'
+    send_telegram_photo "https://cdn.myanimelist.net/images/anime/1286/99889.jpg" "🔍 <b>CEK TOKEN — TIDAK VALID ❌</b>
+━━━━━━━━━━━━━━━━━━━━
+🔑 Token    : <code>${tok_masked}</code>
+📋 Jenis    : ${tok_type_label}
+❌ HTTP     : <b>${http_code}</b>
+⚠️ Pesan    : ${api_msg}
+📁 <code>${USER}/${REPO}</code>
+━━━━━━━━━━━━━━━━━━━━
+🕐 ${_ts_ct_fail}" "$_btn_ct_fail" 2>/dev/null &
   fi
 
   echo ""
@@ -3469,6 +3505,18 @@ action_list_branches() {
     echo -e "  ${C_RED}❌ Tidak ada branch ditemukan.${C_RESET}"
     prompt_back_or_exit; return
   fi
+
+  local _lb_total=${#all_names[@]}
+  local _ts_lb; _ts_lb=$(date '+%H:%M:%S %d %b %Y')
+  local _btn_lb='{"inline_keyboard":[[{"text":"📋 Lihat Branches","url":"https://github.com/'"${USER}"'/'"${REPO}"'/branches"},{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"}],[{"text":"🔀 Buat PR","url":"https://github.com/'"${USER}"'/'"${REPO}"'/compare"},{"text":"📊 Commits","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commits/'"${DEFAULT_BRANCH}"'"}]]}'
+  send_telegram_photo "https://cdn.myanimelist.net/images/anime/1935/127974.jpg" "📊 <b>STATUS BRANCH DILIHAT</b>
+━━━━━━━━━━━━━━━━━━━━
+👤 <code>${USER}</code>
+📁 <code>${USER}/${REPO}</code>
+🌿 Total branch : <b>${_lb_total}</b>
+✅ Default      : <code>${DEFAULT_BRANCH}</code>
+━━━━━━━━━━━━━━━━━━━━
+🕐 ${_ts_lb}" "$_btn_lb" 2>/dev/null &
 
   # ── Pisahkan default dari yang lain ────────────────────────────────────
   local def_sha=""
@@ -4779,6 +4827,7 @@ action_list_repos() {
   local lr_per_page=10
   local lr_filter="all"   # all | public | private
   local lr_sort="updated" # updated | created | full_name | pushed
+  local _lr_notif_sent=0
 
   while true; do
     # ── Fetch data dari GitHub API ───────────────────────────────────────
@@ -4823,6 +4872,19 @@ action_list_repos() {
 
     relogin_if_needed "$http_code" "ambil daftar repo" || continue
     if [ "$http_code" = "200" ]; then mini_bar_ok "Data repo dimuat"; else mini_bar_fail "HTTP ${http_code}"; fi
+    if [ "$http_code" = "200" ] && [ "$_lr_notif_sent" = "0" ]; then
+      _lr_notif_sent=1
+      local _ts_lr; _ts_lr=$(date '+%H:%M:%S %d %b %Y')
+      local _btn_lr='{"inline_keyboard":[[{"text":"👤 Profil GitHub","url":"https://github.com/'"${USER}"'"},{"text":"📦 Semua Repo","url":"https://github.com/'"${USER}"'?tab=repositories"}],[{"text":"➕ Buat Repo Baru","url":"https://github.com/new"},{"text":"📁 Repo Aktif","url":"https://github.com/'"${USER}"'/'"${REPO}"'"}]]}'
+      send_telegram_photo "https://w.wallhaven.cc/full/96/wallhaven-96k7j8.jpg" "📋 <b>SEMUA REPO DILIHAT</b>
+━━━━━━━━━━━━━━━━━━━━
+👤 <code>${USER}</code>
+🔍 Filter    : <b>${lr_filter}</b>
+📊 Urutan    : <b>${lr_sort}</b>
+📁 Repo aktif: <code>${USER}/${REPO}</code>
+━━━━━━━━━━━━━━━━━━━━
+🕐 ${_ts_lr}" "$_btn_lr" 2>/dev/null &
+    fi
     if [ "$http_code" != "200" ]; then
       clear >/dev/tty 2>/dev/null || true
       echo -e "${C_BOLD}╭──────────────────────────────────╮${C_RESET}"
