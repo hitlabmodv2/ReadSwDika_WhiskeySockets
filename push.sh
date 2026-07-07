@@ -7000,13 +7000,21 @@ action_restore_deleted() {
         log_push_event "$DEFAULT_BRANCH" "OK" "$_msg_r" "$_ok_r"
         local _ts_r; _ts_r=$(date '+%H:%M:%S %d %b %Y')
         local _restore_list_txt; _restore_list_txt=$(printf '  • %s\n' "${_restored_list[@]}")
-        local _btn_r='{"inline_keyboard":[[{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"},{"text":"📊 Commits","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commits/'"${DEFAULT_BRANCH}"'"}]]}'
+        local _restore_commit_sha; _restore_commit_sha=$(git rev-parse HEAD 2>/dev/null || echo "")
+        local _btn_r _commit_line_r=""
+        if [ -n "$_restore_commit_sha" ]; then
+          _btn_r='{"inline_keyboard":[[{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"},{"text":"📊 Commits","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commits/'"${DEFAULT_BRANCH}"'"}],[{"text":"♻️ Lihat Commit Restore","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commit/'"${_restore_commit_sha}"'"},{"text":"🌿 Tree Branch","url":"https://github.com/'"${USER}"'/'"${REPO}"'/tree/'"${DEFAULT_BRANCH}"'"}]]}'
+          _commit_line_r="
+🔖 Commit: <code>${_restore_commit_sha:0:7}</code>"
+        else
+          _btn_r='{"inline_keyboard":[[{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"},{"text":"📊 Commits","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commits/'"${DEFAULT_BRANCH}"'"}]]}'
+        fi
         send_telegram_photo "https://w.wallhaven.cc/full/v9/wallhaven-v9jz53.png" "♻️ <b>FILE/FOLDER DI-RESTORE</b>
 ━━━━━━━━━━━━━━━━━━━━
 📁 <code>${USER}/${REPO}</code>
 🌿 Branch: <code>${DEFAULT_BRANCH}</code>
 ♻️ ${_ok_r} item dikembalikan:
-${_restore_list_txt}
+${_restore_list_txt}${_commit_line_r}
 🕐 ${_ts_r}" "$_btn_r" 2>/dev/null &
       else
         echo -e "  ${C_RED}❌ Push gagal.${C_RESET}"
