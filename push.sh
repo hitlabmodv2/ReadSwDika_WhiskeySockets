@@ -6721,13 +6721,17 @@ action_delete_file_folder() {
           log_push_event "$DEFAULT_BRANCH" "OK" "$_msg" "$ok_count"
           local _ts_del; _ts_del=$(date '+%H:%M:%S %d %b %Y')
           local _del_list_txt; _del_list_txt=$(printf '  • %s\n' "${deleted_list[@]}")
-          local _btn_del='{"inline_keyboard":[[{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"},{"text":"📊 Commits","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commits/'"${DEFAULT_BRANCH}"'"}]]}'
+          local _del_commit_sha; _del_commit_sha=$(git rev-parse HEAD 2>/dev/null || echo "")
+          local _btn_del='{"inline_keyboard":[[{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"},{"text":"📊 Commits","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commits/'"${DEFAULT_BRANCH}"'"}],[{"text":"♻️ Lihat Commit Hapus","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commit/'"${_del_commit_sha}"'"},{"text":"🌿 Tree Branch","url":"https://github.com/'"${USER}"'/'"${REPO}"'/tree/'"${DEFAULT_BRANCH}"'"}]]}'
           send_telegram_photo "https://w.wallhaven.cc/full/v9/wallhaven-v9jz53.png" "🗑 <b>FILE/FOLDER DIHAPUS</b>
 ━━━━━━━━━━━━━━━━━━━━
 📁 <code>${USER}/${REPO}</code>
-🌿 Branch: <code>${DEFAULT_BRANCH}</code>
+🌿 Branch : <code>${DEFAULT_BRANCH}</code>
+🔖 Commit : <code>${_del_commit_sha:0:7}</code>
 🗑 ${ok_count} item dihapus:
 ${_del_list_txt}
+━━━━━━━━━━━━━━━━━━━━
+♻️ Bisa restore lewat menu <b>r</b> di script
 🕐 ${_ts_del}" "$_btn_del" 2>/dev/null &
 
           # ── Quick undo: tawarkan restore langsung tanpa masuk menu terpisah ──
