@@ -23,6 +23,7 @@
  * ───────────────────────────────
  */
 import 'dotenv/config';
+import express from 'express';
 import { getBrowserDevice, BROWSER_LIST } from './name_perangkat_tertautan.js';
 import fs from 'fs';
 import path from 'path';
@@ -495,6 +496,48 @@ function resetAuthTimerLog(entry) {
                 fs.writeFileSync(file, JSON.stringify(db, null, 2), 'utf-8');
         } catch (_) {}
 }
+
+// ── Web Server (Status Page) ─────────────────────────────────────────────────
+(function startWebServer() {
+  const _app = express();
+  const _PORT = process.env.PORT || 5000;
+  function _safeRead(f) { try { return JSON.parse(fs.readFileSync(f, 'utf8')); } catch { return null; } }
+  _app.get('/', (req, res) => {
+    const pkg  = _safeRead('./package.json')    || {};
+    const cfg  = _safeRead('./config.json')      || {};
+    const auth = _safeRead('./data/system/auth-timer.json') || {};
+    const st   = _safeRead('./data/bot_stats.json') || {};
+    let userCount = 0;
+    try { userCount = fs.readdirSync('./data/users').filter(f => f.endsWith('.json') && f !== 'history.json').length; } catch {}
+    let jadibotCount = 0;
+    try { const jd = _safeRead('./data_jadibot/realtime.json') || { bots: {} }; jadibotCount = Object.keys(jd.bots || {}).length; } catch {}
+    let sessionStatus = 'Belum Login'; let sessColor = '#ffa500';
+    try { if (fs.readdirSync('./sessions').filter(f => f.endsWith('.json')).length > 0) { sessionStatus = 'Session Tersimpan'; sessColor = '#00d480'; } } catch {}
+    const lastQR = auth?.events?.find(e => e.type === 'qr_session_start');
+    const lastQRTime = lastQR ? new Date(lastQR.startAt).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }) : '-';
+    const features = [
+      ['Auto Online', cfg.autoOnline?.enabled], ['Auto Read Story', cfg.autoReadStory?.enabled],
+      ['Auto Typing', cfg.autoTyping?.enabled], ['Anti Delete', cfg.antiDelete?.enabled],
+      ['Anti Call', cfg.antiCall?.enabled], ['Anti Link', cfg.antiLink?.enabled],
+      ['Wily AI', cfg.wilyAI?.enabled], ['Auto Simi', cfg.autoSimi?.enabled],
+      ['Welcome/Goodbye', cfg.welcomeGoodbye?.enabled], ['Telegram Notif', cfg.telegram?.enabled],
+      ['Read Chat', cfg.readChat?.enabled], ['Log SW', cfg.logsw?.enabled],
+    ];
+    const featHtml = features.map(([n,v]) => `<div class="fi ${v?'on':'off'}"><span class="fd"></span>${n}</div>`).join('');
+    const ownHtml  = (cfg.owners||[]).map((o,i) => `<span class="ot">👑 Owner ${i+1}: +${o}</span>`).join('');
+    const now = new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' });
+    res.setHeader('Content-Type', 'text/html');
+    res.send(`<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>${pkg.name||'wily-bot'} ${cfg.botVersion||'V25'}</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#0f0f1a,#1a1a2e,#16213e);min-height:100vh;color:#fff;padding:24px 16px}.wrap{max-width:560px;margin:0 auto}.hdr{text-align:center;margin-bottom:24px}.ico{font-size:52px;display:block;animation:float 3s ease-in-out infinite}@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}h1{font-size:1.8rem;font-weight:800;background:linear-gradient(135deg,#00d4aa,#00b4d8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.sub{color:rgba(255,255,255,.3);font-size:.78rem;margin-top:4px;margin-bottom:20px}.br{display:flex;justify-content:center;gap:8px;margin-bottom:22px;flex-wrap:wrap}.b{display:inline-flex;align-items:center;gap:5px;border-radius:50px;padding:5px 14px;font-size:.78rem;font-weight:600}.bg{background:rgba(0,212,128,.15);border:1px solid rgba(0,212,128,.4);color:#00d480}.bb{background:rgba(0,180,216,.15);border:1px solid rgba(0,180,216,.4);color:#00b4d8}.bo{background:rgba(255,165,0,.15);border:1px solid rgba(255,165,0,.4);color:#ffa500}.dot{width:7px;height:7px;border-radius:50%;background:currentColor;animation:blink 1.2s infinite}@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:18px}.card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px 10px;text-align:center}.cl{font-size:.62rem;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}.cv{font-size:1.05rem;font-weight:700;color:#e2e8f0}.cvb{font-size:1.5rem;color:#00d4aa;font-weight:800}.ib{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px;margin-bottom:16px}.ir{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:.8rem}.ir:last-child{border-bottom:none}.ik{color:rgba(255,255,255,.4)}.iv{color:#e2e8f0;font-weight:600;text-align:right;max-width:65%;word-break:break-all}.st{font-size:.72rem;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,.3);margin-bottom:8px}.fg{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:16px}.fi{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:9px;padding:8px 10px;font-size:.78rem}.fi.on .fd{background:#00d480;box-shadow:0 0 6px #00d48066}.fi.off .fd{background:#ff4d4d55}.fi.on{border-color:rgba(0,212,128,.2)}.fd{width:7px;height:7px;border-radius:50%;flex-shrink:0}.ob{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px;margin-bottom:16px;display:flex;flex-wrap:wrap;gap:7px}.ot{background:rgba(0,180,216,.12);border:1px solid rgba(0,180,216,.25);color:#00b4d8;border-radius:7px;padding:4px 10px;font-size:.76rem;font-weight:600}.wa{display:inline-flex;align-items:center;gap:7px;background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;text-decoration:none;border-radius:50px;padding:9px 22px;font-weight:600;font-size:.83rem;margin-bottom:16px;transition:opacity .2s}.wa:hover{opacity:.85}footer{text-align:center;color:rgba(255,255,255,.2);font-size:.7rem;border-top:1px solid rgba(255,255,255,.06);padding-top:14px}@media(max-width:400px){.g3{grid-template-columns:1fr 1fr}.fg{grid-template-columns:1fr}}</style></head><body><div class="wrap"><div class="hdr"><span class="ico">🤖</span><h1>${pkg.name||'wily-bot'} ${cfg.botVersion||'V25'}</h1><div class="sub">${(pkg.description||'').split('—')[0].trim()}</div></div><div class="br"><span class="b bg"><span class="dot"></span> Server Online</span><span class="b bb">📦 v${pkg.version||'25'}</span><span class="b bo">📱 +${cfg.botNumber||'-'}</span></div><div class="g3"><div class="card"><div class="cl">👥 Users</div><div class="cv cvb">${userCount.toLocaleString('id-ID')}</div></div><div class="card"><div class="cl">🤖 JadiBot</div><div class="cv cvb">${jadibotCount}</div></div><div class="card"><div class="cl">💬 Total CMD</div><div class="cv cvb">${(st.totalCommands||0).toLocaleString('id-ID')||'—'}</div></div></div><div class="ib"><div class="ir"><span class="ik">📟 Nomor Bot</span><span class="iv">+${cfg.botNumber||'-'}</span></div><div class="ir"><span class="ik">🔐 Session</span><span class="iv" style="color:${sessColor}">${sessionStatus}</span></div><div class="ir"><span class="ik">📲 QR Terakhir</span><span class="iv">${lastQRTime}</span></div><div class="ir"><span class="ik">🕐 Waktu Server</span><span class="iv">${now}</span></div><div class="ir"><span class="ik">⚙️ Session Name</span><span class="iv">${process.env.BOT_SESSION_NAME||'hisoka'}</span></div></div><div class="st">👑 Owner Bot</div><div class="ob">${ownHtml}</div><div class="st">⚡ Status Fitur</div><div class="fg">${featHtml}</div><div style="text-align:center"><a class="wa" href="https://wa.me/${(cfg.owners||[])[cfg.owners?.length-1]||cfg.botNumber||''}" target="_blank">💬 Chat Owner</a></div><footer>© ${new Date().getFullYear()} ${pkg.name||'wily-bot'} ${cfg.botVersion||'V25'} — Powered by Baileys &amp; Replit</footer></div></body></html>`);
+  });
+  _app.get('/health', (req, res) => res.json({ status: 'ok', uptime: process.uptime(), time: new Date().toISOString() }));
+  _app.get('/api/stats', (req, res) => {
+    const cfg = _safeRead('./config.json') || {};
+    let u = 0; try { u = fs.readdirSync('./data/users').filter(f => f.endsWith('.json') && f !== 'history.json').length; } catch {}
+    res.json({ bot: ((_safeRead('./package.json'))||{}).name, version: ((_safeRead('./package.json'))||{}).version, users: u, botNumber: cfg.botNumber, owners: cfg.owners, time: new Date().toISOString() });
+  });
+  _app.listen(_PORT, '0.0.0.0', () => console.log(`\x1b[36m→ Web     :\x1b[39m Status page aktif di port ${_PORT}`));
+})();
+// ── End Web Server ────────────────────────────────────────────────────────────
 
 async function main() {
         const sessionName = path.basename(sessionDir);
