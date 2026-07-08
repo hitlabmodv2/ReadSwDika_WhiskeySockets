@@ -4,8 +4,8 @@ _🔍 Masih dalam tahap pemantauan — informasi tanggal rilis akan diumumkan ke
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V25*
 ✨ *4 Fitur Baru*
-🔧 *11 Bug/Error Fix*
-🚀 *17 Perubahan*
+🔧 *12 Bug/Error Fix*
+🚀 *19 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -121,6 +121,16 @@ _Bot kini baca langsung RAM & disk dari server tempat bot jalan — bukan dari p
 2. _Fix:_ cabang jadibot dihapus — handler kini selalu `sendMessage(m.from, ...)` tanpa pengecualian
 3. _Catatan:_ bot utama tidak terpengaruh — jalurnya sudah benar sejak awal
 > `.rvo` kini akurat di semua kondisi: GC → reply di GC, PM → reply di PM, jadibot → reply di chat jadibot masing-masing tanpa bentrok
+
+*12. 🤖 Jadibot Expired Tapi Otomatis Jadi Permanent — Bug Serius*
+~Bug: saat jadibot habis masa berlakunya, data di `realtime.json` terhapus tapi folder sesi bisa tetap ada — saat bot utama restart, jadibot itu konek ulang dan otomatis dapat status *Permanent* tanpa izin owner~
+1. _Penyebab 1 — `isJadibotExpired`:_ kalau tidak ada data di `realtime.json` (entry sudah dihapus saat expire), fungsi return `false` → dianggap *belum expired* → lolos dan konek ulang
+2. _Penyebab 2 — `connection 'open'` handler:_ saat bot konek ulang tanpa data expiry, kode langsung panggil `setPermanentJadibot()` → gratis akses unlimited
+3. _Penyebab 3 — auto-start `index.js`:_ saat startup bot utama, folder sesi yang masih ada tapi sudah tidak punya entry di `realtime.json` tetap di-start tanpa filter apapun
+4. _Fix 1:_ `isJadibotExpired` sekarang return `true` kalau tidak ada data → diperlakukan sebagai expired _(bukan kebal expired)_
+5. _Fix 2:_ `connection 'open'` handler — jalur `else` diganti dari `setPermanentJadibot` ke `expireJadibot` → sesi orphan langsung dihentikan & diberitahu
+6. _Fix 3:_ auto-start sekarang deteksi *orphan bots* (folder ada, data tidak ada) dan bersihkan foldernya langsung tanpa mencoba konek — dilengkapi guard agar tidak hapus massal kalau `realtime.json` ternyata corrupt/gagal baca
+> Jadibot yang sudah expired tidak akan pernah bisa "hidup kembali" jadi permanent — baik via restart bot, reconnect, maupun auto-start; log konsol menampilkan info 🗑️ saat orphan ditemukan dan dibersihkan
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *PERUBAHAN*
@@ -260,6 +270,21 @@ _Tiga perbaikan internal di sistem SwTrack agar lebih stabil & efisien di produk
 2. *swProcessingSet TTL Cleanup* — Set dedup story sebelumnya hanya di-add, tidak pernah dibersihkan → lama-lama tumbuh tak terbatas; sekarang ada cleanup otomatis tiap 30 menit, entry >2 jam dihapus — memory tetap terkendali walau bot jalan berhari-hari tanpa restart
 3. *REVOKE LRU Fast Path* — saat story dihapus pengirim, sistem tidak lagi scan semua file user satu-satu (O(n)); sekarang ada LRU map `msgId → nomor HP` di memori (max 5000 entry, FIFO eviction), lookup O(1) langsung ke file pemilik — kalau LRU miss tetap fallback ke full scan otomatis, tidak ada regresi
 > Tidak ada perubahan di tampilan/perintah pengguna — semua transparan di dalam sistem
+
+*18. 🛠️ push.sh — Notif Restore (Menu r) Kini Punya Button Langsung ke Commit*
+_Notif Telegram saat file di-restore via menu `r › Restore/undo hapus` sebelumnya hanya punya 2 tombol tanpa info commit:_
+1. ~Tombol hanya: 📁 Buka Repo + 📊 Commits — tidak ada link langsung ke commit restore~
+2. Tambah *baris 🔖 Commit:* di body pesan — tampil `commit hash 7 karakter` saat SHA berhasil didapat
+3. Tambah baris tombol kedua: *♻️ Lihat Commit Restore* (link langsung ke SHA commit) + *🌿 Tree Branch*
+4. Kedua tambahan ini *kondisional* — hanya muncul kalau SHA berhasil didapat, tidak pernah tampil kosong
+> Notif restore kini sama informatifnya dengan notif hapus — langsung bisa klik ke commit yang bersangkutan tanpa buka GitHub manual
+
+*19. 🛠️ push.sh — Quick-Undo Sekarang Kirim Notif Telegram*
+~Bug: saat user ketik `undo` langsung setelah hapus file, restore berhasil di-push tapi *tidak ada notif Telegram sama sekali* yang dikirim~
+1. _Penyebab:_ jalur quick-undo (ketik `undo` di prompt setelah hapus) sudah ada logika commit & push, tapi tidak ada pemanggilan `send_telegram_photo` setelah push berhasil
+2. _Fix:_ tambah notif `♻️ QUICK UNDO — FILE DI-RESTORE` lengkap: foto, daftar file yang dikembalikan, baris `🔖 Commit`, dan 4 tombol _(Buka Repo, Commits, Lihat Commit Restore, Tree Branch)_ — format sama persis dengan notif menu r
+3. SHA commit di-capture via `git rev-parse HEAD` setelah push sukses — kondisional, tombol commit hanya muncul kalau SHA ada
+> Quick-undo kini terpantau realtime di Telegram — sama seperti restore dari menu r, tidak ada lagi aksi yang "diam" tanpa notif
 
 *15. 🤖 .wilyai — Tombol Single-Select Realtime + Notif Fitur Belum Aktif*
 _Perintah `.wilyai` kini tampil dengan button interaktif single-select, realtime status per fitur, persis pola `.online` & `.readsw`:_
