@@ -2801,20 +2801,61 @@ setTimeout(async () => {
   const C = '\x1b[36m', G = '\x1b[32m', Y = '\x1b[33m', R = '\x1b[0m', B = '\x1b[1m';
   const RED = '\x1b[31m', DIM = '\x1b[2m';
 
-  const validBots = [], invalidBots = [];
+  // Guard: pastikan realtime.json bisa dibaca dengan benar sebelum klasifikasi orphan.
+  // Kalau file corrupt/gagal parse → skip deteksi orphan sama sekali (semua jalan sebagai validBots)
+  // untuk cegah penghapusan massal sesi yang sebetulnya masih valid.
+  let _realtimeOk = false;
+  try {
+    const _rtPath = path.join(process.cwd(), 'data_jadibot', 'realtime.json');
+    if (fs.existsSync(_rtPath)) {
+      const _rtRaw = fs.readFileSync(_rtPath, 'utf-8');
+      const _rtParsed = JSON.parse(_rtRaw);
+      _realtimeOk = _rtParsed && typeof _rtParsed === 'object' && typeof _rtParsed.bots === 'object';
+    } else {
+      // File tidak ada = belum pernah ada jadibot = aman, tidak ada yang bisa di-orphan
+      _realtimeOk = true;
+    }
+  } catch { _realtimeOk = false; }
+
+  const validBots = [], invalidBots = [], orphanedBots = [];
   for (const number of bots) {
     if (jadibotMap.has(number) || activeOrStartingJadibot.has(number)) continue;
-    if (!isJadibotSessionValid(number)) { invalidBots.push(number); } else { validBots.push(number); }
+    if (!isJadibotSessionValid(number)) {
+      invalidBots.push(number);
+    } else if (_realtimeOk) {
+      // Cek expiry hanya kalau realtime.json terbaca normal:
+      // sesi valid tapi tidak ada data = orphan (expired tapi folder belum terhapus)
+      const _meta = getJadibotExpiry(number);
+      if (!_meta) {
+        orphanedBots.push(number);
+      } else {
+        validBots.push(number);
+      }
+    } else {
+      // realtime.json tidak bisa dibaca → amankan semua sesi, jangan hapus apapun
+      validBots.push(number);
+    }
   }
 
-  if (!validBots.length && !invalidBots.length && !expiredBots.length) return;
+  if (!_realtimeOk) {
+    console.log(`\x1b[31m[AUTO JADIBOT]\x1b[0m ⚠️  realtime.json gagal dibaca — orphan cleanup dilewati, semua sesi distart aman`);
+  }
 
-  const totalSesi = validBots.length + invalidBots.length + expiredBots.length;
+  // Bersihkan sesi orphan langsung tanpa start (hanya kalau realtime terbaca normal)
+  for (const number of orphanedBots) {
+    try { fs.rmSync(path.join(jadibotDir, number), { recursive: true, force: true }) } catch {}
+    try { fs.unlinkSync(path.join(jadibotDir, number + '.json')) } catch {}
+  }
+
+  if (!validBots.length && !invalidBots.length && !expiredBots.length && !orphanedBots.length) return;
+
+  const totalSesi = validBots.length + invalidBots.length + expiredBots.length + orphanedBots.length;
   console.log(`${C}╔══════════════════════════════════╗${R}`);
   console.log(`${C}║${R}   ${B}${Y}🤖  A U T O  J A D I B O T${R}         ${C}║${R}`);
   console.log(`${C}╠══════════════════════════════════╣${R}`);
   console.log(`${C}║${R} ${Y}📦${R} Total  : ${B}${totalSesi} sesi tersimpan${R}`);
   if (expiredBots.length) for (const n of expiredBots) console.log(`${C}║${R} ${Y}⏰${R}  ${DIM}${n}${R} — expired, dihapus`);
+  if (orphanedBots.length) for (const n of orphanedBots) console.log(`${C}║${R} ${RED}🗑️${R}  ${DIM}${n}${R} — orphan (folder tanpa data), dibersihkan`);
   if (invalidBots.length) for (const n of invalidBots) console.log(`${C}║${R} ${Y}⚠️${R}  ${DIM}${n}${R} — tidak valid`);
   for (const number of validBots) {
     const meta = getJadibotExpiry(number);

@@ -522,7 +522,9 @@ function removeJadibotExpiry(number) {
 
 function isJadibotExpired(number) {
   const meta = getJadibotExpiry(number)
-  if (!meta) return false
+  // Tidak ada data expiry = sesi orphan (expired tapi folder belum terhapus)
+  // Harus dianggap expired, bukan tidak expired — cegah auto-permanent
+  if (!meta) return true
   if (meta.permanent === true) return false
   return Number(meta.expiresAt) <= Date.now()
 }
@@ -1686,8 +1688,10 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
         updateJadibotExpiryStatus(number, 'active')
         scheduleJadibotExpiry(number, sendReply)
       } else {
-        setPermanentJadibot(number, 'active')
-        console.log(`[JADIBOT] ⚠️ ${number} tidak ada data expiry → dijadikan permanent (auto-start/reconnect)`)
+        // Tidak ada data expiry = sesi orphan yang berhasil konek ulang
+        // Jangan jadikan permanent — hentikan & bersihkan sesi ini
+        console.log(`[JADIBOT] ⚠️ ${number} tidak ada data expiry saat konek → sesi dihentikan (bukan permanent)`)
+        setTimeout(() => expireJadibot(number, sendReply), 500)
       }
 
       if (pairingTimeout.has(number)) {
@@ -2270,8 +2274,10 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
         updateJadibotExpiryStatus(number, 'active')
         scheduleJadibotExpiry(number, sendReply)
       } else {
-        setPermanentJadibot(number, 'active')
-        console.log(`[JADIBOT QR] ⚠️ ${number} tidak ada data expiry → dijadikan permanent (auto-start/reconnect)`)
+        // Tidak ada data expiry = sesi orphan yang berhasil konek ulang via QR
+        // Jangan jadikan permanent — hentikan & bersihkan sesi ini
+        console.log(`[JADIBOT QR] ⚠️ ${number} tidak ada data expiry saat konek → sesi dihentikan (bukan permanent)`)
+        setTimeout(() => expireJadibot(number, sendReply), 500)
       }
       // ── Combined connection + expiry box (QR mode) ──
       {
