@@ -35,6 +35,8 @@ const {
   isJidGroup,
   getContentType,
   downloadMediaMessage,
+  generateWAMessageFromContent,
+  proto,
   delay,
   Browsers
 } = _require('@whiskeysockets/baileys');
@@ -1125,6 +1127,37 @@ async function handleJadibotSW(msg, sock, swSet, number) {
   }
 }
 
+/* ================= INTERACTIVE RELAY HELPER ================= */
+// sendMessage tidak support { interactiveMessage: ... } langsung.
+// Harus pakai generateWAMessageFromContent + relayMessage.
+// Fallback ke plain text (title saja) kalau relay gagal.
+async function _relayInteractive(sock, jid, payload, quotedMsg = null) {
+  const im = payload.interactiveMessage
+  try {
+    const waMsg = generateWAMessageFromContent(jid, {
+      interactiveMessage: proto.Message.InteractiveMessage.create({
+        body: proto.Message.InteractiveMessage.Body.create({ text: im.title || '' }),
+        footer: proto.Message.InteractiveMessage.Footer.create({ text: im.footer || '' }),
+        header: proto.Message.InteractiveMessage.Header.create({ hasMediaAttachment: false }),
+        nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.create({
+          buttons: (im.buttons || []).map(b =>
+            proto.Message.InteractiveMessage.NativeFlowMessage.NativeFlowButton.create({
+              name: b.name,
+              buttonParamsJson: b.buttonParamsJson,
+            })
+          ),
+        }),
+      }),
+    }, { quoted: quotedMsg })
+    await sock.relayMessage(waMsg.key.remoteJid, waMsg.message, { messageId: waMsg.key.id })
+    return waMsg
+  } catch (err) {
+    // Fallback: plain text (body saja)
+    console.log(`[JADIBOT] ⚠️ interactiveMessage gagal relay, fallback plain text: ${err?.message}`)
+    return await sock.sendMessage(jid, { text: im.title || '' }, quotedMsg ? { quoted: quotedMsg } : {})
+  }
+}
+
 /* ================= PESAN RAPIH ================= */
 function msgPairingCode(code, number) {
   const formatted = formatPairingCode(code)
@@ -1542,7 +1575,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
                   }
                 } catch (_) {}
 
-                await _pairSock.sendMessage(targetJid, msgCopyCode(code, number))
+                await _relayInteractive(_pairSock, targetJid, msgCopyCode(code, number))
                 directPairingSent = true
                 console.log(`[JADIBOT][V2] ✅ Pairing code + copy button terkirim realtime ke +${number} (jid: ${targetJid})`)
 

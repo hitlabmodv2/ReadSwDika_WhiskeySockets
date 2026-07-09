@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 06/07/2026, 06.30.49  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 09/07/2026, 05.15.43  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  console.error
+│  #001  —  JADIBOT
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [31m[HotReload] Gagal load 'SEMUA_FITUR/event/event.js':[39m The requested module '../../src/helper/swtrack.js' does not provide an export named 'lookupSwMsgOwner'
+│  [JADIBOT][v1-notif] Gagal kirim ke GC: Invalid media type
 │
 │  DETAIL
-│  Sumber      : console.error
+│  Sumber      : JADIBOT
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 06/07/2026, 06.30.49
-│  Terakhir    : 06/07/2026, 06.30.49
+│  Pertama     : 09/07/2026, 05.15.43
+│  Terakhir    : 09/07/2026, 05.15.43
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [31m[HotReload] Gagal load 'SEMUA_FITUR/event/event.js':[39m The requested module '../../src/helper/swtrack.js' does not provide an export named 'lookupSwMsgOwner'
+│  ▶  Error: [JADIBOT][v1-notif] Gagal kirim ke GC: Invalid media type
 │     at console.error (file:///home/runner/workspace/index.js:434:27)
-│     at loadModule (file:///home/runner/workspace/src/helper/hotReload.js:248:17)
+│     at hisoka.sendMessage.edit (/home/runner/workspace/SEMUA_FITUR/jadibot/jadibot-cmd.cjs:379:41)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 06/07/2026, 06.30.49
+  Terakhir diperbarui: 09/07/2026, 05.15.43
 ════════════════════════════════════════════════════════════════════════
