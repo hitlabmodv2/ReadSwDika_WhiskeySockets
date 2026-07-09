@@ -4,7 +4,7 @@ _🔍 Masih dalam tahap pemantauan — informasi tanggal rilis akan diumumkan ke
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V25*
 ✨ *4 Fitur Baru*
-🔧 *12 Bug/Error Fix*
+🔧 *13 Bug/Error Fix*
 🚀 *21 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
@@ -131,6 +131,18 @@ _Bot kini baca langsung RAM & disk dari server tempat bot jalan — bukan dari p
 5. _Fix 2:_ `connection 'open'` handler — jalur `else` diganti dari `setPermanentJadibot` ke `expireJadibot` → sesi orphan langsung dihentikan & diberitahu
 6. _Fix 3:_ auto-start sekarang deteksi *orphan bots* (folder ada, data tidak ada) dan bersihkan foldernya langsung tanpa mencoba konek — dilengkapi guard agar tidak hapus massal kalau `realtime.json` ternyata corrupt/gagal baca
 > Jadibot yang sudah expired tidak akan pernah bisa "hidup kembali" jadi permanent — baik via restart bot, reconnect, maupun auto-start; log konsol menampilkan info 🗑️ saat orphan ditemukan dan dibersihkan
+
+*13. ⏰ Jadibot V1 & V2 — Notif Pairing Timeout (3 Menit) Tidak Pernah Terkirim — Bug*
+~Bug: saat orang diam 3 menit tidak masukkan kode pairing, bot tidak merespons sama sekali — tidak ada notif ke nomor target maupun ke owner/GC~
+1. _Penyebab utama:_ timer 3 menit diset di event `connection 'connecting'`, tapi saat koneksi pairing putus otomatis setelah 3 menit, event `connection 'close'` lebih dulu jalan dan langsung panggil `clearTimeout` — timer terbunuh sebelum sempat jalan
+2. _Efek lanjutan:_ setelah timer dibunuh, handler `isJadibotExpired` di bawahnya tetap jalan dan panggil `expireJadibot` — akibatnya nomor target malah menerima pesan *"jadibot expired"* yang salah konteks _(beda isi, beda tombol)_, bukan pesan *"kode pairing habis waktu"*
+3. _Fix:_ di event `connection 'close'`, deteksi dulu apakah sesi ini masih di tahap pairing _(belum pernah konek, belum registered, belum di jadibotMap)_ — kalau iya, kirim notif pairing-timeout langsung di sini sebelum `clearTimeout`, lalu `return` agar `expireJadibot` tidak ikut jalan
+4. Notif dikirim ke *dua pihak* sekaligus, tidak saling bentrok:
+   • *Nomor target* → pesan "Kode pairing habis waktu, hubungi owner" + tombol URL langsung chat owner
+   • *GC/owner* → pesan "Pairing gagal" + command `.jadibot xxx` untuk coba ulang
+5. Guard idempotensi (`pairingTimeoutNotified` Set) ditambah — kalau ada race condition antara timer dan close event, notif tetap hanya dikirim *satu kali*, tidak dobel
+6. Guard null `sendReply` ditambah — tidak crash jika sendReply tidak tersedia
+> Sekarang saat orang diam 3 menit tidak masukkan kode, kedua pihak langsung dapat notif yang tepat dan berbeda — tidak ada lagi yang bingung atau tidak tahu apa yang terjadi
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *PERUBAHAN*
