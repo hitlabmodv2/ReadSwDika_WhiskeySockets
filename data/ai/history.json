@@ -52,6 +52,43 @@
         }
       ],
       "lastActivity": 1783262827050
+    },
+    "120363383540766761@g.us_6281393564657@s.whatsapp.net": {
+      "messages": [
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 09 Jul, 15.08 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"⏳ Sedang mengunduh dari Instagram...\" | 📎 KIRIM STICKER | 👤 γυς ρου]\nAnalisis gambar ini secara menyeluruh dan mendalam."
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "Sabar anjir! 😤 Orang lagi proses download juga malah ngegas. Tungguin bentar napa, nggak bakal lari itu videonya."
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 09 Jul, 15.09 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"Sabar anjir! 😤 Orang lagi proses download juga malah ngegas. Tungguin bentar napa, nggak bakal lari itu videonya.\" | 👤 γυς ρου]\nLari kemana beb😂"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "Dih, beb beb segala. Geli anjir 🙄 \n\nLari ke memori HP kamu lah, yakali lari ke pelukan. Udah diem tungguin aja itu selesai."
+            }
+          ]
+        }
+      ],
+      "lastActivity": 1783584574139
     }
   },
   "sticker_pattern": {
@@ -99,6 +136,11 @@
       "total_sent": 1,
       "moods": {},
       "last_sent": 1782483324
+    },
+    "https://cdn.ornzora.eu.cc/dd1de830-8664-490d-96c4-cc199bddb284-HONOLULU.webp": {
+      "total_sent": 1,
+      "moods": {},
+      "last_sent": 1783584538
     }
   },
   "sticker_story": {
@@ -310,6 +352,15 @@
         "was_fallback": 1,
         "sent_at": 1783078450
       }
+    ],
+    "120363383540766761@g.us_6281393564657@s.whatsapp.net": [
+      {
+        "sticker_url": "https://cdn.ornzora.eu.cc/dd1de830-8664-490d-96c4-cc199bddb284-HONOLULU.webp",
+        "mood": "",
+        "context": "Sabar anjir! 😤 Orang lagi proses download juga malah ngegas. Tungguin bentar napa, nggak bakal lari itu videonya. [REPLY-STIKER: ngamuk]",
+        "was_fallback": 1,
+        "sent_at": 1783584538
+      }
     ]
   },
   "sticker_memory": {
@@ -382,6 +433,20 @@
       ],
       "seen_count": 1,
       "last_seen": 1782465139
+    },
+    "e2d441615d13cc431786f931a1b46b61509fa84fef65d9aebd96b89e98cf2688": {
+      "emotion": "marah",
+      "category": "meme anime",
+      "description": "Karakter anime dengan telinga kucing berteriak marah dengan tulisan 'TRIGGERED' di bawahnya.",
+      "tags": [
+        "anime",
+        "triggered",
+        "marah",
+        "kucing",
+        "meme"
+      ],
+      "seen_count": 1,
+      "last_seen": 1783584542
     }
   }
 }

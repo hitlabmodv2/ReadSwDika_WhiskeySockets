@@ -711,19 +711,8 @@ async function handleWily({
                                         ],
                                 },
                         ];
-                        const models = ['gemini-3.1-pro-preview', 'gemini-2.5-pro', 'gemini-2.5-flash'];
-                        let lastErr = null;
-                        for (const model of models) {
-                                try {
-                                        response = await gemini.chat({ model, contents: visionContents });
-                                        wilyLog(`\x1b[36m[Gemini Vision]\x1b[0m ✅ Berhasil dengan model: ${model}`);
-                                        break;
-                                } catch (err) {
-                                        wilyError(`\x1b[31m[Gemini Vision]\x1b[0m ❌ Model ${model} gagal: ${err.message}`);
-                                        lastErr = err;
-                                }
-                        }
-                        if (!response) throw lastErr || new Error('Semua model gagal');
+                        // gemini.chat() sudah punya fallback chain otomatis (gemini-3.1-pro-preview → ... → gemini-2.5-flash-lite)
+                        response = await gemini.chat({ contents: visionContents });
                 } else {
                         response = await gemini.askWithImage(systemPrompt + '\n\n' + finalUserMsg, finalBuffer, finalMime);
                 }
