@@ -1183,8 +1183,9 @@ function msgCopyCode(code, number) {
   }
 }
 
-function msgPairingExpired(number, mode = 'v2') {
+function msgPairingExpired(number) {
   const masked = maskNumber(number)
+  const ownerUrl = `https://wa.me/6289688206739?text=Halo+kak%2C+pairing+code+saya+expired+karena+telat+memasukkan+kodenya+%F0%9F%98%85+Minta+tolong+mulai+ulang+ya+%F0%9F%99%8F`
 
   const bodyText =
     `╔══════════════════════╗\n` +
@@ -1197,29 +1198,23 @@ function msgPairingExpired(number, mode = 'v2') {
     `😔 Maaf ya, waktu habis sebelum kode sempat dimasukkan.\n` +
     `Silakan hubungi owner bot untuk mencoba lagi.`
 
-  if (mode === 'v1') {
-    // V1: kirim interaktif dengan tombol URL ke owner
-    const ownerUrl = `https://wa.me/6289688206739?text=Halo+kak%2C+pairing+code+saya+expired+karena+telat+memasukkan+kodenya+%F0%9F%98%85+Minta+tolong+mulai+ulang+ya+%F0%9F%99%8F`
-    return {
-      interactiveMessage: {
-        title: bodyText,
-        footer: `📲 Tap tombol di bawah untuk menghubungi owner bot`,
-        buttons: [
-          {
-            name: 'cta_url',
-            buttonParamsJson: JSON.stringify({
-              display_text: '💬 Hubungi Owner Bot',
-              url: ownerUrl,
-              merchant_url: ownerUrl
-            })
-          }
-        ]
-      }
+  // V1 maupun V2 — keduanya kirim interaktif dengan tombol URL ke owner
+  return {
+    interactiveMessage: {
+      title: bodyText,
+      footer: `📲 Tap tombol di bawah untuk menghubungi owner bot`,
+      buttons: [
+        {
+          name: 'cta_url',
+          buttonParamsJson: JSON.stringify({
+            display_text: '💬 Hubungi Owner Bot',
+            url: ownerUrl,
+            merchant_url: ownerUrl
+          })
+        }
+      ]
     }
   }
-
-  // V2 / default → plain text
-  return bodyText + `\n\n💡 Ketik *.jadibot ${number}* untuk coba lagi.`
 }
 
 function msgConnected(number) {
@@ -1660,11 +1655,9 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
           removeJadibotExpiry(number)
         }, 500)
 
-        // Kirim notif ke pengirim
+        // Kirim notif ke pengirim (V1 & V2 sama — interaktif + tombol URL owner)
         try {
-          const _expCfg = loadConfig()
-          const _pairingMode = (_expCfg.jadibotPairingMode || 'v2').toLowerCase()
-          await sendReply(msgPairingExpired(number, _pairingMode))
+          await sendReply(msgPairingExpired(number))
         } catch {}
       }, PAIRING_TIMEOUT_MS)
 
