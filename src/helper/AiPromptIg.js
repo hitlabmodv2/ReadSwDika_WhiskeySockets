@@ -92,7 +92,8 @@ export function parseIgMetaHtml(html = '') {
 
 /**
  * Prompt untuk Gemini Vision — analisis thumbnail/cover Instagram.
- * Dipanggil dengan gemini.chat({ model: 'gemini-2.5-flash', ... })
+ * Dipanggil dengan gemini.askWithImage(prompt, buffer, mimeType)
+ * Model otomatis pakai DEFAULT_MODEL (gemini-3.1-pro-preview) + fallback chain.
  */
 export function buildIgVisionPrompt() {
     return `Kamu adalah AI spesialis analisis konten visual Instagram.

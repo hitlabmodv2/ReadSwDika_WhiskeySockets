@@ -1442,7 +1442,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 break;
                         }
 
-                        case 'fb': {
+                        case 'fb1': {
                                 try {
                                         const { handleFacebookDl } = _require(path.resolve('./SEMUA_FITUR/download/downloader.cjs'));
                                         await handleFacebookDl(hisoka, m, query, { gemini, tolak, logCommand, buildFbVisionPrompt, buildFbCaptionPrompt, buildFbFallbackCaption, parseFbMetaHtml, formatFbCount });

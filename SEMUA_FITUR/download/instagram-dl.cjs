@@ -156,18 +156,12 @@ async function handleInstagramDl(hisoka, m, query, ctx) {
             });
             const thumbBuf = Buffer.from(thumbRes.data);
             if (thumbBuf.length > 500) {
-                const base64Thumb = thumbBuf.toString('base64');
                 const mimeThumb = thumbRes.headers['content-type']?.split(';')[0] || 'image/jpeg';
-                igVisualDesc = await gemini.chat({
-                    model: 'gemini-2.5-flash',
-                    contents: [{
-                        role: 'user',
-                        parts: [
-                            { inlineData: { mimeType: mimeThumb, data: base64Thumb } },
-                            { text: buildIgVisionPrompt() },
-                        ],
-                    }],
-                });
+                igVisualDesc = await gemini.askWithImage(
+                    buildIgVisionPrompt(),
+                    thumbBuf,
+                    mimeThumb,
+                );
             }
         } catch (_) {}
     }
