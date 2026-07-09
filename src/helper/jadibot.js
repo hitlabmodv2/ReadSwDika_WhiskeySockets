@@ -148,6 +148,7 @@ const jadibotSesiReportMap = new Map()   // number → getSizeReport fn
 const jadibotConnectedAt = new Map()
 const startingSocketMap = new Map()
 const pairingRequested = new Set()
+const pairingTimeoutNotified = new Set() // guard idempotensi: cegah notif pairing-timeout ganda
 const stoppingJadibot = new Set()
 const expiringJadibot = new Set()
 const reconnectingJadibot = new Set()
@@ -1860,30 +1861,47 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
       }
 
       if (_wasStillPairing) {
-        console.log(`[JADIBOT] ⏰ Pairing socket close saat proses pairing → kirim notif timeout ke ${number}`)
-        const _ptSock = getActiveMainSock(mainBotSock)
-        const _ptMode = ((loadConfig().jadibotPairingMode) || 'v2').toLowerCase()
+        // Guard idempotensi: pastikan hanya kirim notif sekali meski ada race timer vs close
+        if (pairingTimeoutNotified.has(number)) {
+          console.log(`[JADIBOT][PAIR-TIMEOUT] ⚠️ Notif sudah dikirim sebelumnya untuk +${number}, skip duplikat`)
+        } else {
+          pairingTimeoutNotified.add(number)
+          setTimeout(() => pairingTimeoutNotified.delete(number), 10000) // bersihkan setelah 10 detik
 
-        // Kirim ke nomor target (direct=true → link owner, bukan command)
-        if (_ptSock) {
-          try {
-            await _ptSock.sendMessage(`${number}@s.whatsapp.net`, { text: msgPairingExpired(number, true) })
-            console.log(`[JADIBOT][PAIR-TIMEOUT] ✅ Notif terkirim langsung ke +${number}`)
-          } catch (e) {
-            console.log(`[JADIBOT][PAIR-TIMEOUT] ⚠️ Gagal kirim ke +${number}: ${e?.message}`)
+          console.log(`[JADIBOT] ⏰ Pairing socket close saat proses pairing → kirim notif timeout ke ${number}`)
+          const _ptSock = getActiveMainSock(mainBotSock)
+
+          // Kirim ke nomor target (direct=true → link owner, bukan command)
+          if (_ptSock) {
+            try {
+              await _ptSock.sendMessage(`${number}@s.whatsapp.net`, { text: msgPairingExpired(number, true) })
+              console.log(`[JADIBOT][PAIR-TIMEOUT] ✅ Notif terkirim langsung ke +${number}`)
+            } catch (e) {
+              console.log(`[JADIBOT][PAIR-TIMEOUT] ⚠️ Gagal kirim ke +${number}: ${e?.message}`)
+            }
+          }
+
+          // Kirim ke GC/owner (direct=false → command bot)
+          if (sendReply) {
+            try {
+              await sendReply(msgPairingExpired(number, false))
+              console.log(`[JADIBOT][PAIR-TIMEOUT] ✅ Notif terkirim ke GC/owner`)
+            } catch (e) {
+              console.log(`[JADIBOT][PAIR-TIMEOUT] ⚠️ Gagal kirim ke GC/owner: ${e?.message}`)
+            }
           }
         }
 
-        // Kirim ke GC/owner (direct=false → command bot)
-        try {
-          await sendReply(msgPairingExpired(number, false))
-          console.log(`[JADIBOT][PAIR-TIMEOUT] ✅ Notif terkirim ke GC/owner`)
-        } catch (e) {
-          console.log(`[JADIBOT][PAIR-TIMEOUT] ⚠️ Gagal kirim ke GC/owner: ${e?.message}`)
-        }
-
-        // Kedua mode (v1 & v2) sudah dapat notif: target via main sock + GC/owner via sendReply
-        void _ptMode
+        // Cleanup session pairing yang gagal + stop semua proses terkait
+        pairingRequested.delete(number)
+        activeOrStartingJadibot.delete(number)
+        removeJadibotExpiry(number)
+        cleanupSocket()
+        setTimeout(() => {
+          try { if (fs.existsSync(sessionDir)) fs.rmSync(sessionDir, { recursive: true, force: true }) } catch {}
+          try { if (fs.existsSync(sessionFile)) fs.unlinkSync(sessionFile) } catch {}
+        }, 300)
+        return  // ← stop di sini, jangan sampai isJadibotExpired check di bawah ikut kirim notif lagi
       }
 
       pairingRequested.delete(number)
