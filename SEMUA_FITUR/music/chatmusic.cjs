@@ -37,7 +37,7 @@ const path   = require('path');
 const { Gemini } = require(path.resolve('./SEMUA_FITUR/ai/gemini.cjs'));
 
 // ─── Singleton Gemini (pakai gemini.cjs — token pool x3, fallback akurat) ─
-// Model chain: gemini-flash-latest → gemini-pro-latest → gemini-2.5-flash
+// Model chain: gemini-3.1-pro-preview → gemini-2.5-pro → gemini-2.5-flash → gemini-3.1-flash-lite → gemini-2.5-flash-lite
 const _gemmyInstance = new Gemini();
 
 // ─── Pool besar untuk auto-generate kombinasi bebas ───────────────────────

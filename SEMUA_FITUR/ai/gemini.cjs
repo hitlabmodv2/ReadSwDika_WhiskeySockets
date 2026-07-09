@@ -37,7 +37,7 @@ const fs    = require('fs');
 const path  = require('path');
 
 const SIGNUP_URL = 'https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key=AIzaSyAxof8_SbpDcww38NEQRhNh0Pzvbphh-IQ';
-const CHAT_URL   = 'https://asia-northeast3-gemmy-ai-bdc03.cloudfunctions.net/gemini';
+const GEMINI_BASE_URL = 'https://firebasevertexai.googleapis.com/v1beta/projects/gemmy-ai-bdc03/models';
 
 const TOKEN_CACHE_FILE = path.join(process.cwd(), 'data', 'gemini', 'tokens_scrape.json');
 fs.mkdirSync(path.join(process.cwd(), 'data', 'gemini'), { recursive: true });
@@ -56,7 +56,13 @@ const SIGNUP_HEADERS = {
     'x-firebase-gmpid':    '1:652803432695:android:c4341db6033e62814f33f2',
 };
 
-const FALLBACK_MODELS    = ['gemini-pro-latest', 'gemini-2.5-pro', 'gemini-flash-latest'];
+const FALLBACK_MODELS = [
+    'gemini-3.1-pro-preview',  // terdepan
+    'gemini-2.5-pro',          // pro stabil
+    'gemini-2.5-flash',        // seimbang
+    'gemini-3.1-flash-lite',   // 3.1 lite
+    'gemini-2.5-flash-lite',   // paling ringan
+];
 const MAX_TOKEN_ROTATIONS = 5;
 const POOL_SIZE           = 3;
 
@@ -180,18 +186,18 @@ class Gemini {
             ...config,
         };
         const { data } = await axios.post(
-            CHAT_URL,
-            {
-                model,
-                stream: false,
-                request: { contents, generationConfig },
-            },
+            `${GEMINI_BASE_URL}/${model}:generateContent`,
+            { contents, generationConfig },
             {
                 headers: {
-                    'accept-encoding': 'gzip',
-                    'authorization':   `Bearer ${token}`,
-                    'content-type':    'application/json; charset=UTF-8',
-                    'user-agent':      'okhttp/5.3.2',
+                    'accept-encoding':       'gzip',
+                    'content-type':          'application/json; charset=UTF-8',
+                    'x-goog-api-key':        'AIzaSyAxof8_SbpDcww38NEQRhNh0Pzvbphh-IQ',
+                    'x-goog-api-client':     'gl-kotlin/2.2.21-ai fire/17.7.0',
+                    'x-firebase-appid':      '1:652803432695:android:c4341db6033e62814f33f2',
+                    'x-firebase-appversion': '128',
+                    'user-agent':            'Dalvik/2.1.0 (Linux; U; Android 12; SM-S9280 Build/AP3A.240905.015.A2)',
+                    'authorization':         `Bearer ${token}`,
                 },
                 timeout: 30000,
             }
@@ -201,7 +207,7 @@ class Gemini {
         return this._formatForWhatsApp(text);
     }
 
-    async chat({ contents, model = 'gemini-pro-latest', ...config }) {
+    async chat({ contents, model = 'gemini-3.1-pro-preview', ...config }) {
         if (!Array.isArray(contents)) throw new Error('Contents must be an array.');
 
         const requestedModel = model;
@@ -281,7 +287,7 @@ class Gemini {
         throw new Error(lastErr?.message || 'Gemini request failed after all retries.');
     }
 
-    async analyzeImage(imageBuffer, prompt, { mimeType = 'image/jpeg', model = 'gemini-pro-latest' } = {}) {
+    async analyzeImage(imageBuffer, prompt, { mimeType = 'image/jpeg', model = 'gemini-3.1-pro-preview' } = {}) {
         const base64 = Buffer.isBuffer(imageBuffer) ? imageBuffer.toString('base64') : imageBuffer;
         return this.chat({
             model,
@@ -296,7 +302,7 @@ class Gemini {
         });
     }
 
-    async ask(prompt, { model = 'gemini-pro-latest' } = {}) {
+    async ask(prompt, { model = 'gemini-3.1-pro-preview' } = {}) {
         return this.chat({
             model,
             contents: [{ role: 'user', parts: [{ text: prompt }] }],
