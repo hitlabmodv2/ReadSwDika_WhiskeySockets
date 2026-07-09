@@ -247,9 +247,10 @@ export function countHistory() {
 }
 
 export function getSessionKey(m) {
-    // Grup: gunakan group JID saja agar semua peserta berbagi satu riwayat obrolan bersama
+    // Grup: tiap orang punya history sendiri (tidak campur dengan anggota lain)
+    // Format: groupJID_senderJID → history per-orang per-grup
     // Private: per-user seperti biasa
-    return m.isGroup ? m.from : m.sender;
+    return m.isGroup ? `${m.from}_${m.sender}` : m.sender;
 }
 
 // Export shared reader/writer untuk dipakai aiStickerStory.js
