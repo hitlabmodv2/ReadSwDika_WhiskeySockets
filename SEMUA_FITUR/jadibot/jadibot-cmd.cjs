@@ -24,37 +24,6 @@
  */
 'use strict';
 
-const { generateWAMessageFromContent, proto } = require('@whiskeysockets/baileys');
-
-// Helper: kirim interactiveMessage (cta_copy / cta_url) via relay
-// sendMessage biasa tidak support { interactiveMessage: ... } → "Invalid media type"
-async function _sendInteractive(hisoka, jid, payload, quotedMsg) {
-  const im = payload.interactiveMessage;
-  try {
-    const waMsg = generateWAMessageFromContent(jid, {
-      interactiveMessage: proto.Message.InteractiveMessage.create({
-        body:   proto.Message.InteractiveMessage.Body.create({ text: im.title || '' }),
-        footer: proto.Message.InteractiveMessage.Footer.create({ text: im.footer || '' }),
-        header: proto.Message.InteractiveMessage.Header.create({ hasMediaAttachment: false }),
-        nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.create({
-          buttons: (im.buttons || []).map(b =>
-            proto.Message.InteractiveMessage.NativeFlowMessage.NativeFlowButton.create({
-              name: b.name,
-              buttonParamsJson: b.buttonParamsJson,
-            })
-          ),
-        }),
-      }),
-    }, { quoted: quotedMsg });
-    await hisoka.relayMessage(waMsg.key.remoteJid, waMsg.message, { messageId: waMsg.key.id });
-    return waMsg;
-  } catch (err) {
-    // Fallback plain text kalau relay gagal
-    console.log('[JADIBOT][v1-notif] interactiveMessage fallback plain text:', err?.message);
-    return await hisoka.sendMessage(jid, { text: im.title || '' }, { quoted: quotedMsg });
-  }
-}
-
 
 function parseJadibotCommandQuery(raw = '') {
     const text = String(raw || '').trim();
@@ -404,9 +373,6 @@ async function handleJadibot({ hisoka, m, query, tolak, logCommand, isMainBot, p
                 number,
                 async (msg) => {
                         try {
-                                if (msg && typeof msg === 'object' && msg.interactiveMessage) {
-                                        return await _sendInteractive(hisoka, m.from, msg, m);
-                                }
                                 const payload = typeof msg === 'string' ? { text: msg } : msg;
                                 return await hisoka.sendMessage(m.from, payload, { quoted: m });
                         } catch (e) {
