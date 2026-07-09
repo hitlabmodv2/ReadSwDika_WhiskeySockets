@@ -592,6 +592,13 @@ async function expireJadibot(number, sendReply = null) {
         await sendReply(expiredMsg) // expiredMsg = direct=false (default)
       } catch {}
     }
+    // V1: JUGA kirim langsung ke nomor target SEBELUM socket ditutup
+    // (biar user tau jadibotnya expired & perlu hubungi owner)
+    if (sock) {
+      try {
+        await sock.sendMessage(`${number}@s.whatsapp.net`, { text: msgJadibotExpired(number, true) })
+      } catch {}
+    }
   }
 
   // Langkah 3: tutup socket
@@ -701,6 +708,15 @@ function scheduleJadibotExpiry(number, sendReply = null) {
         if (sendReply) {
           try { await sendReply(warningText) } catch {}
         }
+        // V1: JUGA kirim langsung ke nomor target (biar user tau masa aktif hampir habis)
+        const warningTextDirect = msgJadibotExpiryWarning(
+          number,
+          formatRemainingTime(latestRemaining),
+          formatJadibotExpiryTime(latest.expiresAt),
+          durationLabel,
+          true // direct=true → pakai link owner bukan command
+        )
+        await sendDirectJadibotNotice(jadibotMap.get(number), number, warningTextDirect)
       }
     }, delayMs)
     warningTimers.push(warningTimer)
@@ -1640,12 +1656,26 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
             console.log(`[JADIBOT][V2][EXPIRED] ⚠️ Gagal kirim notif ke GC/owner: ${e?.message}`)
           }
         } else {
-          // V1: kirim ke GC/owner saja (direct=false → tampilkan command bot)
+          // V1: kirim ke GC/owner (direct=false → tampilkan command bot)
           try {
             await sendReply(msgPairingExpired(number, false))
             console.log(`[JADIBOT][V1][EXPIRED] ✅ Notif pairing timeout terkirim ke GC/owner`)
           } catch (e) {
             console.log(`[JADIBOT][V1][EXPIRED] ⚠️ Gagal kirim notif ke GC/owner: ${e?.message}`)
+          }
+          // V1: JUGA kirim langsung ke nomor target (direct=true → tampilkan link owner)
+          if (_expSock) {
+            try {
+              let _expJidV1 = `${number}@s.whatsapp.net`
+              try {
+                const [_expWaV1] = await _expSock.onWhatsApp(`${number}@s.whatsapp.net`)
+                if (_expWaV1?.exists && _expWaV1?.jid) _expJidV1 = _expWaV1.jid
+              } catch (_) {}
+              await _expSock.sendMessage(_expJidV1, { text: msgPairingExpired(number, true) })
+              console.log(`[JADIBOT][V1][EXPIRED] ✅ Notif pairing timeout terkirim langsung ke +${number}`)
+            } catch (e) {
+              console.log(`[JADIBOT][V1][EXPIRED] ⚠️ Gagal kirim notif langsung ke +${number}: ${e?.message}`)
+            }
           }
         }
       }, PAIRING_TIMEOUT_MS)
@@ -1863,6 +1893,19 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
             console.log(`[JADIBOT][V1] ✅ Notif logout terkirim ke GC/owner`)
           } catch (e) {
             console.log(`[JADIBOT][V1] ⚠️ Gagal kirim notif logout ke GC: ${e?.message}`)
+          }
+          // V1: JUGA kirim langsung ke nomor target via main bot
+          // (biar user tau jadibotnya logout & perlu hubungi owner)
+          const _logoutSockV1 = getActiveMainSock(mainBotSock)
+          if (_logoutSockV1) {
+            try {
+              await _logoutSockV1.sendMessage(`${number}@s.whatsapp.net`, {
+                text: msgLoggedOutDirect(number)
+              })
+              console.log(`[JADIBOT][V1] ✅ Notif logout terkirim langsung ke +${number}`)
+            } catch (e) {
+              console.log(`[JADIBOT][V1] ⚠️ Gagal kirim notif logout langsung ke +${number}: ${e?.message}`)
+            }
           }
         }
 
