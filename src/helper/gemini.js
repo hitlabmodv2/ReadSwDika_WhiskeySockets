@@ -75,19 +75,13 @@ const GEMINI_HEADERS = {
     'user-agent':           'Dalvik/2.1.0 (Linux; U; Android 12; SM-S9280 Build/AP3A.240905.015.A2)',
 };
 
-// ── Header signup token ───────────────────────────────────────
+// ── Header signup token (sesuai referensi akurat) ────────────
 const SIGNUP_HEADERS = {
-    'accept-encoding':      'gzip',
-    'accept-language':      'in-ID, en-US',
-    'connection':           'Keep-Alive',
-    'content-type':         'application/json',
-    'user-agent':           'Dalvik/2.1.0 (Linux; U; Android 10; SM-J700F Build/QQ3A.200805.001)',
-    'x-android-cert':       '037CD2976D308B4EFD63EC63C48DC6E7AB7E5AF2',
-    'x-android-package':    'com.jetkite.gemmy',
-    'x-client-version':     'Android/Fallback/X24000001/FirebaseCore-Android',
-    'x-firebase-appcheck':  'eyJlcnJvciI6IlVOS05PV05fRVJST1IifQ==',
-    'x-firebase-client':    'H4sIAAAAAAAAAKtWykhNLCpJSk0sKVayio7VUSpLLSrOzM9TslIyUqoFAFyivEQfAAAA',
-    'x-firebase-gmpid':     '1:652803432695:android:c4341db6033e62814f33f2',
+    'User-Agent':       'Dalvik/2.1.0 (Linux; U; Android 12; SM-S9280 Build/AP3A.240905.015.A2)',
+    'Content-Type':     'application/json',
+    'X-Android-Package':'com.jetkite.gemmy',
+    'X-Android-Cert':   '037CD2976D308B4EFD63EC63C48DC6E7AB7E5AF2',
+    'X-Firebase-GMPID': '1:652803432695:android:c4341db6033e62814f33f2',
 };
 
 // ── Model tersedia (akurat) ───────────────────────────────────
@@ -111,14 +105,14 @@ const FALLBACK_MODELS = [
     GEMINI_MODELS.LITE,        // gemini-2.5-flash-lite   — paling ringan
 ];
 
-const MAX_TOKEN_ROTATIONS = 2;
-const POOL_SIZE            = 3;
-const REQUEST_TIMEOUT_MS   = 30000;
+const AUTO_ROTATE_EVERY  = 5;   // rotate token tiap N request (proaktif)
+const REQUEST_TIMEOUT_MS = 30000;
 
 class Gemini {
     constructor() {
-        this.tokenPool = [];
-        this.poolIndex = 0;
+        // Token dimulai null — request pertama tanpa Bearer (x-goog-api-key sebagai auth)
+        this._token    = null;
+        this._reqCount = 0;
         this._loadTokenCache();
     }
 
@@ -127,17 +121,19 @@ class Gemini {
         try {
             const raw = kvGet('ai/gemini_tokens', null);
             if (!raw) return;
-            const now = Date.now();
-            this.tokenPool = (raw.pool || []).filter(t => t && t.token && t.expiry && now < t.expiry - 300000);
-            if (this.tokenPool.length > 0) {
-                geminiLog(`\x1b[32m[Gemini]\x1b[0m ♻️ Loaded ${this.tokenPool.length} cached token(s) dari DB`);
+            const now    = Date.now();
+            const valid  = (raw.pool || []).find(t => t && t.token && t.expiry && now < t.expiry - 300000);
+            if (valid) {
+                this._token = valid.token;
+                geminiLog(`\x1b[32m[Gemini]\x1b[0m ♻️ Token dimuat dari cache DB`);
             }
         } catch (_) {}
     }
 
     _saveTokenCache() {
         try {
-            kvSet('ai/gemini_tokens', { pool: this.tokenPool, savedAt: Date.now() });
+            const entry = this._token ? [{ token: this._token, expiry: Date.now() + 3600 * 1000 }] : [];
+            kvSet('ai/gemini_tokens', { pool: entry, savedAt: Date.now() });
         } catch (_) {}
     }
 
@@ -159,53 +155,27 @@ class Gemini {
         }
     }
 
-    // ── Jaga pool token tetap terisi ──────────────────────────
-    async _ensurePool() {
-        const now    = Date.now();
-        const before = this.tokenPool.length;
-        this.tokenPool = this.tokenPool.filter(t => t && now < t.expiry - 300000);
-        if (this.tokenPool.length !== before) this._saveTokenCache();
-        while (this.tokenPool.length < POOL_SIZE) {
+    // ── State token (pola referensi) ─────────────────────────
+    // Token dimulai null → request pertama TANPA Bearer (cukup x-goog-api-key)
+    // Bearer hanya ditambah setelah signup berhasil (untuk bypass rate-limit)
+    // Setiap AUTO_ROTATE_EVERY request → rotate token proaktif
+
+    async getAuthToken() {
+        // Signup baru kalau belum ada token
+        if (!this._token) {
             try {
                 const t = await this._signup();
-                this.tokenPool.push(t);
+                this._token = t.token;
+                this._reqCount = 0;
                 this._saveTokenCache();
-                geminiLog(`\x1b[36m[Gemini]\x1b[0m 🔑 Token pool +1 (size=${this.tokenPool.length})`);
-            } catch (e) {
-                if (this.tokenPool.length === 0) throw new Error('Auth error: ' + e.message);
-                break;
-            }
+            } catch (_) {}
         }
-    }
-
-    // ── Ambil token dari pool ─────────────────────────────────
-    async _getToken({ forceFresh = false } = {}) {
-        if (forceFresh) {
-            const fresh = await this._signup();
-            this.tokenPool.push(fresh);
-            this._saveTokenCache();
-            this.poolIndex = this.tokenPool.length - 1;
-            geminiLog(`\x1b[33m[Gemini]\x1b[0m ♻️  Forced fresh token (pool=${this.tokenPool.length})`);
-            return fresh.token;
-        }
-        await this._ensurePool();
-        this.poolIndex = (this.poolIndex + 1) % this.tokenPool.length;
-        return this.tokenPool[this.poolIndex].token;
-    }
-
-    // ── Hapus token invalid dari pool ─────────────────────────
-    _invalidateToken(token) {
-        const before = this.tokenPool.length;
-        this.tokenPool = this.tokenPool.filter(t => t.token !== token);
-        if (this.tokenPool.length !== before) this._saveTokenCache();
-    }
-
-    // ── Expose getAuthToken (for external use) ────────────────
-    async getAuthToken() {
-        return this._getToken();
+        return this._token || null;
     }
 
     // ── Satu kali request ke Firebase Vertex AI ───────────────
+    // token = null  → request tanpa Bearer (x-goog-api-key sebagai satu-satunya auth)
+    // token = string → tambah Authorization header (bypass rate-limit layer ke-2)
     async _callOnce({ token, model, contents, config }) {
         const generationConfig = {
             maxOutputTokens: 2048,
@@ -214,28 +184,38 @@ class Gemini {
             ...config,
         };
 
-        const reqHeaders = {
-            ...GEMINI_HEADERS,
-            // Token signup sebagai Bearer (rate-limit bypass layer ke-2)
-            'authorization': `Bearer ${token}`,
-        };
+        const reqHeaders = { ...GEMINI_HEADERS };
+        if (token) reqHeaders['authorization'] = `Bearer ${token}`;
 
         const { data } = await axios.post(
             `${GEMINI_BASE_URL}/${model}:generateContent`,
-            {
-                contents,
-                generationConfig,
-            },
-            {
-                headers:    reqHeaders,
-                timeout:    REQUEST_TIMEOUT_MS,
-                httpsAgent: KEEPALIVE_AGENT,
-            }
+            { contents, generationConfig },
+            { headers: reqHeaders, timeout: REQUEST_TIMEOUT_MS, httpsAgent: KEEPALIVE_AGENT }
         );
 
         const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
         if (!text) throw new Error('Gemini: response kosong. Raw: ' + JSON.stringify(data).slice(0, 200));
         return text;
+    }
+
+    // ── Request dengan token rotation otomatis (pola referensi) ──
+    async _requestWithRotation({ model, contents, config }) {
+        this._reqCount = (this._reqCount || 0) + 1;
+
+        // Rotate proaktif setiap AUTO_ROTATE_EVERY request
+        if (this._reqCount >= AUTO_ROTATE_EVERY && this._token) {
+            try {
+                const t = await this._signup();
+                this._token = t.token;
+                this._reqCount = 0;
+                this._saveTokenCache();
+                geminiLog(`\x1b[36m[Gemini]\x1b[0m ♻️ Token dirotasi (auto, setiap ${AUTO_ROTATE_EVERY} req)`);
+            } catch (_) {
+                this._reqCount = 0; // reset counter, lanjut tanpa rotate
+            }
+        }
+
+        return this._callOnce({ token: this._token || null, model, contents, config });
     }
 
     // ── Chat utama — support history + fallback model ─────────
@@ -248,81 +228,85 @@ class Gemini {
     async chat({ contents, model = DEFAULT_MODEL, ...config }) {
         if (!Array.isArray(contents)) throw new Error('Contents harus berupa array.');
 
-        const requestedModel = model;
-        // Pastikan model yang diminta ada di urutan pertama fallback
-        const modelChain = [requestedModel, ...FALLBACK_MODELS.filter(m => m !== requestedModel)];
-
+        const modelChain = [model, ...FALLBACK_MODELS.filter(m => m !== model)];
         const tStart     = Date.now();
         const promptSize = JSON.stringify(contents).length;
         let   lastErr    = null;
 
         for (const m of modelChain) {
-            for (let attempt = 0; attempt < MAX_TOKEN_ROTATIONS; attempt++) {
-                let token;
-                try {
-                    token = await this._getToken({ forceFresh: attempt > 0 });
-                } catch (e) {
-                    lastErr = e;
+            try {
+                // ── Attempt 1: request normal (token dari state, mungkin null) ──
+                const text    = await this._requestWithRotation({ model: m, contents, config });
+                const elapsed = Date.now() - tStart;
+                const slow    = elapsed > 8000 ? ' 🐢' : elapsed > 4000 ? ' ⏱️' : '';
+                geminiTiming(`\x1b[36m[Gemini]\x1b[0m ✓ ${m} • ${elapsed}ms • in:${(promptSize / 1024).toFixed(1)}KB out:${text.length}c${slow}`);
+                return text;
+
+            } catch (err) {
+                lastErr = err;
+                const status  = err.response?.status;
+                const body    = err.response?.data;
+                const bodyStr = body ? (typeof body === 'string' ? body : JSON.stringify(body)) : '';
+
+                // ── 401/403: Bearer ditolak → drop token, retry TANPA Bearer langsung ──
+                if (status === 401 || status === 403 || /UNAUTHENTICATED|invalid.?token|expired/i.test(bodyStr)) {
+                    if (this._token) {
+                        geminiError(`\x1b[33m[Gemini]\x1b[0m 🔒 Bearer ditolak (${m}) → drop token, retry tanpa Bearer`);
+                        this._token = null;
+                        this._saveTokenCache();
+                        try {
+                            const text    = await this._callOnce({ token: null, model: m, contents, config });
+                            const elapsed = Date.now() - tStart;
+                            geminiTiming(`\x1b[36m[Gemini]\x1b[0m ✓ ${m} (no-bearer) • ${elapsed}ms`);
+                            return text;
+                        } catch (retryErr) {
+                            lastErr = retryErr;
+                            const rs = retryErr.response?.status;
+                            if (rs === 404 || /NOT_FOUND/i.test(JSON.stringify(retryErr.response?.data || ''))) continue;
+                        }
+                    }
+                    // Token sudah null dan masih 401 → auth utama error, berhenti total
                     break;
                 }
 
-                try {
-                    const text    = await this._callOnce({ token, model: m, contents, config });
-                    const elapsed = Date.now() - tStart;
-                    const slow    = elapsed > 8000 ? ' 🐢' : elapsed > 4000 ? ' ⏱️' : '';
-                    geminiTiming(`\x1b[36m[Gemini]\x1b[0m ✓ ${m} • ${elapsed}ms • in:${(promptSize / 1024).toFixed(1)}KB out:${text.length}c${slow}`);
-                    if (attempt > 0 || m !== requestedModel) {
-                        geminiLog(`\x1b[32m[Gemini]\x1b[0m ✅ OK setelah retry → model=${m}, attempt=${attempt + 1}`);
-                    }
-                    return text;
-                } catch (err) {
-                    lastErr = err;
-                    const status  = err.response?.status;
-                    const body    = err.response?.data;
-                    const bodyStr = body ? (typeof body === 'string' ? body : JSON.stringify(body)) : '';
-
-                    // Token expired / tidak valid
-                    if (status === 401 || status === 403 || /UNAUTHENTICATED|invalid.?token|expired/i.test(bodyStr)) {
-                        geminiError(`\x1b[33m[Gemini]\x1b[0m 🔒 Token invalid → refresh & retry`);
-                        this._invalidateToken(token);
-                        await new Promise(r => setTimeout(r, 300));
-                        continue;
-                    }
-
-                    // Rate limit / quota habis → rotate token
-                    if (status === 429 || /RESOURCE_EXHAUSTED|quota/i.test(bodyStr)) {
-                        geminiError(`\x1b[33m[Gemini]\x1b[0m ⏳ Rate-limit (429) → rotate token (attempt ${attempt + 1}/${MAX_TOKEN_ROTATIONS}, model=${m})`);
-                        this._invalidateToken(token);
-                        const wait = Math.min(500 * (attempt + 1), 2500);
-                        await new Promise(r => setTimeout(r, wait));
-                        continue;
-                    }
-
-                    // Model tidak tersedia → coba model fallback berikutnya
-                    if (status === 404 || /NOT_FOUND|not found/i.test(bodyStr)) {
-                        geminiError(`\x1b[33m[Gemini]\x1b[0m 🚫 Model ${m} tidak tersedia (404) → fallback ke model berikutnya`);
-                        break;
-                    }
-
-                    // Network / server error → retry
-                    if (status >= 500 || err.code === 'ECONNRESET' || err.code === 'ETIMEDOUT' || err.code === 'ECONNABORTED') {
-                        geminiError(`\x1b[33m[Gemini]\x1b[0m 🌐 Network/server error (${status || err.code}) → retry`);
-                        const wait = Math.min(400 * (attempt + 1), 2000);
-                        await new Promise(r => setTimeout(r, wait));
-                        continue;
-                    }
-
-                    // Error lain → langsung lempar
-                    throw new Error(bodyStr ? bodyStr.slice(0, 300) : err.message);
+                // ── 429: Rate limit → signup token baru, retry langsung ──
+                if (status === 429 || /RESOURCE_EXHAUSTED|quota/i.test(bodyStr)) {
+                    geminiError(`\x1b[33m[Gemini]\x1b[0m ⏳ Rate-limit (${m}) → signup token baru`);
+                    try {
+                        const t = await this._signup();
+                        this._token = t.token;
+                        this._reqCount = 0;
+                        this._saveTokenCache();
+                    } catch (_) { this._token = null; }
+                    try {
+                        const text    = await this._callOnce({ token: this._token, model: m, contents, config });
+                        const elapsed = Date.now() - tStart;
+                        geminiTiming(`\x1b[36m[Gemini]\x1b[0m ✓ ${m} (rate-limit retry) • ${elapsed}ms`);
+                        return text;
+                    } catch (retryErr) { lastErr = retryErr; continue; }
                 }
+
+                // ── 404: Model tidak ada → fallback ke model berikutnya ──
+                if (status === 404 || /NOT_FOUND|not found/i.test(bodyStr)) {
+                    geminiError(`\x1b[33m[Gemini]\x1b[0m 🚫 Model ${m} tidak tersedia → fallback`);
+                    continue;
+                }
+
+                // ── Network error → fallback ke model berikutnya ──
+                if (!status || status >= 500 || err.code === 'ECONNRESET' || err.code === 'ETIMEDOUT' || err.code === 'ECONNABORTED') {
+                    geminiError(`\x1b[33m[Gemini]\x1b[0m 🌐 Network/server error (${status || err.code}) → fallback`);
+                    continue;
+                }
+
+                // Error lain → langsung lempar tanpa coba model lain
+                throw new Error(bodyStr ? bodyStr.slice(0, 300) : err.message);
             }
         }
 
-        if (lastErr?.response?.data) {
-            const body = lastErr.response.data;
-            throw new Error(typeof body === 'string' ? body.slice(0, 300) : JSON.stringify(body).slice(0, 300));
-        }
-        throw new Error(lastErr?.message || 'Gemini: request gagal setelah semua retry.');
+        const errBody = lastErr?.response?.data;
+        throw new Error(errBody
+            ? (typeof errBody === 'string' ? errBody.slice(0, 300) : JSON.stringify(errBody).slice(0, 300))
+            : (lastErr?.message || 'Gemini: semua model gagal.'));
     }
 
     // ── Chat teks sederhana (single-turn) ─────────────────────
@@ -353,9 +337,6 @@ class Gemini {
 }
 
 const gemini = new Gemini();
-
-// Pre-warm token pool saat startup
-gemini._ensurePool().catch(() => {});
 
 export default gemini;
 

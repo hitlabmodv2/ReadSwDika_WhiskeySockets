@@ -43,17 +43,11 @@ const TOKEN_CACHE_FILE = path.join(process.cwd(), 'data', 'gemini', 'tokens_scra
 fs.mkdirSync(path.join(process.cwd(), 'data', 'gemini'), { recursive: true });
 
 const SIGNUP_HEADERS = {
-    'accept-encoding':     'gzip',
-    'accept-language':     'in-ID, en-US',
-    'connection':          'Keep-Alive',
-    'content-type':        'application/json',
-    'user-agent':          'Dalvik/2.1.0 (Linux; U; Android 10; SM-J700F Build/QQ3A.200805.001)',
-    'x-android-cert':      '037CD2976D308B4EFD63EC63C48DC6E7AB7E5AF2',
-    'x-android-package':   'com.jetkite.gemmy',
-    'x-client-version':    'Android/Fallback/X24000001/FirebaseCore-Android',
-    'x-firebase-appcheck': 'eyJlcnJvciI6IlVOS05PV05fRVJST1IifQ==',
-    'x-firebase-client':   'H4sIAAAAAAAAAKtWykhNLCpJSk0sKVayio7VUSpLLSrOzM9TslIyUqoFAFyivEQfAAAA',
-    'x-firebase-gmpid':    '1:652803432695:android:c4341db6033e62814f33f2',
+    'User-Agent':        'Dalvik/2.1.0 (Linux; U; Android 12; SM-S9280 Build/AP3A.240905.015.A2)',
+    'Content-Type':      'application/json',
+    'X-Android-Package': 'com.jetkite.gemmy',
+    'X-Android-Cert':    '037CD2976D308B4EFD63EC63C48DC6E7AB7E5AF2',
+    'X-Firebase-GMPID':  '1:652803432695:android:c4341db6033e62814f33f2',
 };
 
 const FALLBACK_MODELS = [
@@ -118,16 +112,27 @@ class Gemini {
     }
 
     async _getToken({ forceFresh = false } = {}) {
-        if (forceFresh) {
-            const fresh = await this._signup();
-            this.tokenPool.push(fresh);
-            this._saveTokenCache();
-            this.poolIndex = this.tokenPool.length - 1;
-            return fresh.token;
+        try {
+            if (forceFresh) {
+                const fresh = await this._signup();
+                this.tokenPool.push(fresh);
+                this._saveTokenCache();
+                this.poolIndex = this.tokenPool.length - 1;
+                return fresh.token;
+            }
+            const now = Date.now();
+            this.tokenPool = this.tokenPool.filter(t => t && now < t.expiry - 300000);
+            if (this.tokenPool.length === 0) {
+                const fresh = await this._signup();
+                this.tokenPool.push(fresh);
+                this._saveTokenCache();
+            }
+            this.poolIndex = (this.poolIndex + 1) % this.tokenPool.length;
+            return this.tokenPool[this.poolIndex].token;
+        } catch (e) {
+            console.warn(`[Gemini] ⚠️ Gagal ambil token, lanjut tanpa Bearer: ${e.message}`);
+            return null; // lanjut pakai x-goog-api-key saja
         }
-        await this._ensurePool();
-        this.poolIndex = (this.poolIndex + 1) % this.tokenPool.length;
-        return this.tokenPool[this.poolIndex].token;
     }
 
     _invalidateToken(token) {
@@ -189,16 +194,19 @@ class Gemini {
             `${GEMINI_BASE_URL}/${model}:generateContent`,
             { contents, generationConfig },
             {
-                headers: {
-                    'accept-encoding':       'gzip',
-                    'content-type':          'application/json; charset=UTF-8',
-                    'x-goog-api-key':        'AIzaSyAxof8_SbpDcww38NEQRhNh0Pzvbphh-IQ',
-                    'x-goog-api-client':     'gl-kotlin/2.2.21-ai fire/17.7.0',
-                    'x-firebase-appid':      '1:652803432695:android:c4341db6033e62814f33f2',
-                    'x-firebase-appversion': '128',
-                    'user-agent':            'Dalvik/2.1.0 (Linux; U; Android 12; SM-S9280 Build/AP3A.240905.015.A2)',
-                    'authorization':         `Bearer ${token}`,
-                },
+                headers: (() => {
+                    const h = {
+                        'accept-encoding':       'gzip',
+                        'content-type':          'application/json; charset=UTF-8',
+                        'x-goog-api-key':        'AIzaSyAxof8_SbpDcww38NEQRhNh0Pzvbphh-IQ',
+                        'x-goog-api-client':     'gl-kotlin/2.2.21-ai fire/17.7.0',
+                        'x-firebase-appid':      '1:652803432695:android:c4341db6033e62814f33f2',
+                        'x-firebase-appversion': '128',
+                        'user-agent':            'Dalvik/2.1.0 (Linux; U; Android 12; SM-S9280 Build/AP3A.240905.015.A2)',
+                    };
+                    if (token) h['authorization'] = `Bearer ${token}`;
+                    return h;
+                })(),
                 timeout: 30000,
             }
         );
@@ -247,10 +255,14 @@ class Gemini {
                     const bodyStr = body ? (typeof body === 'string' ? body : JSON.stringify(body)) : '';
 
                     if (status === 401 || status === 403 || /UNAUTHENTICATED|invalid.?token|expired/i.test(bodyStr)) {
-                        console.warn(`[Gemini] 🔑 Token invalid untuk "${m}" attempt ${attempt + 1}, rotate token...`);
-                        this._invalidateToken(token);
-                        await new Promise(r => setTimeout(r, 300));
-                        continue;
+                        if (token) {
+                            console.warn(`[Gemini] 🔒 Bearer token ditolak → drop, retry tanpa Bearer`);
+                            this._invalidateToken(token);
+                            token = null;
+                            await new Promise(r => setTimeout(r, 200));
+                            continue;
+                        }
+                        break; // sudah tanpa token tapi masih 401 → stop
                     }
 
                     if (status === 429 || /RESOURCE_EXHAUSTED|quota/i.test(bodyStr)) {

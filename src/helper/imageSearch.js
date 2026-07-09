@@ -84,25 +84,20 @@ async function getGemmyToken() {
 // ── Gemmy Gemini: chat ──
 async function gemmyChat(contents, model = 'gemini-2.5-flash') {
     const authToken = await getGemmyToken();
+    const _imgSrchHeaders = {
+        'accept-encoding':       'gzip',
+        'content-type':          'application/json; charset=UTF-8',
+        'x-goog-api-key':        'AIzaSyAxof8_SbpDcww38NEQRhNh0Pzvbphh-IQ',
+        'x-goog-api-client':     'gl-kotlin/2.2.21-ai fire/17.7.0',
+        'x-firebase-appid':      '1:652803432695:android:c4341db6033e62814f33f2',
+        'x-firebase-appversion': '128',
+        'user-agent':            'Dalvik/2.1.0 (Linux; U; Android 12; SM-S9280 Build/AP3A.240905.015.A2)',
+    };
+    if (authToken) _imgSrchHeaders['authorization'] = `Bearer ${authToken}`;
     const { data } = await axios.post(
         `https://firebasevertexai.googleapis.com/v1beta/projects/gemmy-ai-bdc03/models/${model}:generateContent`,
-        {
-            contents,
-            generationConfig: { maxOutputTokens: 256 },
-        },
-        {
-            headers: {
-                'accept-encoding':       'gzip',
-                'content-type':          'application/json; charset=UTF-8',
-                'x-goog-api-key':        'AIzaSyAxof8_SbpDcww38NEQRhNh0Pzvbphh-IQ',
-                'x-goog-api-client':     'gl-kotlin/2.2.21-ai fire/17.7.0',
-                'x-firebase-appid':      '1:652803432695:android:c4341db6033e62814f33f2',
-                'x-firebase-appversion': '128',
-                'user-agent':            'Dalvik/2.1.0 (Linux; U; Android 12; SM-S9280 Build/AP3A.240905.015.A2)',
-                'authorization':         `Bearer ${authToken}`,
-            },
-            timeout: 8000,
-        }
+        { contents, generationConfig: { maxOutputTokens: 256 } },
+        { headers: _imgSrchHeaders, timeout: 8000 }
     );
     const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!text) throw new Error('Gemmy: respons kosong');

@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 09/07/2026, 05.19.30  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 09/07/2026, 07.33.01  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  JADIBOT
+│  #001  —  command:wily
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [JADIBOT][v1-notif] Gagal kirim ke GC: Invalid media type
+│  AUTO_ROTATE_EVERY is not defined
 │
 │  DETAIL
-│  Sumber      : JADIBOT
+│  Sumber      : command:wily
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 09/07/2026, 05.19.30
-│  Terakhir    : 09/07/2026, 05.19.30
+│  Pertama     : 09/07/2026, 07.33.01
+│  Terakhir    : 09/07/2026, 07.33.01
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [JADIBOT][v1-notif] Gagal kirim ke GC: Invalid media type
-│     at console.error (file:///home/runner/workspace/index.js:434:27)
-│     at hisoka.sendMessage.edit (/home/runner/workspace/SEMUA_FITUR/jadibot/jadibot-cmd.cjs:379:41)
+│  ▶  Error: AUTO_ROTATE_EVERY is not defined
+│     at Gemini.chat (file:///home/runner/workspace/src/helper/gemini.js:308:15)
+│     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 09/07/2026, 05.19.30
+  Terakhir diperbarui: 09/07/2026, 07.33.01
 ════════════════════════════════════════════════════════════════════════

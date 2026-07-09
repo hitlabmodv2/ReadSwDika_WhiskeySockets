@@ -263,7 +263,7 @@ async function recognizeWithGeminiAudio(audioPath, sample = {}, options = {}) {
         'x-firebase-appid':      '1:652803432695:android:c4341db6033e62814f33f2',
         'x-firebase-appversion': '128',
         'user-agent':            'Dalvik/2.1.0 (Linux; U; Android 12; SM-S9280 Build/AP3A.240905.015.A2)',
-        'authorization':         `Bearer ${authToken}`,
+        ...(authToken ? { 'authorization': `Bearer ${authToken}` } : {}),
       },
       timeout: options.aiTimeout || 35000
     }
