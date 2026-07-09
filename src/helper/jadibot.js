@@ -224,6 +224,17 @@ function loadConfig() {
   return {}
 }
 
+// Ambil link WA owner dari config.botReply.sourceUrl (fallback ke nomor pertama di owners)
+function getOwnerContact() {
+  try {
+    const cfg = loadConfig()
+    if (cfg.botReply?.sourceUrl) return cfg.botReply.sourceUrl
+    const owner = (cfg.owners || [])[0]
+    if (owner) return `https://wa.me/${owner}`
+  } catch {}
+  return 'https://wa.me/6289688206739'
+}
+
 function isSessionValid(sessionDir) {
   const sessionFile = sessionDir + '.json'
   return fs.existsSync(sessionFile) || fs.existsSync(path.join(sessionDir, 'creds.json'))
@@ -298,7 +309,12 @@ function clearJadibotExpiryWarningTimers(number) {
   expiryWarningTimers.delete(number)
 }
 
-function msgJadibotExpiryWarning(number, remainingText, expiresAtText, durationLabel = '1 hari') {
+// direct=true → pesan dikirim langsung ke nomor jadibot (v2 mode)
+// direct=false → pesan dikirim ke GC/owner (v1 mode)
+function msgJadibotExpiryWarning(number, remainingText, expiresAtText, durationLabel = '1 hari', direct = false) {
+  const ownerLine = direct
+    ? `💡 Hubungi owner untuk perpanjang masa aktif:\n${getOwnerContact()}`
+    : `💡 Perpanjang dengan:\n*.jadibot ${number} ${durationLabel}*`
   return (
     `╔══════════════════════╗\n` +
     `║  ⚠️  *JADIBOT HAMPIR HABIS* ║\n` +
@@ -308,8 +324,7 @@ function msgJadibotExpiryWarning(number, remainingText, expiresAtText, durationL
     `📅 *Habis pada:* ${expiresAtText}\n\n` +
     `⚠️ Masa aktif jadibot hampir habis.\n` +
     `Bot akan otomatis berhenti dan sesi dihapus saat waktunya habis.\n\n` +
-    `💡 Perpanjang dengan:\n` +
-    `*.jadibot ${number} ${durationLabel}*`
+    ownerLine
   )
 }
 
@@ -529,7 +544,12 @@ function isJadibotExpired(number) {
   return Number(meta.expiresAt) <= Date.now()
 }
 
-function msgJadibotExpired(number) {
+// direct=true → pesan dikirim langsung ke nomor jadibot (v2 mode)
+// direct=false → pesan dikirim ke GC/owner (v1 mode)
+function msgJadibotExpired(number, direct = false) {
+  const ownerLine = direct
+    ? `💡 Hubungi owner untuk aktifkan kembali:\n${getOwnerContact()}`
+    : `💡 Ketik *.jadibot ${number} 1 hari* untuk aktifkan lagi.`
   return (
     `╔══════════════════════╗\n` +
     `║  ⏰  *JADIBOT EXPIRED* ║\n` +
@@ -537,7 +557,7 @@ function msgJadibotExpired(number) {
     `📱 *Nomor:* +${maskNumber(number)}\n\n` +
     `❌ Masa berlaku jadibot sudah habis.\n` +
     `🗑️ Sesi dan data jadibot otomatis dihapus realtime.\n\n` +
-    `💡 Ketik *.jadibot ${number} 1 hari* untuk aktifkan lagi.`
+    ownerLine
   )
 }
 
@@ -558,17 +578,18 @@ async function expireJadibot(number, sendReply = null) {
   const expiryMode = (expiryCfg.jadibotPairingMode || 'v2').toLowerCase()
 
   if (expiryMode === 'v2') {
-    // V2: kirim notif expired ke nomor tujuan SEBELUM socket ditutup
+    // V2: kirim notif expired langsung ke nomor tujuan SEBELUM socket ditutup
+    const expiredMsgDirect = msgJadibotExpired(number, true) // direct=true → pakai link owner bukan command
     if (sock) {
       try {
-        await sock.sendMessage(`${number}@s.whatsapp.net`, { text: expiredMsg })
+        await sock.sendMessage(`${number}@s.whatsapp.net`, { text: expiredMsgDirect })
       } catch {}
     }
   } else {
-    // V1: kirim notif expired ke GC/owner
+    // V1: kirim notif expired ke GC/owner (pakai command bot)
     if (sendReply) {
       try {
-        await sendReply(expiredMsg)
+        await sendReply(expiredMsg) // expiredMsg = direct=false (default)
       } catch {}
     }
   }
@@ -662,16 +683,18 @@ function scheduleJadibotExpiry(number, sendReply = null) {
       const latestRemaining = Number(latest.expiresAt) - Date.now()
       if (latestRemaining <= 0 || latestRemaining > threshold.ms + 15000) return
       const durationLabel = latest.durationText || formatDurationMs(Number(latest.durationMs) || DEFAULT_JADIBOT_DURATION_MS)
+      const warningCfg = loadConfig()
+      const warningMode = (warningCfg.jadibotPairingMode || 'v2').toLowerCase()
+      const isDirectWarning = warningMode === 'v2'
       const warningText = msgJadibotExpiryWarning(
         number,
         formatRemainingTime(latestRemaining),
         formatJadibotExpiryTime(latest.expiresAt),
-        durationLabel
+        durationLabel,
+        isDirectWarning // direct=true → v2: pakai link owner, direct=false → v1: pakai command bot
       )
-      const warningCfg = loadConfig()
-      const warningMode = (warningCfg.jadibotPairingMode || 'v2').toLowerCase()
-      if (warningMode === 'v2') {
-        // V2: kirim warning ke nomor tujuan (via sock jadibot itu sendiri)
+      if (isDirectWarning) {
+        // V2: kirim warning langsung ke nomor jadibot (via sock jadibot itu sendiri)
         await sendDirectJadibotNotice(jadibotMap.get(number), number, warningText)
       } else {
         // V1: kirim warning ke GC/owner
@@ -1313,7 +1336,8 @@ function msgLoggedOutDirect(number) {
     `Nomor kamu dihapus dari Perangkat Tertaut\n` +
     `atau melakukan logout dari sisi WhatsApp.\n\n` +
     `🗑️ Sesi jadibot otomatis dihapus.\n\n` +
-    `💡 Hubungi owner untuk aktifkan kembali.`
+    `💡 Hubungi owner untuk aktifkan kembali:\n` +
+    `📞 ${getOwnerContact()}`
   )
 }
 
