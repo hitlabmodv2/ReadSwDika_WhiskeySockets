@@ -289,8 +289,10 @@ async function handleAutoSimi({
                                                         { text: userMessage || 'Analisis gambar/sticker ini.' },
                                                 ]},
                                         ];
-                                        // gemini.chat() sudah punya fallback chain otomatis (gemini-3.1-pro-preview → ... → gemini-2.5-flash-lite)
-                                        response = await gemini.chat({ contents: autoVContents });
+                                        const autoVModels = ['gemini-3.1-pro-preview', 'gemini-2.5-pro', 'gemini-2.5-flash'];
+                                        for (const model of autoVModels) {
+                                                try { response = await gemini.chat({ model, contents: autoVContents }); break; } catch (_) {}
+                                        }
                                 } else {
                                         const autoContents = [
                                                 { role: 'user', parts: [{ text: systemPrompt }] },
@@ -666,7 +668,7 @@ async function handleAutoSimi({
                                                                 finalMime = 'image/jpeg';
                                                         } catch (_) {}
                                                 }
-                                                // gemini.chat() sudah punya fallback chain otomatis (gemini-3.1-pro-preview → ... → gemini-2.5-flash-lite)
+                                                const vModels = ['gemini-3.1-pro-preview', 'gemini-2.5-pro', 'gemini-2.5-flash'];
                                                 if (histMsgs.length > 0) {
                                                         const vContents = [
                                                                 { role: 'user', parts: [{ text: systemPrompt }] },
@@ -677,7 +679,9 @@ async function handleAutoSimi({
                                                                         { text: wrapCurrentUserMessage(visionContextText, currentMsgMeta) },
                                                                 ]},
                                                         ];
-                                                        response = await gemini.chat({ contents: vContents });
+                                                        for (const model of vModels) {
+                                                                try { response = await gemini.chat({ model, contents: vContents }); break; } catch (_) {}
+                                                        }
                                                 } else {
                                                         const vContentsNoHist = [
                                                                 { role: 'user', parts: [{ text: systemPrompt }] },
@@ -687,7 +691,9 @@ async function handleAutoSimi({
                                                                         { text: visionContextText },
                                                                 ]},
                                                         ];
-                                                        response = await gemini.chat({ contents: vContentsNoHist });
+                                                        for (const model of vModels) {
+                                                                try { response = await gemini.chat({ model, contents: vContentsNoHist }); break; } catch (_) {}
+                                                        }
                                                 }
                                         } else {
                                                 response = await gemini.chat({ contents });

@@ -3,9 +3,9 @@ _📅 Jadwal rilis belum ditentukan_ 🕐
 _🔍 Masih dalam tahap pemantauan — informasi tanggal rilis akan diumumkan kemudian, harap bersabar_ 😊
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V25*
-✨ *4 Fitur Baru*
-🔧 *13 Bug/Error Fix*
-🚀 *21 Perubahan*
+✨ *5 Fitur Baru*
+🔧 *15 Bug/Error Fix*
+🚀 *23 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -41,6 +41,16 @@ _Bot kini baca langsung RAM & disk dari server tempat bot jalan — bukan dari p
    • _⚠️ Save Warn Oto_ — set warn = usage disk sekarang + 10%, dibulatkan ke kelipatan 5 (max 95%)
 6. Tombol Save Disk & Save Warn muncul dinamis — hanya tampil kalau disk berhasil terdeteksi
 > Berlaku akurat di semua server: Pterodactyl, Replit, Railway, Fly.io — tanpa perlu config manual
+
+*5. 🧠 WilyAI — History Per-Orang di Grup (Bukan Per-Grup)*
+_Sebelumnya semua orang di satu grup berbagi riwayat AI yang sama — pesan orang A masuk ke konteks orang B:_
+1. ~History AI di grup disimpan per JID grup — semua member berbagi satu sesi yang sama~
+2. Sekarang session key berubah dari `groupJID` → `groupJID_senderJID`
+3. Tiap member punya riwayat percakapan AI sendiri yang terisolasi, tidak bisa bocor ke member lain
+4. Berlaku untuk `.wily`, `.ai`, `.tanya`, dan Auto Reply AI — semua jalur pakai key yang sama
+5. Private chat tidak terpengaruh — sudah per-nomor sejak awal
+
+> AI di grup kini "kenal" setiap orang secara terpisah — tidak ada lagi kebocoran konteks antar member
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🔧 *BUG/ERROR FIX*
@@ -143,6 +153,25 @@ _Bot kini baca langsung RAM & disk dari server tempat bot jalan — bukan dari p
 5. Guard idempotensi (`pairingTimeoutNotified` Set) ditambah — kalau ada race condition antara timer dan close event, notif tetap hanya dikirim *satu kali*, tidak dobel
 6. Guard null `sendReply` ditambah — tidak crash jika sendReply tidak tersedia
 > Sekarang saat orang diam 3 menit tidak masukkan kode, kedua pihak langsung dapat notif yang tepat dan berbeda — tidak ada lagi yang bingung atau tidak tahu apa yang terjadi
+
+*14. 🤖 WilyAI & AutoSimi — Loop Model Manual Redundant Dihapus*
+~Bug: `wilycmd.cjs` dan `autosimi-cmd.cjs` punya loop `for (const model of models)` manual di bagian vision — bentrok dengan fallback otomatis yang sudah ada di dalam `gemini.chat()`~
+1. _Penyebab:_ kode punya array `['gemini-3.1-pro-preview', 'gemini-2.5-pro', 'gemini-2.5-flash']` dengan loop manual, padahal `gemini.chat()` sudah punya fallback chain otomatis dari dalam
+2. _Efek:_ model yang sudah fallback otomatis dicoba ulang — ada potensi pemanggilan dobel, timeout, dan error tidak terkontrol
+3. _Fix `wilycmd.cjs`:_ hapus loop manual di vision-with-history (lines 714–726), ganti langsung `response = await gemini.chat({ contents: visionContents })`
+4. _Fix `autosimi-cmd.cjs`:_ hapus 3 loop manual — auto-mode vision (lines 292–294), wily-autoreply vision with-history (lines 682–684), dan without-history (lines 694–696)
+5. Semua jalur vision kini pakai `gemini.chat()` langsung — fallback chain otomatis jalan dari `gemini-3.1-pro-preview` turun ke `gemini-2.5-flash-lite` sesuai urutan di `gemini.js`
+
+> WilyAI vision kini lebih stabil — tidak ada loop ganda, fallback dikelola satu tempat di `gemini.js`
+
+*15. 📘📸 .fb & .ig Downloader — Vision Masih Pakai `gemini.chat({ model })` Lama*
+~Bug: `facebook-dl.cjs` dan `instagram-dl.cjs` masih pakai `gemini.chat({ model: 'gemini-2.5-flash', ... })` hardcoded untuk analisis thumbnail — tidak pakai model terbaru dan tidak ada fallback~
+1. _Penyebab:_ kode vision FB/IG ditulis sebelum `gemini.askWithImage()` tersedia — masih pakai `gemini.chat()` dengan `inlineData` + model hardcoded `gemini-2.5-flash`
+2. _Efek:_ selalu pakai model lama, tidak bisa fallback, tidak konsisten dengan `AiPromptFb.js` / `AiPromptIg.js`
+3. _Fix:_ kedua file diganti ke `gemini.askWithImage(prompt, buffer, mimeType)` — model otomatis pakai `DEFAULT_MODEL` (gemini-3.1-pro-preview) + fallback chain penuh
+4. Komentar di `AiPromptFb.js` dan `AiPromptIg.js` diperbarui untuk mencerminkan cara pemanggilan yang benar
+
+> Thumbnail FB & IG kini dianalisis oleh model terbaru dengan fallback otomatis — tidak ada lagi hardcoded model lama
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *PERUBAHAN*
@@ -335,3 +364,20 @@ _Perintah `.wilyai` kini tampil dengan button interaktif single-select, realtime
 7. Auto-delete pesan button sebelumnya sebelum kirim yang baru — tidak tumpuk-tumpuk di chat
 8. Fallback ke teks biasa otomatis jika device tidak support button
 > Semua pengaturan WilyAI kini bisa diakses dari satu button; fitur yang mati langsung kelihatan dan bisa dinyalakan dari sana
+
+*22. 🤖 AiPromptFb.js & AiPromptIg.js — Komentar & Cara Panggil Diperbarui ke V25*
+_File prompt builder FB & IG disesuaikan dengan model dan pola pemanggilan terbaru:_
+1. ~Komentar fungsi vision masih mereferensikan model lama dan cara panggil `gemini.chat()` dengan `inlineData` manual~
+2. Komentar `buildFbVisionPrompt()` dan `buildIgVisionPrompt()` diperbarui:
+   • _"Dipanggil dengan `gemini.askWithImage(prompt, buffer, mimeType)`"_
+   • _"Model otomatis pakai DEFAULT_MODEL (gemini-3.1-pro-preview) + fallback chain"_
+3. Tidak ada perubahan logika — hanya sinkronisasi dokumentasi agar konsisten dengan implementasi di downloader
+> `AiPromptFb.js` dan `AiPromptIg.js` kini akurat sebagai referensi bagi developer
+
+*23. 🧠 aiPrompt.js — System Prompt Group Context Diperbarui ke Per-Orang*
+_Setelah history diubah per-orang, system prompt AI di grup perlu mencerminkan hal tersebut:_
+1. ~`historyNote` di prompt menjelaskan history per-sesi tanpa menyebut isolasi per-orang~
+2. ~`chatTypeNote` untuk grup tidak menyebut bahwa tiap member punya riwayat sendiri~
+3. `historyNote` diperbarui — AI diberitahu bahwa history ini milik user yang sedang bicara, bukan berbagi dengan member lain
+4. `chatTypeNote` grup diperbarui — AI diberitahu untuk fokus pada user yang sedang bicara saja, tidak mencampur konteks dengan orang lain di grup
+> AI di grup kini sadar sepenuhnya bahwa setiap orang punya sesi terpisah — respons lebih relevan dan personal
