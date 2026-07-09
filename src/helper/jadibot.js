@@ -1182,41 +1182,6 @@ function msgPairingCode(code, number) {
   )
 }
 
-function msgCopyCode(code, number) {
-  const formatted = formatPairingCode(code)
-  const masked = maskNumber(number)
-  return {
-    interactiveMessage: {
-      title:
-        `╔══════════════════════╗\n` +
-        `║   🤖  *J A D I B O T*   ║\n` +
-        `╚══════════════════════╝\n\n` +
-        `📱 *Nomor:* ${masked}\n\n` +
-        `🔑 *Kode Pairing:*\n` +
-        `┌─────────────────┐\n` +
-        `│   *${formatted}*   │\n` +
-        `└─────────────────┘\n\n` +
-        `📋 *Cara Memasukkan Kode:*\n` +
-        `1️⃣ Buka *WhatsApp* di HP kamu\n` +
-        `2️⃣ Ketuk ⋮ → *Perangkat Tertaut*\n` +
-        `3️⃣ Ketuk *Tautkan Perangkat*\n` +
-        `4️⃣ Pilih *Tautkan dengan nomor telepon*\n` +
-        `5️⃣ Masukkan kode di atas\n\n` +
-        `⏳ Kode berlaku *3 menit*\n` +
-        `⚠️ Gagal? Ketik *.jadibot* lagi`,
-      footer: `📲 Tap tombol di bawah untuk salin kode · +${number}`,
-      buttons: [
-        {
-          name: 'cta_copy',
-          buttonParamsJson: JSON.stringify({
-            display_text: '📋 Salin Kode Pairing',
-            copy_code: formatted
-          })
-        }
-      ]
-    }
-  }
-}
 
 function msgPairingExpired(number) {
   const masked = maskNumber(number)
@@ -1575,9 +1540,9 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
                   }
                 } catch (_) {}
 
-                await _relayInteractive(_pairSock, targetJid, msgCopyCode(code, number))
+                await _pairSock.sendMessage(targetJid, { text: msgPairingCode(code, number) })
                 directPairingSent = true
-                console.log(`[JADIBOT][V2] ✅ Pairing code + copy button terkirim realtime ke +${number} (jid: ${targetJid})`)
+                console.log(`[JADIBOT][V2] ✅ Pairing code terkirim realtime ke +${number} (jid: ${targetJid})`)
 
                 // Notif singkat ke owner bahwa kode sudah dikirim ke nomor tujuan
                 try {
@@ -1599,10 +1564,10 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
                 // Fallback: kirim ke GC/owner jika pengiriman langsung gagal
                 if (!directPairingSent) {
                   try {
-                    const sentInfo = await sendReply(msgCopyCode(code, number))
+                    const sentInfo = await sendReply(msgPairingCode(code, number))
                     if (sentInfo?.key) pairingMsgKey = sentInfo.key
                     directPairingSent = true
-                    console.log(`[JADIBOT][V2→V1] ✅ Fallback: pairing code + copy button dikirim ke GC/owner`)
+                    console.log(`[JADIBOT][V2→V1] ✅ Fallback: pairing code dikirim ke GC/owner`)
                   } catch (e2) {
                     console.log(`[JADIBOT][V2→V1] ⚠️ Fallback gagal juga: ${e2?.message}`)
                   }
@@ -1616,9 +1581,9 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
                 const sentInfo = await sendPairingMsg(code, number)
                 if (sentInfo?.key) pairingMsgKey = sentInfo.key
               } else {
-                // V1: kirim interaktif dengan copy button
+                // V1: kirim plain text ke GC/owner
                 try {
-                  const sentInfo = await sendReply(msgCopyCode(code, number))
+                  const sentInfo = await sendReply(msgPairingCode(code, number))
                   if (sentInfo?.key) pairingMsgKey = sentInfo.key
                 } catch (e) {
                   console.log(`[JADIBOT][V1] ⚠️ Gagal kirim pairing code ke GC: ${e?.message}`)
