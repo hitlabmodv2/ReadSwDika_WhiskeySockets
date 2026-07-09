@@ -1159,17 +1159,19 @@ function msgCopyCode(code, number) {
         `║   🤖  *J A D I B O T*   ║\n` +
         `╚══════════════════════╝\n\n` +
         `📱 *Nomor:* ${masked}\n\n` +
-        `━━━━━━━━━━━━━━━━━━━━━━\n` +
+        `🔑 *Kode Pairing:*\n` +
+        `┌─────────────────┐\n` +
+        `│   *${formatted}*   │\n` +
+        `└─────────────────┘\n\n` +
         `📋 *Cara Memasukkan Kode:*\n` +
-        `━━━━━━━━━━━━━━━━━━━━━━\n\n` +
         `1️⃣ Buka *WhatsApp* di HP kamu\n` +
         `2️⃣ Ketuk ⋮ → *Perangkat Tertaut*\n` +
         `3️⃣ Ketuk *Tautkan Perangkat*\n` +
         `4️⃣ Pilih *Tautkan dengan nomor telepon*\n` +
-        `5️⃣ Masukkan kode pairing di atas\n\n` +
+        `5️⃣ Masukkan kode di atas\n\n` +
         `⏳ Kode berlaku *3 menit*\n` +
         `⚠️ Gagal? Ketik *.jadibot* lagi`,
-      footer: `📲 Tap tombol untuk salin kode · +${number}`,
+      footer: `📲 Tap tombol di bawah untuk salin kode · +${number}`,
       buttons: [
         {
           name: 'cta_copy',
@@ -1531,8 +1533,6 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
             if (pairingMode === 'v2' && _pairSock) {
               // ── V2: Kirim kode langsung ke nomor tujuan ──
               try {
-                const fmt = formatPairingCode(code)
-
                 // Resolve JID yang benar dulu (support LID/linked device)
                 let targetJid = `${number}@s.whatsapp.net`
                 try {
@@ -1542,26 +1542,9 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
                   }
                 } catch (_) {}
 
-                const pairingText =
-                  `╔══════════════════════╗\n` +
-                  `║   🤖  *J A D I B O T*  ║\n` +
-                  `╚══════════════════════╝\n\n` +
-                  `🔑 *Kode Pairing untuk nomormu:*\n\n` +
-                  `┌─────────────────┐\n` +
-                  `│   *${fmt}*   │\n` +
-                  `└─────────────────┘\n\n` +
-                  `📋 *Cara memasukkan kode:*\n` +
-                  `1️⃣ Buka WhatsApp di HP kamu\n` +
-                  `2️⃣ Ketuk ⋮ → *Perangkat Tertaut*\n` +
-                  `3️⃣ Ketuk *Tautkan Perangkat*\n` +
-                  `4️⃣ Pilih *Tautkan dengan nomor telepon*\n` +
-                  `5️⃣ Masukkan kode di atas\n\n` +
-                  `⏳ *Kode berlaku 3 menit*\n\n` +
-                  `\`\`\`${fmt}\`\`\``
-
-                await _pairSock.sendMessage(targetJid, { text: pairingText })
+                await _pairSock.sendMessage(targetJid, msgCopyCode(code, number))
                 directPairingSent = true
-                console.log(`[JADIBOT][V2] ✅ Pairing code terkirim realtime ke +${number} (jid: ${targetJid})`)
+                console.log(`[JADIBOT][V2] ✅ Pairing code + copy button terkirim realtime ke +${number} (jid: ${targetJid})`)
 
                 // Notif singkat ke owner bahwa kode sudah dikirim ke nomor tujuan
                 try {
@@ -1583,10 +1566,10 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
                 // Fallback: kirim ke GC/owner jika pengiriman langsung gagal
                 if (!directPairingSent) {
                   try {
-                    const sentInfo = await sendReply(msgPairingCode(code, number))
+                    const sentInfo = await sendReply(msgCopyCode(code, number))
                     if (sentInfo?.key) pairingMsgKey = sentInfo.key
                     directPairingSent = true
-                    console.log(`[JADIBOT][V2→V1] ✅ Fallback: pairing code dikirim ke GC/owner`)
+                    console.log(`[JADIBOT][V2→V1] ✅ Fallback: pairing code + copy button dikirim ke GC/owner`)
                   } catch (e2) {
                     console.log(`[JADIBOT][V2→V1] ⚠️ Fallback gagal juga: ${e2?.message}`)
                   }
@@ -1600,9 +1583,9 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
                 const sentInfo = await sendPairingMsg(code, number)
                 if (sentInfo?.key) pairingMsgKey = sentInfo.key
               } else {
-                // V1: pakai plain text langsung (interactiveMessage/tombol tidak bekerja di GC)
+                // V1: kirim interaktif dengan copy button
                 try {
-                  const sentInfo = await sendReply(msgPairingCode(code, number))
+                  const sentInfo = await sendReply(msgCopyCode(code, number))
                   if (sentInfo?.key) pairingMsgKey = sentInfo.key
                 } catch (e) {
                   console.log(`[JADIBOT][V1] ⚠️ Gagal kirim pairing code ke GC: ${e?.message}`)

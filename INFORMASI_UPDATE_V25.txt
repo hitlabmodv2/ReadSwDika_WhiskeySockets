@@ -5,7 +5,7 @@ _🔍 Masih dalam tahap pemantauan — informasi tanggal rilis akan diumumkan ke
 🤖 *WILY BOT — V25*
 ✨ *4 Fitur Baru*
 🔧 *12 Bug/Error Fix*
-🚀 *20 Perubahan*
+🚀 *21 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -285,6 +285,17 @@ _Notif Telegram saat file di-restore via menu `r › Restore/undo hapus` sebelum
 2. _Fix:_ tambah notif `♻️ QUICK UNDO — FILE DI-RESTORE` lengkap: foto, daftar file yang dikembalikan, baris `🔖 Commit`, dan 4 tombol _(Buka Repo, Commits, Lihat Commit Restore, Tree Branch)_ — format sama persis dengan notif menu r
 3. SHA commit di-capture via `git rev-parse HEAD` setelah push sukses — kondisional, tombol commit hanya muncul kalau SHA ada
 > Quick-undo kini terpantau realtime di Telegram — sama seperti restore dari menu r, tidak ada lagi aksi yang "diam" tanpa notif
+
+*21. 🔑 Jadibot V1 & V2 — Pesan Pairing Code Kini Ada Tombol "Salin Kode Pairing"*
+_Sebelumnya kode pairing dikirim sebagai teks biasa — tidak ada tombol salin, user harus ketik manual atau screenshot:_
+1. ~Pesan pairing code hanya teks polos — tidak ada tombol, user harus salin manual dari layar~
+2. Sekarang baik mode *V1 maupun V2*, pesan pairing code tampil sebagai *pesan interaktif* dengan tombol `📋 Salin Kode Pairing`
+3. Tap tombol → kode langsung tersalin ke clipboard tanpa perlu ketik ulang
+4. Kode yang disalin otomatis menggunakan format *custom pairing* sesuai `pairingCode` di `config.json` _(contoh: `WILYCODE` → tombol salin `WILY-CODE`)_
+5. Kode juga tetap tampil visual di body pesan dalam kotak `┌──┐` agar bisa dibaca sebelum disalin
+6. Berlaku di *semua jalur*: V2 langsung ke nomor tujuan, V2 fallback ke GC, dan V1 ke GC/owner — tidak ada yang terlewat
+
+> Pengalaman jadibot kini jauh lebih mulus — satu tap untuk salin kode, tidak perlu screenshot atau ketik ulang satu per satu
 
 *20. ⏰ Jadibot V1 & V2 — Pairing Expired Kini Ada Tombol URL "Hubungi Owner Bot"*
 _Sebelumnya saat pairing code habis waktu (3 menit), bot hanya kirim teks polos tanpa ada cara langsung hubungi owner:_
