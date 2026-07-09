@@ -1584,10 +1584,29 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
           removeJadibotExpiry(number)
         }, 500)
 
-        // Kirim notif ke pengirim (V1 & V2 sama — interaktif + tombol URL owner)
-        try {
-          await sendReply(msgPairingExpired(number))
-        } catch {}
+        // Kirim notif expired sesuai mode
+        const _expSock = getActiveMainSock(mainBotSock)
+        const _expMode = ((loadConfig().jadibotPairingMode) || 'v2').toLowerCase()
+
+        // Selalu kirim langsung ke nomor tujuan
+        if (_expSock) {
+          try {
+            let _expJid = `${number}@s.whatsapp.net`
+            try {
+              const [_expWa] = await _expSock.onWhatsApp(`${number}@s.whatsapp.net`)
+              if (_expWa?.exists && _expWa?.jid) _expJid = _expWa.jid
+            } catch (_) {}
+            await _expSock.sendMessage(_expJid, { text: msgPairingExpired(number) })
+            console.log(`[JADIBOT][EXPIRED] ✅ Notif expired terkirim langsung ke +${number}`)
+          } catch (e) {
+            console.log(`[JADIBOT][EXPIRED] ⚠️ Gagal kirim ke nomor tujuan: ${e?.message}`)
+          }
+        }
+
+        // V1: juga kirim ke GC/owner agar owner tau
+        if (_expMode === 'v1') {
+          try { await sendReply(msgPairingExpired(number)) } catch {}
+        }
       }, PAIRING_TIMEOUT_MS)
 
       pairingTimeout.set(number, timeout)
