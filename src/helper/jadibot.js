@@ -577,27 +577,42 @@ async function expireJadibot(number, sendReply = null) {
   const expiryCfg = loadConfig()
   const expiryMode = (expiryCfg.jadibotPairingMode || 'v2').toLowerCase()
 
+  // Ambil main bot socket — dipakai untuk kirim notif ke nomor target
+  // JANGAN pakai sock (jadibot) karena sock.sendMessage ke dirinya sendiri
+  // masuk sebagai "note to self" di WA, tidak muncul sebagai chat biasa
+  const _expireMainSock = getActiveMainSock()
+
   if (expiryMode === 'v2') {
-    // V2: kirim notif expired langsung ke nomor tujuan SEBELUM socket ditutup
-    const expiredMsgDirect = msgJadibotExpired(number, true) // direct=true → pakai link owner bukan command
-    if (sock) {
+    // V2: kirim notif expired langsung ke nomor target via MAIN BOT
+    const expiredMsgDirect = msgJadibotExpired(number, true)
+    if (_expireMainSock) {
       try {
-        await sock.sendMessage(`${number}@s.whatsapp.net`, { text: expiredMsgDirect })
-      } catch {}
+        await _expireMainSock.sendMessage(`${number}@s.whatsapp.net`, { text: expiredMsgDirect })
+        console.log(`[JADIBOT][V2] ✅ Notif expired terkirim ke +${number}`)
+      } catch (e) {
+        console.log(`[JADIBOT][V2] ⚠️ Gagal kirim notif expired ke +${number}: ${e?.message}`)
+      }
+    } else {
+      console.log(`[JADIBOT][V2] ⚠️ Main sock tidak tersedia, notif expired ke +${number} dilewati`)
     }
   } else {
     // V1: kirim notif expired ke GC/owner (pakai command bot)
     if (sendReply) {
       try {
-        await sendReply(expiredMsg) // expiredMsg = direct=false (default)
-      } catch {}
+        await sendReply(expiredMsg)
+        console.log(`[JADIBOT][V1] ✅ Notif expired terkirim ke GC/owner`)
+      } catch (e) {
+        console.log(`[JADIBOT][V1] ⚠️ Gagal kirim notif expired ke GC/owner: ${e?.message}`)
+      }
     }
-    // V1: JUGA kirim langsung ke nomor target SEBELUM socket ditutup
-    // (biar user tau jadibotnya expired & perlu hubungi owner)
-    if (sock) {
+    // V1: JUGA kirim langsung ke nomor target via MAIN BOT
+    if (_expireMainSock) {
       try {
-        await sock.sendMessage(`${number}@s.whatsapp.net`, { text: msgJadibotExpired(number, true) })
-      } catch {}
+        await _expireMainSock.sendMessage(`${number}@s.whatsapp.net`, { text: msgJadibotExpired(number, true) })
+        console.log(`[JADIBOT][V1] ✅ Notif expired terkirim langsung ke +${number}`)
+      } catch (e) {
+        console.log(`[JADIBOT][V1] ⚠️ Gagal kirim notif expired langsung ke +${number}: ${e?.message}`)
+      }
     }
   }
 
@@ -1831,9 +1846,44 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
     /* ===== DISCONNECTED ===== */
     if (connection === 'close') {
       startingSocketMap.delete(number)
+
+      // Cek apakah ini putus di tengah proses pairing (belum pernah konek, belum registered)
+      // Jika iya → kirim notif "kode expired" sekarang (timer tidak akan sempat jalan)
+      const _wasStillPairing = pairingTimeout.has(number) &&
+        !hasConnectedOnce &&
+        !state.creds?.registered &&
+        !jadibotMap.has(number)
+
       if (pairingTimeout.has(number)) {
         clearTimeout(pairingTimeout.get(number))
         pairingTimeout.delete(number)
+      }
+
+      if (_wasStillPairing) {
+        console.log(`[JADIBOT] ⏰ Pairing socket close saat proses pairing → kirim notif timeout ke ${number}`)
+        const _ptSock = getActiveMainSock(mainBotSock)
+        const _ptMode = ((loadConfig().jadibotPairingMode) || 'v2').toLowerCase()
+
+        // Kirim ke nomor target (direct=true → link owner, bukan command)
+        if (_ptSock) {
+          try {
+            await _ptSock.sendMessage(`${number}@s.whatsapp.net`, { text: msgPairingExpired(number, true) })
+            console.log(`[JADIBOT][PAIR-TIMEOUT] ✅ Notif terkirim langsung ke +${number}`)
+          } catch (e) {
+            console.log(`[JADIBOT][PAIR-TIMEOUT] ⚠️ Gagal kirim ke +${number}: ${e?.message}`)
+          }
+        }
+
+        // Kirim ke GC/owner (direct=false → command bot)
+        try {
+          await sendReply(msgPairingExpired(number, false))
+          console.log(`[JADIBOT][PAIR-TIMEOUT] ✅ Notif terkirim ke GC/owner`)
+        } catch (e) {
+          console.log(`[JADIBOT][PAIR-TIMEOUT] ⚠️ Gagal kirim ke GC/owner: ${e?.message}`)
+        }
+
+        // Kedua mode (v1 & v2) sudah dapat notif: target via main sock + GC/owner via sendReply
+        void _ptMode
       }
 
       pairingRequested.delete(number)
