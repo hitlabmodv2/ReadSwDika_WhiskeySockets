@@ -1183,18 +1183,43 @@ function msgCopyCode(code, number) {
   }
 }
 
-function msgPairingExpired(number) {
+function msgPairingExpired(number, mode = 'v2') {
   const masked = maskNumber(number)
-  return (
+
+  const bodyText =
     `╔══════════════════════╗\n` +
     `║   ⏰  *WAKTU HABIS*   ║\n` +
     `╚══════════════════════╝\n\n` +
     `📱 *Nomor:* ${masked}\n\n` +
     `❌ Kode pairing sudah *kedaluwarsa*\n` +
-    `karena tidak digunakan dalam *3 menit*.\n\n` +
-    `🔄 Sesi otomatis dihapus.\n` +
-    `💡 Ketik *.jadibot ${number}* untuk coba lagi.`
-  )
+    `karena tidak dimasukkan dalam *3 menit*.\n\n` +
+    `🔄 Sesi otomatis dihapus.\n\n` +
+    `😔 Maaf ya, waktu habis sebelum kode sempat dimasukkan.\n` +
+    `Silakan hubungi owner bot untuk mencoba lagi.`
+
+  if (mode === 'v1') {
+    // V1: kirim interaktif dengan tombol URL ke owner
+    const ownerUrl = `https://wa.me/6289688206739?text=Halo+kak%2C+pairing+code+saya+expired+karena+telat+memasukkan+kodenya+%F0%9F%98%85+Minta+tolong+mulai+ulang+ya+%F0%9F%99%8F`
+    return {
+      interactiveMessage: {
+        title: bodyText,
+        footer: `📲 Tap tombol di bawah untuk menghubungi owner bot`,
+        buttons: [
+          {
+            name: 'cta_url',
+            buttonParamsJson: JSON.stringify({
+              display_text: '💬 Hubungi Owner Bot',
+              url: ownerUrl,
+              merchant_url: ownerUrl
+            })
+          }
+        ]
+      }
+    }
+  }
+
+  // V2 / default → plain text
+  return bodyText + `\n\n💡 Ketik *.jadibot ${number}* untuk coba lagi.`
 }
 
 function msgConnected(number) {
@@ -1637,7 +1662,9 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
 
         // Kirim notif ke pengirim
         try {
-          await sendReply(msgPairingExpired(number))
+          const _expCfg = loadConfig()
+          const _pairingMode = (_expCfg.jadibotPairingMode || 'v2').toLowerCase()
+          await sendReply(msgPairingExpired(number, _pairingMode))
         } catch {}
       }, PAIRING_TIMEOUT_MS)
 

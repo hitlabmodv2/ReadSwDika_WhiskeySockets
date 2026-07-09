@@ -5,7 +5,7 @@ _🔍 Masih dalam tahap pemantauan — informasi tanggal rilis akan diumumkan ke
 🤖 *WILY BOT — V25*
 ✨ *4 Fitur Baru*
 🔧 *12 Bug/Error Fix*
-🚀 *19 Perubahan*
+🚀 *20 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -285,6 +285,17 @@ _Notif Telegram saat file di-restore via menu `r › Restore/undo hapus` sebelum
 2. _Fix:_ tambah notif `♻️ QUICK UNDO — FILE DI-RESTORE` lengkap: foto, daftar file yang dikembalikan, baris `🔖 Commit`, dan 4 tombol _(Buka Repo, Commits, Lihat Commit Restore, Tree Branch)_ — format sama persis dengan notif menu r
 3. SHA commit di-capture via `git rev-parse HEAD` setelah push sukses — kondisional, tombol commit hanya muncul kalau SHA ada
 > Quick-undo kini terpantau realtime di Telegram — sama seperti restore dari menu r, tidak ada lagi aksi yang "diam" tanpa notif
+
+*20. ⏰ Jadibot V1 — Pairing Expired Kini Ada Tombol URL "Hubungi Owner Bot"*
+_Sebelumnya saat pairing code habis waktu di mode V1, bot hanya kirim teks biasa tanpa ada cara langsung hubungi owner:_
+1. ~Notif expired hanya teks polos — tidak ada tombol, tidak ada link ke owner~
+2. Sekarang jika `jadibotPairingMode` di `config.json` bernilai `v1`, notif expired tampil sebagai *pesan interaktif* dengan tombol URL
+3. Tombol *💬 Hubungi Owner Bot* langsung buka chat WA ke nomor owner (`wa.me/6289688206739`) dengan teks pre-fill otomatis: _"Halo kak, pairing code saya expired karena telat memasukkan kodenya 😅 Minta tolong mulai ulang ya 🙏"_
+4. Footer pesan: _📲 Tap tombol di bawah untuk menghubungi owner bot_
+5. Mode *V2* tidak berubah — tetap kirim teks biasa + petunjuk `.jadibot ulang`
+6. Mode dibaca fresh dari `config.json` saat timeout terjadi — tidak perlu restart bot jika config diubah
+
+> Pengguna jadibot V1 yang telat masukkan kode kini langsung bisa tap satu tombol untuk chat owner — tidak perlu tebak-tebak nomor atau cari info manual
 
 *15. 🤖 .wilyai — Tombol Single-Select Realtime + Notif Fitur Belum Aktif*
 _Perintah `.wilyai` kini tampil dengan button interaktif single-select, realtime status per fitur, persis pola `.online` & `.readsw`:_
