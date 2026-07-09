@@ -118,9 +118,25 @@
               "text": "centang 10 apaan njir, wa kamu bajakan ya? 🙄 lebay amat. \n\nawas aja ntar malah ketiduran. tungguin bentar lagi nih."
             }
           ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 09 Jul, 15.14 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"centang 10 apaan njir, wa kamu bajakan ya? 🙄 lebay amat. awas aja ntar malah ketiduran. tungguin bentar lagi nih.\" | 👤 γυς ρου]\nOke tante 🗿"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "tante matamu 🙄 enak aja manggil tante, dikira aku seumuran emak lu apa. \n\nudah diem nunggu aja sana. awas kalau ntar aku chat malah beneran ketiduran."
+            }
+          ]
         }
       ],
-      "lastActivity": 1783584809844
+      "lastActivity": 1783584843104
     }
   },
   "sticker_pattern": {
@@ -150,9 +166,9 @@
       "last_sent": 1780237811
     },
     "https://cdn.ornzora.eu.cc/41f054d0-55e9-4d1a-abb7-6a49ac74769b-HONOLULU.webp": {
-      "total_sent": 9,
+      "total_sent": 10,
       "moods": {},
-      "last_sent": 1783584690
+      "last_sent": 1783584842
     },
     "https://cdn.ornzora.eu.cc/31f63a4b-95a8-440a-9d77-9d634ef2153a-HONOLULU.webp": {
       "total_sent": 5,
@@ -394,6 +410,13 @@
         "context": "ngapain ngirim stiker muka ngeselin gitu anjir 😑 ngeledek ya lu? udah diem tungguin aja, beneran aku chat ntar. awas aja kalau pas di-chat malah centang satu. [REPLY-STIKER: jutek]",
         "was_fallback": 1,
         "sent_at": 1783584767
+      },
+      {
+        "sticker_url": "https://cdn.ornzora.eu.cc/41f054d0-55e9-4d1a-abb7-6a49ac74769b-HONOLULU.webp",
+        "mood": "",
+        "context": "tante matamu 🙄 enak aja manggil tante, dikira aku seumuran emak lu apa. [REPLY-STIKER: kesel] udah diem nunggu aja sana. awas kalau ntar aku chat malah beneran ketiduran.",
+        "was_fallback": 1,
+        "sent_at": 1783584842
       }
     ]
   },
