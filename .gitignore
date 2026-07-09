@@ -24,8 +24,10 @@ zipFile.zip
 *.pdf
 
 
-# Sessions — JANGAN masuk git (data autentikasi sensitif)
-sessions/
+# Sessions — single-file format (.json) di-upload, folder lama di-exclude
+sessions/**
+!sessions/
+!sessions/*.json
 
 # Jadibot — upload seluruh isi folder (termasuk consolidated session)
 !jadibot/
