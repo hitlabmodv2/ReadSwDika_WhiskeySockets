@@ -544,8 +544,18 @@ async function handleSv({ hisoka, m, query, tolak, logCommand }) {
                         );
                 }
 
-                // Nama dari query (opsional) — kalau tidak ada, tampil sebagai +nomor
-                targetNamaDepan    = queryNamaDepan    || null;
+                if (!queryNamaDepan) {
+                        // Tidak ada nama → wajib kasih nama, tampilkan contoh
+                        return tolak(hisoka, m,
+                                `❌ *Nama kontak wajib diisi!*\n\n` +
+                                `📌 *Cara pakai di DM:*\n` +
+                                `• \`${pref}sv Wily\` — simpan dengan nama depan saja\n` +
+                                `• \`${pref}sv Wily|Den\` — simpan dengan nama depan + belakang\n\n` +
+                                `_Nama depan saja sudah cukup, nama belakang opsional._`
+                        );
+                }
+
+                targetNamaDepan    = queryNamaDepan;
                 targetNamaBelakang = queryNamaBelakang || null;
         }
         // ── Mode E: Di grup tanpa reply/mention/nomor → pesan error spesifik ──
