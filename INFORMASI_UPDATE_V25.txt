@@ -407,3 +407,17 @@ _Setelah history diubah per-orang, system prompt AI di grup perlu mencerminkan h
 3. `historyNote` diperbarui — AI diberitahu bahwa history ini milik user yang sedang bicara, bukan berbagi dengan member lain
 4. `chatTypeNote` grup diperbarui — AI diberitahu untuk fokus pada user yang sedang bicara saja, tidak mencampur konteks dengan orang lain di grup
 > AI di grup kini sadar sepenuhnya bahwa setiap orang punya sesi terpisah — respons lebih relevan dan personal
+
+*24. 📇 .sv — Simpan Kontak Tanpa Ketik Nomor, Nama Bebas Tanpa Pipe*
+_Perintah `.sv` kini lebih simpel dan fleksibel — tidak perlu ketik nomor manual, nama depan saja sudah cukup tanpa harus pakai `|`:_
+1. ~Sebelumnya format utama: `.sv 628xxx|NamaDepan|NamaBelakang` — harus ketik nomor dulu~
+2. *Reply pesan* → `.sv` — simpan pengirim, nama otomatis dari profil WA mereka
+3. *Reply pesan* → `.sv Wily` — simpan dengan nama depan saja _(tanpa `|` sudah cukup)_
+4. *Reply pesan* → `.sv Wily|Den` — simpan dengan nama depan + belakang
+5. *Tag orang* → `.sv @nama Wily` atau `.sv @nama Wily|Den` — simpan orang yang ditag
+6. *DM* → `.sv Wily` atau `.sv Wily|Den` — simpan lawan chat, nama wajib diisi
+7. *DM tanpa nama* → muncul pesan panduan lengkap dengan contoh cara pakai, bukan simpan pakai `+nomor`
+8. *Grup tanpa reply/tag tapi ada nama* → muncul pesan error spesifik + contoh cara yang benar _(bukan tampil pesan bantuan panjang)_
+9. *Nama dengan karakter berbahaya* `; : \` → otomatis dibersihkan agar format vCard tidak rusak
+10. Format nomor langsung tetap bisa: `.sv 628xxx`, `.sv 08xxx|Wily`, `.sv 628xxx|Wily|Den`
+> Nama belakang selalu opsional — cukup nama depan saja tanpa `|` sudah work di semua mode
