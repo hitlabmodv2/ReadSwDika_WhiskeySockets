@@ -544,24 +544,9 @@ async function handleSv({ hisoka, m, query, tolak, logCommand }) {
                         );
                 }
 
-                if (queryNamaDepan) {
-                        // Nama custom dari query → pakai itu
-                        targetNamaDepan    = queryNamaDepan;
-                        targetNamaBelakang = queryNamaBelakang;
-                } else {
-                        // Tidak ada nama di query → coba ambil pushName lawan chat
-                        const pushName = m.pushName || m.name || null;
-                        if (pushName) {
-                                const spaceIdx = pushName.indexOf(' ');
-                                if (spaceIdx > -1) {
-                                        targetNamaDepan    = pushName.slice(0, spaceIdx).trim() || null;
-                                        targetNamaBelakang = pushName.slice(spaceIdx + 1).trim() || null;
-                                } else {
-                                        targetNamaDepan = pushName.trim() || null;
-                                }
-                        }
-                        // Kalau pushName juga tidak ada → FN akan jadi +nomor (aman)
-                }
+                // Nama dari query (opsional) — kalau tidak ada, tampil sebagai +nomor
+                targetNamaDepan    = queryNamaDepan    || null;
+                targetNamaBelakang = queryNamaBelakang || null;
         }
         // ── Mode E: Di grup tanpa reply/mention/nomor → pesan error spesifik ──
         else {
