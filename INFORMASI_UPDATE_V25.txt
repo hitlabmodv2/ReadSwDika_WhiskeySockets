@@ -3,9 +3,9 @@ _📅 Sabtu, 11 Juli 2026 — Malam Minggu_ 🌙
 _🚀 Rilis dijadwalkan malam ini — pantau terus!_ 🔥
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V25*
-✨ *5 Fitur Baru*
+✨ *6 Fitur Baru*
 🔧 *15 Bug/Error Fix*
-🚀 *23 Perubahan*
+🚀 *24 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -51,6 +51,30 @@ _Sebelumnya semua orang di satu grup berbagi riwayat AI yang sama — pesan oran
 5. Private chat tidak terpengaruh — sudah per-nomor sejak awal
 
 > AI di grup kini "kenal" setiap orang secara terpisah — tidak ada lagi kebocoran konteks antar member
+
+*6. 📇 .savekontak / .sv — Scraper & Simpan Kontak GC (vCard)*
+_Bot kini bisa scrape nomor semua member grup dan kirim sebagai kartu kontak (vCard) langsung ke DM — tinggal tap, simpan ke HP:_
+
+*.savekontak* / *.svgc* — Scrape semua member GC → kirim ke DM kamu:
+1. Ketik `.savekontak` di dalam grup → bot scrape semua nomor member, kirim ke DM kamu sebagai vCard satu per satu
+2. Dari luar grup: `.savekontak 120363xxx@g.us` — cukup isi JID grup target
+3. Progress bar live terupdate per batch — tampil berapa terkirim & gagal secara realtime
+4. Kirim per batch 5 kontak per pesan — aman dari flood/rate limit WhatsApp
+5. Bisa dibatalkan di tengah jalan: `.savekontakstop` / `.svcstop`
+6. LID (nomor tersembunyi) di-resolve otomatis kalau sudah ter-sinkronisasi — yang tidak bisa di-resolve diskip
+
+*.sv* — Simpan 1 kontak spesifik → kirim vCard ke chat:
+1. `.sv 6281234567890` — nomor langsung (format internasional)
+2. `.sv 081234567890` — otomatis konversi 08xxx → 628xxx
+3. `.sv 628xxx|Wily` — nomor + nama depan custom
+4. `.sv 628xxx|Wily|Deno` — nomor + nama depan + nama belakang (masuk ke field N: vCard, rapi di phonebook)
+5. Reply pesan seseorang → `.sv` — ambil nomor dari pengirim pesan yang di-reply, nama diambil otomatis dari profil WA (split depan/belakang)
+6. Reply pesan → `.sv Wily|Deno` — nomor dari reply, nama custom override
+7. @mention → `.sv` — ambil nomor dari orang yang di-tag
+8. @mention → `.sv Wily|Deno` — nomor dari mention, nama custom; teks @mention di-strip otomatis sebelum parsing nama sehingga tidak bocor ke field kontak
+9. Tanpa nama → FN tampil sebagai `+628xxx`; dengan nama → vCard menyertakan field `N:Belakang;Depan;;;` + `FN:Depan Belakang` sesuai standar phonebook
+
+> Tap kartu kontak yang muncul → klik *Tambah ke Kontak* → kalau HP sudah sync Google/Gmail, kontak otomatis masuk ke Google Contacts tanpa langkah tambahan
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🔧 *BUG/ERROR FIX*
