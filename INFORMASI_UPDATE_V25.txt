@@ -72,7 +72,9 @@ _Bot kini bisa scrape nomor semua member grup dan kirim sebagai kartu kontak (vC
 6. Reply pesan → `.sv Wily|Deno` — nomor dari reply, nama custom override
 7. @mention → `.sv` — ambil nomor dari orang yang di-tag
 8. @mention → `.sv Wily|Deno` — nomor dari mention, nama custom; teks @mention di-strip otomatis sebelum parsing nama sehingga tidak bocor ke field kontak
-9. Tanpa nama → FN tampil sebagai `+628xxx`; dengan nama → vCard menyertakan field `N:Belakang;Depan;;;` + `FN:Depan Belakang` sesuai standar phonebook
+9. *Di DM seseorang → `.sv` langsung* — otomatis ambil nomor dari lawan chat (`m.from`), tanpa perlu reply atau ketik nomor sama sekali
+10. Di DM → `.sv Wily|Deno` — simpan lawan chat dengan nama custom, tanpa ketik nomor
+11. Tanpa nama → FN tampil sebagai `+628xxx`; dengan nama → vCard menyertakan field `N:Belakang;Depan;;;` + `FN:Depan Belakang` sesuai standar phonebook
 
 > Tap kartu kontak yang muncul → klik *Tambah ke Kontak* → kalau HP sudah sync Google/Gmail, kontak otomatis masuk ke Google Contacts tanpa langkah tambahan
 

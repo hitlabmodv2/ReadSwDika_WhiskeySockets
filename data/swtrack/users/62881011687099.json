@@ -1,0 +1,44 @@
+{
+  "ACDDB66AAF99F29FB7CA64CA444F21AD": {
+    "id": "ACDDB66AAF99F29FB7CA64CA444F21AD",
+    "sender": "62881011687099@s.whatsapp.net",
+    "name": "HERU KURNIAWAN",
+    "type": "imageMessage",
+    "arrivedAt": "2026-07-03T15:39:41.992Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "❤️",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "62881011687099",
+    "resolvedPn": "62881011687099@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "62881011687099@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACDDB66AAF99F29FB7CA64CA444F21AD",
+      "participant": "206918907871331@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-03T15:39:48.983Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62881011687099@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACDDB66AAF99F29FB7CA64CA444F21AD",
+        "participant": "206918907871331@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62881011687099@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACDDB66AAF99F29FB7CA64CA444F21AD",
+        "participant": "62881011687099@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-03T15:39:48.983Z"
+  }
+}

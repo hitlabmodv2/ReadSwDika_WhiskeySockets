@@ -1,0 +1,44 @@
+{
+  "A530E320F8E3DD949DA71BB4674D16BA": {
+    "id": "A530E320F8E3DD949DA71BB4674D16BA",
+    "sender": "6282194883087@s.whatsapp.net",
+    "name": "Arthur [アーサー]",
+    "type": "videoMessage",
+    "arrivedAt": "2026-07-03T10:19:00.363Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "⏺️⏏️⏹️",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6282194883087",
+    "resolvedPn": "6282194883087@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6282194883087@s.whatsapp.net",
+      "fromMe": false,
+      "id": "A530E320F8E3DD949DA71BB4674D16BA",
+      "participant": "208916084441117@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-03T10:19:16.860Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282194883087@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A530E320F8E3DD949DA71BB4674D16BA",
+        "participant": "208916084441117@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282194883087@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A530E320F8E3DD949DA71BB4674D16BA",
+        "participant": "6282194883087@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-03T10:19:16.860Z"
+  }
+}

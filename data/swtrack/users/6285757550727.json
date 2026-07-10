@@ -1,0 +1,46 @@
+{
+  "AC0F0B015F0B6F654F2F32C8D771B84D": {
+    "id": "AC0F0B015F0B6F654F2F32C8D771B84D",
+    "sender": "6285757550727@s.whatsapp.net",
+    "name": "Callie",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-26T15:15:41.501Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "5️⃣➕3️⃣🟰8️⃣",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285757550727",
+    "resolvedPn": "6285757550727@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285757550727@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC0F0B015F0B6F654F2F32C8D771B84D",
+      "participant": "172262816804884@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-26T15:16:14.989Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285757550727@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC0F0B015F0B6F654F2F32C8D771B84D",
+        "participant": "172262816804884@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285757550727@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC0F0B015F0B6F654F2F32C8D771B84D",
+        "participant": "6285757550727@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-26T15:16:00.089Z",
+    "deleted": true,
+    "deletedAt": "2026-06-26T15:16:14.989Z"
+  }
+}

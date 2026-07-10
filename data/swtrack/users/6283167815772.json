@@ -1,0 +1,71 @@
+{
+  "AC3D78AFDC4D652F6C0587A8757D4FEA": {
+    "id": "AC3D78AFDC4D652F6C0587A8757D4FEA",
+    "sender": "6283167815772@s.whatsapp.net",
+    "name": "Døwn Fâll",
+    "type": "videoMessage",
+    "arrivedAt": "2026-07-03T06:39:17.398Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6283167815772",
+    "resolvedPn": "6283167815772@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6283167815772@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC3D78AFDC4D652F6C0587A8757D4FEA",
+      "participant": "127543868977315@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-03T06:39:19.694Z",
+    "deleted": true,
+    "deletedAt": "2026-07-03T06:39:19.694Z"
+  },
+  "AC709161A48814BADEF43915AB5EE273": {
+    "id": "AC709161A48814BADEF43915AB5EE273",
+    "sender": "6283167815772@s.whatsapp.net",
+    "name": "Døwn Fâll",
+    "type": "videoMessage",
+    "arrivedAt": "2026-07-04T06:01:02.830Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "❤️",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6283167815772",
+    "resolvedPn": "6283167815772@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6283167815772@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC709161A48814BADEF43915AB5EE273",
+      "participant": "127543868977315@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-04T06:02:41.195Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283167815772@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC709161A48814BADEF43915AB5EE273",
+        "participant": "127543868977315@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283167815772@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC709161A48814BADEF43915AB5EE273",
+        "participant": "6283167815772@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-04T06:01:12.963Z",
+    "deleted": true,
+    "deletedAt": "2026-07-04T06:02:41.195Z"
+  }
+}

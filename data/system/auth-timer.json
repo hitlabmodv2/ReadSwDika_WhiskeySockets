@@ -1,0 +1,144 @@
+{
+  "events": [
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-10T13:43:03.257Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-10T11:00:05.389Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-10T09:52:54.956Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-09T14:23:09.436Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-09T08:31:15.097Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-09T08:17:39.378Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-09T08:11:05.752Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-09T08:04:28.498Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-09T07:54:49.810Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-09T07:51:09.463Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-09T07:33:31.180Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-09T07:32:33.246Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-09T07:32:28.148Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-09T07:32:22.108Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-09T07:32:15.577Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-09T07:32:13.647Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-09T07:30:54.763Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-09T07:22:43.914Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-09T07:08:32.822Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-09T06:31:03.135Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-09T06:29:48.576Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-09T06:17:34.588Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-09T06:15:39.352Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-09T06:09:58.492Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-09T06:09:29.435Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-09T06:00:20.825Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-09T05:59:48.491Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-09T05:57:45.479Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-09T05:57:33.173Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-09T05:38:21.330Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-09T05:25:21.332Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-09T05:11:04.586Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-09T05:00:34.121Z"
+    },
+    {
+      "type": "qr_session_start",
+      "startAt": "2026-07-09T05:00:08.827Z",
+      "expireAt": "2026-07-09T05:03:08.827Z",
+      "durationSeconds": 180
+    }
+  ],
+  "lastUpdated": "2026-07-10T13:43:03.311Z",
+  "sessionStart": "2026-07-09T05:00:08.854Z"
+}

@@ -519,7 +519,27 @@ async function handleSv({ hisoka, m, query, tolak, logCommand }) {
                         }
                 }
         }
-        // ── Mode D: Tidak ada apa-apa → tampilkan bantuan ─────────────
+        // ── Mode D: Chat pribadi (DM) tanpa nomor/reply/mention ──────
+        // Otomatis ambil nomor dari lawan chat (m.from) — tidak perlu apa-apa
+        else if (!m.isGroup && m.from && m.from.endsWith('@s.whatsapp.net')) {
+                targetNomor = resolveJidToNumber(m.from);
+                if (!targetNomor) {
+                        return tolak(hisoka, m,
+                                `❌ *Gagal resolve nomor dari chat ini.*\n\n` +
+                                `Coba ketik nomornya langsung:\n` +
+                                `\`${pref}sv 6281234567890\``
+                        );
+                }
+                // Nama dari query kalau ada (misal: .sv Wily|Deno di DM)
+                // Kalau tidak ada → pakai nama WA lawan chat (pushName dari m.pushName peer)
+                if (queryNamaDepan) {
+                        targetNamaDepan    = queryNamaDepan;
+                        targetNamaBelakang = queryNamaBelakang;
+                }
+                // Tidak ada nama dari query → biarkan null, FN akan jadi +nomor
+                // (pushName lawan chat tidak selalu tersedia di m, aman tanpa nama)
+        }
+        // ── Mode E: Tidak ada apa-apa & bukan DM → tampilkan bantuan ──
         else {
                 return m.reply(
                         `📇 *Simpan Kontak (SV)*\n\n` +
@@ -529,7 +549,9 @@ async function handleSv({ hisoka, m, query, tolak, logCommand }) {
                         `• \`${pref}sv 08xxx\` — otomatis konversi ke 628...\n` +
                         `• \`${pref}sv 628xxx|Wily\` — nomor + nama depan\n` +
                         `• \`${pref}sv 628xxx|Wily|Deno\` — nomor + nama depan + belakang\n` +
-                        `• Reply pesan → \`${pref}sv\` — simpan pengirim\n` +
+                        `• Di DM seseorang → \`${pref}sv\` — langsung simpan lawan chat\n` +
+                        `• Di DM → \`${pref}sv Wily|Deno\` — simpan lawan chat dengan nama custom\n` +
+                        `• Reply pesan → \`${pref}sv\` — simpan pengirim pesan itu\n` +
                         `• Reply pesan → \`${pref}sv Wily|Deno\` — simpan dengan nama custom\n` +
                         `• @mention → \`${pref}sv Wily|Deno\` — simpan orang yang ditag\n\n` +
                         `📌 *Scrape semua kontak GC:*\n` +

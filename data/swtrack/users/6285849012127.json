@@ -1,0 +1,44 @@
+{
+  "ACD9499CC2E6E9ED5FAC97EBCE76EE0E": {
+    "id": "ACD9499CC2E6E9ED5FAC97EBCE76EE0E",
+    "sender": "6285849012127@s.whatsapp.net",
+    "name": "Zaen",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-29T03:43:26.088Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🎃",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285849012127",
+    "resolvedPn": "6285849012127@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285849012127@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACD9499CC2E6E9ED5FAC97EBCE76EE0E",
+      "participant": "133848394391686@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-29T03:43:39.529Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285849012127@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACD9499CC2E6E9ED5FAC97EBCE76EE0E",
+        "participant": "133848394391686@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285849012127@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACD9499CC2E6E9ED5FAC97EBCE76EE0E",
+        "participant": "6285849012127@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-29T03:43:39.529Z"
+  }
+}
