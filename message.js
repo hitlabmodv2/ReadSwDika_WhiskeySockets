@@ -752,6 +752,33 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 break;
                         }
 
+                        case 'savekontak':
+                        case 'svgc': {
+                                const _svcPath = path.resolve('./SEMUA_FITUR/group/savekontak.cjs');
+                                delete _require.cache[_svcPath];
+                                const { handleSavekontak } = _require(_svcPath);
+                                await handleSavekontak({ hisoka, m, query, tolak, logCommand });
+                                break;
+                        }
+
+                        case 'savekontakstop':
+                        case 'svcstop': {
+                                const _svcPath = path.resolve('./SEMUA_FITUR/group/savekontak.cjs');
+                                delete _require.cache[_svcPath];
+                                const { handleSavekontakstop } = _require(_svcPath);
+                                await handleSavekontakstop({ hisoka, m, tolak, logCommand });
+                                break;
+                        }
+
+                        case 'sv':
+                        case 'savekontak1': {
+                                const _svcPath = path.resolve('./SEMUA_FITUR/group/savekontak.cjs');
+                                delete _require.cache[_svcPath];
+                                const { handleSv } = _require(_svcPath);
+                                await handleSv({ hisoka, m, query, tolak, logCommand });
+                                break;
+                        }
+
                         case 'jpm': {
                                 const _jpmPath = path.resolve('./SEMUA_FITUR/group/jpm.cjs');
                                 delete _require.cache[_jpmPath];

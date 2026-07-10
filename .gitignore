@@ -24,14 +24,11 @@ zipFile.zip
 *.pdf
 
 
-# Sessions — single-file format (.json) di-upload, folder lama di-exclude
-sessions/**
-!sessions/
-!sessions/*.json
+# Sessions — auth credentials, jangan pernah di-commit
+sessions/
 
-# Jadibot — upload seluruh isi folder (termasuk consolidated session)
-!jadibot/
-!jadibot/**
+# Jadibot runtime data — jangan di-commit
+data_jadibot/
 
 .token
 .token.secret
