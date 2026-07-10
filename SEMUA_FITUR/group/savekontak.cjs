@@ -78,18 +78,36 @@ function resolveJidToNumber(jid) {
 
 /**
  * Buat format vCard v3.0 yang kompatibel dengan WhatsApp.
- * @param {string} nomor   — nomor tanpa + (contoh: "628123456789")
- * @param {string|null} nama — nama tampilan (boleh null)
+ * @param {string} nomor          — nomor tanpa + (contoh: "628123456789")
+ * @param {string|null} namaDepan — nama depan (boleh null)
+ * @param {string|null} namaBelakang — nama belakang (boleh null)
+ *
+ * Format vCard:
+ *   N:NamaBelakang;NamaDepan;;;   ← untuk phonebook (sorting by last name)
+ *   FN:NamaDepan NamaBelakang     ← nama tampilan penuh
  */
-function buildVCard(nomor, nama) {
-        const displayName = (nama && nama.trim()) ? nama.trim() : ('+' + nomor);
-        return [
-                'BEGIN:VCARD',
-                'VERSION:3.0',
-                `FN:${displayName}`,
-                `TEL;type=CELL;type=VOICE;waid=${nomor}:+${nomor}`,
-                'END:VCARD'
-        ].join('\n');
+function buildVCard(nomor, namaDepan, namaBelakang) {
+        const dep  = (namaDepan   && namaDepan.trim())   ? namaDepan.trim()   : null;
+        const bel  = (namaBelakang && namaBelakang.trim()) ? namaBelakang.trim() : null;
+
+        let displayName, nField;
+        if (dep && bel) {
+                displayName = `${dep} ${bel}`;
+                nField      = `N:${bel};${dep};;;`;
+        } else if (dep) {
+                displayName = dep;
+                nField      = `N:;${dep};;;`;
+        } else {
+                displayName = '+' + nomor;
+                nField      = null;
+        }
+
+        const lines = ['BEGIN:VCARD', 'VERSION:3.0'];
+        if (nField) lines.push(nField);
+        lines.push(`FN:${displayName}`);
+        lines.push(`TEL;type=CELL;type=VOICE;waid=${nomor}:+${nomor}`);
+        lines.push('END:VCARD');
+        return lines.join('\n');
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -130,7 +148,8 @@ async function getMemberNumbers(hisoka, gid) {
  */
 async function kirimBatchKontak(hisoka, tujuan, batch) {
         const contacts = batch.map(({ nomor, nama }) => ({
-                vcard: buildVCard(nomor, nama)
+                // nama dari member GC → taruh sebagai namaDepan saja (tidak ada last name)
+                vcard: buildVCard(nomor, nama, null)
         }));
 
         const displayName = contacts.length === 1
@@ -349,19 +368,52 @@ async function handleSavekontakstop({ hisoka, m, tolak, logCommand }) {
  * Kirim vCard 1 kontak ke chat saat ini.
  *
  * Mode penggunaan:
- *   .sv 6281234567890     — nomor langsung (format internasional)
- *   .sv 081234567890      — otomatis konversi 08xx → 628xx
- *   [reply pesan] .sv     — ambil nomor pengirim pesan yang di-reply
+ *   .sv 6281234567890            — nomor langsung
+ *   .sv 081234567890             — otomatis konversi 08xx → 628xx
+ *   .sv 6281234567890|Wily       — nomor + nama depan
+ *   .sv 6281234567890|Wily|Deno  — nomor + nama depan + nama belakang
+ *   [reply] .sv                  — ambil nomor dari pesan yang di-reply
+ *   [reply] .sv Wily|Deno        — reply + nama custom (depan|belakang)
+ *   [@mention] .sv               — ambil nomor dari tag mention
+ *   [@mention] .sv Wily|Deno     — mention + nama custom
  *
  * Tap kontak yang muncul → klik "Tambah ke Kontak" untuk simpan ke HP.
  */
 async function handleSv({ hisoka, m, query, tolak, logCommand }) {
         const pref = m.prefix || '.';
 
-        let targetNomor = null;
-        let targetNama  = null;
+        let targetNomor     = null;
+        let targetNamaDepan = null;
+        let targetNamaBelakang = null;
 
-        // ── Kumpulkan mentionedJid dari semua kemungkinan field ────────────
+        // ══════════════════════════════════════════════════════════════════
+        //  LANGKAH 1: Parse query untuk pisah nomor vs nama (via | )
+        // ══════════════════════════════════════════════════════════════════
+        let queryNomor        = null; // bagian nomor dari query (jika ada)
+        let queryNamaDepan    = null;
+        let queryNamaBelakang = null;
+
+        if (query && query.trim()) {
+                const parts = query.trim().split('|').map(s => s.trim()).filter(Boolean);
+                const firstClean = parts[0].replace(/[\s\-\+\(\)\.]/g, '');
+
+                if (/^\d+$/.test(firstClean)) {
+                        // Format: .sv 628xxx  ATAU  .sv 628xxx|NamaDepan  ATAU  .sv 628xxx|Dep|Bel
+                        queryNomor        = firstClean;
+                        queryNamaDepan    = parts[1] || null;
+                        queryNamaBelakang = parts[2] || null;
+                } else {
+                        // Format: .sv NamaDepan|NamaBelakang  (dipakai bareng reply/mention)
+                        queryNamaDepan    = parts[0] || null;
+                        queryNamaBelakang = parts[1] || null;
+                }
+        }
+
+        // ══════════════════════════════════════════════════════════════════
+        //  LANGKAH 2: Tentukan sumber nomor
+        // ══════════════════════════════════════════════════════════════════
+
+        // ── Kumpulkan mentionedJid ─────────────────────────────────────
         const mentionedJids = [
                 ...(Array.isArray(m.mentions) ? m.mentions : []),
                 ...(m.message?.extendedTextMessage?.contextInfo?.mentionedJid || []),
@@ -370,10 +422,33 @@ async function handleSv({ hisoka, m, query, tolak, logCommand }) {
                 ...(m.content?.contextInfo?.mentionedJid || []),
         ].filter(Boolean);
 
-        // ── Mode 0: Ada mention (@tag seseorang) → ambil nomor orang itu ──
-        if (mentionedJids.length > 0) {
-                // Ambil mention pertama yang bukan bot sendiri
-                const botNum = (hisoka.user?.id || '').split(':')[0].split('@')[0];
+        // ── Mode A: Query punya nomor → pakai nomor dari query ────────
+        if (queryNomor) {
+                let raw = queryNomor;
+
+                // Konversi format lokal → internasional
+                if (raw.startsWith('0'))                                        raw = '62' + raw.slice(1);
+                else if (!raw.startsWith('62') && !raw.startsWith('1') && raw.length <= 12) raw = '62' + raw;
+
+                // Validasi panjang
+                if (raw.length < 7 || raw.length > 15) {
+                        return tolak(hisoka, m,
+                                `❌ *Panjang nomor tidak valid!* (${raw.length} digit)\n\n` +
+                                `Nomor WA yang valid biasanya 10–13 digit.\n\n` +
+                                `📌 *Contoh format:*\n` +
+                                `• \`${pref}sv 6281234567890\`\n` +
+                                `• \`${pref}sv 081234567890\`\n` +
+                                `• \`${pref}sv 628xxx|NamaDepan|NamaBelakang\``
+                        );
+                }
+
+                targetNomor        = raw;
+                targetNamaDepan    = queryNamaDepan;
+                targetNamaBelakang = queryNamaBelakang;
+        }
+        // ── Mode B: Ada mention → ambil nomor dari mention ────────────
+        else if (mentionedJids.length > 0) {
+                const botNum   = (hisoka.user?.id || '').split(':')[0].split('@')[0];
                 const targetJid = mentionedJids.find(jid => {
                         const n = resolveJidToNumber(jid);
                         return n && n !== botNum;
@@ -392,10 +467,12 @@ async function handleSv({ hisoka, m, query, tolak, logCommand }) {
                         `Coba ketik nomornya langsung:\n` +
                         `\`${pref}sv 6281234567890\``
                 );
-                // Coba ambil nama dari userDb jika tersedia
-                targetNama = null;
+
+                // Nama dari query (jika ada) override nama default
+                targetNamaDepan    = queryNamaDepan;
+                targetNamaBelakang = queryNamaBelakang;
         }
-        // ── Mode 1: Reply pesan → ambil sender ────────────────────────────
+        // ── Mode C: Ada reply → ambil nomor dari pengirim quoted ──────
         else if (m.isQuoted && m.quoted) {
                 const qJid = m.quoted.sender
                         || m.quoted.key?.participant
@@ -403,8 +480,6 @@ async function handleSv({ hisoka, m, query, tolak, logCommand }) {
                         || '';
 
                 targetNomor = resolveJidToNumber(qJid);
-                targetNama  = m.quoted.pushName || null;
-
                 if (!targetNomor) {
                         return tolak(hisoka, m,
                                 `❌ *Tidak bisa resolve nomor dari pesan yang di-reply.*\n\n` +
@@ -415,64 +490,56 @@ async function handleSv({ hisoka, m, query, tolak, logCommand }) {
                                 `\`${pref}sv 6281234567890\``
                         );
                 }
+
+                // Kalau user kasih nama custom via query → pakai itu
+                // Kalau tidak → pakai nama WA pengirim (pushName)
+                if (queryNamaDepan) {
+                        targetNamaDepan    = queryNamaDepan;
+                        targetNamaBelakang = queryNamaBelakang;
+                } else {
+                        // Split pushName jadi depan & belakang otomatis (pisah spasi pertama)
+                        const pushName = m.quoted.pushName || null;
+                        if (pushName) {
+                                const spaceIdx = pushName.indexOf(' ');
+                                if (spaceIdx > -1) {
+                                        targetNamaDepan    = pushName.slice(0, spaceIdx).trim();
+                                        targetNamaBelakang = pushName.slice(spaceIdx + 1).trim() || null;
+                                } else {
+                                        targetNamaDepan = pushName;
+                                }
+                        }
+                }
         }
-        // ── Mode 2: Ada query → nomor langsung ────────────────────────────
-        else if (query && query.trim()) {
-                // Bersihkan: hapus spasi, tanda baca, dll — ambil digit saja
-                let raw = query.trim().replace(/[\s\-\+\(\)\.]/g, '');
-
-                // Validasi: hanya digit
-                if (!/^\d+$/.test(raw)) {
-                        return tolak(hisoka, m,
-                                `❌ *Nomor tidak valid!*\n\n` +
-                                `Masukkan hanya angka, contoh:\n` +
-                                `\`${pref}sv 6281234567890\`\n` +
-                                `\`${pref}sv 081234567890\``
-                        );
-                }
-
-                // Konversi 08xxx → 628xxx
-                if (raw.startsWith('0')) raw = '62' + raw.slice(1);
-                // Konversi 8xxx (tanpa 0 depan, tapi bukan 62) → 628xxx
-                else if (!raw.startsWith('62') && !raw.startsWith('1') && raw.length <= 12) {
-                        raw = '62' + raw;
-                }
-
-                // Validasi panjang nomor WA: 7–15 digit (termasuk kode negara)
-                if (raw.length < 7 || raw.length > 15) {
-                        return tolak(hisoka, m,
-                                `❌ *Panjang nomor tidak valid!* (${raw.length} digit)\n\n` +
-                                `Nomor WA yang valid biasanya 10–13 digit.\n\n` +
-                                `📌 *Contoh format:*\n` +
-                                `• \`${pref}sv 6281234567890\` (format internasional)\n` +
-                                `• \`${pref}sv 081234567890\` (otomatis konversi)\n\n` +
-                                `📌 *Atau reply pesan seseorang:*\n` +
-                                `_Reply pesan → ketik \`${pref}sv\`_`
-                        );
-                }
-
-                targetNomor = raw;
-        }
-        // ── Mode 3: Tidak ada query & tidak reply → tampilkan bantuan ─────
+        // ── Mode D: Tidak ada apa-apa → tampilkan bantuan ─────────────
         else {
                 return m.reply(
                         `📇 *Simpan Kontak (SV)*\n\n` +
                         `Kirim vCard kontak WhatsApp ke chat ini agar bisa langsung disimpan ke phonebook HP.\n\n` +
                         `📌 *Cara pakai:*\n` +
-                        `• \`${pref}sv 6281234567890\` — simpan dari nomor langsung\n` +
-                        `• \`${pref}sv 081234567890\` — otomatis konversi ke 628...\n` +
-                        `• Reply pesan seseorang → \`${pref}sv\` — simpan pengirim pesan itu\n\n` +
+                        `• \`${pref}sv 628xxx\` — simpan nomor langsung\n` +
+                        `• \`${pref}sv 08xxx\` — otomatis konversi ke 628...\n` +
+                        `• \`${pref}sv 628xxx|Wily\` — nomor + nama depan\n` +
+                        `• \`${pref}sv 628xxx|Wily|Deno\` — nomor + nama depan + belakang\n` +
+                        `• Reply pesan → \`${pref}sv\` — simpan pengirim\n` +
+                        `• Reply pesan → \`${pref}sv Wily|Deno\` — simpan dengan nama custom\n` +
+                        `• @mention → \`${pref}sv Wily|Deno\` — simpan orang yang ditag\n\n` +
                         `📌 *Scrape semua kontak GC:*\n` +
                         `• \`${pref}savekontak\` — scrape semua member grup, kirim ke DM kamu\n\n` +
-                        `💡 *Cara simpan kontak:*\n` +
+                        `💡 *Cara simpan ke HP:*\n` +
                         `_Tap kartu kontak yang muncul → klik_ *Tambah ke Kontak* 📲`
                 );
         }
 
-        // ── Kirim vCard ────────────────────────────────────────────────────
+        // ══════════════════════════════════════════════════════════════════
+        //  LANGKAH 3: Kirim vCard
+        // ══════════════════════════════════════════════════════════════════
         try {
-                const vcard       = buildVCard(targetNomor, targetNama);
-                const displayName = targetNama || ('+' + targetNomor);
+                const vcard = buildVCard(targetNomor, targetNamaDepan, targetNamaBelakang);
+
+                // Nama tampilan untuk header pesan WhatsApp
+                const displayName = targetNamaDepan
+                        ? (targetNamaBelakang ? `${targetNamaDepan} ${targetNamaBelakang}` : targetNamaDepan)
+                        : ('+' + targetNomor);
 
                 await hisoka.sendMessage(m.from, {
                         contacts: {
@@ -481,15 +548,22 @@ async function handleSv({ hisoka, m, query, tolak, logCommand }) {
                         }
                 });
 
+                // Konfirmasi dengan detail nama
+                let namaInfo = `👤 *Nama :* ${displayName}`;
+                if (targetNamaDepan && targetNamaBelakang) {
+                        namaInfo = `👤 *Nama Depan :* ${targetNamaDepan}\n` +
+                                   `👤 *Nama Belakang :* ${targetNamaBelakang}`;
+                }
+
                 await m.reply(
                         `✅ *Kontak berhasil dikirim!*\n\n` +
-                        `👤 *Nama :* ${displayName}\n` +
+                        `${namaInfo}\n` +
                         `📞 *Nomor :* +${targetNomor}\n\n` +
                         `_Tap kartu kontak di atas → klik_ *Tambah ke Kontak* _untuk menyimpan ke HP_ 📲`
                 );
 
         } catch (err) {
-                // ── Error handler detail ───────────────────────────────────
+                // ── Error handler detail ───────────────────────────────
                 let errMsg = `❌ *Gagal mengirim kontak!*\n\n`;
 
                 if (err?.message?.includes('400') || err?.message?.includes('Bad Request')) {
