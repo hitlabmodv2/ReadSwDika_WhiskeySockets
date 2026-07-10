@@ -394,19 +394,28 @@ async function handleSv({ hisoka, m, query, tolak, logCommand }) {
         let queryNamaBelakang = null;
 
         if (query && query.trim()) {
-                const parts = query.trim().split('|').map(s => s.trim()).filter(Boolean);
-                const firstClean = parts[0].replace(/[\s\-\+\(\)\.]/g, '');
+                // Strip token @mention (teks "@xxx") dari query agar tidak masuk ke nama
+                // Contoh: ".sv @Wily Wily|Deno" → cleanQuery = "Wily|Deno"
+                const cleanQuery = query.trim().replace(/@\S+/g, '').trim();
 
-                if (/^\d+$/.test(firstClean)) {
-                        // Format: .sv 628xxx  ATAU  .sv 628xxx|NamaDepan  ATAU  .sv 628xxx|Dep|Bel
-                        queryNomor        = firstClean;
-                        queryNamaDepan    = parts[1] || null;
-                        queryNamaBelakang = parts[2] || null;
-                } else {
-                        // Format: .sv NamaDepan|NamaBelakang  (dipakai bareng reply/mention)
-                        queryNamaDepan    = parts[0] || null;
-                        queryNamaBelakang = parts[1] || null;
+                const parts = cleanQuery.split('|').map(s => s.trim()).filter(Boolean);
+
+                if (parts.length > 0) {
+                        const firstClean = parts[0].replace(/[\s\-\+\(\)\.]/g, '');
+
+                        if (/^\d+$/.test(firstClean)) {
+                                // Format: .sv 628xxx  /  .sv 628xxx|NamaDepan  /  .sv 628xxx|Dep|Bel
+                                queryNomor        = firstClean;
+                                queryNamaDepan    = parts[1] || null;
+                                queryNamaBelakang = parts[2] || null;
+                        } else {
+                                // Format: .sv Wily  /  .sv Wily|Deno  (dipakai bareng reply/mention)
+                                queryNamaDepan    = parts[0] || null;
+                                queryNamaBelakang = parts[1] || null;
+                        }
                 }
+                // Kalau parts kosong (query hanya @mention) → semua tetap null,
+                // nomor akan diambil dari mentionedJids di Mode B
         }
 
         // ══════════════════════════════════════════════════════════════════
