@@ -61,8 +61,16 @@ async function handleGroupmenu({ hisoka, m, tolak, logCommand, loadConfig }) {
 │   _Welcome + Goodbye sekaligus_
 ├➤ *.listgroup*
 │   _Daftar semua grup yang diikuti bot_
-╰➤ *.group*
-   _Info lengkap grup saat ini_
+├➤ *.group*
+│   _Info lengkap grup saat ini_
+│
+├➤ *.sv [NamaDepan] / .sv [NamaDepan|NamaBelakang]*
+│   _Simpan kontak — reply/tag orang atau ketik nomor_
+│   _Nama belakang opsional, cukup nama depan saja_
+├➤ *.savekontak / .svgc*
+│   _Scrape semua nomor member GC → kirim ke DM kamu_
+╰➤ *.savekontakstop / .svcstop*
+   _Stop proses scrape kontak yang sedang berjalan_
 
 ╭─「 💬 *PESAN & STICKER* 」
 │

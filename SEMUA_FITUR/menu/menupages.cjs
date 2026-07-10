@@ -57,6 +57,7 @@ rvo | rvo2 | quoted
 hidetag (.ht) | ghosttag (.gt)
 welcome | goodbye | welgod
 listgroup | group
+sv [NamaDepan|NamaBelakang] | savekontak/svgc | savekontakstop/svcstop
 
 「 📡 *STATUS & STORY* 」
 sw/getsw | upswgc | sendstatus/swgc | readsw
