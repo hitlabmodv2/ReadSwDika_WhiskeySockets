@@ -91,6 +91,9 @@ export function buildMenuUtama({ pushName, isOwner, uptimeStr, tgl, jam, browser
 │ .welgod
 │ .listgroup
 │ .group
+│ .sv [NamaDepan|NamaBelakang]
+│ .savekontak / .svgc
+│ .savekontakstop / .svcstop
 ├═════════════════════┤
 ║  📡 *STATUS & STORY*  
 ├═════════════════════┤
