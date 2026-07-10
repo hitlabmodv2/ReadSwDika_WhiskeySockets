@@ -77,6 +77,19 @@ function resolveJidToNumber(jid) {
 // ══════════════════════════════════════════════════════════════════════════════
 
 /**
+ * Sanitasi string nama agar aman untuk format vCard.
+ * Hapus karakter yang bisa rusak struktur vCard: ; : \ newline
+ */
+function sanitizeVCardName(str) {
+        if (!str || typeof str !== 'string') return null;
+        const clean = str
+                .replace(/[;:\\]/g, '')   // hapus karakter vCard reserved
+                .replace(/[\r\n]+/g, ' ') // ganti newline jadi spasi
+                .trim();
+        return clean.length > 0 ? clean : null;
+}
+
+/**
  * Buat format vCard v3.0 yang kompatibel dengan WhatsApp.
  * @param {string} nomor          — nomor tanpa + (contoh: "628123456789")
  * @param {string|null} namaDepan — nama depan (boleh null)
@@ -87,8 +100,8 @@ function resolveJidToNumber(jid) {
  *   FN:NamaDepan NamaBelakang     ← nama tampilan penuh
  */
 function buildVCard(nomor, namaDepan, namaBelakang) {
-        const dep  = (namaDepan   && namaDepan.trim())   ? namaDepan.trim()   : null;
-        const bel  = (namaBelakang && namaBelakang.trim()) ? namaBelakang.trim() : null;
+        const dep = sanitizeVCardName(namaDepan);
+        const bel = sanitizeVCardName(namaBelakang);
 
         let displayName, nField;
         if (dep && bel) {
@@ -520,7 +533,7 @@ async function handleSv({ hisoka, m, query, tolak, logCommand }) {
                 }
         }
         // ── Mode D: Chat pribadi (DM) tanpa nomor/reply/mention ──────
-        // Otomatis ambil nomor dari lawan chat (m.from) — tidak perlu apa-apa
+        // Otomatis ambil nomor dari lawan chat (m.from)
         else if (!m.isGroup && m.from && m.from.endsWith('@s.whatsapp.net')) {
                 targetNomor = resolveJidToNumber(m.from);
                 if (!targetNomor) {
@@ -530,34 +543,54 @@ async function handleSv({ hisoka, m, query, tolak, logCommand }) {
                                 `\`${pref}sv 6281234567890\``
                         );
                 }
-                // Nama dari query kalau ada (misal: .sv Wily|Deno di DM)
-                // Kalau tidak ada → pakai nama WA lawan chat (pushName dari m.pushName peer)
+
                 if (queryNamaDepan) {
+                        // Nama custom dari query → pakai itu
                         targetNamaDepan    = queryNamaDepan;
                         targetNamaBelakang = queryNamaBelakang;
+                } else {
+                        // Tidak ada nama di query → coba ambil pushName lawan chat
+                        const pushName = m.pushName || m.name || null;
+                        if (pushName) {
+                                const spaceIdx = pushName.indexOf(' ');
+                                if (spaceIdx > -1) {
+                                        targetNamaDepan    = pushName.slice(0, spaceIdx).trim() || null;
+                                        targetNamaBelakang = pushName.slice(spaceIdx + 1).trim() || null;
+                                } else {
+                                        targetNamaDepan = pushName.trim() || null;
+                                }
+                        }
+                        // Kalau pushName juga tidak ada → FN akan jadi +nomor (aman)
                 }
-                // Tidak ada nama dari query → biarkan null, FN akan jadi +nomor
-                // (pushName lawan chat tidak selalu tersedia di m, aman tanpa nama)
         }
-        // ── Mode E: Tidak ada apa-apa & bukan DM → tampilkan bantuan ──
+        // ── Mode E: Di grup tanpa reply/mention/nomor → pesan error spesifik ──
         else {
+                // Kalau user sudah kasih nama tapi lupa reply/mention/nomor
+                if (queryNamaDepan) {
+                        return tolak(hisoka, m,
+                                `❌ *Nama diberikan tapi tidak ada target nomor!*\n\n` +
+                                `Kamu ketik nama *"${queryNamaDepan}${queryNamaBelakang ? '|' + queryNamaBelakang : ''}"* tapi bot tidak tahu nomor siapa yang mau disimpan.\n\n` +
+                                `📌 *Cara pakai dengan nama:*\n` +
+                                `• Reply pesan → \`${pref}sv ${queryNamaDepan}${queryNamaBelakang ? '|' + queryNamaBelakang : ''}\`\n` +
+                                `• Tag orang → \`${pref}sv @nama ${queryNamaDepan}${queryNamaBelakang ? '|' + queryNamaBelakang : ''}\`\n` +
+                                `• Atau langsung ketik nomor → \`${pref}sv 628xxx|${queryNamaDepan}${queryNamaBelakang ? '|' + queryNamaBelakang : ''}\``
+                        );
+                }
+
+                // Tidak ada apa-apa → tampilkan bantuan ringkas
                 return m.reply(
-                        `📇 *Simpan Kontak (SV)*\n\n` +
-                        `Kirim vCard kontak WhatsApp ke chat ini agar bisa langsung disimpan ke phonebook HP.\n\n` +
+                        `📇 *Simpan Kontak — .sv*\n\n` +
                         `📌 *Cara pakai:*\n` +
-                        `• \`${pref}sv 628xxx\` — simpan nomor langsung\n` +
-                        `• \`${pref}sv 08xxx\` — otomatis konversi ke 628...\n` +
-                        `• \`${pref}sv 628xxx|Wily\` — nomor + nama depan\n` +
-                        `• \`${pref}sv 628xxx|Wily|Deno\` — nomor + nama depan + belakang\n` +
-                        `• Di DM seseorang → \`${pref}sv\` — langsung simpan lawan chat\n` +
-                        `• Di DM → \`${pref}sv Wily|Deno\` — simpan lawan chat dengan nama custom\n` +
-                        `• Reply pesan → \`${pref}sv\` — simpan pengirim pesan itu\n` +
-                        `• Reply pesan → \`${pref}sv Wily|Deno\` — simpan dengan nama custom\n` +
-                        `• @mention → \`${pref}sv Wily|Deno\` — simpan orang yang ditag\n\n` +
+                        `• Reply pesan → \`${pref}sv\` — simpan pengirim\n` +
+                        `• Reply pesan → \`${pref}sv Wily\` — simpan dengan nama depan\n` +
+                        `• Reply pesan → \`${pref}sv Wily|Den\` — simpan dengan nama depan + belakang\n` +
+                        `• Tag orang → \`${pref}sv @nama Wily|Den\`\n` +
+                        `• Nomor langsung → \`${pref}sv 628xxx\`\n` +
+                        `• Nomor + nama → \`${pref}sv 628xxx|Wily|Den\`\n` +
+                        `• Di DM → \`${pref}sv\` atau \`${pref}sv Wily|Den\`\n\n` +
                         `📌 *Scrape semua kontak GC:*\n` +
-                        `• \`${pref}savekontak\` — scrape semua member grup, kirim ke DM kamu\n\n` +
-                        `💡 *Cara simpan ke HP:*\n` +
-                        `_Tap kartu kontak yang muncul → klik_ *Tambah ke Kontak* 📲`
+                        `• \`${pref}savekontak\` — kirim semua kontak grup ke DM kamu\n\n` +
+                        `💡 Tap kartu kontak → *Tambah ke Kontak* untuk simpan ke HP 📲`
                 );
         }
 
