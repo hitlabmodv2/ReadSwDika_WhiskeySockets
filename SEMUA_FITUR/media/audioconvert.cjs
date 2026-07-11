@@ -245,29 +245,49 @@ async function buatVideoDariGambarDanAudio(imageBuffer, audioBuffer, audioMime =
     fs.writeFileSync(imgPath, imageBuffer);
     fs.writeFileSync(audioPath, audioBuffer);
 
-    try {
-        await execFileAsync('ffmpeg', [
-            '-y',
-            '-hide_banner',
-            '-loglevel', 'error',
-            '-loop', '1',
-            '-i', imgPath,
-            '-i', audioPath,
-            '-c:v', 'libx264',
-            '-tune', 'stillimage',
-            '-c:a', 'aac',
-            '-b:a', '128k',
-            '-pix_fmt', 'yuv420p',
-            '-vf', 'scale=trunc(iw/2)*2:trunc(ih/2)*2',
-            '-shortest',
-            outPath
-        ], { timeout: 60000 });
+    // Beberapa build ffmpeg (terutama di hosting/Pterodactyl) tidak include
+    // encoder libx264 (butuh build GPL). Coba libx264 dulu, kalau gagal
+    // fallback ke mpeg4 (encoder bawaan ffmpeg, hampir selalu tersedia).
+    const kandidatEncoder = [
+        { videoArgs: ['-c:v', 'libx264', '-tune', 'stillimage', '-pix_fmt', 'yuv420p'], nama: 'libx264' },
+        { videoArgs: ['-c:v', 'mpeg4', '-q:v', '5', '-pix_fmt', 'yuv420p'],             nama: 'mpeg4'   },
+    ];
 
-        if (!fs.existsSync(outPath) || fs.statSync(outPath).size < 512) {
-            throw new Error('Gagal gabungkan gambar + audio jadi video, output kosong.');
+    let lastErr = null;
+
+    try {
+        for (const enc of kandidatEncoder) {
+            try {
+                await execFileAsync('ffmpeg', [
+                    '-y',
+                    '-hide_banner',
+                    '-loglevel', 'error',
+                    '-loop', '1',
+                    '-i', imgPath,
+                    '-i', audioPath,
+                    ...enc.videoArgs,
+                    '-c:a', 'aac',
+                    '-b:a', '128k',
+                    '-vf', 'scale=trunc(iw/2)*2:trunc(ih/2)*2',
+                    '-shortest',
+                    outPath
+                ], { timeout: 60000 });
+
+                if (fs.existsSync(outPath) && fs.statSync(outPath).size >= 512) {
+                    return fs.readFileSync(outPath);
+                }
+                lastErr = new Error(`Encoder ${enc.nama}: output kosong/tidak valid.`);
+            } catch (e) {
+                lastErr = e;
+                const detail = (e?.stderr || e?.message || '').toString().trim();
+                console.error(`[AutoSholat/buatVideo] Encoder ${enc.nama} gagal:`, detail.slice(0, 1000));
+                // coba encoder berikutnya
+            }
         }
 
-        return fs.readFileSync(outPath);
+        // Semua encoder gagal → lempar error dengan detail asli biar kelihatan penyebabnya
+        const detail = (lastErr?.stderr || lastErr?.message || 'unknown error').toString().trim().slice(0, 500);
+        throw new Error(`Gagal gabungkan gambar + audio jadi video (semua encoder gagal). Detail: ${detail}`);
     } finally {
         cleanupFiles(imgPath, audioPath, outPath);
     }
