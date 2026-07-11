@@ -224,7 +224,56 @@ async function toMP3(inputBuffer, inputMime = 'audio/ogg; codecs=opus') {
     }
 }
 
-module.exports = { toVoiceNote, toMP3, generateWaveform };
+/**
+ * Gabungkan 1 gambar statis + 1 audio jadi 1 video (MP4) —
+ * dipakai supaya gambar + suara bisa terkirim sebagai SATU pesan/chat
+ * (bukan 2 pesan terpisah: gambar lalu voice note).
+ * @param {Buffer} imageBuffer - buffer gambar (JPEG/PNG)
+ * @param {Buffer} audioBuffer - buffer audio apapun (mp3, ogg, dll)
+ * @param {string} audioMime   - mimetype audio asli, untuk tentukan ekstensi input
+ * @returns {Promise<Buffer>}  - buffer MP4 (video+audio), durasi = durasi audio
+ */
+async function buatVideoDariGambarDanAudio(imageBuffer, audioBuffer, audioMime = 'audio/mpeg') {
+    const tmpDir = ensureTmpDir();
+    const id = `${Date.now()}_${Math.random().toString(16).slice(2)}`;
+    const audioExt = _AUDIO_EXT_MAP[audioMime?.toLowerCase().trim()] || 'mp3';
+
+    const imgPath   = path.join(tmpDir, `av_img_${id}.jpg`);
+    const audioPath = path.join(tmpDir, `av_aud_${id}.${audioExt}`);
+    const outPath   = path.join(tmpDir, `av_out_${id}.mp4`);
+
+    fs.writeFileSync(imgPath, imageBuffer);
+    fs.writeFileSync(audioPath, audioBuffer);
+
+    try {
+        await execFileAsync('ffmpeg', [
+            '-y',
+            '-hide_banner',
+            '-loglevel', 'error',
+            '-loop', '1',
+            '-i', imgPath,
+            '-i', audioPath,
+            '-c:v', 'libx264',
+            '-tune', 'stillimage',
+            '-c:a', 'aac',
+            '-b:a', '128k',
+            '-pix_fmt', 'yuv420p',
+            '-vf', 'scale=trunc(iw/2)*2:trunc(ih/2)*2',
+            '-shortest',
+            outPath
+        ], { timeout: 60000 });
+
+        if (!fs.existsSync(outPath) || fs.statSync(outPath).size < 512) {
+            throw new Error('Gagal gabungkan gambar + audio jadi video, output kosong.');
+        }
+
+        return fs.readFileSync(outPath);
+    } finally {
+        cleanupFiles(imgPath, audioPath, outPath);
+    }
+}
+
+module.exports = { toVoiceNote, toMP3, generateWaveform, buatVideoDariGambarDanAudio };
 
 // ── HANDLER: tovn ─────────────────────────────────────────────────────────────
 

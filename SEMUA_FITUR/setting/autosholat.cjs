@@ -412,8 +412,14 @@ async function handleAutosholat({ hisoka, m, query, tolak, logCommand, path, loa
                         const _owner0   = Array.isArray(_asCfg.owners) ? (_asCfg.owners[0] || '') : '';
                         const _emoji    = (module.exports.EMOJI_SHOLAT  || {})[hasil.nama] || '🕌';
                         const _ucapan   = (module.exports.UCAPAN_SHOLAT || {})[hasil.nama] || 'Segera tunaikan sholat 🤲';
-                        const imgMsg = await hisoka.sendMessage(m.from, {
-                                image  : hasil.urlGambar,
+
+                        // Gabung gambar + audio adzan jadi 1 video → terkirim sebagai SATU pesan/chat
+                        const { buatVideoDariGambarDanAudio: _asBuatVideo } = require(path.resolve('./SEMUA_FITUR/media/audioconvert.cjs'));
+                        const _asAudRes = await require('axios').get(hasil.urlAudio, { responseType: 'arraybuffer', timeout: 20000 });
+                        const _asVideoBuf = await _asBuatVideo(hasil.urlGambar, Buffer.from(_asAudRes.data), 'audio/mpeg');
+
+                        await hisoka.sendMessage(m.from, {
+                                video  : _asVideoBuf,
                                 caption: hasil.caption,
                                 contextInfo: {
                                         externalAdReply: {
@@ -427,16 +433,6 @@ async function handleAutosholat({ hisoka, m, query, tolak, logCommand, path, loa
                                         },
                                 },
                         }, { quoted: m });
-                        const { toVoiceNote: _asToVN, generateWaveform: _asGenWF } = require(path.resolve('./SEMUA_FITUR/media/audioconvert.cjs'));
-                        const _asAudRes  = await require('axios').get(hasil.urlAudio, { responseType: 'arraybuffer', timeout: 20000 });
-                        const _asVnBuf   = await _asToVN(Buffer.from(_asAudRes.data), 'audio/mpeg');
-                        const _asWaveform = await _asGenWF(_asVnBuf, 'audio/ogg; codecs=opus').catch(() => null);
-                        await hisoka.sendMessage(m.from, {
-                                audio   : _asVnBuf,
-                                ptt     : true,
-                                mimetype: 'audio/ogg; codecs=opus',
-                                ...(_asWaveform ? { waveform: _asWaveform } : {}),
-                        }, { quoted: imgMsg });
                         await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
                         logCommand(m, hisoka, 'autosholat-test');
                 } catch (err) {
