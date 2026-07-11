@@ -658,7 +658,7 @@ async function main() {
                         },
                         browser: getBrowserDevice(loadConfig()),
                         generateHighQualityLinkPreview: true,
-                        syncFullHistory: true,
+                        syncFullHistory: false,
                         connectTimeoutMs: 60000,
                         defaultQueryTimeoutMs: 60000,
                         keepAliveIntervalMs: 25000,
