@@ -52,17 +52,38 @@ print_banner() {
 
 print_banner
 
-# ── Jalankan npm install dengan output ASLI (bukan ticker buatan) ──
+# ── Output asli npm (live) + heartbeat ringan saat npm sedang diam ──
 # Panel Pterodactyl (web terminal via WebSocket) sering tidak mendukung
 # overwrite baris (\r + tput civis/cnorm) seperti terminal biasa — hasilnya
-# teks kepotong/berantakan. Solusi paling aman & tidak spam: biarkan output
-# asli npm install tampil langsung (di-tee ke log juga untuk arsip),
-# jadi progres yang muncul selalu nyata sesuai kecepatan npm, bukan buatan.
+# teks kepotong/berantakan. Jadi:
+#   1. Output ASLI npm install tetap tampil live (via tail -f ke log file)
+#   2. Kalau npm sedang diam lama (fase "resolving deps"), ada heartbeat
+#      tiap 15 detik — cukup jarang jadi tidak spam, tapi tidak "hilang total"
 run_install() {
   local label="$1"; shift
   echo -e "  ${C_CYAN}▶${C_RESET} ${C_DIM}${label}${C_RESET}"
-  "$@" 2>&1 | tee /tmp/wilybot_install.log
-  return "${PIPESTATUS[0]}"
+
+  : > /tmp/wilybot_install.log
+  "$@" > /tmp/wilybot_install.log 2>&1 &
+  local pid=$!
+
+  tail -n 0 -f /tmp/wilybot_install.log &
+  local tail_pid=$!
+
+  local elapsed=0
+  while kill -0 "$pid" 2>/dev/null; do
+    sleep 15
+    elapsed=$((elapsed + 15))
+    kill -0 "$pid" 2>/dev/null && \
+      echo -e "  ${C_CYAN}⏳${C_RESET} ${C_DIM}${label} — masih berjalan (${elapsed}s)...${C_RESET}"
+  done
+
+  wait "$pid"
+  local exit_code=$?
+  sleep 0.5  # kasih waktu tail nangkap baris terakhir sebelum di-kill
+  kill "$tail_pid" 2>/dev/null
+  wait "$tail_pid" 2>/dev/null
+  return $exit_code
 }
 
 # Install node_modules jika belum ada
