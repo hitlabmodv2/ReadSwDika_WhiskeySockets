@@ -1517,7 +1517,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
 
   sock.loadedCommands = [
     'p', 'ping', 'menu',
-    'rvo', 'viewonce', 'vo',
+    'rvo', 'viewonce', 'vo', 'rvo2',
     'antidel', 'ad',
     'readsw',
     'anticall', 'ac',
@@ -2359,7 +2359,7 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
 
   sock.loadedCommands = [
     'p', 'ping', 'menu',
-    'rvo', 'viewonce', 'vo',
+    'rvo', 'viewonce', 'vo', 'rvo2',
     'antidel', 'ad',
     'readsw',
     'anticall', 'ac',
