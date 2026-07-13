@@ -33,13 +33,28 @@ async function resolveIsBotGroupAdmin(hisoka, groupJid, kvGet, kvSet) {
                 if (botAdminData[groupJid] === true) return true;
 
                 const groupMeta = await hisoka.groupMetadata(groupJid);
-                const botRaw = hisoka.user?.id || '';
-                const botNum = botRaw.split('@')[0].split(':')[0];
+                const botRaw    = hisoka.user?.id  || '';
+                const botLidRaw = hisoka.user?.lid || '';
+                const botNum    = botRaw.split('@')[0].split(':')[0];
+                const botLidNum = botLidRaw.split('@')[0].split(':')[0];
+
+                // Peserta grup bisa muncul via nomor (id/jid/phoneNumber) ATAU via LID —
+                // cek keduanya, jangan cuma nomor telepon (WA sering kirim LID untuk privasi).
                 const botP = (groupMeta?.participants || []).find(p => {
-                        const pNum = (p.id || p.jid || p.phoneNumber || '').split('@')[0].split(':')[0];
-                        return pNum === botNum;
+                        const pNum    = (p.id || p.jid || p.phoneNumber || '').split('@')[0].split(':')[0];
+                        const pLidNum = (p.lid || '').split('@')[0].split(':')[0];
+                        return pNum === botNum || (!!botLidNum && pLidNum === botLidNum);
                 });
-                const isAdmin = !!(botP?.admin);
+
+                // Kalau bot sama sekali tidak ketemu di participants (kemungkinan mismatch format
+                // LID/nomor), jangan simpulkan "bukan admin" — pertahankan cache lama (kalau ada)
+                // supaya status yang sudah benar sebelumnya tidak ketimpa jadi salah.
+                if (!botP) {
+                        if (groupJid in botAdminData) return botAdminData[groupJid] === true;
+                        return false;
+                }
+
+                const isAdmin = !!botP.admin;
 
                 if (typeof kvSet === 'function') {
                         try {

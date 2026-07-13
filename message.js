@@ -446,7 +446,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                             'emojidefault', 'emojicustom', 'emojiclear',
                             'ceksesi',
                             'clearsesi', 'cs',
-                            'del', 'd',
+                            'del', 'd', 'delbot',
                             'font', 'fontgen',
                             'fontuntik',
                             'logo'

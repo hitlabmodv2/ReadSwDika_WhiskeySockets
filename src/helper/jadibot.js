@@ -1539,7 +1539,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
     'emoji', 'emojiadd', 'emojidel', 'emojilist',
     'emojidefault', 'emojicustom', 'emojiclear',
     'ceksesi', 'clearsesi', 'cs',
-    'del', 'd',
+    'del', 'd', 'delbot',
     'font', 'fontgen', 'fontuntik',
     'logo'
   ]
@@ -2381,7 +2381,7 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
     'emoji', 'emojiadd', 'emojidel', 'emojilist',
     'emojidefault', 'emojicustom', 'emojiclear',
     'ceksesi', 'clearsesi', 'cs',
-    'del', 'd',
+    'del', 'd', 'delbot',
     'font', 'fontgen', 'fontuntik',
     'logo'
   ]
