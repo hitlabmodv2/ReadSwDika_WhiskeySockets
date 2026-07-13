@@ -546,6 +546,85 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                 return;
                                         }
 
+                                        // Cek format kurangi: "1,-3j" atau "2,-30m" (prefix minus = downbot via reply)
+                                        const downbotMatch = rawChoice.match(/^(\d{1,3})\s*[,.]\s*-\s*(.+)$/);
+                                        if (downbotMatch) {
+                                                const downIdx = Number(downbotMatch[1]);
+                                                const downDurStr = downbotMatch[2].trim();
+                                                const downDurInfo = parseJadibotDuration(downDurStr);
+
+                                                if (downIdx < 1 || downIdx > pendingJadibot.numbers.length) {
+                                                        await tolak(hisoka, m, `❌ *Nomor urutan tidak valid.*\n_Masukkan angka_ *1* _sampai_ *${maxNum}*_._`);
+                                                        return;
+                                                }
+                                                if (!downDurInfo || downDurInfo.ms === 'permanent') {
+                                                        await tolak(hisoka, m,
+                                                                `❌ *Format durasi tidak valid!*\n\n` +
+                                                                `📌 *Contoh:*\n` +
+                                                                `• \`${downIdx},-30m\` → kurangi 30 menit\n` +
+                                                                `• \`${downIdx},-2j\` → kurangi 2 jam\n` +
+                                                                `• \`${downIdx},-3h\` → kurangi 3 hari\n\n` +
+                                                                `> _Singkatan: m=menit · j=jam · h=hari_`
+                                                        );
+                                                        return;
+                                                }
+
+                                                const targetDownNum = pendingJadibot.numbers[downIdx - 1];
+                                                if (!targetDownNum || !activeList.includes(targetDownNum)) {
+                                                        await tolak(hisoka, m, `❌ *Bot urutan ${downIdx} tidak ditemukan atau sudah tidak aktif.*\n> _Ketik_ \`.listbot\` _untuk refresh._`);
+                                                        return;
+                                                }
+
+                                                const downSendReply = async (msg) => tolak(hisoka, m, msg);
+                                                const oldDownInfo = getJadibotExpirySummary(targetDownNum);
+                                                const oldDownLabel = oldDownInfo?.remaining || 'Tidak ada data';
+                                                const oldDownExpire = oldDownInfo?.expiresAtText || '-';
+
+                                                const downResult = reduceJadibotExpiry(targetDownNum, downDurInfo.ms, 'active');
+
+                                                if (!downResult) {
+                                                        await tolak(hisoka, m, `⚠️ *Gagal!*\nData masa berlaku +${maskNumber(targetDownNum)} tidak ditemukan.`);
+                                                        return;
+                                                }
+                                                if (downResult.error === 'permanent') {
+                                                        await tolak(hisoka, m,
+                                                                `❌ *Tidak bisa!*\n+${maskNumber(targetDownNum)} statusnya *Permanent* ♾️, tidak punya batas waktu yang bisa dikurangi.\n\n` +
+                                                                `💡 Set durasi tertentu dulu lewat \`.upbot ${targetDownNum},1h\`.`
+                                                        );
+                                                        return;
+                                                }
+
+                                                scheduleJadibotExpiry(targetDownNum, downSendReply);
+
+                                                if (downResult.expiredNow) {
+                                                        await hisoka.sendMessage(m.from, { react: { text: '⏬', key: m.key } });
+                                                        await tolak(hisoka, m,
+                                                                `⏬ *Durasi dikurangi!*\n` +
+                                                                `📱 \`+${maskNumber(targetDownNum)}\`\n\n` +
+                                                                `📊 *Perubahan masa berlaku:*\n` +
+                                                                `⏮️ Sebelumnya : ~${oldDownLabel}~\n` +
+                                                                `➖ Dikurangi  : *${downDurInfo.label}*\n` +
+                                                                `✨ Sisa baru  : *Kedaluwarsa*\n\n` +
+                                                                `> _Sisa waktu sudah habis, bot langsung dihentikan & sesi dihapus._`
+                                                        );
+                                                } else {
+                                                        const downInfo = getJadibotExpirySummary(targetDownNum);
+                                                        await hisoka.sendMessage(m.from, { react: { text: '⏬', key: m.key } });
+                                                        await tolak(hisoka, m,
+                                                                `⏬ *Durasi dikurangi!*\n` +
+                                                                `📱 \`+${maskNumber(targetDownNum)}\`\n\n` +
+                                                                `📊 *Perubahan masa berlaku:*\n` +
+                                                                `⏮️ Sebelumnya : ~${oldDownLabel}~\n` +
+                                                                `   _Exp lama_ : _${oldDownExpire}_\n` +
+                                                                `➖ Dikurangi  : *${downDurInfo.label}*\n` +
+                                                                `✨ Sisa baru  : *${downInfo.remaining}*\n` +
+                                                                `   _Exp baru_ : _${downInfo.expiresAtText}_\n\n` +
+                                                                `> _Bot tetap aktif, durasi dikurangi._`
+                                                        );
+                                                }
+                                                return;
+                                        }
+
                                         // Cek format perpanjang: "1,3j" atau "2,p" atau "1, 2h"
                                         const upbotMatch = rawChoice.match(/^(\d{1,3})\s*[,.]\s*(.+)$/);
                                         if (upbotMatch) {
@@ -639,8 +718,9 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                 `1. Ketik \`1\` → stop 1 bot\n` +
                                                 `2. Ketik \`1,2,3\` atau \`1.2.3\` → stop beberapa\n` +
                                                 `3. Ketik \`1,3j\` → perpanjang 3 jam\n` +
-                                                `4. Ketik \`1,p\` → ubah ke permanent\n` +
-                                                `5. Ketik \`batal\` → batalkan\n\n` +
+                                                `4. Ketik \`1,-3j\` → kurangi 3 jam\n` +
+                                                `5. Ketik \`1,p\` → ubah ke permanent\n` +
+                                                `6. Ketik \`batal\` → batalkan\n\n` +
                                                 `> _Singkatan: m=menit · j=jam · h=hari · p=permanent_`
                                         );
                                         return;
