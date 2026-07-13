@@ -26,17 +26,22 @@
 
 
 // Satuan durasi tunggal, misal "1h" atau "20m". Dipakai untuk menyusun pola
-// durasi gabungan seperti "1h,20m" (1 hari + 20 menit) — harus identik dengan
-// pattern di src/helper/jadibot.js#parseJadibotDuration supaya konsisten.
+// durasi gabungan seperti "1h,20m" atau "1h.20m" (1 hari + 20 menit) — harus
+// identik dengan pattern di src/helper/jadibot.js#parseJadibotDuration supaya
+// konsisten. Pemisah antar-satuan boleh koma (,) ATAU titik (.).
 const JADIBOT_DURATION_UNIT_SRC = '(?:\\d+\\s*(?:menit|mnt|min|minute|minutes|m|jam|hour|hours|j|hari|day|days|h|d))';
 const JADIBOT_DURATION_PERM_SRC = '(?:permanent|permanen|perm|perma|selamanya|p)';
-const JADIBOT_DURATION_COMPOUND_SRC = `${JADIBOT_DURATION_UNIT_SRC}(?:\\s*,\\s*${JADIBOT_DURATION_UNIT_SRC})*`;
-// Boundary durasi: dipisah spasi ATAU koma dari nomor, lalu durasi itu sendiri
-// bisa gabungan beberapa satuan dipisah koma. Contoh yang semua valid:
+const JADIBOT_DURATION_COMPOUND_SRC = `${JADIBOT_DURATION_UNIT_SRC}(?:\\s*[,.]\\s*${JADIBOT_DURATION_UNIT_SRC})*`;
+// Boundary durasi: dipisah spasi, koma, ATAU titik dari nomor, lalu durasi itu
+// sendiri bisa gabungan beberapa satuan dipisah koma/titik. Contoh yang valid:
 //   "628xxx 1h,20m"  → nomor "628xxx", durasi "1h,20m" (1 hari 20 menit)
+//   "628xxx 1h.20m"  → sama seperti di atas, titik = koma
 //   "628xxx,1h"      → format lama, tetap didukung
+//   "628xxx.1h"      → format lama dengan titik, tetap didukung
 //   "628xxx,1h,20m"  → format lama + gabungan, tetap didukung
-const JADIBOT_DURATION_AT_END_RE = new RegExp(`[ ,]\\s*(${JADIBOT_DURATION_COMPOUND_SRC}|${JADIBOT_DURATION_PERM_SRC})\\s*$`, 'i');
+const JADIBOT_DURATION_AT_END_RE = new RegExp(`[ ,.]\\s*(${JADIBOT_DURATION_COMPOUND_SRC}|${JADIBOT_DURATION_PERM_SRC})\\s*$`, 'i');
+
+
 
 
 
@@ -446,6 +451,7 @@ async function handleUpbot({ hisoka, m, query, tolak, logCommand, isMainBot, jad
                         `_${upPfx}upbot 628xxx,2j_ → perpanjang 2 jam\n` +
                         `_${upPfx}upbot 628xxx,3h_ → perpanjang 3 hari\n` +
                         `_${upPfx}upbot 628xxx,1h,20m_ → perpanjang 1 hari 20 menit\n` +
+                        `_${upPfx}upbot 628xxx,1h.20m_ → sama, titik juga bisa\n` +
                         `_${upPfx}upbot 628xxx,p_ → ubah ke permanent\n\n` +
                         `📌 *Format spasi juga bisa:*\n` +
                         `_${upPfx}upbot 628xxx 2j_\n` +
@@ -467,6 +473,7 @@ async function handleUpbot({ hisoka, m, query, tolak, logCommand, isMainBot, jad
                         `_${upPfx}upbot ${upNum},2j_\n` +
                         `_${upPfx}upbot ${upNum},3h_\n` +
                         `_${upPfx}upbot ${upNum},1h,20m_\n` +
+                        `_${upPfx}upbot ${upNum},1h.20m_\n` +
                         `_${upPfx}upbot ${upNum},p_\n\n` +
                         `⏱️ *Singkatan: m=menit, j=jam, h=hari, p=permanent*`
                 );
@@ -560,7 +567,8 @@ async function handleDownbot({ hisoka, m, query, tolak, logCommand, isMainBot, j
                         `_${downPfx}downbot 628xxx,30m_ → kurangi 30 menit\n` +
                         `_${downPfx}downbot 628xxx,2j_ → kurangi 2 jam\n` +
                         `_${downPfx}downbot 628xxx,3h_ → kurangi 3 hari\n` +
-                        `_${downPfx}downbot 628xxx,1h,20m_ → kurangi 1 hari 20 menit\n\n` +
+                        `_${downPfx}downbot 628xxx,1h,20m_ → kurangi 1 hari 20 menit\n` +
+                        `_${downPfx}downbot 628xxx,1h.20m_ → sama, titik juga bisa\n\n` +
                         `📌 *Format spasi juga bisa:*\n` +
                         `_${downPfx}downbot 628xxx 2j_\n\n` +
                         `⏱️ *Singkatan: m=menit, j=jam, h=hari*\n` +
@@ -579,7 +587,8 @@ async function handleDownbot({ hisoka, m, query, tolak, logCommand, isMainBot, j
                         `_${downPfx}downbot ${downNum},30m_\n` +
                         `_${downPfx}downbot ${downNum},2j_\n` +
                         `_${downPfx}downbot ${downNum},3h_\n` +
-                        `_${downPfx}downbot ${downNum},1h,20m_\n\n` +
+                        `_${downPfx}downbot ${downNum},1h,20m_\n` +
+                        `_${downPfx}downbot ${downNum},1h.20m_\n\n` +
                         `⏱️ *Singkatan: m=menit, j=jam, h=hari*`
                 );
                 return;

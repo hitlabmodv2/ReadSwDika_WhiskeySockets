@@ -365,10 +365,11 @@ function getJadibotExpirySummary(number) {
 
 // Satu satuan durasi, misal "1h", "20m", "2j". Diekspor biar jadibot-cmd.cjs
 // pakai pattern yang sama persis (single source of truth), termasuk untuk
-// durasi gabungan seperti "1h,20m" (1 hari + 20 menit).
+// durasi gabungan seperti "1h,20m" atau "1h.20m" (1 hari + 20 menit).
+// Pemisah antar-satuan boleh koma (,) ATAU titik (.) — keduanya sama artinya.
 const JADIBOT_DURATION_UNIT_SOURCE = '\\d+\\s*(?:menit|mnt|min|minute|minutes|m|jam|hour|hours|j|hari|day|days|h|d)'
 const JADIBOT_DURATION_PERMANENT_SOURCE = '(?:permanent|permanen|perm|perma|selamanya|p)'
-const JADIBOT_DURATION_COMPOUND_SOURCE = `${JADIBOT_DURATION_UNIT_SOURCE}(?:\\s*,\\s*${JADIBOT_DURATION_UNIT_SOURCE})*`
+const JADIBOT_DURATION_COMPOUND_SOURCE = `${JADIBOT_DURATION_UNIT_SOURCE}(?:\\s*[,.]\\s*${JADIBOT_DURATION_UNIT_SOURCE})*`
 
 function parseJadibotDuration(input = '') {
   const clean = String(input || '').trim().toLowerCase()
@@ -388,9 +389,9 @@ function parseJadibotDuration(input = '') {
       isDefault: false
     }
   }
-  // Durasi gabungan dipisah koma, misal "1h,20m" = 1 hari + 20 menit.
-  // m=menit, j=jam, h=hari, d=hari — setiap bagian dijumlahkan.
-  const parts = clean.split(',').map(p => p.trim()).filter(Boolean)
+  // Durasi gabungan dipisah koma ATAU titik, misal "1h,20m" / "1h.20m" =
+  // 1 hari + 20 menit. m=menit, j=jam, h=hari, d=hari — dijumlahkan semua.
+  const parts = clean.split(/[,.]/).map(p => p.trim()).filter(Boolean)
   if (!parts.length) return null
   let ms = 0
   for (const part of parts) {
