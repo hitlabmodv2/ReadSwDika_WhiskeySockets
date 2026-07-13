@@ -2,7 +2,7 @@
 _📅 Senin, 13 Juli 2026_ 🌙
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V26*
-✨ *1 Fitur Baru*
+✨ *2 Fitur Baru*
 🔧 *2 Bug/Error Fix*
 🚀 *2 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -15,6 +15,16 @@ _Kebalikan dari `.upbot` — sekarang durasi jadibot bisa dikurangi, bukan cuma 
 3. Tidak bisa dipakai ke bot berstatus *Permanent* — muncul pesan error yang jelas + saran solusi
 4. Konfirmasi setelah eksekusi tampilkan sisa waktu sebelum & sesudah, plus waktu kedaluwarsa lama & baru
 > Owner sekarang bisa presisi atur durasi jadibot orang lain, naik maupun turun
+
+*2. 📋 Reply .listbot — Atur Durasi Langsung dari Daftar, Bisa Banyak Sekaligus*
+_Nggak perlu ketik ulang nomor lengkap — cukup reply pesan `.listbot`, pakai nomor urutannya:_
+1. Reply `1,3j` → target urutan 1 ditambah 3 jam (upbot)
+2. Reply `1,-3j` → target urutan 1 dikurangi 3 jam (downbot)
+3. Reply `1,p` → target urutan 1 diubah jadi Permanent
+4. Reply `3,1d,20m|1,30d` → banyak target sekaligus dalam satu reply, dipisah `|` (masing-masing boleh naik/turun/permanent, bebas dicampur)
+5. Tetap didukung format lama: reply `1` untuk stop 1 bot, `1,2,3` untuk stop beberapa bot
+6. Kalau ada target yang gagal (urutan salah, durasi salah, atau bot-nya Permanent), laporan tetap tampilkan mana yang berhasil & mana yang gagal per baris
+> Kelola banyak jadibot sekaligus dari satu balasan `.listbot`, tanpa ketik ulang nomor satu-satu
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🔧 *BUG/ERROR FIX*
