@@ -92,7 +92,7 @@ ss/screenshot | ssweb/webinfo
 tmail/tempmail | tminbox | tmread | tmwait | tmdel
 
 「 🤖 *JADIBOT* 」
-jadibot [nomor] [durasi] | stopbot | listbot | setpairing v1/v2
+jadibot [nomor] [durasi] | upbot [nomor],[durasi] | downbot [nomor],[durasi] | stopbot | listbot | setpairing v1/v2
 
 「 👑 *OWNER ONLY* 」
 listowner | addowner | delowner

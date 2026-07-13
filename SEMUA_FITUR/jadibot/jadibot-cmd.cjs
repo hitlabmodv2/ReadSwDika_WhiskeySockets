@@ -25,6 +25,21 @@
 'use strict';
 
 
+// Satuan durasi tunggal, misal "1h" atau "20m". Dipakai untuk menyusun pola
+// durasi gabungan seperti "1h,20m" (1 hari + 20 menit) — harus identik dengan
+// pattern di src/helper/jadibot.js#parseJadibotDuration supaya konsisten.
+const JADIBOT_DURATION_UNIT_SRC = '(?:\\d+\\s*(?:menit|mnt|min|minute|minutes|m|jam|hour|hours|j|hari|day|days|h|d))';
+const JADIBOT_DURATION_PERM_SRC = '(?:permanent|permanen|perm|perma|selamanya|p)';
+const JADIBOT_DURATION_COMPOUND_SRC = `${JADIBOT_DURATION_UNIT_SRC}(?:\\s*,\\s*${JADIBOT_DURATION_UNIT_SRC})*`;
+// Boundary durasi: dipisah spasi ATAU koma dari nomor, lalu durasi itu sendiri
+// bisa gabungan beberapa satuan dipisah koma. Contoh yang semua valid:
+//   "628xxx 1h,20m"  → nomor "628xxx", durasi "1h,20m" (1 hari 20 menit)
+//   "628xxx,1h"      → format lama, tetap didukung
+//   "628xxx,1h,20m"  → format lama + gabungan, tetap didukung
+const JADIBOT_DURATION_AT_END_RE = new RegExp(`[ ,]\\s*(${JADIBOT_DURATION_COMPOUND_SRC}|${JADIBOT_DURATION_PERM_SRC})\\s*$`, 'i');
+
+
+
 function parseJadibotCommandQuery(raw = '') {
     const text = String(raw || '').trim();
     if (!text) return { number: '', durationInput: '', rawNumberPart: '' };
@@ -32,16 +47,15 @@ function parseJadibotCommandQuery(raw = '') {
     let numberPart = '';
     let durationRaw = '';
 
-    // Support comma format: "628xxx,1h" atau "+628xxx,p"
-    const commaIdx = text.indexOf(',');
-    if (commaIdx !== -1) {
-        numberPart = text.slice(0, commaIdx).trim();
-        durationRaw = text.slice(commaIdx + 1).trim();
+    // Cari batas nomor/durasi dari kiri ke kanan: posisi pertama di mana sisa
+    // teks setelah pemisah (spasi/koma) adalah durasi valid sampai akhir string.
+    const durationMatch = text.match(JADIBOT_DURATION_AT_END_RE);
+    if (durationMatch) {
+        durationRaw = durationMatch[1].trim();
+        numberPart = text.slice(0, durationMatch.index).trim();
     } else {
-        // Space-separated: "628xxx 1h" atau "628xxx permanent"
-        const durationMatch = text.match(/\s((?:\d+\s*(?:menit|mnt|min|minute|minutes|m|jam|hour|hours|j|hari|day|days|h|d))|(?:permanent|permanen|perm|perma|selamanya|p))\s*$/i);
-        durationRaw = durationMatch ? durationMatch[1].trim() : '';
-        numberPart = durationMatch ? text.slice(0, durationMatch.index).trim() : text;
+        numberPart = text;
+        durationRaw = '';
     }
 
     const rawNumberPart = numberPart;
@@ -395,7 +409,11 @@ async function handleJadibot({ hisoka, m, query, tolak, logCommand, isMainBot, p
         );
 }
 
-async function handleUpbot({ hisoka, m, query, tolak, logCommand, isMainBot, jadibotMap, parseJadibotCommandQuery, parseJadibotDuration, maskNumber, getJadibotExpirySummary, getJadibotExpiry, extendJadibotExpiry, scheduleJadibotExpiry, setPermanentJadibot }) {
+// NB: parseJadibotCommandQuery TIDAK didestrukturisasi dari parameter — dia sudah
+// tersedia sebagai fungsi top-level di file ini. Kalau didestrukturisasi di sini,
+// dia akan shadow fungsi aslinya jadi `undefined` setiap kali caller (message.js)
+// tidak mengirimkannya, dan `.upbot` akan selalu crash (bug lama yang sudah diperbaiki).
+async function handleUpbot({ hisoka, m, query, tolak, logCommand, isMainBot, jadibotMap, parseJadibotDuration, maskNumber, getJadibotExpirySummary, getJadibotExpiry, extendJadibotExpiry, scheduleJadibotExpiry, setPermanentJadibot }) {
         if (!isMainBot(hisoka)) return;
         if (!m.isOwner) return;
 
@@ -427,10 +445,13 @@ async function handleUpbot({ hisoka, m, query, tolak, logCommand, isMainBot, jad
                         `_${upPfx}upbot 628xxx,30m_ → perpanjang 30 menit\n` +
                         `_${upPfx}upbot 628xxx,2j_ → perpanjang 2 jam\n` +
                         `_${upPfx}upbot 628xxx,3h_ → perpanjang 3 hari\n` +
+                        `_${upPfx}upbot 628xxx,1h,20m_ → perpanjang 1 hari 20 menit\n` +
                         `_${upPfx}upbot 628xxx,p_ → ubah ke permanent\n\n` +
                         `📌 *Format spasi juga bisa:*\n` +
-                        `_${upPfx}upbot 628xxx 2j_\n\n` +
-                        `⏱️ *Singkatan: m=menit, j=jam, h=hari, p=permanent*`
+                        `_${upPfx}upbot 628xxx 2j_\n` +
+                        `_${upPfx}upbot 628xxx 1h,20m_\n\n` +
+                        `⏱️ *Singkatan: m=menit, j=jam, h=hari, p=permanent*\n` +
+                        `💡 Mau kurangi durasi? Pakai *${upPfx}downbot*`
                 );
                 return;
         }
@@ -445,6 +466,7 @@ async function handleUpbot({ hisoka, m, query, tolak, logCommand, isMainBot, jad
                         `_${upPfx}upbot ${upNum},30m_\n` +
                         `_${upPfx}upbot ${upNum},2j_\n` +
                         `_${upPfx}upbot ${upNum},3h_\n` +
+                        `_${upPfx}upbot ${upNum},1h,20m_\n` +
                         `_${upPfx}upbot ${upNum},p_\n\n` +
                         `⏱️ *Singkatan: m=menit, j=jam, h=hari, p=permanent*`
                 );
@@ -500,6 +522,156 @@ async function handleUpbot({ hisoka, m, query, tolak, logCommand, isMainBot, jad
                 );
         }
         logCommand(m, hisoka, 'upbot');
+}
+
+// Kebalikan dari .upbot — mengurangi sisa masa berlaku jadibot. Tidak bisa
+// dipakai untuk bot permanent (harus di-upbot ke durasi tertentu dulu).
+// Sama seperti handleUpbot: parseJadibotCommandQuery TIDAK didestrukturisasi dari
+// parameter supaya tidak shadow fungsi top-level-nya sendiri.
+async function handleDownbot({ hisoka, m, query, tolak, logCommand, isMainBot, jadibotMap, parseJadibotDuration, maskNumber, getJadibotExpirySummary, getJadibotExpiry, reduceJadibotExpiry, scheduleJadibotExpiry }) {
+        if (!isMainBot(hisoka)) return;
+        if (!m.isOwner) return;
+
+        const downPfx = m.prefix || '.';
+        const sendDownBtn = async (bodyText) => { await tolak(hisoka, m, bodyText); };
+
+        const { number: downNumber, durationInput: downDurationInput } = parseJadibotCommandQuery(query || '');
+        let downNum = downNumber;
+
+        if (m.isQuoted && m.quoted?.sender && !m.quoted?.key?.fromMe && (!downNum || downNum.length < 7)) {
+                let qNum = (m.quoted.sender || '').split('@')[0].split(':')[0].replace(/[^0-9]/g, '');
+                if (qNum.startsWith('00')) qNum = qNum.slice(2);
+                if (qNum.startsWith('08')) qNum = '62' + qNum.slice(1);
+                else if (qNum.startsWith('8')) qNum = '62' + qNum;
+                downNum = qNum;
+        }
+
+        if (downNum && downNum.startsWith('08')) downNum = '62' + downNum.slice(1);
+
+        const downDurationInfo = parseJadibotDuration(downDurationInput);
+
+        if (!downNum) {
+                await sendDownBtn(
+                        `╔══════════════════════╗\n` +
+                        `║   ⏬  *D O W N B O T*   ║\n` +
+                        `╚══════════════════════╝\n\n` +
+                        `❌ *Nomor tidak boleh kosong!*\n\n` +
+                        `📌 *Format koma (direkomendasikan):*\n` +
+                        `_${downPfx}downbot 628xxx,30m_ → kurangi 30 menit\n` +
+                        `_${downPfx}downbot 628xxx,2j_ → kurangi 2 jam\n` +
+                        `_${downPfx}downbot 628xxx,3h_ → kurangi 3 hari\n` +
+                        `_${downPfx}downbot 628xxx,1h,20m_ → kurangi 1 hari 20 menit\n\n` +
+                        `📌 *Format spasi juga bisa:*\n` +
+                        `_${downPfx}downbot 628xxx 2j_\n\n` +
+                        `⏱️ *Singkatan: m=menit, j=jam, h=hari*\n` +
+                        `⚠️ Tidak berlaku untuk bot *Permanent*.`
+                );
+                return;
+        }
+
+        if (!downDurationInfo || downDurationInput === '') {
+                await sendDownBtn(
+                        `╔══════════════════════╗\n` +
+                        `║   ⏬  *D O W N B O T*   ║\n` +
+                        `╚══════════════════════╝\n\n` +
+                        `❌ *Format durasi tidak valid!*\n\n` +
+                        `📌 *Contoh:*\n` +
+                        `_${downPfx}downbot ${downNum},30m_\n` +
+                        `_${downPfx}downbot ${downNum},2j_\n` +
+                        `_${downPfx}downbot ${downNum},3h_\n` +
+                        `_${downPfx}downbot ${downNum},1h,20m_\n\n` +
+                        `⏱️ *Singkatan: m=menit, j=jam, h=hari*`
+                );
+                return;
+        }
+
+        if (downDurationInfo.ms === 'permanent') {
+                await sendDownBtn(
+                        `╔══════════════════════╗\n` +
+                        `║   ⏬  *D O W N B O T*   ║\n` +
+                        `╚══════════════════════╝\n\n` +
+                        `❌ *Tidak valid!*\n` +
+                        `*downbot* cuma buat mengurangi durasi (angka), bukan "permanent".\n\n` +
+                        `💡 Mau ubah ke permanent? Pakai *${downPfx}upbot ${downNum},p*`
+                );
+                return;
+        }
+
+        if (!jadibotMap.has(downNum)) {
+                await sendDownBtn(
+                        `╔══════════════════════╗\n` +
+                        `║   ⏬  *D O W N B O T*   ║\n` +
+                        `╚══════════════════════╝\n\n` +
+                        `⚠️ *Bot tidak aktif!*\n` +
+                        `+${maskNumber(downNum)} tidak ditemukan dalam daftar jadibot aktif.`
+                );
+                return;
+        }
+
+        const downSendReplyFn = async (msg) => tolak(hisoka, m, msg);
+        const oldDownInfo = getJadibotExpirySummary(downNum);
+        const oldDownLabel = oldDownInfo?.remaining || 'Tidak ada data';
+        const oldDownExpire = oldDownInfo?.expiresAtText || '-';
+
+        const downResult = reduceJadibotExpiry(downNum, downDurationInfo.ms, 'active');
+
+        if (!downResult) {
+                await sendDownBtn(
+                        `╔══════════════════════╗\n` +
+                        `║   ⏬  *D O W N B O T*   ║\n` +
+                        `╚══════════════════════╝\n\n` +
+                        `⚠️ *Gagal!*\n` +
+                        `Data masa berlaku +${maskNumber(downNum)} tidak ditemukan.`
+                );
+                return;
+        }
+
+        if (downResult.error === 'permanent') {
+                await sendDownBtn(
+                        `╔══════════════════════╗\n` +
+                        `║   ⏬  *D O W N B O T*   ║\n` +
+                        `╚══════════════════════╝\n\n` +
+                        `❌ *Tidak bisa!*\n` +
+                        `+${maskNumber(downNum)} statusnya *Permanent* ♾️, tidak punya batas waktu yang bisa dikurangi.\n\n` +
+                        `💡 Set durasi tertentu dulu: *${downPfx}upbot ${downNum},1h*`
+                );
+                return;
+        }
+
+        scheduleJadibotExpiry(downNum, downSendReplyFn);
+
+        if (downResult.expiredNow) {
+                await sendDownBtn(
+                        `╔══════════════════════╗\n` +
+                        `║   ⏬  *D O W N B O T*   ║\n` +
+                        `╚══════════════════════╝\n\n` +
+                        `✅ *Durasi dikurangi!*\n` +
+                        `📱 +${maskNumber(downNum)}\n\n` +
+                        `📊 *Perubahan masa berlaku:*\n` +
+                        `⏮️ Sebelumnya : *${oldDownLabel}*\n` +
+                        `   Exp lama   : ${oldDownExpire}\n` +
+                        `➖ Dikurangi  : *${downDurationInfo.label}*\n` +
+                        `✨ Sisa baru  : *Kedaluwarsa*\n\n` +
+                        `⚠️ Sisa waktu sudah habis, bot langsung dihentikan & sesi dihapus.`
+                );
+        } else {
+                const downInfo = getJadibotExpirySummary(downNum);
+                await sendDownBtn(
+                        `╔══════════════════════╗\n` +
+                        `║   ⏬  *D O W N B O T*   ║\n` +
+                        `╚══════════════════════╝\n\n` +
+                        `✅ *Durasi dikurangi!*\n` +
+                        `📱 +${maskNumber(downNum)}\n\n` +
+                        `📊 *Perubahan masa berlaku:*\n` +
+                        `⏮️ Sebelumnya : *${oldDownLabel}*\n` +
+                        `   Exp lama   : ${oldDownExpire}\n` +
+                        `➖ Dikurangi  : *${downDurationInfo.label}*\n` +
+                        `✨ Sisa baru  : *${downInfo.remaining}*\n` +
+                        `   Exp baru   : ${downInfo.expiresAtText}\n\n` +
+                        `Bot tetap aktif, durasi dikurangi.`
+                );
+        }
+        logCommand(m, hisoka, 'downbot');
 }
 
 async function handleStopbot({ hisoka, m, query, tolak, logCommand, isMainBot, jadibotMap, stopJadibot, maskNumber, getJadibotExpiry, formatRemainingTime, getJadibotChoiceKey, pendingJadibotChoices }) {
@@ -592,4 +764,4 @@ async function handleStopbot({ hisoka, m, query, tolak, logCommand, isMainBot, j
         );
 }
 
-module.exports = { handleJadibot, handleUpbot, handleStopbot, normalizeJadibotNumber };
+module.exports = { handleJadibot, handleUpbot, handleDownbot, handleStopbot, normalizeJadibotNumber };

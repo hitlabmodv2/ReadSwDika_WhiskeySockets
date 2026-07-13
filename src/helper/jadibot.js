@@ -363,6 +363,13 @@ function getJadibotExpirySummary(number) {
   }
 }
 
+// Satu satuan durasi, misal "1h", "20m", "2j". Diekspor biar jadibot-cmd.cjs
+// pakai pattern yang sama persis (single source of truth), termasuk untuk
+// durasi gabungan seperti "1h,20m" (1 hari + 20 menit).
+const JADIBOT_DURATION_UNIT_SOURCE = '\\d+\\s*(?:menit|mnt|min|minute|minutes|m|jam|hour|hours|j|hari|day|days|h|d)'
+const JADIBOT_DURATION_PERMANENT_SOURCE = '(?:permanent|permanen|perm|perma|selamanya|p)'
+const JADIBOT_DURATION_COMPOUND_SOURCE = `${JADIBOT_DURATION_UNIT_SOURCE}(?:\\s*,\\s*${JADIBOT_DURATION_UNIT_SOURCE})*`
+
 function parseJadibotDuration(input = '') {
   const clean = String(input || '').trim().toLowerCase()
   if (!clean) {
@@ -381,16 +388,22 @@ function parseJadibotDuration(input = '') {
       isDefault: false
     }
   }
-  // m=menit, j=jam, h=hari, d=hari
-  const match = clean.match(/^(\d+)\s*(menit|mnt|min|minute|minutes|m|jam|hour|hours|j|hari|day|days|h|d)$/i)
-  if (!match) return null
-  const value = Number(match[1])
-  if (!Number.isSafeInteger(value) || value <= 0) return null
-  const unit = match[2].toLowerCase()
-  let multiplier = 60000 // default: menit
-  if (['jam', 'hour', 'hours', 'j'].includes(unit)) multiplier = 60 * 60000
-  if (['hari', 'day', 'days', 'h', 'd'].includes(unit)) multiplier = 24 * 60 * 60000
-  const ms = value * multiplier
+  // Durasi gabungan dipisah koma, misal "1h,20m" = 1 hari + 20 menit.
+  // m=menit, j=jam, h=hari, d=hari — setiap bagian dijumlahkan.
+  const parts = clean.split(',').map(p => p.trim()).filter(Boolean)
+  if (!parts.length) return null
+  let ms = 0
+  for (const part of parts) {
+    const match = part.match(/^(\d+)\s*(menit|mnt|min|minute|minutes|m|jam|hour|hours|j|hari|day|days|h|d)$/i)
+    if (!match) return null
+    const value = Number(match[1])
+    if (!Number.isSafeInteger(value) || value <= 0) return null
+    const unit = match[2].toLowerCase()
+    let multiplier = 60000 // default: menit
+    if (['jam', 'hour', 'hours', 'j'].includes(unit)) multiplier = 60 * 60000
+    if (['hari', 'day', 'days', 'h', 'd'].includes(unit)) multiplier = 24 * 60 * 60000
+    ms += value * multiplier
+  }
   if (!Number.isSafeInteger(ms) || ms <= 0) return null
   return { ms, label: formatDurationMs(ms), isDefault: false }
 }
@@ -493,6 +506,50 @@ function extendJadibotExpiry(number, addedDurationMs, status = 'active') {
   data.bots[number] = meta
   saveJadibotRealtimeData(data)
   return meta
+}
+
+// Kebalikan dari extendJadibotExpiry: mengurangi sisa masa berlaku jadibot.
+// Tidak berlaku untuk bot permanent (dikembalikan { error: 'permanent' }) karena
+// permanent tidak punya expiresAt numerik untuk dikurangi.
+// Hasil dijamin tidak pernah negatif — jika pengurangan melebihi sisa waktu,
+// sisa langsung dianggap 0 (kedaluwarsa), bukan expiresAt di masa lalu.
+function reduceJadibotExpiry(number, subtractedDurationMs, status = 'active') {
+  number = String(number || '').replace(/[^0-9]/g, '')
+  const subMs = Number(subtractedDurationMs)
+  if (!number || !Number.isSafeInteger(subMs) || subMs <= 0) return null
+  const now = Date.now()
+  const data = loadJadibotRealtimeData()
+  const existing = data.bots[number] || null
+  if (!existing) return null
+  if (existing.permanent === true) return { error: 'permanent' }
+  const oldExpiresAt = Number(existing.expiresAt) || now
+  const oldRemainingMs = Math.max(0, oldExpiresAt - now)
+  const newExpiresAt = Math.max(now, oldExpiresAt - subMs)
+  const totalRemainingMs = Math.max(0, newExpiresAt - now)
+  const actualSubtractedMs = oldRemainingMs - totalRemainingMs
+  const meta = {
+    ...existing,
+    number,
+    createdAt: existing.createdAt || now,
+    updatedAt: now,
+    expiresAt: newExpiresAt,
+    durationMs: totalRemainingMs,
+    durationText: totalRemainingMs > 0 ? formatDurationMs(totalRemainingMs) : 'Kedaluwarsa',
+    subtractedDurationMs: subMs,
+    subtractedDurationText: formatDurationMs(subMs),
+    previousRemainingMs: oldRemainingMs,
+    previousRemainingText: formatRemainingTime(oldRemainingMs),
+    status,
+    permanent: false,
+  }
+  data.bots[number] = meta
+  saveJadibotRealtimeData(data)
+  return {
+    ...meta,
+    expiredNow: totalRemainingMs <= 0,
+    requestedSubtractMs: subMs,
+    actualSubtractedMs
+  }
 }
 
 function updateJadibotExpiryStatus(number, status) {
@@ -2889,6 +2946,7 @@ export {
   setPermanentJadibot,
   ensureJadibotExpiry,
   extendJadibotExpiry,
+  reduceJadibotExpiry,
   updateJadibotExpiryStatus,
   scheduleJadibotExpiry,
   pauseAllJadibotTimers,

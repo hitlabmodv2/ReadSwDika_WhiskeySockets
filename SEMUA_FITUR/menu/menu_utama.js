@@ -177,6 +177,8 @@ export function buildMenuUtama({ pushName, isOwner, uptimeStr, tgl, jam, browser
 ║   🤖 *JADIBOT*   
 ├═════════════════════┤
 │ .jadibot
+│ .upbot
+│ .downbot
 │ .stopbot
 │ .listbot
 │ .setpairing
