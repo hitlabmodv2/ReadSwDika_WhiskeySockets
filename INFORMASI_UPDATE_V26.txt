@@ -1,0 +1,42 @@
+📢 *INFORMASI RILIS*
+_📅 Senin, 13 Juli 2026_ 🌙
+━━━━━━━━━━━━━━━━━━━━━━
+🤖 *WILY BOT — V26*
+✨ *1 Fitur Baru*
+🔧 *1 Bug/Error Fix*
+🚀 *2 Perubahan*
+━━━━━━━━━━━━━━━━━━━━━━
+✨ *FITUR BARU*
+━━━━━━━━━━━━━━━━━━━━━━
+*1. ⏬ .downbot — Kurangi Durasi JadiBot*
+_Kebalikan dari `.upbot` — sekarang durasi jadibot bisa dikurangi, bukan cuma diperpanjang:_
+1. Tambah perintah `.downbot 628xxx,<durasi>` — kurangi sisa masa aktif sesi jadibot nomor tersebut
+2. Kalau pengurangan melebihi sisa waktu, sisa langsung dianggap 0 (kedaluwarsa) — tidak pernah jadi tanggal minus, dan bot langsung dihentikan otomatis
+3. Tidak bisa dipakai ke bot berstatus *Permanent* — muncul pesan error yang jelas + saran solusi
+4. Konfirmasi setelah eksekusi tampilkan sisa waktu sebelum & sesudah, plus waktu kedaluwarsa lama & baru
+> Owner sekarang bisa presisi atur durasi jadibot orang lain, naik maupun turun
+
+━━━━━━━━━━━━━━━━━━━━━━
+🔧 *BUG/ERROR FIX*
+━━━━━━━━━━━━━━━━━━━━━━
+*1. 🐛 .upbot Selalu Gagal — Parameter Shadowing*
+_`handleUpbot` mendestrukturisasi `parseJadibotCommandQuery` dari parameter, padahal `message.js` tidak pernah mengirimkannya:_
+1. ~Setiap `.upbot` dipanggil, `parseJadibotCommandQuery` bernilai `undefined` di dalam fungsi → error "is not a function"~
+2. Parameter tersebut dihapus dari destrukturisasi — fungsi sekarang dipanggil langsung dari scope file (sudah tersedia di sana), tidak lagi bergantung pengiriman dari caller
+3. Fix yang sama diterapkan preventif ke `.downbot` yang baru ditambahkan, supaya tidak kena bug serupa
+> `.upbot` sekarang benar-benar bisa dipakai — sebelumnya selalu gagal
+
+━━━━━━━━━━━━━━━━━━━━━━
+🚀 *PERUBAHAN*
+━━━━━━━━━━━━━━━━━━━━━━
+*1. 🧮 Durasi Gabungan (Compound) untuk .jadibot / .upbot / .downbot*
+_Durasi sekarang bisa digabung beberapa satuan sekaligus, tidak cuma satu unit:_
+1. Format baru: `1h,20m` atau `1h.20m` = 1 hari + 20 menit (dijumlahkan)
+2. Pemisah antar-satuan boleh koma `,` ATAU titik `.` — dua-duanya berarti sama, bisa dicampur
+3. Format lama (satu satuan, nomor dipisah koma/titik seperti `628xxx,1h`) tetap didukung, tidak ada yang rusak
+4. Berlaku konsisten di `.jadibot`, `.upbot`, dan `.downbot` — satu fungsi parsing yang sama dipakai semuanya
+
+*2. 📋 Menu — Info .upbot & .downbot*
+_Menu bantuan diperbarui supaya kedua perintah ini terlihat dan mudah ditemukan:_
+1. `menu_utama.js` — tambah baris `.upbot` dan `.downbot` di bagian JadiBot
+2. `menupages.cjs` — ringkasan JadiBot diperbarui menyebut format `upbot [nomor],[durasi]` dan `downbot [nomor],[durasi]`
