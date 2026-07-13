@@ -51,7 +51,7 @@ const FILE_DATA   = path.join(process.cwd(), 'data', 'animasu', 'state.json');
 const FILE_LOG    = path.join(process.cwd(), 'data', 'animasu', 'log.json');
 fs.mkdirSync(path.join(process.cwd(), 'data', 'animasu'), { recursive: true });
 const FILE_CONFIG = path.join(process.cwd(), 'config.json');
-const BASE_URL    = 'https://v1.animasu.app';
+const BASE_URL    = 'https://v1.animasu.work';
 const API_POSTS   = `${BASE_URL}/wp-json/wp/v2/posts`;
 const HEADERS     = { 'User-Agent': 'Mozilla/5.0 (compatible; WilyBot/1.0)' };
 
@@ -276,7 +276,9 @@ async function fetchRecentPosts(count = 20) {
 async function fetchAnimeUrlFromEpisodePage(postLink) {
     try {
         const html = await axios.get(postLink, { headers: HEADERS, timeout: 20000 }).then(r => r.data);
-        const m = html.match(/href="(https:\/\/v1\.animasu\.app\/anime\/[^"]+)"/);
+        const baseEscaped = BASE_URL.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const pattern = 'href="(' + baseEscaped + '\\/anime\\/[^"]+)"';
+        const m = html.match(new RegExp(pattern));
         return m ? m[1].replace(/\/$/, '') + '/' : null;
     } catch (_) {
         return null;

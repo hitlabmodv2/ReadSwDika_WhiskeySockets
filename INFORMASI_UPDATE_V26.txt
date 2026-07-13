@@ -3,8 +3,8 @@ _📅 Senin, 13 Juli 2026_ 🌙
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V26*
 ✨ *2 Fitur Baru*
-🔧 *5 Bug/Error Fix*
-🚀 *2 Perubahan*
+🔧 *6 Bug/Error Fix*
+🚀 *3 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -63,6 +63,13 @@ _`.del` gagal menghapus pesan di grup dengan pesan "Bot bukan admin", padahal bo
 4. Kalau bot tetap tidak ketemu di peserta grup (format tak dikenali), status admin lama di cache tidak lagi ditimpa jadi "bukan admin" — dipertahankan apa adanya
 > `.del` di grup sekarang mendeteksi status admin bot dengan akurat, tidak lagi salah tolak & tidak lagi merusak cache
 
+*6. 🐛 Animasu — Fallback URL Anime Hardcode ke Domain Lama*
+_Setelah domain Animasu pindah, banyak anime gagal ditemukan meski API & halaman anime-nya sendiri normal:_
+1. ~Slug anime kadang ditebak salah dari judul post (misal post bilang "season-3" tapi slug asli di web-nya "s3"), makanya ada mekanisme fallback: buka halaman episode, cari link anime yang benar dari situ~
+2. ~Tapi regex pencarian link fallback itu hardcode ke domain lama (`v1.animasu.app`) — begitu domain resmi ganti, regex tidak pernah cocok lagi, fallback selalu gagal, dan anime dengan slug tebakan salah jadi tidak pernah terkirim~
+3. Regex fallback sekarang ikut domain aktif (`BASE_URL`) secara dinamis, bukan hardcode — otomatis ikut kalau domain ganti lagi ke depannya
+> Fitur cari anime & pantau episode baru sekarang akurat lagi walau ada anime dengan slug "tebakan" yang meleset
+
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *PERUBAHAN*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -77,3 +84,9 @@ _Durasi sekarang bisa digabung beberapa satuan sekaligus, tidak cuma satu unit:_
 _Menu bantuan diperbarui supaya kedua perintah ini terlihat dan mudah ditemukan:_
 1. `menu_utama.js` — tambah baris `.upbot` dan `.downbot` di bagian JadiBot
 2. `menupages.cjs` — ringkasan JadiBot diperbarui menyebut format `upbot [nomor],[durasi]` dan `downbot [nomor],[durasi]`
+
+*3. 🌐 Animasu — Ganti Domain ke v1.animasu.work*
+_Domain lama sudah tidak dipakai, semua sumber Animasu dialihkan ke domain baru:_
+1. Base URL scraper diganti dari `v1.animasu.app` ke `v1.animasu.work`
+2. Sudah dites simulasi ambil episode terbaru + fallback slug — hasil akurat, caption & gambar tampil normal
+> `.animasu` (cari, pantau episode baru, cek status tayang) tetap jalan normal di domain baru
