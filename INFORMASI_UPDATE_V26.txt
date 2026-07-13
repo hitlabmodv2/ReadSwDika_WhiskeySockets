@@ -3,7 +3,7 @@ _📅 Senin, 13 Juli 2026_ 🌙
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V26*
 ✨ *2 Fitur Baru*
-🔧 *2 Bug/Error Fix*
+🔧 *3 Bug/Error Fix*
 🚀 *2 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
@@ -42,6 +42,12 @@ _Sebelumnya, mau set durasi apapun saat `.jadibot`, kalau sempat disconnect sebe
 2. Sekarang cek expired hanya jalan kalau sesi *sudah pernah* berhasil konek minimal sekali (`hasConnectedOnce` / `hasConnected`) — berlaku di jalur pairing-code maupun QR
 3. Disconnect biasa di tengah proses pairing/scan (sebelum pernah konek) sekarang diperlakukan sebagai reconnect normal, bukan langsung dihapus
 > `.jadibot` dengan durasi berapa pun sekarang bisa selesai proses konek dengan wajar, tidak lagi gagal di tengah jalan karena dikira sudah kedaluwarsa
+
+*3. 🐛 .rvo2 Tidak Merespon di JadiBot*
+_Perintah `.rvo2` normal dipakai di bot utama, tapi diam saja kalau dipakai di sesi jadibot:_
+1. ~Daftar `loadedCommands` yang dipasang ke tiap sesi jadibot (dipakai buat mengenali command yang valid) sudah punya `rvo`, `viewonce`, `vo`, tapi lupa memasukkan `rvo2` — jadi `.rvo2` di jadibot tidak pernah dianggap command, langsung diabaikan sebelum sampai ke handler~
+2. `rvo2` sekarang ditambahkan ke daftar `loadedCommands` jadibot (berlaku di jalur pairing-code maupun QR)
+> `.rvo2` sekarang merespon normal juga di sesi jadibot, sama seperti di bot utama
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *PERUBAHAN*
