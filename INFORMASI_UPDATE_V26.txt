@@ -3,7 +3,7 @@ _📅 Senin, 13 Juli 2026_ 🌙
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V26*
 ✨ *2 Fitur Baru*
-🔧 *3 Bug/Error Fix*
+🔧 *5 Bug/Error Fix*
 🚀 *2 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
@@ -48,6 +48,20 @@ _Perintah `.rvo2` normal dipakai di bot utama, tapi diam saja kalau dipakai di s
 1. ~Daftar `loadedCommands` yang dipasang ke tiap sesi jadibot (dipakai buat mengenali command yang valid) sudah punya `rvo`, `viewonce`, `vo`, tapi lupa memasukkan `rvo2` — jadi `.rvo2` di jadibot tidak pernah dianggap command, langsung diabaikan sebelum sampai ke handler~
 2. `rvo2` sekarang ditambahkan ke daftar `loadedCommands` jadibot (berlaku di jalur pairing-code maupun QR)
 > `.rvo2` sekarang merespon normal juga di sesi jadibot, sama seperti di bot utama
+
+*4. 🐛 .delbot Tidak Merespon di JadiBot*
+_Sama seperti kasus `.rvo2` — `.delbot` normal dipakai di bot utama, tapi diam saja di sesi jadibot:_
+1. ~`delbot` tidak pernah dimasukkan ke daftar `jadibotAllowedCommands` (message.js) maupun daftar `loadedCommands` yang dipasang ke tiap sesi jadibot (src/helper/jadibot.js) — jadi `.delbot` di jadibot tidak pernah dianggap command, langsung diabaikan sebelum sampai ke handler~
+2. `delbot` sekarang ditambahkan ke ketiga daftar tersebut (jadibotAllowedCommands, serta loadedCommands di jalur pairing-code maupun QR)
+> `.delbot` sekarang merespon normal juga di sesi jadibot, sama seperti di bot utama
+
+*5. 🐛 .del di Grup Salah Deteksi "Bot Bukan Admin" (Bug LID)*
+_`.del` gagal menghapus pesan di grup dengan pesan "Bot bukan admin", padahal bot sebenarnya admin — bisa kejadian di bot utama maupun jadibot:_
+1. ~Pengecekan status admin bot (`resolveIsBotGroupAdmin`) mencari bot di daftar peserta grup cuma berdasarkan nomor telepon — padahal WhatsApp sekarang sering mengirim identitas peserta grup dalam format LID, bukan nomor telepon, jadi pencocokan gagal dan bot dianggap "bukan admin" walau sebenarnya admin~
+2. ~Hasil cek yang salah itu langsung ditimpa ke cache status admin — jadi status yang tadinya benar (admin) ikut rusak dan `.del` terus gagal sampai cache direset manual~
+3. Sekarang bot dicocokkan ke peserta grup lewat nomor telepon ATAU LID (`hisoka.user?.lid`), sama seperti pola yang sudah dipakai di bagian lain
+4. Kalau bot tetap tidak ketemu di peserta grup (format tak dikenali), status admin lama di cache tidak lagi ditimpa jadi "bukan admin" — dipertahankan apa adanya
+> `.del` di grup sekarang mendeteksi status admin bot dengan akurat, tidak lagi salah tolak & tidak lagi merusak cache
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *PERUBAHAN*
