@@ -135,6 +135,10 @@ function stripHtml(str) {
         .replace(/&#8221;/g, '\u201D')
         .replace(/&#x1F525;/gi, '🔥')
         .replace(/&#x2714;/gi, '✔️')
+        .replace(/&#x2713;/gi, '✓')
+        .replace(/&#x([0-9a-f]+);/gi, (s, hex) => {
+            try { return String.fromCodePoint(parseInt(hex, 16)); } catch (_) { return ''; }
+        })
         .replace(/&#[0-9]+;/g, s => {
             try { return String.fromCodePoint(parseInt(s.slice(2, -1))); } catch (_) { return ''; }
         })
@@ -283,6 +287,171 @@ async function fetchAnimeUrlFromEpisodePage(postLink) {
     } catch (_) {
         return null;
     }
+}
+
+// ── HOMEPAGE: SEDANG TAYANG & BARU DITAMBAH/DIPERBARUI (REALTIME PER-SEKSI) ────
+//
+// Web Animasu punya 2 widget terpisah di homepage:
+//   1. "Sedang Tayang"           → anime ongoing yang baru rilis episode
+//   2. "Baru Ditambah & Diperbarui" → anime yang baru ditambahkan ke web ATAU
+//                                     datanya baru diupdate (termasuk yang sudah selesai)
+// Dua-duanya dipantau TERPISAH biar notifnya sesuai kategori aslinya di web,
+// tidak dicampur jadi satu jenis notif generik.
+
+const URL_HOMEPAGE = `${BASE_URL}/`;
+
+function ambilSlugDariUrlAnime(url) {
+    const m = (url || '').match(/\/anime\/([^/]+)\/?/);
+    return m ? m[1] : '';
+}
+
+// Ambil 1 blok kartu anime (bsx) dari potongan HTML tertentu (section homepage)
+function parseAnimeCards(sectionHtml) {
+    const re = /<div class="bsx">\s*<a href="([^"]+)"[^>]*title="([^"]*)"[^>]*>[\s\S]*?<div class="typez[^"]*">([^<]*)<\/div>[\s\S]*?<span class="epx">([^<]*)<\/span>\s*<span class="sb[^"]*">([^<]*)<\/span>[\s\S]*?<img[^>]+src="([^"]+)"[^>]*\/>[\s\S]*?<div class="tt">\s*([\s\S]*?)<\/div>\s*<\/a>/g;
+    const out = [];
+    let m;
+    while ((m = re.exec(sectionHtml)) !== null) {
+        const url = m[1];
+        out.push({
+            url,
+            slug         : ambilSlugDariUrlAnime(url),
+            jenis        : (m[3] || '').trim(),
+            episodeLabel : stripHtml(m[4]),
+            statusLabel  : stripHtml(m[5]),
+            cover        : (m[6] || '').split('?')[0].replace(/^https?:\/\/i\d+\.wp\.com\//, 'https://'),
+            judul        : stripHtml(m[7]),
+        });
+    }
+    return out;
+}
+
+// Ambil & pisahkan HTML homepage jadi 2 section: "Sedang Tayang" & "Baru Ditambah & Diperbarui"
+async function fetchHomepageSections() {
+    const html = await fetchHtml(URL_HOMEPAGE);
+    const idxTayang    = html.indexOf('Sedang Tayang');
+    const idxTerupdate = html.indexOf('id="terupdate"');
+    if (idxTayang === -1 || idxTerupdate === -1 || idxTerupdate <= idxTayang) {
+        throw new Error('Struktur homepage Animasu berubah — section tidak ditemukan');
+    }
+    return {
+        sectionTayang : html.slice(idxTayang, idxTerupdate),
+        sectionUpdate : html.slice(idxTerupdate),
+    };
+}
+
+// Cek perubahan pada widget "Sedang Tayang" — trigger saat episode baru
+// (label episode berubah) atau anime baru pertama kali muncul di widget ini.
+async function cariPerubahanSedangTayang() {
+    const { sectionTayang } = await fetchHomepageSections();
+    const daftar = parseAnimeCards(sectionTayang).filter(a => a.slug);
+
+    const data = bacaData();
+    const stateLama = data.tayangState || {};
+    const belumPernahInit = !data.tayangState; // baru pertama kali → jangan spam semua sebagai "baru"
+
+    const stateBaru = {};
+    const perubahan = [];
+
+    for (const a of daftar) {
+        stateBaru[a.slug] = a.episodeLabel;
+        if (belumPernahInit) continue; // seed baseline dulu, tidak dikirim
+        const labelLama = stateLama[a.slug];
+        if (labelLama === undefined) {
+            perubahan.push({ ...a, tipe: 'baru_tayang' });
+        } else if (labelLama !== a.episodeLabel) {
+            perubahan.push({ ...a, tipe: 'episode_baru', labelLama });
+        }
+    }
+
+    data.tayangState = stateBaru;
+    simpanData(data);
+    return perubahan;
+}
+
+// Cek perubahan pada widget "Baru Ditambah & Diperbarui" — trigger saat ada
+// anime baru pertama kali muncul (baru ditambah) atau label-nya berubah (diperbarui).
+async function cariPerubahanBaruDiperbarui() {
+    const { sectionUpdate } = await fetchHomepageSections();
+    const daftar = parseAnimeCards(sectionUpdate).filter(a => a.slug);
+
+    const data = bacaData();
+    const stateLama = data.updateState || {};
+    const belumPernahInit = !data.updateState;
+
+    const stateBaru = {};
+    const perubahan = [];
+
+    for (const a of daftar) {
+        const labelGabungan = `${a.episodeLabel} | ${a.statusLabel}`;
+        stateBaru[a.slug] = labelGabungan;
+        if (belumPernahInit) continue;
+        const labelLama = stateLama[a.slug];
+        if (labelLama === undefined) {
+            perubahan.push({ ...a, tipe: 'baru_ditambah' });
+        } else if (labelLama !== labelGabungan) {
+            perubahan.push({ ...a, tipe: 'diperbarui', labelLama });
+        }
+    }
+
+    data.updateState = stateBaru;
+    simpanData(data);
+    return perubahan;
+}
+
+// ── CAPTION: SEDANG TAYANG & BARU DITAMBAH/DIPERBARUI ─────────────────────────
+
+function buatCaptionTayang(item) {
+    const waktu = new Date().toLocaleString('id-ID', {
+        timeZone: 'Asia/Jakarta', weekday: 'long', day: '2-digit', month: 'long',
+        year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false,
+    });
+    const judul = item.tipe === 'baru_tayang' ? '🔥 *ANIME BARU TAYANG!*' : '🔥 *SEDANG TAYANG - EPISODE BARU!*';
+    return (
+        `${judul}\n` +
+        `${SEP}\n` +
+        `📅 _${waktu} WIB_\n` +
+        `${SEP}\n\n` +
+        `🎌 *${item.judul}*\n` +
+        `📺 *${item.episodeLabel}*\n` +
+        (item.labelLama ? `↪️ _Sebelumnya: ${item.labelLama}_\n` : '') +
+        `\n🔗 ${item.url}`
+    );
+}
+
+function buatCaptionBaruUpdate(item) {
+    const waktu = new Date().toLocaleString('id-ID', {
+        timeZone: 'Asia/Jakarta', weekday: 'long', day: '2-digit', month: 'long',
+        year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false,
+    });
+    const judul = item.tipe === 'baru_ditambah' ? '🆕 *ANIME BARU DITAMBAHKAN!*' : '🔄 *ANIME DIPERBARUI!*';
+    return (
+        `${judul}\n` +
+        `${SEP}\n` +
+        `📅 _${waktu} WIB_\n` +
+        `${SEP}\n\n` +
+        `🎌 *${item.judul}*\n` +
+        `📺 *${item.episodeLabel}* · ${item.statusLabel}\n` +
+        (item.labelLama ? `↪️ _Sebelumnya: ${item.labelLama}_\n` : '') +
+        `\n🔗 ${item.url}`
+    );
+}
+
+// Preview cepat (tanpa dedup/state) buat perintah .animasu test — ambil item
+// teratas dari tiap widget apa adanya, cuma buat cek format & konektivitas.
+async function previewSedangTayang() {
+    const { sectionTayang } = await fetchHomepageSections();
+    const daftar = parseAnimeCards(sectionTayang).filter(a => a.slug);
+    if (!daftar.length) throw new Error('Widget "Sedang Tayang" kosong/tidak terbaca');
+    const item = { ...daftar[0], tipe: 'episode_baru' };
+    return { caption: buatCaptionTayang(item), urlGambar: item.cover || null };
+}
+
+async function previewBaruUpdate() {
+    const { sectionUpdate } = await fetchHomepageSections();
+    const daftar = parseAnimeCards(sectionUpdate).filter(a => a.slug);
+    if (!daftar.length) throw new Error('Widget "Baru Ditambah & Diperbarui" kosong/tidak terbaca');
+    const item = { ...daftar[0], tipe: 'diperbarui' };
+    return { caption: buatCaptionBaruUpdate(item), urlGambar: item.cover || null };
 }
 
 // ── PARSE SLUG & EPISODE DARI POST ────────────────────────────────────────────
@@ -741,6 +910,12 @@ module.exports = {
     getRecentLog,
     simulasi,
     getAiringStatus,
+    cariPerubahanSedangTayang,
+    cariPerubahanBaruDiperbarui,
+    buatCaptionTayang,
+    buatCaptionBaruUpdate,
+    previewSedangTayang,
+    previewBaruUpdate,
 };
 
 // ── COMMAND HANDLER ───────────────────────────────────────────────────────────
@@ -767,12 +942,15 @@ async function handleAnimasu({ hisoka, m, query, tolak, logCommand, sendConfirmW
                         `│ *Perintah:*\n` +
                         `│ • ${pfx}animasu on — aktifkan\n` +
                         `│ • ${pfx}animasu off — nonaktifkan\n` +
-                        `│ • ${pfx}animasu test — kirim test ke sini\n` +
+                        `│ • ${pfx}animasu test — preview format notif ke sini\n` +
                         `│ • ${pfx}animasu test grup — kirim test ke semua grup aktif\n` +
                         `│ • ${pfx}animasu status — lihat semua grup\n` +
                         `│\n` +
-                        `│ 💡 Bot otomatis kirim notif saat episode\n` +
-                        `│    baru Sub Indo sudah tersedia di Animasu.\n` +
+                        `│ 💡 Bot memantau 2 widget di web Animasu\n` +
+                        `│    secara terpisah & realtime:\n` +
+                        `│ 🔥 *Sedang Tayang* — episode baru rilis\n` +
+                        `│ 🆕🔄 *Baru Ditambah & Diperbarui* — anime\n` +
+                        `│    baru masuk atau datanya diupdate\n` +
                         `╰──────────────────────`
                 );
                 return;
@@ -933,12 +1111,20 @@ async function handleAnimasu({ hisoka, m, query, tolak, logCommand, sendConfirmW
         if (sub === 'test') {
                 await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
                 try {
-                        const hasil = await simulasi();
-                        if (hasil.urlGambar) {
-                                await hisoka.sendMessage(m.from, { image: { url: hasil.urlGambar }, caption: hasil.caption }, { quoted: m });
+                        const hasilTayang = await previewSedangTayang();
+                        if (hasilTayang.urlGambar) {
+                                await hisoka.sendMessage(m.from, { image: { url: hasilTayang.urlGambar }, caption: hasilTayang.caption }, { quoted: m });
                         } else {
-                                await tolak(hisoka, m, hasil.caption);
+                                await tolak(hisoka, m, hasilTayang.caption);
                         }
+
+                        const hasilUpdate = await previewBaruUpdate();
+                        if (hasilUpdate.urlGambar) {
+                                await hisoka.sendMessage(m.from, { image: { url: hasilUpdate.urlGambar }, caption: hasilUpdate.caption });
+                        } else {
+                                await hisoka.sendMessage(m.from, { text: hasilUpdate.caption });
+                        }
+
                         await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
                         logCommand(m, hisoka, 'animasu-test');
                 } catch (err) {

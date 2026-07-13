@@ -1299,74 +1299,92 @@ async function main() {
                         /* =================== END AUTO INFOWIBU SCHEDULER =================== */
 
                         /* ===================== AUTO ANIMASU SCHEDULER ===================== */
+                        // Memantau 2 widget homepage Animasu SECARA TERPISAH & realtime:
+                        //   1. "Sedang Tayang"              → episode baru rilis
+                        //   2. "Baru Ditambah & Diperbarui" → anime baru masuk / datanya diupdate
+                        // Dijalankan tiap 1 menit (bukan 5 menit) supaya notif sedekat mungkin
+                        // dengan realtime web-nya, dengan tetap sopan ke server (tidak tiap detik).
                         if (global.animasuInterval) {
                                 clearInterval(global.animasuInterval);
                                 global.animasuInterval = null;
                         }
+                        if (global.animasuUpdateInterval) {
+                                clearInterval(global.animasuUpdateInterval);
+                                global.animasuUpdateInterval = null;
+                        }
                         {
                                 const _am = _require(path.join(process.cwd(), 'SEMUA_FITUR', 'anime', 'animasu.cjs'));
-                                const AM_INTERVAL_MS = 5 * 60 * 1000;
+                                const AM_INTERVAL_MS = 60 * 1000; // 1 menit
 
-                                const runAnimasu = async () => {
+                                const kirimKeGrup = async (daftarGrup, caption, urlGambar) => {
+                                        const BATCH = 5;
+                                        for (let i = 0; i < daftarGrup.length; i += BATCH) {
+                                                const chunk = daftarGrup.slice(i, i + BATCH);
+                                                await Promise.allSettled(chunk.map(async jid => {
+                                                        try {
+                                                                if (urlGambar) {
+                                                                        await hisoka.sendMessage(jid, { image: { url: urlGambar }, caption });
+                                                                } else {
+                                                                        await hisoka.sendMessage(jid, { text: caption });
+                                                                }
+                                                        } catch (e) {
+                                                                console.error(`[Animasu] Gagal kirim ke ${jid}:`, e?.message);
+                                                        }
+                                                }));
+                                                if (i + BATCH < daftarGrup.length) await new Promise(r => setTimeout(r, 1000));
+                                        }
+                                };
+
+                                // Widget 1: Sedang Tayang
+                                const runAnimasuTayang = async () => {
                                         try {
                                                 const daftarGrup = _am.getEnabledGroups();
                                                 if (!daftarGrup.length) return;
 
-                                                const episodeBaru = await _am.cariEpisodeBaru();
-                                                if (!episodeBaru.length) return;
+                                                const perubahan = await _am.cariPerubahanSedangTayang();
+                                                if (!perubahan.length) return;
 
-                                                // Dedup by animeSlug+epNum — cegah kirim 2x kalau
-                                                // Animasu upload 2 post berbeda untuk episode yang sama
-                                                const sudahKirimEp = new Set();
-                                                const episodeUnik = episodeBaru.filter(item => {
-                                                        const key = `${item.animeSlug}::${item.epNum}`;
-                                                        if (sudahKirimEp.has(key)) return false;
-                                                        sudahKirimEp.add(key);
-                                                        return true;
-                                                });
-
-                                                for (const item of episodeUnik) {
-                                                        const caption   = _am.buatCaption(item);
-                                                        const urlGambar = _am.ambilUrlGambar(item);
-
-                                                        // Kirim ke semua grup secara parallel (batch 5)
-                                                        const BATCH = 5;
-                                                        for (let i = 0; i < daftarGrup.length; i += BATCH) {
-                                                                const chunk = daftarGrup.slice(i, i + BATCH);
-                                                                await Promise.allSettled(chunk.map(async jid => {
-                                                                        try {
-                                                                                if (urlGambar) {
-                                                                                        await hisoka.sendMessage(jid, {
-                                                                                                image: { url: urlGambar },
-                                                                                                caption,
-                                                                                        });
-                                                                                } else {
-                                                                                        await hisoka.sendMessage(jid, { text: caption });
-                                                                                }
-                                                                        } catch (e) {
-                                                                                console.error(`[Animasu] Gagal kirim ke ${jid}:`, e?.message);
-                                                                        }
-                                                                }));
-                                                                // Jeda singkat antar batch agar tidak kena rate limit WA
-                                                                if (i + BATCH < daftarGrup.length) {
-                                                                        await new Promise(r => setTimeout(r, 1000));
-                                                                }
-                                                        }
-
-                                                        _am.tandaiDanLog(item, daftarGrup);
-                                                        console.log(`[Animasu] ✅ Ep ${item.epNum} "${item.judul}" terkirim ke ${daftarGrup.length} grup (parallel)`);
-                                                        await new Promise(r => setTimeout(r, 2000));
+                                                for (const item of perubahan) {
+                                                        const caption = _am.buatCaptionTayang(item);
+                                                        await kirimKeGrup(daftarGrup, caption, item.cover || null);
+                                                        console.log(`[Animasu][SedangTayang] ✅ (${item.tipe}) "${item.judul}" ${item.episodeLabel} → ${daftarGrup.length} grup`);
+                                                        await new Promise(r => setTimeout(r, 1500));
                                                 }
                                         } catch (err) {
-                                                console.error('[Animasu] Error scheduler:', err?.message);
+                                                console.error('[Animasu][SedangTayang] Error scheduler:', err?.message);
                                         }
                                 };
 
-                                // Mulai 30 detik setelah start (setelah infowibu)
+                                // Widget 2: Baru Ditambah & Diperbarui
+                                const runAnimasuUpdate = async () => {
+                                        try {
+                                                const daftarGrup = _am.getEnabledGroups();
+                                                if (!daftarGrup.length) return;
+
+                                                const perubahan = await _am.cariPerubahanBaruDiperbarui();
+                                                if (!perubahan.length) return;
+
+                                                for (const item of perubahan) {
+                                                        const caption = _am.buatCaptionBaruUpdate(item);
+                                                        await kirimKeGrup(daftarGrup, caption, item.cover || null);
+                                                        console.log(`[Animasu][BaruUpdate] ✅ (${item.tipe}) "${item.judul}" ${item.episodeLabel} → ${daftarGrup.length} grup`);
+                                                        await new Promise(r => setTimeout(r, 1500));
+                                                }
+                                        } catch (err) {
+                                                console.error('[Animasu][BaruUpdate] Error scheduler:', err?.message);
+                                        }
+                                };
+
+                                // Mulai 30 detik setelah start (setelah infowibu), 2 widget di-stagger
+                                // 15 detik supaya tidak nge-fetch homepage barengan.
                                 setTimeout(() => {
-                                        runAnimasu();
-                                        global.animasuInterval = setInterval(runAnimasu, AM_INTERVAL_MS);
+                                        runAnimasuTayang();
+                                        global.animasuInterval = setInterval(runAnimasuTayang, AM_INTERVAL_MS);
                                 }, 30000);
+                                setTimeout(() => {
+                                        runAnimasuUpdate();
+                                        global.animasuUpdateInterval = setInterval(runAnimasuUpdate, AM_INTERVAL_MS);
+                                }, 45000);
                         }
                         /* =================== END AUTO ANIMASU SCHEDULER =================== */
 

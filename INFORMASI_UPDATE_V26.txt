@@ -2,7 +2,7 @@
 _📅 Senin, 13 Juli 2026_ 🌙
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V26*
-✨ *2 Fitur Baru*
+✨ *3 Fitur Baru*
 🔧 *6 Bug/Error Fix*
 🚀 *3 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -25,6 +25,16 @@ _Nggak perlu ketik ulang nomor lengkap — cukup reply pesan `.listbot`, pakai n
 5. Tetap didukung format lama: reply `1` untuk stop 1 bot, `1,2,3` untuk stop beberapa bot
 6. Kalau ada target yang gagal (urutan salah, durasi salah, atau bot-nya Permanent), laporan tetap tampilkan mana yang berhasil & mana yang gagal per baris
 > Kelola banyak jadibot sekaligus dari satu balasan `.listbot`, tanpa ketik ulang nomor satu-satu
+
+*3. 🔥🆕🔄 Animasu — Pantau 2 Widget Realtime Terpisah (Sedang Tayang & Baru Ditambah/Diperbarui)*
+_Sebelumnya notif Animasu cuma satu jenis generik dari daftar post episode. Sekarang bot memantau persis seperti struktur web-nya, 2 widget terpisah, biar tidak ada beda paham/bentrok antar kategori:_
+1. Widget *"Sedang Tayang 🔥"* di web dipantau sendiri — trigger saat ada anime baru mulai tayang, atau episode barunya rilis (label episode berubah)
+2. Widget *"Baru Ditambah & Diperbarui"* di web dipantau sendiri — trigger saat ada anime baru pertama kali masuk ke web (🆕 Baru Ditambah), atau data anime yang sudah ada berubah (🔄 Diperbarui, misal status/jumlah episode berubah)
+3. Caption notif dibedakan sesuai kategori & tipe kejadian (🔥 Episode Baru / 🔥 Anime Baru Tayang / 🆕 Baru Ditambah / 🔄 Diperbarui), lengkap dengan info "sebelumnya apa" kalau ada perubahan label
+4. Interval cek dipercepat dari 5 menit jadi *1 menit* per widget (di-stagger 15 detik antar widget) — jauh lebih dekat ke realtime tanpa membebani server Animasu
+5. `.animasu test` sekarang kirim 2 preview (satu dari tiap widget) supaya format & konektivitas kedua kategori bisa dicek langsung
+6. Dedup state dipisah per widget (`tayangState` & `updateState`) — supaya perubahan di satu widget tidak pernah memicu notif dari widget lain
+> Sudah diuji simulasi manual: deteksi "episode baru", "anime baru tayang", "baru ditambah", dan "diperbarui" semuanya akurat sebelum dipasang ke scheduler
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🔧 *BUG/ERROR FIX*
