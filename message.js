@@ -546,147 +546,146 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                 return;
                                         }
 
-                                        // Cek format kurangi: "1,-3j" atau "2,-30m" (prefix minus = downbot via reply)
-                                        const downbotMatch = rawChoice.match(/^(\d{1,3})\s*[,.]\s*-\s*(.+)$/);
-                                        if (downbotMatch) {
-                                                const downIdx = Number(downbotMatch[1]);
-                                                const downDurStr = downbotMatch[2].trim();
-                                                const downDurInfo = parseJadibotDuration(downDurStr);
+                                        // Cek format atur durasi (upbot/downbot), satu atau BANYAK target sekaligus
+                                        // dipisah "|". Tiap bagian formatnya "idx,durasi":
+                                        //   - "3,1d,20m"      → target 3, tambah 1 hari 20 menit (upbot)
+                                        //   - "1,-45m"        → target 1, kurangi 45 menit (downbot, prefix "-")
+                                        //   - "2,p"           → target 2, ubah ke permanent
+                                        //   - "3,1d,20m|1,30d" → banyak target sekaligus, dipisah "|"
+                                        const ADJUST_SEGMENT_RE = /^(\d{1,3})\s*[,.]\s*(-)?\s*(.+)$/;
+                                        const adjustSegmentsRaw = rawChoice.split('|').map(s => s.trim()).filter(Boolean);
+                                        const isAdjustFormat = adjustSegmentsRaw.length >= 1 &&
+                                                adjustSegmentsRaw.every(seg => ADJUST_SEGMENT_RE.test(seg));
 
-                                                if (downIdx < 1 || downIdx > pendingJadibot.numbers.length) {
-                                                        await tolak(hisoka, m, `❌ *Nomor urutan tidak valid.*\n_Masukkan angka_ *1* _sampai_ *${maxNum}*_._`);
-                                                        return;
+                                        if (isAdjustFormat) {
+                                                const results = [];
+
+                                                for (const seg of adjustSegmentsRaw) {
+                                                        const segMatch = seg.match(ADJUST_SEGMENT_RE);
+                                                        const idx = Number(segMatch[1]);
+                                                        const isMinus = !!segMatch[2];
+                                                        const durStr = segMatch[3].trim();
+                                                        const durInfo = parseJadibotDuration(durStr);
+
+                                                        if (idx < 1 || idx > pendingJadibot.numbers.length) {
+                                                                results.push({ idx, ok: false, error: `Urutan tidak valid _(masukkan 1-${maxNum})_.` });
+                                                                continue;
+                                                        }
+                                                        const targetNum = pendingJadibot.numbers[idx - 1];
+                                                        if (!targetNum || !activeList.includes(targetNum)) {
+                                                                results.push({ idx, ok: false, error: 'Bot tidak ditemukan atau sudah tidak aktif.' });
+                                                                continue;
+                                                        }
+                                                        if (!durInfo) {
+                                                                results.push({ idx, targetNum, ok: false, error: `Format durasi \`${durStr}\` tidak valid.` });
+                                                                continue;
+                                                        }
+                                                        if (isMinus && durInfo.ms === 'permanent') {
+                                                                results.push({ idx, targetNum, ok: false, error: `Tidak bisa kurangi ke "permanent". Pakai \`${idx},p\` (tanpa "-") untuk set permanent.` });
+                                                                continue;
+                                                        }
+
+                                                        const adjSendReply = async (msg) => tolak(hisoka, m, msg);
+                                                        const oldInfo = getJadibotExpirySummary(targetNum);
+                                                        const oldLabel = oldInfo?.remaining || 'Tidak ada data';
+                                                        const oldExpire = oldInfo?.expiresAtText || '-';
+
+                                                        if (isMinus) {
+                                                                const downResult = reduceJadibotExpiry(targetNum, durInfo.ms, 'active');
+                                                                if (!downResult) {
+                                                                        results.push({ idx, targetNum, ok: false, error: 'Data masa berlaku tidak ditemukan.' });
+                                                                        continue;
+                                                                }
+                                                                if (downResult.error === 'permanent') {
+                                                                        results.push({ idx, targetNum, ok: false, error: 'Status *Permanent* ♾️, tidak punya batas waktu yang bisa dikurangi.' });
+                                                                        continue;
+                                                                }
+                                                                scheduleJadibotExpiry(targetNum, adjSendReply);
+                                                                const newInfo = downResult.expiredNow ? null : getJadibotExpirySummary(targetNum);
+                                                                results.push({
+                                                                        idx, targetNum, ok: true, kind: 'down',
+                                                                        durLabel: durInfo.label, oldLabel, oldExpire,
+                                                                        expiredNow: downResult.expiredNow,
+                                                                        newLabel: newInfo ? newInfo.remaining : 'Kedaluwarsa',
+                                                                        newExpire: newInfo ? newInfo.expiresAtText : '-'
+                                                                });
+                                                        } else if (durInfo.ms === 'permanent') {
+                                                                setPermanentJadibot(targetNum, 'active');
+                                                                results.push({ idx, targetNum, ok: true, kind: 'perm', oldLabel });
+                                                        } else {
+                                                                extendJadibotExpiry(targetNum, durInfo.ms, 'active');
+                                                                scheduleJadibotExpiry(targetNum, adjSendReply);
+                                                                const newInfo = getJadibotExpirySummary(targetNum);
+                                                                results.push({
+                                                                        idx, targetNum, ok: true, kind: 'up',
+                                                                        durLabel: durInfo.label, oldLabel, oldExpire,
+                                                                        newLabel: newInfo.remaining, newExpire: newInfo.expiresAtText
+                                                                });
+                                                        }
                                                 }
-                                                if (!downDurInfo || downDurInfo.ms === 'permanent') {
-                                                        await tolak(hisoka, m,
-                                                                `❌ *Format durasi tidak valid!*\n\n` +
-                                                                `📌 *Contoh:*\n` +
-                                                                `• \`${downIdx},-30m\` → kurangi 30 menit\n` +
-                                                                `• \`${downIdx},-2j\` → kurangi 2 jam\n` +
-                                                                `• \`${downIdx},-3h\` → kurangi 3 hari\n\n` +
-                                                                `> _Singkatan: m=menit · j=jam · h=hari_`
-                                                        );
-                                                        return;
-                                                }
 
-                                                const targetDownNum = pendingJadibot.numbers[downIdx - 1];
-                                                if (!targetDownNum || !activeList.includes(targetDownNum)) {
-                                                        await tolak(hisoka, m, `❌ *Bot urutan ${downIdx} tidak ditemukan atau sudah tidak aktif.*\n> _Ketik_ \`.listbot\` _untuk refresh._`);
-                                                        return;
-                                                }
+                                                const okCount = results.filter(r => r.ok).length;
+                                                const failCount = results.length - okCount;
+                                                const isMulti = results.length > 1;
+                                                await hisoka.sendMessage(m.from, {
+                                                        react: { text: failCount === 0 ? '✅' : (okCount === 0 ? '❌' : '⚠️'), key: m.key }
+                                                });
 
-                                                const downSendReply = async (msg) => tolak(hisoka, m, msg);
-                                                const oldDownInfo = getJadibotExpirySummary(targetDownNum);
-                                                const oldDownLabel = oldDownInfo?.remaining || 'Tidak ada data';
-                                                const oldDownExpire = oldDownInfo?.expiresAtText || '-';
-
-                                                const downResult = reduceJadibotExpiry(targetDownNum, downDurInfo.ms, 'active');
-
-                                                if (!downResult) {
-                                                        await tolak(hisoka, m, `⚠️ *Gagal!*\nData masa berlaku +${maskNumber(targetDownNum)} tidak ditemukan.`);
-                                                        return;
-                                                }
-                                                if (downResult.error === 'permanent') {
-                                                        await tolak(hisoka, m,
-                                                                `❌ *Tidak bisa!*\n+${maskNumber(targetDownNum)} statusnya *Permanent* ♾️, tidak punya batas waktu yang bisa dikurangi.\n\n` +
-                                                                `💡 Set durasi tertentu dulu lewat \`.upbot ${targetDownNum},1h\`.`
-                                                        );
-                                                        return;
-                                                }
-
-                                                scheduleJadibotExpiry(targetDownNum, downSendReply);
-
-                                                if (downResult.expiredNow) {
-                                                        await hisoka.sendMessage(m.from, { react: { text: '⏬', key: m.key } });
-                                                        await tolak(hisoka, m,
-                                                                `⏬ *Durasi dikurangi!*\n` +
-                                                                `📱 \`+${maskNumber(targetDownNum)}\`\n\n` +
-                                                                `📊 *Perubahan masa berlaku:*\n` +
-                                                                `⏮️ Sebelumnya : ~${oldDownLabel}~\n` +
-                                                                `➖ Dikurangi  : *${downDurInfo.label}*\n` +
-                                                                `✨ Sisa baru  : *Kedaluwarsa*\n\n` +
-                                                                `> _Sisa waktu sudah habis, bot langsung dihentikan & sesi dihapus._`
-                                                        );
+                                                if (!isMulti) {
+                                                        const r = results[0];
+                                                        if (!r.ok) {
+                                                                await tolak(hisoka, m, `❌ *Gagal!*\n${r.targetNum ? `+${maskNumber(r.targetNum)} — ` : ''}${r.error}`);
+                                                        } else if (r.kind === 'perm') {
+                                                                await tolak(hisoka, m,
+                                                                        `♾️ *Durasi diperbarui ke Permanent!*\n` +
+                                                                        `📱 \`+${maskNumber(r.targetNum)}\`\n\n` +
+                                                                        `📊 *Perubahan masa berlaku:*\n` +
+                                                                        `⏮️ Sebelumnya : ~${r.oldLabel}~\n` +
+                                                                        `✨ Terbaru    : *Permanent* ♾️\n\n` +
+                                                                        `> _Bot tetap aktif tanpa batas waktu._`
+                                                                );
+                                                        } else if (r.kind === 'down') {
+                                                                await tolak(hisoka, m,
+                                                                        `⏬ *Durasi dikurangi!*\n` +
+                                                                        `📱 \`+${maskNumber(r.targetNum)}\`\n\n` +
+                                                                        `📊 *Perubahan masa berlaku:*\n` +
+                                                                        `⏮️ Sebelumnya : ~${r.oldLabel}~\n` +
+                                                                        `   _Exp lama_ : _${r.oldExpire}_\n` +
+                                                                        `➖ Dikurangi  : *${r.durLabel}*\n` +
+                                                                        `✨ Sisa baru  : *${r.newLabel}*\n` +
+                                                                        (r.expiredNow ? '' : `   _Exp baru_ : _${r.newExpire}_\n`) +
+                                                                        `\n> _${r.expiredNow ? 'Sisa waktu sudah habis, bot langsung dihentikan & sesi dihapus.' : 'Bot tetap aktif, durasi dikurangi.'}_`
+                                                                );
+                                                        } else {
+                                                                await tolak(hisoka, m,
+                                                                        `⏫ *Durasi diperbarui!*\n` +
+                                                                        `📱 \`+${maskNumber(r.targetNum)}\`\n\n` +
+                                                                        `📊 *Perubahan masa berlaku:*\n` +
+                                                                        `⏮️ Sebelumnya : ~${r.oldLabel}~\n` +
+                                                                        `   _Exp lama_ : _${r.oldExpire}_\n` +
+                                                                        `➕ Ditambah   : *+${r.durLabel}*\n` +
+                                                                        `✨ Total baru : *${r.newLabel}*\n` +
+                                                                        `   _Exp baru_ : _${r.newExpire}_\n\n` +
+                                                                        `> _Bot tetap aktif, durasi diperpanjang._`
+                                                                );
+                                                        }
                                                 } else {
-                                                        const downInfo = getJadibotExpirySummary(targetDownNum);
-                                                        await hisoka.sendMessage(m.from, { react: { text: '⏬', key: m.key } });
+                                                        const lines = results.map(r => {
+                                                                if (!r.ok) {
+                                                                        return `*${r.idx}.* ❌ ${r.targetNum ? `+${maskNumber(r.targetNum)} — ` : ''}${r.error}`;
+                                                                }
+                                                                if (r.kind === 'perm') {
+                                                                        return `*${r.idx}.* ♾️ +${maskNumber(r.targetNum)} → *Permanent* _(sebelumnya ${r.oldLabel})_`;
+                                                                }
+                                                                if (r.kind === 'down') {
+                                                                        return `*${r.idx}.* ⏬ +${maskNumber(r.targetNum)} ➖ *${r.durLabel}* → sisa *${r.newLabel}*${r.expiredNow ? ' _(dihentikan)_' : ` _(exp: ${r.newExpire})_`}`;
+                                                                }
+                                                                return `*${r.idx}.* ⏫ +${maskNumber(r.targetNum)} ➕ *${r.durLabel}* → sisa *${r.newLabel}* _(exp: ${r.newExpire})_`;
+                                                        });
                                                         await tolak(hisoka, m,
-                                                                `⏬ *Durasi dikurangi!*\n` +
-                                                                `📱 \`+${maskNumber(targetDownNum)}\`\n\n` +
-                                                                `📊 *Perubahan masa berlaku:*\n` +
-                                                                `⏮️ Sebelumnya : ~${oldDownLabel}~\n` +
-                                                                `   _Exp lama_ : _${oldDownExpire}_\n` +
-                                                                `➖ Dikurangi  : *${downDurInfo.label}*\n` +
-                                                                `✨ Sisa baru  : *${downInfo.remaining}*\n` +
-                                                                `   _Exp baru_ : _${downInfo.expiresAtText}_\n\n` +
-                                                                `> _Bot tetap aktif, durasi dikurangi._`
-                                                        );
-                                                }
-                                                return;
-                                        }
-
-                                        // Cek format perpanjang: "1,3j" atau "2,p" atau "1, 2h"
-                                        const upbotMatch = rawChoice.match(/^(\d{1,3})\s*[,.]\s*(.+)$/);
-                                        if (upbotMatch) {
-                                                const upIdx = Number(upbotMatch[1]);
-                                                const upDurStr = upbotMatch[2].trim();
-                                                const upDurInfo = parseJadibotDuration(upDurStr);
-
-                                                if (upIdx < 1 || upIdx > pendingJadibot.numbers.length) {
-                                                        await tolak(hisoka, m, `❌ *Nomor urutan tidak valid.*\n_Masukkan angka_ *1* _sampai_ *${maxNum}*_._`);
-                                                        return;
-                                                }
-                                                if (!upDurInfo) {
-                                                        await tolak(hisoka, m,
-                                                                `❌ *Format durasi tidak valid!*\n\n` +
-                                                                `📌 *Contoh:*\n` +
-                                                                `• \`${upIdx},30m\` → 30 menit\n` +
-                                                                `• \`${upIdx},2j\` → 2 jam\n` +
-                                                                `• \`${upIdx},3h\` → 3 hari\n` +
-                                                                `• \`${upIdx},p\` → permanent\n\n` +
-                                                                `> _Singkatan: m=menit · j=jam · h=hari · p=permanent_`
-                                                        );
-                                                        return;
-                                                }
-
-                                                const targetNum = pendingJadibot.numbers[upIdx - 1];
-                                                if (!targetNum || !activeList.includes(targetNum)) {
-                                                        await tolak(hisoka, m, `❌ *Bot urutan ${upIdx} tidak ditemukan atau sudah tidak aktif.*\n> _Ketik_ \`.listbot\` _untuk refresh._`);
-                                                        return;
-                                                }
-
-                                                // Update expiry tanpa stop bot
-                                                const upSendReply = async (msg) => tolak(hisoka, m, msg);
-                                                // Ambil info lama sebelum dihapus
-                                                const oldUpInfo = getJadibotExpirySummary(targetNum);
-                                                const oldUpLabel = oldUpInfo?.remaining || 'Tidak ada data';
-                                                const oldUpExpire = oldUpInfo?.expiresAtText || '-';
-                                                if (upDurInfo.ms === 'permanent') {
-                                                        setPermanentJadibot(targetNum, 'active');
-                                                        await hisoka.sendMessage(m.from, { react: { text: '♾️', key: m.key } });
-                                                        await tolak(hisoka, m,
-                                                                `♾️ *Durasi diperbarui ke Permanent!*\n` +
-                                                                `📱 \`+${maskNumber(targetNum)}\`\n\n` +
-                                                                `📊 *Perubahan masa berlaku:*\n` +
-                                                                `⏮️ Sebelumnya : ~${oldUpLabel}~\n` +
-                                                                `✨ Terbaru    : *Permanent* ♾️\n\n` +
-                                                                `> _Bot tetap aktif tanpa batas waktu._`
-                                                        );
-                                                } else {
-                                                        extendJadibotExpiry(targetNum, upDurInfo.ms, 'active');
-                                                        scheduleJadibotExpiry(targetNum, upSendReply);
-                                                        const upInfo = getJadibotExpirySummary(targetNum);
-                                                        await hisoka.sendMessage(m.from, { react: { text: '⏫', key: m.key } });
-                                                        await tolak(hisoka, m,
-                                                                `⏫ *Durasi diperbarui!*\n` +
-                                                                `📱 \`+${maskNumber(targetNum)}\`\n\n` +
-                                                                `📊 *Perubahan masa berlaku:*\n` +
-                                                                `⏮️ Sebelumnya : ~${oldUpLabel}~\n` +
-                                                                `   _Exp lama_ : _${oldUpExpire}_\n` +
-                                                                `➕ Ditambah   : *+${upDurInfo.label}*\n` +
-                                                                `✨ Total baru : *${upInfo.remaining}*\n` +
-                                                                `   _Exp baru_ : _${upInfo.expiresAtText}_\n\n` +
-                                                                `> _Bot tetap aktif, durasi diperpanjang._`
+                                                                `📋 *Update ${results.length} target — ${okCount} berhasil${failCount ? `, ${failCount} gagal` : ''}*\n` +
+                                                                `━━━━━━━━━━━━━━━━━━━━━━\n` +
+                                                                lines.join('\n')
                                                         );
                                                 }
                                                 return;
@@ -720,7 +719,8 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                 `3. Ketik \`1,3j\` → perpanjang 3 jam\n` +
                                                 `4. Ketik \`1,-3j\` → kurangi 3 jam\n` +
                                                 `5. Ketik \`1,p\` → ubah ke permanent\n` +
-                                                `6. Ketik \`batal\` → batalkan\n\n` +
+                                                `6. Ketik \`3,1d,20m|1,30d\` → banyak target sekaligus, dipisah \`|\`\n` +
+                                                `7. Ketik \`batal\` → batalkan\n\n` +
                                                 `> _Singkatan: m=menit · j=jam · h=hari · p=permanent_`
                                         );
                                         return;
