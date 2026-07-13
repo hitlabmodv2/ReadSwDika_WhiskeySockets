@@ -14,16 +14,16 @@
 
 <br/><br/>
 
-[![Stars](https://img.shields.io/github/stars/hitlabmodv2/ReadSwDika_BangWily?style=for-the-badge&logo=github&color=FFD700&labelColor=1a1a2e&label=Stars)](https://github.com/hitlabmodv2/ReadSwDika_WhiskeySockets/stargazers)
-[![Forks](https://img.shields.io/github/forks/hitlabmodv2/ReadSwDika_BangWily?style=for-the-badge&logo=github&color=4A90D9&labelColor=1a1a2e&label=Forks)](https://github.com/hitlabmodv2/ReadSwDika_WhiskeySockets/network/members)
-[![Issues](https://img.shields.io/github/issues/hitlabmodv2/ReadSwDika_BangWily?style=for-the-badge&logo=github&color=E74C3C&labelColor=1a1a2e&label=Issues)](https://github.com/hitlabmodv2/ReadSwDika_WhiskeySockets/issues)
-[![Last Commit](https://img.shields.io/github/last-commit/hitlabmodv2/ReadSwDika_BangWily?style=for-the-badge&logo=github&color=2ECC71&labelColor=1a1a2e&label=Updated)](https://github.com/hitlabmodv2/ReadSwDika_WhiskeySockets/commits)
-[![Repo Size](https://img.shields.io/github/repo-size/hitlabmodv2/ReadSwDika_BangWily?style=for-the-badge&logo=github&color=9B59B6&labelColor=1a1a2e&label=Size)](https://github.com/hitlabmodv2/ReadSwDika_WhiskeySockets)
+[![Stars](https://img.shields.io/github/stars/hitlabmodv2/ReadSwDika_WhiskeySockets?style=for-the-badge&logo=github&color=FFD700&labelColor=1a1a2e&label=Stars)](https://github.com/hitlabmodv2/ReadSwDika_WhiskeySockets/stargazers)
+[![Forks](https://img.shields.io/github/forks/hitlabmodv2/ReadSwDika_WhiskeySockets?style=for-the-badge&logo=github&color=4A90D9&labelColor=1a1a2e&label=Forks)](https://github.com/hitlabmodv2/ReadSwDika_WhiskeySockets/network/members)
+[![Issues](https://img.shields.io/github/issues/hitlabmodv2/ReadSwDika_WhiskeySockets?style=for-the-badge&logo=github&color=E74C3C&labelColor=1a1a2e&label=Issues)](https://github.com/hitlabmodv2/ReadSwDika_WhiskeySockets/issues)
+[![Last Commit](https://img.shields.io/github/last-commit/hitlabmodv2/ReadSwDika_WhiskeySockets?style=for-the-badge&logo=github&color=2ECC71&labelColor=1a1a2e&label=Updated)](https://github.com/hitlabmodv2/ReadSwDika_WhiskeySockets/commits)
+[![Repo Size](https://img.shields.io/github/repo-size/hitlabmodv2/ReadSwDika_WhiskeySockets?style=for-the-badge&logo=github&color=9B59B6&labelColor=1a1a2e&label=Size)](https://github.com/hitlabmodv2/ReadSwDika_WhiskeySockets)
 
 <br/>
 
 ![Visitors](https://komarev.com/ghpvc/?username=hitlabmodv2&color=25D366&style=for-the-badge&label=TOTAL+VIEWS&abbreviated=true)
-[![Watchers](https://img.shields.io/github/watchers/hitlabmodv2/ReadSwDika_BangWily?style=for-the-badge&logo=github&color=17A589&labelColor=1a1a2e&label=Watchers)](https://github.com/hitlabmodv2/ReadSwDika_WhiskeySockets/watchers)
+[![Watchers](https://img.shields.io/github/watchers/hitlabmodv2/ReadSwDika_WhiskeySockets?style=for-the-badge&logo=github&color=17A589&labelColor=1a1a2e&label=Watchers)](https://github.com/hitlabmodv2/ReadSwDika_WhiskeySockets/watchers)
 
 <br/>
 
@@ -56,7 +56,7 @@
 
 <br/>
 
-[![Run on Replit](https://img.shields.io/badge/Run%20on-Replit-F26207?style=for-the-badge&logo=replit&logoColor=white)](https://replit.com/new/github/hitlabmodv2/ReadSwDika_BangWily)
+[![Run on Replit](https://img.shields.io/badge/Run%20on-Replit-F26207?style=for-the-badge&logo=replit&logoColor=white)](https://replit.com/new/github/hitlabmodv2/ReadSwDika_WhiskeySockets)
 
 <br/>
 
@@ -143,7 +143,7 @@
 
 <div align="center">
 
-[![Run on Replit](https://img.shields.io/badge/▶%20Run%20on-Replit-F26207?style=for-the-badge&logo=replit&logoColor=white)](https://replit.com/new/github/hitlabmodv2/ReadSwDika_BangWily)
+[![Run on Replit](https://img.shields.io/badge/▶%20Run%20on-Replit-F26207?style=for-the-badge&logo=replit&logoColor=white)](https://replit.com/new/github/hitlabmodv2/ReadSwDika_WhiskeySockets)
 
 </div>
 
@@ -1110,7 +1110,7 @@ File temporary (hasil download) dibersihkan otomatis setiap 6 jam.
 &nbsp;
 [![GitHub](https://img.shields.io/badge/GitHub-Repo-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/hitlabmodv2/ReadSwDika_WhiskeySockets)
 &nbsp;
-[![Stars](https://img.shields.io/github/stars/hitlabmodv2/ReadSwDika_BangWily?style=for-the-badge&logo=github&color=FFD700&labelColor=1a1a2e&label=⭐%20Beri%20Bintang)](https://github.com/hitlabmodv2/ReadSwDika_WhiskeySockets/stargazers)
+[![Stars](https://img.shields.io/github/stars/hitlabmodv2/ReadSwDika_WhiskeySockets?style=for-the-badge&logo=github&color=FFD700&labelColor=1a1a2e&label=⭐%20Beri%20Bintang)](https://github.com/hitlabmodv2/ReadSwDika_WhiskeySockets/stargazers)
 
 <br/><br/>
 
