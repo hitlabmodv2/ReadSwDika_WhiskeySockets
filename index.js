@@ -658,7 +658,7 @@ async function main() {
                         },
                         browser: getBrowserDevice(loadConfig()),
                         generateHighQualityLinkPreview: true,
-                        syncFullHistory: false,
+                        syncFullHistory: true,
                         connectTimeoutMs: 60000,
                         defaultQueryTimeoutMs: 60000,
                         keepAliveIntervalMs: 25000,
@@ -1810,15 +1810,16 @@ async function main() {
                                                 const urlGbr  = await _as.buatGambarOverlay(cocok.nama, cocok.waktu);
                                                 const urlAud  = _as.getAudio(cocok.nama);
 
-                                                // Gabung gambar + audio adzan jadi 1 video sekali sebelum dikirim ke semua grup
-                                                // → tiap grup cukup terima 1 pesan/chat (gambar+suara jadi satu), bukan 2 pesan terpisah
-                                                let _asVideoBuf = null;
+                                                // Konversi MP3 → OGG/Opus + generate waveform sekali sebelum dikirim ke semua grup
+                                                let _asVnBuf   = null;
+                                                let _asWaveform = null;
                                                 try {
-                                                        const { buatVideoDariGambarDanAudio: _asBuatVideo } = _require(path.resolve('./SEMUA_FITUR/media/audioconvert.cjs'));
+                                                        const { toVoiceNote: _asToVN, generateWaveform: _asGenWF } = _require(path.resolve('./SEMUA_FITUR/media/audioconvert.cjs'));
                                                         const _asAudRes = await _require('axios').get(urlAud, { responseType: 'arraybuffer', timeout: 20000 });
-                                                        _asVideoBuf = await _asBuatVideo(urlGbr, Buffer.from(_asAudRes.data), 'audio/mpeg');
+                                                        _asVnBuf    = await _asToVN(Buffer.from(_asAudRes.data), 'audio/mpeg');
+                                                        _asWaveform = await _asGenWF(_asVnBuf, 'audio/ogg; codecs=opus').catch(() => null);
                                                 } catch (_asConvErr) {
-                                                        console.error('[AutoSholat] Gagal gabung gambar+audio jadi video:', _asConvErr?.message);
+                                                        console.error('[AutoSholat] Gagal konversi audio:', _asConvErr?.message);
                                                 }
 
                                                 console.log(`[AutoSholat] ⏰ ${cocok.nama} ${cocok.waktu} WIB → kirim ke ${daftarGrup.length} grup`);
@@ -1834,40 +1835,29 @@ async function main() {
 
                                                         await Promise.allSettled(chunk.map(async jid => {
                                                                 try {
-                                                                        if (_asVideoBuf) {
-                                                                                // Gambar + suara adzan jadi 1 pesan/chat (video)
-                                                                                await hisoka.sendMessage(jid, {
-                                                                                        video  : _asVideoBuf,
-                                                                                        caption: caption,
-                                                                                        contextInfo: {
-                                                                                                externalAdReply: {
-                                                                                                        showAdAttribution : false,
-                                                                                                        title             : `${_asEmoji} Sholat ${cocok.nama} — ${cocok.waktu} WIB`,
-                                                                                                        body              : _asUcapan,
-                                                                                                        sourceUrl         : `https://wa.me/${_asOwner0}`,
-                                                                                                        mediaType         : 1,
-                                                                                                        renderLargerThumbnail: true,
-                                                                                                        thumbnail         : _asThumb,
-                                                                                                },
+                                                                        // Kirim gambar bersih + info sholat di luar gambar (externalAdReply)
+                                                                        const imgMsg = await hisoka.sendMessage(jid, {
+                                                                                image  : urlGbr,
+                                                                                caption: caption,
+                                                                                contextInfo: {
+                                                                                        externalAdReply: {
+                                                                                                showAdAttribution : false,
+                                                                                                title             : `${_asEmoji} Sholat ${cocok.nama} — ${cocok.waktu} WIB`,
+                                                                                                body              : _asUcapan,
+                                                                                                sourceUrl         : `https://wa.me/${_asOwner0}`,
+                                                                                                mediaType         : 1,
+                                                                                                renderLargerThumbnail: true,
+                                                                                                thumbnail         : _asThumb,
                                                                                         },
-                                                                                });
-                                                                        } else {
-                                                                                // Fallback: gabung video gagal → tetap kirim gambar saja biar notif tidak hilang
+                                                                                },
+                                                                        });
+                                                                        if (_asVnBuf) {
                                                                                 await hisoka.sendMessage(jid, {
-                                                                                        image  : urlGbr,
-                                                                                        caption: caption,
-                                                                                        contextInfo: {
-                                                                                                externalAdReply: {
-                                                                                                        showAdAttribution : false,
-                                                                                                        title             : `${_asEmoji} Sholat ${cocok.nama} — ${cocok.waktu} WIB`,
-                                                                                                        body              : _asUcapan,
-                                                                                                        sourceUrl         : `https://wa.me/${_asOwner0}`,
-                                                                                                        mediaType         : 1,
-                                                                                                        renderLargerThumbnail: true,
-                                                                                                        thumbnail         : _asThumb,
-                                                                                                },
-                                                                                        },
-                                                                                });
+                                                                                        audio   : _asVnBuf,
+                                                                                        ptt     : true,
+                                                                                        mimetype: 'audio/ogg; codecs=opus',
+                                                                                        ...(_asWaveform ? { waveform: _asWaveform } : {}),
+                                                                                }, { quoted: imgMsg });
                                                                         }
                                                                 } catch (e) {
                                                                         console.error(`[AutoSholat] Gagal kirim ke ${jid}:`, e?.message);

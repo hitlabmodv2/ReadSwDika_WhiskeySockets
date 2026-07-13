@@ -1989,7 +1989,14 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
         return
       }
 
-      if (isJadibotExpired(number)) {
+      // PENTING: cek expired HANYA kalau sesi ini sudah pernah berhasil 'open'
+      // di proses berjalan ini. Sebelum pernah open (masih proses pairing awal),
+      // belum ada data expiry tersimpan (baru diisi saat connection==='open'),
+      // jadi getJadibotExpiry()===null di sini BUKAN berarti expired — itu cuma
+      // artinya belum sempat konek. Tanpa guard ini, disconnect biasa (restartRequired
+      // dll, hal normal & sering terjadi saat proses pairing) langsung dianggap
+      // "expired" dan sesi baru dihapus sebelum sempat konek sama sekali.
+      if (hasConnectedOnce && isJadibotExpired(number)) {
         await expireJadibot(number, sendReply)
         return
       }
@@ -2528,7 +2535,10 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
         return
       }
 
-      if (isJadibotExpired(number)) {
+      // Sama seperti versi pairing-code: jangan anggap "belum ada data expiry"
+      // sebagai expired kalau memang belum pernah berhasil open sekalipun —
+      // itu cuma disconnect biasa di tengah proses scan QR, bukan sesi expired.
+      if (hasConnected && isJadibotExpired(number)) {
         await expireJadibot(number, sendReply)
         return
       }

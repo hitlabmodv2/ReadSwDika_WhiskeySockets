@@ -224,76 +224,7 @@ async function toMP3(inputBuffer, inputMime = 'audio/ogg; codecs=opus') {
     }
 }
 
-/**
- * Gabungkan 1 gambar statis + 1 audio jadi 1 video (MP4) —
- * dipakai supaya gambar + suara bisa terkirim sebagai SATU pesan/chat
- * (bukan 2 pesan terpisah: gambar lalu voice note).
- * @param {Buffer} imageBuffer - buffer gambar (JPEG/PNG)
- * @param {Buffer} audioBuffer - buffer audio apapun (mp3, ogg, dll)
- * @param {string} audioMime   - mimetype audio asli, untuk tentukan ekstensi input
- * @returns {Promise<Buffer>}  - buffer MP4 (video+audio), durasi = durasi audio
- */
-async function buatVideoDariGambarDanAudio(imageBuffer, audioBuffer, audioMime = 'audio/mpeg') {
-    const tmpDir = ensureTmpDir();
-    const id = `${Date.now()}_${Math.random().toString(16).slice(2)}`;
-    const audioExt = _AUDIO_EXT_MAP[audioMime?.toLowerCase().trim()] || 'mp3';
-
-    const imgPath   = path.join(tmpDir, `av_img_${id}.jpg`);
-    const audioPath = path.join(tmpDir, `av_aud_${id}.${audioExt}`);
-    const outPath   = path.join(tmpDir, `av_out_${id}.mp4`);
-
-    fs.writeFileSync(imgPath, imageBuffer);
-    fs.writeFileSync(audioPath, audioBuffer);
-
-    // Beberapa build ffmpeg (terutama di hosting/Pterodactyl) tidak include
-    // encoder libx264 (butuh build GPL). Coba libx264 dulu, kalau gagal
-    // fallback ke mpeg4 (encoder bawaan ffmpeg, hampir selalu tersedia).
-    const kandidatEncoder = [
-        { videoArgs: ['-c:v', 'libx264', '-tune', 'stillimage', '-pix_fmt', 'yuv420p'], nama: 'libx264' },
-        { videoArgs: ['-c:v', 'mpeg4', '-q:v', '5', '-pix_fmt', 'yuv420p'],             nama: 'mpeg4'   },
-    ];
-
-    let lastErr = null;
-
-    try {
-        for (const enc of kandidatEncoder) {
-            try {
-                await execFileAsync('ffmpeg', [
-                    '-y',
-                    '-hide_banner',
-                    '-loglevel', 'error',
-                    '-loop', '1',
-                    '-i', imgPath,
-                    '-i', audioPath,
-                    ...enc.videoArgs,
-                    '-c:a', 'aac',
-                    '-b:a', '128k',
-                    '-vf', 'scale=trunc(iw/2)*2:trunc(ih/2)*2',
-                    '-shortest',
-                    outPath
-                ], { timeout: 60000 });
-
-                if (fs.existsSync(outPath) && fs.statSync(outPath).size >= 512) {
-                    return fs.readFileSync(outPath);
-                }
-                lastErr = new Error(`Encoder ${enc.nama}: output kosong/tidak valid.`);
-            } catch (e) {
-                lastErr = e;
-                const detail = (e?.stderr || e?.message || '').toString().trim();
-                console.error(`[AutoSholat/buatVideo] Encoder ${enc.nama} gagal:`, detail.slice(0, 1000));
-                // coba encoder berikutnya
-            }
-        }
-
-        // Semua encoder gagal → lempar error dengan detail asli biar kelihatan penyebabnya
-        const detail = (lastErr?.stderr || lastErr?.message || 'unknown error').toString().trim().slice(0, 500);
-        throw new Error(`Gagal gabungkan gambar + audio jadi video (semua encoder gagal). Detail: ${detail}`);
-    } finally {
-        cleanupFiles(imgPath, audioPath, outPath);
-    }
-}
-
-module.exports = { toVoiceNote, toMP3, generateWaveform, buatVideoDariGambarDanAudio };
+module.exports = { toVoiceNote, toMP3, generateWaveform };
 
 // ── HANDLER: tovn ─────────────────────────────────────────────────────────────
 

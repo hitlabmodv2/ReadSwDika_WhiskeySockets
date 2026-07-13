@@ -4,3 +4,4 @@
 - [WilyBot changelog.txt format](wilybot-changelog-format.md) — update habitually per session; WA inline formatting (bold/italic/strike/mono/lists/quote) applied contextually
 - [WilyBot logCommand missing in help branches](wilybot-logcommand-help-branch.md) — empty-input/help early-returns often skip logCommand entirely; check every early-return, not just the success path
 - [WilyBot jadibot orphan expiry bug](jadibot-orphan-expiry.md) — isJadibotExpired(null)=false bug; orphan session auto-jadi permanent saat restart
+- [Jadibot pairing-phase false expiry](jadibot-pairing-phase-expiry-bug.md) — close event sebelum pernah 'open' salah dianggap expired; harus gate pakai hasConnectedOnce
