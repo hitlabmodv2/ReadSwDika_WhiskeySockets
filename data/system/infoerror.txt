@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 14/07/2026, 06.08.48  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 14/07/2026, 08.45.06  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,25 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  HENTAIDAD
+│  #001  —  anyvoice-choice
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [HENTAIDAD] Gagal download gambar: Request failed with status code 500
+│  Limit gratis anonim cuma *2x per jam* dari server AnyVoice sendiri (bukan dibatasi bot ini).
+Coba lagi dalam ~15 menit.
 │
 │  DETAIL
-│  Sumber      : HENTAIDAD
+│  Sumber      : anyvoice-choice
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 14/07/2026, 06.08.48
-│  Terakhir    : 14/07/2026, 06.08.48
+│  Pertama     : 14/07/2026, 08.45.06
+│  Terakhir    : 14/07/2026, 08.45.06
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [HENTAIDAD] Gagal download gambar: Request failed with status code 500
-│     at console.error (file:///home/runner/workspace/index.js:434:27)
-│     at handleHentaidadChoice (/home/runner/workspace/SEMUA_FITUR/anime/hentaidad.cjs:227:30)
+│  ▶  Error: Limit gratis anonim cuma *2x per jam* dari server AnyVoice sendiri (bukan dibatasi bot ini).
+│     Coba lagi dalam ~15 menit.
+│     at generateTts (/home/runner/workspace/SEMUA_FITUR/media/anyvoice.cjs:201:21)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 14/07/2026, 06.08.48
+  Terakhir diperbarui: 14/07/2026, 08.45.06
 ════════════════════════════════════════════════════════════════════════

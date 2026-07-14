@@ -159,6 +159,7 @@ const WATCHED_FILES = [
     { key: 'cjs:getsw',        rel: 'SEMUA_FITUR/media/getsw.cjs',         type: 'cjs' },
     { key: 'cjs:audioconvert', rel: 'SEMUA_FITUR/media/audioconvert.cjs',  type: 'cjs' },
     { key: 'cjs:viewonce',     rel: 'SEMUA_FITUR/media/viewonce.cjs',      type: 'cjs' },
+    { key: 'cjs:anyvoice',     rel: 'SEMUA_FITUR/media/anyvoice.cjs',      type: 'cjs' },
     // Download
     { key: 'cjs:downloader',   rel: 'SEMUA_FITUR/download/downloader.cjs', type: 'cjs' },
     { key: 'cjs:hdvid',        rel: 'SEMUA_FITUR/download/hdvid.cjs',      type: 'cjs' },

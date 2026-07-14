@@ -1,0 +1,67 @@
+{
+  "ACB7221F7A71355718FBEA03823B3D38": {
+    "id": "ACB7221F7A71355718FBEA03823B3D38",
+    "sender": "628138034597@s.whatsapp.net",
+    "name": "Victoria Takapente",
+    "type": "protocolMessage",
+    "arrivedAt": "2026-07-14T08:34:09.431Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐟",
+    "source": "group",
+    "number": "628138034597",
+    "messageKey": {
+      "remoteJid": "120363424557936431@g.us",
+      "fromMe": false,
+      "id": "ACB7221F7A71355718FBEA03823B3D38",
+      "participant": "188378003836968@lid",
+      "participantAlt": "628138034597@s.whatsapp.net",
+      "addressingMode": "lid"
+    },
+    "resolvedPn": "628138034597@s.whatsapp.net",
+    "updatedAt": "2026-07-14T08:34:15.633Z",
+    "processedAt": "2026-07-14T08:34:15.633Z"
+  },
+  "ACDB9FFAC12BF06FFE2F00B4EE0329F8": {
+    "id": "ACDB9FFAC12BF06FFE2F00B4EE0329F8",
+    "sender": "628138034597@s.whatsapp.net",
+    "name": "Victoria Takapente",
+    "type": "imageMessage",
+    "arrivedAt": "2026-07-14T08:34:09.480Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐙",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "628138034597",
+    "resolvedPn": "628138034597@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "628138034597@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACDB9FFAC12BF06FFE2F00B4EE0329F8",
+      "participant": "188378003836968@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-14T08:34:19.955Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "628138034597@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACDB9FFAC12BF06FFE2F00B4EE0329F8",
+        "participant": "188378003836968@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "628138034597@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACDB9FFAC12BF06FFE2F00B4EE0329F8",
+        "participant": "628138034597@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-14T08:34:19.955Z"
+  }
+}

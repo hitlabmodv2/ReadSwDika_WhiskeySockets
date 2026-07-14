@@ -5,241 +5,223 @@
  *  Telegram    : @Wilykun1994
  * ───────────────────────────────
  *
- *  anyvoice.cjs — Scraper AnyVoice (anyvoice.net)
- *  Text-to-Speech AI pakai endpoint publik anonim situs (tanpa login/token),
- *  jadi cuma bisa dipakai sesuai kuota gratis yang mereka sediakan.
+ *  anyvoice.cjs — Text-to-Speech untuk .tts
+ *
+ *  ENGINE: Google Translate TTS (translate.google.com/translate_tts) —
+ *  endpoint publik resmi Google, dipanggil tanpa API key/token/login.
+ *  TIDAK ada kuota per-jam seketat AnyVoice (sudah dites beberapa request
+ *  beruntun, semua sukses), dan suaranya beneran mengucapkan bahasa
+ *  Indonesia (tl=id) apa adanya — bukan logat Inggris/Mandarin dipaksa
+ *  baca teks Indo.
+ *  Batasannya cuma soal teknis: 1 request maks ±200 karakter, jadi teks
+ *  panjang dipecah per-kata lalu disambung ulang pakai ffmpeg jadi satu
+ *  file, dikonversi ke OGG Opus, dan dikirim sebagai voice note (PTT)
+ *  asli — bukan file audio biasa — supaya muncul di WhatsApp persis
+ *  seperti bubble VN (bulat, ada gelombang suara, tanpa tombol download).
+ *
+ *  Fitur daftar-suara-karakter AnyVoice (`.anyvoice list`) sudah dihapus
+ *  sesuai permintaan — kuota anonim mereka cuma 2x/jam jadi tidak layak
+ *  dijadikan fitur utama. `.tts` sekarang cuma satu jalur ini.
  * ───────────────────────────────
  */
 'use strict';
 
-const axios = require('axios');
+const axios         = require('axios');
+const fs            = require('fs');
+const path          = require('path');
+const { execFile }  = require('child_process');
+const { promisify } = require('util');
 
-const BASE    = 'https://anyvoice.net';
-const HEADERS = {
-    'User-Agent'   : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-    'Accept'       : 'application/json, text/plain, */*',
-    'Referer'      : 'https://anyvoice.net/',
-};
-
-let voiceCache      = null;
-let voiceCacheAt    = 0;
-const VOICE_CACHE_TTL = 10 * 60 * 1000; // 10 menit
-
-/** Ambil daftar voice publik dari /api/voices (endpoint publik, tanpa token) */
-async function fetchVoices() {
-    if (voiceCache && (Date.now() - voiceCacheAt) < VOICE_CACHE_TTL) return voiceCache;
-
-    const res = await axios.get(`${BASE}/api/voices`, { headers: HEADERS, timeout: 20000 });
-    const items = Array.isArray(res.data?.items) ? res.data.items : [];
-
-    // Voice publik saja, urut dari yang paling banyak dipakai
-    const voices = items
-        .filter(v => v.type === 'Public')
-        .sort((a, b) => (b.usedCount || 0) - (a.usedCount || 0))
-        .map(v => ({
-            id       : v.id,
-            name     : v.name,
-            language : v.language || '-',
-            tag      : Array.isArray(v.tag) ? v.tag.slice(0, 3) : [],
-            usedCount: v.usedCount || 0,
-        }));
-
-    voiceCache   = voices;
-    voiceCacheAt = Date.now();
-    return voices;
-}
+const execFileAsync = promisify(execFile);
 
 /**
- * Generate suara lewat endpoint anonim /api/tts/anonymous.
- * Endpoint ini publik (dipakai situsnya sendiri untuk user belum login),
- * jadi tunduk ke kuota gratis mereka — kalau limit habis, situs balas 429.
+ * Hitung waveform (buat bubble VN WhatsApp bergelombang, bukan garis progress polos).
+ * Baileys sebenarnya bisa generate ini otomatis, TAPI versi `audio-decode` yang
+ * terpasang (3.11.x) return objek {channelData, sampleRate} — bukan AudioBuffer
+ * dengan method getChannelData() yang dipanggil kode Baileys — jadi selalu gagal
+ * diam-diam dan bubble jatuh ke tampilan garis progress polos, bukan gelombang.
+ * Makanya di-generate manual di sini pakai package yang sama, algoritma sama
+ * persis dengan punya Baileys (64 sample, dinormalisasi, dikali 100), lalu
+ * dikirim langsung lewat properti `waveform` supaya Baileys skip proses otomatisnya.
  */
-async function generateTts(text, voiceId, language) {
-    const res = await axios.post(
-        `${BASE}/api/tts/anonymous`,
-        { text, voiceId, language: language || 'en' },
-        {
-            headers: { ...HEADERS, 'Content-Type': 'application/json' },
-            timeout: 30000,
-            validateStatus: () => true,
+async function computeWaveform(oggBuffer, logger) {
+    try {
+        const { default: decoder } = await import('audio-decode');
+        const decoded = await decoder(oggBuffer);
+        const rawData = typeof decoded.getChannelData === 'function'
+            ? decoded.getChannelData(0)
+            : decoded.channelData[0];
+
+        const samples = 64;
+        const blockSize = Math.floor(rawData.length / samples);
+        if (!blockSize) return undefined;
+
+        const filteredData = [];
+        for (let i = 0; i < samples; i++) {
+            const blockStart = blockSize * i;
+            let sum = 0;
+            for (let j = 0; j < blockSize; j++) sum += Math.abs(rawData[blockStart + j] || 0);
+            filteredData.push(sum / blockSize);
         }
-    );
-
-    if (res.status === 429) {
-        const err = new Error('Kuota gratis AnyVoice untuk hari ini sudah habis. Coba lagi nanti.');
-        err.quotaExhausted = true;
-        throw err;
+        const multiplier = Math.pow(Math.max(...filteredData) || 1, -1);
+        return new Uint8Array(filteredData.map(n => Math.floor(100 * n * multiplier)));
+    } catch (err) {
+        if (logger) logger('[TTS] Gagal hitung waveform manual: ' + err.message);
+        return undefined;
     }
-    if (res.status < 200 || res.status >= 300 || !res.data?.audio_url) {
-        throw new Error(res.data?.message || `AnyVoice membalas status ${res.status}`);
-    }
-
-    return res.data; // { audio_url, duration, temporary, expires_in }
 }
 
-/** Download buffer audio hasil generate */
-async function downloadAudio(url) {
-    const res = await axios.get(url, {
+const GTTS_URL          = 'https://translate.google.com/translate_tts';
+const GTTS_CHUNK_MAXLEN = 190; // aman di bawah limit ±200 karakter/request Google
+const MAX_TEXT_LEN      = 800; // aman karena teks dipecah otomatis per ±190 karakter
+
+/** Pecah teks panjang jadi potongan ≤ maxLen, tanpa motong di tengah kata */
+function splitTextChunks(text, maxLen = GTTS_CHUNK_MAXLEN) {
+    const words = text.trim().split(/\s+/);
+    const chunks = [];
+    let cur = '';
+    for (const w of words) {
+        const candidate = cur ? `${cur} ${w}` : w;
+        if (candidate.length > maxLen) {
+            if (cur) chunks.push(cur);
+            cur = w;
+        } else {
+            cur = candidate;
+        }
+    }
+    if (cur) chunks.push(cur);
+    return chunks;
+}
+
+/** Download 1 potongan audio dari Google Translate TTS (bahasa Indonesia) */
+async function fetchGttsChunk(text) {
+    const res = await axios.get(GTTS_URL, {
+        params: { ie: 'UTF-8', q: text, tl: 'id', client: 'tw-ob' },
         responseType: 'arraybuffer',
-        timeout     : 30000,
-        headers     : { ...HEADERS, Referer: BASE + '/' },
+        timeout: 20000,
+        headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Referer'   : 'https://translate.google.com/',
+        },
+        validateStatus: () => true,
     });
+    if (res.status !== 200) {
+        throw new Error(`Google TTS membalas status ${res.status} (kemungkinan teks per-potongan masih terlalu panjang)`);
+    }
     return Buffer.from(res.data);
 }
 
-/** Format daftar voice jadi teks bernomor */
-function formatVoiceList(voices) {
-    let text = `🗣️ *ANYVOICE — Daftar Suara*\n_${voices.length} suara publik tersedia_\n\n`;
-    voices.slice(0, 30).forEach((v, i) => {
-        const tagText = v.tag.length ? ` _(${v.tag.join(', ')})_` : '';
-        text += `${i + 1}. *${v.name}* — \`${v.language}\`${tagText}\n`;
-    });
-    text += `\n> 💬 *Reply* pesan ini dengan format: *nomor teks*\n` +
-            `> _Contoh: balas dengan_ *1 Halo, apa kabar semuanya?*`;
-    return text;
-}
+/**
+ * Generate voice note bahasa Indonesia lewat Google Translate TTS.
+ * Teks dipecah jadi beberapa potongan ≤190 karakter, tiap potongan didownload
+ * terpisah, lalu disambung + dikonversi ke OGG Opus dalam satu langkah ffmpeg
+ * (pakai concat demuxer, supaya sambungannya mulus tanpa glitch).
+ * Hasil buffer OGG/Opus ini siap dikirim langsung sebagai `ptt: true`
+ * (voice note asli WhatsApp — bulat, ada gelombang, tanpa tombol download).
+ */
+async function generateIndoVoiceNote(text) {
+    const chunks = splitTextChunks(text);
+    if (!chunks.length) throw new Error('Teks kosong');
 
-const MAX_TEXT_LEN = 300;
+    const tmpDir = path.join(process.cwd(), 'tmp');
+    if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
+
+    const id = `${Date.now()}_${Math.random().toString(16).slice(2)}`;
+    const chunkPaths = [];
+    const listPath   = path.join(tmpDir, `gtts_list_${id}.txt`);
+    const outputPath = path.join(tmpDir, `gtts_out_${id}.ogg`);
+
+    try {
+        for (let i = 0; i < chunks.length; i++) {
+            const buf = await fetchGttsChunk(chunks[i]);
+            const p   = path.join(tmpDir, `gtts_part_${id}_${i}.mp3`);
+            fs.writeFileSync(p, buf);
+            chunkPaths.push(p);
+        }
+
+        const listContent = chunkPaths.map(p => `file '${p.replace(/'/g, "'\\''")}'`).join('\n');
+        fs.writeFileSync(listPath, listContent);
+
+        await execFileAsync('ffmpeg', [
+            '-y',
+            '-hide_banner',
+            '-loglevel', 'error',
+            '-f', 'concat',
+            '-safe', '0',
+            '-i', listPath,
+            '-vn',
+            '-ac', '1',
+            '-ar', '48000',
+            '-c:a', 'libopus',
+            '-b:a', '48k',
+            '-vbr', 'on',
+            '-compression_level', '10',
+            outputPath,
+        ], { timeout: 60000 });
+
+        if (!fs.existsSync(outputPath) || fs.statSync(outputPath).size < 512) {
+            throw new Error('Hasil konversi ffmpeg kosong/gagal');
+        }
+
+        const oggBuf = fs.readFileSync(outputPath);
+
+        let duration = null;
+        try {
+            const { stdout } = await execFileAsync('ffprobe', [
+                '-v', 'error', '-show_entries', 'format=duration',
+                '-of', 'default=noprint_wrappers=1:nokey=1', outputPath,
+            ]);
+            duration = Math.round(parseFloat(stdout));
+        } catch { /* durasi opsional, tidak fatal kalau gagal */ }
+
+        return { buffer: oggBuf, duration, chunkCount: chunks.length };
+    } finally {
+        for (const p of chunkPaths) { try { if (fs.existsSync(p)) fs.unlinkSync(p); } catch {} }
+        try { if (fs.existsSync(listPath)) fs.unlinkSync(listPath); } catch {}
+        try { if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath); } catch {}
+    }
+}
 
 // ── COMMAND HANDLER UTAMA ──────────────────────────────────────────────────────
 
-async function handleAnyvoice({ hisoka, m, query, tolak, logCommand, logError, pendingAnyvoiceChoices }) {
+async function handleAnyvoice({ hisoka, m, query, tolak, logCommand, logError }) {
     try {
-        logCommand(m, hisoka, m.command || 'anyvoice');
+        logCommand(m, hisoka, m.command || 'tts');
 
         const trimmed = (query || '').trim();
 
-        // Mode 1: kosong / "list" → tampilkan daftar voice
-        if (!trimmed || trimmed.toLowerCase() === 'list') {
-            await hisoka.sendMessage(m.from, { react: { text: '🔍', key: m.key } });
-
-            const voices = await fetchVoices();
-            if (!voices.length) {
-                await tolak(hisoka, m, `❌ Gagal mengambil daftar suara. Coba lagi nanti.`);
-                await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
-                return;
-            }
-
-            const sent = await hisoka.sendMessage(m.from, { text: formatVoiceList(voices) }, { quoted: m });
-
-            const TTL = 3 * 60 * 1000;
-            const key = m.sender;
-            const timeout = setTimeout(() => pendingAnyvoiceChoices.delete(key), TTL);
-            pendingAnyvoiceChoices.set(key, {
-                voices,
-                botMsgId : sent?.key?.id || null,
-                expiresAt: Date.now() + TTL,
-                loading  : false,
-                timeout,
-            });
-
-            await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+        if (!trimmed) {
+            await tolak(hisoka, m, `🗣️ *TTS*\n> _Contoh: .tts halo, apa kabar semuanya?_`);
             return;
         }
-
-        // Mode 2: langsung kasih teks → pakai voice default (paling populer)
         if (trimmed.length > MAX_TEXT_LEN) {
             await tolak(hisoka, m, `❌ *Teks terlalu panjang.*\n> _Maks ${MAX_TEXT_LEN} karakter, punyamu ${trimmed.length}_`);
             return;
         }
 
         await hisoka.sendMessage(m.from, { react: { text: '🔊', key: m.key } });
-        await tolak(hisoka, m, `🔊 *Generate suara...*\n> _Harap tunggu sebentar_`);
 
-        const voices = await fetchVoices();
-        if (!voices.length) {
-            await tolak(hisoka, m, `❌ Gagal mengambil daftar suara. Coba lagi nanti.`);
-            await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
-            return;
-        }
-        const defaultVoice = voices[0];
+        const { buffer } = await generateIndoVoiceNote(trimmed);
+        const waveform   = await computeWaveform(buffer);
 
-        await sendGeneratedVoice({ hisoka, m, text: trimmed, voice: defaultVoice, tolak });
+        // Kirim sebagai voice note (PTT) asli — bulat, gelombang suara, auto-play
+        // di WhatsApp, bukan file audio biasa dengan tombol download.
+        // `waveform` di-hitung manual (lihat computeWaveform) karena auto-generate
+        // bawaan Baileys gagal diam-diam di versi audio-decode yang terpasang.
+        await hisoka.sendMessage(m.from, {
+            audio   : buffer,
+            mimetype: 'audio/ogg; codecs=opus',
+            ptt     : true,
+            ...(waveform ? { waveform } : {}),
+        }, { quoted: m });
+
+        await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
     } catch (err) {
-        console.error('[ANYVOICE] Error:', err?.message);
-        if (typeof logError === 'function') logError(err instanceof Error ? err : new Error(String(err?.message || err)), 'anyvoice');
+        console.error('[TTS] Error:', err?.message);
+        if (typeof logError === 'function') logError(err instanceof Error ? err : new Error(String(err?.message || err)), 'tts');
         await tolak(hisoka, m, `❌ Gagal generate suara.\n💬 ${err?.message || 'Coba lagi nanti.'}`);
         await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
     }
 }
 
-/** Generate + download + kirim sebagai voice note, dengan kartu hasil */
-async function sendGeneratedVoice({ hisoka, m, text, voice, tolak }) {
-    const result = await generateTts(text, voice.id, voice.language);
-    const buf    = await downloadAudio(result.audio_url);
-
-    await hisoka.sendMessage(m.from, {
-        audio   : buf,
-        mimetype: 'audio/mpeg',
-        ptt     : true,
-    }, { quoted: m });
-
-    const teksSingkat = text.length > 60 ? text.slice(0, 60) + '…' : text;
-    await hisoka.sendMessage(m.from, {
-        text:
-            `🗣️ *ANYVOICE*\n\n` +
-            `📌 *Suara:* ${voice.name} \`(${voice.language})\`\n` +
-            `💬 *Teks:* _"${teksSingkat}"_\n` +
-            `⏱️ *Durasi:* \`${result.duration || '?'} detik\`\n\n` +
-            `✅ *Status: Terkirim*` +
-            (result.quotaExhausted ? `\n> ⚠️ _Ini generate gratis terakhir kamu untuk saat ini_` : ''),
-    }, { quoted: m });
-
-    await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
-}
-
-// ── CHOICE HANDLER — dipanggil dari message.js sebelum switch-case ────────────
-
-async function handleAnyvoiceChoice({ hisoka, m, pendingAnyvoiceChoices, getQuotedStanzaId, tolak, logCommand, logError }) {
-    if (!pendingAnyvoiceChoices.has(m.sender)) return false;
-
-    const pending   = pendingAnyvoiceChoices.get(m.sender);
-    const rawChoice = String(m.text || '').trim();
-    const isReply   = m.isQuoted && pending.botMsgId && getQuotedStanzaId(m) === pending.botMsgId;
-    const match     = rawChoice.match(/^(\d+)\s+([\s\S]+)/);
-
-    if (!isReply || !match) return false;
-
-    if (pending.expiresAt <= Date.now()) {
-        pendingAnyvoiceChoices.delete(m.sender);
-        await tolak(hisoka, m, `⏳ *Menu sudah kedaluwarsa.*\n> Ketik \`.anyvoice list\` lagi untuk memulai`);
-        return true;
-    }
-
-    if (pending.loading) {
-        await tolak(hisoka, m, `⏳ *Sedang memproses...*\n> _Tunggu sebentar, jangan kirim ulang_`);
-        return true;
-    }
-
-    const idx  = parseInt(match[1]) - 1;
-    const text = match[2].trim();
-
-    if (idx < 0 || idx >= pending.voices.length) {
-        await tolak(hisoka, m, `❌ *Pilih angka yang valid.*\n> _Ketik angka *1*–*${pending.voices.length}*, diikuti teksnya_`);
-        return true;
-    }
-    if (text.length > MAX_TEXT_LEN) {
-        await tolak(hisoka, m, `❌ *Teks terlalu panjang.*\n> _Maks ${MAX_TEXT_LEN} karakter, punyamu ${text.length}_`);
-        return true;
-    }
-
-    pending.loading = true;
-    if (pending.timeout) clearTimeout(pending.timeout);
-    pendingAnyvoiceChoices.delete(m.sender);
-
-    const voice = pending.voices[idx];
-
-    try {
-        await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
-        await sendGeneratedVoice({ hisoka, m, text, voice, tolak });
-    } catch (err) {
-        console.error('[ANYVOICE] Choice error:', err?.message);
-        if (typeof logError === 'function') logError(err instanceof Error ? err : new Error(String(err?.message || err)), 'anyvoice-choice');
-        await tolak(hisoka, m, `❌ Gagal generate suara.\n💬 ${err?.message || 'Coba lagi nanti.'}`);
-        await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
-    }
-
-    return true;
-}
-
-module.exports = { handleAnyvoice, handleAnyvoiceChoice };
+module.exports = { handleAnyvoice };

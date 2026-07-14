@@ -1,38 +1,13 @@
 {
-  "AC28D6E8B2C675D4F3A189ECA9583044": {
-    "id": "AC28D6E8B2C675D4F3A189ECA9583044",
-    "sender": "6282239841068@s.whatsapp.net",
-    "name": "yayayaya",
-    "type": "imageMessage",
-    "arrivedAt": "2026-07-03T06:40:11.468Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
-    "resolve": "PN langsung ✓",
-    "source": "status",
-    "number": "6282239841068",
-    "resolvedPn": "6282239841068@s.whatsapp.net",
-    "messageKey": {
-      "remoteJid": "status@broadcast",
-      "remoteJidAlt": "6282239841068@s.whatsapp.net",
-      "fromMe": false,
-      "id": "AC28D6E8B2C675D4F3A189ECA9583044",
-      "participant": "37572776599715@lid",
-      "addressingMode": "lid"
-    },
-    "updatedAt": "2026-07-03T07:03:05.528Z",
-    "deleted": true,
-    "deletedAt": "2026-07-03T07:03:05.528Z"
-  },
-  "AC1D78C9B4C659DF2D31A96082292F55": {
-    "id": "AC1D78C9B4C659DF2D31A96082292F55",
+  "AC0E321AFB547ABFFBDE58C516FF730E": {
+    "id": "AC0E321AFB547ABFFBDE58C516FF730E",
     "sender": "6282239841068@s.whatsapp.net",
     "name": "yayayaya",
     "type": "videoMessage",
-    "arrivedAt": "2026-07-03T07:30:49.873Z",
+    "arrivedAt": "2026-07-14T08:34:09.565Z",
     "read": true,
     "reacted": true,
-    "emoji": "⏺️⏏️⏹️",
+    "emoji": "🦈",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6282239841068",
@@ -41,17 +16,17 @@
       "remoteJid": "status@broadcast",
       "remoteJidAlt": "6282239841068@s.whatsapp.net",
       "fromMe": false,
-      "id": "AC1D78C9B4C659DF2D31A96082292F55",
+      "id": "AC0E321AFB547ABFFBDE58C516FF730E",
       "participant": "37572776599715@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-07-03T10:31:10.993Z",
+    "updatedAt": "2026-07-14T08:34:12.891Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6282239841068@s.whatsapp.net",
         "fromMe": false,
-        "id": "AC1D78C9B4C659DF2D31A96082292F55",
+        "id": "AC0E321AFB547ABFFBDE58C516FF730E",
         "participant": "37572776599715@lid",
         "addressingMode": "lid"
       },
@@ -59,57 +34,11 @@
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6282239841068@s.whatsapp.net",
         "fromMe": false,
-        "id": "AC1D78C9B4C659DF2D31A96082292F55",
+        "id": "AC0E321AFB547ABFFBDE58C516FF730E",
         "participant": "6282239841068@s.whatsapp.net",
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-07-03T07:30:59.764Z",
-    "deleted": true,
-    "deletedAt": "2026-07-03T10:31:10.993Z"
-  },
-  "AC4ADE7F8B18B2D1A73971CF00065CDB": {
-    "id": "AC4ADE7F8B18B2D1A73971CF00065CDB",
-    "sender": "6282239841068@s.whatsapp.net",
-    "name": "yayayaya",
-    "type": "videoMessage",
-    "arrivedAt": "2026-07-04T06:04:02.616Z",
-    "read": true,
-    "reacted": true,
-    "emoji": "⏺️⏏️⏹️",
-    "resolve": "PN langsung ✓",
-    "source": "status",
-    "number": "6282239841068",
-    "resolvedPn": "6282239841068@s.whatsapp.net",
-    "messageKey": {
-      "remoteJid": "status@broadcast",
-      "remoteJidAlt": "6282239841068@s.whatsapp.net",
-      "fromMe": false,
-      "id": "AC4ADE7F8B18B2D1A73971CF00065CDB",
-      "participant": "37572776599715@lid",
-      "addressingMode": "lid"
-    },
-    "updatedAt": "2026-07-04T06:05:34.656Z",
-    "receiptKeys": [
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6282239841068@s.whatsapp.net",
-        "fromMe": false,
-        "id": "AC4ADE7F8B18B2D1A73971CF00065CDB",
-        "participant": "37572776599715@lid",
-        "addressingMode": "lid"
-      },
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6282239841068@s.whatsapp.net",
-        "fromMe": false,
-        "id": "AC4ADE7F8B18B2D1A73971CF00065CDB",
-        "participant": "6282239841068@s.whatsapp.net",
-        "addressingMode": "lid"
-      }
-    ],
-    "processedAt": "2026-07-04T06:04:23.716Z",
-    "deleted": true,
-    "deletedAt": "2026-07-04T06:05:34.656Z"
+    "processedAt": "2026-07-14T08:34:12.891Z"
   }
 }

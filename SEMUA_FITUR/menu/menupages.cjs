@@ -87,6 +87,9 @@ komik/komiktap | komikinfo | komikget | komikupdate
 nh/nhentai | nhget | nhrand | nhdl | hentaidad
 cosplay | cosplayrandom | pixivr18
 
+「 🎙️ *TEXT TO SPEECH* 」
+tts
+
 「 🌐 *WEB & TOOLS* 」
 ss/screenshot | ssweb/webinfo
 tmail/tempmail | tminbox | tmread | tmwait | tmdel

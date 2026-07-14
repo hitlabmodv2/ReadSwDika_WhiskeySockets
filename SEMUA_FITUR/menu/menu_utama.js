@@ -165,6 +165,10 @@ export function buildMenuUtama({ pushName, isOwner, uptimeStr, tgl, jam, browser
 │ .cosplayrandom
 │ .pixivr18
 ├═════════════════════┤
+║   🎙️ *TEXT TO SPEECH*   
+├═════════════════════┤
+│ .tts
+├═════════════════════┤
 ║   🌐 *WEB & TOOLS*   
 ├═════════════════════┤
 │ .ss / .screenshot

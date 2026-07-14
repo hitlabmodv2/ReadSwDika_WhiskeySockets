@@ -1,143 +1,13 @@
 {
-  "ACA8230A17D87A56D0CF9354011FD0F9": {
-    "id": "ACA8230A17D87A56D0CF9354011FD0F9",
+  "AC9CDCD541BE0299DBC921B33EC70E85": {
+    "id": "AC9CDCD541BE0299DBC921B33EC70E85",
     "sender": "6289504802678@s.whatsapp.net",
-    "name": "RendraX2",
-    "type": "extendedTextMessage",
-    "arrivedAt": "2026-07-03T06:41:04.137Z",
-    "read": true,
-    "reacted": true,
-    "emoji": "⏺️⏏️⏹️",
-    "resolve": "PN langsung ✓",
-    "source": "status",
-    "number": "6289504802678",
-    "resolvedPn": "6289504802678@s.whatsapp.net",
-    "messageKey": {
-      "remoteJid": "status@broadcast",
-      "remoteJidAlt": "6289504802678@s.whatsapp.net",
-      "fromMe": false,
-      "id": "ACA8230A17D87A56D0CF9354011FD0F9",
-      "participant": "263445207371837@lid",
-      "addressingMode": "lid"
-    },
-    "updatedAt": "2026-07-03T06:41:19.668Z",
-    "receiptKeys": [
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6289504802678@s.whatsapp.net",
-        "fromMe": false,
-        "id": "ACA8230A17D87A56D0CF9354011FD0F9",
-        "participant": "263445207371837@lid",
-        "addressingMode": "lid"
-      },
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6289504802678@s.whatsapp.net",
-        "fromMe": false,
-        "id": "ACA8230A17D87A56D0CF9354011FD0F9",
-        "participant": "6289504802678@s.whatsapp.net",
-        "addressingMode": "lid"
-      }
-    ],
-    "processedAt": "2026-07-03T06:41:06.432Z",
-    "deleted": true,
-    "deletedAt": "2026-07-03T06:41:19.668Z"
-  },
-  "AC1E4F45CDC24E31A1129C9DE4B3B57E": {
-    "id": "AC1E4F45CDC24E31A1129C9DE4B3B57E",
-    "sender": "6289504802678@s.whatsapp.net",
-    "name": "RendraX2",
-    "type": "extendedTextMessage",
-    "arrivedAt": "2026-07-03T06:41:06.713Z",
-    "read": true,
-    "reacted": true,
-    "emoji": "❤️",
-    "resolve": "PN langsung ✓",
-    "source": "status",
-    "number": "6289504802678",
-    "resolvedPn": "6289504802678@s.whatsapp.net",
-    "messageKey": {
-      "remoteJid": "status@broadcast",
-      "remoteJidAlt": "6289504802678@s.whatsapp.net",
-      "fromMe": false,
-      "id": "AC1E4F45CDC24E31A1129C9DE4B3B57E",
-      "participant": "263445207371837@lid",
-      "addressingMode": "lid"
-    },
-    "updatedAt": "2026-07-03T06:41:19.508Z",
-    "receiptKeys": [
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6289504802678@s.whatsapp.net",
-        "fromMe": false,
-        "id": "AC1E4F45CDC24E31A1129C9DE4B3B57E",
-        "participant": "263445207371837@lid",
-        "addressingMode": "lid"
-      },
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6289504802678@s.whatsapp.net",
-        "fromMe": false,
-        "id": "AC1E4F45CDC24E31A1129C9DE4B3B57E",
-        "participant": "6289504802678@s.whatsapp.net",
-        "addressingMode": "lid"
-      }
-    ],
-    "processedAt": "2026-07-03T06:41:13.618Z",
-    "deleted": true,
-    "deletedAt": "2026-07-03T06:41:19.508Z"
-  },
-  "ACC045579C3BEEAF9183600236961ADB": {
-    "id": "ACC045579C3BEEAF9183600236961ADB",
-    "sender": "6289504802678@s.whatsapp.net",
-    "name": "RendraX2",
-    "type": "videoMessage",
-    "arrivedAt": "2026-07-03T06:41:50.875Z",
-    "read": true,
-    "reacted": true,
-    "emoji": "❤️",
-    "resolve": "PN langsung ✓",
-    "source": "status",
-    "number": "6289504802678",
-    "resolvedPn": "6289504802678@s.whatsapp.net",
-    "messageKey": {
-      "remoteJid": "status@broadcast",
-      "remoteJidAlt": "6289504802678@s.whatsapp.net",
-      "fromMe": false,
-      "id": "ACC045579C3BEEAF9183600236961ADB",
-      "participant": "263445207371837@lid",
-      "addressingMode": "lid"
-    },
-    "updatedAt": "2026-07-03T06:41:59.094Z",
-    "receiptKeys": [
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6289504802678@s.whatsapp.net",
-        "fromMe": false,
-        "id": "ACC045579C3BEEAF9183600236961ADB",
-        "participant": "263445207371837@lid",
-        "addressingMode": "lid"
-      },
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6289504802678@s.whatsapp.net",
-        "fromMe": false,
-        "id": "ACC045579C3BEEAF9183600236961ADB",
-        "participant": "6289504802678@s.whatsapp.net",
-        "addressingMode": "lid"
-      }
-    ],
-    "processedAt": "2026-07-03T06:41:59.094Z"
-  },
-  "AC567AB2C02F7A820AD83C4523D72067": {
-    "id": "AC567AB2C02F7A820AD83C4523D72067",
-    "sender": "6289504802678@s.whatsapp.net",
-    "name": "RendraX2",
+    "name": "Ard Holdeacon",
     "type": "imageMessage",
-    "arrivedAt": "2026-07-03T10:17:42.942Z",
+    "arrivedAt": "2026-07-14T08:34:09.478Z",
     "read": true,
     "reacted": true,
-    "emoji": "⏺️⏏️⏹️",
+    "emoji": "🦈",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6289504802678",
@@ -146,17 +16,17 @@
       "remoteJid": "status@broadcast",
       "remoteJidAlt": "6289504802678@s.whatsapp.net",
       "fromMe": false,
-      "id": "AC567AB2C02F7A820AD83C4523D72067",
+      "id": "AC9CDCD541BE0299DBC921B33EC70E85",
       "participant": "263445207371837@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-07-03T11:50:56.702Z",
+    "updatedAt": "2026-07-14T08:34:25.853Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6289504802678@s.whatsapp.net",
         "fromMe": false,
-        "id": "AC567AB2C02F7A820AD83C4523D72067",
+        "id": "AC9CDCD541BE0299DBC921B33EC70E85",
         "participant": "263445207371837@lid",
         "addressingMode": "lid"
       },
@@ -164,187 +34,11 @@
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6289504802678@s.whatsapp.net",
         "fromMe": false,
-        "id": "AC567AB2C02F7A820AD83C4523D72067",
+        "id": "AC9CDCD541BE0299DBC921B33EC70E85",
         "participant": "6289504802678@s.whatsapp.net",
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-07-03T10:17:48.523Z",
-    "deleted": true,
-    "deletedAt": "2026-07-03T11:50:56.702Z"
-  },
-  "AC2A9CEB0CC17E0F5A14CB6C5DBB77BD": {
-    "id": "AC2A9CEB0CC17E0F5A14CB6C5DBB77BD",
-    "sender": "6289504802678@s.whatsapp.net",
-    "name": "RendraX2",
-    "type": "imageMessage",
-    "arrivedAt": "2026-07-03T12:05:11.507Z",
-    "read": true,
-    "reacted": true,
-    "emoji": "⏺️⏏️⏹️",
-    "resolve": "PN langsung ✓",
-    "source": "status",
-    "number": "6289504802678",
-    "resolvedPn": "6289504802678@s.whatsapp.net",
-    "messageKey": {
-      "remoteJid": "status@broadcast",
-      "remoteJidAlt": "6289504802678@s.whatsapp.net",
-      "fromMe": false,
-      "id": "AC2A9CEB0CC17E0F5A14CB6C5DBB77BD",
-      "participant": "263445207371837@lid",
-      "addressingMode": "lid"
-    },
-    "updatedAt": "2026-07-03T15:38:27.538Z",
-    "receiptKeys": [
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6289504802678@s.whatsapp.net",
-        "fromMe": false,
-        "id": "AC2A9CEB0CC17E0F5A14CB6C5DBB77BD",
-        "participant": "263445207371837@lid",
-        "addressingMode": "lid"
-      },
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6289504802678@s.whatsapp.net",
-        "fromMe": false,
-        "id": "AC2A9CEB0CC17E0F5A14CB6C5DBB77BD",
-        "participant": "6289504802678@s.whatsapp.net",
-        "addressingMode": "lid"
-      }
-    ],
-    "processedAt": "2026-07-03T12:05:17.849Z",
-    "deleted": true,
-    "deletedAt": "2026-07-03T15:38:27.538Z"
-  },
-  "ACCB377CD116BD8F380A25CD285CC610": {
-    "id": "ACCB377CD116BD8F380A25CD285CC610",
-    "sender": "6289504802678@s.whatsapp.net",
-    "name": "RendraX2",
-    "type": "imageMessage",
-    "arrivedAt": "2026-07-03T15:38:52.222Z",
-    "read": true,
-    "reacted": true,
-    "emoji": "❤️",
-    "resolve": "PN langsung ✓",
-    "source": "status",
-    "number": "6289504802678",
-    "resolvedPn": "6289504802678@s.whatsapp.net",
-    "messageKey": {
-      "remoteJid": "status@broadcast",
-      "remoteJidAlt": "6289504802678@s.whatsapp.net",
-      "fromMe": false,
-      "id": "ACCB377CD116BD8F380A25CD285CC610",
-      "participant": "263445207371837@lid",
-      "addressingMode": "lid"
-    },
-    "updatedAt": "2026-07-03T15:39:42.187Z",
-    "receiptKeys": [
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6289504802678@s.whatsapp.net",
-        "fromMe": false,
-        "id": "ACCB377CD116BD8F380A25CD285CC610",
-        "participant": "263445207371837@lid",
-        "addressingMode": "lid"
-      },
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6289504802678@s.whatsapp.net",
-        "fromMe": false,
-        "id": "ACCB377CD116BD8F380A25CD285CC610",
-        "participant": "6289504802678@s.whatsapp.net",
-        "addressingMode": "lid"
-      }
-    ],
-    "processedAt": "2026-07-03T15:39:08.468Z",
-    "deleted": true,
-    "deletedAt": "2026-07-03T15:39:42.187Z"
-  },
-  "AC559DBFEA01384D918476F7D6174AE8": {
-    "id": "AC559DBFEA01384D918476F7D6174AE8",
-    "sender": "6289504802678@s.whatsapp.net",
-    "name": "RendraX2",
-    "type": "imageMessage",
-    "arrivedAt": "2026-07-03T15:39:03.946Z",
-    "read": true,
-    "reacted": true,
-    "emoji": "❤️",
-    "resolve": "PN langsung ✓",
-    "source": "status",
-    "number": "6289504802678",
-    "resolvedPn": "6289504802678@s.whatsapp.net",
-    "messageKey": {
-      "remoteJid": "status@broadcast",
-      "remoteJidAlt": "6289504802678@s.whatsapp.net",
-      "fromMe": false,
-      "id": "AC559DBFEA01384D918476F7D6174AE8",
-      "participant": "263445207371837@lid",
-      "addressingMode": "lid"
-    },
-    "updatedAt": "2026-07-03T15:40:32.947Z",
-    "receiptKeys": [
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6289504802678@s.whatsapp.net",
-        "fromMe": false,
-        "id": "AC559DBFEA01384D918476F7D6174AE8",
-        "participant": "263445207371837@lid",
-        "addressingMode": "lid"
-      },
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6289504802678@s.whatsapp.net",
-        "fromMe": false,
-        "id": "AC559DBFEA01384D918476F7D6174AE8",
-        "participant": "6289504802678@s.whatsapp.net",
-        "addressingMode": "lid"
-      }
-    ],
-    "processedAt": "2026-07-03T15:39:07.859Z",
-    "deleted": true,
-    "deletedAt": "2026-07-03T15:40:32.947Z"
-  },
-  "AC0326837CC348D7F547468E72956017": {
-    "id": "AC0326837CC348D7F547468E72956017",
-    "sender": "6289504802678@s.whatsapp.net",
-    "name": "RendraX2",
-    "type": "imageMessage",
-    "arrivedAt": "2026-07-04T08:38:43.297Z",
-    "read": true,
-    "reacted": true,
-    "emoji": "⏺️⏏️⏹️",
-    "resolve": "PN langsung ✓",
-    "source": "status",
-    "number": "6289504802678",
-    "resolvedPn": "6289504802678@s.whatsapp.net",
-    "messageKey": {
-      "remoteJid": "status@broadcast",
-      "remoteJidAlt": "6289504802678@s.whatsapp.net",
-      "fromMe": false,
-      "id": "AC0326837CC348D7F547468E72956017",
-      "participant": "263445207371837@lid",
-      "addressingMode": "lid"
-    },
-    "updatedAt": "2026-07-04T08:38:58.691Z",
-    "receiptKeys": [
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6289504802678@s.whatsapp.net",
-        "fromMe": false,
-        "id": "AC0326837CC348D7F547468E72956017",
-        "participant": "263445207371837@lid",
-        "addressingMode": "lid"
-      },
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6289504802678@s.whatsapp.net",
-        "fromMe": false,
-        "id": "AC0326837CC348D7F547468E72956017",
-        "participant": "6289504802678@s.whatsapp.net",
-        "addressingMode": "lid"
-      }
-    ],
-    "processedAt": "2026-07-04T08:38:58.690Z"
+    "processedAt": "2026-07-14T08:34:25.853Z"
   }
 }

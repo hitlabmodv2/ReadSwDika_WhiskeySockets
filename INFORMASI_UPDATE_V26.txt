@@ -2,7 +2,7 @@
 _📅 Senin, 13 Juli 2026_ 🌙
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V26*
-✨ *4 Fitur Baru*
+✨ *5 Fitur Baru*
 🔧 *8 Bug/Error Fix*
 🚀 *4 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -47,6 +47,14 @@ _Perintah baru untuk browse & kirim galeri dari sumber premium 18+. Semua gambar
 7. Header Referer di-set ke URL galeri spesifik saat download — tanpa ini server sumber return 500 dan gambar gagal diambil
 8. Tidak ada URL/domain sumber yang muncul di pesan bot — tampilan bersih, cuma judul & jumlah gambar
 > `.hentaidad` sekarang bisa browse *dan* cari — `.hentaidad azur lane` langsung nyari galeri sesuai judul, semua gambar tetap dikirim dalam 1 album sekali kirim
+
+*5. 🎙️ .tts — Text to Speech Bahasa Indonesia (Voice Note Asli, Tanpa Login)*
+_Perintah baru untuk ubah teks jadi voice note WhatsApp bahasa Indonesia:_
+1. Ketik `.tts <teks>` → bot generate suara bahasa Indonesia dan kirim sebagai voice note (PTT) asli — bubble bulat WA dengan gelombang suara, bukan file audio biasa dengan tombol download
+2. Pakai endpoint publik Google Translate TTS, tanpa API key/token/login — tidak kena kuota ketat per jam seperti layanan TTS gratis lain
+3. Teks panjang otomatis dipecah per potongan lalu disambung ulang jadi 1 voice note utuh, prosesnya transparan buat pengguna (tidak perlu kirim beberapa kali)
+4. Maksimal 800 karakter per perintah
+> Cukup ketik `.tts <teks>`, langsung dapat voice note bahasa Indonesia — tidak ada menu/pilihan tambahan
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🔧 *BUG/ERROR FIX*
