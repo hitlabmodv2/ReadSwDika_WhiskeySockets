@@ -14,6 +14,7 @@
 
 const axios   = require('axios');
 const cheerio = require('cheerio');
+const sharp   = require('sharp');
 
 const BASE    = 'https://hentaidad.com';
 const HEADERS = {
@@ -86,15 +87,21 @@ async function scrapeGallery(href) {
 }
 
 /**
- * Download buffer satu gambar dengan timeout
+ * Download buffer satu gambar dengan timeout, lalu convert ke JPEG
+ * agar albumMessage tidak error "Invalid media type"
  */
 async function downloadImage(url) {
     const res = await axios.get(url, {
         responseType : 'arraybuffer',
         timeout      : 25000,
-        headers      : { ...HEADERS, Accept: 'image/webp,image/*, */*' },
+        headers      : { ...HEADERS, Accept: 'image/webp,image/avif,image/*, */*' },
     });
-    return Buffer.from(res.data);
+    const raw = Buffer.from(res.data);
+    try {
+        return await sharp(raw).jpeg({ quality: 88 }).toBuffer();
+    } catch {
+        return raw; // fallback buffer asli kalau sharp gagal
+    }
 }
 
 /**
@@ -229,8 +236,29 @@ async function handleHentaidadChoice({ hisoka, m, pendingHentaidadChoices, getQu
         // Caption hanya di foto pertama
         allItems[0].caption = `🔞 *${title}*\n📸 ${allItems.length} gambar | hentaidad.com`;
 
-        // Kirim SEMUA sekaligus dalam 1 albumMessage
-        await hisoka.sendMessage(m.from, { albumMessage: allItems }, { quoted: m });
+        // Kirim dalam album — fallback batch 10 → individual kalau gagal
+        const BATCH = 10;
+        try {
+            await hisoka.sendMessage(m.from, { albumMessage: allItems }, { quoted: m });
+        } catch (_albumErr) {
+            // Fallback: kirim per batch 10
+            let sent = false;
+            for (let b = 0; b < allItems.length; b += BATCH) {
+                const batch = allItems.slice(b, b + BATCH);
+                try {
+                    await hisoka.sendMessage(m.from, { albumMessage: batch }, { quoted: b === 0 ? m : undefined });
+                    sent = true;
+                } catch (_batchErr) {
+                    // Fallback terakhir: kirim satu per satu
+                    for (let i = 0; i < batch.length; i++) {
+                        try {
+                            await hisoka.sendMessage(m.from, { image: batch[i].image, caption: batch[i].caption }, { quoted: (b === 0 && i === 0) ? m : undefined });
+                        } catch (_singleErr) {}
+                    }
+                    sent = true;
+                }
+            }
+        }
 
         await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
     } catch (err) {

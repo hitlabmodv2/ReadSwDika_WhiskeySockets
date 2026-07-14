@@ -5,9 +5,9 @@
     "name": "o",
     "type": "conversation",
     "arrivedAt": "2026-07-14T05:54:33.124Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "🦈",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "62881025542877",
@@ -20,7 +20,7 @@
       "participant": "74797375574209@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-07-14T05:54:41.096Z",
+    "updatedAt": "2026-07-14T05:54:42.575Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -38,6 +38,7 @@
         "participant": "62881025542877@s.whatsapp.net",
         "addressingMode": "lid"
       }
-    ]
+    ],
+    "processedAt": "2026-07-14T05:54:42.575Z"
   }
 }

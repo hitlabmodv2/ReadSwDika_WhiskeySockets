@@ -5,9 +5,9 @@
     "name": "Wily",
     "type": "imageMessage",
     "arrivedAt": "2026-07-14T05:27:16.699Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "⏺️⏏️⏹️",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6289688206739",
@@ -20,7 +20,9 @@
       "participant": "81582920577063@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-07-14T05:27:16.699Z"
+    "updatedAt": "2026-07-14T05:55:14.806Z",
+    "retriedOnStartup": true,
+    "retriedAt": "2026-07-14T05:55:14.806Z"
   },
   "A5E406C08F37ACD84E12E420D58416E5": {
     "id": "A5E406C08F37ACD84E12E420D58416E5",
@@ -28,9 +30,9 @@
     "name": "Wily",
     "type": "imageMessage",
     "arrivedAt": "2026-07-14T05:27:16.805Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "🦈",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6289688206739",
@@ -43,6 +45,8 @@
       "participant": "81582920577063@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-07-14T05:27:16.805Z"
+    "updatedAt": "2026-07-14T05:55:16.227Z",
+    "retriedOnStartup": true,
+    "retriedAt": "2026-07-14T05:55:16.227Z"
   }
 }
