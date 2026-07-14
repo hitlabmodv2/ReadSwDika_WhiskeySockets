@@ -547,7 +547,7 @@ export function logStoryView(data) {
 // Versi ringkas: 1 kotak untuk SEMUA story tertunda dari nomor yang sama
 // (dipakai saat retry beruntun >1 entry) supaya tidak spam kotak per-entry.
 export function logStoryRetrySummary(data) {
-        const { botId, name, number, count, storyCount, emojiMode, resolve } = data;
+        const { botId, name, number, count, storyCount, emojiMode, resolve, mode, reaction } = data;
         const { boxColor: cyan, fgColor: white } = getLogswBoxColor();
         const reset = '\x1b[0m';
 
@@ -564,12 +564,21 @@ export function logStoryRetrySummary(data) {
         if (botId) {
                 console.log(`${cyan}│${reset} ${white}⭔ Jadibot     : ${padEnd(botId, contentWidth)}${reset}${cyan}${reset}`);
         }
+        // Mode & Reaksi ditampilkan sesuai kondisi RIWAKTU retry ini (bukan label
+        // generik) — supaya di mode Read Only jelas kelihatan tidak ada reaksi
+        // yang dikirim, tidak dikira bug.
+        if (mode) {
+                console.log(`${cyan}│${reset} ${white}⭔ Mode        : ${padEnd(mode, contentWidth)}${reset}${cyan}${reset}`);
+        }
         console.log(`${cyan}│${reset} ${white}⭔ Nama        : ${padEnd(String(name || '').slice(0, contentWidth - 2), contentWidth)}${reset}${cyan}${reset}`);
         console.log(`${cyan}│${reset} ${white}⭔ Nomor       : ${padEnd(number, contentWidth)}${reset}${cyan}${reset}`);
         console.log(`${cyan}│${reset} ${white}⭔ StoryTunda  : ${padEnd(String(count), contentWidth)}${reset}${cyan}${reset}`);
         console.log(`${cyan}│${reset} ${white}⭔ TotalStory  : ${padEnd(String(storyCount), contentWidth)}${reset}${cyan}${reset}`);
         console.log(`${cyan}│${reset} ${white}⭔ EmojiMode   : ${padEnd(_modeStr, contentWidth)}${reset}${cyan}${reset}`);
         console.log(`${cyan}│${reset} ${white}⭔ Berhasil    : ${padEnd('Retry ♻️', contentWidth)}${reset}${cyan}${reset}`);
+        if (reaction) {
+                console.log(`${cyan}│${reset} ${white}⭔ Reaksi      : ${padEnd(reaction, contentWidth)}${reset}${cyan}${reset}`);
+        }
         console.log(`${cyan}│${reset} ${white}⭔ Resolve     : ${padEnd((resolve || 'PN ✓') + ' ♻️', contentWidth)}${reset}${cyan}${reset}`);
         console.log(`${cyan}└${'─'.repeat(13)}···${reset}`);
 }

@@ -419,6 +419,14 @@ export default async function (m, hisoka) {
                                         const isCC = (e) => { const s = e?.message || String(e); return s.includes('Connection Closed') || s.includes('Connection closed') || s.includes('EPIPE') || s.includes('Socket closed'); };
                                         let retriedCount = 0;
                                         let lastResolve = null;
+                                        // Cek ulang setting mode SAAT INI — kalau sejak story ini masuk,
+                                        // reaksi sudah dimatikan (Read Only), retry jangan tetap kirim
+                                        // reaksi (data harus ikut kondisi realtime, bukan kondisi lama).
+                                        // Nilai ini juga dipakai buat kotak notif supaya akurat menampilkan
+                                        // Mode & Reaksi yang sebenarnya berlaku saat retry ini, bukan cuma
+                                        // label generik "Retry" yang bikin dikira ada reaksi padahal Read Only.
+                                        const retryShouldReact = storyConfig.autoReaction !== false;
+                                        let anyReacted = false;
                                         for (const miss of missed) {
                                                 try {
                                                         const mk = miss.receiptKeys || [];
@@ -429,10 +437,6 @@ export default async function (m, hisoka) {
                                                                 ]);
                                                         }
                                                         const mp = miss.resolvedPn;
-                                                        // Cek ulang setting mode SAAT INI — kalau sejak story ini masuk,
-                                                        // reaksi sudah dimatikan (Read Only), retry jangan tetap kirim
-                                                        // reaksi (data harus ikut kondisi realtime, bukan kondisi lama).
-                                                        const retryShouldReact = storyConfig.autoReaction !== false;
                                                         let retryEmoji = null;
                                                         if (retryShouldReact && !miss.reacted && mp && miss.messageKey) {
                                                                 retryEmoji = getRandomEmoji('status') || '❤️';
@@ -440,6 +444,7 @@ export default async function (m, hisoka) {
                                                                         { react: { key: miss.messageKey, text: retryEmoji } },
                                                                         { statusJidList: [jidNormalizedUser(hisoka.user.id), jidNormalizedUser(mp)] }
                                                                 ).catch(() => { retryEmoji = null; });
+                                                                if (retryEmoji) anyReacted = true;
                                                                 updateSwUserEntry(trackNumber, miss.id, { read: true, reacted: true, emoji: retryEmoji, retriedAt: new Date().toISOString() });
                                                         } else if (mk.length > 0) {
                                                                 updateSwUserEntry(trackNumber, miss.id, { read: true, retriedAt: new Date().toISOString() });
@@ -460,6 +465,8 @@ export default async function (m, hisoka) {
                                                         storyCount: getStoryCountToday(lastMiss.number || trackNumber),
                                                         resolve: lastResolve,
                                                         emojiMode: getMode(),
+                                                        mode: retryShouldReact ? 'Read+Reaction ✓' : 'Read Only 👁️',
+                                                        reaction: retryShouldReact ? (anyReacted ? 'Retry Berhasil ♻️' : 'Off ❌') : 'Off ❌',
                                                 });
                                         }
                                 }

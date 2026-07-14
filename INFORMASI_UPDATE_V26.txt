@@ -3,7 +3,7 @@ _📅 Senin, 13 Juli 2026_ 🌙
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V26*
 ✨ *3 Fitur Baru*
-🔧 *7 Bug/Error Fix*
+🔧 *8 Bug/Error Fix*
 🚀 *3 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
@@ -89,6 +89,12 @@ _Beberapa sesi jadibot (dari sekian yang tersimpan, misal 10 sesi) kadang stuck 
 5. Ditambahkan guard global (`process.on('unhandledRejection'/'uncaughtException')`) — error yang lolos sekarang cuma dicatat ke log, tidak lagi mematikan seluruh bot
 6. Ketiga pemanggilan `startJadibot()` yang tadinya tanpa `.catch()` sekarang dijaga — error di 1 sesi jadibot sekarang murni gagal untuk sesi itu saja, tidak menyeret sesi lain
 > Sudah diuji simulasi: skenario 1 sesi "error" di tengah proses start banyak sesi sekaligus — sekarang sesi lain tetap lanjut diproses normal, proses bot tidak ikut mati
+
+*8. 🐛 Notif Retry AutoReadStoryWhatsApp Tidak Tampilkan Mode/Reaksi (Bikin Dikira Bug)*
+_Kotak notif ringkasan "Retry" (dikirim saat ada story yang sempat gagal lalu berhasil di-retry) tidak pernah menampilkan info Mode maupun Reaksi — beda dari kotak notif biasa yang selalu jelas menampilkan "Mode: Read Only / Read+Reaction" dan "Reaksi: Off / [emoji]":_
+1. ~Kotak retry cuma nampilkan label generik `Berhasil : Retry ♻️` tanpa info Mode/Reaksi — jadi waktu mode di-set Read Only (tanpa reaksi), notif retry-nya kelihatan "polos" tanpa konfirmasi, bikin terkesan seperti ada yang salah/bug walau sebenarnya perilakunya sudah benar (tidak kirim reaksi)~
+2. Kotak retry sekarang ikut menampilkan baris *Mode* dan *Reaksi*, dihitung dari kondisi setting SAAT retry itu terjadi (bukan label statis) — Read Only akan selalu tampil "Reaksi: Off ❌", Read+Reaction akan tampil "Reaksi: Retry Berhasil ♻️" kalau reaksinya berhasil terkirim
+> Notif retry sekarang akurat & konsisten dengan notif biasa — di mode Read Only jelas kelihatan tidak ada reaksi (bukan bug), di mode Read+Reaction jelas kelihatan reaksinya berhasil retry atau tidak
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *PERUBAHAN*
