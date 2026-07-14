@@ -135,6 +135,7 @@ const pendingCosplayChoices = new Map();
 const pendingKomikChoices = new Map();
 const pendingFontuntikChoices = new Map(); // key → { text, botMsgId, expiresAt, timeout }
 const pendingWaifuChoices     = new Map(); // key → { stage, mode, botMsgKey, expiresAt, timeout }
+const pendingHentaidadChoices = new Map(); // key → { results, botMsgId, expiresAt, loading, timeout }
 
 const aiReplyCooldown = new Map(); // sender → last reply timestamp
 const AI_COOLDOWN_MS = 3000; // 3 detik cooldown per user
@@ -743,6 +744,12 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         if (await handleAlqNotifReply({ hisoka, m, pendingAlqNotifChoices, getQuotedStanzaId, tolak, logCommand, loadConfig, fs, path })) return;
                 }
 
+                // ── Handle pending hentaidad choice → hentaidad.cjs ──
+                {
+                        const { handleHentaidadChoice } = _require(path.resolve('./SEMUA_FITUR/anime/hentaidad.cjs'));
+                        if (await handleHentaidadChoice({ hisoka, m, pendingHentaidadChoices, getQuotedStanzaId, tolak, logCommand, logError })) return;
+                }
+
                 // ── Handle pending cosplaytele search choice → cosplay-cmd.cjs ──
                 if (await handleCosplayChoice({ hisoka, m, pendingCosplayChoices, getQuotedStanzaId, tolak, logCommand, logError })) return;
 
@@ -1115,6 +1122,13 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'alqdownload': {
                                 const { handleAlqdownload } = _require(path.resolve('./SEMUA_FITUR/anime/alqanime-dl.cjs'));
                                 await handleAlqdownload({ hisoka, m, query, tolak, logCommand, logError, fs, path });
+                                break;
+                        }
+
+                        case 'hentaidad':
+                        case 'hdad': {
+                                const { handleHentaidad } = _require(path.resolve('./SEMUA_FITUR/anime/hentaidad.cjs'));
+                                await handleHentaidad({ hisoka, m, tolak, logCommand, logError, pendingHentaidadChoices });
                                 break;
                         }
 
