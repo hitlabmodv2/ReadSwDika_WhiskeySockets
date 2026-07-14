@@ -3,7 +3,7 @@ _📅 Senin, 13 Juli 2026_ 🌙
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V26*
 ✨ *3 Fitur Baru*
-🔧 *6 Bug/Error Fix*
+🔧 *7 Bug/Error Fix*
 🚀 *3 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
@@ -79,6 +79,16 @@ _Setelah domain Animasu pindah, banyak anime gagal ditemukan meski API & halaman
 2. ~Tapi regex pencarian link fallback itu hardcode ke domain lama (`v1.animasu.app`) — begitu domain resmi ganti, regex tidak pernah cocok lagi, fallback selalu gagal, dan anime dengan slug tebakan salah jadi tidak pernah terkirim~
 3. Regex fallback sekarang ikut domain aktif (`BASE_URL`) secara dinamis, bukan hardcode — otomatis ikut kalau domain ganti lagi ke depannya
 > Fitur cari anime & pantau episode baru sekarang akurat lagi walau ada anime dengan slug "tebakan" yang meleset
+
+*7. 🐛🔴 JadiBot Stuck Tidak Connect Setelah Restart (Bug Serius — Bisa Jatuhkan Seluruh Bot)*
+_Beberapa sesi jadibot (dari sekian yang tersimpan, misal 10 sesi) kadang stuck tidak pernah terhubung lagi setelah bot di-restart, terus-menerus, walau sesi lain baik-baik saja:_
+1. ~`startJadibot()` adalah fungsi *async*, tapi dipanggil TANPA `await`/`.catch()` di 3 tempat: proses restore semua jadibot saat bot baru nyala, watchdog retry startup, dan reconnect otomatis setelah disconnect~
+2. ~Akibatnya, kalau ada 1 sesi yang error saat proses start (misal file sesi corrupt, gagal baca creds, dll), error itu jadi "unhandled promise rejection" yang TIDAK pernah tertangkap `try/catch` di pemanggilnya~
+3. ~Sejak Node.js versi 15+, unhandled rejection seperti ini akan MEMATIKAN SELURUH PROSES bot (bukan cuma 1 sesi jadibot yang gagal) — bot lalu di-restart otomatis oleh `start-ptero.sh`, mulai proses restore jadibot dari awal lagi~
+4. ~Kalau bot restore jadibot secara berurutan dengan jeda (staggered) dan proses crash duluan di tengah giliran, sesi-sesi jadibot yang belum kebagian giliran start SAMA SEKALI tidak sempat dicoba di run itu — dan kalau sesi yang bikin crash tetap ada di posisi sama tiap restart, sesi-sesi setelahnya jadi "stuck" terus-menerus tiap kali bot restart~
+5. Ditambahkan guard global (`process.on('unhandledRejection'/'uncaughtException')`) — error yang lolos sekarang cuma dicatat ke log, tidak lagi mematikan seluruh bot
+6. Ketiga pemanggilan `startJadibot()` yang tadinya tanpa `.catch()` sekarang dijaga — error di 1 sesi jadibot sekarang murni gagal untuk sesi itu saja, tidak menyeret sesi lain
+> Sudah diuji simulasi: skenario 1 sesi "error" di tengah proses start banyak sesi sekaligus — sekarang sesi lain tetap lanjut diproses normal, proses bot tidak ikut mati
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *PERUBAHAN*

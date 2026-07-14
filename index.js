@@ -2780,6 +2780,28 @@ process.on('exit', () => {
         pauseAllJadibotTimers();
 });
 
+// ── GUARD: unhandledRejection/uncaughtException tidak boleh mematikan proses ──
+// BUG SERIUS yang diperbaiki: startJadibot() dipanggil TANPA await/catch di
+// beberapa tempat (restore-on-startup loop, watchdog retry, reconnect setelah
+// disconnect). Karena startJadibot adalah async function, error apapun yang
+// terjadi di dalamnya (misal file sesi corrupt, gagal baca creds, dst) TIDAK
+// pernah nyangkut ke try/catch di pemanggilnya — melainkan jadi "unhandled
+// promise rejection". Sejak Node 15+, unhandled rejection MEMATIKAN seluruh
+// proses Node secara default. Efeknya: kalau salah satu dari sekian jadibot
+// (misal 10 sesi tersimpan) gagal start dengan cara ini, BUKAN cuma nomor itu
+// yang gagal — seluruh proses bot ikut crash, lalu start-ptero.sh restart node
+// dari 0. Nomor-nomor jadibot yang belum sempat giliran start di loop staggered
+// (karena crash terjadi di tengah loop) jadi tidak pernah kebagian kesempatan
+// connect sama sekali di run itu — kalau sesi yang bikin crash tetap ada di
+// posisi yang sama tiap restart, nomor-nomor setelahnya "stuck" terus-menerus.
+// Guard ini mencegah 1 sesi jadibot yang error menjatuhkan seluruh bot.
+process.on('unhandledRejection', (reason, promise) => {
+        console.error('\x1b[31m[UnhandledRejection]\x1b[0m Promise gagal tanpa .catch() — diamankan, bot tetap jalan:', reason?.stack || reason);
+});
+process.on('uncaughtException', (err) => {
+        console.error('\x1b[31m[UncaughtException]\x1b[0m Error tidak tertangkap — diamankan, bot tetap jalan:', err?.stack || err);
+});
+
 startWithGuard();
 
 /* =====================================================================
@@ -2947,7 +2969,14 @@ setTimeout(async () => {
       }
       activeOrStartingJadibot.delete(number);
 
-      startJadibot(number, () => {}, mainBotNum, null, null, undefined, null);
+      // .catch() wajib — startJadibot async, error di dalamnya tidak pernah
+      // nyangkut ke try/catch biasa (lihat catatan guard unhandledRejection di atas)
+      Promise.resolve(startJadibot(number, () => {}, mainBotNum, null, null, undefined, null))
+        .catch(err => {
+          console.log(`\x1b[31m[AUTO JADIBOT]\x1b[0m ❌ Retry ${number} gagal: ${err?.message}`);
+          activeOrStartingJadibot.delete(number);
+          startingSocketMap.delete(number);
+        });
       scheduleJadibotStartupWatchdog(number, mainBotNum);
     }, JADIBOT_STARTUP_WATCHDOG_MS);
   }
@@ -2957,7 +2986,12 @@ setTimeout(async () => {
       const number = validBots[i];
       const mainBotNum = global.__mainBotNumber || fallbackMainBotNum || '';
       try {
-        startJadibot(
+        // .catch() wajib — startJadibot async, error di dalamnya (mis. file
+        // sesi corrupt) tidak pernah nyangkut ke try/catch ini kalau tidak
+        // di-catch di level promise. Tanpa ini, 1 sesi gagal = seluruh bot
+        // crash (unhandledRejection) dan sesi lain di loop staggered ini
+        // tidak kebagian giliran start sama sekali (lihat guard di atas).
+        Promise.resolve(startJadibot(
           number,
           () => {},
           mainBotNum,
@@ -2965,7 +2999,11 @@ setTimeout(async () => {
           null,
           undefined,
           null  // mainBotSock null — akan pakai global.hisokaClient via getActiveMainSock()
-        );
+        )).catch(err => {
+          console.log(`\x1b[31m[AUTO JADIBOT]\x1b[0m ❌ Gagal start ${number}: ${err?.message}`);
+          activeOrStartingJadibot.delete(number);
+          startingSocketMap.delete(number);
+        });
         scheduleJadibotStartupWatchdog(number, mainBotNum);
       } catch (err) {
         console.log(`\x1b[31m[AUTO JADIBOT]\x1b[0m ❌ Gagal start ${number}: ${err?.message}`);

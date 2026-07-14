@@ -2092,7 +2092,15 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
       setTimeout(() => {
         reconnectingJadibot.delete(number)
         activeOrStartingJadibot.delete(number)
-        startJadibot(number, sendReply, mainBotNumber, editMsg, sendPairingMsg, hasConnectedOnce ? undefined : durationMs, getActiveMainSock(mainBotSock), null, requesterNumber)
+        // .catch() wajib — startJadibot async, error di dalamnya tidak pernah
+        // nyangkut ke try/catch biasa dan akan jadi unhandledRejection yang
+        // (tanpa guard global) mematikan seluruh proses bot.
+        Promise.resolve(startJadibot(number, sendReply, mainBotNumber, editMsg, sendPairingMsg, hasConnectedOnce ? undefined : durationMs, getActiveMainSock(mainBotSock), null, requesterNumber))
+          .catch(err => {
+            console.log(`\x1b[31m[JADIBOT]\x1b[0m ❌ Reconnect ${number} gagal: ${err?.message}`)
+            activeOrStartingJadibot.delete(number)
+            startingSocketMap.delete(number)
+          })
       }, 3000)
     }
   })
