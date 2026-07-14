@@ -30,38 +30,53 @@ async function fetchHtml(url) {
     return res.data;
 }
 
-/** Ubah slug URL jadi judul yang bersih */
-function slugToTitle(slug) {
-    return slug
-        .replace(/-full(-\d+)?$/, '')        // hapus -full / -full-2 di akhir
-        .replace(/^request-/, '')            // hapus prefix "request-"
-        .replace(/-/g, ' ')                  // dash → spasi
-        .replace(/\b\w/g, c => c.toUpperCase()) // Title Case
+/**
+ * Bersihkan judul dari alt attribute:
+ * - decode HTML entities
+ * - hapus suffix " Hentai" yang ditambah situs di hasil search
+ */
+function cleanTitle(raw) {
+    return raw
+        .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"').replace(/&#39;/g, "'")
+        .replace(/\s+Hentai\s*$/i, '')
         .trim();
 }
 
 /**
- * Scrape halaman utama → ambil Latest Releases
- * @returns {Array<{no, title, href, thumb}>}
+ * Scraper generik — ambil article.post-card dari URL apapun
+ * href dari <a>, judul dari alt <img> (judul asli, bukan tebakan slug)
  */
-async function scrapeLatestReleases() {
-    const html = await fetchHtml(BASE + '/');
+async function _scrapeCards(url, fallbackLabel) {
+    const html = await fetchHtml(url);
     const $    = cheerio.load(html);
     const items = [];
 
-    $('img[src*="thumbnails"]').each((i, imgEl) => {
-        if (items.length >= 15) return false; // ambil max 15
-        const card  = $(imgEl).closest('a');
-        const href  = card.attr('href') || '';
-        const thumb = $(imgEl).attr('src') || '';
-        if (!href || !thumb) return;
-
-        const slug  = href.split('/').filter(Boolean).pop() || '';
-        const title = slugToTitle(slug) || `Gallery ${i + 1}`;
-        items.push({ no: i + 1, title, href: href.startsWith('http') ? href : BASE + href, thumb, slug });
+    $('article.post-card').each((i, el) => {
+        const link  = $(el).find('a[href]').first();
+        const href  = link.attr('href') || '';
+        const alt   = $(el).find('img[alt]').first().attr('alt') || '';
+        if (!href) return;
+        const title = cleanTitle(alt) || `${fallbackLabel} ${i + 1}`;
+        items.push({ no: i + 1, title, href: href.startsWith('http') ? href : BASE + href });
     });
 
     return items;
+}
+
+/**
+ * Scrape halaman utama → Latest Releases (realtime)
+ */
+async function scrapeLatestReleases() {
+    return _scrapeCards(BASE + '/', 'Gallery');
+}
+
+/**
+ * Scrape hasil pencarian — endpoint /search?q=
+ * (bukan /?s= yang tidak berfungsi di situs ini)
+ */
+async function scrapeSearch(query) {
+    return _scrapeCards(`${BASE}/search?q=${encodeURIComponent(query)}`, 'Result');
 }
 
 /**
@@ -108,15 +123,55 @@ async function downloadImage(url, referer) {
     }
 }
 
+/** Format bytes → "18.4 MB" / "320 KB" */
+function fmtBytes(bytes) {
+    if (bytes >= 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    return Math.round(bytes / 1024) + ' KB';
+}
+
+/** Format durasi ms → "42 detik" / "1 mnt 20 dtk" */
+function fmtDur(ms) {
+    const s = Math.round(ms / 1000);
+    if (s < 60) return `${s} detik`;
+    const m = Math.floor(s / 60), r = s % 60;
+    return r > 0 ? `${m} mnt ${r} dtk` : `${m} menit`;
+}
+
+/** Bangun kartu hasil setelah album selesai dikirim */
+function buildFinalCard({ title, berhasil, total, totalBytes, elapsedMs, failed }) {
+    const judul     = title.length > 52 ? title.slice(0, 52) + '…' : title;
+    const gagalLine = failed > 0 ? `│ ⚠️ Gagal     : ~${failed} gambar~\n` : '';
+    return (
+        `╭─「 🔞 *HENTAIDAD* 」\n` +
+        `│\n` +
+        `│ 📌 *${judul}*\n` +
+        `│\n` +
+        `│ 📸 Gambar    : *${berhasil}${failed > 0 ? `/${total}` : ''} foto*\n` +
+        `│ 📦 Ukuran    : \`${fmtBytes(totalBytes)}\`\n` +
+        `│ ⏱️  Waktu     : \`${fmtDur(elapsedMs)}\`\n` +
+        gagalLine +
+        `│ ✅ Status    : *Terkirim*\n` +
+        `╰──────────────────────`
+    );
+}
+
 /**
- * Format teks daftar latest releases
+ * Format teks daftar (latest releases ATAU hasil search)
+ * @param {Array}  items
+ * @param {string|null} query  — null = latest, string = search
  */
-function formatList(items) {
-    let text = `╭─「 🔞 *HENTAIDAD* 」\n│\n│ 📋 *Latest Releases:*\n│\n`;
+function formatList(items, query) {
+    const isSearch   = query && query.length > 0;
+    const qShort     = isSearch && query.length > 30 ? query.slice(0, 30) + '…' : query;
+    const headerLine = isSearch
+        ? `│ 🔎 *Hasil untuk:* _"${qShort}"_\n│ _${items.length} galeri ditemukan_\n`
+        : `│ 📋 *Latest Releases* _— ${items.length} galeri_\n`;
+    let text = `╭─「 🔞 *HENTAIDAD* 」\n│\n${headerLine}│\n`;
     for (const it of items) {
-        text += `│ *${it.no}.* ${it.title.slice(0, 55)}${it.title.length > 55 ? '…' : ''}\n`;
+        const judul = it.title.length > 52 ? it.title.slice(0, 52) + '…' : it.title;
+        text += `│ ${it.no}. ${judul}\n`;
     }
-    text += `│\n│ 💬 *Reply pesan ini* dengan nomor pilihanmu\n│ Contoh: balas dengan *1*\n╰──────────────────────`;
+    text += `│\n> 💬 *Reply* pesan ini dengan *nomor* pilihanmu\n> _Contoh: balas dengan_ *1*`;
     return text;
 }
 
@@ -126,16 +181,50 @@ async function handleHentaidad({ hisoka, m, tolak, logCommand, logError, pending
     try {
         logCommand(m, hisoka, m.command || 'hentaidad');
 
-        await hisoka.sendMessage(m.from, { react: { text: '🔍', key: m.key } });
-        await tolak(hisoka, m, `🔄 Mengambil data terbaru...`);
+        // Deteksi mode: ada teks setelah command → search, kosong → latest
+        // m.args = kata-kata setelah command (sudah strip nama command)
+        // fallback: strip nama command dari m.text manual
+        const query = (Array.isArray(m.args) && m.args.length > 0)
+            ? m.args.join(' ').trim()
+            : (m.text || '').replace(/^[.!/]?hentaidad\s*/i, '').trim();
+        const isSearch = query.length > 0;
 
-        const items = await scrapeLatestReleases();
+        await hisoka.sendMessage(m.from, { react: { text: '🔍', key: m.key } });
+        await tolak(hisoka, m,
+            isSearch
+                ? `🔎 *Mencari:* _${query}_\n> _Harap tunggu sebentar..._`
+                : `🔄 *Mengambil latest releases...*\n> _Harap tunggu sebentar..._`
+        );
+
+        const items = isSearch
+            ? await scrapeSearch(query)
+            : await scrapeLatestReleases();
+
         if (!items.length) {
-            await tolak(hisoka, m, `❌ Gagal mengambil data. Coba lagi nanti.`);
+            if (isSearch) {
+                await hisoka.sendMessage(m.from, {
+                    text:
+                        `╭─「 🔞 *HENTAIDAD* 」\n` +
+                        `│\n` +
+                        `│ 🚫 *No Hentai Found*\n` +
+                        `│ ~We couldn't find any hentai~\n` +
+                        `│ ~matching "${query}"~\n` +
+                        `│\n` +
+                        `│ 💡 *Saran pencarian:*\n` +
+                        `│ • Coba kata kunci _lebih pendek_\n` +
+                        `│ • Gunakan _nama karakter_ / _judul asli_\n` +
+                        `│ • Coba _bahasa Inggris_ (misal: \`re zero\`)\n` +
+                        `│\n` +
+                        `> Ketik \`.hentaidad\` untuk melihat latest`,
+                }, { quoted: m });
+            } else {
+                await tolak(hisoka, m, `❌ Gagal mengambil data. Coba lagi nanti.`);
+            }
+            await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
             return;
         }
 
-        const listText = formatList(items);
+        const listText = formatList(items, isSearch ? query : null);
         const sent     = await hisoka.sendMessage(m.from, { text: listText }, { quoted: m });
 
         // Simpan ke pending map — tunggu reply dari user selama 3 menit
@@ -174,19 +263,19 @@ async function handleHentaidadChoice({ hisoka, m, pendingHentaidadChoices, getQu
     // Expired
     if (pending.expiresAt <= Date.now()) {
         pendingHentaidadChoices.delete(m.sender);
-        await tolak(hisoka, m, '⏳ Menu sudah kedaluwarsa. Ketik `.hentaidad` lagi.');
+        await tolak(hisoka, m, `⏳ *Menu sudah kedaluwarsa.*\n> Ketik \`.hentaidad\` lagi untuk memulai`);
         return true;
     }
 
     // Sedang loading
     if (pending.loading) {
-        await tolak(hisoka, m, '⏳ Sedang memproses, tunggu sebentar...');
+        await tolak(hisoka, m, `⏳ *Sedang memproses...*\n> _Tunggu sebentar, jangan kirim ulang_`);
         return true;
     }
 
     const idx = parseInt(rawChoice) - 1;
     if (idx < 0 || idx >= pending.results.length) {
-        await tolak(hisoka, m, `❌ Pilih angka 1–${pending.results.length}.`);
+        await tolak(hisoka, m, `❌ *Pilih angka yang valid.*\n> _Ketik angka *1*–*${pending.results.length}*_`);
         return true;
     }
 
@@ -199,84 +288,93 @@ async function handleHentaidadChoice({ hisoka, m, pendingHentaidadChoices, getQu
 
     try {
         await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
-        await tolak(hisoka, m, `🔄 Mengambil gambar: *${chosen.title}*\nSabar ya, lagi download...`);
+
+        // ── 1 pesan loading — di-edit sepanjang proses (tidak spam) ───────────
+        const loadingMsg = await hisoka.sendMessage(
+            m.from,
+            { text: `⏳ *Mengambil data galeri...*\n> _Harap tunggu sebentar_` },
+            { quoted: m }
+        );
+        const editLoading = async (txt) => {
+            try {
+                await hisoka.sendMessage(m.from, { text: txt, edit: loadingMsg.key });
+            } catch (_) {}
+        };
 
         // Scrape halaman galeri
         const { title, images } = await scrapeGallery(chosen.href);
 
         if (!images.length) {
-            await tolak(hisoka, m, `❌ Tidak ada gambar ditemukan di galeri ini.`);
+            await editLoading(`❌ *Tidak ada gambar ditemukan.*\n> _Galeri ini mungkin kosong atau belum tersedia_`);
             return true;
         }
 
         const totalImg = images.length;
-
-        await tolak(hisoka, m,
-            `📦 Ditemukan *${totalImg} gambar* — sedang download semua & kirim 1 album...`
-        );
+        await editLoading(`⬇️ *Mendownload* \`${totalImg} gambar\`...\n> _Sabar ya, lagi diproses_`);
 
         // Download semua gambar paralel (8 sekaligus biar cepat)
         // Referer = URL galeri agar server tidak return 500
-        const CONCUR = 8;
-        const allItems = [];
+        const startTime = Date.now();
+        const CONCUR    = 8;
+        const allItems  = [];
+        let   failed    = 0;
         for (let i = 0; i < images.length; i += CONCUR) {
-            const chunk = images.slice(i, i + CONCUR);
+            const chunk   = images.slice(i, i + CONCUR);
             const results = await Promise.allSettled(
                 chunk.map(async (url) => {
                     const buf = await downloadImage(url, chosen.href);
-                    return { image: buf };
+                    return buf;
                 })
             );
             for (const r of results) {
                 if (r.status === 'fulfilled') allItems.push(r.value);
-                else console.error('[HENTAIDAD] Gagal download gambar:', r.reason?.message);
+                else { failed++; console.error('[HENTAIDAD] Gagal download gambar:', r.reason?.message); }
             }
         }
 
         if (!allItems.length) {
-            await tolak(hisoka, m, `❌ Semua gambar gagal didownload.`);
+            await editLoading(`❌ Semua gambar gagal didownload.`);
             return true;
         }
 
-        const buffers = allItems.map(it => it.image);
-        const total   = buffers.length;
+        const total      = allItems.length;
+        const totalBytes = allItems.reduce((acc, buf) => acc + buf.length, 0);
 
-        // ── Kirim album pakai Baileys API yang benar ──────────────────────────
+        await editLoading(`📤 *Mengirim* \`${total} gambar\` _dalam 1 album..._\n> _Sebentar lagi_`);
+
+        // ── Kirim album pakai Baileys API ─────────────────────────────────────
         // 1) Kirim container album → dapat parentKey
         // 2) Tiap gambar dikirim dengan albumParentKey → masuk 1 album, NO caption
-        // 3) Kirim teks info setelah selesai
         try {
             const parentMsg = await hisoka.sendMessage(
                 m.from,
                 { album: { expectedImageCount: total, expectedVideoCount: 0 } },
                 { quoted: m }
             );
-
-            // Kirim semua gambar paralel dalam 1 album, tanpa caption
             await Promise.allSettled(
-                buffers.map(buf =>
+                allItems.map(buf =>
                     hisoka.sendMessage(m.from, {
-                        image        : buf,
+                        image         : buf,
                         albumParentKey: parentMsg.key,
                     })
                 )
             );
         } catch (albumErr) {
             console.error('[HENTAIDAD] Album API error:', albumErr?.message);
-            // Fallback: kirim satu per satu tanpa caption
-            for (let i = 0; i < buffers.length; i++) {
+            // Fallback: kirim satu per satu
+            for (let i = 0; i < allItems.length; i++) {
                 try {
                     await hisoka.sendMessage(m.from, {
-                        image  : buffers[i],
+                        image: allItems[i],
                     }, { quoted: i === 0 ? m : undefined });
                 } catch (_) {}
             }
         }
 
-        // Kirim info judul sebagai teks terpisah setelah album selesai
-        await hisoka.sendMessage(m.from, {
-            text: `🔞 *${title}*\n📸 ${total} gambar`,
-        }, { quoted: m });
+        const elapsedMs = Date.now() - startTime;
+
+        // ── Edit pesan loading → kartu hasil rapi ────────────────────────────
+        await editLoading(buildFinalCard({ title, berhasil: total, total: totalImg, totalBytes, elapsedMs, failed }));
 
         await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
     } catch (err) {

@@ -160,6 +160,7 @@ export function buildMenuUtama({ pushName, isOwner, uptimeStr, tgl, jam, browser
 │ .nhget
 │ .nhrand
 │ .nhdl
+│ .hentaidad
 │ .cosplay
 │ .cosplayrandom
 │ .pixivr18

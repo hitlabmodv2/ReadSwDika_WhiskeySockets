@@ -84,7 +84,7 @@ alq/alqanime | alqupdate | alqdl
 komik/komiktap | komikinfo | komikget | komikupdate
 
 「 🔞 *KONTEN 18+* 」
-nh/nhentai | nhget | nhrand | nhdl
+nh/nhentai | nhget | nhrand | nhdl | hentaidad
 cosplay | cosplayrandom | pixivr18
 
 「 🌐 *WEB & TOOLS* 」

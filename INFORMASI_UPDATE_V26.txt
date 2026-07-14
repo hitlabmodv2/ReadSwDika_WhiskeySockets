@@ -2,7 +2,7 @@
 _📅 Senin, 13 Juli 2026_ 🌙
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V26*
-✨ *3 Fitur Baru*
+✨ *4 Fitur Baru*
 🔧 *8 Bug/Error Fix*
 🚀 *4 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -35,6 +35,16 @@ _Sebelumnya notif Animasu cuma satu jenis generik dari daftar post episode. Seka
 5. `.animasu test` sekarang kirim 2 preview (satu dari tiap widget) supaya format & konektivitas kedua kategori bisa dicek langsung
 6. Dedup state dipisah per widget (`tayangState` & `updateState`) — supaya perubahan di satu widget tidak pernah memicu notif dari widget lain
 > Sudah diuji simulasi manual: deteksi "episode baru", "anime baru tayang", "baru ditambah", dan "diperbarui" semuanya akurat sebelum dipasang ke scheduler
+
+*4. 🔞 .hentaidad — Galeri Hentai Langsung di WhatsApp (Album 1 Paket)*
+_Perintah baru untuk browse & kirim galeri dari sumber premium 18+. Semua gambar dikirim dalam 1 album WhatsApp, bukan satu-satu:_
+1. Ketik `.hentaidad` → bot tampilkan daftar Latest Releases (judul bernomor)
+2. Reply pesan daftar itu dengan nomor pilihan → bot mulai download & kirim
+3. Semua gambar dari galeri yang dipilih dikirim sebagai *1 album WhatsApp* (bukan pesan terpisah-pisah) — efisien & rapi di chat
+4. Gambar diconvert otomatis ke JPEG sebelum dikirim — cegah error "Invalid media type" dari format WebP/AVIF yang kadang dipakai sumber
+5. Header Referer di-set ke URL galeri spesifik saat download — tanpa ini server sumber return 500 dan gambar gagal diambil
+6. Tidak ada URL/domain sumber yang muncul di pesan bot — tampilan bersih, cuma judul & jumlah gambar
+> `.hentaidad` sekarang aktif — browse & kirim galeri 18+ langsung dari WA, semua gambar dalam 1 album sekali kirim
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🔧 *BUG/ERROR FIX*
