@@ -140,18 +140,15 @@ function fmtDur(ms) {
 /** Bangun kartu hasil setelah album selesai dikirim */
 function buildFinalCard({ title, berhasil, total, totalBytes, elapsedMs, failed }) {
     const judul     = title.length > 52 ? title.slice(0, 52) + '…' : title;
-    const gagalLine = failed > 0 ? `│ ⚠️ Gagal     : ~${failed} gambar~\n` : '';
+    const gagalLine = failed > 0 ? `• ⚠️ Gagal   : ~${failed} gambar~\n` : '';
     return (
-        `╭─「 🔞 *HENTAIDAD* 」\n` +
-        `│\n` +
-        `│ 📌 *${judul}*\n` +
-        `│\n` +
-        `│ 📸 Gambar    : *${berhasil}${failed > 0 ? `/${total}` : ''} foto*\n` +
-        `│ 📦 Ukuran    : \`${fmtBytes(totalBytes)}\`\n` +
-        `│ ⏱️  Waktu     : \`${fmtDur(elapsedMs)}\`\n` +
+        `🔞 *HENTAIDAD*\n\n` +
+        `📌 *${judul}*\n\n` +
+        `• 📸 Gambar  : *${berhasil}${failed > 0 ? `/${total}` : ''} foto*\n` +
+        `• 📦 Ukuran  : \`${fmtBytes(totalBytes)}\`\n` +
+        `• ⏱️ Waktu   : \`${fmtDur(elapsedMs)}\`\n` +
         gagalLine +
-        `│ ✅ Status    : *Terkirim*\n` +
-        `╰──────────────────────`
+        `\n✅ *Status: Terkirim*`
     );
 }
 
@@ -164,14 +161,14 @@ function formatList(items, query) {
     const isSearch   = query && query.length > 0;
     const qShort     = isSearch && query.length > 30 ? query.slice(0, 30) + '…' : query;
     const headerLine = isSearch
-        ? `│ 🔎 *Hasil untuk:* _"${qShort}"_\n│ _${items.length} galeri ditemukan_\n`
-        : `│ 📋 *Latest Releases* _— ${items.length} galeri_\n`;
-    let text = `╭─「 🔞 *HENTAIDAD* 」\n│\n${headerLine}│\n`;
+        ? `🔎 *Hasil untuk:* _"${qShort}"_\n_${items.length} galeri ditemukan_\n`
+        : `📋 *Latest Releases* _— ${items.length} galeri_\n`;
+    let text = `🔞 *HENTAIDAD*\n\n${headerLine}\n`;
     for (const it of items) {
         const judul = it.title.length > 52 ? it.title.slice(0, 52) + '…' : it.title;
-        text += `│ ${it.no}. ${judul}\n`;
+        text += `${it.no}. ${judul}\n`;
     }
-    text += `│\n> 💬 *Reply* pesan ini dengan *nomor* pilihanmu\n> _Contoh: balas dengan_ *1*`;
+    text += `\n> 💬 *Reply* pesan ini dengan *nomor* pilihanmu\n> _Contoh: balas dengan_ *1*`;
     return text;
 }
 
@@ -204,17 +201,14 @@ async function handleHentaidad({ hisoka, m, tolak, logCommand, logError, pending
             if (isSearch) {
                 await hisoka.sendMessage(m.from, {
                     text:
-                        `╭─「 🔞 *HENTAIDAD* 」\n` +
-                        `│\n` +
-                        `│ 🚫 *No Hentai Found*\n` +
-                        `│ ~We couldn't find any hentai~\n` +
-                        `│ ~matching "${query}"~\n` +
-                        `│\n` +
-                        `│ 💡 *Saran pencarian:*\n` +
-                        `│ • Coba kata kunci _lebih pendek_\n` +
-                        `│ • Gunakan _nama karakter_ / _judul asli_\n` +
-                        `│ • Coba _bahasa Inggris_ (misal: \`re zero\`)\n` +
-                        `│\n` +
+                        `🔞 *HENTAIDAD*\n\n` +
+                        `🚫 *No Hentai Found*\n` +
+                        `~We couldn't find any hentai~\n` +
+                        `~matching "${query}"~\n\n` +
+                        `💡 *Saran pencarian:*\n` +
+                        `• Coba kata kunci _lebih pendek_\n` +
+                        `• Gunakan _nama karakter_ / _judul asli_\n` +
+                        `• Coba _bahasa Inggris_ (misal: \`re zero\`)\n\n` +
                         `> Ketik \`.hentaidad\` untuk melihat latest`,
                 }, { quoted: m });
             } else {
