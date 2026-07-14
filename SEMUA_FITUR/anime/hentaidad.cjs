@@ -199,23 +199,27 @@ async function handleHentaidadChoice({ hisoka, m, pendingHentaidadChoices, getQu
         }
 
         const totalImg = images.length;
-        await tolak(hisoka, m, `📦 Ditemukan *${totalImg} gambar* — sedang download & kirim album...`);
 
-        // Download semua gambar secara paralel (batch 5)
+        // WhatsApp album limit = 30 foto per album
+        // Ambil max 30 gambar saja agar masuk 1 album, tidak spam
+        const MAX_ALBUM = 30;
+        const picked    = images.slice(0, MAX_ALBUM);
+        const moreCount = totalImg - picked.length;
+
+        const infoMore = moreCount > 0 ? ` (+${moreCount} lainnya)` : '';
+        await tolak(hisoka, m,
+            `📦 Ditemukan *${totalImg} gambar* — download ${picked.length} foto${infoMore} & kirim 1 album...`
+        );
+
+        // Download paralel (5 sekaligus)
         const CONCUR = 5;
         const allItems = [];
-        for (let i = 0; i < images.length; i += CONCUR) {
-            const chunk = images.slice(i, i + CONCUR);
+        for (let i = 0; i < picked.length; i += CONCUR) {
+            const chunk = picked.slice(i, i + CONCUR);
             const results = await Promise.allSettled(
-                chunk.map(async (url, ci) => {
+                chunk.map(async (url) => {
                     const buf = await downloadImage(url);
-                    const isFirst = i === 0 && ci === 0;
-                    return {
-                        image  : buf,
-                        caption: isFirst
-                            ? `🔞 *${title}*\n📸 ${totalImg} gambar | hentaidad.com`
-                            : '',
-                    };
+                    return { image: buf, caption: '' };
                 })
             );
             for (const r of results) {
@@ -229,29 +233,12 @@ async function handleHentaidadChoice({ hisoka, m, pendingHentaidadChoices, getQu
             return true;
         }
 
-        // Kirim sebagai 1 album — fallback batch 10 kalau gagal
-        const BATCH = 10;
-        try {
-            await hisoka.sendMessage(m.from, { albumMessage: allItems }, { quoted: m });
-        } catch (_) {
-            for (let b = 0; b < allItems.length; b += BATCH) {
-                const batch = allItems.slice(b, b + BATCH);
-                try {
-                    await hisoka.sendMessage(
-                        m.from,
-                        { albumMessage: batch },
-                        { quoted: b === 0 ? m : undefined }
-                    );
-                } catch (_2) {
-                    // Fallback kirim satu-satu
-                    for (const item of batch) {
-                        try {
-                            await hisoka.sendMessage(m.from, { image: item.image, caption: item.caption }, { quoted: m });
-                        } catch (_3) {}
-                    }
-                }
-            }
-        }
+        // Caption hanya di item pertama
+        allItems[0].caption = `🔞 *${title}*\n📸 ${picked.length}/${totalImg} gambar | hentaidad.com`
+            + (moreCount > 0 ? `\n_(+${moreCount} gambar lainnya di web)_` : '');
+
+        // Kirim SEKALIGUS sebagai 1 albumMessage — tidak ada fallback batch agar tidak spam
+        await hisoka.sendMessage(m.from, { albumMessage: allItems }, { quoted: m });
 
         await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
     } catch (err) {
