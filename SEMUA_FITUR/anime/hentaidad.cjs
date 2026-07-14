@@ -227,7 +227,7 @@ async function handleHentaidadChoice({ hisoka, m, pendingHentaidadChoices, getQu
         }
 
         // Caption hanya di foto pertama
-        allItems[0].caption = `🔞 *${title}*\n📸 ${allItems.length} gambar | hentaidad.com`;
+        allItems[0].caption = `🔞 *${title}*\n📸 ${allItems.length} gambar`;
 
         // Kirim SEMUA sekaligus dalam 1 albumMessage
         await hisoka.sendMessage(m.from, { albumMessage: allItems }, { quoted: m });
