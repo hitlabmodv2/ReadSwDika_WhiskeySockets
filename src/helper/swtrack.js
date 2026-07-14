@@ -495,7 +495,7 @@ function getLogswBoxColor() {
 }
 
 export function logStoryView(data) {
-        const { botId, mediaType, greeting, dayName, date, time, name, number, success, reaction, delaySeconds, mode, resolve, storyCount, idStory, emojiMode } = data;
+        const { botId, mediaType, greeting, dayName, date, time, name, number, success, reaction, delaySeconds, mode, resolve, storyCount, idStory, emojiMode, groupName } = data;
         const { boxColor: cyan, fgColor: white } = getLogswBoxColor(); // border & teks ikut tema config.json
         const reset = '\x1b[0m';
 
@@ -516,6 +516,11 @@ export function logStoryView(data) {
                 console.log(`${cyan}│${reset} ${white}⭔ Jadibot     : ${padEnd(botId, contentWidth)}${reset}${cyan}${reset}`);
         }
         console.log(`${cyan}│${reset} ${white}⭔ Mode        : ${padEnd(modeStr, contentWidth)}${reset}${cyan}${reset}`);
+        if (groupName) {
+                const _grp = String(groupName);
+                const grpStr = _grp.length > contentWidth ? _grp.slice(0, contentWidth - 3) + '···' : _grp;
+                console.log(`${cyan}│${reset} ${white}⭔ NamaGrup    : ${padEnd(grpStr, contentWidth)}${reset}${cyan}${reset}`);
+        }
         console.log(`${cyan}│${reset} ${white}⭔ TipeStory   : ${padEnd(mediaStr, contentWidth)}${reset}${cyan}${reset}`);
         if (idStory) {
                 const _id = String(idStory);

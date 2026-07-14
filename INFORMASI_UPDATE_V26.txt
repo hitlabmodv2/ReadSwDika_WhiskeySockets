@@ -96,6 +96,12 @@ _Kotak notif ringkasan "Retry" (dikirim saat ada story yang sempat gagal lalu be
 2. Kotak retry sekarang ikut menampilkan baris *Mode* dan *Reaksi*, dihitung dari kondisi setting SAAT retry itu terjadi (bukan label statis) — Read Only akan selalu tampil "Reaksi: Off ❌", Read+Reaction akan tampil "Reaksi: Retry Berhasil ♻️" kalau reaksinya berhasil terkirim
 > Notif retry sekarang akurat & konsisten dengan notif biasa — di mode Read Only jelas kelihatan tidak ada reaksi (bukan bug), di mode Read+Reaction jelas kelihatan reaksinya berhasil retry atau tidak
 
+*9. 🎨 Rapihkan Kotak Notif Story Grup (Nama Grup Bikin Baris "Mode" Kepanjangan)*
+_Di story Protocol GC (story dari grup), baris `Mode` menampilkan gabungan status Mode + nama grup dalam 1 baris (contoh: `Read+Reaction ✓ [📢 ★ Just for fun]`) — kalau nama grupnya panjang, baris jadi kepanjangan & box kelihatan berantakan/miring:_
+1. ~Nama grup ditempel langsung ke isi field `Mode` pakai kurung siku, jadi 1 baris bisa jauh melebihi lebar box~
+2. Nama grup sekarang punya baris sendiri: *NamaGrup* — baris `Mode` kembali bersih cuma nampilkan status Read Only/Read+Reaction, dan kalau nama grupnya kepanjangan otomatis dipotong rapi (dengan `···`) supaya box tetap rapi tidak melebar
+> Kotak notif story grup sekarang rapi & akurat, tidak ada lagi baris yang "tumpah" karena nama grup panjang
+
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *PERUBAHAN*
 ━━━━━━━━━━━━━━━━━━━━━━

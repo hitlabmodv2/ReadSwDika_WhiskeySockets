@@ -805,7 +805,8 @@ ${m.text ? `<b>Caption :</b>\n\n${m.text}` : ''}`.trim();
                                         success: gsReactionSuccess ? 'Grup SW ✓' : (shouldReact ? 'Baca ✓' : 'Baca ✓'),
                                         reaction: shouldReact ? usedReaction : 'Off ❌',
                                         delaySeconds,
-                                        mode: `${mode} [📢 ${groupName}]`,
+                                        mode,
+                                        groupName,
                                         emojiMode: getMode(),
                                 });
 
