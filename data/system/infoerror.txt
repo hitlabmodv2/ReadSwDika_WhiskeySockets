@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 14/07/2026, 05.46.51  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 14/07/2026, 06.08.48  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  hentaidad-choice
+│  #001  —  HENTAIDAD
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  Invalid media type
+│  [HENTAIDAD] Gagal download gambar: Request failed with status code 500
 │
 │  DETAIL
-│  Sumber      : hentaidad-choice
+│  Sumber      : HENTAIDAD
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 14/07/2026, 05.46.51
-│  Terakhir    : 14/07/2026, 05.46.51
+│  Pertama     : 14/07/2026, 06.08.48
+│  Terakhir    : 14/07/2026, 06.08.48
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: Invalid media type
-│     at prepareWAMessageMedia (file:///home/runner/workspace/node_modules/@whiskeysockets/baileys/lib/Utils/messages.js:70:15)
-│     at generateWAMessageContent (file:///home/runner/workspace/node_modules/@whiskeysockets/baileys/lib/Utils/messages.js:489:19)
+│  ▶  Error: [HENTAIDAD] Gagal download gambar: Request failed with status code 500
+│     at console.error (file:///home/runner/workspace/index.js:434:27)
+│     at handleHentaidadChoice (/home/runner/workspace/SEMUA_FITUR/anime/hentaidad.cjs:227:30)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 14/07/2026, 05.46.51
+  Terakhir diperbarui: 14/07/2026, 06.08.48
 ════════════════════════════════════════════════════════════════════════

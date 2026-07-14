@@ -87,20 +87,24 @@ async function scrapeGallery(href) {
 }
 
 /**
- * Download buffer satu gambar dengan timeout, lalu convert ke JPEG
- * agar albumMessage tidak error "Invalid media type"
+ * Download buffer satu gambar dengan timeout, lalu convert ke JPEG.
+ * Wajib kirim Referer = URL galeri agar server tidak return 500.
  */
-async function downloadImage(url) {
+async function downloadImage(url, referer) {
     const res = await axios.get(url, {
         responseType : 'arraybuffer',
         timeout      : 25000,
-        headers      : { ...HEADERS, Accept: 'image/webp,image/avif,image/*, */*' },
+        headers      : {
+            ...HEADERS,
+            Referer : referer || BASE + '/',
+            Accept  : 'image/webp,image/avif,image/*,*/*',
+        },
     });
     const raw = Buffer.from(res.data);
     try {
         return await sharp(raw).jpeg({ quality: 88 }).toBuffer();
     } catch {
-        return raw; // fallback buffer asli kalau sharp gagal
+        return raw;
     }
 }
 
@@ -108,7 +112,7 @@ async function downloadImage(url) {
  * Format teks daftar latest releases
  */
 function formatList(items) {
-    let text = `╭─「 🔞 *HENTAIDAD* 」\n│\n│ 🌐 hentaidad.com\n│ 📋 *Latest Releases:*\n│\n`;
+    let text = `╭─「 🔞 *HENTAIDAD* 」\n│\n│ 📋 *Latest Releases:*\n│\n`;
     for (const it of items) {
         text += `│ *${it.no}.* ${it.title.slice(0, 55)}${it.title.length > 55 ? '…' : ''}\n`;
     }
@@ -123,7 +127,7 @@ async function handleHentaidad({ hisoka, m, tolak, logCommand, logError, pending
         logCommand(m, hisoka, m.command || 'hentaidad');
 
         await hisoka.sendMessage(m.from, { react: { text: '🔍', key: m.key } });
-        await tolak(hisoka, m, `🔄 Mengambil data terbaru dari hentaidad.com...`);
+        await tolak(hisoka, m, `🔄 Mengambil data terbaru...`);
 
         const items = await scrapeLatestReleases();
         if (!items.length) {
@@ -212,14 +216,15 @@ async function handleHentaidadChoice({ hisoka, m, pendingHentaidadChoices, getQu
         );
 
         // Download semua gambar paralel (8 sekaligus biar cepat)
+        // Referer = URL galeri agar server tidak return 500
         const CONCUR = 8;
         const allItems = [];
         for (let i = 0; i < images.length; i += CONCUR) {
             const chunk = images.slice(i, i + CONCUR);
             const results = await Promise.allSettled(
                 chunk.map(async (url) => {
-                    const buf = await downloadImage(url);
-                    return { image: buf, caption: '' };
+                    const buf = await downloadImage(url, chosen.href);
+                    return { image: buf };
                 })
             );
             for (const r of results) {
@@ -270,7 +275,7 @@ async function handleHentaidadChoice({ hisoka, m, pendingHentaidadChoices, getQu
 
         // Kirim info judul sebagai teks terpisah setelah album selesai
         await hisoka.sendMessage(m.from, {
-            text: `🔞 *${title}*\n📸 ${total} gambar | hentaidad.com`,
+            text: `🔞 *${title}*\n📸 ${total} gambar`,
         }, { quoted: m });
 
         await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
