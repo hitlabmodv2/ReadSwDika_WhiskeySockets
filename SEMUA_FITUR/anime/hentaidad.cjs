@@ -233,32 +233,45 @@ async function handleHentaidadChoice({ hisoka, m, pendingHentaidadChoices, getQu
             return true;
         }
 
-        // Caption hanya di foto pertama
-        allItems[0].caption = `🔞 *${title}*\n📸 ${allItems.length} gambar | hentaidad.com`;
+        const buffers = allItems.map(it => it.image);
+        const total   = buffers.length;
 
-        // Kirim dalam album — fallback batch 10 → individual kalau gagal
-        const BATCH = 10;
+        // ── Kirim album pakai Baileys API yang benar ──────────────────────────
+        // 1) Kirim container album → dapat parentKey
+        // 2) Tiap gambar dikirim dengan albumParentKey → masuk 1 album, NO caption
+        // 3) Kirim teks info setelah selesai
         try {
-            await hisoka.sendMessage(m.from, { albumMessage: allItems }, { quoted: m });
-        } catch (_albumErr) {
-            // Fallback: kirim per batch 10
-            let sent = false;
-            for (let b = 0; b < allItems.length; b += BATCH) {
-                const batch = allItems.slice(b, b + BATCH);
+            const parentMsg = await hisoka.sendMessage(
+                m.from,
+                { album: { expectedImageCount: total, expectedVideoCount: 0 } },
+                { quoted: m }
+            );
+
+            // Kirim semua gambar paralel dalam 1 album, tanpa caption
+            await Promise.allSettled(
+                buffers.map(buf =>
+                    hisoka.sendMessage(m.from, {
+                        image        : buf,
+                        albumParentKey: parentMsg.key,
+                    })
+                )
+            );
+        } catch (albumErr) {
+            console.error('[HENTAIDAD] Album API error:', albumErr?.message);
+            // Fallback: kirim satu per satu tanpa caption
+            for (let i = 0; i < buffers.length; i++) {
                 try {
-                    await hisoka.sendMessage(m.from, { albumMessage: batch }, { quoted: b === 0 ? m : undefined });
-                    sent = true;
-                } catch (_batchErr) {
-                    // Fallback terakhir: kirim satu per satu
-                    for (let i = 0; i < batch.length; i++) {
-                        try {
-                            await hisoka.sendMessage(m.from, { image: batch[i].image, caption: batch[i].caption }, { quoted: (b === 0 && i === 0) ? m : undefined });
-                        } catch (_singleErr) {}
-                    }
-                    sent = true;
-                }
+                    await hisoka.sendMessage(m.from, {
+                        image  : buffers[i],
+                    }, { quoted: i === 0 ? m : undefined });
+                } catch (_) {}
             }
         }
+
+        // Kirim info judul sebagai teks terpisah setelah album selesai
+        await hisoka.sendMessage(m.from, {
+            text: `🔞 *${title}*\n📸 ${total} gambar | hentaidad.com`,
+        }, { quoted: m });
 
         await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
     } catch (err) {
