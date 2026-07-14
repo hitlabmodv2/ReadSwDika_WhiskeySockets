@@ -200,22 +200,15 @@ async function handleHentaidadChoice({ hisoka, m, pendingHentaidadChoices, getQu
 
         const totalImg = images.length;
 
-        // WhatsApp album limit = 30 foto per album
-        // Ambil max 30 gambar saja agar masuk 1 album, tidak spam
-        const MAX_ALBUM = 30;
-        const picked    = images.slice(0, MAX_ALBUM);
-        const moreCount = totalImg - picked.length;
-
-        const infoMore = moreCount > 0 ? ` (+${moreCount} lainnya)` : '';
         await tolak(hisoka, m,
-            `📦 Ditemukan *${totalImg} gambar* — download ${picked.length} foto${infoMore} & kirim 1 album...`
+            `📦 Ditemukan *${totalImg} gambar* — sedang download semua & kirim 1 album...`
         );
 
-        // Download paralel (5 sekaligus)
-        const CONCUR = 5;
+        // Download semua gambar paralel (8 sekaligus biar cepat)
+        const CONCUR = 8;
         const allItems = [];
-        for (let i = 0; i < picked.length; i += CONCUR) {
-            const chunk = picked.slice(i, i + CONCUR);
+        for (let i = 0; i < images.length; i += CONCUR) {
+            const chunk = images.slice(i, i + CONCUR);
             const results = await Promise.allSettled(
                 chunk.map(async (url) => {
                     const buf = await downloadImage(url);
@@ -233,11 +226,10 @@ async function handleHentaidadChoice({ hisoka, m, pendingHentaidadChoices, getQu
             return true;
         }
 
-        // Caption hanya di item pertama
-        allItems[0].caption = `🔞 *${title}*\n📸 ${picked.length}/${totalImg} gambar | hentaidad.com`
-            + (moreCount > 0 ? `\n_(+${moreCount} gambar lainnya di web)_` : '');
+        // Caption hanya di foto pertama
+        allItems[0].caption = `🔞 *${title}*\n📸 ${allItems.length} gambar | hentaidad.com`;
 
-        // Kirim SEKALIGUS sebagai 1 albumMessage — tidak ada fallback batch agar tidak spam
+        // Kirim SEMUA sekaligus dalam 1 albumMessage
         await hisoka.sendMessage(m.from, { albumMessage: allItems }, { quoted: m });
 
         await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
