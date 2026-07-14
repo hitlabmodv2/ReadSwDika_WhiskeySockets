@@ -207,17 +207,22 @@ async function handleHentaidadChoice({ hisoka, m, pendingHentaidadChoices, getQu
         // Download semua gambar paralel (8 sekaligus biar cepat)
         const CONCUR = 8;
         const allItems = [];
+        let totalBytes = 0;
         for (let i = 0; i < images.length; i += CONCUR) {
             const chunk = images.slice(i, i + CONCUR);
             const results = await Promise.allSettled(
                 chunk.map(async (url) => {
                     const buf = await downloadImage(url);
-                    return { image: buf, caption: '' };
+                    return { image: buf, caption: '', _size: buf.length };
                 })
             );
             for (const r of results) {
-                if (r.status === 'fulfilled') allItems.push(r.value);
-                else console.error('[HENTAIDAD] Gagal download gambar:', r.reason?.message);
+                if (r.status === 'fulfilled') {
+                    totalBytes += r.value._size;
+                    allItems.push({ image: r.value.image, caption: '' });
+                } else {
+                    console.error('[HENTAIDAD] Gagal download gambar:', r.reason?.message);
+                }
             }
         }
 
@@ -226,8 +231,22 @@ async function handleHentaidadChoice({ hisoka, m, pendingHentaidadChoices, getQu
             return true;
         }
 
-        // Caption hanya di foto pertama
-        allItems[0].caption = `🔞 *${title}*\n📸 ${allItems.length} gambar`;
+        // Deteksi tipe gambar dari URL pertama
+        const extMatch = (images[0] || '').match(/\.(\w+)(?:\?|$)/);
+        const imgExt   = extMatch ? extMatch[1].toUpperCase() : 'IMG';
+
+        // Format ukuran
+        const sizeMB  = totalBytes / (1024 * 1024);
+        const sizeStr = sizeMB >= 1
+            ? `${sizeMB.toFixed(1)} MB`
+            : `${(totalBytes / 1024).toFixed(0)} KB`;
+
+        // Caption rapi di foto pertama
+        allItems[0].caption =
+            `🔞 *${title}*\n` +
+            `├ 📸 ${allItems.length} foto\n` +
+            `├ 🗂️ ${imgExt}\n` +
+            `└ 💾 ${sizeStr}`;
 
         // Kirim SEMUA sekaligus dalam 1 albumMessage
         await hisoka.sendMessage(m.from, { albumMessage: allItems }, { quoted: m });
