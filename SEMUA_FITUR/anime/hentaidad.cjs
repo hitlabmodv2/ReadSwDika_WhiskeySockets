@@ -14,7 +14,6 @@
 
 const axios   = require('axios');
 const cheerio = require('cheerio');
-const sharp   = require('sharp');
 
 const BASE    = 'https://hentaidad.com';
 const HEADERS = {
@@ -206,27 +205,19 @@ async function handleHentaidadChoice({ hisoka, m, pendingHentaidadChoices, getQu
         );
 
         // Download semua gambar paralel (8 sekaligus biar cepat)
-        // WEBP → JPEG otomatis agar albumMessage tidak error "Invalid media type"
         const CONCUR = 8;
         const allItems = [];
-        let totalBytes = 0;
         for (let i = 0; i < images.length; i += CONCUR) {
             const chunk = images.slice(i, i + CONCUR);
             const results = await Promise.allSettled(
                 chunk.map(async (url) => {
-                    const raw = await downloadImage(url);
-                    // Konversi ke JPEG (support WEBP, PNG, dll)
-                    const buf = await sharp(raw).jpeg({ quality: 88 }).toBuffer();
-                    return { image: buf, caption: '', _size: buf.length };
+                    const buf = await downloadImage(url);
+                    return { image: buf, caption: '' };
                 })
             );
             for (const r of results) {
-                if (r.status === 'fulfilled') {
-                    totalBytes += r.value._size;
-                    allItems.push({ image: r.value.image, caption: '' });
-                } else {
-                    console.error('[HENTAIDAD] Gagal download gambar:', r.reason?.message);
-                }
+                if (r.status === 'fulfilled') allItems.push(r.value);
+                else console.error('[HENTAIDAD] Gagal download gambar:', r.reason?.message);
             }
         }
 
@@ -235,22 +226,8 @@ async function handleHentaidadChoice({ hisoka, m, pendingHentaidadChoices, getQu
             return true;
         }
 
-        // Deteksi tipe gambar dari URL pertama
-        const extMatch = (images[0] || '').match(/\.(\w+)(?:\?|$)/);
-        const imgExt   = extMatch ? extMatch[1].toUpperCase() : 'IMG';
-
-        // Format ukuran
-        const sizeMB  = totalBytes / (1024 * 1024);
-        const sizeStr = sizeMB >= 1
-            ? `${sizeMB.toFixed(1)} MB`
-            : `${(totalBytes / 1024).toFixed(0)} KB`;
-
-        // Caption rapi di foto pertama
-        allItems[0].caption =
-            `🔞 *${title}*\n` +
-            `├ 📸 ${allItems.length} foto\n` +
-            `├ 🗂️ ${imgExt}\n` +
-            `└ 💾 ${sizeStr}`;
+        // Caption hanya di foto pertama
+        allItems[0].caption = `🔞 *${title}*\n📸 ${allItems.length} gambar | hentaidad.com`;
 
         // Kirim SEMUA sekaligus dalam 1 albumMessage
         await hisoka.sendMessage(m.from, { albumMessage: allItems }, { quoted: m });
