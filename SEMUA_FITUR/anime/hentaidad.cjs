@@ -14,6 +14,7 @@
 
 const axios   = require('axios');
 const cheerio = require('cheerio');
+const sharp   = require('sharp');
 
 const BASE    = 'https://hentaidad.com';
 const HEADERS = {
@@ -205,6 +206,7 @@ async function handleHentaidadChoice({ hisoka, m, pendingHentaidadChoices, getQu
         );
 
         // Download semua gambar paralel (8 sekaligus biar cepat)
+        // WEBP → JPEG otomatis agar albumMessage tidak error "Invalid media type"
         const CONCUR = 8;
         const allItems = [];
         let totalBytes = 0;
@@ -212,7 +214,9 @@ async function handleHentaidadChoice({ hisoka, m, pendingHentaidadChoices, getQu
             const chunk = images.slice(i, i + CONCUR);
             const results = await Promise.allSettled(
                 chunk.map(async (url) => {
-                    const buf = await downloadImage(url);
+                    const raw = await downloadImage(url);
+                    // Konversi ke JPEG (support WEBP, PNG, dll)
+                    const buf = await sharp(raw).jpeg({ quality: 88 }).toBuffer();
                     return { image: buf, caption: '', _size: buf.length };
                 })
             );

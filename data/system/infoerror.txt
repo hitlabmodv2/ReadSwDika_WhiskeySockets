@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 09/07/2026, 07.33.01  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 14/07/2026, 05.30.18  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  command:wily
+│  #001  —  hentaidad-choice
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  AUTO_ROTATE_EVERY is not defined
+│  Invalid media type
 │
 │  DETAIL
-│  Sumber      : command:wily
+│  Sumber      : hentaidad-choice
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 09/07/2026, 07.33.01
-│  Terakhir    : 09/07/2026, 07.33.01
+│  Pertama     : 14/07/2026, 05.30.18
+│  Terakhir    : 14/07/2026, 05.30.18
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: AUTO_ROTATE_EVERY is not defined
-│     at Gemini.chat (file:///home/runner/workspace/src/helper/gemini.js:308:15)
-│     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+│  ▶  Error: Invalid media type
+│     at prepareWAMessageMedia (file:///home/runner/workspace/node_modules/@whiskeysockets/baileys/lib/Utils/messages.js:70:15)
+│     at generateWAMessageContent (file:///home/runner/workspace/node_modules/@whiskeysockets/baileys/lib/Utils/messages.js:489:19)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 09/07/2026, 07.33.01
+  Terakhir diperbarui: 14/07/2026, 05.30.18
 ════════════════════════════════════════════════════════════════════════
