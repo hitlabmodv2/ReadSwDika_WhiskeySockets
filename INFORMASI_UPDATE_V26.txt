@@ -36,15 +36,17 @@ _Sebelumnya notif Animasu cuma satu jenis generik dari daftar post episode. Seka
 6. Dedup state dipisah per widget (`tayangState` & `updateState`) — supaya perubahan di satu widget tidak pernah memicu notif dari widget lain
 > Sudah diuji simulasi manual: deteksi "episode baru", "anime baru tayang", "baru ditambah", dan "diperbarui" semuanya akurat sebelum dipasang ke scheduler
 
-*4. 🔞 .hentaidad — Galeri Hentai Langsung di WhatsApp (Album 1 Paket)*
+*4. 🔞 .hentaidad — Galeri Hentai Langsung di WhatsApp (Album 1 Paket + Fitur Cari)*
 _Perintah baru untuk browse & kirim galeri dari sumber premium 18+. Semua gambar dikirim dalam 1 album WhatsApp, bukan satu-satu:_
 1. Ketik `.hentaidad` → bot tampilkan daftar Latest Releases (judul bernomor)
-2. Reply pesan daftar itu dengan nomor pilihan → bot mulai download & kirim
-3. Semua gambar dari galeri yang dipilih dikirim sebagai *1 album WhatsApp* (bukan pesan terpisah-pisah) — efisien & rapi di chat
-4. Gambar diconvert otomatis ke JPEG sebelum dikirim — cegah error "Invalid media type" dari format WebP/AVIF yang kadang dipakai sumber
-5. Header Referer di-set ke URL galeri spesifik saat download — tanpa ini server sumber return 500 dan gambar gagal diambil
-6. Tidak ada URL/domain sumber yang muncul di pesan bot — tampilan bersih, cuma judul & jumlah gambar
-> `.hentaidad` sekarang aktif — browse & kirim galeri 18+ langsung dari WA, semua gambar dalam 1 album sekali kirim
+2. Ketik `.hentaidad <judul/karakter>` (contoh: `.hentaidad azur lane`) → bot cari langsung ke sumber & tampilkan daftar hasil pencarian bernomor, judul diambil asli dari sumber (bukan tebakan dari slug URL) supaya akurat
+3. Reply pesan daftar (baik dari Latest Releases maupun hasil pencarian) dengan nomor pilihan → bot mulai download & kirim
+4. Kalau pencarian tidak ketemu, bot kasih tahu jelas + saran (pakai judul lebih pendek, nama karakter asli, atau coba bahasa Inggris) — tidak pernah kirim hasil yang salah/ngasal
+5. Semua gambar dari galeri yang dipilih dikirim sebagai *1 album WhatsApp* (bukan pesan terpisah-pisah) — efisien & rapi di chat
+6. Gambar diconvert otomatis ke JPEG sebelum dikirim — cegah error "Invalid media type" dari format WebP/AVIF yang kadang dipakai sumber
+7. Header Referer di-set ke URL galeri spesifik saat download — tanpa ini server sumber return 500 dan gambar gagal diambil
+8. Tidak ada URL/domain sumber yang muncul di pesan bot — tampilan bersih, cuma judul & jumlah gambar
+> `.hentaidad` sekarang bisa browse *dan* cari — `.hentaidad azur lane` langsung nyari galeri sesuai judul, semua gambar tetap dikirim dalam 1 album sekali kirim
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🔧 *BUG/ERROR FIX*
