@@ -189,6 +189,7 @@ const WATCHED_FILES = [
     { key: 'cjs:kusonimePdf',  rel: 'SEMUA_FITUR/anime/kusonime-pdf.cjs',  type: 'cjs' },
     { key: 'cjs:tenorGif',     rel: 'SEMUA_FITUR/anime/tenor-gif.cjs',     type: 'cjs' },
     { key: 'cjs:nhentai',      rel: 'SEMUA_FITUR/anime/nhentai.cjs',       type: 'cjs' },
+    { key: 'cjs:hentaidad',    rel: 'SEMUA_FITUR/anime/hentaidad.cjs',     type: 'cjs' },
     { key: 'cjs:pixiv',        rel: 'SEMUA_FITUR/anime/pixiv.cjs',         type: 'cjs' },
     { key: 'cjs:pixivr18',     rel: 'SEMUA_FITUR/anime/pixivr18.cjs',      type: 'cjs' },
     // AI
