@@ -136,6 +136,7 @@ const pendingKomikChoices = new Map();
 const pendingFontuntikChoices = new Map(); // key → { text, botMsgId, expiresAt, timeout }
 const pendingWaifuChoices     = new Map(); // key → { stage, mode, botMsgKey, expiresAt, timeout }
 const pendingHentaidadChoices = new Map(); // key → { results, botMsgId, expiresAt, loading, timeout }
+const pendingAnyvoiceChoices = new Map(); // key → { voices, botMsgId, expiresAt, loading, timeout }
 
 const aiReplyCooldown = new Map(); // sender → last reply timestamp
 const AI_COOLDOWN_MS = 3000; // 3 detik cooldown per user
@@ -750,6 +751,12 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         if (await handleHentaidadChoice({ hisoka, m, pendingHentaidadChoices, getQuotedStanzaId, tolak, logCommand, logError })) return;
                 }
 
+                // ── Handle pending anyvoice choice → anyvoice.cjs ──
+                {
+                        const { handleAnyvoiceChoice } = _require(path.resolve('./SEMUA_FITUR/media/anyvoice.cjs'));
+                        if (await handleAnyvoiceChoice({ hisoka, m, pendingAnyvoiceChoices, getQuotedStanzaId, tolak, logCommand, logError })) return;
+                }
+
                 // ── Handle pending cosplaytele search choice → cosplay-cmd.cjs ──
                 if (await handleCosplayChoice({ hisoka, m, pendingCosplayChoices, getQuotedStanzaId, tolak, logCommand, logError })) return;
 
@@ -1129,6 +1136,13 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'hdad': {
                                 const { handleHentaidad } = _require(path.resolve('./SEMUA_FITUR/anime/hentaidad.cjs'));
                                 await handleHentaidad({ hisoka, m, tolak, logCommand, logError, pendingHentaidadChoices });
+                                break;
+                        }
+
+                        case 'anyvoice':
+                        case 'tts': {
+                                const { handleAnyvoice } = _require(path.resolve('./SEMUA_FITUR/media/anyvoice.cjs'));
+                                await handleAnyvoice({ hisoka, m, query, tolak, logCommand, logError, pendingAnyvoiceChoices });
                                 break;
                         }
 
