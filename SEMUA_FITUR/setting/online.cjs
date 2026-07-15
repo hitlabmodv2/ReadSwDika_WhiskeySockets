@@ -25,6 +25,23 @@
  */
 'use strict';
 
+// ── Helper: font keren (pinjam style "Bold Sans" dari fontgenerator.cjs) ───────
+//    Dipakai untuk judul/section/label statis di dalam button — konsisten,
+//    tetap mudah dibaca, dan tidak menyentuh angka/emoji/tanda ✓ yang dinamis.
+let _fancyFontFn = null;
+function _fancy(text) {
+    try {
+        if (!_fancyFontFn) {
+            const { FONTS } = require('../tools/fontgenerator.cjs');
+            const style = FONTS.find(f => f.name === 'Bold Sans');
+            _fancyFontFn = style ? style.fn : (t => t);
+        }
+        return _fancyFontFn(text);
+    } catch (_) {
+        return text;
+    }
+}
+
 // ── Preset interval populer ─────────────────────────────────────────────────
 const _INTERVAL_PRESETS = [
     { sec: 10,  desc: 'Paling sering — sangat stabil, agak boros' },
@@ -42,7 +59,7 @@ function _buildBody({ isJadibot, jadibotNum, autoOnline, running }) {
     const jadibotNote = isJadibot ? `\n> ⚙️ _Setting khusus jadibot +${jadibotNum}_` : '';
 
     return (
-        `╭═══『 🟢 *AUTO ONLINE${isJadibot ? ' JADIBOT' : ''}* 』═══╮\n` +
+        `╭═══『 🟢 ${_fancy(`AUTO ONLINE${isJadibot ? ' JADIBOT' : ''}`)} 』═══╮\n` +
         `│\n` +
         `│ ${statusIcon} *Status   :* ${statusText}\n` +
         `│ ⏱️ *Interval :* \`${interval} detik\`\n` +
@@ -81,32 +98,32 @@ async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, autoOnli
 
             const btn = new Button()
                 .setBody(bodyText)
-                .setFooter('⚡ Wily Bot • Auto Online')
-                .addSelection('🎛️ Pilih Pengaturan')
+                .setFooter(`⚡ ${_fancy('Wily Bot')} • Auto Online`)
+                .addSelection(`🎛️ ${_fancy('Pilih Pengaturan')}`)
 
                 // ── Section 1: Mode ──────────────────────────────────────
-                .makeSections('⚙️ Mode Kehadiran')
+                .makeSections(`⚙️ ${_fancy('Mode Kehadiran')}`)
                 .makeRow(
                     markMode('on') + '✅ Online',
-                    'Terlihat Online',
+                    _fancy('Terlihat Online'),
                     isMode('on')  ? activeDesc('Bot selalu terlihat online') : 'Bot selalu terlihat online',
                     `${pref}online on`
                 )
                 .makeRow(
                     markMode('off') + '🙈 Offline',
-                    'Mode Stealth',
+                    _fancy('Mode Stealth'),
                     isMode('off') ? activeDesc('Bot tersembunyi/tidak terlihat online') : 'Bot tersembunyi/tidak terlihat online',
                     `${pref}online off`
                 )
 
                 // ── Section 2: Interval populer ──────────────────────────
-                .makeSections('⏱️ Interval Populer');
+                .makeSections(`⏱️ ${_fancy('Interval Populer')}`);
 
             for (const p of _INTERVAL_PRESETS) {
                 const aktif = isPreset(p.sec);
                 btn.makeRow(
                     markInt(p.sec) + `${p.sec} detik`,
-                    `Set Interval ${p.sec} Detik`,
+                    _fancy(`Set Interval ${p.sec} Detik`),
                     aktif ? activeDesc(p.desc) : p.desc,
                     `${pref}online set ${p.sec}`
                 );

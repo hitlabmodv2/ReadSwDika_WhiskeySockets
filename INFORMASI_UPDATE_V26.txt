@@ -1,10 +1,10 @@
 📢 *INFORMASI RILIS*
-_📅 Senin, 13 Juli 2026_ 🌙
+_📅 Senin, 13 Juli 2026 (update terakhir: Rabu, 15 Juli 2026)_ 🌙
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V26*
 ✨ *5 Fitur Baru*
 🔧 *8 Bug/Error Fix*
-🚀 *4 Perubahan*
+🚀 *7 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -142,3 +142,23 @@ _Di story Protocol GC (story dari grup), baris `Mode` menampilkan gabungan statu
 1. Nama grup ditempel langsung ke isi field `Mode` pakai kurung siku → sekarang punya baris sendiri: *NamaGrup*
 2. Baris `Mode` kembali bersih cuma nampilkan status Read Only/Read+Reaction, dan kalau nama grupnya kepanjangan otomatis dipotong rapi (dengan `···`) supaya box tetap rapi tidak melebar
 > Kotak notif story grup sekarang rapi & akurat, tidak ada lagi baris yang "tumpah" karena nama grup panjang
+
+*5. 🎨 Rapihkan Kotak `.ceksesi` — Hapus Border Kotak-kotak, Ganti Format WA Asli*
+_Pesan `.ceksesi` (termasuk sub-menu Memory dan Sessionstat) sebelumnya pakai karakter garis kotak (╭╮╰╯│├┤═║╠╣) yang di banyak HP/tampilan WA malah kelihatan berantakan atau kepotong:_
+1. Semua karakter garis kotak dihapus dari `handleMemory`, `handleSessionstat`, dan `handleCeksesi`
+2. Diganti pakai format teks WA asli — *bold* untuk label/nilai penting, _italic_ untuk catatan, daftar bernomor untuk rincian berurutan, dan `> quote` untuk kesimpulan
+> `.ceksesi` sekarang tampil rapi & konsisten di semua device, tanpa border yang bisa berantakan
+
+*6. 🔍 Klarifikasi `.clearsesi` / `.ceksesi` — Bukan Bug, Perilaku Normal*
+_Sempat kelihatan seperti `.clearsesi` tidak benar-benar membersihkan karena `.ceksesi` habis itu masih menunjukkan data "utuh":_
+1. Sudah dites langsung lewat simulasi ke fungsi pembersih sesi (`clearCacheInPlace`) dan fungsi cek ukuran (`getSizeReport`) — keduanya kerja di data yang sama persis, dan `.clearsesi` terbukti benar-benar mengosongkan cache kontak/grup/kunci baik di memory maupun di file, seketika
+2. Data kelihatan "penuh lagi" setelah itu karena WhatsApp/Baileys otomatis mengisi ulang cache kontak & grup begitu ada aktivitas (pesan masuk, info grup diminta, dll) — ini memang cara kerja normal, bukan `.clearsesi` yang gagal
+3. Tidak ada perubahan kode dari poin ini — murni investigasi & konfirmasi, supaya tidak disangka bug ke depannya
+> `.clearsesi` tetap bekerja benar; cache yang cepat terisi lagi adalah perilaku normal Baileys, bukan kegagalan pembersihan
+
+*7. ✍️ Font Keren di Tombol `.readsw`, `.online`, `.typing`, `.recording`*
+_Tombol pilihan (single-select) di 4 perintah ini sebelumnya pakai teks polos, beda dengan `.font` yang punya banyak gaya huruf keren:_
+1. Judul kotak status, footer, judul "Pilih Pengaturan", judul tiap section, dan label tiap baris pilihan sekarang pakai gaya huruf *Bold Sans* (dipinjam dari fitur `.font` yang sudah ada, supaya konsisten & tidak menambah tabel huruf baru)
+2. Tanda centang aktif (✓), emoji, dan angka (detik/interval) sengaja TIDAK ikut diubah — supaya logika status aktif/nonaktif dan penomoran tetap akurat, tidak ada risiko salah baca oleh sistem
+3. Sudah disimulasikan langsung lewat skrip yang meniru pembuatan tombol asli untuk keempat perintah — hasil tampilan dicek satu-satu, tidak ada error saat bot direstart
+> `.readsw`, `.online`, `.typing`, dan `.recording` sekarang tampil lebih keren di tombolnya, tanpa mengubah cara kerja atau bikin error
