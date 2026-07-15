@@ -20,7 +20,7 @@
       "participant": "263445207371837@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-07-14T08:34:25.853Z",
+    "updatedAt": "2026-07-15T04:58:39.556Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -39,6 +39,358 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-07-14T08:34:25.853Z"
+    "processedAt": "2026-07-14T08:34:25.853Z",
+    "deleted": true,
+    "deletedAt": "2026-07-15T04:58:39.556Z"
+  },
+  "AC3641D7F1153A88E4A0CA4A7CE0B95A": {
+    "id": "AC3641D7F1153A88E4A0CA4A7CE0B95A",
+    "sender": "6289504802678@s.whatsapp.net",
+    "name": "Ard Holdeacon",
+    "type": "imageMessage",
+    "arrivedAt": "2026-07-15T04:57:22.926Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐠",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6289504802678",
+    "resolvedPn": "6289504802678@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6289504802678@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC3641D7F1153A88E4A0CA4A7CE0B95A",
+      "participant": "263445207371837@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-15T04:58:39.533Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289504802678@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC3641D7F1153A88E4A0CA4A7CE0B95A",
+        "participant": "263445207371837@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289504802678@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC3641D7F1153A88E4A0CA4A7CE0B95A",
+        "participant": "6289504802678@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-15T04:57:37.255Z",
+    "deleted": true,
+    "deletedAt": "2026-07-15T04:58:39.533Z"
+  },
+  "AC29514608394F3E958F85D70A1B6CF0": {
+    "id": "AC29514608394F3E958F85D70A1B6CF0",
+    "sender": "6289504802678@s.whatsapp.net",
+    "name": "Ard Holdeacon",
+    "type": "imageMessage",
+    "arrivedAt": "2026-07-15T04:57:22.927Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐠",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6289504802678",
+    "resolvedPn": "6289504802678@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6289504802678@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC29514608394F3E958F85D70A1B6CF0",
+      "participant": "263445207371837@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-15T04:58:32.381Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289504802678@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC29514608394F3E958F85D70A1B6CF0",
+        "participant": "263445207371837@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289504802678@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC29514608394F3E958F85D70A1B6CF0",
+        "participant": "6289504802678@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-15T04:57:37.277Z",
+    "deleted": true,
+    "deletedAt": "2026-07-15T04:58:32.381Z"
+  },
+  "ACA628FCCDDE70A9B71EAF902FED30ED": {
+    "id": "ACA628FCCDDE70A9B71EAF902FED30ED",
+    "sender": "6289504802678@s.whatsapp.net",
+    "name": "Ard Holdeacon",
+    "type": "extendedTextMessage",
+    "arrivedAt": "2026-07-15T04:57:24.361Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐳",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6289504802678",
+    "resolvedPn": "6289504802678@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6289504802678@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACA628FCCDDE70A9B71EAF902FED30ED",
+      "participant": "263445207371837@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-15T04:58:32.378Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289504802678@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACA628FCCDDE70A9B71EAF902FED30ED",
+        "participant": "263445207371837@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289504802678@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACA628FCCDDE70A9B71EAF902FED30ED",
+        "participant": "6289504802678@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-15T04:57:31.413Z",
+    "deleted": true,
+    "deletedAt": "2026-07-15T04:58:32.378Z"
+  },
+  "ACD38E8B9AD5864F712E69236988734B": {
+    "id": "ACD38E8B9AD5864F712E69236988734B",
+    "sender": "6289504802678@s.whatsapp.net",
+    "name": "Ard Holdeacon",
+    "type": "extendedTextMessage",
+    "arrivedAt": "2026-07-15T04:57:30.034Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6289504802678",
+    "resolvedPn": "6289504802678@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6289504802678@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACD38E8B9AD5864F712E69236988734B",
+      "participant": "263445207371837@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-15T04:57:32.824Z",
+    "deleted": true,
+    "deletedAt": "2026-07-15T04:57:32.824Z"
+  },
+  "ACD870BCBA81CC54483B5CDF586A8A69": {
+    "id": "ACD870BCBA81CC54483B5CDF586A8A69",
+    "sender": "6289504802678@s.whatsapp.net",
+    "name": "Ard Holdeacon",
+    "type": "extendedTextMessage",
+    "arrivedAt": "2026-07-15T04:57:30.224Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6289504802678",
+    "resolvedPn": "6289504802678@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6289504802678@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACD870BCBA81CC54483B5CDF586A8A69",
+      "participant": "263445207371837@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-15T04:57:32.630Z",
+    "deleted": true,
+    "deletedAt": "2026-07-15T04:57:32.630Z"
+  },
+  "AC2881E7382DACAFBB99D1755B6905AA": {
+    "id": "AC2881E7382DACAFBB99D1755B6905AA",
+    "sender": "6289504802678@s.whatsapp.net",
+    "name": "Ard Holdeacon",
+    "type": "imageMessage",
+    "arrivedAt": "2026-07-15T04:57:32.833Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "⏺️⏏️⏹️",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6289504802678",
+    "resolvedPn": "6289504802678@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6289504802678@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC2881E7382DACAFBB99D1755B6905AA",
+      "participant": "263445207371837@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-15T04:57:43.522Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289504802678@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC2881E7382DACAFBB99D1755B6905AA",
+        "participant": "263445207371837@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289504802678@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC2881E7382DACAFBB99D1755B6905AA",
+        "participant": "6289504802678@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-15T04:57:43.521Z"
+  },
+  "AC6A37515A0A7164C9E9DC4DF2C86EA2": {
+    "id": "AC6A37515A0A7164C9E9DC4DF2C86EA2",
+    "sender": "6289504802678@s.whatsapp.net",
+    "name": "Ard Holdeacon",
+    "type": "imageMessage",
+    "arrivedAt": "2026-07-15T04:57:57.510Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "⏺️⏏️⏹️",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6289504802678",
+    "resolvedPn": "6289504802678@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6289504802678@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC6A37515A0A7164C9E9DC4DF2C86EA2",
+      "participant": "263445207371837@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-15T04:58:14.982Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289504802678@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC6A37515A0A7164C9E9DC4DF2C86EA2",
+        "participant": "263445207371837@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289504802678@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC6A37515A0A7164C9E9DC4DF2C86EA2",
+        "participant": "6289504802678@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-15T04:58:14.982Z"
+  },
+  "ACC3F27F88374E9F8FAEBC0B5C79DF4C": {
+    "id": "ACC3F27F88374E9F8FAEBC0B5C79DF4C",
+    "sender": "6289504802678@s.whatsapp.net",
+    "name": "Ard Holdeacon",
+    "type": "imageMessage",
+    "arrivedAt": "2026-07-15T04:58:08.602Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐳",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6289504802678",
+    "resolvedPn": "6289504802678@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6289504802678@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACC3F27F88374E9F8FAEBC0B5C79DF4C",
+      "participant": "263445207371837@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-15T04:58:14.450Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289504802678@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACC3F27F88374E9F8FAEBC0B5C79DF4C",
+        "participant": "263445207371837@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289504802678@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACC3F27F88374E9F8FAEBC0B5C79DF4C",
+        "participant": "6289504802678@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-15T04:58:14.443Z"
+  },
+  "ACDB31409F0B6BD3958184713D0DF8D1": {
+    "id": "ACDB31409F0B6BD3958184713D0DF8D1",
+    "sender": "6289504802678@s.whatsapp.net",
+    "name": "Ard Holdeacon",
+    "type": "imageMessage",
+    "arrivedAt": "2026-07-15T04:58:08.604Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐋",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6289504802678",
+    "resolvedPn": "6289504802678@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6289504802678@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACDB31409F0B6BD3958184713D0DF8D1",
+      "participant": "263445207371837@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-15T04:58:12.069Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289504802678@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACDB31409F0B6BD3958184713D0DF8D1",
+        "participant": "263445207371837@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289504802678@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACDB31409F0B6BD3958184713D0DF8D1",
+        "participant": "6289504802678@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-15T04:58:12.068Z"
   }
 }

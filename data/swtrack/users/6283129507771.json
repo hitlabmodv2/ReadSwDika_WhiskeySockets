@@ -1,13 +1,36 @@
 {
-  "AC2DD822F1823868DC03C8A9706D055B": {
-    "id": "AC2DD822F1823868DC03C8A9706D055B",
+  "AC948A0CF70D5882AA0D28A0B4DAAAC1": {
+    "id": "AC948A0CF70D5882AA0D28A0B4DAAAC1",
     "sender": "6283129507771@s.whatsapp.net",
-    "name": "jokta vian saputra",
-    "type": "videoMessage",
-    "arrivedAt": "2026-07-04T06:06:13.451Z",
+    "name": "~oktaa😑😑",
+    "type": "protocolMessage",
+    "arrivedAt": "2026-07-15T04:57:10.951Z",
     "read": true,
     "reacted": true,
-    "emoji": "⏺️⏏️⏹️",
+    "emoji": "🦈",
+    "source": "group",
+    "number": "6283129507771",
+    "messageKey": {
+      "remoteJid": "120363424557936431@g.us",
+      "fromMe": false,
+      "id": "AC948A0CF70D5882AA0D28A0B4DAAAC1",
+      "participant": "48031256813702@lid",
+      "participantAlt": "6283129507771@s.whatsapp.net",
+      "addressingMode": "lid"
+    },
+    "resolvedPn": "6283129507771@s.whatsapp.net",
+    "updatedAt": "2026-07-15T04:57:33.356Z",
+    "processedAt": "2026-07-15T04:57:33.356Z"
+  },
+  "AC27F7E69BE24A3EED9384F874D53C0D": {
+    "id": "AC27F7E69BE24A3EED9384F874D53C0D",
+    "sender": "6283129507771@s.whatsapp.net",
+    "name": "~oktaa😑😑",
+    "type": "videoMessage",
+    "arrivedAt": "2026-07-15T04:57:10.953Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐙",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6283129507771",
@@ -16,17 +39,17 @@
       "remoteJid": "status@broadcast",
       "remoteJidAlt": "6283129507771@s.whatsapp.net",
       "fromMe": false,
-      "id": "AC2DD822F1823868DC03C8A9706D055B",
+      "id": "AC27F7E69BE24A3EED9384F874D53C0D",
       "participant": "48031256813702@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-07-04T06:06:31.511Z",
+    "updatedAt": "2026-07-15T04:57:30.805Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6283129507771@s.whatsapp.net",
         "fromMe": false,
-        "id": "AC2DD822F1823868DC03C8A9706D055B",
+        "id": "AC27F7E69BE24A3EED9384F874D53C0D",
         "participant": "48031256813702@lid",
         "addressingMode": "lid"
       },
@@ -34,34 +57,11 @@
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6283129507771@s.whatsapp.net",
         "fromMe": false,
-        "id": "AC2DD822F1823868DC03C8A9706D055B",
+        "id": "AC27F7E69BE24A3EED9384F874D53C0D",
         "participant": "6283129507771@s.whatsapp.net",
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-07-04T06:06:31.511Z"
-  },
-  "AC825AEDD3090CF039B1385F2AFF3033": {
-    "id": "AC825AEDD3090CF039B1385F2AFF3033",
-    "sender": "6283129507771@s.whatsapp.net",
-    "name": "jokta vian saputra",
-    "type": "protocolMessage",
-    "arrivedAt": "2026-07-04T06:06:13.571Z",
-    "read": true,
-    "reacted": true,
-    "emoji": "❤️",
-    "source": "group",
-    "number": "6283129507771",
-    "messageKey": {
-      "remoteJid": "120363424557936431@g.us",
-      "fromMe": false,
-      "id": "AC825AEDD3090CF039B1385F2AFF3033",
-      "participant": "48031256813702@lid",
-      "participantAlt": "6283129507771@s.whatsapp.net",
-      "addressingMode": "lid"
-    },
-    "resolvedPn": "6283129507771@s.whatsapp.net",
-    "updatedAt": "2026-07-04T06:06:23.240Z",
-    "processedAt": "2026-07-04T06:06:23.240Z"
+    "processedAt": "2026-07-15T04:57:30.805Z"
   }
 }

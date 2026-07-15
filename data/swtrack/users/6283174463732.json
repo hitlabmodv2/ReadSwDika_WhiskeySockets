@@ -40,5 +40,131 @@
       }
     ],
     "processedAt": "2026-07-14T08:39:02.557Z"
+  },
+  "ACE3FD48BB7BD7F5FD45AD6E2FD046DA": {
+    "id": "ACE3FD48BB7BD7F5FD45AD6E2FD046DA",
+    "sender": "6283174463732@s.whatsapp.net",
+    "name": "𝕱𝖆𝖑𝖑⛓️",
+    "type": "videoMessage",
+    "arrivedAt": "2026-07-15T04:57:24.804Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐡",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6283174463732",
+    "resolvedPn": "6283174463732@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6283174463732@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACE3FD48BB7BD7F5FD45AD6E2FD046DA",
+      "participant": "71850927358101@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-15T04:57:28.524Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283174463732@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACE3FD48BB7BD7F5FD45AD6E2FD046DA",
+        "participant": "71850927358101@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283174463732@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACE3FD48BB7BD7F5FD45AD6E2FD046DA",
+        "participant": "6283174463732@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-15T04:57:28.524Z"
+  },
+  "AC5B1E4B379691D8690AFC7B5C1BFA5A": {
+    "id": "AC5B1E4B379691D8690AFC7B5C1BFA5A",
+    "sender": "6283174463732@s.whatsapp.net",
+    "name": "𝕱𝖆𝖑𝖑⛓️",
+    "type": "imageMessage",
+    "arrivedAt": "2026-07-15T05:06:21.214Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐋",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6283174463732",
+    "resolvedPn": "6283174463732@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6283174463732@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC5B1E4B379691D8690AFC7B5C1BFA5A",
+      "participant": "71850927358101@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-15T05:06:25.557Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283174463732@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC5B1E4B379691D8690AFC7B5C1BFA5A",
+        "participant": "71850927358101@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283174463732@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC5B1E4B379691D8690AFC7B5C1BFA5A",
+        "participant": "6283174463732@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-15T05:06:25.557Z"
+  },
+  "AC2C6FECFBEDFDAC78575A7C04633BC5": {
+    "id": "AC2C6FECFBEDFDAC78575A7C04633BC5",
+    "sender": "6283174463732@s.whatsapp.net",
+    "name": "𝕱𝖆𝖑𝖑⛓️",
+    "type": "videoMessage",
+    "arrivedAt": "2026-07-15T05:06:21.396Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐙",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6283174463732",
+    "resolvedPn": "6283174463732@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6283174463732@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC2C6FECFBEDFDAC78575A7C04633BC5",
+      "participant": "71850927358101@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-15T05:06:27.077Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283174463732@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC2C6FECFBEDFDAC78575A7C04633BC5",
+        "participant": "71850927358101@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283174463732@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC2C6FECFBEDFDAC78575A7C04633BC5",
+        "participant": "6283174463732@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-15T05:06:27.077Z"
   }
 }
