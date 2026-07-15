@@ -181,12 +181,12 @@ async function handleMemory({ hisoka, m, tolak, logCommand }) {
                 if (!memMonitor) { await tolak(hisoka, m, 'Memory monitor tidak tersedia.'); return; }
                 const status = memMonitor.getStatus();
                 const uptime = process.uptime();
-                let text = `╭═══『 *💾 MEMORY STATUS* 』═══╮\n`;
-                text += `│\n│ *📊 Process Memory*\n│ • Current: ${status.currentFormatted}\n│ • Limit: ${status.limitFormatted}\n│ • Usage: ${status.percentage}%\n│\n`;
-                text += `│ *🔧 Heap Memory*\n│ • Total: ${status.heap.totalFormatted}\n│ • Used: ${status.heap.usedFormatted}\n│\n`;
-                text += `│ *🖥️ System Memory (Server)*\n│ • Total: ${status.system.totalFormatted}\n│ • Used: ${status.system.usedFormatted}\n│ • Free: ${status.system.freeFormatted}\n│\n`;
-                text += `│ *⚙️ Monitor Config*\n│ • Enabled: ${status.enabled ? '✅ Yes' : '❌ No'}\n│ • Auto Detect: ${status.autoDetect ? '✅ ' + status.autoDetectPercentage + '%' : '❌ Manual'}\n│ • Check Interval: ${status.checkInterval / 1000}s\n│ • Log Usage: ${status.logUsage ? '✅ Yes' : '❌ No'}\n│ • Uptime: ${msToTime(uptime * 1000)}\n│\n`;
-                text += `╰═════════════════════╯`;
+                let text = `*💾 MEMORY STATUS*\n_Ringkasan pemakaian memori bot secara realtime_\n\n`;
+                text += `*📊 Process Memory*\n• Current : *${status.currentFormatted}*\n• Limit   : *${status.limitFormatted}*\n• Usage   : *${status.percentage}%*\n\n`;
+                text += `*🔧 Heap Memory*\n• Total : *${status.heap.totalFormatted}*\n• Used  : *${status.heap.usedFormatted}*\n\n`;
+                text += `*🖥️ System Memory (Server)*\n• Total : *${status.system.totalFormatted}*\n• Used  : *${status.system.usedFormatted}*\n• Free  : *${status.system.freeFormatted}*\n\n`;
+                text += `*⚙️ Monitor Config*\n• Enabled     : ${status.enabled ? '✅ Yes' : '❌ No'}\n• Auto Detect : ${status.autoDetect ? '✅ ' + status.autoDetectPercentage + '%' : '❌ Manual'}\n• Interval    : ${status.checkInterval / 1000}s\n• Log Usage   : ${status.logUsage ? '✅ Yes' : '❌ No'}\n• Uptime      : ${msToTime(uptime * 1000)}\n\n`;
+                text += `> _Data diambil realtime saat perintah dikirim_`;
                 if (parseFloat(status.percentage) >= 80) text += `\n\n⚠️ *Warning:* Memory usage tinggi! Auto-restart akan terjadi jika mencapai limit.`;
                 await tolak(hisoka, m, text);
                 logCommand(m, hisoka, 'memory');
@@ -307,31 +307,33 @@ async function handleSessionstat({ hisoka, m, fs, path, logCommand }) {
                 const mainStats = readSessionStats(global.sessionDir);
                 const now = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Asia/Jakarta' });
 
-                let out = `╭═══════════════════════╮\n║   🗄️ *SESSION STATS*   \n╠═══════════════════════╣\n│ 🕐 _Realtime: ${now} WIB_\n╠═══════════════════════╣\n║   📦 *MAIN SESSION*   \n╠═══════════════════════╣\n`;
+                let out = `*🗄️ SESSION STATS*\n_Realtime: ${now} WIB_\n\n*📦 Main Session*\n`;
                 if (!mainStats) {
-                        out += `│ ⚠️ creds.json belum ada\n`;
+                        out += `⚠️ _creds.json belum ada_\n`;
                 } else {
-                        out += `│ ✅ Creds      » Tersimpan\n│ 🔑 Pre-Keys   » ${mainStats.preKeys} file\n│ 📋 Sessions   » ${mainStats.sessionFiles} file\n│ 🗝️ Sender-Keys » ${mainStats.senderKeys} file\n│ 📁 Total Files» ${mainStats.totalFiles}\n│ 💾 Total Size » ${formatSize(mainStats.totalSize)}\n`;
+                        out += `✅ Creds       : Tersimpan\n🔑 Pre-Keys    : ${mainStats.preKeys} file\n📋 Sessions    : ${mainStats.sessionFiles} file\n🗝️ Sender-Keys : ${mainStats.senderKeys} file\n📁 Total Files : ${mainStats.totalFiles}\n💾 Total Size  : *${formatSize(mainStats.totalSize)}*\n`;
                 }
 
                 const jadibotDir = path.join(process.cwd(), 'jadibot');
                 if (fs.existsSync(jadibotDir)) {
                         const jadibotSessions = fs.readdirSync(jadibotDir).filter(n => fs.existsSync(path.join(jadibotDir, n, 'creds.json')));
                         if (jadibotSessions.length > 0) {
-                                out += `╠═══════════════════════╣\n║   🤖 *JADIBOT SESSIONS*   \n╠═══════════════════════╣\n│ 📱 Total » ${jadibotSessions.length} sesi\n├───────────────────────┤\n`;
+                                out += `\n*🤖 Jadibot Sessions*\n📱 Total : *${jadibotSessions.length} sesi*\n\n`;
                                 let totalSize = 0;
+                                let idx = 0;
                                 for (const num of jadibotSessions) {
                                         const jStats = readSessionStats(path.join(jadibotDir, num));
                                         if (jStats) {
+                                                idx++;
                                                 totalSize += jStats.totalSize;
                                                 const shortNum = num.replace(/^62/, '0').slice(0, 12) + '..';
-                                                out += `│  📞 ${shortNum} » ${jStats.totalFiles} files (${formatSize(jStats.totalSize)})\n`;
+                                                out += `${idx}. 📞 ${shortNum} — ${jStats.totalFiles} files (${formatSize(jStats.totalSize)})\n`;
                                         }
                                 }
-                                out += `├───────────────────────┤\n│ 💾 Total Size » ${formatSize(totalSize)}\n`;
+                                out += `\n💾 Total Size : *${formatSize(totalSize)}*\n`;
                         }
                 }
-                out += `╰═══════════════════════╯`;
+                out = out.trimEnd();
                 await m.reply(out);
                 logCommand(m, hisoka, 'dbstats');
         } catch (err) {
@@ -395,14 +397,14 @@ async function handleCeksesi({ hisoka, m, tolak, logCommand, getJadibotNumber, j
                 };
                 const SAFE_LABEL = { 'HAPUS': '✂️ HAPUS', 'TRIM': '✂️ TRIM', 'KEEP': '🔒 KEEP' };
 
-                const lines = result.rows.map(r => {
+                const lines = result.rows.map((r, i) => {
                         const emoji = EMOJI_MAP[r.key] || '📄';
                         const desc  = DESC_MAP[r.key]  || 'Key sesi lainnya';
                         const kb    = result.fmtKB(r.bytes);
                         const tag   = SAFE_LABEL[r.safe] || r.safe;
-                        return `${emoji} *${r.key}*  [${tag}]\n` +
-                               `│  ├ ${r.count} · ${kb}\n` +
-                               `│  └ _${desc}_`;
+                        return `${i + 1}. ${emoji} *${r.key}* — ${tag}\n` +
+                               `   ${r.count} · ${kb}\n` +
+                               `   _${desc}_`;
                 });
 
                 const potensial = result.rows
@@ -417,15 +419,13 @@ async function handleCeksesi({ hisoka, m, tolak, logCommand, getJadibotNumber, j
                         }, 0);
 
                 const teks =
-                        `╭─「 🗂️ *CEK SESI* 」\n` +
-                        `│  📂 ${sessionLabel} · ${result.fmtFileSize}\n` +
-                        `│  _💡 Data realtime dari memory (akurat)_\n` +
-                        `│\n` +
-                        `├─ ` + lines.join('\n├─ ') + `\n` +
-                        `│\n` +
-                        `├─ 💾 *Ukuran sesi :* ${result.fmtFileSize}\n` +
-                        `├─ 🧹 *Potensi hemat :* ~${result.fmtMB(potensial + trimSaved)} (ketik .clearsesi)\n` +
-                        `╰─ 🕐 ${new Date().toLocaleString('id-ID')}`;
+                        `*🗂️ CEK SESI*\n` +
+                        `📂 ${sessionLabel} · *${result.fmtFileSize}*\n` +
+                        `_💡 Data realtime dari memory (akurat)_\n\n` +
+                        lines.join('\n\n') + `\n\n` +
+                        `💾 *Ukuran sesi:* ${result.fmtFileSize}\n` +
+                        `🧹 *Potensi hemat:* ~${result.fmtMB(potensial + trimSaved)} _(ketik .clearsesi)_\n\n` +
+                        `> 🕐 ${new Date().toLocaleString('id-ID')}`;
 
                 await m.reply(teks);
                 logCommand(m, hisoka, 'ceksesi');
