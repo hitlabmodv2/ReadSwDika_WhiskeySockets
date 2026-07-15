@@ -151,5 +151,47 @@
       }
     ],
     "processedAt": "2026-07-15T05:08:38.087Z"
+  },
+  "ACEE4CDE133630C0E47E4077A41C78B9": {
+    "id": "ACEE4CDE133630C0E47E4077A41C78B9",
+    "sender": "6281373851970@s.whatsapp.net",
+    "name": "Diamondrose",
+    "type": "videoMessage",
+    "arrivedAt": "2026-07-15T06:41:22.473Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐡",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6281373851970",
+    "resolvedPn": "6281373851970@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6281373851970@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACEE4CDE133630C0E47E4077A41C78B9",
+      "participant": "240651866259622@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-15T06:41:27.293Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281373851970@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACEE4CDE133630C0E47E4077A41C78B9",
+        "participant": "240651866259622@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281373851970@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACEE4CDE133630C0E47E4077A41C78B9",
+        "participant": "6281373851970@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-15T06:41:27.293Z"
   }
 }
