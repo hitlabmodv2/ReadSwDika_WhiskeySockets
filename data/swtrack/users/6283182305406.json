@@ -70,9 +70,9 @@
     "name": "~Suttt diem",
     "type": "videoMessage",
     "arrivedAt": "2026-07-16T07:14:21.173Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "🐙",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6283182305406",
@@ -85,7 +85,9 @@
       "participant": "155757827874977@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-07-16T07:14:21.173Z"
+    "updatedAt": "2026-07-16T07:15:32.814Z",
+    "retriedOnStartup": true,
+    "retriedAt": "2026-07-16T07:15:32.814Z"
   },
   "A599CB1A35D4D6302BD6E017E8B7747E": {
     "id": "A599CB1A35D4D6302BD6E017E8B7747E",
@@ -93,9 +95,9 @@
     "name": "~Suttt diem",
     "type": "protocolMessage",
     "arrivedAt": "2026-07-16T07:14:22.145Z",
-    "read": false,
-    "reacted": false,
-    "emoji": null,
+    "read": true,
+    "reacted": true,
+    "emoji": "🐡",
     "source": "group",
     "number": "6283182305406",
     "messageKey": {
@@ -107,6 +109,8 @@
       "addressingMode": "lid"
     },
     "resolvedPn": "6283182305406@s.whatsapp.net",
-    "updatedAt": "2026-07-16T07:14:22.145Z"
+    "updatedAt": "2026-07-16T07:15:42.220Z",
+    "retriedOnStartup": true,
+    "retriedAt": "2026-07-16T07:15:42.220Z"
   }
 }

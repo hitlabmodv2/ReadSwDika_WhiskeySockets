@@ -224,8 +224,8 @@ export default async function (m, hisoka) {
                         if (shouldAutoType || shouldAutoRecord) {
                                 (async () => {
                                         try {
-                                                // Skip semua presence saat stealth mode (online off)
-                                                if (hisoka.__stealthMode) return;
+                                                // Auto typing/recording berjalan bebas — TIDAK diblokir oleh mode .online
+                                                // Keduanya fitur terpisah; presence typing hanya muncul sebentar lalu hilang
                                                 if (shouldAutoType && !shouldAutoRecord) {
                                                         await hisoka.sendPresenceUpdate('composing', m.from);
                                                         const delayMs = (autoTyping.delaySeconds || 5) * 1000;
