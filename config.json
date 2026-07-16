@@ -22,8 +22,8 @@
     "intervalSeconds": 15
   },
   "autoTyping": {
-    "enabled": false,
-    "delaySeconds": 1,
+    "enabled": true,
+    "delaySeconds": 10,
     "privateChat": true,
     "groupChat": true
   },

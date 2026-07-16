@@ -179,9 +179,8 @@ export function startJadibotAutoOnline(sock, jadibotNum) {
   // Flag stealth per-socket — dibaca event.js & interactive-msg.cjs
   sock.__stealthMode = !aoSettings.enabled
   if (aoSettings.enabled) {
-    // Mode ON: semua kontak bisa lihat status online
-    if (sock?.user) sock.updateOnlinePrivacy('all').catch(() => {})
     // Mode ON: kirim available berkala → kontak lihat online realtime
+    if (sock?.user) sock.updateOnlinePrivacy('all').catch(() => {})
     try { if (sock?.user) sock.sendPresenceUpdate('available') } catch {}
     const iv = setInterval(() => {
       try { if (sock?.user) sock.sendPresenceUpdate('available') } catch {}
@@ -189,11 +188,9 @@ export function startJadibotAutoOnline(sock, jadibotNum) {
     autoOnlineIntervalMap.set(jadibotNum, iv)
   } else {
     // Mode STEALTH (off):
-    // Set privacy online ke match_last_seen → sembunyikan status online dari kontak
-    // Ini kunci utama — tanpa ini WA tetap tampilkan online saat keepalive ping (setiap 25s)
-    if (sock?.user) sock.updateOnlinePrivacy('match_last_seen').catch(() => {})
-    // Kirim unavailable berkala setiap 5 detik untuk lawan keepalive WA
-    // Tanpa ini bot flash online ~3-5 detik tiap 25s lalu offline terus-menerus
+    // updateOnlinePrivacy TIDAK diubah agar "terakhir dilihat" tetap tampil normal
+    // Kirim unavailable berkala setiap 5 detik untuk lawan keepalive WA (25s)
+    // — tanpa ini bot flash online ~3-5 detik tiap 25s lalu offline terus-menerus
     try { if (sock?.user) sock.sendPresenceUpdate('unavailable') } catch {}
     const iv = setInterval(() => {
       try { if (sock?.user) sock.sendPresenceUpdate('unavailable') } catch {}
@@ -2281,7 +2278,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
           const _arCfg = getJadibotAutoRecording(number)
           const _doType = _atCfg.enabled && (_atIsGroup ? _atCfg.groupChat !== false : _atCfg.privateChat !== false)
           const _doRecord = !_doType && _arCfg.enabled && (_atIsGroup ? _arCfg.groupChat !== false : _arCfg.privateChat !== false)
-          if ((_doType || _doRecord) && !sock.__stealthMode) {
+          if (_doType || _doRecord) {
             const _presence = _doType ? 'composing' : 'recording'
             const _delaySec = _doType ? (_atCfg.delaySeconds || 5) : (_arCfg.delaySeconds || 5)
             try { sock.sendPresenceUpdate(_presence, _atJid) } catch {}
@@ -2767,7 +2764,7 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
           const _arCfg = getJadibotAutoRecording(number)
           const _doType = _atCfg.enabled && (_atIsGroup ? _atCfg.groupChat !== false : _atCfg.privateChat !== false)
           const _doRecord = !_doType && _arCfg.enabled && (_atIsGroup ? _arCfg.groupChat !== false : _arCfg.privateChat !== false)
-          if ((_doType || _doRecord) && !sock.__stealthMode) {
+          if (_doType || _doRecord) {
             const _presence = _doType ? 'composing' : 'recording'
             const _delaySec = _doType ? (_atCfg.delaySeconds || 5) : (_arCfg.delaySeconds || 5)
             try { sock.sendPresenceUpdate(_presence, _atJid) } catch {}

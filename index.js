@@ -1212,20 +1212,18 @@ async function main() {
                                 const intervalMs = (autoOnline.intervalSeconds || 30) * 1000;
 
                                 if (autoOnline.enabled) {
-                                        // Mode ON: semua kontak bisa lihat status online
-                                        hisoka.updateOnlinePrivacy('all').catch(() => {});
                                         // Mode ON: kirim available berkala → kontak lihat online realtime
+                                        hisoka.updateOnlinePrivacy('all').catch(() => {});
                                         hisoka.sendPresenceUpdate('available');
                                         global.autoOnlineInterval = setInterval(() => {
                                                 hisoka.sendPresenceUpdate('available');
                                         }, intervalMs);
                                 } else {
                                         // Mode STEALTH (off):
-                                        // Set privacy online ke match_last_seen → sembunyikan status online dari kontak
-                                        // Ini kunci utama stealth — tanpa ini WA tetap tampilkan online saat keepalive ping
-                                        hisoka.updateOnlinePrivacy('match_last_seen').catch(() => {});
+                                        // updateOnlinePrivacy TIDAK diubah agar "terakhir dilihat" tetap tampil normal
                                         // Kirim unavailable berkala setiap 5 detik untuk lawan keepalive WA (25s)
-                                        // Tanpa ini, setiap keepalive ping bikin bot flash online ~3-5 detik lalu offline
+                                        // — keepalive ping setiap 25s bisa bikin WA flash online ~3-5 detik,
+                                        //   interval 5s ini memastikan bot balik offline jauh lebih cepat
                                         hisoka.sendPresenceUpdate('unavailable');
                                         global.autoOnlineInterval = setInterval(() => {
                                                 hisoka.sendPresenceUpdate('unavailable');
