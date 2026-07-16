@@ -176,6 +176,8 @@ export function startJadibotAutoOnline(sock, jadibotNum) {
   }
   const aoSettings = getJadibotAutoOnline(jadibotNum)
   const intervalMs = Math.max(10000, (aoSettings.intervalSeconds || 30) * 1000)
+  // Flag stealth per-socket — dibaca event.js & interactive-msg.cjs
+  sock.__stealthMode = !aoSettings.enabled
   // Reset online privacy ke 'all' agar "terakhir dilihat" tampil normal (tidak blank)
   if (sock?.user) sock.updateOnlinePrivacy('all').catch(() => {})
   if (aoSettings.enabled) {

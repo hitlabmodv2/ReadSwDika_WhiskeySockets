@@ -224,6 +224,8 @@ export default async function (m, hisoka) {
                         if (shouldAutoType || shouldAutoRecord) {
                                 (async () => {
                                         try {
+                                                // Skip semua presence saat stealth mode (online off)
+                                                if (hisoka.__stealthMode) return;
                                                 if (shouldAutoType && !shouldAutoRecord) {
                                                         await hisoka.sendPresenceUpdate('composing', m.from);
                                                         const delayMs = (autoTyping.delaySeconds || 5) * 1000;

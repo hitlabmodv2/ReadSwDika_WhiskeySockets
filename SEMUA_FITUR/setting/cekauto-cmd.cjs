@@ -464,10 +464,6 @@ function makeCekautoHelpers({
                                                         saveConfig(cfgToggle);
                                                         if (global.startAutoOnline) {
                                                                 global.startAutoOnline();
-                                                        } else if (global.hisokaClient) {
-                                                                // Selalu kirim available agar Perangkat Tertaut tetap "Aktif"
-                                                                // startAutoOnline akan atur interval yang tepat (on=30s, off=5min)
-                                                                global.hisokaClient.sendPresenceUpdate('available');
                                                         }
                                                 } else {
                                                         const currentVal = cfgToggle[configKey] || {};

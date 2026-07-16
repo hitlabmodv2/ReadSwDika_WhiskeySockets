@@ -1205,6 +1205,10 @@ async function main() {
                                         global.autoOnlineInterval = null;
                                 }
 
+                                // Flag stealth per-socket — dibaca event.js & interactive-msg.cjs
+                                // agar composing/recording tidak dikirim saat mode off
+                                hisoka.__stealthMode = !autoOnline.enabled;
+
                                 // Reset online privacy ke 'all' agar "terakhir dilihat" tampil normal
                                 // (bukan blank) — mencegah efek sisa dari setting sebelumnya
                                 hisoka.updateOnlinePrivacy('all').catch(() => {});

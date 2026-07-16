@@ -34,6 +34,8 @@ function resolveThumbnailMedia(thumbnailUrl) {
 function startTyping(hisoka, m) {
         const jid = m?.from;
         if (!hisoka || !jid) return () => {};
+        // Skip composing saat stealth mode (online off) agar kontak tidak lihat "online"
+        if (hisoka.__stealthMode) return () => {};
         let active = true;
         try { hisoka.sendPresenceUpdate('composing', jid); } catch (_) {}
         const interval = setInterval(() => {
