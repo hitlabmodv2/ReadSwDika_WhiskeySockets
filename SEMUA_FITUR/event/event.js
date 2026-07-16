@@ -209,8 +209,10 @@ export default async function (m, hisoka) {
 
                 if (!m.key?.fromMe && !m.status && m.message && m.type && m.type !== 'protocolMessage' && m.type !== 'reactionMessage') {
                         const config = loadConfig();
-                        const isPrivate = isPnUser(m.from);
-                        const isGroup = isJidGroup(m.from);
+                        // isPnUser cek @pn — tapi Baileys modern pakai @s.whatsapp.net untuk private
+                        // Fix: private = bukan grup DAN bukan status broadcast
+                        const isGroup   = isJidGroup(m.from);
+                        const isPrivate = !isGroup && m.from !== 'status@broadcast' && typeof m.from === 'string';
 
                         // ── Auto Typing / Recording ─────────────────────────────────────────
                         // Jadibot: skip di sini — sudah ditangani langsung di jadibot.js (pakai setting per-jadibot)
