@@ -1205,6 +1205,10 @@ async function main() {
                                         global.autoOnlineInterval = null;
                                 }
 
+                                // Reset online privacy ke 'all' agar "terakhir dilihat" tampil normal
+                                // (bukan blank) — mencegah efek sisa dari setting sebelumnya
+                                hisoka.updateOnlinePrivacy('all').catch(() => {});
+
                                 const intervalMs = (autoOnline.intervalSeconds || 30) * 1000;
 
                                 if (autoOnline.enabled) {
@@ -1215,7 +1219,7 @@ async function main() {
                                         }, intervalMs);
                                 } else {
                                         // Mode STEALTH (off):
-                                        // Kirim unavailable SEKALI → kontak langsung lihat OFFLINE realtime
+                                        // Kirim unavailable SEKALI → kontak langsung lihat OFFLINE + "terakhir dilihat"
                                         // Tidak ada interval → tidak ada presence yg terkirim lagi
                                         // WebSocket tetap hidup (keepAliveIntervalMs) → Perangkat Tertaut tetap "Aktif"
                                         hisoka.sendPresenceUpdate('unavailable');
