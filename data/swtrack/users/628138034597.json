@@ -1,36 +1,13 @@
 {
-  "ACB7221F7A71355718FBEA03823B3D38": {
-    "id": "ACB7221F7A71355718FBEA03823B3D38",
-    "sender": "628138034597@s.whatsapp.net",
-    "name": "Victoria Takapente",
-    "type": "protocolMessage",
-    "arrivedAt": "2026-07-14T08:34:09.431Z",
-    "read": true,
-    "reacted": true,
-    "emoji": "🐟",
-    "source": "group",
-    "number": "628138034597",
-    "messageKey": {
-      "remoteJid": "120363424557936431@g.us",
-      "fromMe": false,
-      "id": "ACB7221F7A71355718FBEA03823B3D38",
-      "participant": "188378003836968@lid",
-      "participantAlt": "628138034597@s.whatsapp.net",
-      "addressingMode": "lid"
-    },
-    "resolvedPn": "628138034597@s.whatsapp.net",
-    "updatedAt": "2026-07-14T08:34:15.633Z",
-    "processedAt": "2026-07-14T08:34:15.633Z"
-  },
-  "ACDB9FFAC12BF06FFE2F00B4EE0329F8": {
-    "id": "ACDB9FFAC12BF06FFE2F00B4EE0329F8",
+  "ACDE1858DC0CAC311820E6580ECCD660": {
+    "id": "ACDE1858DC0CAC311820E6580ECCD660",
     "sender": "628138034597@s.whatsapp.net",
     "name": "Victoria Takapente",
     "type": "imageMessage",
-    "arrivedAt": "2026-07-14T08:34:09.480Z",
+    "arrivedAt": "2026-07-16T03:56:24.088Z",
     "read": true,
     "reacted": true,
-    "emoji": "🐙",
+    "emoji": "🐡",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "628138034597",
@@ -39,17 +16,17 @@
       "remoteJid": "status@broadcast",
       "remoteJidAlt": "628138034597@s.whatsapp.net",
       "fromMe": false,
-      "id": "ACDB9FFAC12BF06FFE2F00B4EE0329F8",
+      "id": "ACDE1858DC0CAC311820E6580ECCD660",
       "participant": "188378003836968@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-07-14T08:34:19.955Z",
+    "updatedAt": "2026-07-16T03:56:39.320Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "628138034597@s.whatsapp.net",
         "fromMe": false,
-        "id": "ACDB9FFAC12BF06FFE2F00B4EE0329F8",
+        "id": "ACDE1858DC0CAC311820E6580ECCD660",
         "participant": "188378003836968@lid",
         "addressingMode": "lid"
       },
@@ -57,11 +34,34 @@
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "628138034597@s.whatsapp.net",
         "fromMe": false,
-        "id": "ACDB9FFAC12BF06FFE2F00B4EE0329F8",
+        "id": "ACDE1858DC0CAC311820E6580ECCD660",
         "participant": "628138034597@s.whatsapp.net",
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-07-14T08:34:19.955Z"
+    "processedAt": "2026-07-16T03:56:39.320Z"
+  },
+  "AC0176C1261D91ECC3A4806FB98096EB": {
+    "id": "AC0176C1261D91ECC3A4806FB98096EB",
+    "sender": "628138034597@s.whatsapp.net",
+    "name": "Victoria Takapente",
+    "type": "protocolMessage",
+    "arrivedAt": "2026-07-16T03:56:24.310Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "⏺️⏏️⏹️",
+    "source": "group",
+    "number": "628138034597",
+    "messageKey": {
+      "remoteJid": "120363424557936431@g.us",
+      "fromMe": false,
+      "id": "AC0176C1261D91ECC3A4806FB98096EB",
+      "participant": "188378003836968@lid",
+      "participantAlt": "628138034597@s.whatsapp.net",
+      "addressingMode": "lid"
+    },
+    "resolvedPn": "628138034597@s.whatsapp.net",
+    "updatedAt": "2026-07-16T03:56:34.617Z",
+    "processedAt": "2026-07-16T03:56:34.617Z"
   }
 }

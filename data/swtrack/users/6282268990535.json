@@ -20,7 +20,7 @@
       "participant": "38642156306452@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-07-15T04:55:52.605Z",
+    "updatedAt": "2026-07-16T03:31:35.898Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -39,7 +39,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-07-15T04:55:52.605Z"
+    "processedAt": "2026-07-15T04:55:52.605Z",
+    "deleted": true,
+    "deletedAt": "2026-07-16T03:31:35.898Z"
   },
   "A577E65468F99A74EF498CA1EF5209D7": {
     "id": "A577E65468F99A74EF498CA1EF5209D7",
@@ -106,7 +108,7 @@
       "participant": "38642156306452@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-07-15T05:00:25.419Z",
+    "updatedAt": "2026-07-16T03:37:31.851Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -125,6 +127,176 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-07-15T05:00:25.419Z"
+    "processedAt": "2026-07-15T05:00:25.419Z",
+    "deleted": true,
+    "deletedAt": "2026-07-16T03:37:31.851Z"
+  },
+  "A5EE1F6DD0937E078156F818C3829B0E": {
+    "id": "A5EE1F6DD0937E078156F818C3829B0E",
+    "sender": "6282268990535@s.whatsapp.net",
+    "name": "Otaku Hakase",
+    "type": "videoMessage",
+    "arrivedAt": "2026-07-16T03:37:14.231Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "⏺️⏏️⏹️",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6282268990535",
+    "resolvedPn": "6282268990535@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6282268990535@s.whatsapp.net",
+      "fromMe": false,
+      "id": "A5EE1F6DD0937E078156F818C3829B0E",
+      "participant": "38642156306452@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-16T03:37:29.362Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282268990535@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A5EE1F6DD0937E078156F818C3829B0E",
+        "participant": "38642156306452@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282268990535@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A5EE1F6DD0937E078156F818C3829B0E",
+        "participant": "6282268990535@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-16T03:37:29.361Z"
+  },
+  "A50D91AA722DF224E9BD798F24045D9A": {
+    "id": "A50D91AA722DF224E9BD798F24045D9A",
+    "sender": "6282268990535@s.whatsapp.net",
+    "name": "Otaku Hakase",
+    "type": "videoMessage",
+    "arrivedAt": "2026-07-16T03:37:16.259Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐬",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6282268990535",
+    "resolvedPn": "6282268990535@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6282268990535@s.whatsapp.net",
+      "fromMe": false,
+      "id": "A50D91AA722DF224E9BD798F24045D9A",
+      "participant": "38642156306452@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-16T03:37:19.372Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282268990535@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A50D91AA722DF224E9BD798F24045D9A",
+        "participant": "38642156306452@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282268990535@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A50D91AA722DF224E9BD798F24045D9A",
+        "participant": "6282268990535@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-16T03:37:19.372Z"
+  },
+  "A58D34AC442881A40F968D407A743823": {
+    "id": "A58D34AC442881A40F968D407A743823",
+    "sender": "6282268990535@s.whatsapp.net",
+    "name": "Otaku Hakase",
+    "type": "imageMessage",
+    "arrivedAt": "2026-07-16T03:37:29.843Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐙",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6282268990535",
+    "resolvedPn": "6282268990535@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6282268990535@s.whatsapp.net",
+      "fromMe": false,
+      "id": "A58D34AC442881A40F968D407A743823",
+      "participant": "38642156306452@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-16T03:37:42.818Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282268990535@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A58D34AC442881A40F968D407A743823",
+        "participant": "38642156306452@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282268990535@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A58D34AC442881A40F968D407A743823",
+        "participant": "6282268990535@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-16T03:37:42.818Z"
+  },
+  "A564866F3248AC27F589ABA5799DEFF5": {
+    "id": "A564866F3248AC27F589ABA5799DEFF5",
+    "sender": "6282268990535@s.whatsapp.net",
+    "name": "Otaku Hakase",
+    "type": "imageMessage",
+    "arrivedAt": "2026-07-16T03:51:52.102Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐟",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6282268990535",
+    "resolvedPn": "6282268990535@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6282268990535@s.whatsapp.net",
+      "fromMe": false,
+      "id": "A564866F3248AC27F589ABA5799DEFF5",
+      "participant": "38642156306452@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-16T03:52:05.161Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282268990535@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A564866F3248AC27F589ABA5799DEFF5",
+        "participant": "38642156306452@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282268990535@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A564866F3248AC27F589ABA5799DEFF5",
+        "participant": "6282268990535@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-16T03:52:05.161Z"
   }
 }

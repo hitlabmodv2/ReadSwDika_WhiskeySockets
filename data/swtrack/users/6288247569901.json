@@ -40,5 +40,30 @@
       }
     ],
     "processedAt": "2026-07-15T04:58:57.261Z"
+  },
+  "ACEED896E2ED33EE3F8DE5685CE749D3": {
+    "id": "ACEED896E2ED33EE3F8DE5685CE749D3",
+    "sender": "6288247569901@s.whatsapp.net",
+    "name": "Aii Gntng 😎",
+    "type": "videoMessage",
+    "arrivedAt": "2026-07-16T04:33:42.443Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐠",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6288247569901",
+    "resolvedPn": "6288247569901@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6288247569901@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACEED896E2ED33EE3F8DE5685CE749D3",
+      "participant": "4213446820079@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-16T05:27:26.603Z",
+    "retriedOnStartup": true,
+    "retriedAt": "2026-07-16T05:27:26.603Z"
   }
 }

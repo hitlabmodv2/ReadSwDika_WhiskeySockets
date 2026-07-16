@@ -1,0 +1,67 @@
+{
+  "AC1366E3048D25A717214F6F47B5FD9E": {
+    "id": "AC1366E3048D25A717214F6F47B5FD9E",
+    "sender": "6285693167548@s.whatsapp.net",
+    "name": "ken",
+    "type": "protocolMessage",
+    "arrivedAt": "2026-07-16T03:35:36.635Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐟",
+    "source": "group",
+    "number": "6285693167548",
+    "messageKey": {
+      "remoteJid": "120363424557936431@g.us",
+      "fromMe": false,
+      "id": "AC1366E3048D25A717214F6F47B5FD9E",
+      "participant": "239002682658852@lid",
+      "participantAlt": "6285693167548@s.whatsapp.net",
+      "addressingMode": "lid"
+    },
+    "resolvedPn": "6285693167548@s.whatsapp.net",
+    "updatedAt": "2026-07-16T03:35:42.820Z",
+    "processedAt": "2026-07-16T03:35:42.819Z"
+  },
+  "ACC02CAEDA40E058F1768C231F338D5B": {
+    "id": "ACC02CAEDA40E058F1768C231F338D5B",
+    "sender": "6285693167548@s.whatsapp.net",
+    "name": "ken",
+    "type": "videoMessage",
+    "arrivedAt": "2026-07-16T03:35:36.638Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐟",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285693167548",
+    "resolvedPn": "6285693167548@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285693167548@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACC02CAEDA40E058F1768C231F338D5B",
+      "participant": "239002682658852@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-16T03:35:55.441Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285693167548@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACC02CAEDA40E058F1768C231F338D5B",
+        "participant": "239002682658852@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285693167548@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACC02CAEDA40E058F1768C231F338D5B",
+        "participant": "6285693167548@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-16T03:35:55.441Z"
+  }
+}

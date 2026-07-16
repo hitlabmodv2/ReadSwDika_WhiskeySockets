@@ -1,13 +1,13 @@
 {
-  "A563980BC9B96A17858DC0275A7895BE": {
-    "id": "A563980BC9B96A17858DC0275A7895BE",
+  "A5920A6494EE5B9F935527DD78FCC59B": {
+    "id": "A5920A6494EE5B9F935527DD78FCC59B",
     "sender": "6289639033836@s.whatsapp.net",
     "name": "Rais Alamsyah",
-    "type": "videoMessage",
-    "arrivedAt": "2026-07-14T09:09:33.420Z",
+    "type": "imageMessage",
+    "arrivedAt": "2026-07-16T03:33:21.283Z",
     "read": true,
     "reacted": true,
-    "emoji": "🐳",
+    "emoji": "🐡",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6289639033836",
@@ -16,17 +16,17 @@
       "remoteJid": "status@broadcast",
       "remoteJidAlt": "6289639033836@s.whatsapp.net",
       "fromMe": false,
-      "id": "A563980BC9B96A17858DC0275A7895BE",
+      "id": "A5920A6494EE5B9F935527DD78FCC59B",
       "participant": "18829170229403@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-07-14T09:09:39.289Z",
+    "updatedAt": "2026-07-16T03:33:27.568Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6289639033836@s.whatsapp.net",
         "fromMe": false,
-        "id": "A563980BC9B96A17858DC0275A7895BE",
+        "id": "A5920A6494EE5B9F935527DD78FCC59B",
         "participant": "18829170229403@lid",
         "addressingMode": "lid"
       },
@@ -34,11 +34,11 @@
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6289639033836@s.whatsapp.net",
         "fromMe": false,
-        "id": "A563980BC9B96A17858DC0275A7895BE",
+        "id": "A5920A6494EE5B9F935527DD78FCC59B",
         "participant": "6289639033836@s.whatsapp.net",
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-07-14T09:09:39.289Z"
+    "processedAt": "2026-07-16T03:33:27.568Z"
   }
 }

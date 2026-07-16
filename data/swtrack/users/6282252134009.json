@@ -376,5 +376,131 @@
       }
     ],
     "processedAt": "2026-07-15T05:06:27.129Z"
+  },
+  "AC1E1DC06D0FA7CA0ABABA27176B0A7B": {
+    "id": "AC1E1DC06D0FA7CA0ABABA27176B0A7B",
+    "sender": "6282252134009@s.whatsapp.net",
+    "name": "NISKI MYLAKOVICHE",
+    "type": "videoMessage",
+    "arrivedAt": "2026-07-16T03:56:12.225Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐬",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6282252134009",
+    "resolvedPn": "6282252134009@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6282252134009@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC1E1DC06D0FA7CA0ABABA27176B0A7B",
+      "participant": "76790290767977@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-16T03:56:22.522Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282252134009@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC1E1DC06D0FA7CA0ABABA27176B0A7B",
+        "participant": "76790290767977@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282252134009@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC1E1DC06D0FA7CA0ABABA27176B0A7B",
+        "participant": "6282252134009@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-16T03:56:22.522Z"
+  },
+  "ACE1ED821559F6069B81B5BB45C7139E": {
+    "id": "ACE1ED821559F6069B81B5BB45C7139E",
+    "sender": "6282252134009@s.whatsapp.net",
+    "name": "NISKI MYLAKOVICHE",
+    "type": "videoMessage",
+    "arrivedAt": "2026-07-16T03:56:12.446Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐳",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6282252134009",
+    "resolvedPn": "6282252134009@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6282252134009@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACE1ED821559F6069B81B5BB45C7139E",
+      "participant": "76790290767977@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-16T03:56:16.142Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282252134009@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACE1ED821559F6069B81B5BB45C7139E",
+        "participant": "76790290767977@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282252134009@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACE1ED821559F6069B81B5BB45C7139E",
+        "participant": "6282252134009@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-16T03:56:16.142Z"
+  },
+  "ACB9A3C91C24DF83821AE94853F01106": {
+    "id": "ACB9A3C91C24DF83821AE94853F01106",
+    "sender": "6282252134009@s.whatsapp.net",
+    "name": "NISKI MYLAKOVICHE",
+    "type": "videoMessage",
+    "arrivedAt": "2026-07-16T03:56:12.450Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐬",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6282252134009",
+    "resolvedPn": "6282252134009@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6282252134009@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACB9A3C91C24DF83821AE94853F01106",
+      "participant": "76790290767977@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-16T03:56:16.982Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282252134009@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACB9A3C91C24DF83821AE94853F01106",
+        "participant": "76790290767977@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282252134009@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACB9A3C91C24DF83821AE94853F01106",
+        "participant": "6282252134009@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-16T03:56:16.982Z"
   }
 }
