@@ -24,12 +24,12 @@
   "autoTyping": {
     "enabled": false,
     "delaySeconds": 30,
-    "privateChat": true,
-    "groupChat": false
+    "privateChat": false,
+    "groupChat": true
   },
   "autoRecording": {
-    "enabled": true,
-    "delaySeconds": 30,
+    "enabled": false,
+    "delaySeconds": 1,
     "privateChat": true,
     "groupChat": true
   },

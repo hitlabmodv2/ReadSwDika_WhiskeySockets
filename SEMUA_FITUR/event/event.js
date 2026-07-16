@@ -226,38 +226,29 @@ export default async function (m, hisoka) {
 
                                 if (shouldAutoType || shouldAutoRecord) {
                                         (async () => {
-                                                // Helper: kirim presence + keepalive tiap 10 detik selama delay
-                                                // WA auto-clear typing setelah ~25 detik jika tidak ada update baru
-                                                const _keepPresence = async (presence, jid, totalMs) => {
-                                                        hisoka.__typingActive = (hisoka.__typingActive || 0) + 1;
-                                                        let _kiv = null;
-                                                        try {
-                                                                await hisoka.sendPresenceUpdate(presence, jid);
-                                                                if (totalMs > 10000) {
-                                                                        _kiv = setInterval(() => {
-                                                                                hisoka.sendPresenceUpdate(presence, jid).catch(() => {});
-                                                                        }, 10000);
-                                                                }
-                                                                await delay(totalMs);
-                                                        } finally {
-                                                                if (_kiv) clearInterval(_kiv);
-                                                                hisoka.__typingActive = Math.max(0, (hisoka.__typingActive || 1) - 1);
-                                                        }
-                                                };
                                                 try {
+                                                        // Tandai typing aktif → interval stealth skip kirim unavailable
+                                                        // agar delay tidak dipotong paksa oleh keepalive counter
+                                                        hisoka.__typingActive = (hisoka.__typingActive || 0) + 1;
                                                         if (shouldAutoType && !shouldAutoRecord) {
-                                                                await _keepPresence('composing', m.from, (autoTyping.delaySeconds || 5) * 1000);
+                                                                await hisoka.sendPresenceUpdate('composing', m.from);
+                                                                await delay((autoTyping.delaySeconds || 5) * 1000);
                                                                 await hisoka.sendPresenceUpdate('paused', m.from);
                                                         } else if (shouldAutoRecord && !shouldAutoType) {
-                                                                await _keepPresence('recording', m.from, (autoRecording.delaySeconds || 5) * 1000);
+                                                                await hisoka.sendPresenceUpdate('recording', m.from);
+                                                                await delay((autoRecording.delaySeconds || 5) * 1000);
                                                                 await hisoka.sendPresenceUpdate('paused', m.from);
                                                         } else {
-                                                                await _keepPresence('composing', m.from, (autoTyping.delaySeconds || 5) * 1000);
-                                                                await _keepPresence('recording', m.from, (autoRecording.delaySeconds || 5) * 1000);
+                                                                await hisoka.sendPresenceUpdate('composing', m.from);
+                                                                await delay((autoTyping.delaySeconds || 5) * 1000);
+                                                                await hisoka.sendPresenceUpdate('recording', m.from);
+                                                                await delay((autoRecording.delaySeconds || 5) * 1000);
                                                                 await hisoka.sendPresenceUpdate('paused', m.from);
                                                         }
                                                 } catch (err) {
                                                         console.error('\x1b[31m[AutoTyping/Recording] Error:\x1b[39m', err.message);
+                                                } finally {
+                                                        hisoka.__typingActive = Math.max(0, (hisoka.__typingActive || 1) - 1);
                                                 }
                                         })();
                                 }
