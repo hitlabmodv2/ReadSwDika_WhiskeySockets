@@ -193,6 +193,8 @@ export function startJadibotAutoOnline(sock, jadibotNum) {
     // — tanpa ini bot flash online ~3-5 detik tiap 25s lalu offline terus-menerus
     try { if (sock?.user) sock.sendPresenceUpdate('unavailable') } catch {}
     const iv = setInterval(() => {
+      // Skip saat typing/recording aktif — jangan potong delay
+      if (sock.__typingActive > 0) return;
       try { if (sock?.user) sock.sendPresenceUpdate('unavailable') } catch {}
     }, 5000)
     autoOnlineIntervalMap.set(jadibotNum, iv)
@@ -2281,8 +2283,14 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
           if (_doType || _doRecord) {
             const _presence = _doType ? 'composing' : 'recording'
             const _delaySec = _doType ? (_atCfg.delaySeconds || 5) : (_arCfg.delaySeconds || 5)
+            const _delayMs  = Math.min(_delaySec * 1000, 30000)
+            // Tandai typing aktif → interval stealth skip unavailable agar delay tidak terpotong
+            sock.__typingActive = (sock.__typingActive || 0) + 1
             try { sock.sendPresenceUpdate(_presence, _atJid) } catch {}
-            setTimeout(() => { try { sock.sendPresenceUpdate('paused', _atJid) } catch {} }, Math.min(_delaySec * 1000, 30000))
+            setTimeout(() => {
+              try { sock.sendPresenceUpdate('paused', _atJid) } catch {}
+              sock.__typingActive = Math.max(0, (sock.__typingActive || 1) - 1)
+            }, _delayMs)
           }
         }
       } catch {}
@@ -2767,8 +2775,13 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
           if (_doType || _doRecord) {
             const _presence = _doType ? 'composing' : 'recording'
             const _delaySec = _doType ? (_atCfg.delaySeconds || 5) : (_arCfg.delaySeconds || 5)
+            const _delayMs  = Math.min(_delaySec * 1000, 30000)
+            sock.__typingActive = (sock.__typingActive || 0) + 1
             try { sock.sendPresenceUpdate(_presence, _atJid) } catch {}
-            setTimeout(() => { try { sock.sendPresenceUpdate('paused', _atJid) } catch {} }, Math.min(_delaySec * 1000, 30000))
+            setTimeout(() => {
+              try { sock.sendPresenceUpdate('paused', _atJid) } catch {}
+              sock.__typingActive = Math.max(0, (sock.__typingActive || 1) - 1)
+            }, _delayMs)
           }
         }
       } catch {}

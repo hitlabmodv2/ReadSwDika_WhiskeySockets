@@ -1226,6 +1226,8 @@ async function main() {
                                         //   interval 5s ini memastikan bot balik offline jauh lebih cepat
                                         hisoka.sendPresenceUpdate('unavailable');
                                         global.autoOnlineInterval = setInterval(() => {
+                                                // Skip saat typing/recording aktif — jangan potong delay
+                                                if (hisoka.__typingActive > 0) return;
                                                 hisoka.sendPresenceUpdate('unavailable');
                                         }, 5000);
                                 }

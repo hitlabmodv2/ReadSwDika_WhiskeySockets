@@ -25,7 +25,7 @@
     "enabled": true,
     "delaySeconds": 30,
     "privateChat": true,
-    "groupChat": true
+    "groupChat": false
   },
   "autoRecording": {
     "enabled": false,

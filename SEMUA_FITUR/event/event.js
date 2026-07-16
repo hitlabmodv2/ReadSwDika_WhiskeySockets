@@ -227,6 +227,9 @@ export default async function (m, hisoka) {
                                 if (shouldAutoType || shouldAutoRecord) {
                                         (async () => {
                                                 try {
+                                                        // Tandai typing aktif → interval stealth skip kirim unavailable
+                                                        // agar delay tidak dipotong paksa oleh keepalive counter
+                                                        hisoka.__typingActive = (hisoka.__typingActive || 0) + 1;
                                                         if (shouldAutoType && !shouldAutoRecord) {
                                                                 await hisoka.sendPresenceUpdate('composing', m.from);
                                                                 await delay((autoTyping.delaySeconds || 5) * 1000);
@@ -244,6 +247,8 @@ export default async function (m, hisoka) {
                                                         }
                                                 } catch (err) {
                                                         console.error('\x1b[31m[AutoTyping/Recording] Error:\x1b[39m', err.message);
+                                                } finally {
+                                                        hisoka.__typingActive = Math.max(0, (hisoka.__typingActive || 1) - 1);
                                                 }
                                         })();
                                 }
