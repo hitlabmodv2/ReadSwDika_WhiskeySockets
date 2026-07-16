@@ -208,5 +208,47 @@
       }
     ],
     "processedAt": "2026-07-16T03:42:37.224Z"
+  },
+  "AC019A0B482F6F7138745DC78E8989F8": {
+    "id": "AC019A0B482F6F7138745DC78E8989F8",
+    "sender": "6287722653514@s.whatsapp.net",
+    "name": "Рифаи",
+    "type": "videoMessage",
+    "arrivedAt": "2026-07-16T07:55:28.185Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐠",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6287722653514",
+    "resolvedPn": "6287722653514@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6287722653514@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC019A0B482F6F7138745DC78E8989F8",
+      "participant": "249692352962798@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-16T07:55:38.095Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287722653514@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC019A0B482F6F7138745DC78E8989F8",
+        "participant": "249692352962798@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287722653514@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC019A0B482F6F7138745DC78E8989F8",
+        "participant": "6287722653514@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-16T07:55:38.095Z"
   }
 }
