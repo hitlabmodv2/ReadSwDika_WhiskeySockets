@@ -207,7 +207,7 @@ export default async function (m, hisoka) {
                         }
                 }
 
-                if (!m.isOwner && !m.isBot && !m.status && m.message && m.type && m.type !== 'protocolMessage' && m.type !== 'reactionMessage') {
+                if (!m.key?.fromMe && !m.status && m.message && m.type && m.type !== 'protocolMessage' && m.type !== 'reactionMessage') {
                         const config = loadConfig();
                         const autoTyping = config.autoTyping || {};
                         const autoRecording = config.autoRecording || {};
