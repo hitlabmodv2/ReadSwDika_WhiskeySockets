@@ -176,25 +176,20 @@ export function startJadibotAutoOnline(sock, jadibotNum) {
   }
   const aoSettings = getJadibotAutoOnline(jadibotNum)
   const intervalMs = Math.max(10000, (aoSettings.intervalSeconds || 30) * 1000)
-  // Kirim available langsung saat dipanggil (agar Perangkat Tertaut selalu "Aktif")
-  try { if (sock?.user) sock.sendPresenceUpdate('available') } catch {}
   if (aoSettings.enabled) {
-    // Mode ON: kontak BISA lihat online → updateOnlinePrivacy('all')
-    if (sock?.user) sock.updateOnlinePrivacy('all').catch(() => {})
+    // Mode ON: kirim available berkala → kontak lihat online realtime
+    try { if (sock?.user) sock.sendPresenceUpdate('available') } catch {}
     const iv = setInterval(() => {
       try { if (sock?.user) sock.sendPresenceUpdate('available') } catch {}
     }, intervalMs)
     autoOnlineIntervalMap.set(jadibotNum, iv)
   } else {
     // Mode STEALTH (off):
-    // updateOnlinePrivacy('match_last_seen') → kontak TIDAK bisa lihat online realtime
-    // Tetap kirim available setiap 5 menit → Perangkat Tertaut tetap "Aktif"
-    const STEALTH_KEEPALIVE_MS = 5 * 60 * 1000
-    if (sock?.user) sock.updateOnlinePrivacy('match_last_seen').catch(() => {})
-    const iv = setInterval(() => {
-      try { if (sock?.user) sock.sendPresenceUpdate('available') } catch {}
-    }, STEALTH_KEEPALIVE_MS)
-    autoOnlineIntervalMap.set(jadibotNum, iv)
+    // Kirim unavailable SEKALI → kontak langsung lihat OFFLINE realtime
+    // Tidak ada interval → tidak ada presence yg terkirim lagi
+    // WebSocket tetap hidup (keepAliveIntervalMs) → Perangkat Tertaut tetap "Aktif"
+    try { if (sock?.user) sock.sendPresenceUpdate('unavailable') } catch {}
+    // interval dibiarkan kosong (tidak di-set)
   }
 }
 

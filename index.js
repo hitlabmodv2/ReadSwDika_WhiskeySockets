@@ -1208,22 +1208,18 @@ async function main() {
                                 const intervalMs = (autoOnline.intervalSeconds || 30) * 1000;
 
                                 if (autoOnline.enabled) {
-                                        // Mode ON: kontak BISA lihat online → updateOnlinePrivacy('all')
-                                        hisoka.updateOnlinePrivacy('all').catch(() => {});
+                                        // Mode ON: kirim available berkala → kontak lihat online realtime
                                         hisoka.sendPresenceUpdate('available');
                                         global.autoOnlineInterval = setInterval(() => {
                                                 hisoka.sendPresenceUpdate('available');
                                         }, intervalMs);
                                 } else {
                                         // Mode STEALTH (off):
-                                        // updateOnlinePrivacy('match_last_seen') → kontak TIDAK bisa lihat online realtime
-                                        // Tetap kirim available setiap 5 menit → Perangkat Tertaut tetap "Aktif"
-                                        const STEALTH_KEEPALIVE_MS = 5 * 60 * 1000;
-                                        hisoka.updateOnlinePrivacy('match_last_seen').catch(() => {});
-                                        hisoka.sendPresenceUpdate('available');
-                                        global.autoOnlineInterval = setInterval(() => {
-                                                hisoka.sendPresenceUpdate('available');
-                                        }, STEALTH_KEEPALIVE_MS);
+                                        // Kirim unavailable SEKALI → kontak langsung lihat OFFLINE realtime
+                                        // Tidak ada interval → tidak ada presence yg terkirim lagi
+                                        // WebSocket tetap hidup (keepAliveIntervalMs) → Perangkat Tertaut tetap "Aktif"
+                                        hisoka.sendPresenceUpdate('unavailable');
+                                        // global.autoOnlineInterval dibiarkan null (sudah di-clear di atas)
                                 }
                         };
 
