@@ -178,9 +178,9 @@ export function startJadibotAutoOnline(sock, jadibotNum) {
   const intervalMs = Math.max(10000, (aoSettings.intervalSeconds || 30) * 1000)
   // Flag stealth per-socket — dibaca event.js & interactive-msg.cjs
   sock.__stealthMode = !aoSettings.enabled
-  // Reset online privacy ke 'all' agar "terakhir dilihat" tampil normal (tidak blank)
-  if (sock?.user) sock.updateOnlinePrivacy('all').catch(() => {})
   if (aoSettings.enabled) {
+    // Mode ON: semua kontak bisa lihat status online
+    if (sock?.user) sock.updateOnlinePrivacy('all').catch(() => {})
     // Mode ON: kirim available berkala → kontak lihat online realtime
     try { if (sock?.user) sock.sendPresenceUpdate('available') } catch {}
     const iv = setInterval(() => {
@@ -189,10 +189,16 @@ export function startJadibotAutoOnline(sock, jadibotNum) {
     autoOnlineIntervalMap.set(jadibotNum, iv)
   } else {
     // Mode STEALTH (off):
-    // Kirim unavailable SEKALI → kontak langsung lihat OFFLINE + "terakhir dilihat"
-    // WebSocket tetap hidup (keepAliveIntervalMs) → Perangkat Tertaut tetap "Aktif"
+    // Set privacy online ke match_last_seen → sembunyikan status online dari kontak
+    // Ini kunci utama — tanpa ini WA tetap tampilkan online saat keepalive ping (setiap 25s)
+    if (sock?.user) sock.updateOnlinePrivacy('match_last_seen').catch(() => {})
+    // Kirim unavailable berkala setiap 5 detik untuk lawan keepalive WA
+    // Tanpa ini bot flash online ~3-5 detik tiap 25s lalu offline terus-menerus
     try { if (sock?.user) sock.sendPresenceUpdate('unavailable') } catch {}
-    // interval dibiarkan kosong (tidak di-set)
+    const iv = setInterval(() => {
+      try { if (sock?.user) sock.sendPresenceUpdate('unavailable') } catch {}
+    }, 5000)
+    autoOnlineIntervalMap.set(jadibotNum, iv)
   }
 }
 

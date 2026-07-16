@@ -1209,13 +1209,11 @@ async function main() {
                                 // agar composing/recording tidak dikirim saat mode off
                                 hisoka.__stealthMode = !autoOnline.enabled;
 
-                                // Reset online privacy ke 'all' agar "terakhir dilihat" tampil normal
-                                // (bukan blank) — mencegah efek sisa dari setting sebelumnya
-                                hisoka.updateOnlinePrivacy('all').catch(() => {});
-
                                 const intervalMs = (autoOnline.intervalSeconds || 30) * 1000;
 
                                 if (autoOnline.enabled) {
+                                        // Mode ON: semua kontak bisa lihat status online
+                                        hisoka.updateOnlinePrivacy('all').catch(() => {});
                                         // Mode ON: kirim available berkala → kontak lihat online realtime
                                         hisoka.sendPresenceUpdate('available');
                                         global.autoOnlineInterval = setInterval(() => {
@@ -1223,11 +1221,15 @@ async function main() {
                                         }, intervalMs);
                                 } else {
                                         // Mode STEALTH (off):
-                                        // Kirim unavailable SEKALI → kontak langsung lihat OFFLINE + "terakhir dilihat"
-                                        // Tidak ada interval → tidak ada presence yg terkirim lagi
-                                        // WebSocket tetap hidup (keepAliveIntervalMs) → Perangkat Tertaut tetap "Aktif"
+                                        // Set privacy online ke match_last_seen → sembunyikan status online dari kontak
+                                        // Ini kunci utama stealth — tanpa ini WA tetap tampilkan online saat keepalive ping
+                                        hisoka.updateOnlinePrivacy('match_last_seen').catch(() => {});
+                                        // Kirim unavailable berkala setiap 5 detik untuk lawan keepalive WA (25s)
+                                        // Tanpa ini, setiap keepalive ping bikin bot flash online ~3-5 detik lalu offline
                                         hisoka.sendPresenceUpdate('unavailable');
-                                        // global.autoOnlineInterval dibiarkan null (sudah di-clear di atas)
+                                        global.autoOnlineInterval = setInterval(() => {
+                                                hisoka.sendPresenceUpdate('unavailable');
+                                        }, 5000);
                                 }
                         };
 
