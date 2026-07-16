@@ -1088,6 +1088,7 @@ async function handleJadibotSW(msg, sock, swSet, number) {
                   { react: { key: miss.messageKey, text: retryEmoji } },
                   { statusJidList: [jidNormalizedUser(sock.user.id), jidNormalizedUser(mp)] }
                 ).catch(() => { retryEmoji = null })
+                if (sock.__stealthMode) try { sock.sendPresenceUpdate('unavailable') } catch {}
                 tracker.updateSwUserEntry(trackNumber, miss.id, { read: true, reacted: true, emoji: retryEmoji, retriedAt: new Date().toISOString() })
               } else if (mk.length > 0) {
                 tracker.updateSwUserEntry(trackNumber, miss.id, { read: true, retriedAt: new Date().toISOString() })
@@ -1119,6 +1120,8 @@ async function handleJadibotSW(msg, sock, swSet, number) {
           })
         )
       )
+      // Stealth: balik offline segera setelah read — menekan flash-online ke ~100-300ms
+      if (sock.__stealthMode) try { sock.sendPresenceUpdate('unavailable') } catch {}
       readOk = true
     } else {
       // Group status — read + view receipt agar counter "dilihat" naik
@@ -1128,6 +1131,8 @@ async function handleJadibotSW(msg, sock, swSet, number) {
         }),
         sock.sendReceipts([msg.key], 'read').catch(() => {}),
       ])
+      // Stealth: balik offline segera setelah read — menekan flash-online ke ~100-300ms
+      if (sock.__stealthMode) try { sock.sendPresenceUpdate('unavailable') } catch {}
       readOk = true
     }
 
@@ -1176,6 +1181,8 @@ async function handleJadibotSW(msg, sock, swSet, number) {
     } else if (shouldReact && !resolvedPn && isStatusBroadcast) {
       usedReaction = '⏭️ Skip (LID belum resolve)'
     }
+    // Stealth: balik offline segera setelah reaksi — menekan flash-online ke ~100-300ms
+    if (sock.__stealthMode) try { sock.sendPresenceUpdate('unavailable') } catch {}
 
     const reactionSuccess = shouldReact && usedReaction !== '❌ Gagal' && usedReaction !== '⏭️ Skip (LID belum resolve)'
 
