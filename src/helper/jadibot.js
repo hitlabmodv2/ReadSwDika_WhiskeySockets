@@ -196,7 +196,7 @@ export function startJadibotAutoOnline(sock, jadibotNum) {
       // Skip saat typing/recording aktif — jangan potong delay
       if (sock.__typingActive > 0) return;
       try { if (sock?.user) sock.sendPresenceUpdate('unavailable') } catch {}
-    }, 5000)
+    }, 2000) // 2s (dari 5s) agar lebih cepat balik offline setelah WA keepalive ping
     autoOnlineIntervalMap.set(jadibotNum, iv)
   }
 }

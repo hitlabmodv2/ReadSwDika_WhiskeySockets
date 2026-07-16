@@ -934,6 +934,13 @@ async function main() {
                 }
 
                 if (connection === 'open') {
+                        // Kirim unavailable SESEGERA MUNGKIN saat connect agar bot tidak
+                        // terlihat online selama jeda antara WebSocket open dan startAutoOnline().
+                        // Baileys kadang broadcast presence sebelum kode kita sempat blok.
+                        if (autoOnlineConfig.enabled === false) {
+                                hisoka.sendPresenceUpdate('unavailable').catch(() => {});
+                        }
+
                         // Batalkan timer expired (QR / pairing) saat bot berhasil konek
                         if (global.__qrExpiredTimer) {
                                 clearTimeout(global.__qrExpiredTimer);
@@ -1229,7 +1236,7 @@ async function main() {
                                                 // Skip saat typing/recording aktif — jangan potong delay
                                                 if (hisoka.__typingActive > 0) return;
                                                 hisoka.sendPresenceUpdate('unavailable');
-                                        }, 5000);
+                                        }, 2000); // 2s (dari 5s) agar lebih cepat balik offline setelah WA keepalive ping
                                 }
                         };
 
