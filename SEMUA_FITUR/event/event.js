@@ -224,7 +224,8 @@ export default async function (m, hisoka) {
                                 const shouldAutoType   = autoTyping.enabled   && ((isPrivate && autoTyping.privateChat)   || (isGroup && autoTyping.groupChat));
                                 const shouldAutoRecord = autoRecording.enabled && ((isPrivate && autoRecording.privateChat) || (isGroup && autoRecording.groupChat));
 
-                                if (shouldAutoType || shouldAutoRecord) {
+                                // Skip typing/recording saat stealth mode aktif — mencegah bot flash online sendiri
+                                if ((shouldAutoType || shouldAutoRecord) && !hisoka.__stealthMode) {
                                         (async () => {
                                                 try {
                                                         // Tandai typing aktif → interval stealth skip kirim unavailable
