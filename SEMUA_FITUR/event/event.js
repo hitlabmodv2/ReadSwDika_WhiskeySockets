@@ -38,7 +38,7 @@ import { createRequire } from 'module';
 const _require = createRequire(import.meta.url);
 const { jidNormalizedUser, toNumber, jidDecode, proto, isJidGroup, delay } = _require('@whiskeysockets/baileys');
 import { isPnUser } from '../../src/helper/socketCompat.js';
-import { getJadibotReadchat, getJadibotNumber, getJadibotEmojiMode } from '../../src/helper/jadibotSettings.js';
+import { getJadibotReadchat, getJadibotNumber, getJadibotEmojiMode, getJadibotAutoTyping, getJadibotAutoRecording } from '../../src/helper/jadibotSettings.js';
 
 import { telegram } from '../../src/helper/index.js';
 import { isNumber } from '../../src/helper/text.js';
@@ -209,46 +209,42 @@ export default async function (m, hisoka) {
 
                 if (!m.key?.fromMe && !m.status && m.message && m.type && m.type !== 'protocolMessage' && m.type !== 'reactionMessage') {
                         const config = loadConfig();
-                        const autoTyping = config.autoTyping || {};
-                        const autoRecording = config.autoRecording || {};
-                        
                         const isPrivate = isPnUser(m.from);
                         const isGroup = isJidGroup(m.from);
-                        
-                        const shouldAutoType = autoTyping.enabled && 
-                                ((isPrivate && autoTyping.privateChat) || (isGroup && autoTyping.groupChat));
-                        
-                        const shouldAutoRecord = autoRecording.enabled && 
-                                ((isPrivate && autoRecording.privateChat) || (isGroup && autoRecording.groupChat));
-                        
-                        if (shouldAutoType || shouldAutoRecord) {
-                                (async () => {
-                                        try {
-                                                // Auto typing/recording berjalan bebas — TIDAK diblokir oleh mode .online
-                                                // Keduanya fitur terpisah; presence typing hanya muncul sebentar lalu hilang
-                                                if (shouldAutoType && !shouldAutoRecord) {
-                                                        await hisoka.sendPresenceUpdate('composing', m.from);
-                                                        const delayMs = (autoTyping.delaySeconds || 5) * 1000;
-                                                        await delay(delayMs);
-                                                        await hisoka.sendPresenceUpdate('paused', m.from);
-                                                } else if (shouldAutoRecord && !shouldAutoType) {
-                                                        await hisoka.sendPresenceUpdate('recording', m.from);
-                                                        const delayMs = (autoRecording.delaySeconds || 5) * 1000;
-                                                        await delay(delayMs);
-                                                        await hisoka.sendPresenceUpdate('paused', m.from);
-                                                } else if (shouldAutoType && shouldAutoRecord) {
-                                                        await hisoka.sendPresenceUpdate('composing', m.from);
-                                                        const typingDelayMs = (autoTyping.delaySeconds || 5) * 1000;
-                                                        await delay(typingDelayMs);
-                                                        await hisoka.sendPresenceUpdate('recording', m.from);
-                                                        const recordingDelayMs = (autoRecording.delaySeconds || 5) * 1000;
-                                                        await delay(recordingDelayMs);
-                                                        await hisoka.sendPresenceUpdate('paused', m.from);
+
+                        // ── Auto Typing / Recording ─────────────────────────────────────────
+                        // Jadibot: skip di sini — sudah ditangani langsung di jadibot.js (pakai setting per-jadibot)
+                        // Bot utama: baca dari config.json
+                        if (hisoka.isMainBot !== false) {
+                                const autoTyping    = config.autoTyping    || {};
+                                const autoRecording = config.autoRecording || {};
+
+                                const shouldAutoType   = autoTyping.enabled   && ((isPrivate && autoTyping.privateChat)   || (isGroup && autoTyping.groupChat));
+                                const shouldAutoRecord = autoRecording.enabled && ((isPrivate && autoRecording.privateChat) || (isGroup && autoRecording.groupChat));
+
+                                if (shouldAutoType || shouldAutoRecord) {
+                                        (async () => {
+                                                try {
+                                                        if (shouldAutoType && !shouldAutoRecord) {
+                                                                await hisoka.sendPresenceUpdate('composing', m.from);
+                                                                await delay((autoTyping.delaySeconds || 5) * 1000);
+                                                                await hisoka.sendPresenceUpdate('paused', m.from);
+                                                        } else if (shouldAutoRecord && !shouldAutoType) {
+                                                                await hisoka.sendPresenceUpdate('recording', m.from);
+                                                                await delay((autoRecording.delaySeconds || 5) * 1000);
+                                                                await hisoka.sendPresenceUpdate('paused', m.from);
+                                                        } else {
+                                                                await hisoka.sendPresenceUpdate('composing', m.from);
+                                                                await delay((autoTyping.delaySeconds || 5) * 1000);
+                                                                await hisoka.sendPresenceUpdate('recording', m.from);
+                                                                await delay((autoRecording.delaySeconds || 5) * 1000);
+                                                                await hisoka.sendPresenceUpdate('paused', m.from);
+                                                        }
+                                                } catch (err) {
+                                                        console.error('\x1b[31m[AutoTyping/Recording] Error:\x1b[39m', err.message);
                                                 }
-                                        } catch (err) {
-                                                console.error('\x1b[31m[AutoTyping/Recording] Error:\x1b[39m', err.message);
-                                        }
-                                })();
+                                        })();
+                                }
                         }
 
                         // ── Auto Read Chat (private only) ──────────────────────────────────
