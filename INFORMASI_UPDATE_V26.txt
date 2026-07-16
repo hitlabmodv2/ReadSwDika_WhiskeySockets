@@ -1,10 +1,10 @@
 📢 *INFORMASI RILIS*
-_📅 Senin, 13 Juli 2026 (update terakhir: Rabu, 15 Juli 2026)_ 🌙
+_📅 Senin, 13 Juli 2026 (update terakhir: Kamis, 16 Juli 2026)_ 🌙
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V26*
 ✨ *5 Fitur Baru*
-🔧 *8 Bug/Error Fix*
-🚀 *7 Perubahan*
+🔧 *10 Bug/Error Fix*
+🚀 *8 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -110,6 +110,26 @@ _Beberapa sesi jadibot (dari sekian yang tersimpan, misal 10 sesi) kadang stuck 
 6. Ketiga pemanggilan `startJadibot()` yang tadinya tanpa `.catch()` sekarang dijaga — error di 1 sesi jadibot sekarang murni gagal untuk sesi itu saja, tidak menyeret sesi lain
 > Sudah diuji simulasi: skenario 1 sesi "error" di tengah proses start banyak sesi sekaligus — sekarang sesi lain tetap lanjut diproses normal, proses bot tidak ikut mati
 
+*9. 🐛 Banner Startup Selalu Tampil "Status: OFFLINE 🔴" Padahal Bot Aktif*
+_Baris `Status` di banner bot aktif selalu menampilkan OFFLINE 🔴 meski bot sudah terkoneksi penuh — karena nilainya diambil dari setting fitur auto-online, bukan dari status koneksi WA:_
+1. ~`Status` dibaca dari `config.autoOnline.enabled` — kalau fitur dimatikan, status ikut terbaca OFF/OFFLINE, padahal bot jelas sudah online karena banner itu sendiri baru muncul setelah connect berhasil~
+2. Baris `Status` sekarang selalu tampil `ONLINE 🟢` — karena banner hanya bisa muncul saat bot benar-benar sudah terhubung ke server WA
+3. Setting fitur auto-online dipindah ke baris baru `AutoOnl` (ON 🟢 atau OFF 🙈 (stealth)) — terpisah dari status koneksi, tidak saling bingungkan
+> Banner sekarang informatif: _Status_ = kondisi koneksi WA, _AutoOnl_ = pengaturan fitur visibilitas online
+
+*10. 🐛 .online off — Kontak Masih Lihat Bot "Online" Padahal Mode Stealth Aktif*
+_Bot mode stealth (`.online off`) tapi kontak masih sesekali melihat status "online" di WA — terjadi dari tiga sumber sekaligus:_
+1. ~`markOnlineOnConnect: true` → Baileys otomatis kirim `available` di SETIAP reconnect (WA sering reconnect), sehingga kontak sekilas lihat "online" sebelum kode sempat kirim `unavailable`~
+2. ~Fitur Auto Typing (`event.js`) kirim `composing` ke kontak saat bot proses pesan masuk — presence ini juga memicu tampilan "online" di header chat kontak~
+3. ~Fitur Interactive Reply (`interactive-msg.cjs`) kirim `composing` setiap bot mau membalas command — sama-sama bikin kontak lihat "online"~
+4. ~Ada sisa panggilan `sendPresenceUpdate('available')` di `cekauto-cmd.cjs` (jalur fallback) yang juga bocorkan status online~
+5. `markOnlineOnConnect` sekarang kondisional: `false` saat mode off → Baileys tidak pernah kirim `available` otomatis saat reconnect
+6. Ditambahkan flag `__stealthMode` langsung ke object socket (bot utama & tiap jadibot) — di-set setiap kali `startAutoOnline` / `startJadibotAutoOnline` dipanggil
+7. `event.js` (Auto Typing/Recording) dan `interactive-msg.cjs` (composing reply) sekarang cek `hisoka.__stealthMode` sebelum kirim presence apapun — jika stealth, seluruh blok dilewati
+8. Sisa panggilan `sendPresenceUpdate('available')` di `cekauto-cmd.cjs` dihapus
+9. `updateOnlinePrivacy('all')` dipanggil saat bot connect untuk reset setting privacy lama dari iterasi sebelumnya — mencegah status "terakhir dilihat" muncul blank/kosong di kontak
+> Mode `.online off` sekarang benar-benar stealth: kontak langsung lihat OFFLINE tanpa jeda, dan tidak ada presence apapun yang bocor dari fitur lain
+
 *8. 🐛 Notif Retry AutoReadStoryWhatsApp Tidak Tampilkan Mode/Reaksi (Bikin Dikira Bug)*
 _Kotak notif ringkasan "Retry" (dikirim saat ada story yang sempat gagal lalu berhasil di-retry) tidak pernah menampilkan info Mode maupun Reaksi — beda dari kotak notif biasa yang selalu jelas menampilkan "Mode: Read Only / Read+Reaction" dan "Reaksi: Off / [emoji]":_
 1. ~Kotak retry cuma nampilkan label generik `Berhasil : Retry ♻️` tanpa info Mode/Reaksi — jadi waktu mode di-set Read Only (tanpa reaksi), notif retry-nya kelihatan "polos" tanpa konfirmasi, bikin terkesan seperti ada yang salah/bug walau sebenarnya perilakunya sudah benar (tidak kirim reaksi)~
@@ -155,6 +175,14 @@ _Sempat kelihatan seperti `.clearsesi` tidak benar-benar membersihkan karena `.c
 2. Data kelihatan "penuh lagi" setelah itu karena WhatsApp/Baileys otomatis mengisi ulang cache kontak & grup begitu ada aktivitas (pesan masuk, info grup diminta, dll) — ini memang cara kerja normal, bukan `.clearsesi` yang gagal
 3. Tidak ada perubahan kode dari poin ini — murni investigasi & konfirmasi, supaya tidak disangka bug ke depannya
 > `.clearsesi` tetap bekerja benar; cache yang cepat terisi lagi adalah perilaku normal Baileys, bukan kegagalan pembersihan
+
+*8. 🎛️ Perilaku `.online off` — Stealth Total, Tidak Ada Presence yang Bocor*
+_Mode `.online off` sekarang benar-benar menyembunyikan aktivitas bot dari kontak:_
+1. Saat mode off: bot kirim `unavailable` sekali saat connect → kontak langsung lihat OFFLINE, tidak ada interval/kiriman ulang
+2. WebSocket tetap hidup (keepAlive 25 detik) → Perangkat Tertaut di WA tetap tampil *"Aktif"* meski bot tidak "online" ke kontak
+3. Auto Typing dan Auto Recording otomatis dinonaktifkan saat stealth — tidak ada indikator "sedang mengetik..." atau "sedang merekam..." yang muncul ke kontak
+4. Berlaku konsisten di bot utama dan semua sesi jadibot (masing-masing punya flag `__stealthMode` sendiri)
+> Kontak: selalu lihat OFFLINE saat mode off — Perangkat Tertaut: selalu "Aktif" selama bot berjalan
 
 *7. ✍️ Font Keren di Tombol `.readsw`, `.online`, `.typing`, `.recording`*
 _Tombol pilihan (single-select) di 4 perintah ini sebelumnya pakai teks polos, beda dengan `.font` yang punya banyak gaya huruf keren:_
