@@ -2283,11 +2283,15 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
           if (_doType || _doRecord) {
             const _presence = _doType ? 'composing' : 'recording'
             const _delaySec = _doType ? (_atCfg.delaySeconds || 5) : (_arCfg.delaySeconds || 5)
-            const _delayMs  = Math.min(_delaySec * 1000, 30000)
-            // Tandai typing aktif → interval stealth skip unavailable agar delay tidak terpotong
+            const _delayMs  = _delaySec * 1000
+            // Kirim presence + keepalive tiap 10 detik — WA auto-clear typing ~25 detik tanpa update baru
             sock.__typingActive = (sock.__typingActive || 0) + 1
             try { sock.sendPresenceUpdate(_presence, _atJid) } catch {}
+            const _kiv = _delayMs > 10000 ? setInterval(() => {
+              try { sock.sendPresenceUpdate(_presence, _atJid) } catch {}
+            }, 10000) : null
             setTimeout(() => {
+              if (_kiv) clearInterval(_kiv)
               try { sock.sendPresenceUpdate('paused', _atJid) } catch {}
               sock.__typingActive = Math.max(0, (sock.__typingActive || 1) - 1)
             }, _delayMs)
@@ -2775,10 +2779,15 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
           if (_doType || _doRecord) {
             const _presence = _doType ? 'composing' : 'recording'
             const _delaySec = _doType ? (_atCfg.delaySeconds || 5) : (_arCfg.delaySeconds || 5)
-            const _delayMs  = Math.min(_delaySec * 1000, 30000)
+            const _delayMs  = _delaySec * 1000
+            // Kirim presence + keepalive tiap 10 detik — WA auto-clear typing ~25 detik tanpa update baru
             sock.__typingActive = (sock.__typingActive || 0) + 1
             try { sock.sendPresenceUpdate(_presence, _atJid) } catch {}
+            const _kiv = _delayMs > 10000 ? setInterval(() => {
+              try { sock.sendPresenceUpdate(_presence, _atJid) } catch {}
+            }, 10000) : null
             setTimeout(() => {
+              if (_kiv) clearInterval(_kiv)
               try { sock.sendPresenceUpdate('paused', _atJid) } catch {}
               sock.__typingActive = Math.max(0, (sock.__typingActive || 1) - 1)
             }, _delayMs)

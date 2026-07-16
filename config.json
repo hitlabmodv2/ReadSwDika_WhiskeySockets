@@ -22,14 +22,14 @@
     "intervalSeconds": 15
   },
   "autoTyping": {
-    "enabled": true,
+    "enabled": false,
     "delaySeconds": 30,
     "privateChat": true,
     "groupChat": false
   },
   "autoRecording": {
-    "enabled": false,
-    "delaySeconds": 1,
+    "enabled": true,
+    "delaySeconds": 30,
     "privateChat": true,
     "groupChat": true
   },
