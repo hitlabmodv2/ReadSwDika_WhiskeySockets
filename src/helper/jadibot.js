@@ -2275,7 +2275,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
           const _arCfg = getJadibotAutoRecording(number)
           const _doType = _atCfg.enabled && (_atIsGroup ? _atCfg.groupChat !== false : _atCfg.privateChat !== false)
           const _doRecord = !_doType && _arCfg.enabled && (_atIsGroup ? _arCfg.groupChat !== false : _arCfg.privateChat !== false)
-          if (_doType || _doRecord) {
+          if ((_doType || _doRecord) && !sock.__stealthMode) {
             const _presence = _doType ? 'composing' : 'recording'
             const _delaySec = _doType ? (_atCfg.delaySeconds || 5) : (_arCfg.delaySeconds || 5)
             try { sock.sendPresenceUpdate(_presence, _atJid) } catch {}
@@ -2761,7 +2761,7 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
           const _arCfg = getJadibotAutoRecording(number)
           const _doType = _atCfg.enabled && (_atIsGroup ? _atCfg.groupChat !== false : _atCfg.privateChat !== false)
           const _doRecord = !_doType && _arCfg.enabled && (_atIsGroup ? _arCfg.groupChat !== false : _arCfg.privateChat !== false)
-          if (_doType || _doRecord) {
+          if ((_doType || _doRecord) && !sock.__stealthMode) {
             const _presence = _doType ? 'composing' : 'recording'
             const _delaySec = _doType ? (_atCfg.delaySeconds || 5) : (_arCfg.delaySeconds || 5)
             try { sock.sendPresenceUpdate(_presence, _atJid) } catch {}
