@@ -1208,15 +1208,18 @@ async function main() {
                                 const intervalMs = (autoOnline.intervalSeconds || 30) * 1000;
 
                                 if (autoOnline.enabled) {
-                                        // Mode ON: kirim available sesuai interval → terlihat online ke kontak
+                                        // Mode ON: kontak BISA lihat online → updateOnlinePrivacy('all')
+                                        hisoka.updateOnlinePrivacy('all').catch(() => {});
                                         hisoka.sendPresenceUpdate('available');
                                         global.autoOnlineInterval = setInterval(() => {
                                                 hisoka.sendPresenceUpdate('available');
                                         }, intervalMs);
                                 } else {
-                                        // Mode STEALTH (off): kirim available sekali sekarang + setiap 5 menit
-                                        // → Perangkat Tertaut tetap "Aktif", tapi tidak spam online ke kontak
-                                        const STEALTH_KEEPALIVE_MS = 5 * 60 * 1000; // 5 menit
+                                        // Mode STEALTH (off):
+                                        // updateOnlinePrivacy('match_last_seen') → kontak TIDAK bisa lihat online realtime
+                                        // Tetap kirim available setiap 5 menit → Perangkat Tertaut tetap "Aktif"
+                                        const STEALTH_KEEPALIVE_MS = 5 * 60 * 1000;
+                                        hisoka.updateOnlinePrivacy('match_last_seen').catch(() => {});
                                         hisoka.sendPresenceUpdate('available');
                                         global.autoOnlineInterval = setInterval(() => {
                                                 hisoka.sendPresenceUpdate('available');

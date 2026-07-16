@@ -179,15 +179,18 @@ export function startJadibotAutoOnline(sock, jadibotNum) {
   // Kirim available langsung saat dipanggil (agar Perangkat Tertaut selalu "Aktif")
   try { if (sock?.user) sock.sendPresenceUpdate('available') } catch {}
   if (aoSettings.enabled) {
-    // Mode ON: kirim available sesuai interval → terlihat online ke kontak
+    // Mode ON: kontak BISA lihat online → updateOnlinePrivacy('all')
+    if (sock?.user) sock.updateOnlinePrivacy('all').catch(() => {})
     const iv = setInterval(() => {
       try { if (sock?.user) sock.sendPresenceUpdate('available') } catch {}
     }, intervalMs)
     autoOnlineIntervalMap.set(jadibotNum, iv)
   } else {
-    // Mode STEALTH (off): kirim available setiap 5 menit saja
-    // → Perangkat Tertaut tetap "Aktif", tidak spam online ke kontak
+    // Mode STEALTH (off):
+    // updateOnlinePrivacy('match_last_seen') → kontak TIDAK bisa lihat online realtime
+    // Tetap kirim available setiap 5 menit → Perangkat Tertaut tetap "Aktif"
     const STEALTH_KEEPALIVE_MS = 5 * 60 * 1000
+    if (sock?.user) sock.updateOnlinePrivacy('match_last_seen').catch(() => {})
     const iv = setInterval(() => {
       try { if (sock?.user) sock.sendPresenceUpdate('available') } catch {}
     }, STEALTH_KEEPALIVE_MS)

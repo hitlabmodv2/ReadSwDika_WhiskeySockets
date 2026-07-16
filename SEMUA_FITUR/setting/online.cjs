@@ -65,10 +65,10 @@ function _buildBody({ isJadibot, jadibotNum, autoOnline, running }) {
         `│ ⏱️ *Interval :* \`${interval} detik\`\n` +
         (isJadibot ? '' : `│ 🔄 *Running :* ${running ? '✅ Ya' : '❌ Tidak'}\n`) +
         `│\n` +
-        `│ ℹ️ _Mode Online: bot aktif spam online ke_\n` +
-        `│ _kontak sesuai interval. Mode Stealth:_\n` +
-        `│ _bot tidak spam online, tapi Perangkat_\n` +
-        `│ _Tertaut WA tetap tampil "Aktif"._\n` +
+        `│ ℹ️ _Mode Online: kontak bisa lihat online_\n` +
+        `│ _realtime. Mode Stealth: kontak tidak_\n` +
+        `│ _bisa lihat online realtime, tapi_\n` +
+        `│ _Perangkat Tertaut tetap "Aktif"._\n` +
         `│\n` +
         `╰═════════════════════════╯` +
         jadibotNote
@@ -112,7 +112,7 @@ async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, autoOnli
                 .makeRow(
                     markMode('off') + '🙈 Stealth',
                     _fancy('Mode Stealth'),
-                    isMode('off') ? activeDesc('Bot tidak spam online ke kontak, Perangkat Tertaut tetap aktif') : 'Bot tidak spam online ke kontak, Perangkat Tertaut tetap aktif',
+                    isMode('off') ? activeDesc('Kontak tidak bisa lihat online, Perangkat Tertaut tetap Aktif') : 'Kontak tidak bisa lihat online, Perangkat Tertaut tetap Aktif',
                     `${pref}online off`
                 )
 
