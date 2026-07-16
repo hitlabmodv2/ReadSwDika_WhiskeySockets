@@ -664,7 +664,7 @@ async function main() {
                         keepAliveIntervalMs: 25000,
                         retryRequestDelayMs: 2000,
                         maxMsgRetryCount: 5,
-                        markOnlineOnConnect: true, // selalu true agar Perangkat Tertaut tetap "Aktif"
+                        markOnlineOnConnect: autoOnlineConfig.enabled !== false, // false saat mode off → tidak kirim available otomatis saat reconnect
                         cachedGroupMetadata: async jid => {
                                 const group = groups.read(jid);
                                 if (!group || !group.participants?.length) {
