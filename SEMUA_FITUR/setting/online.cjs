@@ -65,10 +65,10 @@ function _buildBody({ isJadibot, jadibotNum, autoOnline, running }) {
         `│ ⏱️ *Interval :* \`${interval} detik\`\n` +
         (isJadibot ? '' : `│ 🔄 *Running :* ${running ? '✅ Ya' : '❌ Tidak'}\n`) +
         `│\n` +
-        `│ ℹ️ _Mode Online membuat bot terlihat_\n` +
-        `│ _"online" terus di WhatsApp. Mode_\n` +
-        `│ _Offline mengirim status "unavailable"_\n` +
-        `│ _berkala agar tetap tersembunyi._\n` +
+        `│ ℹ️ _Mode Online: bot aktif spam online ke_\n` +
+        `│ _kontak sesuai interval. Mode Stealth:_\n` +
+        `│ _bot tidak spam online, tapi Perangkat_\n` +
+        `│ _Tertaut WA tetap tampil "Aktif"._\n` +
         `│\n` +
         `╰═════════════════════════╯` +
         jadibotNote
@@ -110,9 +110,9 @@ async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, autoOnli
                     `${pref}online on`
                 )
                 .makeRow(
-                    markMode('off') + '🙈 Offline',
+                    markMode('off') + '🙈 Stealth',
                     _fancy('Mode Stealth'),
-                    isMode('off') ? activeDesc('Bot tersembunyi/tidak terlihat online') : 'Bot tersembunyi/tidak terlihat online',
+                    isMode('off') ? activeDesc('Bot tidak spam online ke kontak, Perangkat Tertaut tetap aktif') : 'Bot tidak spam online ke kontak, Perangkat Tertaut tetap aktif',
                     `${pref}online off`
                 )
 

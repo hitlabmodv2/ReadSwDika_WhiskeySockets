@@ -464,13 +464,9 @@ function makeCekautoHelpers({
                                                         saveConfig(cfgToggle);
                                                         if (global.startAutoOnline) {
                                                                 global.startAutoOnline();
-                                                        } else if (action === 'off') {
-                                                                if (global.autoOnlineInterval) {
-                                                                        clearInterval(global.autoOnlineInterval);
-                                                                        global.autoOnlineInterval = null;
-                                                                }
-                                                                if (global.hisokaClient) global.hisokaClient.sendPresenceUpdate('unavailable');
-                                                        } else if (action === 'on' && global.hisokaClient) {
+                                                        } else if (global.hisokaClient) {
+                                                                // Selalu kirim available agar Perangkat Tertaut tetap "Aktif"
+                                                                // startAutoOnline akan atur interval yang tepat (on=30s, off=5min)
                                                                 global.hisokaClient.sendPresenceUpdate('available');
                                                         }
                                                 } else {

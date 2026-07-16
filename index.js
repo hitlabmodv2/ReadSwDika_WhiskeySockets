@@ -664,7 +664,7 @@ async function main() {
                         keepAliveIntervalMs: 25000,
                         retryRequestDelayMs: 2000,
                         maxMsgRetryCount: 5,
-                        markOnlineOnConnect: autoOnlineConfig.enabled !== false,
+                        markOnlineOnConnect: true, // selalu true agar Perangkat Tertaut tetap "Aktif"
                         cachedGroupMetadata: async jid => {
                                 const group = groups.read(jid);
                                 if (!group || !group.participants?.length) {
@@ -1208,15 +1208,20 @@ async function main() {
                                 const intervalMs = (autoOnline.intervalSeconds || 30) * 1000;
 
                                 if (autoOnline.enabled) {
+                                        // Mode ON: kirim available sesuai interval → terlihat online ke kontak
                                         hisoka.sendPresenceUpdate('available');
-
                                         global.autoOnlineInterval = setInterval(() => {
+                                                hisoka.sendPresenceUpdate('available');
+                                        }, intervalMs);
+                                } else {
+                                        // Mode STEALTH (off): kirim available sekali sekarang + setiap 5 menit
+                                        // → Perangkat Tertaut tetap "Aktif", tapi tidak spam online ke kontak
+                                        const STEALTH_KEEPALIVE_MS = 5 * 60 * 1000; // 5 menit
                                         hisoka.sendPresenceUpdate('available');
-                }, intervalMs);
-                                        // status sudah tampil di kotak bot
+                                        global.autoOnlineInterval = setInterval(() => {
+                                                hisoka.sendPresenceUpdate('available');
+                                        }, STEALTH_KEEPALIVE_MS);
                                 }
-                                // mode off: tidak kirim presence apapun agar bot tetap terlihat
-                                // aktif di daftar Perangkat Tertaut WhatsApp
                         };
 
                         startAutoOnline();
