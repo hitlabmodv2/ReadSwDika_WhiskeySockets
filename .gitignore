@@ -23,9 +23,6 @@ zipFile.zip
 *.pdf
 
 
-# Sessions — auth credentials, jangan pernah di-commit
-sessions/
-
 # Jadibot runtime data — jangan di-commit
 data_jadibot/
 

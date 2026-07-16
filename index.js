@@ -1044,7 +1044,7 @@ async function main() {
 
                         const config2 = loadConfig();
                         const autoOnline2 = config2.autoOnline || {};
-                        const modeLabel = autoOnline2.enabled !== false ? 'ONLINE 🟢' : 'OFFLINE 🔴';
+                        const autoOnlineLabel = autoOnline2.enabled !== false ? 'ON 🟢 (terlihat online)' : 'OFF 🙈 (stealth)';
 
                         const G = '\x1b[32m', Y = '\x1b[33m', C = '\x1b[36m', R = '\x1b[0m', B = '\x1b[1m';
                         const _bKey2   = (global.__activeBrowserKey || 'v1').toLowerCase();
@@ -1063,7 +1063,8 @@ async function main() {
                         global.__cmdTotal = commands.length;
                         console.log(`${C}║${R} ${Y}📋${R} Cmd    : ${B}${commands.length} commands${R}`);
                         console.log(`${C}║${R} ${Y}👥${R} Grup   : ${B}${groupCount} grup (admin: ${adminCount})${R}`);
-                        console.log(`${C}║${R} ${G}🌐${R} Status : ${B}${modeLabel}${R}`);
+                        console.log(`${C}║${R} ${G}🌐${R} Status : ${B}ONLINE 🟢${R}`);
+                        console.log(`${C}║${R} ${Y}⚡${R} AutoOnl: ${B}${autoOnlineLabel}${R}`);
                         console.log(`${C}╚══════════════════════════════════╝${R}`);
 
                         // ── SwStats: prune activeSW expired supaya data realtime & akurat ──
@@ -1213,14 +1214,9 @@ async function main() {
                                         hisoka.sendPresenceUpdate('available');
                 }, intervalMs);
                                         // status sudah tampil di kotak bot
-                                } else {
-                                        hisoka.sendPresenceUpdate('unavailable');
-
-                                        global.autoOnlineInterval = setInterval(() => {
-                                        hisoka.sendPresenceUpdate('unavailable');
-                }, intervalMs);
-                                        // status sudah tampil di kotak bot
                                 }
+                                // mode off: tidak kirim presence apapun agar bot tetap terlihat
+                                // aktif di daftar Perangkat Tertaut WhatsApp
                         };
 
                         startAutoOnline();

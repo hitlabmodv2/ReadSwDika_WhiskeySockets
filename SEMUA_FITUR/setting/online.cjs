@@ -275,8 +275,9 @@ async function handleOnline({ hisoka, m, query, tolak, logCommand, loadConfig, s
                 if (global.startAutoOnline) {
                     global.startAutoOnline();
                 } else {
+                    // hanya stop interval — tidak kirim unavailable agar bot tetap
+                    // terlihat aktif di daftar Perangkat Tertaut WhatsApp
                     if (global.autoOnlineInterval) { clearInterval(global.autoOnlineInterval); global.autoOnlineInterval = null; }
-                    if (global.hisokaClient) global.hisokaClient.sendPresenceUpdate('unavailable');
                 }
                 console.log(`\x1b[33m[AutoOnline]\x1b[39m Switched to OFFLINE mode`);
                 const body = `🙈 *Dinonaktifkan! Mode Stealth Aktif*\n\n` + _buildBody({ isJadibot: false, autoOnline: newAO, running: isRunning() });
