@@ -515,5 +515,30 @@
     "updatedAt": "2026-07-17T07:40:42.830Z",
     "deleted": true,
     "deletedAt": "2026-07-17T07:40:42.830Z"
+  },
+  "AC5B6D1A76865DE60BF7F95202AB0BE0": {
+    "id": "AC5B6D1A76865DE60BF7F95202AB0BE0",
+    "sender": "6285700996045@s.whatsapp.net",
+    "name": "yae",
+    "type": "videoMessage",
+    "arrivedAt": "2026-07-17T07:47:21.142Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐋",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285700996045",
+    "resolvedPn": "6285700996045@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285700996045@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC5B6D1A76865DE60BF7F95202AB0BE0",
+      "participant": "10436871233676@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-17T08:37:06.192Z",
+    "retriedOnStartup": true,
+    "retriedAt": "2026-07-17T08:37:06.192Z"
   }
 }

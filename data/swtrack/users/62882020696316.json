@@ -1,13 +1,13 @@
 {
-  "AC76E46443C98C6693C8BB2C829F922E": {
-    "id": "AC76E46443C98C6693C8BB2C829F922E",
+  "AC0536F53013B1B6C7C246CC734C36E5": {
+    "id": "AC0536F53013B1B6C7C246CC734C36E5",
     "sender": "62882020696316@s.whatsapp.net",
     "name": "lee",
     "type": "videoMessage",
-    "arrivedAt": "2026-07-15T05:01:15.869Z",
+    "arrivedAt": "2026-07-17T08:36:14.914Z",
     "read": true,
     "reacted": true,
-    "emoji": "⏺️⏏️⏹️",
+    "emoji": "🦈",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "62882020696316",
@@ -16,17 +16,17 @@
       "remoteJid": "status@broadcast",
       "remoteJidAlt": "62882020696316@s.whatsapp.net",
       "fromMe": false,
-      "id": "AC76E46443C98C6693C8BB2C829F922E",
+      "id": "AC0536F53013B1B6C7C246CC734C36E5",
       "participant": "9204131708977@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-07-16T03:34:25.602Z",
+    "updatedAt": "2026-07-17T08:36:19.854Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "62882020696316@s.whatsapp.net",
         "fromMe": false,
-        "id": "AC76E46443C98C6693C8BB2C829F922E",
+        "id": "AC0536F53013B1B6C7C246CC734C36E5",
         "participant": "9204131708977@lid",
         "addressingMode": "lid"
       },
@@ -34,84 +34,11 @@
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "62882020696316@s.whatsapp.net",
         "fromMe": false,
-        "id": "AC76E46443C98C6693C8BB2C829F922E",
+        "id": "AC0536F53013B1B6C7C246CC734C36E5",
         "participant": "62882020696316@s.whatsapp.net",
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-07-15T05:01:32.053Z",
-    "deleted": true,
-    "deletedAt": "2026-07-16T03:34:25.602Z"
-  },
-  "AC2C91348EBF19F0906BA1A1BA53DC46": {
-    "id": "AC2C91348EBF19F0906BA1A1BA53DC46",
-    "sender": "62882020696316@s.whatsapp.net",
-    "name": "lee",
-    "type": "videoMessage",
-    "arrivedAt": "2026-07-16T03:34:25.591Z",
-    "read": true,
-    "reacted": true,
-    "emoji": "⏺️⏏️⏹️",
-    "resolve": "PN langsung ✓",
-    "source": "status",
-    "number": "62882020696316",
-    "resolvedPn": "62882020696316@s.whatsapp.net",
-    "messageKey": {
-      "remoteJid": "status@broadcast",
-      "remoteJidAlt": "62882020696316@s.whatsapp.net",
-      "fromMe": false,
-      "id": "AC2C91348EBF19F0906BA1A1BA53DC46",
-      "participant": "9204131708977@lid",
-      "addressingMode": "lid"
-    },
-    "updatedAt": "2026-07-16T03:51:42.665Z",
-    "retriedOnStartup": true,
-    "retriedAt": "2026-07-16T03:35:27.094Z",
-    "deleted": true,
-    "deletedAt": "2026-07-16T03:51:42.665Z"
-  },
-  "ACA2619D7C3D168C9764AD2548089611": {
-    "id": "ACA2619D7C3D168C9764AD2548089611",
-    "sender": "62882020696316@s.whatsapp.net",
-    "name": "lee",
-    "type": "videoMessage",
-    "arrivedAt": "2026-07-16T03:51:42.844Z",
-    "read": true,
-    "reacted": true,
-    "emoji": "🐡",
-    "resolve": "PN langsung ✓",
-    "source": "status",
-    "number": "62882020696316",
-    "resolvedPn": "62882020696316@s.whatsapp.net",
-    "messageKey": {
-      "remoteJid": "status@broadcast",
-      "remoteJidAlt": "62882020696316@s.whatsapp.net",
-      "fromMe": false,
-      "id": "ACA2619D7C3D168C9764AD2548089611",
-      "participant": "9204131708977@lid",
-      "addressingMode": "lid"
-    },
-    "updatedAt": "2026-07-16T22:16:24.269Z",
-    "receiptKeys": [
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "62882020696316@s.whatsapp.net",
-        "fromMe": false,
-        "id": "ACA2619D7C3D168C9764AD2548089611",
-        "participant": "9204131708977@lid",
-        "addressingMode": "lid"
-      },
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "62882020696316@s.whatsapp.net",
-        "fromMe": false,
-        "id": "ACA2619D7C3D168C9764AD2548089611",
-        "participant": "62882020696316@s.whatsapp.net",
-        "addressingMode": "lid"
-      }
-    ],
-    "processedAt": "2026-07-16T03:51:49.226Z",
-    "deleted": true,
-    "deletedAt": "2026-07-16T22:16:24.269Z"
+    "processedAt": "2026-07-17T08:36:19.854Z"
   }
 }
