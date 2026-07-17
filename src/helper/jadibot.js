@@ -1463,20 +1463,46 @@ function msgOwnerPairingExpired(number) {
 // direct=true → dikirim ke nomor target (v2): tampilkan link owner, bukan command bot
 // direct=false → dikirim ke GC/owner (v1): tampilkan command bot
 function msgPairingExpired(number, direct = false) {
-  const masked = maskNumber(number)
-  const hintLine = direct
-    ? `💡 Hubungi owner untuk aktifkan kembali:\n📞 ${getOwnerContact()}`
-    : `💡 Ketik *.jadibot ${number}* untuk coba lagi.`
+  const masked  = maskNumber(number)
+  const ver     = loadConfig().botVersion || 'V25'
+
+  if (direct) {
+    // Versi lengkap → dikirim ke nomor tujuan (user jadibot)
+    return (
+      `╔══════════════════════╗\n` +
+      `║   ⏰  *WAKTU HABIS!*   ║\n` +
+      `╚══════════════════════╝\n\n` +
+      `📱 *Nomor kamu:* \`+${number}\`\n` +
+      `🕐 *Waktu:* _${_nowStr()}_\n\n` +
+      `❌ *Kode pairing sudah kedaluwarsa!*\n` +
+      `> _Kode tidak dimasukkan dalam batas waktu *3 menit*, sehingga sesi otomatis dibatalkan._\n\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `🗑️ *Yang terjadi:*\n` +
+      `• ~Kode pairing sudah tidak berlaku~\n` +
+      `• ~Sesi dihapus otomatis dari server~\n` +
+      `• ~Jadibot belum aktif di nomormu~\n\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `📋 *Kemungkinan penyebab:*\n` +
+      `1. Terlambat membuka pesan kode\n` +
+      `2. Salah langkah saat input di WhatsApp\n` +
+      `3. Koneksi internet terganggu saat proses\n\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `💡 *Ingin coba lagi?*\n` +
+      `📞 Hubungi owner — mereka akan kirimkan kode baru:\n` +
+      `${getOwnerContact()}\n\n` +
+      `> _Notif otomatis — Wily Bot ${ver}_ 🤖`
+    )
+  }
+
+  // Versi singkat → dikirim ke GC/owner chat
   return (
     `╔══════════════════════╗\n` +
     `║   ⏰  *WAKTU HABIS*   ║\n` +
     `╚══════════════════════╝\n\n` +
-    `📱 *Nomor:* ${masked}\n\n` +
-    `❌ Kode pairing sudah *kedaluwarsa*\n` +
-    `karena tidak dimasukkan dalam *3 menit*.\n\n` +
-    `🔄 Sesi otomatis dihapus.\n\n` +
-    `😔 Waktu habis sebelum kode sempat dimasukkan.\n` +
-    hintLine
+    `📱 *Nomor:* \`${masked}\`\n\n` +
+    `❌ Kode pairing *kedaluwarsa* — tidak dimasukkan dalam *3 menit*.\n` +
+    `🔄 ~Sesi otomatis dihapus.~\n\n` +
+    `💡 Ketik *.jadibot ${number} <durasi>* untuk coba lagi.`
   )
 }
 
