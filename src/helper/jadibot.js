@@ -327,22 +327,49 @@ function clearJadibotExpiryWarningTimers(number) {
   expiryWarningTimers.delete(number)
 }
 
-// direct=true → pesan dikirim langsung ke nomor jadibot (v2 mode)
-// direct=false → pesan dikirim ke GC/owner (v1 mode)
+// direct=true → pesan dikirim langsung ke nomor jadibot (user)
+// direct=false → pesan dikirim ke GC/owner
 function msgJadibotExpiryWarning(number, remainingText, expiresAtText, durationLabel = '1 hari', direct = false) {
-  const ownerLine = direct
-    ? `💡 Hubungi owner untuk perpanjang masa aktif:\n${getOwnerContact()}`
-    : `💡 Perpanjang dengan:\n*.jadibot ${number} ${durationLabel}*`
+  const masked = maskNumber(number)
+  const ver = loadConfig().botVersion || 'V25'
+
+  if (direct) {
+    // ── Ke USER jadibot (personal, kasual) ──
+    return (
+      `╔══════════════════════╗\n` +
+      `║  ⏰  *HAMPIR HABIS!*   ║\n` +
+      `╚══════════════════════╝\n\n` +
+      `📱 *Nomor kamu:* \`+${number}\`\n` +
+      `⏳ *Sisa waktu:* *${remainingText}*\n` +
+      `📅 *Habis pada:* _${expiresAtText}_\n\n` +
+      `⚠️ *Masa aktif jadibot kamu akan segera berakhir!*\n\n` +
+      `_Jika tidak diperpanjang, fitur berikut akan berhenti:_\n` +
+      `• ~ReadSW + ReactionSW~\n` +
+      `• ~Anti-Delete~\n` +
+      `• ~Auto Typing / Recording~\n` +
+      `• ~Semua command bot~\n\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `> 💡 _Hubungi owner sekarang untuk perpanjang masa aktif:_\n` +
+      `📞 ${getOwnerContact()}\n\n` +
+      `> _Notif otomatis — Wily Bot ${ver}_ 🤖`
+    )
+  }
+
+  // ── Ke GC/owner (monitoring, dengan command) ──
   return (
     `╔══════════════════════╗\n` +
-    `║  ⚠️  *JADIBOT HAMPIR HABIS* ║\n` +
+    `║  ⏰  *HAMPIR EXPIRED*  ║\n` +
     `╚══════════════════════╝\n\n` +
-    `📱 *Nomor:* +${maskNumber(number)}\n` +
-    `⏳ *Sisa waktu:* ${remainingText}\n` +
-    `📅 *Habis pada:* ${expiresAtText}\n\n` +
-    `⚠️ Masa aktif jadibot hampir habis.\n` +
-    `Bot akan otomatis berhenti dan sesi dihapus saat waktunya habis.\n\n` +
-    ownerLine
+    `📱 *Nomor  :* \`+${number}\`\n` +
+    `⏳ *Sisa   :* *${remainingText}*\n` +
+    `📅 *Habis  :* _${expiresAtText}_\n\n` +
+    `⚠️ *Masa aktif jadibot +${masked} akan segera habis!*\n` +
+    `_Bot otomatis berhenti dan sesi dihapus saat waktu tiba._\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━━━\n` +
+    `🛠️ *Perpanjang Sekarang:*\n` +
+    `• \`.upbot ${number} ${durationLabel}\` — perpanjang durasi\n` +
+    `• \`.upbot ${number} p\` — ubah ke permanent\n\n` +
+    `> _Notif otomatis — Wily Bot ${ver}_ 🤖`
   )
 }
 
@@ -623,17 +650,93 @@ function isJadibotExpired(number) {
 // direct=true → pesan dikirim langsung ke nomor jadibot (v2 mode)
 // direct=false → pesan dikirim ke GC/owner (v1 mode)
 function msgJadibotExpired(number, direct = false) {
-  const ownerLine = direct
-    ? `💡 Hubungi owner untuk aktifkan kembali:\n${getOwnerContact()}`
-    : `💡 Ketik *.jadibot ${number} 1 hari* untuk aktifkan lagi.`
+  const masked = maskNumber(number)
+  const ver = loadConfig().botVersion || 'V25'
+  const now = new Date().toLocaleString('id-ID', {
+    timeZone: 'Asia/Jakarta',
+    day: '2-digit', month: '2-digit', year: 'numeric',
+    hour: '2-digit', minute: '2-digit', second: '2-digit'
+  })
+
+  if (direct) {
+    // ── Ke USER jadibot (personal, kasual) ──
+    return (
+      `╔══════════════════════╗\n` +
+      `║  ❌  *JADIBOT BERAKHIR* ║\n` +
+      `╚══════════════════════╝\n\n` +
+      `📱 *Nomor kamu:* \`+${number}\`\n` +
+      `🕐 *Waktu:* _${now} WIB_\n\n` +
+      `🚨 *Masa aktif jadibot kamu telah berakhir!*\n` +
+      `🗑️ ~Sesi otomatis dihapus dari server.~\n\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `❌ *Fitur yang Berhenti:*\n` +
+      `• ~ReadSW + ReactionSW~\n` +
+      `• ~Anti-Delete~\n` +
+      `• ~Auto Typing / Recording~\n` +
+      `• ~Semua command bot~\n\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `> 💡 _Hubungi owner untuk mengaktifkan kembali:_\n` +
+      `📞 ${getOwnerContact()}\n\n` +
+      `> _Notif otomatis — Wily Bot ${ver}_ 🤖`
+    )
+  }
+
+  // ── Ke GC/owner (monitoring, dengan command) ──
   return (
     `╔══════════════════════╗\n` +
-    `║  ⏰  *JADIBOT EXPIRED* ║\n` +
+    `║  ❌  *JADIBOT EXPIRED* ║\n` +
     `╚══════════════════════╝\n\n` +
-    `📱 *Nomor:* +${maskNumber(number)}\n\n` +
-    `❌ Masa berlaku jadibot sudah habis.\n` +
-    `🗑️ Sesi dan data jadibot otomatis dihapus realtime.\n\n` +
-    ownerLine
+    `📱 *Nomor  :* \`+${number}\`\n` +
+    `🕐 *Waktu  :* _${now} WIB_\n\n` +
+    `⏰ *Masa berlaku jadibot +${masked} telah habis.*\n` +
+    `🗑️ ~Sesi dan data otomatis dihapus realtime.~\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━━━\n` +
+    `❌ *Fitur yang Berhenti:*\n` +
+    `• ~ReadSW + ReactionSW~\n` +
+    `• ~Anti-Delete~\n` +
+    `• ~Auto Typing / Recording~\n` +
+    `• ~Semua command bot~\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━━━\n` +
+    `💡 *Aktifkan Kembali:*\n` +
+    `• \`.jadibot ${number} 1h\` — aktifkan 1 hari\n` +
+    `• \`.jadibot ${number} p\` — aktifkan permanent\n\n` +
+    `> _Notif otomatis — Wily Bot ${ver}_ 🤖`
+  )
+}
+
+// ── Notif expired → ke OWNER DM (alert monitoring) ──────────────────────────
+function msgOwnerExpired(number) {
+  const cfg    = loadConfig()
+  const ver    = cfg.botVersion || 'V25'
+  const masked = maskNumber(number)
+  const remainingList = [...jadibotMap.keys()]
+
+  const listPart = remainingList.length > 0
+    ? `📊 *Jadibot Masih Aktif (${remainingList.length}):*\n` +
+      remainingList.map((v, i) => `${i + 1}. \`+${v}\``).join('\n') + `\n`
+    : `> ❌ _Tidak ada jadibot lain yang aktif saat ini._\n`
+
+  return (
+    `╔══════════════════════╗\n` +
+    `║  ❌  *JADIBOT EXPIRED!* ║\n` +
+    `╚══════════════════════╝\n\n` +
+    `📱 *Nomor :* \`+${number}\`\n` +
+    `🕐 *Waktu :* _${_nowStr()}_\n\n` +
+    `⏰ *Masa berlaku jadibot +${masked} telah habis secara otomatis.*\n` +
+    `🗑️ ~Sesi dihapus dari server secara realtime.~\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━━\n` +
+    `❌ *Fitur yang Berhenti di Nomor Ini:*\n` +
+    `• ~ReadSW + ReactionSW~\n` +
+    `• ~Anti-Delete~\n` +
+    `• ~Auto Typing / Recording~\n` +
+    `• ~Semua command bot~\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━━\n` +
+    `${listPart}\n` +
+    `━━━━━━━━━━━━━━━━━━━━━\n` +
+    `💡 *Aktifkan Kembali:*\n` +
+    `• \`.jadibot ${number} 1h\` — aktifkan 1 hari\n` +
+    `• \`.jadibot ${number} p\` — aktifkan permanent\n\n` +
+    `> _Notif otomatis — Wily Bot ${ver}_ 🤖`
   )
 }
 
@@ -658,21 +761,31 @@ async function expireJadibot(number, sendReply = null) {
   // masuk sebagai "note to self" di WA, tidak muncul sebagai chat biasa
   const _expireMainSock = getActiveMainSock()
 
-  if (expiryMode === 'v2') {
-    // V2: kirim notif expired langsung ke nomor target via MAIN BOT
-    const expiredMsgDirect = msgJadibotExpired(number, true)
-    if (_expireMainSock) {
-      try {
-        await _expireMainSock.sendMessage(`${number}@s.whatsapp.net`, { text: expiredMsgDirect })
-        console.log(`[JADIBOT][V2] ✅ Notif expired terkirim ke +${number}`)
-      } catch (e) {
-        console.log(`[JADIBOT][V2] ⚠️ Gagal kirim notif expired ke +${number}: ${e?.message}`)
-      }
-    } else {
-      console.log(`[JADIBOT][V2] ⚠️ Main sock tidak tersedia, notif expired ke +${number} dilewati`)
+  // Helper: resolve JID & kirim notif expired ke nomor user jadibot via main bot
+  const _sendExpiredDirect = async () => {
+    if (!_expireMainSock) {
+      console.log(`[JADIBOT] ⚠️ Main sock tidak tersedia, notif expired ke +${number} dilewati`)
+      return
     }
+    try {
+      // Resolve JID (support LID/linked device)
+      let _expJid = `${number}@s.whatsapp.net`
+      try {
+        const [_waRes] = await _expireMainSock.onWhatsApp(`${number}@s.whatsapp.net`)
+        if (_waRes?.exists && _waRes?.jid) _expJid = _waRes.jid
+      } catch (_) {}
+      await _expireMainSock.sendMessage(_expJid, { text: msgJadibotExpired(number, true) })
+      console.log(`[JADIBOT] ✅ Notif expired terkirim ke +${number} (jid: ${_expJid})`)
+    } catch (e) {
+      console.log(`[JADIBOT] ⚠️ Gagal kirim notif expired ke +${number}: ${e?.message}`)
+    }
+  }
+
+  if (expiryMode === 'v2') {
+    // V2: kirim notif expired langsung ke nomor user jadibot via main bot
+    await _sendExpiredDirect()
   } else {
-    // V1: kirim notif expired ke GC/owner (pakai command bot)
+    // V1: kirim notif expired ke GC/owner
     if (sendReply) {
       try {
         await sendReply(expiredMsg)
@@ -681,15 +794,16 @@ async function expireJadibot(number, sendReply = null) {
         console.log(`[JADIBOT][V1] ⚠️ Gagal kirim notif expired ke GC/owner: ${e?.message}`)
       }
     }
-    // V1: JUGA kirim langsung ke nomor target via MAIN BOT
-    if (_expireMainSock) {
-      try {
-        await _expireMainSock.sendMessage(`${number}@s.whatsapp.net`, { text: msgJadibotExpired(number, true) })
-        console.log(`[JADIBOT][V1] ✅ Notif expired terkirim langsung ke +${number}`)
-      } catch (e) {
-        console.log(`[JADIBOT][V1] ⚠️ Gagal kirim notif expired langsung ke +${number}: ${e?.message}`)
-      }
-    }
+    // V1: JUGA kirim langsung ke nomor user jadibot via main bot
+    await _sendExpiredDirect()
+  }
+
+  // Notif ke semua owner via DM (selalu dikirim di semua mode)
+  try {
+    await sendOwnerNotif(null, msgOwnerExpired(number), [number])
+    console.log(`[JADIBOT] ✅ Notif expired terkirim ke semua owner`)
+  } catch (e) {
+    console.log(`[JADIBOT] ⚠️ Gagal kirim notif expired ke owner: ${e?.message}`)
   }
 
   // Langkah 3: tutup socket
