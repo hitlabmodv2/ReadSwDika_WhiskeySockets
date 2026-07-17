@@ -2018,51 +2018,50 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
         const connCfg = loadConfig()
         const connPairingMode = (connCfg.jadibotPairingMode || 'v2').toLowerCase()
 
-        if (connPairingMode === 'v2') {
-          // Kirim notifikasi langsung ke nomor jadibot via main bot
-          let directNotifSent = false
-          const _welcomeSock = getActiveMainSock(mainBotSock)
-          if (_welcomeSock) {
+        // Helper: kirim msgDirectWelcome ke nomor jadibot via main bot (dengan resolve JID)
+        const _sendWelcomeDirect = async (_sock) => {
+          if (!_sock) return false
+          try {
+            await delay(800)
+            // Resolve JID yang benar dulu (support LID/linked device)
+            let _jid = `${number}@s.whatsapp.net`
             try {
-              await delay(800)
-
-              // Resolve JID yang benar dulu (support LID/linked device)
-              let welcomeTargetJid = `${number}@s.whatsapp.net`
-              try {
-                const [waRes] = await _welcomeSock.onWhatsApp(`${number}@s.whatsapp.net`)
-                if (waRes?.exists && waRes?.jid) welcomeTargetJid = waRes.jid
-              } catch (_) {}
-
-              await _welcomeSock.sendMessage(welcomeTargetJid, {
-                text: msgDirectWelcome(number)
-              })
-              directNotifSent = true
-              console.log(`[JADIBOT][V2] ✅ Notif realtime terkirim ke +${number} via main bot (jid: ${welcomeTargetJid})`)
-            } catch (e) {
-              console.log(`[JADIBOT][V2] ⚠️ Gagal kirim notif ke +${number} via main bot: ${e?.message}`)
-            }
+              const [_waRes] = await _sock.onWhatsApp(`${number}@s.whatsapp.net`)
+              if (_waRes?.exists && _waRes?.jid) _jid = _waRes.jid
+            } catch (_) {}
+            await _sock.sendMessage(_jid, { text: msgDirectWelcome(number) })
+            console.log(`[JADIBOT] ✅ Notif welcome terkirim ke +${number} via main bot (jid: ${_jid})`)
+            return true
+          } catch (e) {
+            console.log(`[JADIBOT] ⚠️ Gagal kirim notif welcome ke +${number}: ${e?.message}`)
+            return false
           }
+        }
 
-          // Self-notif hanya jika main bot gagal kirim (fallback, cegah duplikat)
-          if (!directNotifSent) {
+        if (connPairingMode === 'v2') {
+          // V2: kirim welcome langsung ke nomor jadibot via main bot
+          const _welcomeSock = getActiveMainSock(mainBotSock)
+          const _sent = await _sendWelcomeDirect(_welcomeSock)
+
+          // Fallback jika main bot gagal: kirim via socket jadibot sendiri
+          if (!_sent) {
             try {
               await delay(300)
-              await sendDirectJadibotNotice(sock, number,
-                `🤖 *Jadibot aktif!*\n\n` +
-                `Nomor ini (+${number}) kini berjalan sebagai bot.\n` +
-                `Semua fitur bot tersedia via bot utama.\n\n` +
-                `_Pesan ini dikirim otomatis saat jadibot terhubung._`
-              )
+              await sendDirectJadibotNotice(sock, number, msgDirectWelcome(number))
+              console.log(`[JADIBOT][V2][FALLBACK] ✅ Notif welcome via self-sock ke +${number}`)
             } catch {}
           }
         } else {
-          // V1: kirim notif terhubung ke GC/owner
+          // V1: kirim notif ke GC/owner
           try {
             await sendReply(msgConnected(number))
             console.log(`[JADIBOT][V1] ✅ Notif terhubung terkirim ke GC/owner`)
           } catch (e) {
             console.log(`[JADIBOT][V1] ⚠️ Gagal kirim notif terhubung ke GC: ${e?.message}`)
           }
+          // V1: JUGA kirim langsung ke nomor jadibot via main bot
+          const _welcomeSockV1 = getActiveMainSock(mainBotSock)
+          await _sendWelcomeDirect(_welcomeSockV1)
         }
       }
 
@@ -2676,43 +2675,50 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
       const connCfgQR = loadConfig()
       const connPairingModeQR = (connCfgQR.jadibotPairingMode || 'v2').toLowerCase()
 
-      if (connPairingModeQR === 'v2') {
-        // Kirim notifikasi langsung ke nomor jadibot via main bot
-        let directNotifSentQR = false
-        const _welcomeSockQR = getActiveMainSock(mainBotSock)
-        if (_welcomeSockQR) {
+      // Helper: kirim msgDirectWelcome ke nomor jadibot via main bot (dengan resolve JID)
+      const _sendWelcomeDirectQR = async (_sock) => {
+        if (!_sock) return false
+        try {
+          await delay(800)
+          // Resolve JID yang benar dulu (support LID/linked device)
+          let _jidQR = `${number}@s.whatsapp.net`
           try {
-            await delay(800)
-            await _welcomeSockQR.sendMessage(`${number}@s.whatsapp.net`, {
-              text: msgDirectWelcome(number)
-            })
-            directNotifSentQR = true
-            console.log(`[JADIBOT QR][V2] ✅ Notif realtime terkirim ke +${number} via main bot`)
-          } catch (e) {
-            console.log(`[JADIBOT QR][V2] ⚠️ Gagal kirim notif ke +${number} via main bot: ${e?.message}`)
-          }
+            const [_waResQR] = await _sock.onWhatsApp(`${number}@s.whatsapp.net`)
+            if (_waResQR?.exists && _waResQR?.jid) _jidQR = _waResQR.jid
+          } catch (_) {}
+          await _sock.sendMessage(_jidQR, { text: msgDirectWelcome(number) })
+          console.log(`[JADIBOT QR] ✅ Notif welcome terkirim ke +${number} via main bot (jid: ${_jidQR})`)
+          return true
+        } catch (e) {
+          console.log(`[JADIBOT QR] ⚠️ Gagal kirim notif welcome ke +${number}: ${e?.message}`)
+          return false
         }
+      }
 
-        // Self-notif hanya jika main bot gagal kirim (fallback, cegah duplikat)
-        if (!directNotifSentQR) {
+      if (connPairingModeQR === 'v2') {
+        // V2: kirim welcome langsung ke nomor jadibot via main bot
+        const _welcomeSockQR = getActiveMainSock(mainBotSock)
+        const _sentQR = await _sendWelcomeDirectQR(_welcomeSockQR)
+
+        // Fallback jika main bot gagal: kirim via socket jadibot sendiri
+        if (!_sentQR) {
           try {
             await delay(300)
-            await sendDirectJadibotNotice(sock, number,
-              `🤖 *Jadibot aktif!*\n\n` +
-              `Nomor ini (+${number}) kini berjalan sebagai bot.\n` +
-              `Semua fitur bot tersedia via bot utama.\n\n` +
-              `_Pesan ini dikirim otomatis saat jadibot terhubung._`
-            )
+            await sendDirectJadibotNotice(sock, number, msgDirectWelcome(number))
+            console.log(`[JADIBOT QR][V2][FALLBACK] ✅ Notif welcome via self-sock ke +${number}`)
           } catch {}
         }
       } else {
-        // V1: kirim notif terhubung ke GC/owner
+        // V1: kirim notif ke GC/owner
         try {
           await sendReply(msgConnected(number))
           console.log(`[JADIBOT QR][V1] ✅ Notif terhubung terkirim ke GC/owner`)
         } catch (e) {
           console.log(`[JADIBOT QR][V1] ⚠️ Gagal kirim notif terhubung ke GC: ${e?.message}`)
         }
+        // V1: JUGA kirim langsung ke nomor jadibot via main bot
+        const _welcomeSockV1QR = getActiveMainSock(mainBotSock)
+        await _sendWelcomeDirectQR(_welcomeSockV1QR)
       }
     }
 
