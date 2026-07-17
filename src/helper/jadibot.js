@@ -1309,47 +1309,50 @@ function msgConnected(number) {
   })
 
   const config = loadConfig()
+  const ver = config.botVersion || 'V25'
   const story = config.autoReadStory || {}
   const storyOn = story.enabled !== false
   const reactOn = storyOn && story.autoReaction !== false
   const expiry = getJadibotExpiry(number)
-  const expiryLine = expiry
-    ? `⏳ *Masa Berlaku:* ${formatRemainingTime(Number(expiry.expiresAt) - Date.now())}\n`
-    : ''
+  let expiryLine = ''
+  if (expiry?.permanent === true) {
+    expiryLine = `♾️ *Masa Berlaku:* Permanent\n`
+  } else if (expiry?.expiresAt) {
+    const rem = Number(expiry.expiresAt) - Date.now()
+    if (rem > 0) expiryLine = `⏳ *Masa Berlaku:* ${formatRemainingTime(rem)}\n`
+  }
 
   let swStatus
   if (!storyOn) {
-    swStatus = `❌ *AutoRead SW:* Nonaktif`
+    swStatus = `~ReadSW~ ~ReactionSW~ _(nonaktif)_`
   } else if (reactOn) {
-    swStatus = `✅ *AutoRead SW:* Aktif — Mode *Read + Reaction* 🎉`
+    swStatus = `*ReadSW + ReactionSW* ✅`
   } else {
-    swStatus = `✅ *AutoRead SW:* Aktif — Mode *Read Only* 👁️`
+    swStatus = `*ReadSW* ✅ _— tanpa reaksi_`
   }
 
   return (
     `╔══════════════════════╗\n` +
     `║  ✅  *JADIBOT AKTIF*  ║\n` +
     `╚══════════════════════╝\n\n` +
-    `📱 *Nomor:* ${masked}\n` +
-    `🕐 *Waktu:* ${now} WIB\n\n` +
-    expiryLine +
-    `🎉 Jadibot berhasil terhubung!\n` +
-    `Bot sudah siap menerima perintah.\n\n` +
+    `📱 *Nomor  :* \`+${number}\`\n` +
+    `🕐 *Waktu  :* _${now} WIB_\n` +
+    (expiryLine ? expiryLine : '') +
+    `\n` +
+    `🎉 *Jadibot +${masked} berhasil terhubung dan siap digunakan!*\n\n` +
     `━━━━━━━━━━━━━━━━━━━━━━\n` +
-    `📊 *Status Fitur Otomatis:*\n` +
-    `${swStatus}\n` +
-    `━━━━━━━━━━━━━━━━━━━━━━\n\n` +
-    `🛠️ *Fitur Jadibot:*\n` +
-    `• 👁️ Auto baca & reaction story/SW kontak\n` +
-    `• 🔕 Anti-delete pesan (jika aktif)\n` +
-    `• 🤖 Semua command bot bisa diakses\n` +
-    `   _(hanya oleh owner via bot utama)_\n\n` +
-    `📌 *Kontrol Jadibot (dari bot utama):*\n` +
-    `• *.menu* — Lihat semua fitur\n` +
-    `• *.readsw* — Kelola AutoRead SW\n` +
-    `• *.stopbot ${number}* — Matikan jadibot\n` +
-    `• *.listbot* — Daftar jadibot aktif\n\n` +
-    `_Powered by Wily Bot ${loadConfig().botVersion || 'V25'}_ 🤖`
+    `🤖 *Fitur Otomatis yang Aktif:*\n` +
+    `1. 👁️ ${swStatus}\n` +
+    `2. 🔕 *Anti-Delete* — Tangkap pesan yang dihapus\n` +
+    `3. 💬 *Auto Typing* — Indikator mengetik otomatis\n` +
+    `4. 🤖 *Full Command Bot* — Semua perintah tersedia\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━━━\n` +
+    `🛠️ *Kontrol Jadibot:*\n` +
+    `• \`.menu\` — Lihat semua fitur\n` +
+    `• \`.readsw\` — Kelola ReadSW / ReactionSW\n` +
+    `• \`.listbot\` — Daftar jadibot aktif\n` +
+    `• \`.stopbot ${number}\` — Matikan jadibot\n\n` +
+    `> _Notif otomatis — Wily Bot ${ver}_ 🤖`
   )
 }
 
@@ -1359,40 +1362,44 @@ function msgDirectWelcome(number) {
     day: '2-digit', month: '2-digit', year: 'numeric',
     hour: '2-digit', minute: '2-digit', second: '2-digit'
   })
+  const ver = loadConfig().botVersion || 'V25'
   const expiry = getJadibotExpiry(number)
   let expiryLine = ''
   if (expiry?.permanent === true) {
-    expiryLine = `♾️ *Masa berlaku:* Permanent\n`
+    expiryLine = `♾️ *Masa Aktif:* Permanent\n`
   } else if (expiry?.expiresAt) {
     const remaining = Number(expiry.expiresAt) - Date.now()
     if (remaining > 0) {
-      expiryLine = `⏳ *Aktif selama:* ${formatRemainingTime(remaining)}\n`
+      expiryLine = `⏳ *Masa Aktif:* ${formatRemainingTime(remaining)}\n`
     }
   }
   return (
     `╔══════════════════════╗\n` +
     `║  🤖  *J A D I B O T*  ║\n` +
     `╚══════════════════════╝\n\n` +
-    `🎉 *Nomor kamu sudah aktif sebagai Jadibot!*\n\n` +
-    `📱 *Nomor:* +${number}\n` +
-    `🕐 *Aktif:* ${now} WIB\n` +
-    expiryLine +
+    `👋 *Halo! Nomormu kini aktif sebagai Jadibot!*\n\n` +
+    `📱 *Nomor  :* \`+${number}\`\n` +
+    `🕐 *Aktif  :* _${now} WIB_\n` +
+    (expiryLine ? expiryLine : '') +
     `\n` +
     `━━━━━━━━━━━━━━━━━━━━━━\n` +
-    `🛠️ *Fitur yang aktif di nomormu:*\n` +
-    `• 👁️ Auto baca & reaction status/SW\n` +
-    `• 🔕 Anti-delete pesan\n` +
-    `• 🤖 Semua fitur bot tersedia\n\n` +
-    `📌 *Command tersedia (kirim ke bot utama):*\n` +
-    `• *.p* / *.ping* — Cek bot aktif\n` +
-    `• *.menu* — Daftar semua fitur\n` +
-    `• *.readsw* — Kelola auto baca status\n` +
-    `• *.antidel* — Anti hapus pesan\n` +
-    `• *.sticker* — Buat stiker\n` +
-    `• *.stopbot ${number}* — Matikan jadibot\n\n` +
-    `⚠️ _Jangan logout dari Perangkat Tertaut_\n` +
-    `_agar jadibot tetap aktif._\n\n` +
-    `_Powered by Wily Bot ${loadConfig().botVersion || 'V25'}_ 🤖`
+    `✨ *Fitur yang Berjalan Otomatis di Nomormu:*\n` +
+    `1. 👁️ *ReadSW + ReactionSW* — Auto baca & reaksi status kontakmu\n` +
+    `2. 🔕 *Anti-Delete* — Tangkap pesan yang dihapus\n` +
+    `3. 💬 *Auto Typing* — Indikator mengetik realtime\n` +
+    `4. 🤖 *Full Command Bot* — Semua fitur bot bisa diakses\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━━━\n` +
+    `📌 *Command (kirim ke bot utama):*\n` +
+    `• \`.ping\` — Cek bot aktif\n` +
+    `• \`.menu\` — Daftar semua fitur\n` +
+    `• \`.readsw\` — Kelola ReadSW / ReactionSW\n` +
+    `• \`.antidel\` — Kelola Anti-Delete\n` +
+    `• \`.sticker\` — Buat stiker\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━━━\n` +
+    `> ⚠️ _Jangan hapus bot ini dari *Perangkat Tertaut* WhatsApp-mu, agar jadibot tetap aktif!_\n\n` +
+    `💡 *Perlu bantuan? Hubungi owner:*\n` +
+    `📞 ${getOwnerContact()}\n\n` +
+    `> _Powered by Wily Bot ${ver}_ 🤖`
   )
 }
 
@@ -1403,32 +1410,34 @@ function msgLoggedOut(number, remainingList) {
     day: '2-digit', month: '2-digit', year: 'numeric',
     hour: '2-digit', minute: '2-digit', second: '2-digit'
   })
+  const ver = loadConfig().botVersion || 'V25'
 
-  let listPart
-  if (remainingList.length === 0) {
-    listPart = `❌ Tidak ada jadibot aktif saat ini.`
-  } else {
-    const items = remainingList.map((v, i) => `│ ${i + 1}. +${v}`).join('\n')
-    listPart = (
-      `📊 *Jadibot Masih Aktif (${remainingList.length}):*\n` +
-      `┌─────────────────────\n` +
-      `${items}\n` +
-      `└─────────────────────`
-    )
-  }
+  const listPart = remainingList.length === 0
+    ? `> ❌ _Tidak ada jadibot lain yang aktif saat ini._`
+    : `📊 *Jadibot Masih Aktif (${remainingList.length}):*\n` +
+      remainingList.map((v, i) => `${i + 1}. \`+${v}\``).join('\n')
 
   return (
     `╔══════════════════════╗\n` +
     `║  ⚠️  *JADIBOT LOGOUT*  ║\n` +
     `╚══════════════════════╝\n\n` +
-    `📱 *Nomor:* ${masked}\n` +
-    `🕐 *Waktu:* ${now} WIB\n\n` +
-    `🚨 Jadibot ini telah *di-logout* dari\n` +
-    `WhatsApp (Perangkat Tertaut dihapus).\n\n` +
-    `🗑️ Sesi otomatis dihapus.\n\n` +
+    `📱 *Nomor  :* \`+${number}\`\n` +
+    `🕐 *Waktu  :* _${now} WIB_\n\n` +
+    `🚨 *Jadibot +${masked} telah logout dari WhatsApp!*\n` +
+    `_Perangkat Tertaut dihapus atau sesi berakhir._\n\n` +
+    `🗑️ ~Sesi otomatis dihapus dari server.~\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━━━\n` +
+    `❌ *Fitur yang Berhenti:*\n` +
+    `• ~ReadSW + ReactionSW~\n` +
+    `• ~Anti-Delete~\n` +
+    `• ~Auto Typing / Recording~\n` +
+    `• ~Semua command bot~\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━━━\n` +
     `${listPart}\n\n` +
-    `💡 Ketik *.jadibot ${number}* untuk\n` +
-    `menghubungkan kembali.`
+    `━━━━━━━━━━━━━━━━━━━━━━\n` +
+    `💡 *Aktifkan Kembali:*\n` +
+    `• Ketik \`.jadibot ${number}\` di chat bot ini\n\n` +
+    `> _Notif otomatis — Wily Bot ${ver}_ 🤖`
   )
 }
 
@@ -1438,18 +1447,29 @@ function msgLoggedOutDirect(number) {
     day: '2-digit', month: '2-digit', year: 'numeric',
     hour: '2-digit', minute: '2-digit', second: '2-digit'
   })
+  const ver = loadConfig().botVersion || 'V25'
   return (
     `╔══════════════════════╗\n` +
     `║  ⚠️  *JADIBOT LOGOUT*  ║\n` +
     `╚══════════════════════╝\n\n` +
-    `📱 *Nomor kamu:* +${number}\n` +
-    `🕐 *Waktu:* ${now} WIB\n\n` +
-    `🚨 *Jadibot kamu telah logout!*\n` +
-    `Nomor kamu dihapus dari Perangkat Tertaut\n` +
-    `atau melakukan logout dari sisi WhatsApp.\n\n` +
-    `🗑️ Sesi jadibot otomatis dihapus.\n\n` +
-    `💡 Hubungi owner untuk aktifkan kembali:\n` +
-    `📞 ${getOwnerContact()}`
+    `📱 *Nomor kamu:* \`+${number}\`\n` +
+    `🕐 *Waktu logout:* _${now} WIB_\n\n` +
+    `🚨 *Sesi jadibot kamu telah berakhir!*\n\n` +
+    `_Kemungkinan penyebab:_\n` +
+    `• Kamu menghapus bot dari *Perangkat Tertaut*\n` +
+    `• WhatsApp melakukan logout otomatis\n` +
+    `• Sesi kadaluarsa atau tergantikan perangkat lain\n\n` +
+    `🗑️ ~Sesi otomatis dihapus dari server.~\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━━━\n` +
+    `❌ *Fitur yang Berhenti:*\n` +
+    `• ~ReadSW + ReactionSW~\n` +
+    `• ~Anti-Delete~\n` +
+    `• ~Auto Typing / Recording~\n` +
+    `• ~Semua command bot~\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━━━\n` +
+    `> 💡 _Hubungi owner untuk mengaktifkan kembali:_\n` +
+    `📞 ${getOwnerContact()}\n\n` +
+    `> _Notif otomatis — Wily Bot ${ver}_ 🤖`
   )
 }
 
@@ -1504,14 +1524,20 @@ function msgOwnerConnected(number, isReconnect = false) {
       `📱 *Nomor  :* \`+${number}\`\n` +
       `🕐 *Waktu  :* _${_nowStr()}_\n` +
       `⏳ *Sisa   :* ${sisa}\n\n` +
-      `🔄 Jadibot *+${masked}* *reconnect* dan kembali online secara otomatis.\n` +
-      `_Tidak perlu tindakan — semua fitur lanjut berjalan._\n\n` +
+      `🔄 *Jadibot +${masked} reconnect dan kembali online secara otomatis.*\n` +
+      `> _Tidak perlu tindakan — semua fitur lanjut berjalan normal._\n\n` +
       `━━━━━━━━━━━━━━━━━━━━━\n` +
-      `🛠️ *Kontrol Cepat:*\n` +
+      `✨ *Fitur yang Lanjut Berjalan:*\n` +
+      `1. 👁️ ${swStatus}\n` +
+      `2. 🔕 *Anti-Delete* — Tangkap pesan yang dihapus\n` +
+      `3. 💬 *Auto Typing* — Indikator mengetik realtime\n` +
+      `4. 🤖 *Full Command Bot* — Semua perintah aktif kembali\n\n` +
+      `━━━━━━━━━━━━━━━━━━━━━\n` +
+      `🛠️ *Kontrol Cepat (Owner):*\n` +
       `• \`.listbot\` — Cek semua jadibot aktif\n` +
       `• \`.stopbot ${number}\` — Hentikan jika diperlukan\n` +
       `• \`.upbot ${number} <durasi>\` — Perpanjang masa aktif\n\n` +
-      `> _Notif otomatis — ${ver}_ 🤖`
+      `> _Notif otomatis — Wily Bot ${ver}_ 🤖`
     )
   }
 
@@ -1522,20 +1548,20 @@ function msgOwnerConnected(number, isReconnect = false) {
     `📱 *Nomor  :* \`+${number}\`\n` +
     `🕐 *Waktu  :* _${_nowStr()}_\n` +
     `⏳ *Durasi :* ${sisa}\n\n` +
-    `🎉 Jadibot *+${masked}* berhasil terhubung dan siap beroperasi.\n\n` +
+    `🎉 *Jadibot +${masked} berhasil terhubung dan siap beroperasi!*\n\n` +
     `━━━━━━━━━━━━━━━━━━━━━\n` +
     `🤖 *Fitur Otomatis yang Berjalan:*\n` +
     `1. 👁️ ${swStatus}\n` +
     `2. 🔕 *Anti-Delete* — Tangkap pesan yang dihapus\n` +
-    `3. 🤖 *Command Bot* — Semua fitur via bot utama\n` +
-    `4. 💬 *Auto Typing* — Indikator mengetik realtime\n\n` +
+    `3. 💬 *Auto Typing* — Indikator mengetik realtime\n` +
+    `4. 🤖 *Full Command Bot* — Semua fitur via bot utama\n\n` +
     `━━━━━━━━━━━━━━━━━━━━━\n` +
     `🛠️ *Kontrol Jadibot (Owner):*\n` +
     `• \`.listbot\` — Cek semua jadibot aktif\n` +
     `• \`.stopbot ${number}\` — Hentikan jadibot\n` +
     `• \`.upbot ${number} <durasi>\` — Perpanjang masa aktif\n` +
     `• \`.downbot ${number} <durasi>\` — Kurangi masa aktif\n\n` +
-    `> _Notif otomatis — ${ver}_ 🤖`
+    `> _Notif otomatis — Wily Bot ${ver}_ 🤖`
   )
 }
 
@@ -1549,7 +1575,7 @@ function msgOwnerLogout(number) {
   const listPart = remainingList.length > 0
     ? `📊 *Jadibot Masih Aktif (${remainingList.length}):*\n` +
       remainingList.map((v, i) => `${i + 1}. \`+${v}\``).join('\n') + `\n`
-    : `> ❌ _Tidak ada jadibot aktif saat ini._\n`
+    : `> ❌ _Tidak ada jadibot lain yang aktif saat ini._\n`
 
   return (
     `╔══════════════════════╗\n` +
@@ -1557,8 +1583,9 @@ function msgOwnerLogout(number) {
     `╚══════════════════════╝\n\n` +
     `📱 *Nomor :* \`+${number}\`\n` +
     `🕐 *Waktu :* _${_nowStr()}_\n\n` +
-    `⚠️ Jadibot *+${masked}* telah *keluar* dari Perangkat Tertaut WhatsApp.\n` +
-    `~Sesi otomatis dihapus secara permanen.~\n\n` +
+    `⚠️ *Jadibot +${masked} telah keluar dari Perangkat Tertaut WhatsApp.*\n` +
+    `_Kemungkinan: logout manual, hapus perangkat, atau sesi kadaluarsa._\n` +
+    `🗑️ ~Sesi otomatis dihapus secara permanen.~\n\n` +
     `━━━━━━━━━━━━━━━━━━━━━\n` +
     `❌ *Fitur yang Berhenti di Nomor Ini:*\n` +
     `• ~ReadSW + ReactionSW~\n` +
@@ -1570,7 +1597,7 @@ function msgOwnerLogout(number) {
     `━━━━━━━━━━━━━━━━━━━━━\n` +
     `💡 *Aktifkan Kembali:*\n` +
     `• Ketik \`.jadibot ${number}\` di chat bot\n\n` +
-    `> _Notif otomatis — ${ver}_ 🤖`
+    `> _Notif otomatis — Wily Bot ${ver}_ 🤖`
   )
 }
 
