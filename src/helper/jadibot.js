@@ -1435,6 +1435,31 @@ function msgPairingCode(code, number, direct = false) {
 }
 
 
+// ── Notif pairing expired → ke OWNER DM (monitoring, beda dari versi user/GC) ─
+function msgOwnerPairingExpired(number) {
+  const cfg    = loadConfig()
+  const ver    = cfg.botVersion || 'V25'
+  const masked = maskNumber(number)
+  return (
+    `╔══════════════════════╗\n` +
+    `║   ⏰  *PAIRING TIMEOUT*  ║\n` +
+    `╚══════════════════════╝\n\n` +
+    `📱 *Nomor  :* \`+${number}\`\n` +
+    `🕐 *Waktu  :* _${_nowStr()}_\n\n` +
+    `⚠️ *Kode pairing +${masked} tidak dimasukkan dalam 3 menit.*\n` +
+    `> _Sesi otomatis dihapus dari server — tidak ada data yang tersisa._\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━━\n` +
+    `📋 *Kemungkinan penyebab:*\n` +
+    `• Pengguna tidak sempat membuka pesan kode\n` +
+    `• Kode terlambat dimasukkan ke WhatsApp\n` +
+    `• Pengguna salah langkah saat scan/input kode\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━━\n` +
+    `🔄 *Aktifkan ulang jika diperlukan:*\n` +
+    `• \`.jadibot ${number} <durasi>\` — coba pairing lagi\n\n` +
+    `> _Notif otomatis — Wily Bot ${ver}_ 🤖`
+  )
+}
+
 // direct=true → dikirim ke nomor target (v2): tampilkan link owner, bukan command bot
 // direct=false → dikirim ke GC/owner (v1): tampilkan command bot
 function msgPairingExpired(number, direct = false) {
@@ -2112,6 +2137,12 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
             }
           }
         }
+
+        // Owner DM — notif monitoring pairing timeout (berlaku untuk V1 & V2)
+        try {
+          await sendOwnerNotif(mainBotSock, msgOwnerPairingExpired(number), [number])
+          console.log(`[JADIBOT][EXPIRED] ✅ Notif pairing timeout terkirim ke owner DM`)
+        } catch {}
       }, PAIRING_TIMEOUT_MS)
 
       pairingTimeout.set(number, timeout)
@@ -2325,6 +2356,12 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
               console.log(`[JADIBOT][PAIR-TIMEOUT] ⚠️ Gagal kirim ke GC/owner: ${e?.message}`)
             }
           }
+
+          // Owner DM — notif monitoring pairing timeout
+          try {
+            await sendOwnerNotif(mainBotSock, msgOwnerPairingExpired(number), [number])
+            console.log(`[JADIBOT][PAIR-TIMEOUT] ✅ Notif pairing timeout terkirim ke owner DM`)
+          } catch {}
         }
 
         // Cleanup session pairing yang gagal + stop semua proses terkait
