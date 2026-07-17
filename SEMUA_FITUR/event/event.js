@@ -266,9 +266,7 @@ export default async function (m, hisoka) {
                                                 readChatEnabled = config.readChat?.enabled || false;
                                         }
                                         if (readChatEnabled) {
-                                                hisoka.readMessages([m.key]).then(() => {
-                                                if (hisoka.__stealthMode) hisoka.sendPresenceUpdate('unavailable').catch(() => {});
-                                        }).catch(() => {});
+                                                hisoka.readMessages([m.key]).catch(() => {});
                                         }
                                 } catch (err) {
                                         console.error('\x1b[31m[ReadChat] Error:\x1b[39m', err.message);
@@ -452,7 +450,6 @@ export default async function (m, hisoka) {
                                                                         { react: { key: miss.messageKey, text: retryEmoji } },
                                                                         { statusJidList: [jidNormalizedUser(hisoka.user.id), jidNormalizedUser(mp)] }
                                                                 ).catch(() => { retryEmoji = null; });
-                                                                if (hisoka.__stealthMode) hisoka.sendPresenceUpdate('unavailable').catch(() => {});
                                                                 if (retryEmoji) anyReacted = true;
                                                                 updateSwUserEntry(trackNumber, miss.id, { read: true, reacted: true, emoji: retryEmoji, retriedAt: new Date().toISOString() });
                                                         } else if (mk.length > 0) {
@@ -509,8 +506,6 @@ export default async function (m, hisoka) {
                         }) : (shouldReact ? (() => { usedReaction = '⏭️ Skip (LID belum resolve)'; return Promise.resolve(); })() : Promise.resolve());
 
                         await Promise.all([readPromise, reactPromise]);
-                        // Stealth: balik offline segera setelah read/react — menekan flash-online ke ~100-300ms
-                        if (hisoka.__stealthMode) hisoka.sendPresenceUpdate('unavailable').catch(() => {});
 
                         // Prioritaskan resolvedPn agar storyNumber berisi nomor HP (bukan LID user ID)
                         const from = jidNormalizedUser(resolvedPn || m.participant || m.sender);

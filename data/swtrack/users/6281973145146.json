@@ -40,5 +40,47 @@
       }
     ],
     "processedAt": "2026-07-16T03:56:35.334Z"
+  },
+  "AC5CAEFD90855871B6AC2F6A531A6ABC": {
+    "id": "AC5CAEFD90855871B6AC2F6A531A6ABC",
+    "sender": "6281973145146@s.whatsapp.net",
+    "name": "𝘿𝙚𝙡𝙩𝙖 Z1",
+    "type": "imageMessage",
+    "arrivedAt": "2026-07-16T22:33:00.447Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐙",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6281973145146",
+    "resolvedPn": "6281973145146@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6281973145146@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC5CAEFD90855871B6AC2F6A531A6ABC",
+      "participant": "245023656403118@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-16T22:33:13.930Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281973145146@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC5CAEFD90855871B6AC2F6A531A6ABC",
+        "participant": "245023656403118@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281973145146@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC5CAEFD90855871B6AC2F6A531A6ABC",
+        "participant": "6281973145146@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-16T22:33:13.930Z"
   }
 }

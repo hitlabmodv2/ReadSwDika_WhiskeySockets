@@ -57,3 +57,4 @@ Sudah tersimpan di `.replit` (tab Secrets / userenv):
 ## Preferensi Pengguna
 
 - Semua penjelasan AI di Replit menggunakan **Bahasa Indonesia**
+- Setiap selesai melakukan edit/perubahan kode, selalu tampilkan tombol **View Checkpoints** (SuggestUserAction rollback) agar user bisa rollback ke versi sebelumnya kapan saja

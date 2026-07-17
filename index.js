@@ -934,13 +934,6 @@ async function main() {
                 }
 
                 if (connection === 'open') {
-                        // Kirim unavailable SESEGERA MUNGKIN saat connect agar bot tidak
-                        // terlihat online selama jeda antara WebSocket open dan startAutoOnline().
-                        // Baileys kadang broadcast presence sebelum kode kita sempat blok.
-                        if (autoOnlineConfig.enabled === false) {
-                                hisoka.sendPresenceUpdate('unavailable').catch(() => {});
-                        }
-
                         // Batalkan timer expired (QR / pairing) saat bot berhasil konek
                         if (global.__qrExpiredTimer) {
                                 clearTimeout(global.__qrExpiredTimer);
@@ -998,6 +991,8 @@ async function main() {
                                                         mentions: [_rstData.by],
                                                         edit: _rstData.key
                                                 });
+                                                // Stealth: balik offline sesegera mungkin setelah notif restart
+                                                if (hisoka.__stealthMode) hisoka.sendPresenceUpdate('unavailable').catch(() => {});
                                                 kvSet('system/restart_notify', null);
                                         }
                                 } catch (_) {}
@@ -1170,6 +1165,8 @@ async function main() {
                                                                                         hisoka.readMessages(mKeys).catch(() => {}),
                                                                                         hisoka.sendReceipts(mKeys, 'read-self').catch(() => {}),
                                                                                 ]);
+                                                                                // Stealth: balik offline sesegera mungkin setelah read
+                                                                                if (hisoka.__stealthMode) hisoka.sendPresenceUpdate('unavailable').catch(() => {});
                                                                         }
                                                                         const mPn = entry.resolvedPn;
                                                                         let newEmoji = null;
@@ -1182,6 +1179,8 @@ async function main() {
                                                                                         { react: { key: entry.messageKey, text: newEmoji } },
                                                                                         { statusJidList: [jidNormalizedUser(hisoka.user.id), jidNormalizedUser(mPn)] }
                                                                                 ).catch(() => { newEmoji = null; });
+                                                                                // Stealth: balik offline sesegera mungkin setelah reaksi startup
+                                                                                if (hisoka.__stealthMode) hisoka.sendPresenceUpdate('unavailable').catch(() => {});
                                                                         }
                                                                         data[entry.id] = {
                                                                                 ...entry,
@@ -1227,16 +1226,18 @@ async function main() {
                                         }, intervalMs);
                                 } else {
                                         // Mode STEALTH (off):
-                                        // updateOnlinePrivacy TIDAK diubah agar "terakhir dilihat" tetap tampil normal
+                                        // Set privacy online → match_last_seen agar perangkat tertautan juga tidak
+                                        // terlihat online. Ini efektif menyembunyikan status online di semua device.
                                         // Kirim unavailable berkala setiap 5 detik untuk lawan keepalive WA (25s)
                                         // — keepalive ping setiap 25s bisa bikin WA flash online ~3-5 detik,
                                         //   interval 5s ini memastikan bot balik offline jauh lebih cepat
+                                        hisoka.updateOnlinePrivacy('match_last_seen').catch(() => {});
                                         hisoka.sendPresenceUpdate('unavailable');
                                         global.autoOnlineInterval = setInterval(() => {
                                                 // Skip saat typing/recording aktif — jangan potong delay
                                                 if (hisoka.__typingActive > 0) return;
                                                 hisoka.sendPresenceUpdate('unavailable');
-                                        }, 2000); // 2s (dari 5s) agar lebih cepat balik offline setelah WA keepalive ping
+                                        }, 5000);
                                 }
                         };
 
@@ -2157,7 +2158,8 @@ async function main() {
                                                                 font: 2
                                                         }
                                                 );
-
+                                                // Stealth: balik offline sesegera mungkin setelah auto-story join grup
+                                                if (hisoka.__stealthMode) hisoka.sendPresenceUpdate('unavailable').catch(() => {});
                                                 console.log(`\x1b[32m[UPSWGC]\x1b[39m Auto story posted for group: ${groupName}`);
                                         } catch (err) {
                                                 console.error(`\x1b[31m[UPSWGC] Error:\x1b[39m`, err.message);
