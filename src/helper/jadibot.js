@@ -1390,26 +1390,47 @@ async function handleJadibotSW(msg, sock, swSet, number) {
 }
 
 /* ================= PESAN RAPIH ================= */
-function msgPairingCode(code, number) {
+// direct=true → dikirim ke nomor tujuan (user jadibot) — footer sopan, tanpa command owner
+// direct=false → dikirim ke GC/owner — footer dengan command .jadibot
+function msgPairingCode(code, number, direct = false) {
   const formatted = formatPairingCode(code)
   const masked = maskNumber(number)
+  const ver = loadConfig().botVersion || 'V25'
+
+  const footer = direct
+    ? (
+        `━━━━━━━━━━━━━━━━━━━━━━\n` +
+        `⏳ *Segera masukkan kode sebelum kedaluwarsa!*\n` +
+        `> _Kode hanya berlaku ±3 menit — jangan ditunda._\n\n` +
+        `📌 *Catatan penting:*\n` +
+        `• Pastikan kamu membuka WhatsApp yang sesuai nomor di atas\n` +
+        `• Jangan bagikan kode ini ke siapapun\n` +
+        `• ~Kode tidak bisa dipakai ulang~ setelah digunakan atau expired\n\n` +
+        `💡 *Kode sudah habis atau ada kendala?*\n` +
+        `📞 Hubungi owner: ${getOwnerContact()}\n\n` +
+        `> _Powered by Wily Bot ${ver}_ 🤖`
+      )
+    : (
+        `⏳ *Batas waktu: 3 menit*\n` +
+        `⚠️ Jika gagal, ketik *.jadibot* ulang`
+      )
+
   return (
     `╔══════════════════════╗\n` +
     `║   🤖  *J A D I B O T*   ║\n` +
     `╚══════════════════════╝\n\n` +
-    `📱 *Nomor:* ${masked}\n\n` +
+    `📱 *Nomor:* \`${masked}\`\n\n` +
     `🔑 *Kode Pairing:*\n` +
     `┌─────────────────┐\n` +
     `│   *${formatted}*   │\n` +
     `└─────────────────┘\n\n` +
     `📋 *Cara Memasukkan Kode:*\n` +
     `1️⃣ Buka WhatsApp di HP kamu\n` +
-    `2️⃣ Ketuk ⋮ (titik tiga) → *Perangkat Tertaut*\n` +
+    `2️⃣ Ketuk ⋮ *(titik tiga)* → *Perangkat Tertaut*\n` +
     `3️⃣ Ketuk *Tautkan Perangkat*\n` +
     `4️⃣ Pilih *Tautkan dengan nomor telepon*\n` +
     `5️⃣ Masukkan kode di atas\n\n` +
-    `⏳ *Batas waktu: 3 menit*\n` +
-    `⚠️ Jika gagal, ketik *.jadibot* ulang`
+    footer
   )
 }
 
@@ -1945,7 +1966,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
                   }
                 } catch (_) {}
 
-                await _pairSock.sendMessage(targetJid, { text: msgPairingCode(code, number) })
+                await _pairSock.sendMessage(targetJid, { text: msgPairingCode(code, number, true) })
                 directPairingSent = true
                 console.log(`[JADIBOT][V2] ✅ Pairing code terkirim realtime ke +${number} (jid: ${targetJid})`)
 
