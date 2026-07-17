@@ -380,6 +380,26 @@ async function sendDirectJadibotNotice(sock, number, text) {
   } catch {}
 }
 
+// Kirim pesan langsung ke nomor jadibot via main bot, dengan resolve JID (LID support)
+async function sendDirectToUser(mainBotSock, number, text) {
+  const sock = getActiveMainSock(mainBotSock)
+  if (!sock) return false
+  try {
+    await delay(800)
+    let jid = `${number}@s.whatsapp.net`
+    try {
+      const [res] = await sock.onWhatsApp(`${number}@s.whatsapp.net`)
+      if (res?.exists && res?.jid) jid = res.jid
+    } catch {}
+    await sock.sendMessage(jid, { text })
+    console.log(`[JADIBOT] ✅ Notif user terkirim ke +${number} (jid: ${jid})`)
+    return true
+  } catch (e) {
+    console.log(`[JADIBOT] ⚠️ Gagal kirim notif user ke +${number}: ${e?.message}`)
+    return false
+  }
+}
+
 function getJadibotExpirySummary(number) {
   const meta = getJadibotExpiry(number)
   if (!meta) {
@@ -1679,6 +1699,45 @@ function msgOwnerConnected(number, isReconnect = false) {
   )
 }
 
+// ── Notif reconnect → ke USER JADIBOT (personal, beda dari versi owner) ──────
+function msgDirectReconnect(number) {
+  const cfg    = loadConfig()
+  const ver    = cfg.botVersion || 'V25'
+  const story  = cfg.autoReadStory || {}
+  const swOn   = story.enabled !== false
+  const reactOn = swOn && story.autoReaction !== false
+  const swStatus = !swOn ? '~ReadSW~ ~ReactionSW~ _(nonaktif)_'
+    : reactOn ? '*ReadSW + ReactionSW* ✅'
+    : '*ReadSW* ✅ _— tanpa reaksi_'
+
+  const meta   = getJadibotExpiry(number)
+  const isPerm = meta?.permanent === true
+  const sisa   = !meta ? '_Tidak ada data_'
+    : isPerm ? '*Permanent* ♾️'
+    : `*${formatRemainingTime(Math.max(0, Number(meta.expiresAt) - Date.now()))}*`
+
+  return (
+    `╔══════════════════════╗\n` +
+    `║  🔄  *JADIBOT ONLINE*  ║\n` +
+    `╚══════════════════════╝\n\n` +
+    `📱 *Nomor kamu:* \`+${number}\`\n` +
+    `🕐 *Waktu:* _${_nowStr()}_\n` +
+    `⏳ *Sisa Masa Aktif:* ${sisa}\n\n` +
+    `🔄 *Nomormu kembali online secara otomatis!*\n` +
+    `> _Semua fitur lanjut berjalan — tidak perlu tindakan apapun._\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━━\n` +
+    `✨ *Fitur yang Lanjut Berjalan:*\n` +
+    `1. 👁️ ${swStatus}\n` +
+    `2. 🔕 *Anti-Delete* — Tangkap pesan yang dihapus\n` +
+    `3. 💬 *Auto Typing* — Indikator mengetik realtime\n` +
+    `4. 🤖 *Full Command Bot* — Semua perintah aktif kembali\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━━\n` +
+    `💡 *Ingin perpanjang atau ada pertanyaan?*\n` +
+    `📞 Hubungi owner: ${getOwnerContact()}\n\n` +
+    `> _Notif otomatis — Wily Bot ${ver}_ 🤖`
+  )
+}
+
 // ── Notif logout → ke OWNER (alert monitoring) ───────────────────────────────
 function msgOwnerLogout(number) {
   const cfg    = loadConfig()
@@ -2183,6 +2242,19 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
       try {
         await sendOwnerNotif(mainBotSock, msgOwnerConnected(number, !isFreshPairing), [number])
       } catch {}
+
+      // Reconnect: kirim notif langsung ke user jadibot (teks beda dari owner)
+      if (!isFreshPairing) {
+        try {
+          const _sentRecon = await sendDirectToUser(mainBotSock, number, msgDirectReconnect(number))
+          // Fallback via self-sock jika main bot tidak bisa kirim
+          if (!_sentRecon) {
+            await delay(300)
+            await sendDirectJadibotNotice(sock, number, msgDirectReconnect(number))
+            console.log(`[JADIBOT][RECONNECT][FALLBACK] ✅ Notif reconnect via self-sock ke +${number}`)
+          }
+        } catch {}
+      }
     }
 
     /* ===== DISCONNECTED ===== */
