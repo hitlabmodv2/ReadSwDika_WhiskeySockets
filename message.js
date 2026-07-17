@@ -506,6 +506,49 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                         await tolak(hisoka, m, '✅ *Dibatalkan.*\n_Bot tidak dihentikan._');
                                         return;
                                 } else {
+                                        // ── Confirm mode: user sudah pilih nomor/multi, tinggal tap Yes/No ──
+                                        if (pendingJadibot.confirmMode) {
+                                                const _confirmNum     = pendingJadibot.confirmNumber;
+                                                const _confirmTargets = pendingJadibot.confirmTargets;
+                                                const _isMulti = Array.isArray(_confirmTargets) && _confirmTargets.length > 0;
+                                                const _isYes = rawChoice === '__jbstop_yes__' || ['ya','yes','iya','y'].includes(lowerChoice);
+                                                const _isNo  = rawChoice === '__jbstop_no__'  || ['tidak','no','n','batal','cancel'].includes(lowerChoice);
+                                                if (_isYes) {
+                                                        if (pendingJadibot.timeout) clearTimeout(pendingJadibot.timeout);
+                                                        pendingJadibotChoices.delete(jadibotChoiceKey);
+                                                        if (_isMulti) {
+                                                                // Multi-stop
+                                                                const _activeNow  = [...jadibotMap.keys()];
+                                                                const _stillActive = _confirmTargets.filter(t => _activeNow.includes(t.num));
+                                                                if (_stillActive.length === 0) {
+                                                                        await tolak(hisoka, m, '❌ *Semua bot sudah tidak aktif.*\n> _Ketik `.listbot` untuk refresh._');
+                                                                        return;
+                                                                }
+                                                                await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
+                                                                const _label = _stillActive.map(t => `\`+${maskNumber(t.num)}\``).join(' · ');
+                                                                await tolak(hisoka, m, `🛑 *Menghentikan ${_stillActive.length} bot...*\n${_label}`);
+                                                                for (const { num } of _stillActive) {
+                                                                        await stopJadibot(num, async (text) => { await tolak(hisoka, m, text); });
+                                                                }
+                                                        } else {
+                                                                // Single stop
+                                                                if (!_confirmNum || ![...jadibotMap.keys()].includes(_confirmNum)) {
+                                                                        await tolak(hisoka, m, '❌ *Bot sudah tidak aktif atau tidak ditemukan.*\n> _Ketik `.listbot` untuk refresh._');
+                                                                        return;
+                                                                }
+                                                                await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
+                                                                await stopJadibot(_confirmNum, async (text) => { await tolak(hisoka, m, text); });
+                                                        }
+                                                } else if (_isNo) {
+                                                        if (pendingJadibot.timeout) clearTimeout(pendingJadibot.timeout);
+                                                        pendingJadibotChoices.delete(jadibotChoiceKey);
+                                                        await tolak(hisoka, m, '❌ *Dibatalkan.*\n_Bot tidak dihentikan._\n\n> _Ketik `.listbot` untuk kembali ke daftar._');
+                                                } else {
+                                                        await tolak(hisoka, m, '⚠️ Pilih tombol *✅ Ya, Stop* atau *❌ Tidak, Batal* di atas.');
+                                                }
+                                                return;
+                                        }
+
                                         await cleanupExpiredJadibots(async () => {});
                                         const activeList = [...jadibotMap.keys()];
                                         const maxNum = pendingJadibot.numbers.length;
@@ -534,15 +577,36 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                         );
                                                         return;
                                                 }
-                                                if (pendingJadibot.timeout) clearTimeout(pendingJadibot.timeout);
-                                                pendingJadibotChoices.delete(jadibotChoiceKey);
-                                                await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
-                                                const targetLabel = validTargets.map(t => `\`+${maskNumber(t.num)}\``).join(' · ');
-                                                await tolak(hisoka, m,
-                                                        `🛑 *Menghentikan ${validTargets.length} bot...*\n${targetLabel}`
-                                                );
-                                                for (const { num } of validTargets) {
-                                                        await stopJadibot(num, async (text) => { await tolak(hisoka, m, text); });
+                                                // Jangan langsung stop — tampilkan daftar & minta konfirmasi Button Quick Reply
+                                                const _multiLines = validTargets.map(t =>
+                                                        `  *${t.idx}.* +${maskNumber(t.num)}`
+                                                ).join('\n');
+
+                                                pendingJadibot.confirmMode    = true;
+                                                pendingJadibot.confirmTargets = validTargets;
+                                                pendingJadibot.confirmNumber  = null;
+
+                                                const _multiBody =
+                                                        `🛑 *Konfirmasi Stop ${validTargets.length} Jadibot*\n` +
+                                                        `━━━━━━━━━━━━━━━━━━━━━\n\n` +
+                                                        `📋 *Bot yang akan dihentikan:*\n` +
+                                                        `${_multiLines}\n\n` +
+                                                        `⚠️ Yakin ingin menghentikan *${validTargets.length} bot* sekaligus?\n` +
+                                                        `> _Tindakan ini tidak bisa dibatalkan setelah dikonfirmasi._`;
+
+                                                try {
+                                                        const _confirmBtn = new Button()
+                                                                .setBody(_multiBody)
+                                                                .setFooter(`⚡ Wily Bot • Stop Jadibot`)
+                                                                .addReply(`✅ Ya, Stop ${validTargets.length} Bot`, '__jbstop_yes__')
+                                                                .addReply('❌ Tidak, Batal', '__jbstop_no__');
+                                                        await _confirmBtn.run(m.from, hisoka, m);
+                                                } catch (_) {
+                                                        await tolak(hisoka, m,
+                                                                _multiBody + `\n\n` +
+                                                                `✅ Reply \`ya\` untuk stop semua\n` +
+                                                                `❌ Reply \`batal\` untuk batal`
+                                                        );
                                                 }
                                                 return;
                                         }
@@ -701,12 +765,39 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                 selectedNumber = normalizeJadibotNumber(rawChoice);
                                         }
                                         if (selectedNumber && pendingJadibot.numbers.includes(selectedNumber) && activeList.includes(selectedNumber)) {
-                                                if (pendingJadibot.timeout) clearTimeout(pendingJadibot.timeout);
-                                                pendingJadibotChoices.delete(jadibotChoiceKey);
-                                                await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
-                                                await stopJadibot(selectedNumber, async (text) => {
-                                                        await tolak(hisoka, m, text);
-                                                });
+                                                // Jangan langsung stop — minta konfirmasi dulu via Button Quick Reply
+                                                const _meta  = getJadibotExpiry(selectedNumber);
+                                                const _isPerm = _meta?.permanent === true;
+                                                const _sisa  = !_meta ? '-' : _isPerm ? 'Permanent ♾️' : (getJadibotExpirySummary(selectedNumber)?.remaining || '-');
+                                                const _masked = maskNumber(selectedNumber);
+
+                                                // Update pending state ke confirmMode
+                                                pendingJadibot.confirmMode   = true;
+                                                pendingJadibot.confirmNumber = selectedNumber;
+
+                                                const _confirmBody =
+                                                        `🛑 *Konfirmasi Stop Jadibot*\n` +
+                                                        `━━━━━━━━━━━━━━━━━━━━━\n\n` +
+                                                        `📱 *Nomor :* +${_masked}\n` +
+                                                        `⏳ *Sisa  :* ${_sisa}\n\n` +
+                                                        `⚠️ Yakin ingin menghentikan bot ini?\n` +
+                                                        `> _Tindakan ini tidak bisa dibatalkan setelah dikonfirmasi._`;
+
+                                                try {
+                                                        const _confirmBtn = new Button()
+                                                                .setBody(_confirmBody)
+                                                                .setFooter(`⚡ Wily Bot • Stop Jadibot`)
+                                                                .addReply('✅ Ya, Stop', '__jbstop_yes__')
+                                                                .addReply('❌ Tidak, Batal', '__jbstop_no__');
+                                                        await _confirmBtn.run(m.from, hisoka, m);
+                                                } catch (_) {
+                                                        // Fallback teks jika Button gagal
+                                                        await tolak(hisoka, m,
+                                                                _confirmBody + `\n\n` +
+                                                                `✅ Reply \`ya\` untuk stop\n` +
+                                                                `❌ Reply \`batal\` untuk batal`
+                                                        );
+                                                }
                                                 return;
                                         }
                                         // Pilihan tidak dikenali

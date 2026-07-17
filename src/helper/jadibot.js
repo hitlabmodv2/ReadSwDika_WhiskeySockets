@@ -1453,6 +1453,127 @@ function msgLoggedOutDirect(number) {
   )
 }
 
+// ── Kirim notif ke semua owner di config.owners[] via main bot ──────────────
+// excludeNumbers: nomor yang skip (misal nomor jadibot itu sendiri)
+async function sendOwnerNotif(mainBotSock, text, excludeNumbers = []) {
+  const sock = getActiveMainSock(mainBotSock)
+  if (!sock) return
+  const cfg = loadConfig()
+  const owners = (cfg.owners || []).map(n => String(n).replace(/[^0-9]/g, '')).filter(Boolean)
+  for (const ownerNum of owners) {
+    if (excludeNumbers.includes(ownerNum)) continue
+    try {
+      await sock.sendMessage(`${ownerNum}@s.whatsapp.net`, { text })
+      console.log(`[JADIBOT][OWNER-NOTIF] ✅ Notif terkirim ke owner +${ownerNum}`)
+    } catch (e) {
+      console.log(`[JADIBOT][OWNER-NOTIF] ⚠️ Gagal kirim ke +${ownerNum}: ${e?.message}`)
+    }
+  }
+}
+
+function _nowStr() {
+  const d = new Date()
+  const hari  = d.toLocaleDateString('id-ID', { weekday: 'short', timeZone: 'Asia/Jakarta' })
+  const tgl   = d.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Asia/Jakarta' })
+  const waktu = d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Asia/Jakarta' }).replace(/\./g, ':')
+  return `${hari}, ${tgl} | ${waktu} WIB`
+}
+
+// ── Notif terhubung → ke OWNER (managerial/monitoring) ───────────────────────
+function msgOwnerConnected(number, isReconnect = false) {
+  const cfg    = loadConfig()
+  const ver    = cfg.botVersion || 'V25'
+  const masked = maskNumber(number)
+  const meta   = getJadibotExpiry(number)
+  const isPerm = meta?.permanent === true
+  const sisa   = !meta ? '_Tidak ada data_'
+    : isPerm ? '*Permanent* ♾️'
+    : `*${formatRemainingTime(Math.max(0, Number(meta.expiresAt) - Date.now()))}*`
+  const story   = cfg.autoReadStory || {}
+  const swOn    = story.enabled !== false
+  const reactOn = swOn && story.autoReaction !== false
+  const swStatus = !swOn ? '~ReadSW~ _(nonaktif)_'
+    : reactOn ? '*ReadSW + ReactionSW* ✅'
+    : '*ReadSW* ✅ _— tanpa reaksi_'
+
+  if (isReconnect) {
+    return (
+      `╔══════════════════════╗\n` +
+      `║  🔄  *JADIBOT ONLINE*  ║\n` +
+      `╚══════════════════════╝\n\n` +
+      `📱 *Nomor  :* \`+${number}\`\n` +
+      `🕐 *Waktu  :* _${_nowStr()}_\n` +
+      `⏳ *Sisa   :* ${sisa}\n\n` +
+      `🔄 Jadibot *+${masked}* *reconnect* dan kembali online secara otomatis.\n` +
+      `_Tidak perlu tindakan — semua fitur lanjut berjalan._\n\n` +
+      `━━━━━━━━━━━━━━━━━━━━━\n` +
+      `🛠️ *Kontrol Cepat:*\n` +
+      `• \`.listbot\` — Cek semua jadibot aktif\n` +
+      `• \`.stopbot ${number}\` — Hentikan jika diperlukan\n` +
+      `• \`.upbot ${number} <durasi>\` — Perpanjang masa aktif\n\n` +
+      `> _Notif otomatis — ${ver}_ 🤖`
+    )
+  }
+
+  return (
+    `╔══════════════════════╗\n` +
+    `║  ✅  *JADIBOT AKTIF*   ║\n` +
+    `╚══════════════════════╝\n\n` +
+    `📱 *Nomor  :* \`+${number}\`\n` +
+    `🕐 *Waktu  :* _${_nowStr()}_\n` +
+    `⏳ *Durasi :* ${sisa}\n\n` +
+    `🎉 Jadibot *+${masked}* berhasil terhubung dan siap beroperasi.\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━━\n` +
+    `🤖 *Fitur Otomatis yang Berjalan:*\n` +
+    `1. 👁️ ${swStatus}\n` +
+    `2. 🔕 *Anti-Delete* — Tangkap pesan yang dihapus\n` +
+    `3. 🤖 *Command Bot* — Semua fitur via bot utama\n` +
+    `4. 💬 *Auto Typing* — Indikator mengetik realtime\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━━\n` +
+    `🛠️ *Kontrol Jadibot (Owner):*\n` +
+    `• \`.listbot\` — Cek semua jadibot aktif\n` +
+    `• \`.stopbot ${number}\` — Hentikan jadibot\n` +
+    `• \`.upbot ${number} <durasi>\` — Perpanjang masa aktif\n` +
+    `• \`.downbot ${number} <durasi>\` — Kurangi masa aktif\n\n` +
+    `> _Notif otomatis — ${ver}_ 🤖`
+  )
+}
+
+// ── Notif logout → ke OWNER (alert monitoring) ───────────────────────────────
+function msgOwnerLogout(number) {
+  const cfg    = loadConfig()
+  const ver    = cfg.botVersion || 'V25'
+  const masked = maskNumber(number)
+  const remainingList = [...jadibotMap.keys()]
+
+  const listPart = remainingList.length > 0
+    ? `📊 *Jadibot Masih Aktif (${remainingList.length}):*\n` +
+      remainingList.map((v, i) => `${i + 1}. \`+${v}\``).join('\n') + `\n`
+    : `> ❌ _Tidak ada jadibot aktif saat ini._\n`
+
+  return (
+    `╔══════════════════════╗\n` +
+    `║  🚨  *JADIBOT LOGOUT!* ║\n` +
+    `╚══════════════════════╝\n\n` +
+    `📱 *Nomor :* \`+${number}\`\n` +
+    `🕐 *Waktu :* _${_nowStr()}_\n\n` +
+    `⚠️ Jadibot *+${masked}* telah *keluar* dari Perangkat Tertaut WhatsApp.\n` +
+    `~Sesi otomatis dihapus secara permanen.~\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━━\n` +
+    `❌ *Fitur yang Berhenti di Nomor Ini:*\n` +
+    `• ~ReadSW + ReactionSW~\n` +
+    `• ~Anti-Delete~\n` +
+    `• ~Auto Typing / Recording~\n` +
+    `• ~Semua command bot~\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━━\n` +
+    `${listPart}\n` +
+    `━━━━━━━━━━━━━━━━━━━━━\n` +
+    `💡 *Aktifkan Kembali:*\n` +
+    `• Ketik \`.jadibot ${number}\` di chat bot\n\n` +
+    `> _Notif otomatis — ${ver}_ 🤖`
+  )
+}
+
 /* ================= START JADIBOT ================= */
 async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, sendPairingMsg = null, durationMs = undefined, mainBotSock = null, reactFn = null, requesterNumber = null) {
   number = number.replace(/[^0-9]/g, '')
@@ -1917,6 +2038,11 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
           }
         }
       }
+
+      // Notif realtime ke semua owner di config.owners[] — fresh pairing & reconnect
+      try {
+        await sendOwnerNotif(mainBotSock, msgOwnerConnected(number, !isFreshPairing), [number])
+      } catch {}
     }
 
     /* ===== DISCONNECTED ===== */
@@ -2051,6 +2177,11 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
             }
           }
         }
+
+        // Notif realtime logout ke semua owner di config.owners[]
+        try {
+          await sendOwnerNotif(mainBotSock, msgOwnerLogout(number), [number])
+        } catch {}
 
         // BARU setelah notif terkirim: tutup socket & hapus sesi
         cleanupSocket()
