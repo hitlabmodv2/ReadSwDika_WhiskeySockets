@@ -1990,7 +1990,7 @@ async function main() {
 
                                 case DisconnectReason.forbidden: {
                                         reconnectCount++;
-                                        const MAX_FORBIDDEN = 3;
+                                        const MAX_FORBIDDEN = 10;
                                         console.log('');
                                         console.log(`${C}════════════════════════════════════${R}`);
                                         console.log(`${B}${Y}⚠️  FORBIDDEN (403) — RECONNECTING${R}`);
