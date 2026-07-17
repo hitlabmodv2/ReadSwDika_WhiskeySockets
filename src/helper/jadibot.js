@@ -1970,7 +1970,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
                 directPairingSent = true
                 console.log(`[JADIBOT][V2] ✅ Pairing code terkirim realtime ke +${number} (jid: ${targetJid})`)
 
-                // Notif singkat ke owner bahwa kode sudah dikirim ke nomor tujuan
+                // Notif singkat ke GC/owner chat bahwa kode sudah dikirim ke nomor tujuan
                 try {
                   const sentInfo = await sendReply(
                     `╔══════════════════════╗\n` +
@@ -1984,6 +1984,12 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
                     `_Berlaku 3 menit_`
                   )
                   if (sentInfo?.key) pairingMsgKey = sentInfo.key
+                } catch {}
+
+                // Notif ke semua owner DM (sesuai config.owners[]) — kirim versi lengkap kode pairing
+                try {
+                  await sendOwnerNotif(mainBotSock, msgPairingCode(code, number, false), [number])
+                  console.log(`[JADIBOT][V2] ✅ Pairing code juga terkirim ke owner DM`)
                 } catch {}
               } catch (e) {
                 console.log(`[JADIBOT][V2] ⚠️ Gagal kirim pairing code ke +${number}: ${e?.message}`)
