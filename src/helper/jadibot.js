@@ -1986,11 +1986,6 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
                   if (sentInfo?.key) pairingMsgKey = sentInfo.key
                 } catch {}
 
-                // Notif ke semua owner DM (sesuai config.owners[]) — kirim versi lengkap kode pairing
-                try {
-                  await sendOwnerNotif(mainBotSock, msgPairingCode(code, number, false), [number])
-                  console.log(`[JADIBOT][V2] ✅ Pairing code juga terkirim ke owner DM`)
-                } catch {}
               } catch (e) {
                 console.log(`[JADIBOT][V2] ⚠️ Gagal kirim pairing code ke +${number}: ${e?.message}`)
                 // Fallback: kirim ke GC/owner jika pengiriman langsung gagal
