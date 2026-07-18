@@ -1,10 +1,10 @@
 📢 *INFORMASI RILIS*
-_📅 Senin, 13 Juli 2026 (update terakhir: Kamis, 16 Juli 2026)_ 🌙
+_📅 Senin, 13 Juli 2026 (update terakhir: Jumat, 18 Juli 2026)_ 🌙
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V26*
 ✨ *5 Fitur Baru*
 🔧 *10 Bug/Error Fix*
-🚀 *8 Perubahan*
+🚀 *9 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -190,3 +190,13 @@ _Tombol pilihan (single-select) di 4 perintah ini sebelumnya pakai teks polos, b
 2. Tanda centang aktif (✓), emoji, dan angka (detik/interval) sengaja TIDAK ikut diubah — supaya logika status aktif/nonaktif dan penomoran tetap akurat, tidak ada risiko salah baca oleh sistem
 3. Sudah disimulasikan langsung lewat skrip yang meniru pembuatan tombol asli untuk keempat perintah — hasil tampilan dicek satu-satu, tidak ada error saat bot direstart
 > `.readsw`, `.online`, `.typing`, dan `.recording` sekarang tampil lebih keren di tombolnya, tanpa mengubah cara kerja atau bikin error
+
+*9. ⬇️ .ig — Ganti Primary Scraper Instagram ke API Baru (Lebih Stabil, Paralel, Fallback Otomatis)*
+_Scraper lama (vdraw) kadang lambat atau gagal total. Sekarang pakai API baru sebagai sumber utama, dengan dua lapis fallback supaya `.ig` tetap jalan meski satu sumber bermasalah:_
+1. Primary scraper diganti ke `alwayscodex savefrom API` — lebih stabil untuk video/reel, URL media langsung bisa diakses tanpa redirect
+2. Kalau API utama gagal/kosong, otomatis coba fallback pertama: `vdraw.ai`
+3. Kalau vdraw juga gagal, otomatis coba fallback kedua: `archive.lick.eu.org`
+4. Ketiga sumber di-fetch *secara paralel* (`Promise.allSettled`) — tidak nunggu satu-satu, lebih cepat, hasil terbaik yang dipakai
+5. Audio tetap diekstrak via `ffmpeg` dari URL video (API audio return kosong — sudah dites & dikonfirmasi)
+6. Thumbnail, Gemini vision caption, dan fallback caption tetap jalan seperti sebelumnya — tidak ada fitur yang hilang
+> `.ig` sekarang lebih jarang gagal — kalau satu sumber down, dua lapis cadangan langsung ambil alih secara otomatis
