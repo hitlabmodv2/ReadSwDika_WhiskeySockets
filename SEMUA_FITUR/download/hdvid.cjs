@@ -71,25 +71,38 @@ async function enhanceImageBuffer(buffer, mimeType = 'image/jpeg') {
 
 // ── Parse quality level dari query ─────────────────────────────────────────
 // Contoh input: '1k', '2k', '3k', '4x', 'max'
+// Semua level punya width tetap — konsisten & predictable
 function parseQuality(query) {
     if (!query) return null;
     const q = query.trim().toLowerCase().split(/\s+/)[0];
     const map = {
-        '1k' : { label: '1K',  width: 1024  },
-        '2k' : { label: '2K',  width: 2048  },
-        '3k' : { label: '3K',  width: 3072  },
-        '4x' : { label: '4X',  width: 4096  },
-        'max': { label: 'MAX', width: null   },
+        '1k' : { label: '1K',  width: 1024 },
+        '2k' : { label: '2K',  width: 2048 },
+        '3k' : { label: '3K',  width: 3072 },
+        '4x' : { label: '4X',  width: 4096 },
+        'max': { label: 'MAX', width: 4096 }, // FIX Bug 3: max = 4096px, bukan null (hasil random)
     };
     return map[q] ?? null;
 }
 
-// ── Resize gambar via weserv.nl (no extra npm dep, pure fetch) ─────────────
-// Perlu upload buffer ke freeimage dulu biar dapat public URL
+// ── Resize gambar via images.weserv.nl (no extra npm dep, pure fetch) ──────
+// FIX Bug 1: weserv.nl butuh format ssl:host/path bukan https://host/path
+// FIX Bug 2: hapus &we — kita INGIN upscale, flag itu justru blokir resize ke atas
 async function resizeViaWeserv(buffer, targetWidth, mimeType = 'image/jpeg') {
     const publicUrl = await uploadToFreeimage(buffer, mimeType);
     console.log('[HD] Upload resize source OK:', publicUrl);
-    const weservUrl = `https://images.weserv.nl/?url=${encodeURIComponent(publicUrl)}&w=${targetWidth}&output=jpg&q=95&we`;
+
+    // Konversi URL ke format yang diterima weserv.nl
+    // https://foo.com/img.jpg  → ssl:foo.com/img.jpg
+    // http://foo.com/img.jpg   → foo.com/img.jpg
+    let weservTarget = publicUrl;
+    if (weservTarget.startsWith('https://')) {
+        weservTarget = 'ssl:' + weservTarget.slice(8);
+    } else if (weservTarget.startsWith('http://')) {
+        weservTarget = weservTarget.slice(7);
+    }
+
+    const weservUrl = `https://images.weserv.nl/?url=${encodeURIComponent(weservTarget)}&w=${targetWidth}&output=jpg&q=95`;
     const res = await fetch(weservUrl, {
         signal : AbortSignal.timeout(40000),
         headers: { 'User-Agent': 'Mozilla/5.0' },
@@ -272,10 +285,10 @@ async function handleHdvideo({ hisoka, m, query, tolak, logCommand, fs, path, qu
 
             if (!imgBuffer || imgBuffer.length === 0) throw new Error('Hasil gambar kosong');
 
-            // ── Resize ke quality target (kalau ada dan bukan MAX) ─────────
+            // ── Resize ke quality target (semua level termasuk max punya width) ──
             let finalBuffer = imgBuffer;
-            if (qual && qual.width) {
-                await m.reply({ edit: loadMsg.key, text: `⏳ Menyesuaikan resolusi ke ${qualLabel} (${qual.width}px)...` }).catch(() => {});
+            if (qual) {
+                await m.reply({ edit: loadMsg.key, text: `⏳ Menyesuaikan resolusi ke ${qualLabel} (~${qual.width}px)...` }).catch(() => {});
                 try {
                     finalBuffer = await resizeViaWeserv(imgBuffer, qual.width);
                     console.log('[HD] ✅ Resize OK, size:', finalBuffer.length);
@@ -287,7 +300,7 @@ async function handleHdvideo({ hisoka, m, query, tolak, logCommand, fs, path, qu
 
             // ── Caption sesuai quality ─────────────────────────────────────
             const captionInfo = qual
-                ? `📐 Resolusi: *${qualLabel}*${qual.width ? ` (~${qual.width}px)` : ' (Full)'}`
+                ? `📐 Resolusi: *${qualLabel}* (~${qual.width}px)`
                 : `📐 Resolusi: *AI Enhanced*`;
 
             await m.reply({ edit: loadMsg.key, text: '✅ Selesai!' }).catch(() => {});
