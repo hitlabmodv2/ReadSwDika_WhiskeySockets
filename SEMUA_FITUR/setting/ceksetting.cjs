@@ -24,7 +24,7 @@
  */
 'use strict';
 
-async function handleCeksetting({ hisoka, m, tolak, logCommand, getJadibotNumber, getJadibotReadsw, getJadibotAntidel, getJadibotAnticall, getJadibotAnticallvid, getJadibotAutoOnline, getJadibotAutoTyping, getJadibotAutoRecording, listJadibotEmojis }) {
+async function handleCeksetting({ hisoka, m, tolak, logCommand, getJadibotNumber, getJadibotReadsw, getJadibotAntidel, getJadibotAnticall, getJadibotAnticallvid, getJadibotAutoOnline, getJadibotAutoTyping, getJadibotAutoRecording, getJadibotReadchat, listJadibotEmojis }) {
         if (hisoka?.isMainBot !== false) return;
         const _isJadibotUserCtx_ceks = (() => {
                 const _sn = (m.sender || '').split('@')[0].split(':')[0];
@@ -41,6 +41,7 @@ async function handleCeksetting({ hisoka, m, tolak, logCommand, getJadibotNumber
                 const ao        = getJadibotAutoOnline(jadibotNum);
                 const at        = getJadibotAutoTyping(jadibotNum);
                 const ar        = getJadibotAutoRecording(jadibotNum);
+                const rc        = getJadibotReadchat(jadibotNum);
 
                 const yn  = (v) => v ? '✅ ON' : '❌ OFF';
                 const yns = (v) => v !== false ? '✅' : '❌';
@@ -72,6 +73,9 @@ async function handleCeksetting({ hisoka, m, tolak, logCommand, getJadibotNumber
                 txt += `│   └ Group    : ${yns(ar.groupChat)}\n`;
                 txt += `│   └ Delay    : ${ar.delaySeconds || 5} detik\n`;
                 txt += `│\n`;
+                txt += `│ 👁️ *Read Chat*    : ${yn(rc.enabled)}\n`;
+                txt += `│   └ Berlaku : Private chat saja\n`;
+                txt += `│\n`;
                 const emojiData = listJadibotEmojis(jadibotNum);
                 const _eMode = emojiData.mode === 'custom' ? '🎨 Custom' : '🌐 Default (bot utama)';
                 txt += `│ 😊 *Emoji SW* : ${_eMode}\n`;
@@ -81,7 +85,7 @@ async function handleCeksetting({ hisoka, m, tolak, logCommand, getJadibotNumber
                 txt += `│ *Ubah via:*\n`;
                 txt += `│ .readsw • .antidel • .anticall\n`;
                 txt += `│ .anticallvid • .online\n`;
-                txt += `│ .typing • .recording\n`;
+                txt += `│ .typing • .recording • .readchat\n`;
                 txt += `│ .emojidefault • .emojicustom\n`;
                 txt += `│ .emojiadd • .emojidel\n`;
                 txt += `│ .emojiclear • .emojilist\n`;
