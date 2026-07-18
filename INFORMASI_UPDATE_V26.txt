@@ -3,200 +3,183 @@ _📅 Senin, 13 Juli 2026 (update terakhir: Jumat, 18 Juli 2026)_ 🌙
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V26*
 ✨ *5 Fitur Baru*
-🔧 *10 Bug/Error Fix*
-🚀 *9 Perubahan*
+🐛 *9 Bug Fix*
+❌ *2 Error Fix*
+🚀 *10 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
 *1. ⏬ .downbot — Kurangi Durasi JadiBot*
-_Kebalikan dari `.upbot` — sekarang durasi jadibot bisa dikurangi, bukan cuma diperpanjang:_
-1. Tambah perintah `.downbot 628xxx,<durasi>` — kurangi sisa masa aktif sesi jadibot nomor tersebut
-2. Kalau pengurangan melebihi sisa waktu, sisa langsung dianggap 0 (kedaluwarsa) — tidak pernah jadi tanggal minus, dan bot langsung dihentikan otomatis
-3. Tidak bisa dipakai ke bot berstatus *Permanent* — muncul pesan error yang jelas + saran solusi
-4. Konfirmasi setelah eksekusi tampilkan sisa waktu sebelum & sesudah, plus waktu kedaluwarsa lama & baru
-> Owner sekarang bisa presisi atur durasi jadibot orang lain, naik maupun turun
+_Kebalikan dari `.upbot` — durasi jadibot sekarang bisa dikurangi, bukan cuma diperpanjang._
+1. `.downbot 628xxx,<durasi>` → kurangi sisa masa aktif sesi tersebut
+2. Kalau pengurangan melebihi sisa waktu, sesi langsung dianggap kedaluwarsa & bot dihentikan otomatis
+3. Tidak bisa dipakai ke bot berstatus *Permanent*
+> Owner bisa presisi atur durasi jadibot naik maupun turun
 
-*2. 📋 Reply .listbot — Atur Durasi Langsung dari Daftar, Bisa Banyak Sekaligus*
-_Nggak perlu ketik ulang nomor lengkap — cukup reply pesan `.listbot`, pakai nomor urutannya:_
-1. Reply `1,3j` → target urutan 1 ditambah 3 jam (upbot)
-2. Reply `1,-3j` → target urutan 1 dikurangi 3 jam (downbot)
-3. Reply `1,p` → target urutan 1 diubah jadi Permanent
-4. Reply `3,1d,20m|1,30d` → banyak target sekaligus dalam satu reply, dipisah `|` (masing-masing boleh naik/turun/permanent, bebas dicampur)
-5. Tetap didukung format lama: reply `1` untuk stop 1 bot, `1,2,3` untuk stop beberapa bot
-6. Kalau ada target yang gagal (urutan salah, durasi salah, atau bot-nya Permanent), laporan tetap tampilkan mana yang berhasil & mana yang gagal per baris
-> Kelola banyak jadibot sekaligus dari satu balasan `.listbot`, tanpa ketik ulang nomor satu-satu
+*2. 📋 Reply .listbot — Atur Durasi Langsung dari Daftar*
+_Cukup reply pesan `.listbot` dengan nomor urutan, tidak perlu ketik ulang nomor lengkap._
+1. `1,3j` → tambah 3 jam | `1,-3j` → kurangi 3 jam | `1,p` → jadikan Permanent
+2. Banyak target sekaligus: `3,1d,20m|1,30d` dipisah `|`, boleh campur naik/turun/permanent
+3. Format lama (reply `1` atau `1,2,3` untuk stop) tetap didukung
+> Kelola banyak jadibot sekaligus dari satu balasan `.listbot`
 
-*3. 🔥🆕🔄 Animasu — Pantau 2 Widget Realtime Terpisah (Sedang Tayang & Baru Ditambah/Diperbarui)*
-_Sebelumnya notif Animasu cuma satu jenis generik dari daftar post episode. Sekarang bot memantau persis seperti struktur web-nya, 2 widget terpisah, biar tidak ada beda paham/bentrok antar kategori:_
-1. Widget *"Sedang Tayang 🔥"* di web dipantau sendiri — trigger saat ada anime baru mulai tayang, atau episode barunya rilis (label episode berubah)
-2. Widget *"Baru Ditambah & Diperbarui"* di web dipantau sendiri — trigger saat ada anime baru pertama kali masuk ke web (🆕 Baru Ditambah), atau data anime yang sudah ada berubah (🔄 Diperbarui, misal status/jumlah episode berubah)
-3. Caption notif dibedakan sesuai kategori & tipe kejadian (🔥 Episode Baru / 🔥 Anime Baru Tayang / 🆕 Baru Ditambah / 🔄 Diperbarui), lengkap dengan info "sebelumnya apa" kalau ada perubahan label
-4. Interval cek dipercepat dari 5 menit jadi *1 menit* per widget (di-stagger 15 detik antar widget) — jauh lebih dekat ke realtime tanpa membebani server Animasu
-5. `.animasu test` sekarang kirim 2 preview (satu dari tiap widget) supaya format & konektivitas kedua kategori bisa dicek langsung
-6. Dedup state dipisah per widget (`tayangState` & `updateState`) — supaya perubahan di satu widget tidak pernah memicu notif dari widget lain
-> Sudah diuji simulasi manual: deteksi "episode baru", "anime baru tayang", "baru ditambah", dan "diperbarui" semuanya akurat sebelum dipasang ke scheduler
+*3. 🔥🆕🔄 Animasu — Pantau 2 Widget Realtime Terpisah*
+_Bot sekarang memantau 2 widget sesuai struktur web-nya, bukan 1 feed generik._
+1. Widget *"Sedang Tayang 🔥"* dipantau sendiri — trigger saat anime baru tayang atau episode baru rilis
+2. Widget *"Baru Ditambah & Diperbarui"* dipantau sendiri — trigger saat ada anime baru masuk atau data berubah
+3. Interval cek dipercepat dari 5 menit → *1 menit* per widget
+> Notif Animasu sekarang akurat per kategori, tidak ada silang antara "tayang" dan "update"
 
-*4. 🔞 .hentaidad — Galeri Hentai Langsung di WhatsApp (Album 1 Paket + Fitur Cari)*
-_Perintah baru untuk browse & kirim galeri dari sumber premium 18+. Semua gambar dikirim dalam 1 album WhatsApp, bukan satu-satu:_
-1. Ketik `.hentaidad` → bot tampilkan daftar Latest Releases (judul bernomor)
-2. Ketik `.hentaidad <judul/karakter>` (contoh: `.hentaidad azur lane`) → bot cari langsung ke sumber & tampilkan daftar hasil pencarian bernomor, judul diambil asli dari sumber (bukan tebakan dari slug URL) supaya akurat
-3. Reply pesan daftar (baik dari Latest Releases maupun hasil pencarian) dengan nomor pilihan → bot mulai download & kirim
-4. Kalau pencarian tidak ketemu, bot kasih tahu jelas + saran (pakai judul lebih pendek, nama karakter asli, atau coba bahasa Inggris) — tidak pernah kirim hasil yang salah/ngasal
-5. Semua gambar dari galeri yang dipilih dikirim sebagai *1 album WhatsApp* (bukan pesan terpisah-pisah) — efisien & rapi di chat
-6. Gambar diconvert otomatis ke JPEG sebelum dikirim — cegah error "Invalid media type" dari format WebP/AVIF yang kadang dipakai sumber
-7. Header Referer di-set ke URL galeri spesifik saat download — tanpa ini server sumber return 500 dan gambar gagal diambil
-8. Tidak ada URL/domain sumber yang muncul di pesan bot — tampilan bersih, cuma judul & jumlah gambar
-> `.hentaidad` sekarang bisa browse *dan* cari — `.hentaidad azur lane` langsung nyari galeri sesuai judul, semua gambar tetap dikirim dalam 1 album sekali kirim
+*4. 🔞 .hentaidad — Galeri Hentai Album 1 Paket + Fitur Cari*
+_Browse & kirim galeri 18+. Semua gambar dikirim dalam 1 album WA, bukan satu-satu._
+1. `.hentaidad` → tampilkan Latest Releases bernomor
+2. `.hentaidad <judul>` → cari langsung, tampilkan hasil bernomor
+3. Reply nomor pilihan → bot download & kirim semua gambar sebagai 1 album
+> Bisa browse dan cari, semua gambar sekali kirim dalam 1 album
 
-*5. 🎙️ .tts — Text to Speech Bahasa Indonesia (Voice Note Asli, Tanpa Login)*
-_Perintah baru untuk ubah teks jadi voice note WhatsApp bahasa Indonesia:_
-1. Ketik `.tts <teks>` → bot generate suara bahasa Indonesia dan kirim sebagai voice note (PTT) asli — bubble bulat WA dengan gelombang suara, bukan file audio biasa dengan tombol download
-2. Pakai endpoint publik Google Translate TTS, tanpa API key/token/login — tidak kena kuota ketat per jam seperti layanan TTS gratis lain
-3. Teks panjang otomatis dipecah per potongan lalu disambung ulang jadi 1 voice note utuh, prosesnya transparan buat pengguna (tidak perlu kirim beberapa kali)
-4. Maksimal 800 karakter per perintah
-> Cukup ketik `.tts <teks>`, langsung dapat voice note bahasa Indonesia — tidak ada menu/pilihan tambahan
+*5. 🎙️ .tts — Text to Speech Bahasa Indonesia*
+_Ubah teks jadi voice note WA (bubble bulat) bahasa Indonesia, tanpa API key._
+1. `.tts <teks>` → generate suara & kirim sebagai PTT asli, maks 800 karakter
+2. Teks panjang dipecah otomatis lalu disambung jadi 1 voice note utuh
+> Langsung dapat voice note bahasa Indonesia, tidak ada menu tambahan
 
 ━━━━━━━━━━━━━━━━━━━━━━
-🔧 *BUG/ERROR FIX*
+🐛 *BUG FIX*
 ━━━━━━━━━━━━━━━━━━━━━━
-*1. 🐛 .upbot Selalu Gagal — Parameter Shadowing*
-_`handleUpbot` mendestrukturisasi `parseJadibotCommandQuery` dari parameter, padahal `message.js` tidak pernah mengirimkannya:_
-1. ~Setiap `.upbot` dipanggil, `parseJadibotCommandQuery` bernilai `undefined` di dalam fungsi → error "is not a function"~
-2. Parameter tersebut dihapus dari destrukturisasi — fungsi sekarang dipanggil langsung dari scope file (sudah tersedia di sana), tidak lagi bergantung pengiriman dari caller
-3. Fix yang sama diterapkan preventif ke `.downbot` yang baru ditambahkan, supaya tidak kena bug serupa
-> `.upbot` sekarang benar-benar bisa dipakai — sebelumnya selalu gagal
+*1. 🐛 Konek JadiBot Baru Langsung Dianggap Expired*
+_Disconnect sebentar saat proses pairing/scan QR langsung bikin sesi dihapus, padahal belum pernah konek sama sekali._
+1. ~`isJadibotExpired()` dicek saat disconnect, padahal expiry baru tersimpan setelah `connection === 'open'` — selalu kebaca "tidak ada data" → dianggap expired~
+2. Cek expired sekarang hanya jalan kalau sesi sudah pernah konek minimal sekali (`hasConnectedOnce`)
+> Proses pairing tidak lagi gagal di tengah jalan karena dikira kedaluwarsa
 
-*2. 🐛 Konek JadiBot Baru Langsung Dianggap Expired*
-_Sebelumnya, mau set durasi apapun saat `.jadibot`, kalau sempat disconnect sebentar di tengah proses pairing/scan QR (hal normal & sering terjadi), sesi langsung dianggap "expired" dan dihapus — padahal belum pernah berhasil konek sama sekali:_
-1. ~`isJadibotExpired()` dicek begitu ada disconnect, padahal data durasi/expiry baru benar-benar tersimpan SETELAH koneksi pertama berhasil (`connection === 'open'`) — jadi selalu kebaca "tidak ada data" → dianggap expired~
-2. Sekarang cek expired hanya jalan kalau sesi *sudah pernah* berhasil konek minimal sekali (`hasConnectedOnce` / `hasConnected`) — berlaku di jalur pairing-code maupun QR
-3. Disconnect biasa di tengah proses pairing/scan (sebelum pernah konek) sekarang diperlakukan sebagai reconnect normal, bukan langsung dihapus
-> `.jadibot` dengan durasi berapa pun sekarang bisa selesai proses konek dengan wajar, tidak lagi gagal di tengah jalan karena dikira sudah kedaluwarsa
+*2. 🐛 .rvo2 Tidak Merespon di JadiBot*
+_`.rvo2` jalan normal di bot utama, tapi diam saja di sesi jadibot._
+1. ~`rvo2` tidak pernah dimasukkan ke daftar `loadedCommands` jadibot — langsung diabaikan sebelum sampai handler~
+2. `rvo2` ditambahkan ke daftar `loadedCommands` jadibot (jalur pairing-code & QR)
+> `.rvo2` sekarang merespon normal di jadibot
 
-*3. 🐛 .rvo2 Tidak Merespon di JadiBot*
-_Perintah `.rvo2` normal dipakai di bot utama, tapi diam saja kalau dipakai di sesi jadibot:_
-1. ~Daftar `loadedCommands` yang dipasang ke tiap sesi jadibot (dipakai buat mengenali command yang valid) sudah punya `rvo`, `viewonce`, `vo`, tapi lupa memasukkan `rvo2` — jadi `.rvo2` di jadibot tidak pernah dianggap command, langsung diabaikan sebelum sampai ke handler~
-2. `rvo2` sekarang ditambahkan ke daftar `loadedCommands` jadibot (berlaku di jalur pairing-code maupun QR)
-> `.rvo2` sekarang merespon normal juga di sesi jadibot, sama seperti di bot utama
+*3. 🐛 .delbot Tidak Merespon di JadiBot*
+_Sama seperti kasus `.rvo2` — `.delbot` diam saja di sesi jadibot._
+1. ~`delbot` tidak ada di `jadibotAllowedCommands` maupun `loadedCommands` jadibot~
+2. `delbot` ditambahkan ke semua daftar yang diperlukan
+> `.delbot` sekarang merespon normal di jadibot
 
-*4. 🐛 .delbot Tidak Merespon di JadiBot*
-_Sama seperti kasus `.rvo2` — `.delbot` normal dipakai di bot utama, tapi diam saja di sesi jadibot:_
-1. ~`delbot` tidak pernah dimasukkan ke daftar `jadibotAllowedCommands` (message.js) maupun daftar `loadedCommands` yang dipasang ke tiap sesi jadibot (src/helper/jadibot.js) — jadi `.delbot` di jadibot tidak pernah dianggap command, langsung diabaikan sebelum sampai ke handler~
-2. `delbot` sekarang ditambahkan ke ketiga daftar tersebut (jadibotAllowedCommands, serta loadedCommands di jalur pairing-code maupun QR)
-> `.delbot` sekarang merespon normal juga di sesi jadibot, sama seperti di bot utama
+*4. 🐛 .del di Grup Salah Deteksi "Bot Bukan Admin" (Bug LID)*
+_`.del` tolak dengan pesan "Bot bukan admin", padahal bot sebenarnya admin._
+1. ~Cek admin hanya cocokkan nomor telepon — WA sekarang sering kirim identitas format LID, bukan nomor, jadi cocokkan gagal~
+2. ~Hasil cek yang salah langsung timpa cache → status admin rusak permanen sampai cache direset~
+3. Bot sekarang dicocokkan lewat nomor telepon ATAU LID; kalau tidak ketemu, cache lama tidak ditimpa
+> `.del` mendeteksi status admin bot dengan akurat, cache tidak rusak
 
-*5. 🐛 .del di Grup Salah Deteksi "Bot Bukan Admin" (Bug LID)*
-_`.del` gagal menghapus pesan di grup dengan pesan "Bot bukan admin", padahal bot sebenarnya admin — bisa kejadian di bot utama maupun jadibot:_
-1. ~Pengecekan status admin bot (`resolveIsBotGroupAdmin`) mencari bot di daftar peserta grup cuma berdasarkan nomor telepon — padahal WhatsApp sekarang sering mengirim identitas peserta grup dalam format LID, bukan nomor telepon, jadi pencocokan gagal dan bot dianggap "bukan admin" walau sebenarnya admin~
-2. ~Hasil cek yang salah itu langsung ditimpa ke cache status admin — jadi status yang tadinya benar (admin) ikut rusak dan `.del` terus gagal sampai cache direset manual~
-3. Sekarang bot dicocokkan ke peserta grup lewat nomor telepon ATAU LID (`hisoka.user?.lid`), sama seperti pola yang sudah dipakai di bagian lain
-4. Kalau bot tetap tidak ketemu di peserta grup (format tak dikenali), status admin lama di cache tidak lagi ditimpa jadi "bukan admin" — dipertahankan apa adanya
-> `.del` di grup sekarang mendeteksi status admin bot dengan akurat, tidak lagi salah tolak & tidak lagi merusak cache
+*5. 🐛 Animasu — Fallback URL Hardcode ke Domain Lama*
+_Setelah domain Animasu pindah, banyak anime gagal ditemukan._
+1. ~Regex fallback hardcode ke `v1.animasu.app` — begitu domain ganti, fallback selalu gagal~
+2. Regex fallback sekarang ikut `BASE_URL` secara dinamis
+> Cari anime & pantau episode baru akurat lagi, otomatis ikut kalau domain ganti lagi
 
-*6. 🐛 Animasu — Fallback URL Anime Hardcode ke Domain Lama*
-_Setelah domain Animasu pindah, banyak anime gagal ditemukan meski API & halaman anime-nya sendiri normal:_
-1. ~Slug anime kadang ditebak salah dari judul post (misal post bilang "season-3" tapi slug asli di web-nya "s3"), makanya ada mekanisme fallback: buka halaman episode, cari link anime yang benar dari situ~
-2. ~Tapi regex pencarian link fallback itu hardcode ke domain lama (`v1.animasu.app`) — begitu domain resmi ganti, regex tidak pernah cocok lagi, fallback selalu gagal, dan anime dengan slug tebakan salah jadi tidak pernah terkirim~
-3. Regex fallback sekarang ikut domain aktif (`BASE_URL`) secara dinamis, bukan hardcode — otomatis ikut kalau domain ganti lagi ke depannya
-> Fitur cari anime & pantau episode baru sekarang akurat lagi walau ada anime dengan slug "tebakan" yang meleset
+*6. 🐛 Banner Startup Selalu "Status: OFFLINE 🔴" Padahal Bot Online*
+_Baris `Status` di banner bot selalu tampil OFFLINE meski sudah terkoneksi._
+1. ~`Status` dibaca dari `config.autoOnline.enabled` — kalau fitur dimatikan, status terbaca OFFLINE~
+2. `Status` sekarang selalu `ONLINE 🟢` (banner hanya muncul setelah connect berhasil)
+3. Setting auto-online dipindah ke baris baru `AutoOnl` agar tidak bingungkan status koneksi
+> Banner sekarang informatif dan akurat
 
-*7. 🐛🔴 JadiBot Stuck Tidak Connect Setelah Restart (Bug Serius — Bisa Jatuhkan Seluruh Bot)*
-_Beberapa sesi jadibot (dari sekian yang tersimpan, misal 10 sesi) kadang stuck tidak pernah terhubung lagi setelah bot di-restart, terus-menerus, walau sesi lain baik-baik saja:_
-1. ~`startJadibot()` adalah fungsi *async*, tapi dipanggil TANPA `await`/`.catch()` di 3 tempat: proses restore semua jadibot saat bot baru nyala, watchdog retry startup, dan reconnect otomatis setelah disconnect~
-2. ~Akibatnya, kalau ada 1 sesi yang error saat proses start (misal file sesi corrupt, gagal baca creds, dll), error itu jadi "unhandled promise rejection" yang TIDAK pernah tertangkap `try/catch` di pemanggilnya~
-3. ~Sejak Node.js versi 15+, unhandled rejection seperti ini akan MEMATIKAN SELURUH PROSES bot (bukan cuma 1 sesi jadibot yang gagal) — bot lalu di-restart otomatis oleh `start-ptero.sh`, mulai proses restore jadibot dari awal lagi~
-4. ~Kalau bot restore jadibot secara berurutan dengan jeda (staggered) dan proses crash duluan di tengah giliran, sesi-sesi jadibot yang belum kebagian giliran start SAMA SEKALI tidak sempat dicoba di run itu — dan kalau sesi yang bikin crash tetap ada di posisi sama tiap restart, sesi-sesi setelahnya jadi "stuck" terus-menerus tiap kali bot restart~
-5. Ditambahkan guard global (`process.on('unhandledRejection'/'uncaughtException')`) — error yang lolos sekarang cuma dicatat ke log, tidak lagi mematikan seluruh bot
-6. Ketiga pemanggilan `startJadibot()` yang tadinya tanpa `.catch()` sekarang dijaga — error di 1 sesi jadibot sekarang murni gagal untuk sesi itu saja, tidak menyeret sesi lain
-> Sudah diuji simulasi: skenario 1 sesi "error" di tengah proses start banyak sesi sekaligus — sekarang sesi lain tetap lanjut diproses normal, proses bot tidak ikut mati
+*7. 🐛 .online off — Presence Masih Bocor ke Kontak*
+_Mode stealth aktif tapi kontak masih sesekali lihat bot "online"._
+1. ~`markOnlineOnConnect: true` → Baileys kirim `available` otomatis setiap reconnect~
+2. ~Auto Typing & Interactive Reply kirim `composing` walau mode off — kontak ikut lihat "online"~
+3. `markOnlineOnConnect` sekarang kondisional; flag `__stealthMode` ditambah ke socket; semua presence di-block saat stealth
+> Mode `.online off` benar-benar stealth — tidak ada presence yang bocor dari mana pun
 
-*9. 🐛 Banner Startup Selalu Tampil "Status: OFFLINE 🔴" Padahal Bot Aktif*
-_Baris `Status` di banner bot aktif selalu menampilkan OFFLINE 🔴 meski bot sudah terkoneksi penuh — karena nilainya diambil dari setting fitur auto-online, bukan dari status koneksi WA:_
-1. ~`Status` dibaca dari `config.autoOnline.enabled` — kalau fitur dimatikan, status ikut terbaca OFF/OFFLINE, padahal bot jelas sudah online karena banner itu sendiri baru muncul setelah connect berhasil~
-2. Baris `Status` sekarang selalu tampil `ONLINE 🟢` — karena banner hanya bisa muncul saat bot benar-benar sudah terhubung ke server WA
-3. Setting fitur auto-online dipindah ke baris baru `AutoOnl` (ON 🟢 atau OFF 🙈 (stealth)) — terpisah dari status koneksi, tidak saling bingungkan
-> Banner sekarang informatif: _Status_ = kondisi koneksi WA, _AutoOnl_ = pengaturan fitur visibilitas online
+*8. 🐛 Notif Retry Story Tidak Tampilkan Mode/Reaksi*
+_Kotak notif "Retry" tidak pernah tampilkan info Mode & Reaksi, beda dari notif biasa._
+1. ~Kotak retry cuma tampilkan label generik `Berhasil : Retry ♻️` tanpa info Mode/Reaksi~
+2. Kotak retry sekarang ikut tampilkan baris *Mode* dan *Reaksi* sesuai kondisi setting saat retry terjadi
+> Notif retry konsisten dengan notif biasa, tidak dikira bug
 
-*10. 🐛 .online off — Kontak Masih Lihat Bot "Online" Padahal Mode Stealth Aktif*
-_Bot mode stealth (`.online off`) tapi kontak masih sesekali melihat status "online" di WA — terjadi dari tiga sumber sekaligus:_
-1. ~`markOnlineOnConnect: true` → Baileys otomatis kirim `available` di SETIAP reconnect (WA sering reconnect), sehingga kontak sekilas lihat "online" sebelum kode sempat kirim `unavailable`~
-2. ~Fitur Auto Typing (`event.js`) kirim `composing` ke kontak saat bot proses pesan masuk — presence ini juga memicu tampilan "online" di header chat kontak~
-3. ~Fitur Interactive Reply (`interactive-msg.cjs`) kirim `composing` setiap bot mau membalas command — sama-sama bikin kontak lihat "online"~
-4. ~Ada sisa panggilan `sendPresenceUpdate('available')` di `cekauto-cmd.cjs` (jalur fallback) yang juga bocorkan status online~
-5. `markOnlineOnConnect` sekarang kondisional: `false` saat mode off → Baileys tidak pernah kirim `available` otomatis saat reconnect
-6. Ditambahkan flag `__stealthMode` langsung ke object socket (bot utama & tiap jadibot) — di-set setiap kali `startAutoOnline` / `startJadibotAutoOnline` dipanggil
-7. `event.js` (Auto Typing/Recording) dan `interactive-msg.cjs` (composing reply) sekarang cek `hisoka.__stealthMode` sebelum kirim presence apapun — jika stealth, seluruh blok dilewati
-8. Sisa panggilan `sendPresenceUpdate('available')` di `cekauto-cmd.cjs` dihapus
-9. `updateOnlinePrivacy('all')` dipanggil saat bot connect untuk reset setting privacy lama dari iterasi sebelumnya — mencegah status "terakhir dilihat" muncul blank/kosong di kontak
-> Mode `.online off` sekarang benar-benar stealth: kontak langsung lihat OFFLINE tanpa jeda, dan tidak ada presence apapun yang bocor dari fitur lain
+*9. 🐛 .fb Tidak Merespon sama Sekali*
+_Perintah `.fb` terdaftar di allowed list tapi tidak pernah diproses._
+1. ~Case handler di switch tertulis `'fb1'` bukan `'fb'` — tidak pernah cocok saat user ketik `.fb`~
+2. Diperbaiki ke `case 'fb': case 'facebook': case 'fbdl':` dan ketiganya ditambah ke allowed list
+> `.fb`, `.facebook`, `.fbdl` sekarang merespon normal
 
-*8. 🐛 Notif Retry AutoReadStoryWhatsApp Tidak Tampilkan Mode/Reaksi (Bikin Dikira Bug)*
-_Kotak notif ringkasan "Retry" (dikirim saat ada story yang sempat gagal lalu berhasil di-retry) tidak pernah menampilkan info Mode maupun Reaksi — beda dari kotak notif biasa yang selalu jelas menampilkan "Mode: Read Only / Read+Reaction" dan "Reaksi: Off / [emoji]":_
-1. ~Kotak retry cuma nampilkan label generik `Berhasil : Retry ♻️` tanpa info Mode/Reaksi — jadi waktu mode di-set Read Only (tanpa reaksi), notif retry-nya kelihatan "polos" tanpa konfirmasi, bikin terkesan seperti ada yang salah/bug walau sebenarnya perilakunya sudah benar (tidak kirim reaksi)~
-2. Kotak retry sekarang ikut menampilkan baris *Mode* dan *Reaksi*, dihitung dari kondisi setting SAAT retry itu terjadi (bukan label statis) — Read Only akan selalu tampil "Reaksi: Off ❌", Read+Reaction akan tampil "Reaksi: Retry Berhasil ♻️" kalau reaksinya berhasil terkirim
-> Notif retry sekarang akurat & konsisten dengan notif biasa — di mode Read Only jelas kelihatan tidak ada reaksi (bukan bug), di mode Read+Reaction jelas kelihatan reaksinya berhasil retry atau tidak
+━━━━━━━━━━━━━━━━━━━━━━
+❌ *ERROR FIX*
+━━━━━━━━━━━━━━━━━━━━━━
+*1. ❌ .upbot Selalu Gagal — Parameter Shadowing*
+_Setiap `.upbot` dipanggil langsung error "is not a function"._
+1. ~`handleUpbot` destrukturisasi `parseJadibotCommandQuery` dari parameter, padahal `message.js` tidak pernah kirim — nilainya `undefined` → crash~
+2. Parameter dihapus dari destrukturisasi; fungsi dipanggil langsung dari scope file
+> `.upbot` sekarang bisa dipakai — sebelumnya selalu crash
+
+*2. ❌ JadiBot Stuck / Seluruh Bot Crash saat Restart*
+_1 sesi jadibot yang error saat startup bisa mematikan seluruh proses bot._
+1. ~`startJadibot()` dipanggil tanpa `.catch()` di 3 tempat — error jadi unhandled rejection~
+2. ~Node.js 15+ langsung matikan proses saat ada unhandled rejection → bot restart, siklus crash berulang~
+3. Ditambahkan `process.on('unhandledRejection')` global; ketiga pemanggilan `startJadibot()` sekarang dijaga `.catch()`
+> Error di 1 sesi jadibot tidak lagi menyeret sesi lain atau mematikan seluruh bot
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *PERUBAHAN*
 ━━━━━━━━━━━━━━━━━━━━━━
-*1. 🧮 Durasi Gabungan (Compound) untuk .jadibot / .upbot / .downbot*
-_Durasi sekarang bisa digabung beberapa satuan sekaligus, tidak cuma satu unit:_
-1. Format baru: `1h,20m` atau `1h.20m` = 1 hari + 20 menit (dijumlahkan)
-2. Pemisah antar-satuan boleh koma `,` ATAU titik `.` — dua-duanya berarti sama, bisa dicampur
-3. Format lama (satu satuan, nomor dipisah koma/titik seperti `628xxx,1h`) tetap didukung, tidak ada yang rusak
-4. Berlaku konsisten di `.jadibot`, `.upbot`, dan `.downbot` — satu fungsi parsing yang sama dipakai semuanya
+*1. 🧮 Durasi Gabungan untuk .jadibot / .upbot / .downbot*
+_Durasi sekarang bisa digabung beberapa satuan sekaligus._
+1. Format baru: `1h,20m` atau `1h.20m` = 1 jam + 20 menit (dijumlahkan)
+2. Format lama tetap didukung, tidak ada yang rusak
+> Berlaku konsisten di `.jadibot`, `.upbot`, dan `.downbot`
 
-*2. 📋 Menu — Info .upbot & .downbot*
-_Menu bantuan diperbarui supaya kedua perintah ini terlihat dan mudah ditemukan:_
+*2. 📋 Menu — Tambah Info .upbot & .downbot*
+_Menu bantuan diperbarui supaya kedua perintah ini mudah ditemukan._
 1. `menu_utama.js` — tambah baris `.upbot` dan `.downbot` di bagian JadiBot
-2. `menupages.cjs` — ringkasan JadiBot diperbarui menyebut format `upbot [nomor],[durasi]` dan `downbot [nomor],[durasi]`
+2. `menupages.cjs` — ringkasan JadiBot diperbarui dengan format kedua perintah
+> Pengguna bisa langsung tahu format perintah dari menu
 
 *3. 🌐 Animasu — Ganti Domain ke v1.animasu.work*
-_Domain lama sudah tidak dipakai, semua sumber Animasu dialihkan ke domain baru:_
-1. Base URL scraper diganti dari `v1.animasu.app` ke `v1.animasu.work`
-2. Sudah dites simulasi ambil episode terbaru + fallback slug — hasil akurat, caption & gambar tampil normal
-> `.animasu` (cari, pantau episode baru, cek status tayang) tetap jalan normal di domain baru
+_Domain lama tidak dipakai, semua sumber dialihkan ke domain baru._
+1. Base URL diganti dari `v1.animasu.app` → `v1.animasu.work`
+> `.animasu` tetap jalan normal di domain baru
 
-*4. 🎨 Rapihkan Kotak Notif Story Grup (Nama Grup Bikin Baris "Mode" Kepanjangan)*
-_Di story Protocol GC (story dari grup), baris `Mode` menampilkan gabungan status Mode + nama grup dalam 1 baris (contoh: `Read+Reaction ✓ [📢 ★ Just for fun]`) — kalau nama grupnya panjang, baris jadi kepanjangan & box kelihatan berantakan/miring:_
-1. Nama grup ditempel langsung ke isi field `Mode` pakai kurung siku → sekarang punya baris sendiri: *NamaGrup*
-2. Baris `Mode` kembali bersih cuma nampilkan status Read Only/Read+Reaction, dan kalau nama grupnya kepanjangan otomatis dipotong rapi (dengan `···`) supaya box tetap rapi tidak melebar
-> Kotak notif story grup sekarang rapi & akurat, tidak ada lagi baris yang "tumpah" karena nama grup panjang
+*4. 🎨 Rapihkan Kotak Notif Story Grup*
+_Nama grup panjang bikin baris "Mode" kepanjangan & kotak berantakan._
+1. Nama grup dipindah ke baris sendiri (*NamaGrup*), bukan ditempel ke baris Mode
+2. Baris Mode kembali bersih; nama grup yang terlalu panjang dipotong rapi (`···`)
+> Kotak notif story grup sekarang rapi di semua HP
 
-*5. 🎨 Rapihkan Kotak `.ceksesi` — Hapus Border Kotak-kotak, Ganti Format WA Asli*
-_Pesan `.ceksesi` (termasuk sub-menu Memory dan Sessionstat) sebelumnya pakai karakter garis kotak (╭╮╰╯│├┤═║╠╣) yang di banyak HP/tampilan WA malah kelihatan berantakan atau kepotong:_
-1. Semua karakter garis kotak dihapus dari `handleMemory`, `handleSessionstat`, dan `handleCeksesi`
-2. Diganti pakai format teks WA asli — *bold* untuk label/nilai penting, _italic_ untuk catatan, daftar bernomor untuk rincian berurutan, dan `> quote` untuk kesimpulan
-> `.ceksesi` sekarang tampil rapi & konsisten di semua device, tanpa border yang bisa berantakan
+*5. 🎨 Rapihkan Kotak .ceksesi*
+_Karakter garis kotak (╭╮╰╯│) tampil berantakan di banyak HP WA._
+1. Semua karakter border dihapus dari `handleMemory`, `handleSessionstat`, `handleCeksesi`
+2. Diganti format WA asli: *bold*, _italic_, daftar bernomor, `> quote`
+> `.ceksesi` tampil rapi & konsisten di semua device
 
-*6. 🔍 Klarifikasi `.clearsesi` / `.ceksesi` — Bukan Bug, Perilaku Normal*
-_Sempat kelihatan seperti `.clearsesi` tidak benar-benar membersihkan karena `.ceksesi` habis itu masih menunjukkan data "utuh":_
-1. Sudah dites langsung lewat simulasi ke fungsi pembersih sesi (`clearCacheInPlace`) dan fungsi cek ukuran (`getSizeReport`) — keduanya kerja di data yang sama persis, dan `.clearsesi` terbukti benar-benar mengosongkan cache kontak/grup/kunci baik di memory maupun di file, seketika
-2. Data kelihatan "penuh lagi" setelah itu karena WhatsApp/Baileys otomatis mengisi ulang cache kontak & grup begitu ada aktivitas (pesan masuk, info grup diminta, dll) — ini memang cara kerja normal, bukan `.clearsesi` yang gagal
-3. Tidak ada perubahan kode dari poin ini — murni investigasi & konfirmasi, supaya tidak disangka bug ke depannya
-> `.clearsesi` tetap bekerja benar; cache yang cepat terisi lagi adalah perilaku normal Baileys, bukan kegagalan pembersihan
+*6. 🔍 Klarifikasi .clearsesi — Bukan Bug*
+_Data kelihatan "penuh lagi" setelah `.clearsesi` bukan berarti pembersihan gagal._
+1. `.clearsesi` terbukti benar-benar mengosongkan cache seketika
+2. Data cepat terisi lagi karena Baileys otomatis refill saat ada aktivitas WA — perilaku normal
+> Tidak ada perubahan kode; murni investigasi & konfirmasi
 
-*8. 🎛️ Perilaku `.online off` — Stealth Total, Tidak Ada Presence yang Bocor*
-_Mode `.online off` sekarang benar-benar menyembunyikan aktivitas bot dari kontak:_
-1. Saat mode off: bot kirim `unavailable` sekali saat connect → kontak langsung lihat OFFLINE, tidak ada interval/kiriman ulang
-2. WebSocket tetap hidup (keepAlive 25 detik) → Perangkat Tertaut di WA tetap tampil *"Aktif"* meski bot tidak "online" ke kontak
-3. Auto Typing dan Auto Recording otomatis dinonaktifkan saat stealth — tidak ada indikator "sedang mengetik..." atau "sedang merekam..." yang muncul ke kontak
-4. Berlaku konsisten di bot utama dan semua sesi jadibot (masing-masing punya flag `__stealthMode` sendiri)
-> Kontak: selalu lihat OFFLINE saat mode off — Perangkat Tertaut: selalu "Aktif" selama bot berjalan
+*7. ✍️ Font Keren di Tombol .readsw, .online, .typing, .recording*
+_Tombol 4 perintah ini sebelumnya pakai teks polos._
+1. Judul, footer, dan label tombol sekarang pakai gaya *Bold Sans* (dipinjam dari fitur `.font`)
+2. Tanda centang (✓), emoji, dan angka tidak diubah — logika status tetap akurat
+> Tombol tampil lebih keren tanpa mengubah cara kerja
 
-*7. ✍️ Font Keren di Tombol `.readsw`, `.online`, `.typing`, `.recording`*
-_Tombol pilihan (single-select) di 4 perintah ini sebelumnya pakai teks polos, beda dengan `.font` yang punya banyak gaya huruf keren:_
-1. Judul kotak status, footer, judul "Pilih Pengaturan", judul tiap section, dan label tiap baris pilihan sekarang pakai gaya huruf *Bold Sans* (dipinjam dari fitur `.font` yang sudah ada, supaya konsisten & tidak menambah tabel huruf baru)
-2. Tanda centang aktif (✓), emoji, dan angka (detik/interval) sengaja TIDAK ikut diubah — supaya logika status aktif/nonaktif dan penomoran tetap akurat, tidak ada risiko salah baca oleh sistem
-3. Sudah disimulasikan langsung lewat skrip yang meniru pembuatan tombol asli untuk keempat perintah — hasil tampilan dicek satu-satu, tidak ada error saat bot direstart
-> `.readsw`, `.online`, `.typing`, dan `.recording` sekarang tampil lebih keren di tombolnya, tanpa mengubah cara kerja atau bikin error
+*8. 🎛️ Perilaku .online off — Stealth Total*
+_Rangkuman perubahan mode stealth (detail ada di Bug Fix #7)._
+1. Kontak selalu lihat OFFLINE saat mode off — tidak ada presence yang bocor
+2. WebSocket tetap hidup → Perangkat Tertaut di WA tetap tampil *"Aktif"*
+3. Auto Typing & Auto Recording otomatis nonaktif saat stealth
+> Berlaku konsisten di bot utama dan semua sesi jadibot
 
-*9. ⬇️ .ig — Ganti Primary Scraper Instagram ke API Baru (Lebih Stabil, Paralel, Fallback Otomatis)*
-_Scraper lama (vdraw) kadang lambat atau gagal total. Sekarang pakai API baru sebagai sumber utama, dengan dua lapis fallback supaya `.ig` tetap jalan meski satu sumber bermasalah:_
-1. Primary scraper diganti ke `alwayscodex savefrom API` — lebih stabil untuk video/reel, URL media langsung bisa diakses tanpa redirect
-2. Kalau API utama gagal/kosong, otomatis coba fallback pertama: `vdraw.ai`
-3. Kalau vdraw juga gagal, otomatis coba fallback kedua: `archive.lick.eu.org`
-4. Ketiga sumber di-fetch *secara paralel* (`Promise.allSettled`) — tidak nunggu satu-satu, lebih cepat, hasil terbaik yang dipakai
-5. Audio tetap diekstrak via `ffmpeg` dari URL video (API audio return kosong — sudah dites & dikonfirmasi)
-6. Thumbnail, Gemini vision caption, dan fallback caption tetap jalan seperti sebelumnya — tidak ada fitur yang hilang
-> `.ig` sekarang lebih jarang gagal — kalau satu sumber down, dua lapis cadangan langsung ambil alih secara otomatis
+*9. ⬇️ .ig — Ganti Primary Scraper Instagram*
+_Scraper lama (vdraw) kadang lambat atau gagal. Diganti ke API baru dengan 2 lapis fallback._
+1. Primary: `alwayscodex savefrom API` — lebih stabil untuk video/reel
+2. Fallback 1: `vdraw.ai` | Fallback 2: `archive.lick.eu.org`
+3. Ketiga sumber di-fetch paralel — lebih cepat, hasil terbaik yang dipakai
+> `.ig` lebih jarang gagal — kalau satu sumber down, cadangan langsung ambil alih
+
+*10. ⬇️ .fb — Ganti Primary Scraper Facebook*
+_Scraper lama kadang gagal ambil URL video. Diganti ke API baru dengan 2 lapis fallback._
+1. Primary: `alwayscodex savefrom API` — return 720p & 360p langsung
+2. Fallback 1: `archive.lick.eu.org` | Fallback 2: Chrome UA page scraping
+3. Sumber di-fetch paralel; kualitas tertinggi otomatis diprioritaskan
+> `.fb` lebih stabil — video tetap terkirim meski satu sumber bermasalah
