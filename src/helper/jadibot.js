@@ -329,12 +329,16 @@ function clearJadibotExpiryWarningTimers(number) {
 
 // ── Helper realtime: baca setting per-jadibot → list fitur aktif & berhenti ─
 // Semua fungsi notif pakai ini — tidak ada lagi hardcode daftar fitur
+// Total auto fitur: 7 (readsw, antidel, anticall, anticallvid, online, typing, recording)
+// → konsisten dengan counter di menu-cmd.cjs (_jbAutoList.length = 7)
 function buildJadibotFeatureStatus(number) {
-  const readsw     = getJadibotReadsw(number)
-  const antidel    = getJadibotAntidel(number)
-  const autoTyping = getJadibotAutoTyping(number)
-  const autoRec    = getJadibotAutoRecording(number)
-  const autoOnline = getJadibotAutoOnline(number)
+  const readsw      = getJadibotReadsw(number)
+  const antidel     = getJadibotAntidel(number)
+  const autoTyping  = getJadibotAutoTyping(number)
+  const autoRec     = getJadibotAutoRecording(number)
+  const autoOnline  = getJadibotAutoOnline(number)
+  const anticall    = getJadibotAnticall(number)
+  const anticallvid = getJadibotAnticallvid(number)
 
   const swOn    = readsw.enabled !== false
   const reactOn = swOn && readsw.autoReaction !== false
@@ -345,28 +349,34 @@ function buildJadibotFeatureStatus(number) {
     : reactOn ? `*ReadSW + ReactionSW* ✅`
               : `*ReadSW* ✅ _— tanpa reaksi_`
 
-  const antidelOn = antidel.enabled === true
-  const typingOn  = autoTyping.enabled === true
-  const recOn     = autoRec.enabled === true
-  const onlineOn  = autoOnline.enabled === true
+  const antidelOn      = antidel.enabled === true
+  const typingOn       = autoTyping.enabled === true
+  const recOn          = autoRec.enabled === true
+  const onlineOn       = autoOnline.enabled === true
+  const anticallOn     = anticall.enabled === true
+  const anticallvidOn  = anticallvid.enabled === true
 
   // Fitur yang AKTIF — numbered list, untuk notif connect/reconnect/welcome
   const activeLines = []
-  if (swOn)      activeLines.push(`👁️ ${swStatus}`)
-  if (antidelOn) activeLines.push(`🔕 *Anti-Delete* — Tangkap pesan yang dihapus`)
-  if (typingOn)  activeLines.push(`💬 *Auto Typing* — Indikator mengetik realtime`)
-  if (recOn)     activeLines.push(`🎙️ *Auto Recording* — Indikator merekam realtime`)
-  if (onlineOn)  activeLines.push(`🟢 *Auto Online* — Selalu tampil online`)
+  if (swOn)           activeLines.push(`👁️ ${swStatus}`)
+  if (antidelOn)      activeLines.push(`🔕 *Anti-Delete* — Tangkap pesan yang dihapus`)
+  if (typingOn)       activeLines.push(`💬 *Auto Typing* — Indikator mengetik realtime`)
+  if (recOn)          activeLines.push(`🎙️ *Auto Recording* — Indikator merekam realtime`)
+  if (onlineOn)       activeLines.push(`🟢 *Auto Online* — Selalu tampil online`)
+  if (anticallOn)     activeLines.push(`🚫 *Anti Call* — Tolak panggilan suara otomatis`)
+  if (anticallvidOn)  activeLines.push(`📵 *Anti Call Video* — Tolak panggilan video otomatis`)
   activeLines.push(`🤖 *Full Command Bot* — Semua perintah aktif`)
   const activeFeaturesText = activeLines.map((l, i) => `${i + 1}. ${l}`).join('\n')
 
   // Fitur yang BERHENTI — bullet ~strikethrough~, untuk notif stop/expired/warning
   // Hanya fitur yang sedang ON yang masuk daftar ini
   const stoppedLines = []
-  if (swOn)                stoppedLines.push(`~ReadSW${reactOn ? ' + ReactionSW' : ''}~`)
-  if (antidelOn)           stoppedLines.push(`~Anti-Delete~`)
-  if (typingOn || recOn)   stoppedLines.push(`~Auto Typing${recOn ? ' / Recording' : ''}~`)
-  if (onlineOn)            stoppedLines.push(`~Auto Online~`)
+  if (swOn)            stoppedLines.push(`~ReadSW${reactOn ? ' + ReactionSW' : ''}~`)
+  if (antidelOn)       stoppedLines.push(`~Anti-Delete~`)
+  if (typingOn || recOn) stoppedLines.push(`~Auto Typing${recOn ? ' / Recording' : ''}~`)
+  if (onlineOn)        stoppedLines.push(`~Auto Online~`)
+  if (anticallOn)      stoppedLines.push(`~Anti Call~`)
+  if (anticallvidOn)   stoppedLines.push(`~Anti Call Video~`)
   stoppedLines.push(`~Semua command bot~`)
   const stoppedFeaturesText = stoppedLines.map(l => `• ${l}`).join('\n')
 
@@ -1928,6 +1938,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
     'recording', 'record',
     'tt', 'ig', 'fb', 'ytmp3', 'ytmp4', 'play',
     'allunduh', 'twdl',
+    'animgif', 'animegif', 'gifanime',
     'sticker', 's',
     'wm', 'swm',
     'toimg', 'hd',
@@ -2820,6 +2831,7 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
     'recording', 'record',
     'tt', 'ig', 'fb', 'ytmp3', 'ytmp4', 'play',
     'allunduh', 'twdl',
+    'animgif', 'animegif', 'gifanime',
     'sticker', 's',
     'wm', 'swm',
     'toimg', 'hd',

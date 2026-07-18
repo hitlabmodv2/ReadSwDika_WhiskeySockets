@@ -91,6 +91,7 @@ export function getMenuJadibotBody() {
 
 ╭─「 🔤 *FONT & LOGO* 」
 ├➤ *.font [teks]*
+├➤ *.fontgen [teks]*
 ├➤ *.fontuntik [teks]*
 ├➤ *.logo [style]|[teks]*
 ╰➤ *.logo list*
