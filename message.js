@@ -432,7 +432,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                             'readchat',
                             'typing', 'typ',
                             'recording', 'record',
-                            'allunduh', 'tt', 'ig', 'fb', 'twdl', 'ytmp3', 'ytmp4', 'play',
+                            'allunduh', 'tt', 'ig', 'fb', 'facebook', 'fbdl', 'twdl', 'ytmp3', 'ytmp4', 'play',
                             'animgif', 'animegif', 'gifanime',
                             'sticker', 's',
                             'wm', 'swm',
@@ -1661,7 +1661,9 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 break;
                         }
 
-                        case 'fb1': {
+                        case 'fb':
+                        case 'facebook':
+                        case 'fbdl': {
                                 try {
                                         const { handleFacebookDl } = _require(path.resolve('./SEMUA_FITUR/download/downloader.cjs'));
                                         await handleFacebookDl(hisoka, m, query, { gemini, tolak, logCommand, buildFbVisionPrompt, buildFbCaptionPrompt, buildFbFallbackCaption, parseFbMetaHtml, formatFbCount });

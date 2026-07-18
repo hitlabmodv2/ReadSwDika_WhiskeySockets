@@ -22,18 +22,10 @@
  *  Download video/reels Facebook tanpa login
  * ───────────────────────────────
  */
-/**
- * ═══════════════════════════════════════════════════════════════
- *  Facebook Video Downloader
- *  Perintah .fb untuk download video & Reels Facebook tanpa
- *  perlu login — mendukung berbagai kualitas (SD/HD) dan kirim
- *  langsung ke WhatsApp.
- * ═══════════════════════════════════════════════════════════════
- */
 'use strict';
 
 /**
- * Handler untuk command .fb
+ * Handler untuk command .fb / .facebook / .fbdl
  * @param {object} hisoka - bot socket
  * @param {object} m       - pesan
  * @param {string} query   - URL Facebook
@@ -41,6 +33,114 @@
  *                            buildFbVisionPrompt, buildFbCaptionPrompt,
  *                            buildFbFallbackCaption, parseFbMetaHtml, formatFbCount }
  */
+
+// ── Primary scraper: alwayscodex savefrom API ─────────────────────────────────
+async function fetchAlwayscodexFb(url) {
+    try {
+        const res = await fetch('https://api.alwayscodex.my.id/api/downloader/savefrom', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url, type: 'vidio' }),
+            signal: AbortSignal.timeout(20000),
+        });
+        if (!res.ok) return null;
+        const json = await res.json();
+        if (!json?.status || !Array.isArray(json?.data) || json.data.length === 0) return null;
+
+        // Ambil video (bukan audio), urutkan kualitas tertinggi dulu
+        const videos = json.data
+            .filter(item => item.url && !item.is_audio)
+            .sort((a, b) => {
+                const qa = parseInt(a.quality) || 0;
+                const qb = parseInt(b.quality) || 0;
+                return qb - qa; // descending: 720 > 360 > 4
+            });
+
+        if (!videos.length) return null;
+
+        const best = videos[0];
+        return {
+            url      : best.url,
+            quality  : best.quality === '720' ? 'HD' : best.quality === '480' ? 'SD' : best.quality || 'SD',
+            isHD     : parseInt(best.quality) >= 480,
+            isVideo  : true,
+            title    : best.title || '',
+            thumbnail: best.thumbnail || null,
+            _source  : 'alwayscodex',
+        };
+    } catch (e) {
+        console.log('[FB] alwayscodex failed:', e.message);
+        return null;
+    }
+}
+
+// ── Fallback 1: archive.lick.eu.org ──────────────────────────────────────────
+async function fetchArchiveFb(url) {
+    try {
+        const apiUrl = `https://archive.lick.eu.org/api/download/facebook?url=${encodeURIComponent(url)}`;
+        const res = await fetch(apiUrl, { signal: AbortSignal.timeout(20000) });
+        if (!res.ok) return null;
+        const data = await res.json();
+        if (!data?.status || !data?.result?.media?.length) return null;
+
+        const mediaList = data.result.media;
+        const hdMedia   = mediaList.find(item =>
+            item.quality && (item.quality.toLowerCase().includes('hd') || item.quality.toLowerCase().includes('high'))
+        );
+        const best = hdMedia || mediaList[0];
+        if (!best?.url) return null;
+
+        return {
+            url      : best.url,
+            quality  : hdMedia ? 'HD' : 'SD',
+            isHD     : !!hdMedia,
+            isVideo  : true,
+            title    : data.result.metadata?.title || '',
+            thumbnail: data.result.metadata?.thumbnail || data.result.thumbnail || null,
+            _source  : 'archive',
+        };
+    } catch (e) {
+        console.log('[FB] archive fallback failed:', e.message);
+        return null;
+    }
+}
+
+// ── Fallback 2: Chrome UA page scraping ──────────────────────────────────────
+async function fetchChromeUAFb(url) {
+    try {
+        const axios = (await import('axios')).default;
+        const { data: pageData } = await axios.get(url, {
+            maxRedirects: 10,
+            headers: {
+                'User-Agent'     : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept'         : 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.5',
+                'sec-fetch-dest' : 'document',
+                'sec-fetch-mode' : 'navigate',
+                'sec-fetch-site' : 'none',
+            },
+            timeout: 20000,
+        });
+        const cleaned = pageData.replace(/&quot;/g, '"').replace(/&amp;/g, '&');
+        const hdMatch  = cleaned.match(/"browser_native_hd_url":"([^"]+)"/) || cleaned.match(/"playable_url_quality_hd":"([^"]+)"/);
+        const sdMatch  = cleaned.match(/"browser_native_sd_url":"([^"]+)"/) || cleaned.match(/"playable_url":"([^"]+)"/);
+        const hdUrl    = hdMatch ? hdMatch[1].replace(/\\/g, '') : null;
+        const sdUrl    = sdMatch ? sdMatch[1].replace(/\\/g, '') : null;
+        const videoUrl = hdUrl || sdUrl;
+        if (!videoUrl || !videoUrl.startsWith('https://')) return null;
+        return {
+            url    : videoUrl,
+            quality: hdUrl ? 'HD' : 'SD',
+            isHD   : !!hdUrl,
+            isVideo: true,
+            _source: 'chrome_ua',
+        };
+    } catch (e) {
+        console.log('[FB] chrome UA fallback failed:', e.message);
+        return null;
+    }
+}
+
 async function handleFacebookDl(hisoka, m, query, ctx) {
     const {
         gemini, tolak, logCommand,
@@ -71,24 +171,17 @@ async function handleFacebookDl(hisoka, m, query, ctx) {
     const isStory = fbUrl.includes('/stories/') || fbUrl.includes('story.php') || fbUrl.includes('/story/');
     const isReel  = fbUrl.includes('/reel/');
 
-    let mediaData = null;
-    let metaHtml  = '';
-
-    // Fetch media + meta HTML secara paralel
-    const [archiveResult, metaHtmlResult] = await Promise.allSettled([
-        // Method 1: archive.lick.eu.org (primary)
-        (async () => {
-            const apiUrl = `https://archive.lick.eu.org/api/download/facebook?url=${encodeURIComponent(fbUrl)}`;
-            const response = await fetch(apiUrl, { signal: AbortSignal.timeout(20000) });
-            return response.json();
-        })(),
-        // Fetch meta HTML untuk og: tags
+    // ── Fetch semua sumber paralel ────────────────────────────────────────────
+    const [acResult, archiveResult, metaHtmlResult] = await Promise.allSettled([
+        fetchAlwayscodexFb(fbUrl),
+        fetchArchiveFb(fbUrl),
+        // Fetch meta HTML untuk og: tags (caption)
         (async () => {
             const axios = (await import('axios')).default;
             const { data } = await axios.get(fbUrl, {
                 maxRedirects: 10,
                 headers: {
-                    'User-Agent': 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)',
+                    'User-Agent'     : 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)',
                     'Accept-Language': 'id-ID,id;q=0.9,en;q=0.8',
                 },
                 timeout: 15000,
@@ -97,86 +190,48 @@ async function handleFacebookDl(hisoka, m, query, ctx) {
         })(),
     ]);
 
-    // Proses archive result
-    if (archiveResult.status === 'fulfilled') {
-        const data = archiveResult.value;
-        if (data.status && data.result?.media?.length > 0) {
-            const mediaList = data.result.media;
-            const hdMedia   = mediaList.find(item =>
-                item.quality && (item.quality.toLowerCase().includes('hd') || item.quality.toLowerCase().includes('high'))
-            );
-            const bestMedia = hdMedia || mediaList[0];
-            if (bestMedia?.url) {
-                mediaData = {
-                    url      : bestMedia.url,
-                    quality  : hdMedia ? 'HD' : 'SD',
-                    isHD     : !!hdMedia,
-                    title    : data.result.metadata?.title || '',
-                    thumbnail: data.result.metadata?.thumbnail || data.result.thumbnail || null,
-                    isVideo  : true,
-                };
-            }
-        }
+    // ── Prioritas: alwayscodex → archive → chrome UA ──────────────────────────
+    let mediaData = null;
+
+    const acData = acResult.status === 'fulfilled' ? acResult.value : null;
+    if (acData?.url) {
+        mediaData = acData;
+        console.log('[FB] ✅ Scraper: alwayscodex');
     }
 
-    // Proses meta HTML
-    if (metaHtmlResult.status === 'fulfilled') {
-        metaHtml = metaHtmlResult.value || '';
-    }
-
-    // Method 2: direct page scraping dengan Chrome UA (browser_native_hd_url hanya muncul di Chrome UA)
     if (!mediaData) {
-        try {
-            const axios2 = (await import('axios')).default;
-            const { data: pageData } = await axios2.get(fbUrl, {
-                maxRedirects: 10,
-                headers: {
-                    'User-Agent'     : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                    'Accept'         : 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                    'Accept-Language': 'en-US,en;q=0.5',
-                    'sec-fetch-dest' : 'document',
-                    'sec-fetch-mode' : 'navigate',
-                    'sec-fetch-site' : 'none',
-                },
-                timeout: 20000,
-            });
-            const cleaned = pageData.replace(/&quot;/g, '"').replace(/&amp;/g, '&');
-            const hdMatch  = cleaned.match(/"browser_native_hd_url":"([^"]+)"/)  || cleaned.match(/"playable_url_quality_hd":"([^"]+)"/);
-            const sdMatch  = cleaned.match(/"browser_native_sd_url":"([^"]+)"/)  || cleaned.match(/"playable_url":"([^"]+)"/);
-            const hdUrl    = hdMatch ? hdMatch[1].replace(/\\/g, '') : null;
-            const sdUrl    = sdMatch ? sdMatch[1].replace(/\\/g, '') : null;
-            const videoUrl = hdUrl || sdUrl;
-            if (videoUrl && videoUrl.startsWith('https://')) {
-                mediaData = {
-                    url    : videoUrl,
-                    quality: hdUrl ? 'HD' : 'SD',
-                    isHD   : !!hdUrl,
-                    isVideo: true,
-                };
-                console.log('[FB] method2 Chrome UA success:', hdUrl ? 'HD' : 'SD');
-            }
-        } catch (e) {
-            console.log('[FB] method2 Chrome UA failed:', e.message);
+        const archiveData = archiveResult.status === 'fulfilled' ? archiveResult.value : null;
+        if (archiveData?.url) {
+            mediaData = archiveData;
+            console.log('[FB] ✅ Scraper: archive (fallback)');
         }
     }
+
+    if (!mediaData) {
+        // Chrome UA: jalan sequential (butuh network call baru, tidak bisa di-paralel awal)
+        mediaData = await fetchChromeUAFb(fbUrl);
+        if (mediaData) console.log('[FB] ✅ Scraper: chrome_ua (fallback)');
+    }
+
+    const metaHtml = metaHtmlResult.status === 'fulfilled' ? metaHtmlResult.value || '' : '';
 
     if (!mediaData?.url) {
         await m.reply({ edit: loadingMsg.key, text: '❌ Gagal mengunduh. Video/story mungkin private, perlu login, atau link tidak valid.' });
         return;
     }
 
-    // Parse metadata dari HTML
-    const parsedMeta = parseFbMetaHtml(metaHtml);
-    const pageTitle  = mediaData.title || parsedMeta.pageTitle || '';
-    const mediaType  = isStory ? 'story' : isReel ? 'reel' : parsedMeta.mediaType || 'video';
-    const views      = parsedMeta.views || '';
-    const quality    = mediaData.quality || '';
-    const hashtags   = parsedMeta.hashtags || [];
+    // ── Parse metadata ─────────────────────────────────────────────────────────
+    const parsedMeta  = parseFbMetaHtml(metaHtml);
+    const pageTitle   = mediaData.title || parsedMeta.pageTitle || '';
+    const mediaType   = isStory ? 'story' : isReel ? 'reel' : parsedMeta.mediaType || 'video';
+    const views       = parsedMeta.views || '';
+    const quality     = mediaData.quality || '';
+    const hashtags    = parsedMeta.hashtags || [];
     const description = parsedMeta.description || '';
 
     await m.reply({ edit: loadingMsg.key, text: '✅ Berhasil! Menganalisis konten...' });
 
-    // ── Gemini Vision: analisis thumbnail ──
+    // ── Gemini vision: analisis thumbnail ─────────────────────────────────────
     let fbVisualDesc = '';
     const thumbUrl = mediaData.thumbnail || null;
     if (thumbUrl && gemini) {
@@ -190,16 +245,12 @@ async function handleFacebookDl(hisoka, m, query, ctx) {
             const thumbBuf = Buffer.from(thumbRes.data);
             if (thumbBuf.length > 500) {
                 const mimeThumb = thumbRes.headers['content-type']?.split(';')[0] || 'image/jpeg';
-                fbVisualDesc = await gemini.askWithImage(
-                    buildFbVisionPrompt(),
-                    thumbBuf,
-                    mimeThumb,
-                );
+                fbVisualDesc = await gemini.askWithImage(buildFbVisionPrompt(), thumbBuf, mimeThumb);
             }
         } catch (_) {}
     }
 
-    // ── Generate AI caption ──
+    // ── AI caption ─────────────────────────────────────────────────────────────
     let finalCaption = buildFbFallbackCaption({ pageTitle, description, views, quality, mediaType });
 
     if (gemini) {
@@ -213,7 +264,7 @@ async function handleFacebookDl(hisoka, m, query, ctx) {
         } catch (_) {}
     }
 
-    // ── Kirim media + caption sekaligus ──
+    // ── Kirim video ────────────────────────────────────────────────────────────
     if (mediaData.isVideo !== false) {
         await hisoka.sendMessage(m.from, {
             video  : { url: mediaData.url },
