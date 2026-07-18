@@ -69,6 +69,37 @@ async function enhanceImageBuffer(buffer, mimeType = 'image/jpeg') {
     return await enhanceImageUrl(publicUrl);
 }
 
+// ── Parse quality level dari query ─────────────────────────────────────────
+// Contoh input: '1k', '2k', '3k', '4x', 'max'
+function parseQuality(query) {
+    if (!query) return null;
+    const q = query.trim().toLowerCase().split(/\s+/)[0];
+    const map = {
+        '1k' : { label: '1K',  width: 1024  },
+        '2k' : { label: '2K',  width: 2048  },
+        '3k' : { label: '3K',  width: 3072  },
+        '4x' : { label: '4X',  width: 4096  },
+        'max': { label: 'MAX', width: null   },
+    };
+    return map[q] ?? null;
+}
+
+// ── Resize gambar via weserv.nl (no extra npm dep, pure fetch) ─────────────
+// Perlu upload buffer ke freeimage dulu biar dapat public URL
+async function resizeViaWeserv(buffer, targetWidth, mimeType = 'image/jpeg') {
+    const publicUrl = await uploadToFreeimage(buffer, mimeType);
+    console.log('[HD] Upload resize source OK:', publicUrl);
+    const weservUrl = `https://images.weserv.nl/?url=${encodeURIComponent(publicUrl)}&w=${targetWidth}&output=jpg&q=95&we`;
+    const res = await fetch(weservUrl, {
+        signal : AbortSignal.timeout(40000),
+        headers: { 'User-Agent': 'Mozilla/5.0' },
+    });
+    if (!res.ok) throw new Error(`weserv resize gagal: HTTP ${res.status}`);
+    const ct = res.headers.get('content-type') || '';
+    if (!ct.includes('image/')) throw new Error(`weserv respons bukan gambar: ${ct}`);
+    return Buffer.from(await res.arrayBuffer());
+}
+
 // ── Video enhancer (tetap pakai unblurimage.ai) ────────────────────────────
 async function hdvideo(buffer) {
     const baseApi       = 'https://api.unblurimage.ai';
@@ -142,11 +173,17 @@ async function handleHdvideo({ hisoka, m, query, tolak, logCommand, fs, path, qu
         // ── Tidak ada media: tampilkan panduan ─────────────────────────────
         if (!isMediaMsg && !isQuotedMedia) {
             await tolak(hisoka, m,
-                `🖼️ *HD Enhancer*\n\n` +
+                `🖼️ *HD Enhancer — Gambar*\n\n` +
                 `Tingkatkan kualitas gambar jadi lebih tajam & jernih via AI.\n\n` +
                 `*Cara pakai:*\n` +
-                `• Kirim gambar dengan caption *.hd*\n` +
-                `• Atau reply ke gambar dengan *.hd*\n\n` +
+                `• Kirim gambar + caption *.hd* → AI enhance (default)\n` +
+                `• Atau reply gambar dengan *.hd*\n\n` +
+                `*Pilihan resolusi (khusus gambar):*\n` +
+                `• *.hd 1k* → AI enhance + resize ~1024px\n` +
+                `• *.hd 2k* → AI enhance + resize ~2048px\n` +
+                `• *.hd 3k* → AI enhance + resize ~3072px\n` +
+                `• *.hd 4x* → AI enhance + resize ~4096px\n` +
+                `• *.hd max* → AI enhance tanpa resize (full output)\n\n` +
                 `*Untuk video:*\n` +
                 `• Ketik *.hdvid* / *.vidhd* / *.hdvideo*`
             );
@@ -213,9 +250,15 @@ async function handleHdvideo({ hisoka, m, query, tolak, logCommand, fs, path, qu
             await hisoka.sendMessage(m.from, { video: videoBuffer, mimetype: 'video/mp4', caption: '✅ Video berhasil diproses ke HD!' }, { quoted: m });
             await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
 
-        // ── GAMBAR (alwayscodex AI enhance) ────────────────────────────────
+        // ── GAMBAR (alwayscodex AI enhance + optional resize by quality) ──────
         } else {
-            const loadMsg = await tolak(hisoka, m, `⏳ Mengunggah gambar untuk dienhance AI...\nMohon tunggu sebentar.`);
+            // Parse quality level dari query: 1k / 2k / 3k / 4x / max
+            const qual = parseQuality(query);
+            const qualLabel = qual ? qual.label : 'AI';
+
+            const loadMsg = await tolak(hisoka, m,
+                `⏳ Mengunggah & enhance gambar${qual ? ` ke kualitas *${qualLabel}*` : ''}...\nMohon tunggu sebentar.`
+            );
 
             let imgBuffer;
             try {
@@ -229,10 +272,28 @@ async function handleHdvideo({ hisoka, m, query, tolak, logCommand, fs, path, qu
 
             if (!imgBuffer || imgBuffer.length === 0) throw new Error('Hasil gambar kosong');
 
-            await m.reply({ edit: loadMsg.key, text: '✅ Gambar berhasil di-enhance!' }).catch(() => {});
+            // ── Resize ke quality target (kalau ada dan bukan MAX) ─────────
+            let finalBuffer = imgBuffer;
+            if (qual && qual.width) {
+                await m.reply({ edit: loadMsg.key, text: `⏳ Menyesuaikan resolusi ke ${qualLabel} (${qual.width}px)...` }).catch(() => {});
+                try {
+                    finalBuffer = await resizeViaWeserv(imgBuffer, qual.width);
+                    console.log('[HD] ✅ Resize OK, size:', finalBuffer.length);
+                } catch (resizeErr) {
+                    console.warn('[HD] resize gagal, pakai hasil AI langsung:', resizeErr.message);
+                    finalBuffer = imgBuffer; // fallback ke AI hasil tanpa resize
+                }
+            }
+
+            // ── Caption sesuai quality ─────────────────────────────────────
+            const captionInfo = qual
+                ? `📐 Resolusi: *${qualLabel}*${qual.width ? ` (~${qual.width}px)` : ' (Full)'}`
+                : `📐 Resolusi: *AI Enhanced*`;
+
+            await m.reply({ edit: loadMsg.key, text: '✅ Selesai!' }).catch(() => {});
             await hisoka.sendMessage(m.from, {
-                image  : imgBuffer,
-                caption: `✅ *Gambar berhasil dienhance AI!*\n🔗 _Powered by AlwaysCodex AI Enhance_`,
+                image   : finalBuffer,
+                caption : `✅ *Gambar berhasil dienhance!*\n${captionInfo}\n🔗 _Powered by AlwaysCodex AI Enhance_`,
                 mimetype: 'image/jpeg',
             }, { quoted: m });
             await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
