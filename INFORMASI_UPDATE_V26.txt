@@ -2,8 +2,8 @@
 _📅 Senin, 13 Juli 2026 (update terakhir: Jumat, 18 Juli 2026)_ 🌙
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V26*
-✨ *5 Fitur Baru*
-🐛 *9 Bug Fix*
+✨ *6 Fitur Baru*
+🐛 *12 Bug Fix*
 ❌ *2 Error Fix*
 🚀 *10 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -42,6 +42,16 @@ _Ubah teks jadi voice note WA (bubble bulat) bahasa Indonesia, tanpa API key._
 1. `.tts <teks>` → generate suara & kirim sebagai PTT asli, maks 800 karakter
 2. Teks panjang dipecah otomatis lalu disambung jadi 1 voice note utuh
 > Langsung dapat voice note bahasa Indonesia, tidak ada menu tambahan
+
+*6. 🖼️ .hd — Pilihan Resolusi Gambar (1K / 2K / 3K / 4X / MAX)*
+_Command `.hd` sekarang support target resolusi setelah AI enhance — bukan cuma enhance default._
+1. `.hd` → AI enhance biasa (perilaku lama, tidak berubah)
+2. `.hd 1k` → AI enhance → resize ke ~1024px (lebar)
+3. `.hd 2k` → AI enhance → resize ke ~2048px
+4. `.hd 3k` → AI enhance → resize ke ~3072px
+5. `.hd 4x` → AI enhance → resize ke ~4096px
+6. `.hd max` → AI enhance → resize ke ~4096px (resolusi maksimum)
+> Tidak butuh npm tambahan — resize via weserv.nl (pure fetch). Hanya berlaku untuk gambar; alur video (.hdvid/.hdvideo) tidak berubah
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🐛 *BUG FIX*
@@ -102,6 +112,24 @@ _Perintah `.fb` terdaftar di allowed list tapi tidak pernah diproses._
 1. ~Case handler di switch tertulis `'fb1'` bukan `'fb'` — tidak pernah cocok saat user ketik `.fb`~
 2. Diperbaiki ke `case 'fb': case 'facebook': case 'fbdl':` dan ketiganya ditambah ke allowed list
 > `.fb`, `.facebook`, `.fbdl` sekarang merespon normal
+
+*10. 🐛 .hd 1k/2k/3k/4x/max — Resize Tidak Jalan Sama Sekali (URL Format Salah)*
+_Fitur resize quality level baru tidak menghasilkan apa-apa meski tidak error._
+1. ~`resizeViaWeserv` kirim URL format `https%3A%2F%2F...` ke weserv.nl — weserv butuh format `ssl:host/path`, bukan `https://` yang di-encode biasa~
+2. URL sekarang dikonversi dulu: `https://foo.com/img.jpg` → `ssl:foo.com/img.jpg` sebelum dikirim ke weserv
+> Resize via weserv.nl sekarang benar-benar jalan untuk semua level
+
+*11. 🐛 .hd — Flag &we Blokir Resize ke Resolusi Lebih Kecil*
+_Resize dari AI output besar ke target kecil (mis. `.hd 1k`) tidak turun ke 1024px._
+1. ~Flag `&we` (withoutEnlargement) dipasang di URL weserv — flag ini blokir SEMUA perubahan ukuran, naik maupun turun~
+2. Flag `&we` dihapus; weserv sekarang bebas resize ke target width apapun
+> `.hd 1k` pada gambar AI 2000px kini benar-benar turun ke ~1024px
+
+*12. 🐛 .hd max — Resolusi Output Tidak Konsisten / Random*
+_`.hd max` kadang hasilkan gambar 600px, kadang 1200px — tidak ada patokan._
+1. ~`max` didefinisikan `width: null` → tidak ada resize → ukuran output sepenuhnya tergantung apa yang dikembalikan AI (tidak terprediksi)~
+2. `max` sekarang disamakan dengan `4x` → `width: 4096` — resolusi tetap & konsisten
+> `.hd max` selalu hasilkan gambar ~4096px, tidak random
 
 ━━━━━━━━━━━━━━━━━━━━━━
 ❌ *ERROR FIX*
