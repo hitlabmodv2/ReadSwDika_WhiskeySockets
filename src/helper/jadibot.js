@@ -327,6 +327,52 @@ function clearJadibotExpiryWarningTimers(number) {
   expiryWarningTimers.delete(number)
 }
 
+// ── Helper realtime: baca setting per-jadibot → list fitur aktif & berhenti ─
+// Semua fungsi notif pakai ini — tidak ada lagi hardcode daftar fitur
+function buildJadibotFeatureStatus(number) {
+  const readsw     = getJadibotReadsw(number)
+  const antidel    = getJadibotAntidel(number)
+  const autoTyping = getJadibotAutoTyping(number)
+  const autoRec    = getJadibotAutoRecording(number)
+  const autoOnline = getJadibotAutoOnline(number)
+
+  const swOn    = readsw.enabled !== false
+  const reactOn = swOn && readsw.autoReaction !== false
+
+  // swStatus string — format inline untuk baris fitur
+  const swStatus = !swOn
+    ? `~ReadSW~ ~ReactionSW~ _(nonaktif)_`
+    : reactOn ? `*ReadSW + ReactionSW* ✅`
+              : `*ReadSW* ✅ _— tanpa reaksi_`
+
+  const antidelOn = antidel.enabled === true
+  const typingOn  = autoTyping.enabled === true
+  const recOn     = autoRec.enabled === true
+  const onlineOn  = autoOnline.enabled === true
+
+  // Fitur yang AKTIF — numbered list, untuk notif connect/reconnect/welcome
+  const activeLines = []
+  if (swOn)      activeLines.push(`👁️ ${swStatus}`)
+  if (antidelOn) activeLines.push(`🔕 *Anti-Delete* — Tangkap pesan yang dihapus`)
+  if (typingOn)  activeLines.push(`💬 *Auto Typing* — Indikator mengetik realtime`)
+  if (recOn)     activeLines.push(`🎙️ *Auto Recording* — Indikator merekam realtime`)
+  if (onlineOn)  activeLines.push(`🟢 *Auto Online* — Selalu tampil online`)
+  activeLines.push(`🤖 *Full Command Bot* — Semua perintah aktif`)
+  const activeFeaturesText = activeLines.map((l, i) => `${i + 1}. ${l}`).join('\n')
+
+  // Fitur yang BERHENTI — bullet ~strikethrough~, untuk notif stop/expired/warning
+  // Hanya fitur yang sedang ON yang masuk daftar ini
+  const stoppedLines = []
+  if (swOn)                stoppedLines.push(`~ReadSW${reactOn ? ' + ReactionSW' : ''}~`)
+  if (antidelOn)           stoppedLines.push(`~Anti-Delete~`)
+  if (typingOn || recOn)   stoppedLines.push(`~Auto Typing${recOn ? ' / Recording' : ''}~`)
+  if (onlineOn)            stoppedLines.push(`~Auto Online~`)
+  stoppedLines.push(`~Semua command bot~`)
+  const stoppedFeaturesText = stoppedLines.map(l => `• ${l}`).join('\n')
+
+  return { activeFeaturesText, stoppedFeaturesText, swStatus, swOn, reactOn }
+}
+
 // direct=true → pesan dikirim langsung ke nomor jadibot (user)
 // direct=false → pesan dikirim ke GC/owner
 function msgJadibotExpiryWarning(number, remainingText, expiresAtText, durationLabel = '1 hari', direct = false) {
@@ -344,10 +390,7 @@ function msgJadibotExpiryWarning(number, remainingText, expiresAtText, durationL
       `📅 *Habis pada:* _${expiresAtText}_\n\n` +
       `⚠️ *Masa aktif jadibot kamu akan segera berakhir!*\n\n` +
       `_Jika tidak diperpanjang, fitur berikut akan berhenti:_\n` +
-      `• ~ReadSW + ReactionSW~\n` +
-      `• ~Anti-Delete~\n` +
-      `• ~Auto Typing / Recording~\n` +
-      `• ~Semua command bot~\n\n` +
+      `${buildJadibotFeatureStatus(number).stoppedFeaturesText}\n\n` +
       `━━━━━━━━━━━━━━━━━━━━━━\n` +
       `> 💡 _Hubungi owner sekarang untuk perpanjang masa aktif:_\n` +
       `📞 ${getOwnerContact()}\n\n` +
@@ -690,10 +733,7 @@ function msgJadibotExpired(number, direct = false) {
       `🗑️ ~Sesi otomatis dihapus dari server.~\n\n` +
       `━━━━━━━━━━━━━━━━━━━━━━\n` +
       `❌ *Fitur yang Berhenti:*\n` +
-      `• ~ReadSW + ReactionSW~\n` +
-      `• ~Anti-Delete~\n` +
-      `• ~Auto Typing / Recording~\n` +
-      `• ~Semua command bot~\n\n` +
+      `${buildJadibotFeatureStatus(number).stoppedFeaturesText}\n\n` +
       `━━━━━━━━━━━━━━━━━━━━━━\n` +
       `> 💡 _Hubungi owner untuk mengaktifkan kembali:_\n` +
       `📞 ${getOwnerContact()}\n\n` +
@@ -712,10 +752,7 @@ function msgJadibotExpired(number, direct = false) {
     `🗑️ ~Sesi dan data otomatis dihapus realtime.~\n\n` +
     `━━━━━━━━━━━━━━━━━━━━━━\n` +
     `❌ *Fitur yang Berhenti:*\n` +
-    `• ~ReadSW + ReactionSW~\n` +
-    `• ~Anti-Delete~\n` +
-    `• ~Auto Typing / Recording~\n` +
-    `• ~Semua command bot~\n\n` +
+    `${buildJadibotFeatureStatus(number).stoppedFeaturesText}\n\n` +
     `━━━━━━━━━━━━━━━━━━━━━━\n` +
     `💡 *Aktifkan Kembali:*\n` +
     `• \`.jadibot ${number} 1h\` — aktifkan 1 hari\n` +
@@ -746,10 +783,7 @@ function msgOwnerExpired(number) {
     `🗑️ ~Sesi dihapus dari server secara realtime.~\n\n` +
     `━━━━━━━━━━━━━━━━━━━━━\n` +
     `❌ *Fitur yang Berhenti di Nomor Ini:*\n` +
-    `• ~ReadSW + ReactionSW~\n` +
-    `• ~Anti-Delete~\n` +
-    `• ~Auto Typing / Recording~\n` +
-    `• ~Semua command bot~\n\n` +
+    `${buildJadibotFeatureStatus(number).stoppedFeaturesText}\n\n` +
     `━━━━━━━━━━━━━━━━━━━━━\n` +
     `${listPart}\n` +
     `━━━━━━━━━━━━━━━━━━━━━\n` +
@@ -1516,9 +1550,7 @@ function msgConnected(number) {
 
   const config = loadConfig()
   const ver = config.botVersion || 'V25'
-  const story = config.autoReadStory || {}
-  const storyOn = story.enabled !== false
-  const reactOn = storyOn && story.autoReaction !== false
+  const { activeFeaturesText } = buildJadibotFeatureStatus(number)
   const expiry = getJadibotExpiry(number)
   let expiryLine = ''
   if (expiry?.permanent === true) {
@@ -1526,15 +1558,6 @@ function msgConnected(number) {
   } else if (expiry?.expiresAt) {
     const rem = Number(expiry.expiresAt) - Date.now()
     if (rem > 0) expiryLine = `⏳ *Masa Berlaku:* ${formatRemainingTime(rem)}\n`
-  }
-
-  let swStatus
-  if (!storyOn) {
-    swStatus = `~ReadSW~ ~ReactionSW~ _(nonaktif)_`
-  } else if (reactOn) {
-    swStatus = `*ReadSW + ReactionSW* ✅`
-  } else {
-    swStatus = `*ReadSW* ✅ _— tanpa reaksi_`
   }
 
   return (
@@ -1548,10 +1571,7 @@ function msgConnected(number) {
     `🎉 *Jadibot +${masked} berhasil terhubung dan siap digunakan!*\n\n` +
     `━━━━━━━━━━━━━━━━━━━━━━\n` +
     `🤖 *Fitur Otomatis yang Aktif:*\n` +
-    `1. 👁️ ${swStatus}\n` +
-    `2. 🔕 *Anti-Delete* — Tangkap pesan yang dihapus\n` +
-    `3. 💬 *Auto Typing* — Indikator mengetik otomatis\n` +
-    `4. 🤖 *Full Command Bot* — Semua perintah tersedia\n\n` +
+    `${activeFeaturesText}\n\n` +
     `━━━━━━━━━━━━━━━━━━━━━━\n` +
     `🛠️ *Kontrol Jadibot:*\n` +
     `• \`.menu\` — Lihat semua fitur\n` +
@@ -1569,6 +1589,7 @@ function msgDirectWelcome(number) {
     hour: '2-digit', minute: '2-digit', second: '2-digit'
   })
   const ver = loadConfig().botVersion || 'V25'
+  const { activeFeaturesText } = buildJadibotFeatureStatus(number)
   const expiry = getJadibotExpiry(number)
   let expiryLine = ''
   if (expiry?.permanent === true) {
@@ -1590,10 +1611,7 @@ function msgDirectWelcome(number) {
     `\n` +
     `━━━━━━━━━━━━━━━━━━━━━━\n` +
     `✨ *Fitur yang Berjalan Otomatis di Nomormu:*\n` +
-    `1. 👁️ *ReadSW + ReactionSW* — Auto baca & reaksi status kontakmu\n` +
-    `2. 🔕 *Anti-Delete* — Tangkap pesan yang dihapus\n` +
-    `3. 💬 *Auto Typing* — Indikator mengetik realtime\n` +
-    `4. 🤖 *Full Command Bot* — Semua fitur bot bisa diakses\n\n` +
+    `${activeFeaturesText}\n\n` +
     `━━━━━━━━━━━━━━━━━━━━━━\n` +
     `📌 *Command (kirim ke bot utama):*\n` +
     `• \`.ping\` — Cek bot aktif\n` +
@@ -1634,10 +1652,7 @@ function msgLoggedOut(number, remainingList) {
     `🗑️ ~Sesi otomatis dihapus dari server.~\n\n` +
     `━━━━━━━━━━━━━━━━━━━━━━\n` +
     `❌ *Fitur yang Berhenti:*\n` +
-    `• ~ReadSW + ReactionSW~\n` +
-    `• ~Anti-Delete~\n` +
-    `• ~Auto Typing / Recording~\n` +
-    `• ~Semua command bot~\n\n` +
+    `${buildJadibotFeatureStatus(number).stoppedFeaturesText}\n\n` +
     `━━━━━━━━━━━━━━━━━━━━━━\n` +
     `${listPart}\n\n` +
     `━━━━━━━━━━━━━━━━━━━━━━\n` +
@@ -1668,10 +1683,7 @@ function msgLoggedOutDirect(number) {
     `🗑️ ~Sesi otomatis dihapus dari server.~\n\n` +
     `━━━━━━━━━━━━━━━━━━━━━━\n` +
     `❌ *Fitur yang Berhenti:*\n` +
-    `• ~ReadSW + ReactionSW~\n` +
-    `• ~Anti-Delete~\n` +
-    `• ~Auto Typing / Recording~\n` +
-    `• ~Semua command bot~\n\n` +
+    `${buildJadibotFeatureStatus(number).stoppedFeaturesText}\n\n` +
     `━━━━━━━━━━━━━━━━━━━━━━\n` +
     `> 💡 _Hubungi owner untuk mengaktifkan kembali:_\n` +
     `📞 ${getOwnerContact()}\n\n` +
@@ -1715,12 +1727,7 @@ function msgOwnerConnected(number, isReconnect = false) {
   const sisa   = !meta ? '_Tidak ada data_'
     : isPerm ? '*Permanent* ♾️'
     : `*${formatRemainingTime(Math.max(0, Number(meta.expiresAt) - Date.now()))}*`
-  const story   = cfg.autoReadStory || {}
-  const swOn    = story.enabled !== false
-  const reactOn = swOn && story.autoReaction !== false
-  const swStatus = !swOn ? '~ReadSW~ _(nonaktif)_'
-    : reactOn ? '*ReadSW + ReactionSW* ✅'
-    : '*ReadSW* ✅ _— tanpa reaksi_'
+  const { activeFeaturesText } = buildJadibotFeatureStatus(number)
 
   if (isReconnect) {
     return (
@@ -1734,10 +1741,7 @@ function msgOwnerConnected(number, isReconnect = false) {
       `> _Tidak perlu tindakan — semua fitur lanjut berjalan normal._\n\n` +
       `━━━━━━━━━━━━━━━━━━━━━\n` +
       `✨ *Fitur yang Lanjut Berjalan:*\n` +
-      `1. 👁️ ${swStatus}\n` +
-      `2. 🔕 *Anti-Delete* — Tangkap pesan yang dihapus\n` +
-      `3. 💬 *Auto Typing* — Indikator mengetik realtime\n` +
-      `4. 🤖 *Full Command Bot* — Semua perintah aktif kembali\n\n` +
+      `${activeFeaturesText}\n\n` +
       `━━━━━━━━━━━━━━━━━━━━━\n` +
       `🛠️ *Kontrol Cepat (Owner):*\n` +
       `• \`.listbot\` — Cek semua jadibot aktif\n` +
@@ -1757,10 +1761,7 @@ function msgOwnerConnected(number, isReconnect = false) {
     `🎉 *Jadibot +${masked} berhasil terhubung dan siap beroperasi!*\n\n` +
     `━━━━━━━━━━━━━━━━━━━━━\n` +
     `🤖 *Fitur Otomatis yang Berjalan:*\n` +
-    `1. 👁️ ${swStatus}\n` +
-    `2. 🔕 *Anti-Delete* — Tangkap pesan yang dihapus\n` +
-    `3. 💬 *Auto Typing* — Indikator mengetik realtime\n` +
-    `4. 🤖 *Full Command Bot* — Semua fitur via bot utama\n\n` +
+    `${activeFeaturesText}\n\n` +
     `━━━━━━━━━━━━━━━━━━━━━\n` +
     `🛠️ *Kontrol Jadibot (Owner):*\n` +
     `• \`.listbot\` — Cek semua jadibot aktif\n` +
@@ -1775,12 +1776,7 @@ function msgOwnerConnected(number, isReconnect = false) {
 function msgDirectReconnect(number) {
   const cfg    = loadConfig()
   const ver    = cfg.botVersion || 'V25'
-  const story  = cfg.autoReadStory || {}
-  const swOn   = story.enabled !== false
-  const reactOn = swOn && story.autoReaction !== false
-  const swStatus = !swOn ? '~ReadSW~ ~ReactionSW~ _(nonaktif)_'
-    : reactOn ? '*ReadSW + ReactionSW* ✅'
-    : '*ReadSW* ✅ _— tanpa reaksi_'
+  const { activeFeaturesText } = buildJadibotFeatureStatus(number)
 
   const meta   = getJadibotExpiry(number)
   const isPerm = meta?.permanent === true
@@ -1799,10 +1795,7 @@ function msgDirectReconnect(number) {
     `> _Semua fitur lanjut berjalan — tidak perlu tindakan apapun._\n\n` +
     `━━━━━━━━━━━━━━━━━━━━━\n` +
     `✨ *Fitur yang Lanjut Berjalan:*\n` +
-    `1. 👁️ ${swStatus}\n` +
-    `2. 🔕 *Anti-Delete* — Tangkap pesan yang dihapus\n` +
-    `3. 💬 *Auto Typing* — Indikator mengetik realtime\n` +
-    `4. 🤖 *Full Command Bot* — Semua perintah aktif kembali\n\n` +
+    `${activeFeaturesText}\n\n` +
     `━━━━━━━━━━━━━━━━━━━━━\n` +
     `💡 *Ingin perpanjang atau ada pertanyaan?*\n` +
     `📞 Hubungi owner: ${getOwnerContact()}\n\n` +
@@ -1833,10 +1826,7 @@ function msgOwnerLogout(number) {
     `🗑️ ~Sesi otomatis dihapus secara permanen.~\n\n` +
     `━━━━━━━━━━━━━━━━━━━━━\n` +
     `❌ *Fitur yang Berhenti di Nomor Ini:*\n` +
-    `• ~ReadSW + ReactionSW~\n` +
-    `• ~Anti-Delete~\n` +
-    `• ~Auto Typing / Recording~\n` +
-    `• ~Semua command bot~\n\n` +
+    `${buildJadibotFeatureStatus(number).stoppedFeaturesText}\n\n` +
     `━━━━━━━━━━━━━━━━━━━━━\n` +
     `${listPart}\n` +
     `━━━━━━━━━━━━━━━━━━━━━\n` +
