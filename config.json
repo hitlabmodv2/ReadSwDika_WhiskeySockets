@@ -87,7 +87,7 @@
     "enabled": false,
     "autoReply": true,
     "privateReply": false,
-    "scope": "gc",
+    "scope": "all",
     "persona": {
       "name": "WilyAI",
       "greeting": "Siap! WilyAI di sini ✨"

@@ -1,0 +1,67 @@
+{
+  "AC922028CA85D9EFC73C3224C34DC8D5": {
+    "id": "AC922028CA85D9EFC73C3224C34DC8D5",
+    "sender": "6283165814686@s.whatsapp.net",
+    "name": "الم",
+    "type": "protocolMessage",
+    "arrivedAt": "2026-07-19T05:13:55.754Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐬",
+    "source": "group",
+    "number": "6283165814686",
+    "messageKey": {
+      "remoteJid": "120363424557936431@g.us",
+      "fromMe": false,
+      "id": "AC922028CA85D9EFC73C3224C34DC8D5",
+      "participant": "74170528456875@lid",
+      "participantAlt": "6283165814686@s.whatsapp.net",
+      "addressingMode": "lid"
+    },
+    "resolvedPn": "6283165814686@s.whatsapp.net",
+    "updatedAt": "2026-07-19T05:14:12.032Z",
+    "processedAt": "2026-07-19T05:14:12.031Z"
+  },
+  "AC787C1B62711744E53574F64A24CBE6": {
+    "id": "AC787C1B62711744E53574F64A24CBE6",
+    "sender": "6283165814686@s.whatsapp.net",
+    "name": "الم",
+    "type": "videoMessage",
+    "arrivedAt": "2026-07-19T05:13:55.976Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "⏺️⏏️⏹️",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6283165814686",
+    "resolvedPn": "6283165814686@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6283165814686@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC787C1B62711744E53574F64A24CBE6",
+      "participant": "74170528456875@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-19T05:14:14.387Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283165814686@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC787C1B62711744E53574F64A24CBE6",
+        "participant": "74170528456875@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283165814686@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC787C1B62711744E53574F64A24CBE6",
+        "participant": "6283165814686@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-19T05:14:14.387Z"
+  }
+}
