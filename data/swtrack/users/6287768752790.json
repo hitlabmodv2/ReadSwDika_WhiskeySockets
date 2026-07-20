@@ -1,46 +1,4 @@
 {
-  "ACE3D33602F16235C4C536BD168FBA85": {
-    "id": "ACE3D33602F16235C4C536BD168FBA85",
-    "sender": "6287768752790@s.whatsapp.net",
-    "name": "Andini Arifah Hamidah",
-    "type": "extendedTextMessage",
-    "arrivedAt": "2026-07-18T09:11:03.794Z",
-    "read": true,
-    "reacted": true,
-    "emoji": "🐟",
-    "resolve": "PN langsung ✓",
-    "source": "status",
-    "number": "6287768752790",
-    "resolvedPn": "6287768752790@s.whatsapp.net",
-    "messageKey": {
-      "remoteJid": "status@broadcast",
-      "remoteJidAlt": "6287768752790@s.whatsapp.net",
-      "fromMe": false,
-      "id": "ACE3D33602F16235C4C536BD168FBA85",
-      "participant": "105420123283659@lid",
-      "addressingMode": "lid"
-    },
-    "updatedAt": "2026-07-18T09:11:07.198Z",
-    "receiptKeys": [
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6287768752790@s.whatsapp.net",
-        "fromMe": false,
-        "id": "ACE3D33602F16235C4C536BD168FBA85",
-        "participant": "105420123283659@lid",
-        "addressingMode": "lid"
-      },
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6287768752790@s.whatsapp.net",
-        "fromMe": false,
-        "id": "ACE3D33602F16235C4C536BD168FBA85",
-        "participant": "6287768752790@s.whatsapp.net",
-        "addressingMode": "lid"
-      }
-    ],
-    "processedAt": "2026-07-18T09:11:07.198Z"
-  },
   "ACC8CE805FAC0DB27FEF3AAE133031EA": {
     "id": "ACC8CE805FAC0DB27FEF3AAE133031EA",
     "sender": "6287768752790@s.whatsapp.net",
@@ -334,5 +292,427 @@
       }
     ],
     "processedAt": "2026-07-19T05:15:17.584Z"
+  },
+  "ACBFA6A40DB983B636B52FC35EC4F566": {
+    "id": "ACBFA6A40DB983B636B52FC35EC4F566",
+    "sender": "6287768752790@s.whatsapp.net",
+    "name": "Andini Arifah Hamidah",
+    "type": "imageMessage",
+    "arrivedAt": "2026-07-20T03:48:45.743Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐙",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6287768752790",
+    "resolvedPn": "6287768752790@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6287768752790@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACBFA6A40DB983B636B52FC35EC4F566",
+      "participant": "105420123283659@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-20T03:48:52.634Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287768752790@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACBFA6A40DB983B636B52FC35EC4F566",
+        "participant": "105420123283659@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287768752790@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACBFA6A40DB983B636B52FC35EC4F566",
+        "participant": "6287768752790@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-20T03:48:52.555Z",
+    "deleted": true,
+    "deletedAt": "2026-07-20T03:48:52.634Z"
+  },
+  "ACC4EC3ABBA524A53E24B4E4686F14D0": {
+    "id": "ACC4EC3ABBA524A53E24B4E4686F14D0",
+    "sender": "6287768752790@s.whatsapp.net",
+    "name": "Andini Arifah Hamidah",
+    "type": "imageMessage",
+    "arrivedAt": "2026-07-20T03:48:52.780Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐟",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6287768752790",
+    "resolvedPn": "6287768752790@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6287768752790@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACC4EC3ABBA524A53E24B4E4686F14D0",
+      "participant": "105420123283659@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-20T03:49:02.619Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287768752790@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACC4EC3ABBA524A53E24B4E4686F14D0",
+        "participant": "105420123283659@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287768752790@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACC4EC3ABBA524A53E24B4E4686F14D0",
+        "participant": "6287768752790@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-20T03:49:02.619Z"
+  },
+  "AC873CA1192B6A65F37DCB727D4ABB7C": {
+    "id": "AC873CA1192B6A65F37DCB727D4ABB7C",
+    "sender": "6287768752790@s.whatsapp.net",
+    "name": "Andini Arifah Hamidah",
+    "type": "imageMessage",
+    "arrivedAt": "2026-07-20T04:12:40.357Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🦈",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6287768752790",
+    "resolvedPn": "6287768752790@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6287768752790@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC873CA1192B6A65F37DCB727D4ABB7C",
+      "participant": "105420123283659@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-20T04:13:00.100Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287768752790@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC873CA1192B6A65F37DCB727D4ABB7C",
+        "participant": "105420123283659@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287768752790@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC873CA1192B6A65F37DCB727D4ABB7C",
+        "participant": "6287768752790@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-20T04:13:00.099Z"
+  },
+  "AC6481729A9195E41AD219D7DD88404A": {
+    "id": "AC6481729A9195E41AD219D7DD88404A",
+    "sender": "6287768752790@s.whatsapp.net",
+    "name": "Andini Arifah Hamidah",
+    "type": "extendedTextMessage",
+    "arrivedAt": "2026-07-20T04:12:40.362Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐬",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6287768752790",
+    "resolvedPn": "6287768752790@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6287768752790@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC6481729A9195E41AD219D7DD88404A",
+      "participant": "105420123283659@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-20T04:12:42.574Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287768752790@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC6481729A9195E41AD219D7DD88404A",
+        "participant": "105420123283659@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287768752790@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC6481729A9195E41AD219D7DD88404A",
+        "participant": "6287768752790@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-20T04:12:42.574Z"
+  },
+  "AC4E5E865785A47CDC48C94EB3BB07D6": {
+    "id": "AC4E5E865785A47CDC48C94EB3BB07D6",
+    "sender": "6287768752790@s.whatsapp.net",
+    "name": "Andini Arifah Hamidah",
+    "type": "videoMessage",
+    "arrivedAt": "2026-07-20T04:12:40.365Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐟",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6287768752790",
+    "resolvedPn": "6287768752790@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6287768752790@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC4E5E865785A47CDC48C94EB3BB07D6",
+      "participant": "105420123283659@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-20T04:12:59.858Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287768752790@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC4E5E865785A47CDC48C94EB3BB07D6",
+        "participant": "105420123283659@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287768752790@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC4E5E865785A47CDC48C94EB3BB07D6",
+        "participant": "6287768752790@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-20T04:12:59.858Z"
+  },
+  "AC8F35BB4459DBDA25F67CA858B61D59": {
+    "id": "AC8F35BB4459DBDA25F67CA858B61D59",
+    "sender": "6287768752790@s.whatsapp.net",
+    "name": "Andini Arifah Hamidah",
+    "type": "extendedTextMessage",
+    "arrivedAt": "2026-07-20T04:12:40.369Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🦈",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6287768752790",
+    "resolvedPn": "6287768752790@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6287768752790@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC8F35BB4459DBDA25F67CA858B61D59",
+      "participant": "105420123283659@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-20T04:12:46.941Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287768752790@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC8F35BB4459DBDA25F67CA858B61D59",
+        "participant": "105420123283659@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287768752790@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC8F35BB4459DBDA25F67CA858B61D59",
+        "participant": "6287768752790@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-20T04:12:46.941Z"
+  },
+  "ACD2D8E20EA8E8854C892FD5F52054FD": {
+    "id": "ACD2D8E20EA8E8854C892FD5F52054FD",
+    "sender": "6287768752790@s.whatsapp.net",
+    "name": "Andini Arifah Hamidah",
+    "type": "extendedTextMessage",
+    "arrivedAt": "2026-07-20T04:12:40.373Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐠",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6287768752790",
+    "resolvedPn": "6287768752790@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6287768752790@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACD2D8E20EA8E8854C892FD5F52054FD",
+      "participant": "105420123283659@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-20T04:12:47.561Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287768752790@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACD2D8E20EA8E8854C892FD5F52054FD",
+        "participant": "105420123283659@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287768752790@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACD2D8E20EA8E8854C892FD5F52054FD",
+        "participant": "6287768752790@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-20T04:12:47.561Z"
+  },
+  "AC5A7B698E616F6D44523C53C8FC6ED7": {
+    "id": "AC5A7B698E616F6D44523C53C8FC6ED7",
+    "sender": "6287768752790@s.whatsapp.net",
+    "name": "Andini Arifah Hamidah",
+    "type": "extendedTextMessage",
+    "arrivedAt": "2026-07-20T04:12:40.377Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐬",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6287768752790",
+    "resolvedPn": "6287768752790@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6287768752790@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC5A7B698E616F6D44523C53C8FC6ED7",
+      "participant": "105420123283659@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-20T04:12:42.185Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287768752790@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC5A7B698E616F6D44523C53C8FC6ED7",
+        "participant": "105420123283659@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287768752790@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC5A7B698E616F6D44523C53C8FC6ED7",
+        "participant": "6287768752790@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-20T04:12:42.185Z"
+  },
+  "ACE01CD979248C7B8E45F3D069D72981": {
+    "id": "ACE01CD979248C7B8E45F3D069D72981",
+    "sender": "6287768752790@s.whatsapp.net",
+    "name": "Andini Arifah Hamidah",
+    "type": "extendedTextMessage",
+    "arrivedAt": "2026-07-20T04:12:40.545Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐳",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6287768752790",
+    "resolvedPn": "6287768752790@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6287768752790@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACE01CD979248C7B8E45F3D069D72981",
+      "participant": "105420123283659@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-20T04:12:47.810Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287768752790@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACE01CD979248C7B8E45F3D069D72981",
+        "participant": "105420123283659@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287768752790@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACE01CD979248C7B8E45F3D069D72981",
+        "participant": "6287768752790@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-20T04:12:47.809Z"
+  },
+  "AC5EEB67CD77F54CCE5258FD58B6FCF7": {
+    "id": "AC5EEB67CD77F54CCE5258FD58B6FCF7",
+    "sender": "6287768752790@s.whatsapp.net",
+    "name": "Andini Arifah Hamidah",
+    "type": "extendedTextMessage",
+    "arrivedAt": "2026-07-20T04:12:40.547Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐬",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6287768752790",
+    "resolvedPn": "6287768752790@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6287768752790@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC5EEB67CD77F54CCE5258FD58B6FCF7",
+      "participant": "105420123283659@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-20T04:12:51.312Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287768752790@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC5EEB67CD77F54CCE5258FD58B6FCF7",
+        "participant": "105420123283659@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287768752790@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC5EEB67CD77F54CCE5258FD58B6FCF7",
+        "participant": "6287768752790@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-20T04:12:51.311Z"
   }
 }

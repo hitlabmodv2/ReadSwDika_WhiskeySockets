@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 14/07/2026, 08.45.06  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 20/07/2026, 06.10.38  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,25 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  anyvoice-choice
+│  #001  —  console.error
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  Limit gratis anonim cuma *2x per jam* dari server AnyVoice sendiri (bukan dibatasi bot ini).
-Coba lagi dalam ~15 menit.
+│  [31m[HotReload] ✗ Gagal reload 'message.js', pakai versi lama.[39m
 │
 │  DETAIL
-│  Sumber      : anyvoice-choice
+│  Sumber      : console.error
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 14/07/2026, 08.45.06
-│  Terakhir    : 14/07/2026, 08.45.06
+│  Pertama     : 20/07/2026, 06.10.38
+│  Terakhir    : 20/07/2026, 06.10.38
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: Limit gratis anonim cuma *2x per jam* dari server AnyVoice sendiri (bukan dibatasi bot ini).
-│     Coba lagi dalam ~15 menit.
-│     at generateTts (/home/runner/workspace/SEMUA_FITUR/media/anyvoice.cjs:201:21)
+│  ▶  Error: [31m[HotReload] ✗ Gagal reload 'message.js', pakai versi lama.[39m
+│     at console.error (file:///home/runner/workspace/index.js:434:27)
+│     at Timeout._onTimeout (file:///home/runner/workspace/src/helper/hotReload.js:309:33)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 14/07/2026, 08.45.06
+  Terakhir diperbarui: 20/07/2026, 06.10.38
 ════════════════════════════════════════════════════════════════════════

@@ -1,13 +1,13 @@
 {
-  "ACC9002CA8D5A686115898D933FC4E96": {
-    "id": "ACC9002CA8D5A686115898D933FC4E96",
+  "AC986D9DEBE2A77F22F93F3D8C9B9505": {
+    "id": "AC986D9DEBE2A77F22F93F3D8C9B9505",
     "sender": "6285852156994@s.whatsapp.net",
     "name": "Fatma Atuss",
     "type": "videoMessage",
-    "arrivedAt": "2026-07-04T06:03:16.688Z",
+    "arrivedAt": "2026-07-20T03:55:13.422Z",
     "read": true,
     "reacted": true,
-    "emoji": "❤️",
+    "emoji": "🐙",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6285852156994",
@@ -16,12 +16,29 @@
       "remoteJid": "status@broadcast",
       "remoteJidAlt": "6285852156994@s.whatsapp.net",
       "fromMe": false,
-      "id": "ACC9002CA8D5A686115898D933FC4E96",
+      "id": "AC986D9DEBE2A77F22F93F3D8C9B9505",
       "participant": "138267882160332@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-07-04T06:04:38.630Z",
-    "retriedOnStartup": true,
-    "retriedAt": "2026-07-04T06:04:38.630Z"
+    "updatedAt": "2026-07-20T03:55:32.756Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285852156994@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC986D9DEBE2A77F22F93F3D8C9B9505",
+        "participant": "138267882160332@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285852156994@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC986D9DEBE2A77F22F93F3D8C9B9505",
+        "participant": "6285852156994@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-20T03:55:32.756Z"
   }
 }

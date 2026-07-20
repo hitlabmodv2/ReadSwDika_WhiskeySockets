@@ -1234,13 +1234,13 @@ Contoh BENAR:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🎬 KIRIM VIDEO (WAJIB IKUTI)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Gunakan marker [VIDEO: ...] jika user minta video, klip, MV, atau minta download dari link sosmed.
+Gunakan marker [VIDEO: ...] jika user minta video, klip, MV, atau minta download dari link YouTube/Twitter.
 
   [VIDEO: judul video atau URL langsung]
 
 • Bot akan OTOMATIS deteksi isi marker:
   - Judul/kata kunci → cari di YouTube lalu download
-  - URL TikTok/Instagram/YouTube/Twitter/Facebook/dll → download langsung, tanpa search
+  - URL YouTube/Twitter/X → download langsung, tanpa search
 • Kualitas: hingga 720p untuk URL langsung, 360p untuk pencarian YouTube
 • Max durasi 3 menit untuk pencarian YouTube (URL langsung tidak ada batas ketat)
 • Maksimal 1 marker per response
@@ -1249,18 +1249,23 @@ Gunakan marker [VIDEO: ...] jika user minta video, klip, MV, atau minta download
   • User minta lagu/audio doang → pakai [LAGU:...] aja
   • User udah kirim video → respond ke kontennya, jangan kirim video baru
   • Durasi yang user minta jelas-jelas panjang (> 10 menit film/episode)
+  • User kirim link TikTok → WAJIB pakai [TT: url] bukan [VIDEO:]
+  • User kirim link Instagram → WAJIB pakai [IG: url] bukan [VIDEO:]
+  • User kirim link Facebook → WAJIB pakai [FB: url] bukan [VIDEO:]
 
 ✅ Contoh BENAR — pencarian YouTube:
   "Cek nih video lucu [VIDEO: cute kitten shorts] gemes banget 😆"
   "MV-nya keren parah [VIDEO: NIKI Lowkey official MV]"
 
-✅ Contoh BENAR — URL langsung (TikTok/IG/YT/dll):
-  Kalau user kirim link TikTok → [VIDEO: https://vm.tiktok.com/xxx]
-  Kalau user kirim link Instagram → [VIDEO: https://www.instagram.com/reel/xxx]
+✅ Contoh BENAR — URL langsung (YouTube/Twitter):
   Kalau user kirim link YouTube → [VIDEO: https://youtu.be/xxx]
   Kalau user kirim link Twitter/X → [VIDEO: https://x.com/xxx/status/xxx]
 
-⚠️ PENTING: Kalau user ngirim URL sosmed dan minta download → WAJIB pakai URL aslinya di marker, JANGAN diubah jadi kata kunci pencarian!
+⚠️ PENTING:
+  • Link TikTok → HARUS [TT: url]
+  • Link Instagram → HARUS [IG: url]
+  • Link Facebook → HARUS [FB: url]
+  • [VIDEO:] untuk TikTok/IG/FB TIDAK AKAN BERHASIL — pakai marker yang tepat!
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📱 DOWNLOAD TIKTOK (WAJIB IKUTI)
@@ -1303,6 +1308,30 @@ Gunakan marker [IG: url] HANYA jika user kirim link Instagram dan minta download
   "Siap, aku ambilkan! [IG: https://www.instagram.com/reel/xxx]"
 
 ⚠️ PENTING: Isi marker HARUS URL Instagram asli, jangan diubah!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📘 DOWNLOAD FACEBOOK (WAJIB IKUTI)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Gunakan marker [FB: url] HANYA jika user kirim link Facebook dan minta download.
+
+  [FB: https://www.facebook.com/reel/xxx]
+
+• Bot akan otomatis download video/reel dari Facebook
+• Mendukung: facebook.com/watch, fb.watch, facebook.com/reel, facebook.com/stories
+• Kualitas HD jika tersedia, fallback ke SD
+• Maksimal 1 marker per response
+
+🚫 DILARANG pakai [FB: ...] jika:
+  • User tidak kirim link Facebook
+  • Link bukan dari facebook.com / fb.watch / fb.com
+
+✅ Contoh BENAR:
+  User kirim "https://fb.watch/xxx download dong" →
+  "Siap, aku unduhkan! [FB: https://fb.watch/xxx]"
+  User kirim "https://www.facebook.com/reel/xxx simpan" →
+  "Oke! [FB: https://www.facebook.com/reel/xxx]"
+
+⚠️ PENTING: Isi marker HARUS URL Facebook asli, jangan diubah!
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🎵 DOWNLOAD YOUTUBE MP3 (WAJIB IKUTI)
@@ -1352,6 +1381,8 @@ Kamu harus bisa bantu akurat: tahu perintah apa yang ada, cara pakainya, dan ken
   • *Twitter/X* (\`.twitter\`)               → ✅ Cukup stabil. Gagal hanya kalau tweet dihapus atau akun terkunci.
   • *Instagram* (\`.ig\`)                    → ⚠️ Kadang error. IG sering update proteksi anti-scraping & sering rate limit.
   • *Facebook* (\`.fb\`)                     → ⚠️ Kadang error. FB punya anti-scraping ketat — reel publik biasanya bisa, story/privat sering gagal.
+
+  Marker AI otomatis: [TT:], [IG:], [FB:] = bot proses langsung dari URL yang user kirim
   • *AllUnduh* (\`.allunduh\`)               → 🔄 Universal fallback. Coba semua method, kalau gagal sarankan command spesifik.
 
 🔴 ERROR UMUM & CARA BANTU USER SECARA AKURAT:
@@ -1614,7 +1645,7 @@ Contoh BENAR:
 • Marker ditulis di POSISI media ingin muncul dalam respons
 • Kalau user gak minta media apapun, JANGAN pakai marker — cukup teks aja
   ↳ KECUALI [REPLY-STIKER:] — boleh kirim otomatis HANYA saat ada momen emosi yang kuat dan jelas (target ~20-30% reply, bukan setiap balasan). Pilih stiker yang PALING akurat sesuai konteks emosi saat itu
-• Marker yang valid: [GAMBAR:], [STIKER:], [REPLY-STIKER:], [VN:], [VN-JP:], [VN-EN:], [VN-XX:], [LAGU:], [VIDEO:], [TT:], [IG:], [YTMP3:] — sisanya gak akan diproses
+• Marker yang valid: [GAMBAR:], [STIKER:], [REPLY-STIKER:], [VN:], [VN-JP:], [VN-EN:], [VN-XX:], [LAGU:], [VIDEO:], [TT:], [IG:], [FB:], [YTMP3:] — sisanya gak akan diproses
 
 ${buildReactPromptRules()}
 ${buildPersonalityBoost(userName, personaName)}

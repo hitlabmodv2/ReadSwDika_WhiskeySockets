@@ -53,7 +53,7 @@ import gemini from './src/helper/gemini.js';
 import { updateUserName, getUserName } from './src/db/userDb.js';
 import { loadUserMemory, detectAndUpdateMemory, clearUserMemory, clearAllUserMemory, memoryToReadable } from './src/helper/userMemory.js';
 import { searchAndGetImage, searchAndGetImages, extractImagesFromText } from './src/helper/imageSearch.js';
-import { extractSongsFromText, extractVideosFromText, extractReplyStickersFromText, extractTikTokFromText, extractInstagramFromText, extractYouTubeAudioFromText, hasMediaDownloadMarker, hasSocialDLMarker, hasStickerMarker, extractVoiceNotesFromText, extractStickersFromText } from './src/helper/aiTools.js';
+import { extractSongsFromText, extractVideosFromText, extractReplyStickersFromText, extractTikTokFromText, extractInstagramFromText, extractFacebookFromText, extractYouTubeAudioFromText, hasMediaDownloadMarker, hasSocialDLMarker, hasStickerMarker, extractVoiceNotesFromText, extractStickersFromText } from './src/helper/aiTools.js';
 import { getHistory, addToHistory, clearHistory, clearAllHistory, countHistory, getSessionKey, buildHistoryMeta, wrapCurrentUserMessage } from './src/db/aiHistory.js';
 import { kvGet, kvSet } from './src/db/datadb.js';
 import { sendAIReply } from './src/helper/aiReact.js';
@@ -107,7 +107,7 @@ const {
     rememberAIMedia, sendAIReply, tolak,
     extractImagesFromText, hasStickerMarker, extractStickersFromText, extractReplyStickersFromText,
     extractVoiceNotesFromText, extractSongsFromText, extractVideosFromText, extractYouTubeAudioFromText,
-    extractTikTokFromText, extractInstagramFromText, hasMediaDownloadMarker, hasSocialDLMarker,
+    extractTikTokFromText, extractInstagramFromText, extractFacebookFromText, hasMediaDownloadMarker, hasSocialDLMarker,
     wilyLog, wilyError,
 });
 
@@ -136,6 +136,7 @@ const pendingKomikChoices = new Map();
 const pendingFontuntikChoices = new Map(); // key → { text, botMsgId, expiresAt, timeout }
 const pendingWaifuChoices     = new Map(); // key → { stage, mode, botMsgKey, expiresAt, timeout }
 const pendingHentaidadChoices = new Map(); // key → { results, botMsgId, expiresAt, loading, timeout }
+const pendingShutdownConfirm  = new Map(); // key → { type: 'mati'|'restart', expiresAt, timeout, botMsgId }
 
 const aiReplyCooldown = new Map(); // sender → last reply timestamp
 const AI_COOLDOWN_MS = 3000; // 3 detik cooldown per user
@@ -894,6 +895,87 @@ export default async function ({ message, type: messagesType }, hisoka) {
                 })) return;
                 // ──────────────────────────────────────────────────────────────────────
 
+                // ── Handle konfirmasi .mati / .restart (button quick reply) ───────────
+                if (m.isOwner && pendingShutdownConfirm.has(m.sender)) {
+                        const _sdPending = pendingShutdownConfirm.get(m.sender);
+                        const _sdRaw     = String(m.text || '').trim();
+                        const _sdLower   = _sdRaw.toLowerCase();
+                        const _sdQuoted  = getQuotedStanzaId(m);
+                        const _sdIsReply = m.isQuoted && (!_sdPending.botMsgId || _sdQuoted === _sdPending.botMsgId);
+
+                        // Jika bukan reply ke pesan konfirmasi → biarkan lanjut ke command biasa
+                        if (!_sdIsReply && !['__mati_yes__','__mati_no__','__restart_yes__','__restart_no__'].includes(_sdRaw)) {
+                                // lanjut normal
+                        } else if (_sdPending.expiresAt && _sdPending.expiresAt <= Date.now()) {
+                                if (_sdPending.timeout) clearTimeout(_sdPending.timeout);
+                                pendingShutdownConfirm.delete(m.sender);
+                                await tolak(hisoka, m, '⏳ *Waktu konfirmasi habis.*\n> _Ulangi perintah jika ingin lanjut._');
+                                return;
+                        } else {
+                                const _sdIsYes = ['__mati_yes__','__restart_yes__'].includes(_sdRaw) || ['ya','yes','iya','y'].includes(_sdLower);
+                                const _sdIsNo  = ['__mati_no__','__restart_no__'].includes(_sdRaw)   || ['tidak','no','n','batal','cancel'].includes(_sdLower);
+
+                                if (_sdIsYes) {
+                                        if (_sdPending.timeout) clearTimeout(_sdPending.timeout);
+                                        pendingShutdownConfirm.delete(m.sender);
+                                        const { shutdownBot, restartBot } = _require(path.resolve('./SEMUA_FITUR/system/shutdown.cjs'));
+                                        if (_sdPending.type === 'mati') {
+                                                await hisoka.sendMessage(m.from, { react: { text: '⛔', key: m.key } });
+                                                await tolak(hisoka, m,
+                                                        `╔══════════════════════╗\n` +
+                                                        `║  ⛔  *B O T  M A T I*  ║\n` +
+                                                        `╚══════════════════════╝\n\n` +
+                                                        `🔴 *Bot dimatikan sekarang!*\n\n` +
+                                                        `⚙️ Dimatikan oleh: @${m.sender.split('@')[0]}\n` +
+                                                        `🕐 Waktu: ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })}\n\n` +
+                                                        `ℹ️ Untuk menjalankan bot kembali,\n` +
+                                                        `jalankan ulang dari Replit.`,
+                                                        { mentions: [m.sender] }
+                                                );
+                                                logCommand(m, hisoka, 'mati');
+                                                shutdownBot(2000);
+                                        } else {
+                                                await hisoka.sendMessage(m.from, { react: { text: '🔄', key: m.key } });
+                                                const _rstSent = await tolak(hisoka, m,
+                                                        `╔══════════════════════╗\n` +
+                                                        `║  🔄  *R E S T A R T*  ║\n` +
+                                                        `╚══════════════════════╝\n\n` +
+                                                        `♻️ *Bot direstart sekarang!*\n\n` +
+                                                        `⚙️ Direstart oleh: @${m.sender.split('@')[0]}\n` +
+                                                        `🕐 Waktu: ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })}\n\n` +
+                                                        `⏳ Menunggu bot online kembali...`,
+                                                        { mentions: [m.sender] }
+                                                );
+                                                try {
+                                                        const { kvSet: _sdKvSet } = await import('./src/db/datadb.js');
+                                                        _sdKvSet('system/restart_notify', { from: m.from, key: _rstSent?.key || null, by: m.sender, time: Date.now() });
+                                                } catch (_) {}
+                                                logCommand(m, hisoka, 'restart');
+                                                restartBot(2000);
+                                        }
+                                } else if (_sdIsNo) {
+                                        if (_sdPending.timeout) clearTimeout(_sdPending.timeout);
+                                        pendingShutdownConfirm.delete(m.sender);
+                                        await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
+                                        await tolak(hisoka, m,
+                                                _sdPending.type === 'mati'
+                                                        ? `❌ *Dibatalkan.*\n_Bot tidak dimatikan._`
+                                                        : `❌ *Dibatalkan.*\n_Bot tidak direstart._`
+                                        );
+                                } else {
+                                        // Balasan tidak valid
+                                        const _sdLabel = _sdPending.type === 'mati' ? 'matikan bot' : 'restart bot';
+                                        await tolak(hisoka, m,
+                                                `⚠️ *Pilihan tidak valid.*\n\n` +
+                                                `Tap tombol atau balas pesan konfirmasi dengan:\n` +
+                                                `• \`ya\` / \`iya\` — untuk ${_sdLabel}\n` +
+                                                `• \`tidak\` / \`batal\` — untuk membatalkan`
+                                        );
+                                }
+                                return;
+                        }
+                }
+
                 switch (m.command) {
 
                         case 'hidetag':
@@ -1067,7 +1149,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'shutdown':
                         case 'matiin': {
                                 const { handleMati } = _require(path.resolve('./SEMUA_FITUR/info/mati-cmd.cjs'));
-                                await handleMati({ hisoka, m, tolak, logCommand, _require, path });
+                                await handleMati({ hisoka, m, tolak, logCommand, _require, path, Button, pendingShutdownConfirm });
                                 break;
                         }
 
@@ -1075,7 +1157,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'rebot':
                         case 'rb': {
                                 const { handleRb } = _require(path.resolve('./SEMUA_FITUR/system/shutdown.cjs'));
-                                await handleRb({ hisoka, m, tolak, logCommand, _require });
+                                await handleRb({ hisoka, m, tolak, logCommand, _require, Button, pendingShutdownConfirm });
                                 break;
                         }
                         case 'credsjson': {
@@ -1456,7 +1538,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 await handleSimi({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, isMainBot });
                                 break;
                         }
-                        case 'wilyai': {
+                        case 'wilyai1': {
                                 const { handleWilyai } = _require(path.resolve('./SEMUA_FITUR/tools/wilyai.cjs'));
                                 await handleWilyai({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, isMainBot, countHistory, clearAllHistory, clearAllUserMemory, Button });
                                 break;

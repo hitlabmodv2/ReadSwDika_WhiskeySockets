@@ -40,5 +40,47 @@
       }
     ],
     "processedAt": "2026-07-19T05:15:16.583Z"
+  },
+  "A5A9C3866E560EF1E8CF040FCFA14846": {
+    "id": "A5A9C3866E560EF1E8CF040FCFA14846",
+    "sender": "6287812372599@s.whatsapp.net",
+    "name": "BnZ_Enquarorth",
+    "type": "videoMessage",
+    "arrivedAt": "2026-07-20T03:55:33.864Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "⏺️⏏️⏹️",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6287812372599",
+    "resolvedPn": "6287812372599@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6287812372599@s.whatsapp.net",
+      "fromMe": false,
+      "id": "A5A9C3866E560EF1E8CF040FCFA14846",
+      "participant": "101949638746286@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-20T03:55:41.741Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287812372599@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A5A9C3866E560EF1E8CF040FCFA14846",
+        "participant": "101949638746286@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287812372599@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A5A9C3866E560EF1E8CF040FCFA14846",
+        "participant": "6287812372599@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-20T03:55:41.741Z"
   }
 }

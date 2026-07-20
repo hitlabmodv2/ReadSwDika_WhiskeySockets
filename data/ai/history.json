@@ -248,6 +248,144 @@
         }
       ],
       "lastActivity": 1783607025471
+    },
+    "6289688206739@s.whatsapp.net": {
+      "messages": [
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 20 Jul, 13.10 | 👤 Wily]\nHi"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "Halo, selamat siang. Ada yang bisa aku bantu hari ini?"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 20 Jul, 13.10 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"Halo, selamat siang. Ada yang bisa aku bantu hari ini?\" | 👤 Wily]\nEngga"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "dih, terus ngapain nyapa coba... kurang kerjaan banget. \n\nyaudah, aku standby aja deh di sini. panggil aja kalau butuh sesuatu."
+            }
+          ]
+        }
+      ],
+      "lastActivity": 1784527858350
+    },
+    "120363428460360783@g.us_6289688206739@s.whatsapp.net": {
+      "messages": [
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 20 Jul, 13.10 | 👤 Wily]\nSeseorang men-tag kamu di grup tanpa mengetik pesan apapun. Aktifkan MODE KESAL TAPI TETAP BANTU: tunjukkan sedikit kesan \"duh dipanggil-panggil\" tapi tetap tanya ada apa — nada ketus manis, 1-2 kalimat saja. Contoh: \"Dipanggil tanpa bilang apa-apa... oke aku di sini, ada apa? 🙄\" atau \"Eh, ada apa? Jangan cuma nge-tag doang dong~\""
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "duh kebiasaan deh nge-tag tanpa ngomong apa-apa... iya iya aku di sini 🙄 ada perlu apa emangnya?"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 20 Jul, 13.10 | ↩️ BALAS PESAN BOT SEBELUMNYA | 👤 Wily]\nHi"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "hi juga. tumben nyapa doang, biasanya langsung ngasih kerjaan. ada apa nih siang-siang? 👀"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 20 Jul, 13.12 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"hi juga. tumben nyapa doang, biasanya langsung ngasih kerjaan. ada apa nih siang-siang? 👀\" | 👤 Wily]\nBisa download fb reel?"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "ya bisa lah, masa gitu aja diraguin 😏 tinggal kirim aja link *fb reel*-nya ke sini. atau kalau mau pakai perintah ketik `.fb [link]`. \n\nmana sini linknya kalau mau didownloadin."
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 20 Jul, 13.13 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"ya bisa lah, masa gitu aja diraguin 😏 tinggal kirim aja link *fb reel*-nya ke sini. atau kalau mau pakai perintah ketik `.fb [link]`. mana ...\" | 👤 Wily]\nhttps://www.facebook.com/reel/1645357033206462?locale=id_ID itu download"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "nah gitu dong langsung ngasih link. bentar aku downloadin ya~"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 20 Jul, 13.13 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"nah gitu dong langsung ngasih link. bentar aku downloadin ya~\" | 👤 Wily]\nMksh"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "tumben banget bilang makasih, biasanya juga habis nyuruh langsung ngilang. \n\nnih udah beres ya videonya, cek aja~"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 20 Jul, 13.14 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"tumben banget bilang makasih, biasanya juga habis nyuruh langsung ngilang. nih udah beres ya videonya, cek aja~\" | 👤 Wily]\nLah kan udg di atas masa di kirim 2x sih aneh"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "ya elah, mending dobel daripada nggak masuk sama sekali kan. 🙄 tinggal hapus aja satu repot amat sih, udah dibantuin juga."
+            }
+          ]
+        }
+      ],
+      "lastActivity": 1784528077669
     }
   },
   "sticker_pattern": {
@@ -277,9 +415,9 @@
       "last_sent": 1780237811
     },
     "https://cdn.ornzora.eu.cc/41f054d0-55e9-4d1a-abb7-6a49ac74769b-HONOLULU.webp": {
-      "total_sent": 12,
+      "total_sent": 14,
       "moods": {},
-      "last_sent": 1783607021
+      "last_sent": 1784528076
     },
     "https://cdn.ornzora.eu.cc/31f63a4b-95a8-440a-9d77-9d634ef2153a-HONOLULU.webp": {
       "total_sent": 5,
@@ -287,9 +425,9 @@
       "last_sent": 1783078450
     },
     "https://cdn.ornzora.eu.cc/0e5ac3ba-8326-46ab-947c-fb03374207f6-HONOLULU.webp": {
-      "total_sent": 2,
+      "total_sent": 3,
       "moods": {},
-      "last_sent": 1783584767
+      "last_sent": 1784527857
     },
     "https://cdn.ornzora.eu.cc/c06ae88e-858b-4a22-af58-52091d095b94-HONOLULU.webp": {
       "total_sent": 1,
@@ -558,6 +696,31 @@
         "context": "dih, gr banget sih kamu. itu tuh kepencet atau emang sistemnya nge-tag otomatis pas ngasih info panel error tadi 🙄 yaudah sih biarin aja kalau ga mau dihapus, yang penting kan pesannya nyampe kalau",
         "was_fallback": 1,
         "sent_at": 1783607021
+      }
+    ],
+    "120363428460360783@g.us_6289688206739@s.whatsapp.net": [
+      {
+        "sticker_url": "https://cdn.ornzora.eu.cc/41f054d0-55e9-4d1a-abb7-6a49ac74769b-HONOLULU.webp",
+        "mood": "",
+        "context": "duh kebiasaan deh nge-tag tanpa ngomong apa-apa... iya iya aku di sini 🙄 ada perlu apa emangnya? [REPLY-STIKER: mikir kesel]",
+        "was_fallback": 1,
+        "sent_at": 1784527821
+      },
+      {
+        "sticker_url": "https://cdn.ornzora.eu.cc/41f054d0-55e9-4d1a-abb7-6a49ac74769b-HONOLULU.webp",
+        "mood": "",
+        "context": "ya elah, mending dobel daripada nggak masuk sama sekali kan. 🙄 tinggal hapus aja satu repot amat sih, udah dibantuin juga. [REPLY-STIKER: kesel]",
+        "was_fallback": 1,
+        "sent_at": 1784528076
+      }
+    ],
+    "6289688206739@s.whatsapp.net": [
+      {
+        "sticker_url": "https://cdn.ornzora.eu.cc/0e5ac3ba-8326-46ab-947c-fb03374207f6-HONOLULU.webp",
+        "mood": "",
+        "context": "dih, terus ngapain nyapa coba... kurang kerjaan banget. yaudah, aku standby aja deh di sini. panggil aja kalau butuh sesuatu. [REPLY-STIKER: jutek]",
+        "was_fallback": 1,
+        "sent_at": 1784527857
       }
     ]
   },

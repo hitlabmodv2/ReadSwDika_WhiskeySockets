@@ -63,5 +63,70 @@
       }
     ],
     "processedAt": "2026-07-19T05:14:26.774Z"
+  },
+  "ACFB21C105E4BADCB3E2E8238E26740C": {
+    "id": "ACFB21C105E4BADCB3E2E8238E26740C",
+    "sender": "6289674060675@s.whatsapp.net",
+    "name": "𝐂𝟗/𝐑𝐎𝐑/𝟕𝟎𝟓/𝟖𝟖𝟕 𝐧𝐢𝐥",
+    "type": "protocolMessage",
+    "arrivedAt": "2026-07-20T03:53:29.793Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "⏺️⏏️⏹️",
+    "source": "group",
+    "number": "6289674060675",
+    "messageKey": {
+      "remoteJid": "120363424557936431@g.us",
+      "fromMe": false,
+      "id": "ACFB21C105E4BADCB3E2E8238E26740C",
+      "participant": "109973375815838@lid",
+      "participantAlt": "6289674060675@s.whatsapp.net",
+      "addressingMode": "lid"
+    },
+    "resolvedPn": "6289674060675@s.whatsapp.net",
+    "updatedAt": "2026-07-20T03:53:49.651Z",
+    "processedAt": "2026-07-20T03:53:49.651Z"
+  },
+  "AC6A11433806769A2FE8A903F1A3C7EF": {
+    "id": "AC6A11433806769A2FE8A903F1A3C7EF",
+    "sender": "6289674060675@s.whatsapp.net",
+    "name": "𝐂𝟗/𝐑𝐎𝐑/𝟕𝟎𝟓/𝟖𝟖𝟕 𝐧𝐢𝐥",
+    "type": "imageMessage",
+    "arrivedAt": "2026-07-20T03:53:29.836Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐙",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6289674060675",
+    "resolvedPn": "6289674060675@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6289674060675@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC6A11433806769A2FE8A903F1A3C7EF",
+      "participant": "109973375815838@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-20T03:53:49.682Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289674060675@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC6A11433806769A2FE8A903F1A3C7EF",
+        "participant": "109973375815838@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289674060675@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC6A11433806769A2FE8A903F1A3C7EF",
+        "participant": "6289674060675@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-20T03:53:49.682Z"
   }
 }

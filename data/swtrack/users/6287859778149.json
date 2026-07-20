@@ -1,69 +1,4 @@
 {
-  "AC14A5353E72A57FF25CB8BDB45854A3": {
-    "id": "AC14A5353E72A57FF25CB8BDB45854A3",
-    "sender": "6287859778149@s.whatsapp.net",
-    "name": "loena",
-    "type": "protocolMessage",
-    "arrivedAt": "2026-07-18T09:11:03.788Z",
-    "read": true,
-    "reacted": true,
-    "emoji": "⏺️⏏️⏹️",
-    "source": "group",
-    "number": "6287859778149",
-    "messageKey": {
-      "remoteJid": "120363427374078962@g.us",
-      "fromMe": false,
-      "id": "AC14A5353E72A57FF25CB8BDB45854A3",
-      "participant": "145136172458113@lid",
-      "participantAlt": "6287859778149@s.whatsapp.net",
-      "addressingMode": "lid"
-    },
-    "resolvedPn": "6287859778149@s.whatsapp.net",
-    "updatedAt": "2026-07-18T09:11:18.001Z",
-    "processedAt": "2026-07-18T09:11:18.001Z"
-  },
-  "AC00506BBB23D93CD6605E0267954121": {
-    "id": "AC00506BBB23D93CD6605E0267954121",
-    "sender": "6287859778149@s.whatsapp.net",
-    "name": "loena",
-    "type": "videoMessage",
-    "arrivedAt": "2026-07-18T09:11:03.796Z",
-    "read": true,
-    "reacted": true,
-    "emoji": "🐠",
-    "resolve": "PN langsung ✓",
-    "source": "status",
-    "number": "6287859778149",
-    "resolvedPn": "6287859778149@s.whatsapp.net",
-    "messageKey": {
-      "remoteJid": "status@broadcast",
-      "remoteJidAlt": "6287859778149@s.whatsapp.net",
-      "fromMe": false,
-      "id": "AC00506BBB23D93CD6605E0267954121",
-      "participant": "145136172458113@lid",
-      "addressingMode": "lid"
-    },
-    "updatedAt": "2026-07-18T09:11:16.929Z",
-    "receiptKeys": [
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6287859778149@s.whatsapp.net",
-        "fromMe": false,
-        "id": "AC00506BBB23D93CD6605E0267954121",
-        "participant": "145136172458113@lid",
-        "addressingMode": "lid"
-      },
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6287859778149@s.whatsapp.net",
-        "fromMe": false,
-        "id": "AC00506BBB23D93CD6605E0267954121",
-        "participant": "6287859778149@s.whatsapp.net",
-        "addressingMode": "lid"
-      }
-    ],
-    "processedAt": "2026-07-18T09:11:16.929Z"
-  },
   "ACAEBFB3480223DC60FEF20DCF32208C": {
     "id": "ACAEBFB3480223DC60FEF20DCF32208C",
     "sender": "6287859778149@s.whatsapp.net",
@@ -258,5 +193,70 @@
       }
     ],
     "processedAt": "2026-07-19T05:15:17.897Z"
+  },
+  "ACDFE0DAD45B10580FF73590BE015954": {
+    "id": "ACDFE0DAD45B10580FF73590BE015954",
+    "sender": "6287859778149@s.whatsapp.net",
+    "name": "loena",
+    "type": "videoMessage",
+    "arrivedAt": "2026-07-20T03:53:30.192Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐬",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6287859778149",
+    "resolvedPn": "6287859778149@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6287859778149@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACDFE0DAD45B10580FF73590BE015954",
+      "participant": "145136172458113@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-20T03:53:36.256Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287859778149@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACDFE0DAD45B10580FF73590BE015954",
+        "participant": "145136172458113@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287859778149@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACDFE0DAD45B10580FF73590BE015954",
+        "participant": "6287859778149@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-20T03:53:36.256Z"
+  },
+  "AC96B249BAAAEC18E89BAB0B5AA7922D": {
+    "id": "AC96B249BAAAEC18E89BAB0B5AA7922D",
+    "sender": "6287859778149@s.whatsapp.net",
+    "name": "loena",
+    "type": "protocolMessage",
+    "arrivedAt": "2026-07-20T03:53:32.197Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐟",
+    "source": "group",
+    "number": "6287859778149",
+    "messageKey": {
+      "remoteJid": "120363427374078962@g.us",
+      "fromMe": false,
+      "id": "AC96B249BAAAEC18E89BAB0B5AA7922D",
+      "participant": "145136172458113@lid",
+      "participantAlt": "6287859778149@s.whatsapp.net",
+      "addressingMode": "lid"
+    },
+    "resolvedPn": "6287859778149@s.whatsapp.net",
+    "updatedAt": "2026-07-20T03:53:46.603Z",
+    "processedAt": "2026-07-20T03:53:46.602Z"
   }
 }

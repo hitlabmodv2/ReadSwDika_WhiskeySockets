@@ -1220,9 +1220,9 @@ async function main() {
                                 if (autoOnline.enabled) {
                                         // Mode ON: kirim available berkala → kontak lihat online realtime
                                         hisoka.updateOnlinePrivacy('all').catch(() => {});
-                                        hisoka.sendPresenceUpdate('available');
+                                        hisoka.sendPresenceUpdate('available').catch(() => {});
                                         global.autoOnlineInterval = setInterval(() => {
-                                                hisoka.sendPresenceUpdate('available');
+                                                hisoka.sendPresenceUpdate('available').catch(() => {});
                                         }, intervalMs);
                                 } else {
                                         // Mode STEALTH (off):
@@ -1232,11 +1232,11 @@ async function main() {
                                         // — keepalive ping setiap 25s bisa bikin WA flash online ~3-5 detik,
                                         //   interval 5s ini memastikan bot balik offline jauh lebih cepat
                                         hisoka.updateOnlinePrivacy('match_last_seen').catch(() => {});
-                                        hisoka.sendPresenceUpdate('unavailable');
+                                        hisoka.sendPresenceUpdate('unavailable').catch(() => {});
                                         global.autoOnlineInterval = setInterval(() => {
                                                 // Skip saat typing/recording aktif — jangan potong delay
                                                 if (hisoka.__typingActive > 0) return;
-                                                hisoka.sendPresenceUpdate('unavailable');
+                                                hisoka.sendPresenceUpdate('unavailable').catch(() => {});
                                         }, 5000);
                                 }
                         };

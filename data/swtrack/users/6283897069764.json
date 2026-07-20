@@ -40,5 +40,47 @@
       }
     ],
     "processedAt": "2026-07-19T05:14:36.522Z"
+  },
+  "A597FD95EC6A8EEDF35F2743C5BDDB52": {
+    "id": "A597FD95EC6A8EEDF35F2743C5BDDB52",
+    "sender": "6283897069764@s.whatsapp.net",
+    "name": "WansXDR",
+    "type": "videoMessage",
+    "arrivedAt": "2026-07-20T03:52:21.667Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐙",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6283897069764",
+    "resolvedPn": "6283897069764@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6283897069764@s.whatsapp.net",
+      "fromMe": false,
+      "id": "A597FD95EC6A8EEDF35F2743C5BDDB52",
+      "participant": "59236289622095@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-20T03:52:38.836Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283897069764@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A597FD95EC6A8EEDF35F2743C5BDDB52",
+        "participant": "59236289622095@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283897069764@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A597FD95EC6A8EEDF35F2743C5BDDB52",
+        "participant": "6283897069764@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-20T03:52:38.836Z"
   }
 }

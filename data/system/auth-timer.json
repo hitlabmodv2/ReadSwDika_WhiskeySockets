@@ -2,6 +2,82 @@
   "events": [
     {
       "type": "connected",
+      "connectedAt": "2026-07-20T06:11:36.386Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-20T06:00:44.487Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-20T06:00:10.609Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-20T05:59:42.720Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-20T05:53:24.589Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-20T03:53:00.953Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-20T03:51:52.970Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-20T03:51:46.739Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-20T03:51:40.843Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-20T03:51:34.661Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-20T03:51:28.292Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-20T03:51:22.111Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-20T03:51:15.917Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-20T03:51:09.957Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-20T03:51:03.556Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-20T03:50:57.011Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-20T03:50:53.367Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-20T03:50:47.084Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-20T03:47:41.482Z"
+    },
+    {
+      "type": "connected",
       "connectedAt": "2026-07-19T05:13:27.393Z"
     },
     {
@@ -31,6 +107,6 @@
       "durationSeconds": 180
     }
   ],
-  "lastUpdated": "2026-07-19T05:13:27.393Z",
+  "lastUpdated": "2026-07-20T06:11:36.387Z",
   "sessionStart": "2026-07-18T07:19:36.123Z"
 }

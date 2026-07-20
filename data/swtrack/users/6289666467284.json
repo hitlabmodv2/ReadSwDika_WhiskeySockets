@@ -20,7 +20,7 @@
       "participant": "22836525699074@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-07-19T05:14:06.049Z",
+    "updatedAt": "2026-07-20T04:15:49.003Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -39,7 +39,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-07-19T05:14:06.049Z"
+    "processedAt": "2026-07-19T05:14:06.049Z",
+    "deleted": true,
+    "deletedAt": "2026-07-20T04:15:49.003Z"
   },
   "ACD224AE60CF6872BC1F68A42FEB8505": {
     "id": "ACD224AE60CF6872BC1F68A42FEB8505",
@@ -82,5 +84,47 @@
       }
     ],
     "processedAt": "2026-07-19T05:14:31.320Z"
+  },
+  "AC72D13DF68034E68A06C1FD9C1DC3D5": {
+    "id": "AC72D13DF68034E68A06C1FD9C1DC3D5",
+    "sender": "6289666467284@s.whatsapp.net",
+    "name": "Parulll",
+    "type": "imageMessage",
+    "arrivedAt": "2026-07-20T04:15:48.988Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐟",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6289666467284",
+    "resolvedPn": "6289666467284@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6289666467284@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC72D13DF68034E68A06C1FD9C1DC3D5",
+      "participant": "22836525699074@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-20T04:15:51.715Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289666467284@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC72D13DF68034E68A06C1FD9C1DC3D5",
+        "participant": "22836525699074@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289666467284@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC72D13DF68034E68A06C1FD9C1DC3D5",
+        "participant": "6289666467284@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-20T04:15:51.715Z"
   }
 }

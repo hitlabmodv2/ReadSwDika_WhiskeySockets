@@ -181,10 +181,10 @@ export function hasMediaDownloadMarker(text) {
 }
 
 /**
- * Helper: cek apakah teks mengandung marker sosmed download (TT/IG).
+ * Helper: cek apakah teks mengandung marker sosmed download (TT/IG/FB).
  */
 export function hasSocialDLMarker(text) {
-    return /\[TT:\s*[^\]]+\]/i.test(text) || /\[IG:\s*[^\]]+\]/i.test(text);
+    return /\[TT:\s*[^\]]+\]/i.test(text) || /\[IG:\s*[^\]]+\]/i.test(text) || /\[FB:\s*[^\]]+\]/i.test(text);
 }
 
 /**
@@ -334,6 +334,97 @@ export async function downloadInstagram(url) {
 
     aiToolsLog(`[AITool/IG] ✅ @${username} — ${mediaItems.length} media`);
     return { mediaItems, caption, username, url };
+}
+
+// ════════════════════════════════════════════════════════════
+//  FACEBOOK DOWNLOADER
+//  Marker: [FB: url]
+//  Pakai alwayscodex → archive.lick fallback
+//  Return: { videoUrl, title, quality, url }
+// ════════════════════════════════════════════════════════════
+
+/**
+ * Download Facebook video/reel dari URL.
+ * @param {string} url - URL Facebook (facebook.com/watch, fb.watch, facebook.com/reel)
+ * @returns {Promise<{videoUrl: string, title: string, quality: string, url: string}>}
+ */
+export async function downloadFacebook(url) {
+    let videoUrl = null;
+    let title = '';
+    let quality = 'SD';
+
+    // Primary: alwayscodex savefrom API
+    try {
+        const res = await axios.post('https://api.alwayscodex.my.id/api/downloader/savefrom', {
+            url,
+            type: 'vidio',
+        }, { timeout: 20000 });
+        const json = res.data;
+        if (json?.status && Array.isArray(json?.data) && json.data.length > 0) {
+            const videos = json.data
+                .filter(item => item.url && !item.is_audio)
+                .sort((a, b) => (parseInt(b.quality) || 0) - (parseInt(a.quality) || 0));
+            if (videos.length > 0) {
+                videoUrl = videos[0].url;
+                title    = videos[0].title || '';
+                quality  = parseInt(videos[0].quality) >= 480 ? 'HD' : 'SD';
+                aiToolsLog(`[AITool/FB] ✅ alwayscodex — ${quality}`);
+            }
+        }
+    } catch (_) {}
+
+    // Fallback: archive.lick
+    if (!videoUrl) {
+        try {
+            const apiUrl = `https://archive.lick.eu.org/api/download/facebook?url=${encodeURIComponent(url)}`;
+            const res = await axios.get(apiUrl, { timeout: 20000 });
+            const data = res.data;
+            if (data?.status && data?.result?.media?.length) {
+                const mediaList = data.result.media;
+                const hdMedia = mediaList.find(item =>
+                    item.quality && (item.quality.toLowerCase().includes('hd') || item.quality.toLowerCase().includes('high'))
+                );
+                const best = hdMedia || mediaList[0];
+                if (best?.url) {
+                    videoUrl = best.url;
+                    title    = data.result.metadata?.title || '';
+                    quality  = hdMedia ? 'HD' : 'SD';
+                    aiToolsLog(`[AITool/FB] ✅ archive.lick — ${quality}`);
+                }
+            }
+        } catch (_) {}
+    }
+
+    if (!videoUrl) throw new Error('Gagal download Facebook: semua API gagal');
+    return { videoUrl, title, quality, url };
+}
+
+/**
+ * Parse [FB: url] dari response AI, download Facebook.
+ * @returns {Promise<{cleanText: string, facebooks: Array}>}
+ */
+export async function extractFacebookFromText(text) {
+    const facebooks = [];
+    let cleanText = String(text || '');
+
+    const regex = /\[FB:\s*(https?:\/\/[^\]]{5,300})\]/gi;
+    const matches = [...cleanText.matchAll(regex)];
+
+    for (const match of matches) {
+        const fullMarker = match[0];
+        const url = match[1].trim();
+        cleanText = cleanText.split(fullMarker).join('');
+        if (!url) continue;
+        try {
+            const result = await downloadFacebook(url);
+            facebooks.push({ ...result, query: url });
+        } catch (e) {
+            aiToolsError(`[AITool/FB] ❌ Gagal download "${url}": ${e.message}`);
+        }
+    }
+
+    cleanText = cleanText.replace(/\n{3,}/g, '\n\n').trim();
+    return { cleanText, facebooks };
 }
 
 /**

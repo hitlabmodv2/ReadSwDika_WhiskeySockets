@@ -87,7 +87,7 @@ function makeWilyHelpers({
     rememberAIMedia, sendAIReply, tolak,
     extractImagesFromText, hasStickerMarker, extractStickersFromText, extractReplyStickersFromText,
     extractVoiceNotesFromText, extractSongsFromText, extractVideosFromText, extractYouTubeAudioFromText,
-    extractTikTokFromText, extractInstagramFromText, hasMediaDownloadMarker, hasSocialDLMarker,
+    extractTikTokFromText, extractInstagramFromText, extractFacebookFromText, hasMediaDownloadMarker, hasSocialDLMarker,
     wilyLog = () => {}, wilyError = () => {},
 }) {
     async function buildSmartImageWaitText({ userName, userQuestion, query, count }) {
@@ -260,6 +260,7 @@ function makeWilyHelpers({
 
         let tikToks = [];
         let instagrams = [];
+        let facebooks = [];
         if (hasSocialDLMarker(working)) {
             try {
                 const ttRes = await extractTikTokFromText(working);
@@ -274,6 +275,13 @@ function makeWilyHelpers({
                 instagrams = igRes.instagrams || [];
             } catch (e) {
                 wilyError(`[AIMedia] ❌ extractInstagram gagal: ${e.message}`);
+            }
+            try {
+                const fbRes = await extractFacebookFromText(working);
+                working = fbRes.cleanText;
+                facebooks = fbRes.facebooks || [];
+            } catch (e) {
+                wilyError(`[AIMedia] ❌ extractFacebook gagal: ${e.message}`);
             }
         }
 
@@ -362,6 +370,13 @@ function makeWilyHelpers({
                 }
             } catch (e) { wilyError(`[AIMedia] kirim instagram gagal: ${e.message}`); }
         }
+        for (const fb of facebooks) {
+            try {
+                const shortTitle = (fb.title || '').length > 100 ? fb.title.slice(0, 100) + '...' : (fb.title || '');
+                const cap = `╭═══ *FACEBOOK* ═══╮\n│ 🎬 ${shortTitle || 'Video Facebook'}\n│ 📊 Kualitas: ${fb.quality || 'SD'}\n╰══════════════════╯`;
+                await hisoka.sendMessage(m.from, { video: { url: fb.videoUrl }, caption: cap }, { quoted: m });
+            } catch (e) { wilyError(`[AIMedia] kirim facebook gagal: ${e.message}`); }
+        }
 
         const finalText = working.replace(/\n{3,}/g, '\n\n').trim();
         let sentText = null;
@@ -369,15 +384,15 @@ function makeWilyHelpers({
             sentText = await sendAIReply(hisoka, m, finalText);
         }
 
-        const totalMedia = images.length + stickers.length + voiceNotes.length + songs.length + videos.length + ytAudios.length + tikToks.length + instagrams.length;
+        const totalMedia = images.length + stickers.length + voiceNotes.length + songs.length + videos.length + ytAudios.length + tikToks.length + instagrams.length + facebooks.length;
         if (totalMedia > 0) {
-            wilyLog(`\x1b[36m[AIMedia]\x1b[39m sent → ${images.length} img + ${stickers.length} stk + ${voiceNotes.length} vn + ${songs.length} lagu + ${videos.length} video + ${ytAudios.length} ytmp3 + ${tikToks.length} tt + ${instagrams.length} ig`);
+            wilyLog(`\x1b[36m[AIMedia]\x1b[39m sent → ${images.length} img + ${stickers.length} stk + ${voiceNotes.length} vn + ${songs.length} lagu + ${videos.length} video + ${ytAudios.length} ytmp3 + ${tikToks.length} tt + ${instagrams.length} ig + ${facebooks.length} fb`);
         }
 
         return {
             cleanText: finalText,
             sentText,
-            counts: { images: images.length, stickers: stickers.length, voiceNotes: voiceNotes.length, songs: songs.length, videos: videos.length, ytAudios: ytAudios.length, tikToks: tikToks.length, instagrams: instagrams.length },
+            counts: { images: images.length, stickers: stickers.length, voiceNotes: voiceNotes.length, songs: songs.length, videos: videos.length, ytAudios: ytAudios.length, tikToks: tikToks.length, instagrams: instagrams.length, facebooks: facebooks.length },
         };
     }
 
