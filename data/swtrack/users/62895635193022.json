@@ -129,5 +129,70 @@
     "updatedAt": "2026-07-20T06:12:34.742Z",
     "retriedOnStartup": true,
     "retriedAt": "2026-07-20T06:12:34.742Z"
+  },
+  "AC95C562CCDBEB7C747C0F93E1BE3D7A": {
+    "id": "AC95C562CCDBEB7C747C0F93E1BE3D7A",
+    "sender": "62895635193022@s.whatsapp.net",
+    "name": ".",
+    "type": "protocolMessage",
+    "arrivedAt": "2026-07-20T06:20:50.540Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐠",
+    "source": "group",
+    "number": "62895635193022",
+    "messageKey": {
+      "remoteJid": "120363424557936431@g.us",
+      "fromMe": false,
+      "id": "AC95C562CCDBEB7C747C0F93E1BE3D7A",
+      "participant": "10111074471961@lid",
+      "participantAlt": "62895635193022@s.whatsapp.net",
+      "addressingMode": "lid"
+    },
+    "resolvedPn": "62895635193022@s.whatsapp.net",
+    "updatedAt": "2026-07-20T06:21:06.640Z",
+    "processedAt": "2026-07-20T06:21:06.640Z"
+  },
+  "AC6939E3B1F9B6673B3C4730DABCB54D": {
+    "id": "AC6939E3B1F9B6673B3C4730DABCB54D",
+    "sender": "62895635193022@s.whatsapp.net",
+    "name": ".",
+    "type": "videoMessage",
+    "arrivedAt": "2026-07-20T06:20:50.542Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐠",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "62895635193022",
+    "resolvedPn": "62895635193022@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "62895635193022@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC6939E3B1F9B6673B3C4730DABCB54D",
+      "participant": "10111074471961@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-20T06:21:09.050Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62895635193022@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC6939E3B1F9B6673B3C4730DABCB54D",
+        "participant": "10111074471961@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62895635193022@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC6939E3B1F9B6673B3C4730DABCB54D",
+        "participant": "62895635193022@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-20T06:21:09.050Z"
   }
 }

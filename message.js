@@ -53,7 +53,7 @@ import gemini from './src/helper/gemini.js';
 import { updateUserName, getUserName } from './src/db/userDb.js';
 import { loadUserMemory, detectAndUpdateMemory, clearUserMemory, clearAllUserMemory, memoryToReadable } from './src/helper/userMemory.js';
 import { searchAndGetImage, searchAndGetImages, extractImagesFromText } from './src/helper/imageSearch.js';
-import { extractSongsFromText, extractVideosFromText, extractReplyStickersFromText, extractTikTokFromText, extractInstagramFromText, extractFacebookFromText, extractYouTubeAudioFromText, hasMediaDownloadMarker, hasSocialDLMarker, hasStickerMarker, extractVoiceNotesFromText, extractStickersFromText } from './src/helper/aiTools.js';
+import { extractSongsFromText, extractVideosFromText, extractReplyStickersFromText, extractTikTokFromText, extractInstagramFromText, extractFacebookFromText, extractYouTubeAudioFromText, hasMediaDownloadMarker, hasSocialDLMarker, hasStickerMarker, extractVoiceNotesFromText, extractStickersFromText, hasCuacaMarker, extractCuacaFromText } from './src/helper/aiTools.js';
 import { getHistory, addToHistory, clearHistory, clearAllHistory, countHistory, getSessionKey, buildHistoryMeta, wrapCurrentUserMessage } from './src/db/aiHistory.js';
 import { kvGet, kvSet } from './src/db/datadb.js';
 import { sendAIReply } from './src/helper/aiReact.js';
@@ -108,6 +108,8 @@ const {
     extractImagesFromText, hasStickerMarker, extractStickersFromText, extractReplyStickersFromText,
     extractVoiceNotesFromText, extractSongsFromText, extractVideosFromText, extractYouTubeAudioFromText,
     extractTikTokFromText, extractInstagramFromText, extractFacebookFromText, hasMediaDownloadMarker, hasSocialDLMarker,
+    hasCuacaMarker, extractCuacaFromText,
+    downloadMediaMessage,
     wilyLog, wilyError,
 });
 

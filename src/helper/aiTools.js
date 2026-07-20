@@ -194,6 +194,45 @@ export function hasStickerMarker(text) {
     return /\[(?:STIKER|STICKER|REPLY-STIKER|REPLY-STICKER):\s*[^\]]+\]/i.test(text);
 }
 
+/**
+ * Helper: cek apakah teks mengandung marker [CUACA: kota].
+ */
+export function hasCuacaMarker(text) {
+    return /\[CUACA:\s*[^\]]+\]/i.test(text);
+}
+
+/**
+ * Parse [CUACA: nama_kota] dari response AI, fetch data cuaca real-time.
+ * Menggunakan Open-Meteo + Nominatim (gratis, tanpa API key).
+ * @param {string} text
+ * @returns {Promise<{cleanText: string, cuacas: Array<{kota: string, report: string}>}>}
+ */
+export async function extractCuacaFromText(text) {
+    const cuacas = [];
+    let cleanText = String(text || '');
+    const regex = /\[CUACA:\s*([^\]]{1,100})\]/gi;
+    const matches = [...cleanText.matchAll(regex)];
+    for (const match of matches) {
+        const fullMarker = match[0];
+        const kota = match[1].trim();
+        cleanText = cleanText.split(fullMarker).join('');
+        if (!kota) continue;
+        try {
+            const { createRequire } = await import('module');
+            const _require = createRequire(import.meta.url);
+            const { getWeather, formatWeatherReport } = _require('../../SEMUA_FITUR/tools/cuaca.cjs');
+            const result = await getWeather(kota);
+            const report = formatWeatherReport(result);
+            cuacas.push({ kota, report });
+        } catch (e) {
+            aiToolsError(`[AITool/CUACA] ❌ Gagal cek cuaca "${kota}": ${e.message}`);
+            cuacas.push({ kota, report: `❌ Maaf, gagal ambil data cuaca untuk *${kota}* saat ini. Coba lagi nanti ya~` });
+        }
+    }
+    cleanText = cleanText.replace(/\n{3,}/g, '\n\n').trim();
+    return { cleanText, cuacas };
+}
+
 // ════════════════════════════════════════════════════════════
 //  TIKTOK DOWNLOADER
 //  Marker: [TT: url]

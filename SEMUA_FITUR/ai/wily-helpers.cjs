@@ -88,6 +88,8 @@ function makeWilyHelpers({
     extractImagesFromText, hasStickerMarker, extractStickersFromText, extractReplyStickersFromText,
     extractVoiceNotesFromText, extractSongsFromText, extractVideosFromText, extractYouTubeAudioFromText,
     extractTikTokFromText, extractInstagramFromText, extractFacebookFromText, hasMediaDownloadMarker, hasSocialDLMarker,
+    hasCuacaMarker, extractCuacaFromText,
+    downloadMediaMessage,
     wilyLog = () => {}, wilyError = () => {},
 }) {
     async function buildSmartImageWaitText({ userName, userQuestion, query, count }) {
@@ -285,6 +287,35 @@ function makeWilyHelpers({
             }
         }
 
+        // ── TOIMG marker: [TOIMG] — convert stiker di pesan saat ini jadi gambar ──
+        let doToimg = false;
+        if (/\[TOIMG\]/i.test(working)) {
+            working = working.replace(/\[TOIMG\]/gi, '').trim();
+            doToimg = true;
+        }
+
+        // ── Cuaca marker: [CUACA: kota] ────────────────────────────────────────
+        let cuacas = [];
+        if (hasCuacaMarker && extractCuacaFromText && hasCuacaMarker(working)) {
+            try {
+                const cuacaRes = await extractCuacaFromText(working);
+                working = cuacaRes.cleanText;
+                cuacas = cuacaRes.cuacas || [];
+            } catch (e) {
+                wilyError(`[AIMedia] ❌ extractCuaca gagal: ${e.message}`);
+            }
+        }
+
+        // ── Kirim teks AI DULU sebelum proses download ──────────────────────────
+        // Supaya pesan acknowledgment ("boleh, tunggu ya~") muncul lebih dulu
+        // sebelum file download dikirim ke user
+        const _hasDownloads = songs.length + videos.length + ytAudios.length + tikToks.length + instagrams.length + facebooks.length > 0;
+        const finalText = working.replace(/\n{3,}/g, '\n\n').trim();
+        let sentText = null;
+        if (finalText && _hasDownloads) {
+            sentText = await sendAIReply(hisoka, m, finalText);
+        }
+
         for (const img of images) {
             try {
                 await hisoka.sendMessage(m.from, { image: img.buffer, caption: '🖼️' }, { quoted: m });
@@ -378,21 +409,86 @@ function makeWilyHelpers({
             } catch (e) { wilyError(`[AIMedia] kirim facebook gagal: ${e.message}`); }
         }
 
-        const finalText = working.replace(/\n{3,}/g, '\n\n').trim();
-        let sentText = null;
-        if (finalText) {
+        // Kirim teks hanya jika belum dikirim di atas (kasus non-download)
+        if (finalText && !sentText) {
             sentText = await sendAIReply(hisoka, m, finalText);
         }
 
-        const totalMedia = images.length + stickers.length + voiceNotes.length + songs.length + videos.length + ytAudios.length + tikToks.length + instagrams.length + facebooks.length;
+        // ── Kirim hasil TOIMG ────────────────────────────────────────────────────
+        if (doToimg && downloadMediaMessage) {
+            try {
+                let stickerBuffer = null;
+                // Coba dari quoted message dulu
+                if (m.isQuoted && m.quoted && m.quoted.type === 'stickerMessage') {
+                    stickerBuffer = await downloadMediaMessage(
+                        { ...m.quoted, message: m.quoted.raw },
+                        'buffer', {},
+                        { logger: hisoka.logger, reuploadRequest: hisoka.updateMediaMessage }
+                    );
+                } else if (m.type === 'stickerMessage') {
+                    // Stiker adalah pesan saat ini
+                    stickerBuffer = await downloadMediaMessage(
+                        m, 'buffer', {},
+                        { logger: hisoka.logger, reuploadRequest: hisoka.updateMediaMessage }
+                    );
+                }
+
+                if (stickerBuffer && stickerBuffer.length > 0) {
+                    let imageBuffer = null;
+                    try {
+                        const sharp = (await import('sharp')).default;
+                        imageBuffer = await sharp(stickerBuffer).png().toBuffer();
+                    } catch (sharpErr) {
+                        wilyError(`[AIMedia/TOIMG] sharp gagal: ${sharpErr.message}`);
+                        const { exec: _exec, promisify } = require('child_process');
+                        const { promisify: _p } = require('util');
+                        const execAsync = require('util').promisify(require('child_process').exec);
+                        const fs = require('fs');
+                        const ts = Date.now();
+                        const tmpIn = `/tmp/aitoimg_${ts}.webp`;
+                        const tmpOut = `/tmp/aitoimg_${ts}.png`;
+                        fs.writeFileSync(tmpIn, stickerBuffer);
+                        try {
+                            await execAsync(`ffmpeg -y -i "${tmpIn}" -vframes 1 "${tmpOut}"`, { timeout: 20000 });
+                            if (fs.existsSync(tmpOut)) imageBuffer = fs.readFileSync(tmpOut);
+                        } finally {
+                            if (fs.existsSync(tmpIn)) fs.unlinkSync(tmpIn);
+                            if (fs.existsSync(tmpOut)) try { fs.unlinkSync(tmpOut); } catch (_) {}
+                        }
+                    }
+
+                    if (imageBuffer && imageBuffer.length > 0) {
+                        await hisoka.sendMessage(m.from, { image: imageBuffer, caption: '✅ Stiker berhasil diconvert ke gambar!' }, { quoted: m });
+                        wilyLog('\x1b[36m[AIMedia]\x1b[39m [TOIMG] stiker → gambar OK');
+                    } else {
+                        await sendAIReply(hisoka, m, '❌ Gagal convert stiker, format mungkin tidak didukung. Coba pakai .toimg ya~');
+                    }
+                } else {
+                    await sendAIReply(hisoka, m, 'Hmm, aku nggak nemu stikernya~ Coba reply langsung ke stiker yang mau diconvert, terus minta lagi ya 🙏');
+                }
+            } catch (e) {
+                wilyError(`[AIMedia/TOIMG] error: ${e.message}`);
+                await sendAIReply(hisoka, m, `❌ Gagal convert stiker: ${e.message}`);
+            }
+        }
+
+        // ── Kirim hasil cuaca ────────────────────────────────────────────────────
+        for (const cw of cuacas) {
+            try {
+                await sendAIReply(hisoka, m, cw.report);
+            } catch (e) { wilyError(`[AIMedia] kirim cuaca gagal: ${e.message}`); }
+        }
+
+        const _toImgCount = doToimg ? 1 : 0;
+        const totalMedia = images.length + stickers.length + voiceNotes.length + songs.length + videos.length + ytAudios.length + tikToks.length + instagrams.length + facebooks.length + cuacas.length + _toImgCount;
         if (totalMedia > 0) {
-            wilyLog(`\x1b[36m[AIMedia]\x1b[39m sent → ${images.length} img + ${stickers.length} stk + ${voiceNotes.length} vn + ${songs.length} lagu + ${videos.length} video + ${ytAudios.length} ytmp3 + ${tikToks.length} tt + ${instagrams.length} ig + ${facebooks.length} fb`);
+            wilyLog(`\x1b[36m[AIMedia]\x1b[39m sent → ${images.length} img + ${stickers.length} stk + ${voiceNotes.length} vn + ${songs.length} lagu + ${videos.length} video + ${ytAudios.length} ytmp3 + ${tikToks.length} tt + ${instagrams.length} ig + ${facebooks.length} fb + ${cuacas.length} cuaca + ${_toImgCount} toimg`);
         }
 
         return {
             cleanText: finalText,
             sentText,
-            counts: { images: images.length, stickers: stickers.length, voiceNotes: voiceNotes.length, songs: songs.length, videos: videos.length, ytAudios: ytAudios.length, tikToks: tikToks.length, instagrams: instagrams.length, facebooks: facebooks.length },
+            counts: { images: images.length, stickers: stickers.length, voiceNotes: voiceNotes.length, songs: songs.length, videos: videos.length, ytAudios: ytAudios.length, tikToks: tikToks.length, instagrams: instagrams.length, facebooks: facebooks.length, cuacas: cuacas.length, toimg: _toImgCount },
         };
     }
 

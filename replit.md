@@ -58,3 +58,4 @@ Sudah tersimpan di `.replit` (tab Secrets / userenv):
 
 - Semua penjelasan AI di Replit menggunakan **Bahasa Indonesia**
 - Setiap selesai melakukan edit/perubahan kode, selalu tampilkan tombol **View Checkpoints** (SuggestUserAction rollback) agar user bisa rollback ke versi sebelumnya kapan saja
+- Setiap selesai melakukan edit/perubahan kode, tampilkan ringkasan changelog langsung di chat (bukan hanya disimpan di file) — format WA inline: `*bold*`, `_italic_`, `` `monospace` ``, dll. Sekaligus update file `changelog.txt` di root project dengan format yang sama
