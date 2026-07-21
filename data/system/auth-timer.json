@@ -2,139 +2,34 @@
   "events": [
     {
       "type": "connected",
-      "connectedAt": "2026-07-20T07:04:45.433Z"
+      "connectedAt": "2026-07-21T04:39:31.357Z"
     },
     {
       "type": "connected",
-      "connectedAt": "2026-07-20T07:04:42.307Z"
+      "connectedAt": "2026-07-21T04:36:35.718Z"
     },
     {
       "type": "connected",
-      "connectedAt": "2026-07-20T06:58:05.944Z"
+      "connectedAt": "2026-07-21T04:34:09.277Z"
     },
     {
       "type": "connected",
-      "connectedAt": "2026-07-20T06:53:55.057Z"
+      "connectedAt": "2026-07-21T02:36:33.258Z"
     },
     {
       "type": "connected",
-      "connectedAt": "2026-07-20T06:45:32.498Z"
+      "connectedAt": "2026-07-20T15:03:31.707Z"
     },
     {
-      "type": "connected",
-      "connectedAt": "2026-07-20T06:29:26.900Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-20T06:20:50.144Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-20T06:11:36.386Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-20T06:00:44.487Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-20T06:00:10.609Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-20T05:59:42.720Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-20T05:53:24.589Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-20T03:53:00.953Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-20T03:51:52.970Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-20T03:51:46.739Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-20T03:51:40.843Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-20T03:51:34.661Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-20T03:51:28.292Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-20T03:51:22.111Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-20T03:51:15.917Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-20T03:51:09.957Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-20T03:51:03.556Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-20T03:50:57.011Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-20T03:50:53.367Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-20T03:50:47.084Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-20T03:47:41.482Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-19T05:13:27.393Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-18T10:52:37.083Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-18T09:11:03.354Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-18T08:16:46.250Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-18T08:05:52.407Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-18T07:19:54.557Z"
-    },
-    {
-      "type": "qr_session_start",
-      "startAt": "2026-07-18T07:19:36.110Z",
-      "expireAt": "2026-07-18T07:22:36.110Z",
-      "durationSeconds": 180
+      "type": "pairing",
+      "code": "WILY-CODE",
+      "number": "6285159438825",
+      "startAt": "2026-07-20T15:03:14.834Z",
+      "expireAt": "2026-07-20T15:06:14.834Z",
+      "durationSeconds": 180,
+      "sessionExpireAt": "2026-07-20T15:06:14.834Z"
     }
   ],
-  "lastUpdated": "2026-07-20T07:04:45.434Z",
-  "sessionStart": "2026-07-18T07:19:36.123Z"
+  "lastUpdated": "2026-07-21T04:39:31.358Z",
+  "sessionStart": "2026-07-20T15:03:14.835Z"
 }

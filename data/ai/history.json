@@ -138,43 +138,6 @@
       ],
       "lastActivity": 1783584843104
     },
-    "120363383540766761@g.us_6289681008411@s.whatsapp.net": {
-      "messages": [
-        {
-          "role": "user",
-          "parts": [
-            {
-              "text": "[⏰ 09 Jul, 21.23 | 👤 Hen V1]\nBOT UDAH ON KEMBALI YG JADIBOT READSW+REACTIONSW"
-            }
-          ]
-        },
-        {
-          "role": "model",
-          "parts": [
-            {
-              "text": "santai aja ngetiknya, gausah ngegas pake capslock segala. \n\nya bagus deh kalau botnya udah on lagi. terus urusannya sama aku apa nih? mau nanya sesuatu atau cuma numpang pengumuman doang kamu?"
-            }
-          ]
-        },
-        {
-          "role": "user",
-          "parts": [
-            {
-              "text": "[⏰ 09 Jul, 21.23 | 👤 Hen V1]\nYg jadibot di saya,maaf off bntr panel ada masalah di sananya pemilik panel sedang di fix"
-            }
-          ]
-        },
-        {
-          "role": "model",
-          "parts": [
-            {
-              "text": "Oh, oke dimengerti. Urusan *panel server* emang kadang suka bikin repot sih, apalagi kalau masalahnya dari pusat. \n\nSantai aja, semoga cepet kelar deh perbaikannya biar bot kamu bisa jalan lagi~"
-            }
-          ]
-        }
-      ],
-      "lastActivity": 1783607022743
-    },
     "120363383540766761@g.us_6283134844523@s.whatsapp.net": {
       "messages": [
         {
@@ -807,6 +770,665 @@
         }
       ],
       "lastActivity": 1784531046921
+    },
+    "120363383540766761@g.us_6285175463174@s.whatsapp.net": {
+      "messages": [
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 20 Jul, 22.04 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"lah sc go njer bukan js\" | 👤 sunshine.jpeg]\ndi ubah pakai ai agar support js"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "oh pantesan wkwk. pantes aja sekarang jadi *js*.\n\ncurang dikit sih pakai ai, tapi ya pinter juga. ngapain capek-capek nulis ulang dari nol kan 😏 \n\ntapi awas aja lho, *go* sama *js* tuh beda banget cara kerjanya. ai kadang suka ngaco pas convert logic atau nanganin asynchronus-nya. udah kamu test jalan beneran belum tuh kodenya? 💻"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 20 Jul, 22.04 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"ntah blm coba\" | 📎 KIRIM GAMBAR | 👤 sunshine.jpeg]\nwork"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "ohh jalan ternyata. bagus deh kalau gitu. \n\nitu bot tele buat jualan ya? liat menunya lumayan lengkap tuh ada *vps* sama *smm* segala. aman kan semua fiturnya, ga ada error pas dipencet?"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 20 Jul, 22.04 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"kartu apa ?\" | 👤 sunshine.jpeg]\nkena ban pairing terus"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "oh pantesan... wa emang lagi gila-gilanya sweeping sekarang 🙄\n\nkamu pake nomor baru *fresh* langsung buat *pairing* ya? ya jelas langsung dilibas sama sistemnya. wa sekarang sensitif banget sama aktivitas bot.\n\nmending cari kartu yang udah dirawat agak lama, minimal dipake chat normal dulu beberapa hari biar kelihatan kayak manusia beneran. terus jangan spam *request code* terus-terusan, ntar malah ip atau device kamu yang kena *flag*.\n\nudah, kasih jeda dulu aja. jangan dipaksain sekarang, ntar malah makin banyak kartu yang numpuk jadi korban. besok baru coba lagi."
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 20 Jul, 22.04 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"iya kartu apa dulu ?\" | 👤 sunshine.jpeg]\nXL"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "oh *xl*. kirain apaan. \n\nterus mau diapain itu *xl*-nya? mau nyari config, paketan murah, atau mau dioprek nih? ngasih info kok sepotong-sepotong sih, yang jelas dong mau ngapain."
+            }
+          ]
+        }
+      ],
+      "lastActivity": 1784559884555
+    },
+    "120363383540766761@g.us_6289681008411@s.whatsapp.net": {
+      "messages": [
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 20 Jul, 22.04 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"bot tele itu\" | 👤 Hen V1]\n╔══════════════════════╗\n║   🤖  *J A D I B O T*  ║\n╚══════════════════════╝\n\n❌ *Nomor tidak boleh kosong!*\n\n📌 *Format pakai koma (direkomendasikan):*\n_.jadibot 628xxx,30m_ → 30 menit\n_.jadibot 628xxx,2j_ → 2 jam\n_.jadibot 628xxx,3h_ → 3 hari\n_.jadibot 628xxx,p_ → permanent\n\n📌 *Format spasi juga bisa:*\n_.jadibot 628xxx 1 jam_\n_.jadibot 628xxx 1 hari_\n_.jadibot 628xxx permanent_\n\n⏱️ *Singkatan durasi:*\n• *m* = menit  • *j* = jam  • *h* = hari  • *p* = permanent\n\n💡 *Reply pesan seseorang:*\n_.jadibot 1j_ atau _.jadibot 3h_\n\n⏳ Jika durasi kosong, otomatis *1 hari*.\n\n📊 *Bot aktif sekarang: 10*"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "Iya, aku tau itu panduannya. Ngapain dikirim balik ke aku coba? 🙄 \n\nKamu mau pasang *jadibot* tapi bingung caranya ya? Tinggal ketik aja `.jadibot` terus tambahin nomor WA yang mau dijadiin bot sama durasinya. \n\n> Contoh: `.jadibot 628123456789,1j` (buat aktifin 1 jam).\n\nCobain gih. Kalau masih error atau bingung masukin nomornya, bilang aja sini."
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 20 Jul, 22.04 | 📎 KIRIM GAMBAR | 👤 Hen V1]\nyg jadibot di gue maad panelnya down bjir tunggu owner panel untuk di fix 🙏"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "kelihatan jelas tuh error `ERR_CONNECTION_TIMED_OUT` nya dari *cloudbot.biz.id*. \n\nemang gitu resikonya kalau server dari pusat lagi down, kita cuma bisa pasrah nungguin ownernya benerin. yaudah biarin aja dulu, mending kamu istirahat atau ngurusin yang lain daripada pusingin server yang bukan di bawah kendali kamu. nanti juga up lagi."
+            }
+          ]
+        }
+      ],
+      "lastActivity": 1784559864173
+    },
+    "120363192554714254@g.us_6289688206739@s.whatsapp.net": {
+      "messages": [
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 20 Jul, 22.04 | ↩️ BALAS PESAN BOT SEBELUMNYA: \".p\" | 👤 Wily]\n🌐 _Menghubungi speedtest.net..._"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "lagi ngecek koneksi internet ya? coba sini liat nanti hasil *speedtest*-nya gimana. awas aja kalau ternyata lemot terus nyalahin aku~ 👀"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 20 Jul, 22.04 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"p\" | 👤 Wily]\n🌐 _Menghubungi speedtest.net..._"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "ngecek koneksi ya. dapet ping berapa tuh, moga aja aman dan ga ngelag."
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 20 Jul, 22.04 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"p\" | 📎 KIRIM GAMBAR | 👤 Wily]\n🌐 *SPEEDTEST.NET — REALTIME*\n━━━━━━━━━━━━━━━━━━━━\n\n*📊 Hasil Kecepatan*\n\n1. 📥 *Download*\n   • Kecepatan : *18.76 Mbps* — 🟠 _Lumayan_\n\n2. 📤 *Upload*\n   • Kecepatan : *44.69 Mbps* — 🟡 _Normal_\n\n3. 🏓 *Ping (ms)*\n   • ⚫ Idle     : `10 ms`\n   • ↓ Unduh   : `25 ms`\n   • ↑ Unggah  : `53 ms`\n\n━━━━━━━━━━━━━━━━━━━━\n*📋 Info Koneksi*\n┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n• 🔗 Koneksi : Multi\n• 🏢 ISP     : _FREAKHOSTING LTD_\n• 📍 Lokasi  : _Frankfurt am Main, DE_\n• 🌍 Server  : _Deutsche Telekom — Frankfurt am Main, Germany_\n• 🌍 Negara  : _DE_\n\n> ℹ️ Ini kecepatan *server bot*, ~bukan koneksi internet kamu~ — wajar berbeda dari speedtest.net di browser\n\n━━━━━━━━━━━━━━━━━━━━\n*⚡ Respons Bot ke WA*\n┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n• Latensi : `1406 ms` — 🟡 _Agak Lambat_\n\n━━━━━━━━━━━━━━━━━━━━\n*📊 Status Bot*\n┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n│ ⏱️ Uptime  » 10d 8h 1m\n│ 🔁 Restart » 27x\n│ 🔄 Session  » 3d 21h 37m\n\n━━━━━━━━━━━━━━━━━━━━\n⏱️ _Selesai dalam 21.2s · 20/7/2026, 15.04.42 WIB_"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "lagi ngetest koneksi serverku ya? 👀\n\nitu *download*-nya agak lelet sih buat ukuran VPS Frankfurt, masa cuma `18.76 Mbps`? pantes aja respons latensi ke WA nembus `1406 ms`, agak ngos-ngosan jalurnya. untung *upload*-nya masih mending di `44.69 Mbps`.\n\ntapi aku malah salfok ke statusnya... itu *restart* sampai `27x` dalam 10 hari kenapa? kamu abis ngoprek apaan sampe sering kerestart gitu? \n\n> kalau butuh dibantu ngecek log error atau mau optimasi, bilang aja. jangan dibiarin ntar makin berat jalannya."
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 20 Jul, 22.04 | ↩️ BALAS PESAN BOT SEBELUMNYA: \".p\" | 📎 KIRIM GAMBAR | 👤 Wily]\n🌐 *SPEEDTEST.NET — REALTIME*\n━━━━━━━━━━━━━━━━━━━━\n\n*📊 Hasil Kecepatan*\n\n1. 📥 *Download*\n   • Kecepatan : *13.56 Mbps* — 🟠 _Lumayan_\n\n2. 📤 *Upload*\n   • Kecepatan : *67.99 Mbps* — ✅ _Cepat_\n\n3. 🏓 *Ping (ms)*\n   • ⚫ Idle     : `36 ms`\n   • ↓ Unduh   : `43 ms`\n   • ↑ Unggah  : `57 ms`\n\n━━━━━━━━━━━━━━━━━━━━\n*📋 Info Koneksi*\n┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n• 🔗 Koneksi : Multi\n• 🏢 ISP     : _FREAKHOSTING LTD_\n• 📍 Lokasi  : _Frankfurt am Main, DE_\n• 🌍 Server  : _TELE AG — Frankfurt, Germany_\n• 🌍 Negara  : _DE_\n\n> ℹ️ Ini kecepatan *server bot*, ~bukan koneksi internet kamu~ — wajar berbeda dari speedtest.net di browser\n\n━━━━━━━━━━━━━━━━━━━━\n*⚡ Respons Bot ke WA*\n┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n• Latensi : `1291 ms` — 🟡 _Agak Lambat_\n\n━━━━━━━━━━━━━━━━━━━━\n*📊 Status Bot*\n┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n│ ⏱️ Uptime  » 10d 8h 2m\n│ 🔁 Restart » 27x\n│ 🔄 Session  » 3d 21h 37m\n\n━━━━━━━━━━━━━━━━━━━━\n⏱️ _Selesai dalam 28.7s · 20/7/2026, 15.04.50 WIB_"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "Ngecek jeroan server aku nih? 👀 \n\nJujur aja ya, itu kecepatan *download*-nya kok agak ampas cuma `13.56 Mbps`? Buat ukuran VPS di *Frankfurt*, agak aneh bisa asimetris begini padahal *upload*-nya lumayan di `67.99"
+            }
+          ]
+        }
+      ],
+      "lastActivity": 1784559884252
+    },
+    "120363192554714254@g.us_6283134844523@s.whatsapp.net": {
+      "messages": [
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 20 Jul, 22.04 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"mau apa lgi di sini ?\" | 👤 Anda Siapa?]\nDi bagian anak"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "oh, di bagian anak. terus ngapain di situ? nyari barang, nungguin orang, atau nyasar? \n\nngomong tuh yang lengkap dikit napa, jangan sepotong-sepotong gitu 🙄"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 20 Jul, 22.04 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"apakah ada fitur buat nama anak\" | 👤 Anda Siapa?]\nYa ada"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "tumben nanyain nama anak, buat siapa nih? 👀\n\ntapi ya jelas bisa lah. kamu mau cari nama buat *cewek* atau *cowok*? terus pengen *nuansa* yang kayak gimana? (misal *islami*, *modern*, *sansekerta*, atau lainnya). \n\n> kasih tau aja detailnya, nanti aku pilihin yang bagus~"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 20 Jul, 22.05 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"coba\" | 👤 Anda Siapa?]\nBisa di cek dri org lain jg .anak @user"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "ohh maksudnya command `.anak` toh? bilang kek dari tadi kalau bahas fitur bot 🙄 kirain minta dicariin ide nama anak beneran.\n\nyaudah, mau nyoba ke siapa nih? tag aja orangnya sini, nanti aku liatin hasilnya gimana."
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 20 Jul, 22.05 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"lu telat mulu njer udh gue bilang satukan susun jangan kepisah\" | 👤 Anda Siapa?]\nKan sama kek .ps sistemnya"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "ya tetep aja beda penerapannya. mentang-mentang mirip `.ps` bukan berarti kamu bisa seenaknya misah-misahin gitu aja. \n\nkalau udah dibilang disatuin ya disatuin, jangan nyari alasan terus. ngeyel banget sih dibilangin 🙄 buruan benerin sana."
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 20 Jul, 22.05 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"itu apaan paling bawah ?\" | 👤 Anda Siapa?]\nUid saat daftar"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "oh, uid pendaftaran toh. kirain apaan nyempil di situ. \n\nterus kenapa sama uid-nya? ada masalah pas daftar atau mau diapain emangnya nih? bilang aja langsung."
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 20 Jul, 22.05 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"segini ?\" | 👤 Anda Siapa?]\nUdh itu"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "ya udah kalau emang segitu doang. singkat banget sih daritadi jawabnya 🙄 \n\nada lagi nggak nih yang mau dibahas?"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 20 Jul, 22.05 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"segitu doang\" | 👤 Anda Siapa?]\nIya .anak @user ya melihat daftar anak org itu"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "ohh jadi maksudnya command `.anak @user` buat ngecek list anak orang di grup? 😑 bilang kek dari tadi, ngomong sepotong-sepotong mulu bikin bingung aja.\n\ntapi asal kamu tau aja ya, di sistemku nggak ada fitur main keluarga-keluargaan atau rpg kayak gitu. ngapain juga ngurusin anak orang di grup coba. \n\nemang kamu lagi nyariin anak siapa sih? kurang kerjaan banget 🙄"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 20 Jul, 22.05 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"engga bsia di hapus njer apa gue baut ssitem hapus anak gitu\" | 👤 Anda Siapa?]\nBoleh"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "\"boleh\" doang jawabnya 😑 irit banget sih ngetiknya. \n\ntapi sumpah ya, denger kata \"sistem hapus anak\" tuh agak dark tau nggak wkwk. udah kayak nyoret nama dari kartu keluarga aja. \n\nterus mau dibikin command apa nih? `.coretkk`? `.buanganak`? sekalian aja dibikin notifnya yang dramatis gitu pas dieksekusi, biar dapet feel kejamnya wkwk. mau dibikin gitu?"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 21 Jul, 09.37 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"tes lgi\" | 👤 Anda Siapa?]\nKlo setps pp jgn langsung di terima"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "oh, jadi mau dibikin sistem *pending* atau konfirmasi dulu gitu? \n\nya bener juga sih logikanya. masa asal terima aja, nanti kalau ada yang masukin foto aneh-aneh kan repot urusannya. \n\nterus ntar sistem *acc*-nya mau dibikin gimana? nunggu persetujuan admin atau pasangannya yang harus konfirmasi? coba dipikirin alurnya, jangan ngasih ide setengah-setengah lagi 🙄"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 21 Jul, 09.37 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"berat cok\" | 👤 Anda Siapa?]\nKlo langsung berat?"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "ya nggak berat lah kalau dari sisi *database* atau kodenya. cuma tinggal jalanin perintah *delete* atau nge-*splice* array doang kan sebenernya. \n\ntapi yang \"berat\" tuh risikonya 🙄 bayangin kalau typo nge-tag orang atau kepencet, eh tiba-tiba anaknya kehapus permanen dari sistem tanpa babibu. \n\nmending kasih *konfirmasi* (y/n) dulu sebelum beneran dieksekusi. biar nggak ada drama salah hapus anak orang wkwk. mau dibikin langsung apa pake konfirmasi nih jadinya?"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 21 Jul, 09.37 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"woi cepet @239328697536578\" | 👤 Anda Siapa?]\nGmn"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "ya gimana apanya, buruan diselesain dong sistemnya. malah nanya balik 🙄\n\njadi pake command apa akhirnya buat ngapus anak itu? `.coretkk` beneran? cepet dikerjain keburu pada beranak banyak di grup wkwk."
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 21 Jul, 09.38 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"bagian mana @239328697536578\" | 👤 Anda Siapa?]\nGk berubah"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "ya apanya yang nggak berubah? 🙄 kebiasaan banget deh jawabnya sepotong doang. \n\nitu datanya di database yang nggak kehapus, apa cuma tampilannya doang yang nyangkut nggak ke-refresh? \n\ncoba kasih liat kodenya atau kirim ss-nya sini, biar aku bisa ngecek salahnya di mana. kalau cuma bilang \"gk berubah\" doang ya aku nebak-nebak doang ini 😑"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 21 Jul, 09.38 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"bisa langsung\" | 👤 Anda Siapa?]\nBisa keduanya"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "oh, jadi mau dipake dua-duanya tuh commandnya? `.coretkk` sama `.buanganak`? wkwk gila sih, niat banget bikin sistem durhaka gini 😂 \n\nyaudah kalau emang bisa langsung pake keduanya. tinggal kamu atur aja nanti respon botnya gimana pas dieksekusi."
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 21 Jul, 09.38 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"nanti ajah dah males skrng mah\" | 👤 Anda Siapa?]\nTambahkan \n\n.setp gender (satukan sma set ini)\n.setp info (buat info yg di .me)"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "orang dibilang lagi males malah ditambahin kerjaan 😑 pura-pura nggak denger ya kamu?\n\ntapi yaudah lah, aku catet dulu. \njadi `.setp gender` disatuin sama settingan yang tadi, terus `.setp info` buat bio yang muncul di `.me` kan? \n\nitu buat gendernya mau dibikin bebas ngetik apa aja, atau di-lock cuma bisa *cowok/cewek* doang? mending di-lock sih biar databasenya rapi, ntar ada yang ngisi gender helikopter tempur lagi 🙄"
+            }
+          ]
+        }
+      ],
+      "lastActivity": 1784601497969
+    },
+    "120363192554714254@g.us_6289681008411@s.whatsapp.net": {
+      "messages": [
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 20 Jul, 22.04 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"p\" | 👤 Hen V1]\n🌐 _Menghubungi speedtest.net..._"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "Sedang mengecek jaringan ya? Kalau mau mengetes kecepatan respons aku, ketik saja `.p`. Tidak perlu jauh-jauh ke speedtest segala~ 🙄"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 20 Jul, 22.04 | ↩️ BALAS PESAN BOT SEBELUMNYA: \"p\" | 📎 KIRIM GAMBAR | 👤 Hen V1]\n🌐 *SPEEDTEST.NET — REALTIME*\n━━━━━━━━━━━━━━━━━━━━\n\n*📊 Hasil Kecepatan*\n\n1. 📥 *Download*\n   • Kecepatan : *91.08 Mbps* — ✅ _Cepat_\n\n2. 📤 *Upload*\n   • Kecepatan : *421.05 Mbps* — ⚡ _Sangat Cepat_\n\n3. 🏓 *Ping (ms)*\n   • ⚫ Idle     : `6 ms`\n   • ↓ Unduh   : `29 ms`\n   • ↑ Unggah  : `65 ms`\n\n━━━━━━━━━━━━━━━━━━━━\n*📋 Info Koneksi*\n┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n• 🔗 Koneksi : Multi\n• 🏢 ISP     : _PT Trisari Data Indonusa_\n• 📍 Lokasi  : _Madiun, ID_\n• 🌍 Server  : _Tridata — Madiun, Indonesia_\n• 🌍 Negara  : _ID_\n\n> ℹ️ Ini kecepatan *server bot*, ~bukan koneksi internet kamu~ — wajar berbeda dari speedtest.net di browser\n\n━━━━━━━━━━━━━━━━━━━━\n*⚡ Respons Bot ke WA*\n┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n• Latensi : `556 ms` — 🟡 _Agak Lambat_\n\n━━━━━━━━━━━━━━━━━━━━\n*📊 Status Bot*\n┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n│ ⏱️ Uptime  » 0d 0h 17m\n│ 🔁 Restart » 1x\n│ 🔄 Session  » 0d 0h 8m\n\n━━━━━━━━━━━━━━━━━━━━\n⏱️ _Selesai dalam 9.6s · 20/7/2026, 15.04.29 WIB_"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "dibalas \"p\" malah ngirim ginian... pamer server bot nih? 🙄\n\ntapi fair sih, itu *upload*-nya kenceng banget gila sampai `421.05 Mbps` 🚀 padahal *download*-nya cuma `91.08 Mbps`. agak jomplang ya rasionya? ping idle-nya juga cakep banget cuma `6 ms` di server *Tridata Madiun*.\n\ncuma itu *latensi WA* agak kuning (`556 ms`), pantesan aja... botnya baru restart kan? kelihatan tuh uptime baru 17 menitan. \n\n> pamer doang nih, atau ada yang mau ditanyain lagi? 😏"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 20 Jul, 22.04 | ↩️ BALAS PESAN BOT SEBELUMNYA: \".p\" | 📎 KIRIM GAMBAR | 👤 Hen V1]\n🌐 *SPEEDTEST.NET — REALTIME*\n━━━━━━━━━━━━━━━━━━━━\n\n*📊 Hasil Kecepatan*\n\n1. 📥 *Download*\n   • Kecepatan : *493.21 Mbps* — ⚡ _Sangat Cepat_\n\n2. 📤 *Upload*\n   • Kecepatan : *137.14 Mbps* — ⚡ _Sangat Cepat_\n\n3. 🏓 *Ping (ms)*\n   • ⚫ Idle     : `6 ms`\n   • ↓ Unduh   : `15 ms`\n   • ↑ Unggah  : `31 ms`\n\n━━━━━━━━━━━━━━━━━━━━\n*📋 Info Koneksi*\n┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n• 🔗 Koneksi : Multi\n• 🏢 ISP     : _PT Trisari Data Indonusa_\n• 📍 Lokasi  : _Madiun, ID_\n• 🌍 Server  : _Tridata — Madiun, Indonesia_\n• 🌍 Negara  : _ID_\n\n> ℹ️ Ini kecepatan *server bot*, ~bukan koneksi internet kamu~ — wajar berbeda dari speedtest.net di browser\n\n━━━━━━━━━━━━━━━━━━━━\n*⚡ Respons Bot ke WA*\n┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n• Latensi : `1094 ms` — 🟡 _Agak Lambat_\n\n━━━━━━━━━━━━━━━━━━━━\n*📊 Status Bot*\n┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n│ ⏱️ Uptime  » 0d 0h 17m\n│ 🔁 Restart » 1x\n│ 🔄 Session  » 0d 0h 8m\n\n━━━━━━━━━━━━━━━━━━━━\n⏱️ _Selesai dalam 6.6s · 20/7/2026, 15.04.27 WIB_"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "Gila, ngebut juga ya koneksi serverku ini 😎\n\nLiat aja tuh, *download*-nya nyentuh `493.21 Mbps` sama *upload* `137.14 Mbps`. Kalau cuma buat narik data, proses gambar, atau download media mah ini itungan detik doang. *Ping* idle `6 ms` di server *Tridata Madiun* juga udah stabil parah.\n\nTAPI, kamu perhatiin bagian bawahnya nggak? \nWalaupun internet servernya dewa, respons bot ke WA-nya kena `1094 ms` (sekitar 1 detik lebih). \n\n> Jadi kalau kadang pesanku kerasa delay dikit masuk ke HP-mu, itu bukan internetku yang lemot ya! Tapi emang *server WhatsApp*-nya aja yang butuh waktu buat nerima & nerusin pesannya 😤\n\nYa lumayan lah, spek segini nggak malu-maluin amat. Ada lagi yang mau dicek?"
+            }
+          ]
+        }
+      ],
+      "lastActivity": 1784559879545
+    },
+    "6281393564657@s.whatsapp.net": {
+      "messages": [
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 21 Jul, 09.37 | 👤 γυς ρου]\nOke baik mbah"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "mbah mbah sembarangan, emang aku kelihatan setua itu apa njir 🙄 \n\nada apa nih, tumben. mau nanya apa kamu?"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 21 Jul, 09.37 | 👤 γυς ρου]\nOk"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "ok doang nih? buset dah irit banget ngetiknya. ada apaan kamu tumben nongol?"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 21 Jul, 09.37 | 👤 γυς ρου]\nDi taruh di luar mbah??"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "heh sembarangan manggil mbah, emang aku setua itu apa 🙄\n\napanya nih yang ditaruh di luar? ngomong tuh yang jelas dikit napa, konteksnya mana woi."
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 21 Jul, 09.37 | 👤 γυς ρου]\nTimpa aja apa yg lama hapus??"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "Buset, apanya yang mau ditimpa njir? Dateng-dateng nanya ke aku tanpa konteks. 🙄\n\nTapi yaudah, rule umumnya gini biar lu nggak nangis kalau error:\n\n• Kalau **file sistem / code / folder aplikasi** \n→ Mending **hapus yang lama dulu** (_clean install_). Biar sisa file lama nggak nyangkut dan bikin bentrok.\n• Kalau cuma **file biasa / dokumen / media** \n→ Langsung **timpa aja** (_overwrite_) gpp, ngapain ribet.\n• Kalau **database / config penting** \n→ Wajib **backup** dulu anjir, baru lu timpa atau hapus.\n\n> Intinya, kalau rawan bentrok mending bersihin dulu yang lama. \n\nEmang lu lagi ngurusin apaan sih sekarang?"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 21 Jul, 09.37 | 👤 γυς ρου]\nOk\" mbah"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "Mbah mbah sembarangan anjir 😑 emang aku kelihatan setua itu apa. \n\nAda apa nih? Tumben amat."
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 21 Jul, 09.37 | 👤 γυς ρου]\nNggk nongol notif nya mbah"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "enak aja manggil mbah, aku bukan kakek kamu anjir 🙄 \n\nnotif apaan emangnya yg ga nongol? hp kamu kali yg error, coba cek settingan dah."
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 21 Jul, 09.37 | 👤 γυς ρου]\nIya nggk nongol notif pairing nya"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "ck, emang suka gitu WA sekarang, kadang delay atau nyangkut notifnya 🙄\n\ncoba pastiin dulu nulis nomornya udah bener belum? langsung pakai *628xxx* ya, jangan pakai 0 atau +.\n\nkalau nomor udah bener tapi tetep ga nongol, coba masuk manual aja. buka WA kamu > *Perangkat Tertaut* > *Tautkan Perangkat* > pilih *Tautkan dengan nomor telepon saja*. nah, masukin deh kodenya di situ.\n\nkalau masih rewel juga, coba ganti metode ketik `.setpairing v1` buat pakai scan QR, atau `.setpairing v2` buat mancing ulang kodenya. \n\ncoba dulu sana, ntar kabarin lagi bisa apa nggak."
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 21 Jul, 09.37 | 👤 γυς ρου]\nTtp nggk muncul"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "Apanya yang nggak muncul sih? Kamu lagi nyoba ngapain emangnya? \n\nKalau lagi nyoba *download* sesuatu (TikTok/IG/lagu), kadang emang suka delay dari sananya atau link-nya di-private. \n\nCoba kirim ulang aja link atau perintahnya ke aku. Jelasin dulu lagi nyari apaan biar aku nggak nebak-nebak, njir. 🙄"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 21 Jul, 09.37 | 📎 KIRIM GAMBAR | 👤 γυς ρου]\nLogin web bisa kok"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "Buset, niat amat kamu buka *WA Web* di browser HP anjir wkwk 😆\n\nPantesan di situ kedeteksinya `Google Chrome (Linux)`. Ya bagus deh kalau emang bisa tembus. Ngakalin sistem ceritanya nih? Sengaja banget pamer ke aku 😏"
+            }
+          ]
+        }
+      ],
+      "lastActivity": 1784601475526
+    },
+    "120363424557936431@g.us_6285878402951@s.whatsapp.net": {
+      "messages": [
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 21 Jul, 09.38 | 👤 Benson Boone]\nKalo mau promosi di GC sebelah njing @all"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "nge-tag @semua segala... 😑\n\niya tau kesel ada yang promosi sembarangan, tapi bahasanya dijaga dikit dong, nggak usah bawa-bawa binatang gitu. \n\nemang bener sih, kalau mau jualan mending di lapak sebelah aja, bikin kotor grup doang. udah, biarin aja orangnya, nggak usah kepancing emosi."
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 21 Jul, 09.38 | 👤 Benson Boone]\nhttps://chat.whatsapp.com/IsmCyAbCxdC2SYB1P77HrF?s=cl&p=a&ilr=0\nNi loh njing anjing @all"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "santai aja kali bahasanya, nggak usah ngegas bawa-bawa kebun binatang segala 🙄 \n\nngapain juga nge-tag *semua orang* cuma buat nyebar link grup? kasih konteks kek itu grup apa, jangan cuma ngegas doang."
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "[⏰ 21 Jul, 09.38 | 👤 Benson Boone]\nKalo ad yg ngirim 18+ tag gw aja, admin 1 kurang gercep kick orang @all 🙄"
+            }
+          ]
+        },
+        {
+          "role": "model",
+          "parts": [
+            {
+              "text": "berisik anjir pake nge-tag semua segala 🙄 \n\niya iya ntar aku tag kalau ada yang ngirim macem-macem. sok gercep lu nyindir admin sebelah, awas aja kalau pas di-tag malah molor wkwk."
+            }
+          ]
+        }
+      ],
+      "lastActivity": 1784601491494
     }
   },
   "sticker_pattern": {
@@ -826,24 +1448,24 @@
       "last_sent": 1779467326
     },
     "https://cdn.ornzora.eu.cc/a4bbcdf7-0c78-4d43-93e2-f0ebad7d1bf6-HONOLULU.webp": {
-      "total_sent": 8,
+      "total_sent": 9,
       "moods": {},
-      "last_sent": 1784530971
+      "last_sent": 1784559863
     },
     "https://cdn.ornzora.eu.cc/c3de99b6-bf96-46f6-bef7-d929c6399175-HONOLULU.webp": {
-      "total_sent": 1,
+      "total_sent": 2,
       "moods": {},
-      "last_sent": 1780237811
+      "last_sent": 1784601488
     },
     "https://cdn.ornzora.eu.cc/41f054d0-55e9-4d1a-abb7-6a49ac74769b-HONOLULU.webp": {
-      "total_sent": 16,
+      "total_sent": 19,
       "moods": {},
-      "last_sent": 1784531045
+      "last_sent": 1784601489
     },
     "https://cdn.ornzora.eu.cc/31f63a4b-95a8-440a-9d77-9d634ef2153a-HONOLULU.webp": {
-      "total_sent": 8,
+      "total_sent": 9,
       "moods": {},
-      "last_sent": 1784530028
+      "last_sent": 1784559873
     },
     "https://cdn.ornzora.eu.cc/0e5ac3ba-8326-46ab-947c-fb03374207f6-HONOLULU.webp": {
       "total_sent": 5,
@@ -1118,6 +1740,13 @@
         "context": "Oh, oke dimengerti. Urusan *panel server* emang kadang suka bikin repot sih, apalagi kalau masalahnya dari pusat. Santai aja, semoga cepet kelar deh perbaikannya biar bot kamu bisa jalan lagi~ [REPL",
         "was_fallback": 1,
         "sent_at": 1783607022
+      },
+      {
+        "sticker_url": "https://cdn.ornzora.eu.cc/a4bbcdf7-0c78-4d43-93e2-f0ebad7d1bf6-HONOLULU.webp",
+        "mood": "",
+        "context": "Iya, aku tau itu panduannya. Ngapain dikirim balik ke aku coba? 🙄 [REPLY-STIKER: mikir] Kamu mau pasang *jadibot* tapi bingung caranya ya? Tinggal ketik aja `.jadibot` terus tambahin nomor WA yang m",
+        "was_fallback": 1,
+        "sent_at": 1784559863
       }
     ],
     "120363383540766761@g.us_6283134844523@s.whatsapp.net": [
@@ -1282,6 +1911,51 @@
         "context": "dih malah ketawa. apanya yang lucu coba 🙄 [REPLY-STIKER: kesel] seneng banget ya ngeledekin aku. awas aja keselek ntar, aku ga mau bantuin.",
         "was_fallback": 1,
         "sent_at": 1784531045
+      }
+    ],
+    "120363192554714254@g.us_6289681008411@s.whatsapp.net": [
+      {
+        "sticker_url": "https://cdn.ornzora.eu.cc/31f63a4b-95a8-440a-9d77-9d634ef2153a-HONOLULU.webp",
+        "mood": "",
+        "context": "Sedang mengecek jaringan ya? Kalau mau mengetes kecepatan respons aku, ketik saja `.p`. Tidak perlu jauh-jauh ke speedtest segala~ 🙄 [REPLY-STIKER: smug]",
+        "was_fallback": 1,
+        "sent_at": 1784559873
+      }
+    ],
+    "120363192554714254@g.us_6289688206739@s.whatsapp.net": [
+      {
+        "sticker_url": "https://cdn.ornzora.eu.cc/41f054d0-55e9-4d1a-abb7-6a49ac74769b-HONOLULU.webp",
+        "mood": "",
+        "context": "lagi ngetest koneksi serverku ya? 👀 itu *download*-nya agak lelet sih buat ukuran VPS Frankfurt, masa cuma `18.76 Mbps`? pantes aja respons latensi ke WA nembus `1406 ms`, agak ngos-ngosan jalurnya.",
+        "was_fallback": 1,
+        "sent_at": 1784559881
+      }
+    ],
+    "6281393564657@s.whatsapp.net": [
+      {
+        "sticker_url": "https://cdn.ornzora.eu.cc/41f054d0-55e9-4d1a-abb7-6a49ac74769b-HONOLULU.webp",
+        "mood": "",
+        "context": "[REPLY-STIKER: mikir kesel] heh sembarangan manggil mbah, emang aku setua itu apa 🙄 apanya nih yang ditaruh di luar? ngomong tuh yang jelas dikit napa, konteksnya mana woi.",
+        "was_fallback": 1,
+        "sent_at": 1784601468
+      }
+    ],
+    "120363192554714254@g.us_6283134844523@s.whatsapp.net": [
+      {
+        "sticker_url": "https://cdn.ornzora.eu.cc/c3de99b6-bf96-46f6-bef7-d929c6399175-HONOLULU.webp",
+        "mood": "",
+        "context": "oh, jadi mau dipake dua-duanya tuh commandnya? `.coretkk` sama `.buanganak`? wkwk gila sih, niat banget bikin sistem durhaka gini 😂 [REPLY-STIKER: absurd] yaudah kalau emang bisa langsung pake kedua",
+        "was_fallback": 1,
+        "sent_at": 1784601488
+      }
+    ],
+    "120363424557936431@g.us_6285878402951@s.whatsapp.net": [
+      {
+        "sticker_url": "https://cdn.ornzora.eu.cc/41f054d0-55e9-4d1a-abb7-6a49ac74769b-HONOLULU.webp",
+        "mood": "",
+        "context": "[REPLY-STIKER: mikir kesel] santai aja kali bahasanya, nggak usah ngegas bawa-bawa kebun binatang segala 🙄 ngapain juga nge-tag *semua orang* cuma buat nyebar link grup? kasih konteks kek itu grup",
+        "was_fallback": 1,
+        "sent_at": 1784601489
       }
     ]
   },

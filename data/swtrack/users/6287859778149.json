@@ -1,199 +1,4 @@
 {
-  "ACAEBFB3480223DC60FEF20DCF32208C": {
-    "id": "ACAEBFB3480223DC60FEF20DCF32208C",
-    "sender": "6287859778149@s.whatsapp.net",
-    "name": "loena",
-    "type": "videoMessage",
-    "arrivedAt": "2026-07-19T05:14:02.624Z",
-    "read": true,
-    "reacted": true,
-    "emoji": "🐟",
-    "resolve": "PN langsung ✓",
-    "source": "status",
-    "number": "6287859778149",
-    "resolvedPn": "6287859778149@s.whatsapp.net",
-    "messageKey": {
-      "remoteJid": "status@broadcast",
-      "remoteJidAlt": "6287859778149@s.whatsapp.net",
-      "fromMe": false,
-      "id": "ACAEBFB3480223DC60FEF20DCF32208C",
-      "participant": "145136172458113@lid",
-      "addressingMode": "lid"
-    },
-    "updatedAt": "2026-07-19T05:14:19.426Z",
-    "receiptKeys": [
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6287859778149@s.whatsapp.net",
-        "fromMe": false,
-        "id": "ACAEBFB3480223DC60FEF20DCF32208C",
-        "participant": "145136172458113@lid",
-        "addressingMode": "lid"
-      },
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6287859778149@s.whatsapp.net",
-        "fromMe": false,
-        "id": "ACAEBFB3480223DC60FEF20DCF32208C",
-        "participant": "6287859778149@s.whatsapp.net",
-        "addressingMode": "lid"
-      }
-    ],
-    "processedAt": "2026-07-19T05:14:19.425Z"
-  },
-  "AC330F1D14B8E9BA222CC8DFF80D3E6C": {
-    "id": "AC330F1D14B8E9BA222CC8DFF80D3E6C",
-    "sender": "6287859778149@s.whatsapp.net",
-    "name": "loena",
-    "type": "protocolMessage",
-    "arrivedAt": "2026-07-19T05:14:02.834Z",
-    "read": true,
-    "reacted": true,
-    "emoji": "🐡",
-    "source": "group",
-    "number": "6287859778149",
-    "messageKey": {
-      "remoteJid": "120363427374078962@g.us",
-      "fromMe": false,
-      "id": "AC330F1D14B8E9BA222CC8DFF80D3E6C",
-      "participant": "145136172458113@lid",
-      "participantAlt": "6287859778149@s.whatsapp.net",
-      "addressingMode": "lid"
-    },
-    "resolvedPn": "6287859778149@s.whatsapp.net",
-    "updatedAt": "2026-07-19T05:14:16.903Z",
-    "processedAt": "2026-07-19T05:14:16.903Z"
-  },
-  "ACB36BA7A23F95414423653F2A4540B0": {
-    "id": "ACB36BA7A23F95414423653F2A4540B0",
-    "sender": "6287859778149@s.whatsapp.net",
-    "name": "loena",
-    "type": "protocolMessage",
-    "arrivedAt": "2026-07-19T05:14:32.668Z",
-    "read": true,
-    "reacted": true,
-    "emoji": "🦈",
-    "source": "group",
-    "number": "6287859778149",
-    "messageKey": {
-      "remoteJid": "120363427374078962@g.us",
-      "fromMe": false,
-      "id": "ACB36BA7A23F95414423653F2A4540B0",
-      "participant": "145136172458113@lid",
-      "participantAlt": "6287859778149@s.whatsapp.net",
-      "addressingMode": "lid"
-    },
-    "resolvedPn": "6287859778149@s.whatsapp.net",
-    "updatedAt": "2026-07-19T05:14:38.438Z",
-    "processedAt": "2026-07-19T05:14:38.438Z"
-  },
-  "AC13B6D5E8F90135D1FF5E3C26F3AA28": {
-    "id": "AC13B6D5E8F90135D1FF5E3C26F3AA28",
-    "sender": "6287859778149@s.whatsapp.net",
-    "name": "loena",
-    "type": "videoMessage",
-    "arrivedAt": "2026-07-19T05:14:32.671Z",
-    "read": true,
-    "reacted": true,
-    "emoji": "🐬",
-    "resolve": "PN langsung ✓",
-    "source": "status",
-    "number": "6287859778149",
-    "resolvedPn": "6287859778149@s.whatsapp.net",
-    "messageKey": {
-      "remoteJid": "status@broadcast",
-      "remoteJidAlt": "6287859778149@s.whatsapp.net",
-      "fromMe": false,
-      "id": "AC13B6D5E8F90135D1FF5E3C26F3AA28",
-      "participant": "145136172458113@lid",
-      "addressingMode": "lid"
-    },
-    "updatedAt": "2026-07-19T05:14:49.352Z",
-    "receiptKeys": [
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6287859778149@s.whatsapp.net",
-        "fromMe": false,
-        "id": "AC13B6D5E8F90135D1FF5E3C26F3AA28",
-        "participant": "145136172458113@lid",
-        "addressingMode": "lid"
-      },
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6287859778149@s.whatsapp.net",
-        "fromMe": false,
-        "id": "AC13B6D5E8F90135D1FF5E3C26F3AA28",
-        "participant": "6287859778149@s.whatsapp.net",
-        "addressingMode": "lid"
-      }
-    ],
-    "processedAt": "2026-07-19T05:14:49.352Z"
-  },
-  "AC336C8445BE45A07CF27E7469048D05": {
-    "id": "AC336C8445BE45A07CF27E7469048D05",
-    "sender": "6287859778149@s.whatsapp.net",
-    "name": "loena",
-    "type": "protocolMessage",
-    "arrivedAt": "2026-07-19T05:14:58.432Z",
-    "read": true,
-    "reacted": true,
-    "emoji": "🐬",
-    "source": "group",
-    "number": "6287859778149",
-    "messageKey": {
-      "remoteJid": "120363427374078962@g.us",
-      "fromMe": false,
-      "id": "AC336C8445BE45A07CF27E7469048D05",
-      "participant": "145136172458113@lid",
-      "participantAlt": "6287859778149@s.whatsapp.net",
-      "addressingMode": "lid"
-    },
-    "resolvedPn": "6287859778149@s.whatsapp.net",
-    "updatedAt": "2026-07-19T05:15:08.270Z",
-    "processedAt": "2026-07-19T05:15:08.269Z"
-  },
-  "AC30C5BF8AB6365AFC2805D0067D37D7": {
-    "id": "AC30C5BF8AB6365AFC2805D0067D37D7",
-    "sender": "6287859778149@s.whatsapp.net",
-    "name": "loena",
-    "type": "videoMessage",
-    "arrivedAt": "2026-07-19T05:14:58.434Z",
-    "read": true,
-    "reacted": true,
-    "emoji": "🐡",
-    "resolve": "PN langsung ✓",
-    "source": "status",
-    "number": "6287859778149",
-    "resolvedPn": "6287859778149@s.whatsapp.net",
-    "messageKey": {
-      "remoteJid": "status@broadcast",
-      "remoteJidAlt": "6287859778149@s.whatsapp.net",
-      "fromMe": false,
-      "id": "AC30C5BF8AB6365AFC2805D0067D37D7",
-      "participant": "145136172458113@lid",
-      "addressingMode": "lid"
-    },
-    "updatedAt": "2026-07-19T05:15:17.897Z",
-    "receiptKeys": [
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6287859778149@s.whatsapp.net",
-        "fromMe": false,
-        "id": "AC30C5BF8AB6365AFC2805D0067D37D7",
-        "participant": "145136172458113@lid",
-        "addressingMode": "lid"
-      },
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6287859778149@s.whatsapp.net",
-        "fromMe": false,
-        "id": "AC30C5BF8AB6365AFC2805D0067D37D7",
-        "participant": "6287859778149@s.whatsapp.net",
-        "addressingMode": "lid"
-      }
-    ],
-    "processedAt": "2026-07-19T05:15:17.897Z"
-  },
   "ACDFE0DAD45B10580FF73590BE015954": {
     "id": "ACDFE0DAD45B10580FF73590BE015954",
     "sender": "6287859778149@s.whatsapp.net",
@@ -323,5 +128,135 @@
     "resolvedPn": "6287859778149@s.whatsapp.net",
     "updatedAt": "2026-07-20T06:44:06.538Z",
     "processedAt": "2026-07-20T06:44:06.538Z"
+  },
+  "AC98D3872328F0C1F7BB0F8C9B300259": {
+    "id": "AC98D3872328F0C1F7BB0F8C9B300259",
+    "sender": "6287859778149@s.whatsapp.net",
+    "name": "loena",
+    "type": "protocolMessage",
+    "arrivedAt": "2026-07-21T02:37:01.928Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐋",
+    "source": "group",
+    "number": "6287859778149",
+    "messageKey": {
+      "remoteJid": "120363427374078962@g.us",
+      "fromMe": false,
+      "id": "AC98D3872328F0C1F7BB0F8C9B300259",
+      "participant": "145136172458113@lid",
+      "participantAlt": "6287859778149@s.whatsapp.net",
+      "addressingMode": "lid"
+    },
+    "resolvedPn": "6287859778149@s.whatsapp.net",
+    "updatedAt": "2026-07-21T02:37:16.524Z",
+    "processedAt": "2026-07-21T02:37:16.524Z"
+  },
+  "AC8A2B0B974DA8739C3C1DCB19A75E4F": {
+    "id": "AC8A2B0B974DA8739C3C1DCB19A75E4F",
+    "sender": "6287859778149@s.whatsapp.net",
+    "name": "loena",
+    "type": "videoMessage",
+    "arrivedAt": "2026-07-21T02:37:02.100Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐳",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6287859778149",
+    "resolvedPn": "6287859778149@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6287859778149@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC8A2B0B974DA8739C3C1DCB19A75E4F",
+      "participant": "145136172458113@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-21T02:37:20.010Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287859778149@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC8A2B0B974DA8739C3C1DCB19A75E4F",
+        "participant": "145136172458113@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287859778149@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC8A2B0B974DA8739C3C1DCB19A75E4F",
+        "participant": "6287859778149@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-21T02:37:20.010Z"
+  },
+  "AC5598292BB2B39E9DF8A2C53273B8C8": {
+    "id": "AC5598292BB2B39E9DF8A2C53273B8C8",
+    "sender": "6287859778149@s.whatsapp.net",
+    "name": "loena",
+    "type": "videoMessage",
+    "arrivedAt": "2026-07-21T02:37:48.777Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐳",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6287859778149",
+    "resolvedPn": "6287859778149@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6287859778149@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC5598292BB2B39E9DF8A2C53273B8C8",
+      "participant": "145136172458113@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-21T02:38:05.562Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287859778149@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC5598292BB2B39E9DF8A2C53273B8C8",
+        "participant": "145136172458113@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287859778149@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC5598292BB2B39E9DF8A2C53273B8C8",
+        "participant": "6287859778149@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-21T02:38:05.562Z"
+  },
+  "AC45403915B3DB3AFC8CB02C490D0FD5": {
+    "id": "AC45403915B3DB3AFC8CB02C490D0FD5",
+    "sender": "6287859778149@s.whatsapp.net",
+    "name": "loena",
+    "type": "protocolMessage",
+    "arrivedAt": "2026-07-21T02:37:48.970Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🦈",
+    "source": "group",
+    "number": "6287859778149",
+    "messageKey": {
+      "remoteJid": "120363427374078962@g.us",
+      "fromMe": false,
+      "id": "AC45403915B3DB3AFC8CB02C490D0FD5",
+      "participant": "145136172458113@lid",
+      "participantAlt": "6287859778149@s.whatsapp.net",
+      "addressingMode": "lid"
+    },
+    "resolvedPn": "6287859778149@s.whatsapp.net",
+    "updatedAt": "2026-07-21T02:37:52.535Z",
+    "processedAt": "2026-07-21T02:37:52.535Z"
   }
 }

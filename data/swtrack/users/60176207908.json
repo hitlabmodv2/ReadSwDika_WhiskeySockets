@@ -1,36 +1,37 @@
 {
-  "AC49D2D4886470A0E942437EAD5939A1": {
-    "id": "AC49D2D4886470A0E942437EAD5939A1",
+  "AC990F9706D43465E1155C60F6276CDE": {
+    "id": "AC990F9706D43465E1155C60F6276CDE",
     "sender": "60176207908@s.whatsapp.net",
-    "name": "kyy",
+    "name": "Account not found",
     "type": "protocolMessage",
-    "arrivedAt": "2026-07-18T10:52:41.105Z",
+    "arrivedAt": "2026-07-20T15:06:15.807Z",
     "read": true,
     "reacted": true,
-    "emoji": "🐳",
+    "emoji": "🐟",
     "source": "group",
     "number": "60176207908",
     "messageKey": {
       "remoteJid": "120363405980349907@g.us",
       "fromMe": false,
-      "id": "AC49D2D4886470A0E942437EAD5939A1",
+      "id": "AC990F9706D43465E1155C60F6276CDE",
       "participant": "51763633742041@lid",
       "participantAlt": "60176207908@s.whatsapp.net",
       "addressingMode": "lid"
     },
     "resolvedPn": "60176207908@s.whatsapp.net",
-    "updatedAt": "2026-07-18T10:52:54.998Z",
-    "processedAt": "2026-07-18T10:52:54.998Z"
+    "updatedAt": "2026-07-21T02:37:25.411Z",
+    "retriedOnStartup": true,
+    "retriedAt": "2026-07-21T02:37:25.411Z"
   },
-  "AC9E277C896DDEEF11DF813461E222BB": {
-    "id": "AC9E277C896DDEEF11DF813461E222BB",
+  "AC42362C5B7DC1C024496B818590F75D": {
+    "id": "AC42362C5B7DC1C024496B818590F75D",
     "sender": "60176207908@s.whatsapp.net",
-    "name": "kyy",
+    "name": "Account not found",
     "type": "videoMessage",
-    "arrivedAt": "2026-07-18T10:52:41.351Z",
+    "arrivedAt": "2026-07-20T15:06:15.808Z",
     "read": true,
     "reacted": true,
-    "emoji": "🐋",
+    "emoji": "🦈",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "60176207908",
@@ -39,17 +40,17 @@
       "remoteJid": "status@broadcast",
       "remoteJidAlt": "60176207908@s.whatsapp.net",
       "fromMe": false,
-      "id": "AC9E277C896DDEEF11DF813461E222BB",
+      "id": "AC42362C5B7DC1C024496B818590F75D",
       "participant": "51763633742041@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-07-18T10:53:00.034Z",
+    "updatedAt": "2026-07-20T15:06:24.782Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "60176207908@s.whatsapp.net",
         "fromMe": false,
-        "id": "AC9E277C896DDEEF11DF813461E222BB",
+        "id": "AC42362C5B7DC1C024496B818590F75D",
         "participant": "51763633742041@lid",
         "addressingMode": "lid"
       },
@@ -57,11 +58,59 @@
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "60176207908@s.whatsapp.net",
         "fromMe": false,
-        "id": "AC9E277C896DDEEF11DF813461E222BB",
+        "id": "AC42362C5B7DC1C024496B818590F75D",
         "participant": "60176207908@s.whatsapp.net",
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-07-18T10:53:00.034Z"
+    "processedAt": "2026-07-20T15:06:24.782Z"
+  },
+  "ACA6563DD39CA7EA11583104995A6780": {
+    "id": "ACA6563DD39CA7EA11583104995A6780",
+    "sender": "60176207908@s.whatsapp.net",
+    "name": "Account not found",
+    "type": "protocolMessage",
+    "arrivedAt": "2026-07-21T02:37:07.402Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐬",
+    "source": "group",
+    "number": "60176207908",
+    "messageKey": {
+      "remoteJid": "120363405980349907@g.us",
+      "fromMe": false,
+      "id": "ACA6563DD39CA7EA11583104995A6780",
+      "participant": "51763633742041@lid",
+      "participantAlt": "60176207908@s.whatsapp.net",
+      "addressingMode": "lid"
+    },
+    "resolvedPn": "60176207908@s.whatsapp.net",
+    "updatedAt": "2026-07-21T02:37:14.193Z",
+    "processedAt": "2026-07-21T02:37:14.193Z"
+  },
+  "ACA8DFDF048F29FACBE1EF40B6465257": {
+    "id": "ACA8DFDF048F29FACBE1EF40B6465257",
+    "sender": "60176207908@s.whatsapp.net",
+    "name": "Account not found",
+    "type": "videoMessage",
+    "arrivedAt": "2026-07-21T02:37:07.404Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐟",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "60176207908",
+    "resolvedPn": "60176207908@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "60176207908@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACA8DFDF048F29FACBE1EF40B6465257",
+      "participant": "51763633742041@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-21T04:35:09.314Z",
+    "retriedOnStartup": true,
+    "retriedAt": "2026-07-21T04:35:09.314Z"
   }
 }
