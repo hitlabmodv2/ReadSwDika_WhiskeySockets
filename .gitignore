@@ -22,6 +22,9 @@ zipFile.zip
 *.zip
 *.pdf
 
+# Folder asset AI Replit — jangan di-push ke GitHub
+attached_assets/
+
 
 # Jadibot runtime data — jangan di-commit
 data_jadibot/

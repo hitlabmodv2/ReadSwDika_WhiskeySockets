@@ -2366,7 +2366,7 @@ prepare_stage() {
   # Force-add file penting yang biasanya di-ignore.
   # CATATAN: .token.secret SENGAJA TIDAK di-force-add (keamanan token).
   for forced in package-lock.json .env \
-                attached_assets .agents \
+                .agents \
                 jadibot \
                 data \
                 .replit; do
