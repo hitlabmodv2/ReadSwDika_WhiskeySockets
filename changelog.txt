@@ -20,9 +20,27 @@
   → Tap salah satu → kategori di-toggle, bot kirim konfirmasi +
     button 3 kategori diperbarui (bisa ulang terus).
 
-• Callback baru: `__nknotif_kat_menu__` (layar kategori),
+• Callback baru: `__nknotif_kat_menu__`, `__nknotif_back__`,
   `__nknotif_kat_hentai__`, `__nknotif_kat_2d__`, `__nknotif_kat_3d__`
-• Helper baru: `_tambahBtnOnOff()`, `_tambahBtnKat()`, `_katInfoLine()`
+• Helper baru: `_tambahBtnOnOff()`, `_tambahBtnKat()`, `_katInfoLine()`,
+  `_prevBtnKey` (Map), `_autoClean()`, `_runBtn()`
+
+✨ *[22 Juli 2026] — Tambahan: Tombol Kembali + Auto-Delete Pesan Button*
+━━━━━━━━━━━━━━━━━━
+
+🔧 *nekopoi-monitor.cjs — Kembali & Auto-Delete*
+┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+• *Tombol 🔙 Kembali* di layar Edit Kategori → tap untuk balik ke
+  layar ON/OFF (menampilkan status grup saat ini + tombol toggle yang tepat)
+
+• *Auto-delete pesan sebelumnya* saat tap button apapun:
+  - Pesan bot sebelumnya yang ada button → otomatis dihapus
+  - Pesan tap button user → otomatis dihapus
+  - Efek: chat tidak spam, hanya pesan terbaru yang terlihat
+
+• Implementasi: `_prevBtnKey` Map menyimpan key pesan button terakhir
+  per grup. `_autoClean()` dipanggil di awal tiap callback. `_runBtn()`
+  kirim button + simpan key-nya untuk delete berikutnya.
 ┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 
 ━━━━━━━━━━━━━━━━━━
