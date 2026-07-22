@@ -1204,6 +1204,9 @@ while true; do
   [ "$TOKEN" = "__EXIT__" ] && exit 0
 done
 
+# ── Buat file .autopr jika belum ada (setelah token valid) ───────────────────
+init_autopr_config
+
 # ── Auto-install node_modules jika belum ada setelah token valid ─────────────
 _auto_nm_needed=0
 if [ ! -d node_modules ] || [ ! -d node_modules/.bin ]; then
@@ -1683,14 +1686,33 @@ tg_linkify_commit() {
 
 # ===== Auto-buat Pull Request setelah push ke non-default branch =====
 # Usage: auto_create_pr "head_branch" "commit_msg_title"
+# - Kalau .autopr enabled=false → skip
 # - Kalau push ke DEFAULT_BRANCH sendiri → skip (tidak perlu PR)
 # - Kalau sudah ada PR open → tampilkan link PR yang ada
 # - Kalau belum ada → buat PR baru via GitHub API + notif Telegram
 auto_create_pr() {
   local _head="$1"
   local _title="${2:-chore: update}"
-  local _base="$DEFAULT_BRANCH"
   local _tg_ts; _tg_ts=$(date '+%H:%M:%S %d %b %Y')
+
+  # Baca konfigurasi dari .autopr
+  local _pr_enabled="true" _pr_draft="false" _pr_base_cfg="auto"
+  if [ -f .autopr ]; then
+    _pr_enabled=$(grep -E '^enabled=' .autopr 2>/dev/null | cut -d= -f2 | tr -d ' \r\n')
+    _pr_draft=$(grep -E '^draft=' .autopr 2>/dev/null | cut -d= -f2 | tr -d ' \r\n')
+    _pr_base_cfg=$(grep -E '^base=' .autopr 2>/dev/null | cut -d= -f2 | tr -d ' \r\n')
+  fi
+
+  # Skip kalau disabled di .autopr
+  [ "$_pr_enabled" = "false" ] && return 0
+
+  # Tentukan base branch
+  local _base
+  if [ "$_pr_base_cfg" = "auto" ] || [ -z "$_pr_base_cfg" ]; then
+    _base="$DEFAULT_BRANCH"
+  else
+    _base="$_pr_base_cfg"
+  fi
 
   # Skip kalau push ke default branch sendiri
   [ "$_head" = "$_base" ] && return 0
@@ -1740,8 +1762,9 @@ print(json.dumps({
   'title': sys.argv[1],
   'head':  sys.argv[2],
   'base':  sys.argv[3],
-  'body':  sys.argv[4]
-}))" "$_title" "$_head" "$_base" "$_pr_body" 2>/dev/null)
+  'body':  sys.argv[4],
+  'draft': sys.argv[5] == 'true'
+}))" "$_title" "$_head" "$_base" "$_pr_body" "$_pr_draft" 2>/dev/null)
 
   [ -z "$_payload" ] && return 1
 
@@ -1785,6 +1808,27 @@ except: print('unknown error')
 " <<< "$_resp" 2>/dev/null)
   echo -e "  ${C_YELLOW}⚠️  Auto PR gagal: ${_err}${C_RESET}"
   return 1
+}
+
+# ===== Init file config Auto PR (.autopr) =====
+# Dipanggil sekali setelah token valid — buat .autopr kalau belum ada.
+# User bisa edit file itu kapan saja untuk matikan/nyalakan auto PR.
+init_autopr_config() {
+  [ -f .autopr ] && return 0
+  cat > .autopr << 'EOF'
+# Konfigurasi Auto PR — push.sh (dibuat otomatis saat login)
+# Edit file ini untuk mengatur perilaku Pull Request otomatis.
+
+# Aktifkan/matikan auto PR: true / false
+enabled=true
+
+# Branch tujuan PR (base). "auto" = pakai DEFAULT_BRANCH script
+base=auto
+
+# Buat PR sebagai draft: true / false
+draft=false
+EOF
+  echo -e "  ${C_GREEN}✅ File .autopr dibuat${C_RESET} ${C_DIM}— konfigurasi Auto PR tersimpan${C_RESET}" >&2
 }
 
 # ===== Bersihkan stale index.lock (sisa run sebelumnya yang ke-interrupt) =====

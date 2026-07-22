@@ -6,6 +6,22 @@
 📦 *[22 Juli 2026] — Update 4*
 ━━━━━━━━━━━━━━━━━━
 
+⚙️ *push.sh — File `.autopr` Otomatis Dibuat saat Login*
+┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+*File:*
+• `push.sh`
+• `.gitignore`
+
+*Perubahan:*
+• Setelah login & token valid → file `.autopr` otomatis dibuat (kalau belum ada)
+• `.autopr` berisi 3 setting: `enabled`, `base`, `draft` — bisa diedit kapan saja
+• `auto_create_pr()` sekarang baca config dari `.autopr` sebelum buat PR
+• `enabled=false` → auto PR dimatikan tanpa hapus kode
+• `base=auto` → pakai `DEFAULT_BRANCH`; bisa diisi nama branch spesifik
+• `draft=true` → PR dibuat sebagai Draft
+• `.autopr` ditambahkan ke `.gitignore` — tidak ke-push ke GitHub
+
+━━━━━━━━━━━━━━━━━━
 🔀 *push.sh — Auto Pull Request setelah Push ke Branch*
 ┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 *File:*

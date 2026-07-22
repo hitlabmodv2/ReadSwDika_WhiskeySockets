@@ -29,6 +29,7 @@ data_jadibot/
 .token
 .token.secret
 .repo.last
+.autopr
 
 # node_modules — exclude semua (install ulang via npm install)
 node_modules/
