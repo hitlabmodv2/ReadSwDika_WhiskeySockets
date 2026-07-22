@@ -929,60 +929,109 @@ async function handleNekopoinotifCallbacks({ hisoka, m, tolak, logCommand, Butto
     if (txt === '__nknotif_list__') {
         await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
         try {
-            const cfg        = loadConfig();
-            const groups     = cfg?.nekopoinotif?.groups || {};
-            const aktifJids  = Object.entries(groups).filter(([, v]) => v?.enabled === true).map(([jid]) => jid);
-            const nonaktif   = Object.entries(groups).filter(([, v]) => v?.enabled === false).map(([jid]) => jid);
+            const pfxL   = m.prefix || '.';
+            const cfg    = loadConfig();
+            const groups = cfg?.nekopoinotif?.groups || {};
+            const totalReg = Object.keys(groups).length;
 
-            if (!aktifJids.length && !nonaktif.length) {
+            const aktifJids = Object.entries(groups)
+                .filter(([, v]) => v?.enabled === true).map(([jid]) => jid);
+            const nonJids   = Object.entries(groups)
+                .filter(([, v]) => v?.enabled === false).map(([jid]) => jid);
+
+            // ── Kosong: belum ada GC terdaftar ───────────────────────────────
+            if (!totalReg) {
                 await hisoka.sendMessage(m.from, { react: { text: '📋', key: m.key } });
-                await tolak(hisoka, m,
-                    `╭─「 🎌 *NEKOPOI NOTIF — GC* 」\n│\n` +
-                    `│ Belum ada GC yang terdaftar.\n│\n` +
-                    `│ Ketik *${m.prefix || '.'}nekopoinotif* di dalam\n` +
-                    `│ grup untuk mendaftarkan GC.\n│\n` +
-                    `╰──────────────────────`
-                );
+                const _bodyKosong =
+                    `🎌 *Nekopoi Notif — Daftar GC*\n` +
+                    `━━━━━━━━━━━━━━━━━━\n\n` +
+                    `> _Belum ada GC yang terdaftar._\n\n` +
+                    `• Masuk ke GC tujuan\n` +
+                    `• Ketik *${pfxL}nekopoinotif* lalu pilih\n` +
+                    `  tombol *✅ Ya, Aktifkan*`;
+                try {
+                    await new Button()
+                        .setBody(_bodyKosong)
+                        .setFooter('🎌 Nekopoi Notif')
+                        .addReply('🔄 Refresh', '__nknotif_list__')
+                        .run(m.from, hisoka, m);
+                } catch (_) { await tolak(hisoka, m, _bodyKosong); }
                 return true;
             }
 
-            // Ambil nama grup dari WA
+            // ── Ambil nama grup dari WA ───────────────────────────────────────
             let allGroupsMap = {};
             try {
                 const raw = await hisoka.groupFetchAllParticipating();
                 for (const [jid, meta] of Object.entries(raw || {})) {
-                    allGroupsMap[jid] = (meta.subject || jid).slice(0, 30);
+                    allGroupsMap[jid] = (meta.subject || '').trim().slice(0, 28) || jid.split('@')[0];
                 }
             } catch (_) {}
-
             const getNama = (jid) => allGroupsMap[jid] || jid.split('@')[0];
 
-            let txt2 = `╭─「 🎌 *NEKOPOI NOTIF — GC* 」\n│\n`;
-            txt2 += `│ Total GC terdaftar : *${Object.keys(groups).length}*\n`;
-            txt2 += `│ ✅ Aktif           : *${aktifJids.length}*\n`;
-            if (nonaktif.length) txt2 += `│ ❌ Nonaktif        : *${nonaktif.length}*\n`;
-            txt2 += `│\n`;
+            // ── Susun pesan ───────────────────────────────────────────────────
+            const katAktif = (cfg?.nekopoinotif?.categories || []).join(', ') || 'semua';
 
+            let out = `🎌 *Nekopoi Notif — Daftar GC*\n`;
+            out += `━━━━━━━━━━━━━━━━━━\n\n`;
+
+            // Ringkasan (bullet)
+            out += `• *Total terdaftar :* ${totalReg} GC\n`;
+            out += `• *Aktif           :* *${aktifJids.length} GC*\n`;
+            if (nonJids.length) out += `• *Nonaktif        :* ~${nonJids.length} GC~\n`;
+            out += `• *Kategori        :* _${katAktif}_\n\n`;
+
+            // List GC Aktif (bernomor)
             if (aktifJids.length) {
-                txt2 += `│ ━━ ✅ *GC AKTIF* ━━\n`;
+                out += `✅ *GC Aktif* _(notif berjalan)_\n`;
+                out += `┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n`;
                 aktifJids.forEach((jid, i) => {
-                    txt2 += `│ ${String(i + 1).padStart(2, ' ')}. ✅ ${getNama(jid)}\n`;
+                    out += `${i + 1}. *${getNama(jid)}*\n`;
                 });
-                txt2 += `│\n`;
+                out += `\n`;
             }
 
-            if (nonaktif.length) {
-                txt2 += `│ ━━ ❌ *GC NONAKTIF* ━━\n`;
-                nonaktif.forEach((jid, i) => {
-                    txt2 += `│ ${String(i + 1).padStart(2, ' ')}. ❌ ${getNama(jid)}\n`;
+            // List GC Nonaktif (bernomor, coret)
+            if (nonJids.length) {
+                out += `❌ *GC Nonaktif* _(notif dimatikan)_\n`;
+                out += `┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n`;
+                nonJids.forEach((jid, i) => {
+                    out += `${i + 1}. ~${getNama(jid)}~\n`;
                 });
-                txt2 += `│\n`;
+                out += `\n`;
             }
 
-            txt2 += `╰──────────────────────`;
+            // Catatan
+            out += `> _Diperbarui otomatis setiap tap Refresh._`;
+
+            // ── Tentukan button kontekstual ───────────────────────────────────
+            // Cek status GC tempat pesan ini dikirim
+            const gcEntry   = groups[m.from];
+            const gcAktif   = gcEntry?.enabled === true;
+            const gcNonaktif = gcEntry?.enabled === false;
+            const gcBelum   = !gcEntry;
 
             await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
-            await tolak(hisoka, m, txt2);
+
+            const _btnList = new Button()
+                .setBody(out)
+                .setFooter('🎌 Nekopoi Notif');
+
+            // Button 1: aksi untuk GC ini (kontekstual)
+            if (gcAktif)         _btnList.addReply('❌ Nonaktifkan GC Ini',  '__nknotif_off__');
+            if (gcNonaktif || gcBelum) _btnList.addReply('✅ Aktifkan GC Ini', '__nknotif_on__');
+
+            // Button 2: aktifkan semua (hanya kalau ada yg belum aktif)
+            if (nonJids.length || gcBelum || gcNonaktif)
+                _btnList.addReply('➕ Aktifkan Semua GC', '__addallgrp__nekopoinotif');
+
+            // Button 3: refresh selalu ada
+            _btnList.addReply('🔄 Refresh', '__nknotif_list__');
+
+            try {
+                await _btnList.run(m.from, hisoka, m);
+            } catch (_) { await tolak(hisoka, m, out); }
+
             logCommand(m, hisoka, 'nekopoinotif-list-btn');
         } catch (e) {
             await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });

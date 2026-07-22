@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 22/07/2026, 08.14.09  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 22/07/2026, 11.39.08  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -31,16 +31,16 @@
 │  DETAIL
 │  Sumber      : HENTAIDAD
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 22/07/2026, 08.14.09
-│  Terakhir    : 22/07/2026, 08.14.09
+│  Pertama     : 22/07/2026, 11.39.08
+│  Terakhir    : 22/07/2026, 11.39.08
 │
 │  STACK TRACE (3 baris pertama)
 │  ▶  Error: [HENTAIDAD] Gagal download gambar: Request failed with status code 500
 │     at console.error (file:///home/runner/workspace/index.js:434:27)
-│     at handleHentaidadChoice (/home/runner/workspace/SEMUA_FITUR/anime/hentaidad.cjs:327:42)
+│     at handleHentaidadChoice (/home/runner/workspace/SEMUA_FITUR/anime/hentaidad.cjs:354:42)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 22/07/2026, 08.14.09
+  Terakhir diperbarui: 22/07/2026, 11.39.08
 ════════════════════════════════════════════════════════════════════════
