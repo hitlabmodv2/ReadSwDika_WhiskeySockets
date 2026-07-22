@@ -123,9 +123,9 @@ function formatBaChar(data) {
     body += `\n🔫 *Senjata*\n`;
     body += `▸ *Nama:* ${cleanText(wp.name || '-')}\n`;
     if (wp.type) body += `▸ *Tipe:* ${wp.type}\n`;
-    if (wp.attack) body += `▸ *ATK:* ${wp.attack}\n`;
-    if (wp.hp) body += `▸ *HP:* ${wp.hp}\n`;
-    if (wp.desc) body += `▸ *Deskripsi:* ${cleanText(wp.desc).slice(0, 100)}\n`;
+    if (wp.attack) body += `▸ *ATK:* \`${wp.attack}\`\n`;
+    if (wp.hp) body += `▸ *HP:* \`${wp.hp}\`\n`;
+    if (wp.desc) body += `▸ *Deskripsi:* _${cleanText(wp.desc).slice(0, 100)}_\n`;
   }
 
   if (data.skills && Array.isArray(data.skills)) {
@@ -142,15 +142,15 @@ function formatBaChar(data) {
   if (data.skillprio) {
     const sp = data.skillprio;
     body += `\n🎯 *Skill Priority*\n`;
-    if (sp['General Skill Priority']) body += `▸ *Umum:* ${sp['General Skill Priority'].trim()}\n`;
-    if (sp['Early to Mid Game investments']) body += `▸ *Early-Mid:* ${sp['Early to Mid Game investments']}\n`;
-    if (sp['Recommended Investment pre UE40']) body += `▸ *Pre UE40:* ${sp['Recommended Investment pre UE40']}\n`;
-    if (sp['Recommended Investment UE40']) body += `▸ *UE40:* ${sp['Recommended Investment UE40']}\n`;
-    if (sp['Notes']) body += `▸ *Catatan:* ${cleanText(sp['Notes']).slice(0, 150)}\n`;
+    if (sp['General Skill Priority']) body += `▸ ~Umum:~ \`${sp['General Skill Priority'].trim()}\`\n`;
+    if (sp['Early to Mid Game investments']) body += `▸ *Early-Mid:* \`${sp['Early to Mid Game investments']}\`\n`;
+    if (sp['Recommended Investment pre UE40']) body += `▸ *Pre UE40:* \`${sp['Recommended Investment pre UE40']}\`\n`;
+    if (sp['Recommended Investment UE40']) body += `▸ *UE40:* \`${sp['Recommended Investment UE40']}\`\n`;
+    if (sp['Notes']) body += `▸ *Catatan:*\n> ${cleanText(sp['Notes']).slice(0, 150)}\n`;
   }
 
   if (typeof data.bio === 'string' && data.bio.trim()) {
-    body += `\n📖 *Bio:* ${cleanText(data.bio).slice(0, 250)}\n`;
+    body += `\n📖 *Bio:*\n> ${cleanText(data.bio).slice(0, 250)}\n`;
   }
 
   body += `\n🔗 *Source:* ${BASE}/characters/${data.url || ''}`;
@@ -168,7 +168,7 @@ async function handleBa({ hisoka, m, query, tolak, logCommand, logError }) {
 
                 if (!input) {
                         await tolak(hisoka, m,
-                                `╭─「 🎮 *BLUE ARCHIVE* 」\n│\n│ Cek info lengkap karakter Blue\n│ Archive secara realtime.\n│ Total: *227 karakter* tersedia.\n│\n├─「 📌 *Cara Pakai* 」\n│ ${pfx}ba <nama karakter>\n│\n├─「 🎯 *Contoh Karakter* 」\n│ • ${pfx}ba shiroko\n│ • ${pfx}ba hina\n│ • ${pfx}ba aru\n│ • ${pfx}ba hoshino\n│ • ${pfx}ba iori\n│ • ${pfx}ba yuuka\n│\n├─「 👙 *Versi Alternatif* 」\n│ Tambah kata di belakang nama:\n│ • ${pfx}ba hina swimsuit\n│ • ${pfx}ba neru bunnygirl\n│ • ${pfx}ba aru newyear\n│ • ${pfx}ba serika swimsuit\n│ • ${pfx}ba chinatsu onsen\n│\n├─「 📊 *Info yang Ditampilkan* 」\n│ 💬 Quote suara karakter (random)\n│ 🏫 Sekolah, Role, Tipe, Posisi\n│ 📋 Profil (usia, hobi, CV, dll)\n│ 🔫 Senjata + stats\n│ 🔥 Skills lengkap\n│ 🎯 Skill priority & investasi\n│ 📖 Bio karakter\n│\n├─「 🔰 *Tipe Karakter* 」\n│ Striker (155) • Special (72)\n│\n├─「 ⚔️ *Role* 」\n│ DPS (122) • Supporter (61)\n│ Tank (20) • Healer (18) • T.S.\n╰────────────────────`
+                                `╭─「 🎮 *BLUE ARCHIVE* 」\n│\n│ Cek info karakter _secara realtime_,\n│ ~tanpa login~ atau API key.\n│ Total: *227 karakter* tersedia.\n│\n├─「 📌 *Cara Pakai* 」\n│ \`${pfx}ba <nama karakter>\`\n│\n├─「 🎯 *Contoh Karakter* 」\n│ • \`${pfx}ba shiroko\`\n│ • \`${pfx}ba hina\`\n│ • \`${pfx}ba aru\`\n│ • \`${pfx}ba hoshino\`\n│ • \`${pfx}ba iori\`\n│ • \`${pfx}ba yuuka\`\n│\n├─「 👙 *Versi Alternatif* 」\n│ > Tambah kata di belakang nama:\n│ • \`${pfx}ba hina swimsuit\`\n│ • \`${pfx}ba neru bunnygirl\`\n│ • \`${pfx}ba aru newyear\`\n│ • \`${pfx}ba serika swimsuit\`\n│ • \`${pfx}ba chinatsu onsen\`\n│\n├─「 📊 *Info yang Ditampilkan* 」\n│ 1. 💬 Quote suara _(random)_\n│ 2. 🏫 Sekolah, Role, Tipe, Posisi\n│ 3. 📋 Profil (usia, hobi, CV, dll)\n│ 4. 🔫 Senjata + _stats_\n│ 5. 🔥 *Skills* lengkap\n│ 6. 🎯 *Skill priority* & investasi\n│ 7. 📖 Bio karakter\n│\n├─「 🔰 *Tipe Karakter* 」\n│ \`Striker\` (155) • \`Special\` (72)\n│\n├─「 ⚔️ *Role* 」\n│ \`DPS\` (122) • \`Supporter\` (61)\n│ \`Tank\` (20) • \`Healer\` (18) • \`T.S.\`\n╰────────────────────`
                         );
                         logCommand(m, hisoka, m.command || 'bluearchive');
                         return;
