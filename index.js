@@ -1726,13 +1726,23 @@ async function main() {
                                                                 const chunk = daftarGrup.slice(i, i + BATCH);
                                                                 await Promise.allSettled(chunk.map(async jid => {
                                                                         try {
-                                                                                if (imgBuffer) {
-                                                                                        await hisoka.sendMessage(jid, { image: imgBuffer, mimetype: 'image/jpeg', caption });
-                                                                                } else if (imgSendUrl) {
-                                                                                        await hisoka.sendMessage(jid, { image: { url: imgSendUrl }, caption });
-                                                                                } else {
-                                                                                        await hisoka.sendMessage(jid, { text: caption });
+                                                                                // ── Auto-delete pesan notif sebelumnya ──
+                                                                                const prevKey = _neko.bacaLastMsgKey(jid);
+                                                                                if (prevKey) {
+                                                                                        try { await hisoka.sendMessage(jid, { delete: prevKey }); } catch (_) {}
+                                                                                        _neko.hapusLastMsgKey(jid);
                                                                                 }
+
+                                                                                // ── Kirim notif baru & simpan key ──
+                                                                                let sentMsg;
+                                                                                if (imgBuffer) {
+                                                                                        sentMsg = await hisoka.sendMessage(jid, { image: imgBuffer, mimetype: 'image/jpeg', caption });
+                                                                                } else if (imgSendUrl) {
+                                                                                        sentMsg = await hisoka.sendMessage(jid, { image: { url: imgSendUrl }, caption });
+                                                                                } else {
+                                                                                        sentMsg = await hisoka.sendMessage(jid, { text: caption });
+                                                                                }
+                                                                                if (sentMsg?.key) _neko.simpanLastMsgKey(jid, sentMsg.key);
                                                                         } catch (e) {
                                                                                 console.error(`[NekopoinNotif] Gagal kirim ke ${jid}:`, e?.message);
                                                                         }

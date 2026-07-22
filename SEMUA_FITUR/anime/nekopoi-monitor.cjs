@@ -60,6 +60,34 @@ function simpanLog(log) {
     try { fs.writeFileSync(FILE_LOG, JSON.stringify(log, null, 2), 'utf-8'); } catch (_) {}
 }
 
+// ── SIMPAN / BACA KEY PESAN TERAKHIR PER GRUP ─────────────────────────────────
+// Dipakai untuk auto-delete pesan notif sebelumnya sebelum kirim yang baru
+
+function simpanLastMsgKey(jid, key) {
+    try {
+        const data = bacaData();
+        if (!data.lastMsgKey) data.lastMsgKey = {};
+        data.lastMsgKey[jid] = key;
+        simpanData(data);
+    } catch (_) {}
+}
+
+function bacaLastMsgKey(jid) {
+    try {
+        return bacaData().lastMsgKey?.[jid] || null;
+    } catch (_) { return null; }
+}
+
+function hapusLastMsgKey(jid) {
+    try {
+        const data = bacaData();
+        if (data.lastMsgKey?.[jid]) {
+            delete data.lastMsgKey[jid];
+            simpanData(data);
+        }
+    } catch (_) {}
+}
+
 function bacaConfig() {
     try {
         if (fs.existsSync(FILE_CONFIG)) return JSON.parse(fs.readFileSync(FILE_CONFIG, 'utf-8'));
@@ -487,6 +515,9 @@ module.exports = {
     simulasi,
     downloadImageBuffer,
     buatProxyUrl,
+    simpanLastMsgKey,
+    bacaLastMsgKey,
+    hapusLastMsgKey,
 };
 
 // ── COMMAND HANDLER ───────────────────────────────────────────────────────────
