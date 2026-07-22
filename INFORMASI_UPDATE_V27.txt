@@ -1,0 +1,46 @@
+📢 *INFORMASI RILIS*
+_📅 Selasa, 22 Juli 2026_ 🌙
+━━━━━━━━━━━━━━━━━━━━━━
+🤖 *WILY BOT — V27*
+✨ *2 Fitur Baru*
+🐛 *1 Bug Fix*
+🚀 *1 Perubahan*
+━━━━━━━━━━━━━━━━━━━━━━
+✨ *FITUR BARU*
+━━━━━━━━━━━━━━━━━━━━━━
+*1. 🎌 .nekopoinotif — Button Quick Edit Kategori 2 Layar*
+_Setelah aktifkan/matikan notif, langsung muncul tombol kontekstual. Edit kategori tinggal tap, tidak perlu ketik perintah panjang._
+1. Setelah *aktifkan* → tombol: `❌ Matikan GC Ini` · `✏️ Edit Kategori` · `📋 Lihat GC Aktif`
+2. Setelah *matikan* → tombol: `✅ Aktifkan GC Ini` · `✏️ Edit Kategori` · `📋 Lihat GC Aktif`
+3. Tap `✏️ Edit Kategori` → layar khusus dengan 3 tombol toggle: `✅/❌ 🎌 Hentai` · `✅/❌ 🎥 2D Anim` · `✅/❌ 🧊 3D Hentai`
+4. Label tombol kategori langsung tampilkan status aktif/nonaktif saat ini — tap untuk toggle
+> Berlaku konsisten di semua jalur: command `.nekopoinotif on/off` maupun tap button dari menu
+
+*2. 🔙 .nekopoinotif — Tombol Kembali di Layar Edit Kategori*
+_Di layar Edit Kategori, ada tombol keempat untuk balik ke layar ON/OFF tanpa perlu ketik ulang._
+1. Layar Edit Kategori sekarang punya 4 tombol: `✅/❌ Hentai` · `✅/❌ 2D Anim` · `✅/❌ 3D Hentai` · `🔙 Kembali`
+2. Tap `🔙 Kembali` → bot cek status grup saat ini → tampilkan layar ON/OFF yang sesuai (Aktifkan atau Matikan)
+3. Bisa navigasi bolak-balik: ON/OFF → Edit Kategori → Kembali → Edit Kategori → dst
+> Tidak perlu ketik `.nekopoinotif` ulang setelah edit kategori
+
+━━━━━━━━━━━━━━━━━━━━━━
+🐛 *BUG FIX*
+━━━━━━━━━━━━━━━━━━━━━━
+*1. 🐛 .nekopoinotif — Button Konfirmasi ON/OFF Langsung Tampilkan Kategori (Layout Salah)*
+_Setelah tap "Ya, Aktifkan", yang muncul adalah 3 tombol kategori — bukan tombol untuk matikan/aktifkan ulang._
+1. ~Konfirmasi ON langsung tampilkan 3 tombol toggle kategori — tidak ada tombol untuk matikan lagi~
+2. ~Konfirmasi OFF juga sama — tidak ada tombol untuk aktifkan ulang~
+3. Sekarang konfirmasi ON selalu tampilkan `❌ Matikan GC Ini` di posisi pertama; konfirmasi OFF tampilkan `✅ Aktifkan GC Ini`
+4. Edit Kategori dipindah ke tombol tersendiri (`✏️ Edit Kategori`) — 2 langkah terpisah yang logis
+> Alur lebih intuitif: konfirmasi dulu, baru edit kategori kalau mau
+
+━━━━━━━━━━━━━━━━━━━━━━
+🚀 *PERUBAHAN*
+━━━━━━━━━━━━━━━━━━━━━━
+*1. 🧹 .nekopoinotif — Auto-Delete Pesan Button Sebelumnya (Anti Spam)*
+_Setiap kali tap tombol, pesan lama otomatis terhapus — chat tidak penuh dengan tumpukan menu._
+1. Pesan bot sebelumnya yang berisi tombol → otomatis dihapus saat tombol berikutnya ditap
+2. Pesan tap tombol user → ikut terhapus otomatis
+3. Berlaku di semua callback: ON/OFF, Edit Kategori, Kembali, toggle per kategori, Lihat GC, Aktifkan/Matikan Semua
+4. Implementasi via `_prevBtnKey` Map (track key per grup) + `_autoClean()` + `_runBtn()` — tidak ada side effect ke fitur lain
+> Chat tetap bersih, hanya pesan terbaru yang terlihat — tidak spam
