@@ -331,7 +331,7 @@ async function handleCosplay({ hisoka, m, query, tolak, logCommand, logError, _r
             `│\n` +
             results.map((r, i) => {
                 const match = r.title.match(/(\d+\s*photos?\s*(?:and\s*\d+\s*videos?)?)/i);
-                const count = match ? ` ~[~\`${match[1]}\`~]~` : '';
+                const count = match ? ` [\`${match[1]}\`]` : '';
                 const cleanTitle = r.title.replace(/"[^"]*"/g, '').replace(/\s{2,}/g, ' ').trim();
                 return `│ *${i + 1}.* ${cleanTitle.slice(0, 65)}${count}`;
             }).join('\n') + '\n' +
