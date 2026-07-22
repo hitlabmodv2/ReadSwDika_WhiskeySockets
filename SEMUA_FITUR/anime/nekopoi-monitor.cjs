@@ -305,12 +305,11 @@ function potongTeks(teks, maks = 400) {
     return t.slice(0, maks).trimEnd() + '…';
 }
 
-function buatBarisInfo(items) {
-    const valid = items.filter(([, v]) => v && v !== '' && v !== '-');
-    return valid.map(([label, val], i) => {
-        const prefix = i === valid.length - 1 ? '╰' : '├';
-        return `${prefix} ${label}: ${val}`;
-    }).join('\n');
+// Format angka pakai titik ribuan (1234 → 1.234) — tidak bergantung locale
+function formatAngka(n) {
+    const num = parseInt(String(n).replace(/\D/g, ''), 10);
+    if (isNaN(num)) return String(n);
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 }
 
 function buatCaption(data) {
@@ -318,15 +317,17 @@ function buatCaption(data) {
         title, kategori, tanggal, sinopsis,
         genre, producers, durasi, ukuran, status,
         episode, tayang, judulJp, url,
+        viewCount = '',
         downloads = [],
         originalTitle = '', parody = '',
+        anime = '',
     } = data;
 
     const katInfo     = getKatInfo(kategori);
     const headerWaktu = waktuSekarang();
 
-    // Sinopsis — untuk konten 2D/3D yang tidak punya sinopsis,
-    // pakai kombinasi Original Title + Parody sebagai gantinya
+    // ── Sinopsis (> quote) ────────────────────────────────────────────────────
+    // Untuk konten 2D/3D tanpa sinopsis → pakai Original Title + Parody
     let sinOpsi = sinopsis || '';
     if (!sinOpsi) {
         const bagian = [];
@@ -335,66 +336,89 @@ function buatCaption(data) {
         sinOpsi = bagian.join('\n') || '';
     }
     const sinopsisBlok = sinOpsi
-        ? potongTeks(sinOpsi, 350).split('\n').map(b => b.trim() ? `> ${b}` : '').join('\n')
-        : null; // null = sembunyikan blok sinopsis jika benar-benar kosong
+        ? potongTeks(sinOpsi, 350).split('\n').map(b => b.trim() ? `> ${b}` : '').filter(Boolean).join('\n')
+        : null;
 
-    // Info blok
-    const infoBlok = buatBarisInfo([
+    // ── Info items (├ ╰ tree, nilai _italic_) ─────────────────────────────────
+    const infoItems = [
         ['🗂️ Kategori', katInfo.label],
-        ['🇯🇵 Judul JP', judulJp   || null],
-        ['🎬 Anime   ', (!judulJp && data.anime && data.anime !== title) ? data.anime : null],
-        ['🏢 Produser', producers  || null],
-        ['📡 Status  ', status     || null],
-        ['📺 Episode ', episode    || null],
-        ['🗓️ Tayang  ', tayang     || null],
-        ['⏱️ Durasi  ', durasi     || null],
-        ['🎭 Genre   ', genre      || null],
-        ['💾 Ukuran  ', ukuran     || null],
-    ]);
+        ['🇯🇵 Judul JP', judulJp                                          || null],
+        ['🎬 Anime   ', (!judulJp && anime && anime !== title) ? anime    : null],
+        ['🏢 Produser', producers                                          || null],
+        ['📡 Status  ', status                                             || null],
+        ['📺 Episode ', episode                                            || null],
+        ['🗓️ Tayang  ', tayang                                             || null],
+        ['⏱️ Durasi  ', durasi                                             || null],
+        ['🎭 Genre   ', genre                                              || null],
+        ['💾 Ukuran  ', ukuran                                             || null],
+        // View count realtime dari scraper (berapa kali halaman dilihat)
+        ['👁️ Dilihat ', viewCount ? `${formatAngka(viewCount)} kali`      : null],
+    ].filter(([, v]) => v && v !== '' && v !== '-');
 
-    // Download blok — tampilkan per resolusi dengan semua host
+    const infoBlok = infoItems.map(([label, val], i) => {
+        const prefix = i === infoItems.length - 1 ? '╰' : '├';
+        return `${prefix} ${label}: _${val}_`;
+    }).join('\n');
+
+    // ── Download (daftar bernomor, resolusi `monospace`) ──────────────────────
     let dlBlok = '';
     if (downloads && downloads.length) {
         dlBlok  = `${SEP}\n`;
         dlBlok += `📥 *DOWNLOAD*\n`;
         dlBlok += `${SEP2}\n`;
         downloads.forEach((dl, i) => {
-            const isLast  = i === downloads.length - 1;
-            const prefix  = isLast ? '╰' : '├';
             const hostStr = dl.links
                 .slice(0, 4)
                 .map(h => `[${h.host}](${h.url})`)
-                .join('  ');
-            dlBlok += `${prefix} *${dl.resolusi}* → ${hostStr}\n`;
+                .join(' · ');
+            // Tandai host tersembunyi dengan ~strikethrough~
+            const sisanya = dl.links.length > 4
+                ? ` ~+${dl.links.length - 4} lainnya~`
+                : '';
+            dlBlok += `${i + 1}. \`${dl.resolusi}\` → ${hostStr}${sisanya}\n`;
         });
         dlBlok = dlBlok.trimEnd();
     }
 
-    // Streaming blok — konstruksi dari URL post
+    // ── Streaming (daftar berpoint •) ─────────────────────────────────────────
     const streamBlok = url
-        ? `▶️ *Streaming* : [Server 1](${url}#nk-stream-1)  [Server 2](${url}#nk-stream-2)  [Server 3](${url}#nk-stream-3)`
+        ? `${SEP}\n` +
+          `▶️ *STREAMING*\n` +
+          `${SEP2}\n` +
+          `• [▶ Server 1](${url}#nk-stream-1)\n` +
+          `• [▶ Server 2](${url}#nk-stream-2)\n` +
+          `• [▶ Server 3](${url}#nk-stream-3)`
         : null;
 
+    // ── Susun baris ───────────────────────────────────────────────────────────
     const baris = [
+        // [1] Header + waktu (paling penting di atas)
         katInfo.header,
         SEP,
-        `📅 _${headerWaktu}_`,
+        `📅 _${headerWaktu}_`,                          // _italic_ timestamp
         SEP,
         ``,
+        // [2] Judul *bold*
         `*${title || '-'}*`,
+        tanggal ? `_🗓 Rilis: ${tanggal}_` : null,      // _italic_ tanggal posting
         ``,
+        // [3] Sinopsis (> kutip)
         sinopsisBlok ? `📖 *Sinopsis*` : null,
         sinopsisBlok || null,
         sinopsisBlok ? `` : null,
+        // [4] Info
         SEP,
-        `📋 *Info*`,
+        `📋 *INFO*`,
         SEP2,
         infoBlok || '-',
-        dlBlok     ? dlBlok     : null,
-        `${SEP}`,
-        streamBlok ? streamBlok : null,
-        `🔗 *Post*    : ${url}`,
-        `🌐 *Source*  : nekopoi.care`,
+        // [5] Download (bernomor + `monospace` + ~strikethrough~)
+        dlBlok ? `\n${dlBlok}` : null,
+        // [6] Streaming (berpoint)
+        streamBlok ? `\n${streamBlok}` : null,
+        // [7] Post & Source
+        `\n${SEP}`,
+        `🔗 *Post*   : ${url}`,
+        `🌐 *Source* : nekopoi.care`,
     ];
 
     return baris.filter(b => b !== null && b !== undefined).join('\n');

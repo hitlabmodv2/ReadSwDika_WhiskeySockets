@@ -1,0 +1,35 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+*CHANGELOG — WILY BOT*
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+━━━━━━━━━━━━━━━━━━
+📦 *[22 Juli 2026]*
+━━━━━━━━━━━━━━━━━━
+
+🎌 *Nekopoi — Perbaikan Caption & Scraper View Count*
+┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+*File:*
+• `SEMUA_FITUR/anime/nekopoi.cjs`
+• `SEMUA_FITUR/anime/nekopoi-monitor.cjs`
+
+*Perubahan:*
+
+1. 👁️ *Scraper view count* — `parseDetailPost` sekarang mengambil _berapa kali dilihat_ langsung dari halaman nekopoi secara realtime
+   - Deteksi dari H1: `"JUDUL 1234 kali"` atau sebelum tanggal: `"1234 kali Senin, ..."`
+   - Data dikembalikan sebagai field `viewCount` di hasil scrape
+
+2. 📋 *Layout caption baru* — urutan seksi rapi sesuai konteks:
+   > _Header (kategori + waktu)_ → _Judul_ → _Sinopsis_ → _Info_ → _Download_ → _Streaming_ → _Post_ → _Source_
+
+3. ✨ *Semua formatting WA* dipakai sesuai konteks:
+   - `*bold*` → header seksi, judul, label nama seksi
+   - `_italic_` → timestamp, nilai di Info, tanggal rilis
+   - `` `monospace` `` → resolusi download (720p, 1080p, 4K, dst)
+   - `~strikethrough~` → host tersembunyi jika ada >4 per resolusi (`~+N lainnya~`)
+   - _Daftar bernomor_ → opsi download per resolusi
+   - _Daftar berpoint_ → server streaming (• Server 1/2/3)
+   - `> kutip` → blok sinopsis (atau Original Title+Parody untuk 2D/3D)
+
+4. 🔢 *formatAngka* — view count ditampilkan dengan titik ribuan (contoh: `12.457 kali`) tanpa bergantung locale Node.js
+
+5. 🔗 *URL tidak bentrok* — setiap link di seksi terpisah (Download / Streaming / Post) dengan pemisah `━` dan `┄` agar tidak saling tumpang tindih

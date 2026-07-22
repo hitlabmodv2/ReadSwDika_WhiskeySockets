@@ -176,6 +176,18 @@ function parseDetailPost(md, url) {
     const titleM = md.match(/^# ([^\n]+)/m);
     const title  = titleM ? titleM[1].replace(/\d+\s+kali\s*$/, '').trim() : '';
 
+    // View count — posisi H1: "TITLE 1234 kali"
+    // atau sebelum tanggal: "1234 kali Senin, 20 Juli 2026"
+    let viewCount = '';
+    if (titleM) {
+        const vcM = titleM[1].match(/(\d[\d.]*)\s+kali\s*$/i);
+        if (vcM) viewCount = vcM[1].replace(/\./g, '');
+    }
+    if (!viewCount) {
+        const vcM2 = md.match(/(\d[\d.]*)\s+kali\s+(?:Senin|Selasa|Rabu|Kamis|Jumat|Sabtu|Minggu)/i);
+        if (vcM2) viewCount = vcM2[1].replace(/\./g, '');
+    }
+
     // Tanggal posting — format: "N kali Senin, 20 Juli 2026" atau standalone
     const dateM   = md.match(/((?:Senin|Selasa|Rabu|Kamis|Jumat|Sabtu|Minggu),\s+\d+\s+\w+\s+\d{4})/);
     const tanggal = dateM ? dateM[1].trim() : '';
@@ -242,7 +254,7 @@ function parseDetailPost(md, url) {
         originalTitle, parody,
         anime, judulJp,
         producers, durasi, ukuran, status, episode, tayang,
-        kategori, url, downloads,
+        kategori, url, downloads, viewCount,
     };
 }
 
