@@ -1717,6 +1717,41 @@ auto_create_pr() {
   # Skip kalau push ke default branch sendiri
   [ "$_head" = "$_base" ] && return 0
 
+  # ── Cek base branch ada di remote ────────────────────────────────────────
+  local _base_check
+  _base_check=$(curl -s --max-time 6 \
+    "https://api.github.com/repos/${REPO_OWNER}/${REPO}/branches/${_base}" \
+    -H "Authorization: token ${TOKEN}" \
+    -H "Accept: application/vnd.github+json" 2>/dev/null)
+  local _base_exists
+  _base_exists=$(python3 -c "
+import json,sys
+try: print('yes' if 'name' in json.loads(sys.stdin.read()) else 'no')
+except: print('no')
+" <<< "$_base_check" 2>/dev/null)
+  if [ "$_base_exists" != "yes" ]; then
+    echo -e "  ${C_YELLOW}⚠️  Auto PR skip: base branch '${_base}' tidak ditemukan di remote.${C_RESET}" \
+      "${C_DIM}(Ubah setting via menu [a])${C_RESET}"
+    return 0
+  fi
+
+  # ── Cek ada commit beda antara head dan base ──────────────────────────────
+  local _compare_json
+  _compare_json=$(curl -s --max-time 6 \
+    "https://api.github.com/repos/${REPO_OWNER}/${REPO}/compare/${_base}...${_head}" \
+    -H "Authorization: token ${TOKEN}" \
+    -H "Accept: application/vnd.github+json" 2>/dev/null)
+  local _ahead
+  _ahead=$(python3 -c "
+import json,sys
+try: print(json.loads(sys.stdin.read()).get('ahead_by', 0))
+except: print(0)
+" <<< "$_compare_json" 2>/dev/null)
+  if [ "${_ahead:-0}" -eq 0 ]; then
+    echo -e "  ${C_DIM}ℹ️  Auto PR skip: branch '${_head}' tidak ada commit beda dari '${_base}'.${C_RESET}"
+    return 0
+  fi
+
   # ── Cek apakah sudah ada PR open untuk branch ini ──
   local _existing_json
   _existing_json=$(curl -s --max-time 8 \
@@ -1799,11 +1834,19 @@ except: print('')
     return 0
   fi
 
-  # Error (misal branch tidak ada commit beda, atau token kurang scope)
+  # Error — tampilkan message + detail errors[] dari GitHub
   local _err
   _err=$(python3 -c "
 import json,sys
-try: print(json.loads(sys.stdin.read()).get('message','unknown error'))
+try:
+  r=json.loads(sys.stdin.read())
+  msg=r.get('message','unknown error')
+  errs=r.get('errors',[])
+  detail='; '.join(
+    e.get('message','') or e.get('field','') or str(e)
+    for e in errs if e
+  )
+  print(msg + (' — ' + detail if detail else ''))
 except: print('unknown error')
 " <<< "$_resp" 2>/dev/null)
   echo -e "  ${C_YELLOW}⚠️  Auto PR gagal: ${_err}${C_RESET}"
