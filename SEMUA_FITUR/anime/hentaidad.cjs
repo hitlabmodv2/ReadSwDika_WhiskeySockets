@@ -138,9 +138,16 @@ function fmtDur(ms) {
 }
 
 /** Bangun kartu hasil setelah album selesai dikirim */
-function buildFinalCard({ title, berhasil, total, totalBytes, elapsedMs, failed }) {
+function buildFinalCard({ title, berhasil, total, totalBytes, elapsedMs, failed, isSearch = false, query = null }) {
     const judul     = title.length > 52 ? title.slice(0, 52) + '…' : title;
     const gagalLine = failed > 0 ? `• ⚠️ Gagal   : ~${failed} gambar~\n` : '';
+
+    // Footer hint — kontekstual sesuai mode (latest / search)
+    const qShort  = query && query.length > 24 ? query.slice(0, 24) + '…' : query;
+    const hintLine = isSearch
+        ? `\n> 🔎 Cari lagi? Ketik \`.hentaidad ${qShort}\`\n> 📋 Atau ketik \`.hentaidad\` untuk _latest releases_`
+        : `\n> 🔎 Mau cari judul lain? Ketik \`.hentaidad [judul]\`\n> 📋 Atau ketik \`.hentaidad\` untuk _latest terbaru_`;
+
     return (
         `🔞 *HENTAIDAD*\n\n` +
         `📌 *${judul}*\n\n` +
@@ -148,7 +155,8 @@ function buildFinalCard({ title, berhasil, total, totalBytes, elapsedMs, failed 
         `• 📦 Ukuran  : \`${fmtBytes(totalBytes)}\`\n` +
         `• ⏱️ Waktu   : \`${fmtDur(elapsedMs)}\`\n` +
         gagalLine +
-        `\n✅ *Status: Terkirim*`
+        `\n✅ *Status: Terkirim*` +
+        hintLine
     );
 }
 
@@ -397,7 +405,7 @@ async function handleHentaidadChoice({ hisoka, m, pendingHentaidadChoices, getQu
         const elapsedMs = Date.now() - startTime;
 
         // ── Edit pesan loading → kartu hasil rapi ────────────────────────────
-        await editLoading(buildFinalCard({ title, berhasil: total, total: totalImg, totalBytes, elapsedMs, failed }));
+        await editLoading(buildFinalCard({ title, berhasil: total, total: totalImg, totalBytes, elapsedMs, failed, isSearch: pending.isSearch, query: pending.query }));
         await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
 
     } catch (err) {
