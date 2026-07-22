@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 20/07/2026, 06.52.10  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 22/07/2026, 08.14.09  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  console.error
+│  #001  —  HENTAIDAD
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [31m[HotReload] ✗ Gagal reload 'message.js', pakai versi lama.[39m
+│  [HENTAIDAD] Gagal download gambar: Request failed with status code 500
 │
 │  DETAIL
-│  Sumber      : console.error
+│  Sumber      : HENTAIDAD
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 20/07/2026, 06.52.10
-│  Terakhir    : 20/07/2026, 06.52.10
+│  Pertama     : 22/07/2026, 08.14.09
+│  Terakhir    : 22/07/2026, 08.14.09
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [31m[HotReload] ✗ Gagal reload 'message.js', pakai versi lama.[39m
+│  ▶  Error: [HENTAIDAD] Gagal download gambar: Request failed with status code 500
 │     at console.error (file:///home/runner/workspace/index.js:434:27)
-│     at Timeout._onTimeout (file:///home/runner/workspace/src/helper/hotReload.js:309:33)
+│     at handleHentaidadChoice (/home/runner/workspace/SEMUA_FITUR/anime/hentaidad.cjs:327:42)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 20/07/2026, 06.52.10
+  Terakhir diperbarui: 22/07/2026, 08.14.09
 ════════════════════════════════════════════════════════════════════════

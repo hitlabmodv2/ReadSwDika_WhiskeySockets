@@ -229,6 +229,9 @@ async function handleHentaidad({ hisoka, m, tolak, logCommand, logError, pending
         pendingHentaidadChoices.set(key, {
             results   : items,
             botMsgId  : sent?.key?.id || null,
+            sentKey   : sent?.key || null,   // full key — untuk edit pesan daftar setelah dipilih
+            isSearch  : isSearch,
+            query     : isSearch ? query : null,
             expiresAt : Date.now() + TTL,
             loading   : false,
             timeout,
@@ -278,7 +281,23 @@ async function handleHentaidadChoice({ hisoka, m, pendingHentaidadChoices, getQu
     if (pending.timeout) clearTimeout(pending.timeout);
     pendingHentaidadChoices.delete(m.sender);
 
-    const chosen = pending.results[idx];
+    const chosen     = pending.results[idx];
+    const judulPilih = chosen.title.length > 48 ? chosen.title.slice(0, 48) + '…' : chosen.title;
+
+    // ── Auto-edit pesan daftar → tampilkan pilihan user, daftar panjang hilang ──
+    if (pending.sentKey) {
+        const headerPilih = pending.isSearch
+            ? `🔎 *Hasil:* _"${pending.query && pending.query.length > 28 ? pending.query.slice(0, 28) + '…' : pending.query}"_`
+            : `📋 *Latest Releases*`;
+        try {
+            await hisoka.sendMessage(m.from, {
+                text : `🔞 *HENTAIDAD*\n\n${headerPilih}\n\n` +
+                       `✅ *Dipilih #${chosen.no}:*\n_${judulPilih}_\n\n` +
+                       `> _Sedang diproses..._`,
+                edit : pending.sentKey,
+            });
+        } catch (_) {}
+    }
 
     // ── 1 pesan loading — semua status di-edit di sini, tidak pernah kirim pesan baru ──
     // editLoading: pertama kali kirim pesan baru (lazy), selanjutnya selalu edit pesan itu
