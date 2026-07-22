@@ -753,58 +753,6 @@ function makeCekautoHelpers({
                         return true;
                 }
 
-                // ── __nknotif_on__ — aktifkan nekopoi notif di grup ini ──────────────
-                if (txt === '__nknotif_on__') {
-                        if (!m.isGroup) { await t(hisoka, m, '❌ Hanya bisa di dalam grup.'); return true; }
-                        try {
-                                const cfgNk = loadConfig();
-                                if (!cfgNk.nekopoinotif)        cfgNk.nekopoinotif        = { groups: {}, categories: ['hentai', '2d-animation', '3d-hentai'] };
-                                if (!cfgNk.nekopoinotif.groups) cfgNk.nekopoinotif.groups = {};
-                                cfgNk.nekopoinotif.groups[m.from] = { enabled: true, diubahPada: Date.now() };
-                                saveConfig(cfgNk);
-                                await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
-                                await sendConfirmWithButtons(hisoka, m,
-                                        `╭─「 🎌 *NEKOPOI NOTIF* 」\n│\n` +
-                                        `│ Status : ✅ *BERHASIL DIAKTIFKAN!*\n│\n` +
-                                        `│ Notif anime dari nekopoi.care akan\n` +
-                                        `│ otomatis masuk ke grup ini. 🎌\n│\n` +
-                                        `│ Ketik *${m.prefix || '.'}nekopoinotif off* untuk matikan.\n│\n` +
-                                        `╰──────────────────────`,
-                                        [{ text: '➕ Aktifkan Semua Grup', id: '__addallgrp__nekopoinotif' }]
-                                );
-                        } catch (e) { await t(hisoka, m, `❌ Gagal aktifkan: ${e.message}`); }
-                        return true;
-                }
-
-                // ── __nknotif_off__ — nonaktifkan nekopoi notif di grup ini ──────────
-                if (txt === '__nknotif_off__') {
-                        if (!m.isGroup) { await t(hisoka, m, '❌ Hanya bisa di dalam grup.'); return true; }
-                        try {
-                                const cfgNk = loadConfig();
-                                if (!cfgNk.nekopoinotif)        cfgNk.nekopoinotif        = { groups: {}, categories: ['hentai', '2d-animation', '3d-hentai'] };
-                                if (!cfgNk.nekopoinotif.groups) cfgNk.nekopoinotif.groups = {};
-                                cfgNk.nekopoinotif.groups[m.from] = { enabled: false, diubahPada: Date.now() };
-                                saveConfig(cfgNk);
-                                await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
-                                await t(hisoka, m,
-                                        `╭─「 🎌 *NEKOPOI NOTIF* 」\n│\n` +
-                                        `│ Status : ❌ *DINONAKTIFKAN*\n│\n` +
-                                        `│ Notif nekopoi tidak akan masuk ke\n` +
-                                        `│ grup ini lagi.\n│\n` +
-                                        `│ Ketik *${m.prefix || '.'}nekopoinotif on* untuk aktifkan ulang.\n│\n` +
-                                        `╰──────────────────────`
-                                );
-                        } catch (e) { await t(hisoka, m, `❌ Gagal nonaktifkan: ${e.message}`); }
-                        return true;
-                }
-
-                // ── __nknotif_cancel__ — batalkan ─────────────────────────────────────
-                if (txt === '__nknotif_cancel__') {
-                        await hisoka.sendMessage(m.from, { react: { text: '👋', key: m.key } });
-                        await t(hisoka, m, `ℹ️ Dibatalkan. Fitur nekopoi notif tidak diaktifkan di grup ini.`);
-                        return true;
-                }
-
                 // ── __addallgrp__ — aktifkan fitur untuk SEMUA grup sekaligus ─────────
                 if (txt.startsWith('__addallgrp__')) {
                         const featureKey = txt.slice('__addallgrp__'.length).trim();

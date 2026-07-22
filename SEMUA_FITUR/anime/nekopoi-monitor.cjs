@@ -901,5 +901,72 @@ async function handleNekpoiNotifReply({ hisoka, m, pendingNekpoiNotifChoices, ge
     return true;
 }
 
-module.exports.handleNekopoinotif    = handleNekopoinotif;
-module.exports.handleNekpoiNotifReply = handleNekpoiNotifReply;
+// ── BUTTON CALLBACK HANDLER ───────────────────────────────────────────────────
+// Tangani tap button quick_reply dari menu .nekopoinotif di grup:
+//   __nknotif_on__      → aktifkan GC ini
+//   __nknotif_off__     → nonaktifkan GC ini
+//   __nknotif_cancel__  → batalkan
+async function handleNekopoinotifCallbacks({ hisoka, m, tolak, logCommand, Button, loadConfig, fs: fsMod, path: pathMod }) {
+    if (!m.isOwner) return false;
+    const txt = typeof m.text === 'string' ? m.text.trim() : '';
+    if (!['__nknotif_on__', '__nknotif_off__', '__nknotif_cancel__'].includes(txt)) return false;
+
+    const pfx     = m.prefix || '.';
+    const cfgPath = pathMod.join(process.cwd(), 'config.json');
+
+    // ── BATALKAN ─────────────────────────────────────────────────────────────
+    if (txt === '__nknotif_cancel__') {
+        await hisoka.sendMessage(m.from, { react: { text: '👋', key: m.key } });
+        await tolak(hisoka, m, `ℹ️ Dibatalkan. Fitur nekopoi notif tidak diaktifkan di grup ini.`);
+        return true;
+    }
+
+    if (!m.isGroup) {
+        await tolak(hisoka, m, '❌ Hanya bisa digunakan di dalam grup.');
+        return true;
+    }
+
+    const enabled = txt === '__nknotif_on__';
+    try {
+        const cfg = loadConfig();
+        if (!cfg.nekopoinotif)        cfg.nekopoinotif        = { groups: {}, categories: ['hentai', '2d-animation', '3d-hentai'] };
+        if (!cfg.nekopoinotif.groups) cfg.nekopoinotif.groups = {};
+        cfg.nekopoinotif.groups[m.from] = { enabled, diubahPada: Date.now() };
+        fsMod.writeFileSync(cfgPath, JSON.stringify(cfg, null, 2));
+        await hisoka.sendMessage(m.from, { react: { text: enabled ? '✅' : '❌', key: m.key } });
+
+        if (enabled) {
+            const _body =
+                `╭─「 🎌 *NEKOPOI NOTIF* 」\n│\n` +
+                `│ Status : ✅ *BERHASIL DIAKTIFKAN!*\n│\n` +
+                `│ Notif anime dari nekopoi.care akan\n` +
+                `│ otomatis masuk ke grup ini. 🎌\n│\n` +
+                `│ Ketik *${pfx}nekopoinotif off* untuk matikan.\n│\n` +
+                `╰──────────────────────`;
+            try {
+                await new Button()
+                    .setBody(_body)
+                    .setFooter('🎌 Nekopoi Notif')
+                    .addReply('➕ Aktifkan Semua Grup', '__addallgrp__nekopoinotif')
+                    .run(m.from, hisoka, m);
+            } catch (_) { await tolak(hisoka, m, _body); }
+        } else {
+            await tolak(hisoka, m,
+                `╭─「 🎌 *NEKOPOI NOTIF* 」\n│\n` +
+                `│ Status : ❌ *DINONAKTIFKAN*\n│\n` +
+                `│ Notif nekopoi tidak akan masuk ke\n` +
+                `│ grup ini lagi.\n│\n` +
+                `│ Ketik *${pfx}nekopoinotif on* untuk aktifkan ulang.\n│\n` +
+                `╰──────────────────────`
+            );
+        }
+        logCommand(m, hisoka, enabled ? 'nekopoinotif-on-btn' : 'nekopoinotif-off-btn');
+    } catch (e) {
+        await tolak(hisoka, m, `❌ Gagal: ${e.message}`);
+    }
+    return true;
+}
+
+module.exports.handleNekopoinotif          = handleNekopoinotif;
+module.exports.handleNekpoiNotifReply      = handleNekpoiNotifReply;
+module.exports.handleNekopoinotifCallbacks = handleNekopoinotifCallbacks;

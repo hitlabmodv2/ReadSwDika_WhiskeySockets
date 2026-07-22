@@ -845,6 +845,12 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         if (await handleNekpoiNotifReply({ hisoka, m, pendingNekpoiNotifChoices, getQuotedStanzaId, tolak, logCommand, loadConfig, fs, path })) return;
                 }
 
+                // ── Handle button callback nekopoinotif (__nknotif_*) ──
+                {
+                        const { handleNekopoinotifCallbacks } = _require(path.resolve('./SEMUA_FITUR/anime/nekopoi-monitor.cjs'));
+                        if (await handleNekopoinotifCallbacks({ hisoka, m, tolak, logCommand, Button, loadConfig, fs, path })) return;
+                }
+
                 // ── Handle pending hentaidad choice → hentaidad.cjs ──
                 {
                         const { handleHentaidadChoice } = _require(path.resolve('./SEMUA_FITUR/anime/hentaidad.cjs'));
