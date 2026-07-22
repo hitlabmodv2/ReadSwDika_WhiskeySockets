@@ -280,60 +280,70 @@ async function handleHentaidadChoice({ hisoka, m, pendingHentaidadChoices, getQu
 
     const chosen = pending.results[idx];
 
+    // ── 1 pesan loading — semua status di-edit di sini, tidak pernah kirim pesan baru ──
+    // editLoading: pertama kali kirim pesan baru (lazy), selanjutnya selalu edit pesan itu
+    let _loadingMsg = null;
+    const editLoading = async (txt) => {
+        try {
+            if (!_loadingMsg) {
+                _loadingMsg = await hisoka.sendMessage(m.from, { text: txt }, { quoted: m });
+            } else {
+                await hisoka.sendMessage(m.from, { text: txt, edit: _loadingMsg.key });
+            }
+        } catch (_) {}
+    };
+
     try {
         await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
-
-        // ── 1 pesan loading — di-edit sepanjang proses (tidak spam) ───────────
-        const loadingMsg = await hisoka.sendMessage(
-            m.from,
-            { text: `⏳ *Mengambil data galeri...*\n> _Harap tunggu sebentar_` },
-            { quoted: m }
-        );
-        const editLoading = async (txt) => {
-            try {
-                await hisoka.sendMessage(m.from, { text: txt, edit: loadingMsg.key });
-            } catch (_) {}
-        };
+        await editLoading(`⏳ *Mengambil data galeri...*\n> _Harap tunggu sebentar_`);
 
         // Scrape halaman galeri
         const { title, images } = await scrapeGallery(chosen.href);
 
         if (!images.length) {
             await editLoading(`❌ *Tidak ada gambar ditemukan.*\n> _Galeri ini mungkin kosong atau belum tersedia_`);
+            await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
             return true;
         }
 
-        const totalImg = images.length;
+        const totalImg   = images.length;
+        const CONCUR     = 8;
+        const totalBatch = Math.ceil(totalImg / CONCUR);
         await editLoading(`⬇️ *Mendownload* \`${totalImg} gambar\`...\n> _Sabar ya, lagi diproses_`);
 
-        // Download semua gambar paralel (8 sekaligus biar cepat)
-        // Referer = URL galeri agar server tidak return 500
+        // Download semua gambar paralel (CONCUR sekaligus) + update progress per batch
         const startTime = Date.now();
-        const CONCUR    = 8;
         const allItems  = [];
         let   failed    = 0;
+
         for (let i = 0; i < images.length; i += CONCUR) {
-            const chunk   = images.slice(i, i + CONCUR);
-            const results = await Promise.allSettled(
-                chunk.map(async (url) => {
-                    const buf = await downloadImage(url, chosen.href);
-                    return buf;
-                })
+            const batchIdx = Math.floor(i / CONCUR) + 1;
+            const chunk    = images.slice(i, i + CONCUR);
+            const results  = await Promise.allSettled(
+                chunk.map(async (url) => downloadImage(url, chosen.href))
             );
             for (const r of results) {
                 if (r.status === 'fulfilled') allItems.push(r.value);
                 else { failed++; console.error('[HENTAIDAD] Gagal download gambar:', r.reason?.message); }
             }
+            // Update progress realtime per batch (skip kalau batch tunggal — tidak perlu)
+            if (totalBatch > 1) {
+                const doneNow = Math.min(i + CONCUR, totalImg);
+                await editLoading(
+                    `⬇️ *Mendownload* \`${doneNow}/${totalImg} gambar\`...\n` +
+                    `> _Batch ${batchIdx}/${totalBatch} — sabar ya_`
+                );
+            }
         }
 
         if (!allItems.length) {
             await editLoading(`❌ *Semua gambar gagal didownload.*\n> _Coba lagi nanti_`);
+            await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
             return true;
         }
 
         const total      = allItems.length;
         const totalBytes = allItems.reduce((acc, buf) => acc + buf.length, 0);
-
         await editLoading(`📤 *Mengirim* \`${total} gambar\` _dalam 1 album..._\n> _Sebentar lagi_`);
 
         // ── Kirim album pakai Baileys API ─────────────────────────────────────
@@ -369,12 +379,14 @@ async function handleHentaidadChoice({ hisoka, m, pendingHentaidadChoices, getQu
 
         // ── Edit pesan loading → kartu hasil rapi ────────────────────────────
         await editLoading(buildFinalCard({ title, berhasil: total, total: totalImg, totalBytes, elapsedMs, failed }));
-
         await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+
     } catch (err) {
         console.error('[HENTAIDAD] Choice error:', err?.message);
         if (typeof logError === 'function') logError(err instanceof Error ? err : new Error(String(err?.message || err)), 'hentaidad-choice');
-        await tolak(hisoka, m, `❌ *Gagal kirim gambar.*\n💬 _${err?.message || 'Coba lagi nanti.'}_`);
+        // Edit pesan loading yang sudah ada — bukan kirim pesan baru
+        await editLoading(`❌ *Gagal kirim gambar.*\n💬 _${err?.message || 'Coba lagi nanti.'}_`);
+        await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
     }
 
     return true;
