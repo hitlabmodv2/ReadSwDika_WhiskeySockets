@@ -185,9 +185,9 @@ async function handleMemory({ hisoka, m, tolak, logCommand }) {
                 text += `*📊 Process Memory*\n• Current : *${status.currentFormatted}*\n• Limit   : *${status.limitFormatted}*\n• Usage   : *${status.percentage}%*\n\n`;
                 text += `*🔧 Heap Memory*\n• Total : *${status.heap.totalFormatted}*\n• Used  : *${status.heap.usedFormatted}*\n\n`;
                 text += `*🖥️ System Memory (Server)*\n• Total : *${status.system.totalFormatted}*\n• Used  : *${status.system.usedFormatted}*\n• Free  : *${status.system.freeFormatted}*\n\n`;
-                text += `*⚙️ Monitor Config*\n• Enabled     : ${status.enabled ? '✅ Yes' : '❌ No'}\n• Auto Detect : ${status.autoDetect ? '✅ ' + status.autoDetectPercentage + '%' : '❌ Manual'}\n• Interval    : ${status.checkInterval / 1000}s\n• Log Usage   : ${status.logUsage ? '✅ Yes' : '❌ No'}\n• Uptime      : ${msToTime(uptime * 1000)}\n\n`;
+                text += `*⚙️ Monitor Config*\n1. Enabled     : ${status.enabled ? '✅ _Aktif_' : '❌ ~Nonaktif~'}\n2. Auto Detect : ${status.autoDetect ? '✅ _' + status.autoDetectPercentage + '%_' : '❌ ~Manual~'}\n3. Interval    : \`${status.checkInterval / 1000}s\`\n4. Log Usage   : ${status.logUsage ? '✅ _Aktif_' : '❌ ~Nonaktif~'}\n5. Uptime      : \`${msToTime(uptime * 1000)}\`\n\n`;
                 text += `> _Data diambil realtime saat perintah dikirim_`;
-                if (parseFloat(status.percentage) >= 80) text += `\n\n⚠️ *Warning:* Memory usage tinggi! Auto-restart akan terjadi jika mencapai limit.`;
+                if (parseFloat(status.percentage) >= 80) text += `\n\n⚠️ *Warning:* ~Batas aman terlampaui~ — _auto-restart_ akan terjadi jika mencapai *limit*!`;
                 await tolak(hisoka, m, text);
                 logCommand(m, hisoka, 'memory');
         } catch (error) {
@@ -309,9 +309,9 @@ async function handleSessionstat({ hisoka, m, fs, path, logCommand }) {
 
                 let out = `*🗄️ SESSION STATS*\n_Realtime: ${now} WIB_\n\n*📦 Main Session*\n`;
                 if (!mainStats) {
-                        out += `⚠️ _creds.json belum ada_\n`;
+                        out += `⚠️ ~creds.json belum ada~\n`;
                 } else {
-                        out += `✅ Creds       : Tersimpan\n🔑 Pre-Keys    : ${mainStats.preKeys} file\n📋 Sessions    : ${mainStats.sessionFiles} file\n🗝️ Sender-Keys : ${mainStats.senderKeys} file\n📁 Total Files : ${mainStats.totalFiles}\n💾 Total Size  : *${formatSize(mainStats.totalSize)}*\n`;
+                        out += `1. ✅ Creds       : _Tersimpan_\n2. 🔑 Pre-Keys    : \`${mainStats.preKeys} file\`\n3. 📋 Sessions    : \`${mainStats.sessionFiles} file\`\n4. 🗝️ Sender-Keys : \`${mainStats.senderKeys} file\`\n5. 📁 Total Files : \`${mainStats.totalFiles}\`\n6. 💾 Total Size  : *${formatSize(mainStats.totalSize)}*\n`;
                 }
 
                 const jadibotDir = path.join(process.cwd(), 'jadibot');
@@ -395,7 +395,7 @@ async function handleCeksesi({ hisoka, m, tolak, logCommand, getJadibotNumber, j
                         'app-state-sync-version': 'Versi sync state — aman dihapus (auto re-sync)',
                         'tctoken':                'Token cache — aman dihapus',
                 };
-                const SAFE_LABEL = { 'HAPUS': '✂️ HAPUS', 'TRIM': '✂️ TRIM', 'KEEP': '🔒 KEEP' };
+                const SAFE_LABEL = { 'HAPUS': '✂️ ~HAPUS~', 'TRIM': '✂️ _TRIM_', 'KEEP': '🔒 *KEEP*' };
 
                 const lines = result.rows.map((r, i) => {
                         const emoji = EMOJI_MAP[r.key] || '📄';
@@ -403,7 +403,7 @@ async function handleCeksesi({ hisoka, m, tolak, logCommand, getJadibotNumber, j
                         const kb    = result.fmtKB(r.bytes);
                         const tag   = SAFE_LABEL[r.safe] || r.safe;
                         return `${i + 1}. ${emoji} *${r.key}* — ${tag}\n` +
-                               `   ${r.count} · ${kb}\n` +
+                               `   ${r.count} · \`${kb}\`\n` +
                                `   _${desc}_`;
                 });
 
