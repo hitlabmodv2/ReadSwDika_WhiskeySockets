@@ -166,7 +166,7 @@ function formatList(items, query) {
     let text = `🔞 *HENTAIDAD*\n\n${headerLine}\n`;
     for (const it of items) {
         const judul = it.title.length > 52 ? it.title.slice(0, 52) + '…' : it.title;
-        text += `${it.no}. ${judul}\n`;
+        text += `${it.no}. _${judul}_\n`;
     }
     text += `\n> 💬 *Reply* pesan ini dengan *nomor* pilihanmu\n> _Contoh: balas dengan_ *1*`;
     return text;
@@ -212,7 +212,7 @@ async function handleHentaidad({ hisoka, m, tolak, logCommand, logError, pending
                         `> Ketik \`.hentaidad\` untuk melihat latest`,
                 }, { quoted: m });
             } else {
-                await tolak(hisoka, m, `❌ Gagal mengambil data. Coba lagi nanti.`);
+                await tolak(hisoka, m, `❌ _Gagal mengambil data. Coba lagi nanti._`);
             }
             await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
             return;
@@ -238,7 +238,7 @@ async function handleHentaidad({ hisoka, m, tolak, logCommand, logError, pending
     } catch (err) {
         console.error('[HENTAIDAD] Error:', err?.message);
         if (typeof logError === 'function') logError(err instanceof Error ? err : new Error(String(err?.message || err)), 'hentaidad');
-        await tolak(hisoka, m, `❌ Gagal mengambil data hentaidad.\n💬 ${err?.message || 'Coba lagi nanti.'}`);
+        await tolak(hisoka, m, `❌ *Gagal mengambil data hentaidad.*\n💬 _${err?.message || 'Coba lagi nanti.'}_`);
     }
 }
 
@@ -257,7 +257,7 @@ async function handleHentaidadChoice({ hisoka, m, pendingHentaidadChoices, getQu
     // Expired
     if (pending.expiresAt <= Date.now()) {
         pendingHentaidadChoices.delete(m.sender);
-        await tolak(hisoka, m, `⏳ *Menu sudah kedaluwarsa.*\n> Ketik \`.hentaidad\` lagi untuk memulai`);
+        await tolak(hisoka, m, `⏳ *Menu sudah kedaluwarsa.*\n> Ketik \`.hentaidad\` _lagi untuk memulai_`);
         return true;
     }
 
@@ -327,7 +327,7 @@ async function handleHentaidadChoice({ hisoka, m, pendingHentaidadChoices, getQu
         }
 
         if (!allItems.length) {
-            await editLoading(`❌ Semua gambar gagal didownload.`);
+            await editLoading(`❌ *Semua gambar gagal didownload.*\n> _Coba lagi nanti_`);
             return true;
         }
 
@@ -374,7 +374,7 @@ async function handleHentaidadChoice({ hisoka, m, pendingHentaidadChoices, getQu
     } catch (err) {
         console.error('[HENTAIDAD] Choice error:', err?.message);
         if (typeof logError === 'function') logError(err instanceof Error ? err : new Error(String(err?.message || err)), 'hentaidad-choice');
-        await tolak(hisoka, m, `❌ Gagal kirim gambar.\n💬 ${err?.message || 'Coba lagi nanti.'}`);
+        await tolak(hisoka, m, `❌ *Gagal kirim gambar.*\n💬 _${err?.message || 'Coba lagi nanti.'}_`);
     }
 
     return true;
