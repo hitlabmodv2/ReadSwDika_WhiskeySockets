@@ -1634,13 +1634,29 @@ generate_commit_msg() {
   classify_commit "$@"
 }
 
-# ===== Nomor commit berikutnya — realtime dari git log lokal (#NNNN) =====
-# Menghitung total commit di repo lalu +1 → angka ini ditempel di akhir commit message
-# supaya commit punya referensi unik seperti pola GitHub PR/commit (#5198)
+# ===== Nomor commit berikutnya — realtime dari GitHub API (#NNNN) =====
+# Ambil total commit langsung dari GitHub (bukan local git) supaya angka selalu akurat
+# walau ada commit dari device/mesin lain. Fallback ke local count kalau offline/API error.
 next_commit_no() {
-  local _count
-  _count=$(git rev-list --count HEAD 2>/dev/null || echo "0")
-  echo $(( _count + 1 ))
+  local _api_count _local_count _link_header
+
+  # Coba ambil dari GitHub API — 1 request ringan, cukup baca header Link
+  # Link: <...?page=N>; rel="last" → N = total commit (karena per_page=1)
+  _link_header=$(curl -s -I \
+    "https://api.github.com/repos/${USER}/${REPO}/commits?sha=${DEFAULT_BRANCH}&per_page=1" \
+    -H "Authorization: token ${TOKEN}" \
+    -H "Accept: application/vnd.github+json" \
+    --max-time 8 2>/dev/null | grep -i '^link:')
+
+  _api_count=$(echo "$_link_header" | grep -oE 'page=[0-9]+' | tail -1 | cut -d= -f2)
+
+  if [ -n "$_api_count" ] && [ "$_api_count" -gt 0 ] 2>/dev/null; then
+    echo $(( _api_count + 1 ))
+  else
+    # Fallback: hitung dari local git
+    _local_count=$(git rev-list --count HEAD 2>/dev/null || echo "0")
+    echo $(( _local_count + 1 ))
+  fi
 }
 
 # Tempel (#NNNN) ke pesan commit
