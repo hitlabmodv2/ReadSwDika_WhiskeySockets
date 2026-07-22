@@ -1204,6 +1204,212 @@ while true; do
   [ "$TOKEN" = "__EXIT__" ] && exit 0
 done
 
+# ===== Auto-setup Branch Ruleset di GitHub =====
+# Dipanggil sekali setelah token valid.
+# - Cek apakah ruleset "Protect <branch>" sudah ada
+# - Kalau belum → buat otomatis via GitHub API
+# - Kalau sudah → skip (tidak overwrite)
+# Rules yang diaktifkan:
+#   ✅ deletion       — cegah branch dihapus tidak sengaja
+#   ✅ non_fast_forward — block force push (bypass: repo admin)
+setup_branch_ruleset() {
+  local _branch="${1:-$DEFAULT_BRANCH}"
+  local _ruleset_name="Protect ${_branch}"
+  local _flag_file=".ruleset_${_branch}.ok"
+
+  # Skip kalau flag sudah ada (tidak perlu hit API setiap run)
+  [ -f "$_flag_file" ] && return 0
+
+  [ -z "$TOKEN" ] && return 0
+
+  # Cek apakah ruleset dengan nama ini sudah ada
+  local _existing
+  _existing=$(curl -s --max-time 8 \
+    "https://api.github.com/repos/${REPO_OWNER}/${REPO}/rulesets" \
+    -H "Authorization: token ${TOKEN}" \
+    -H "Accept: application/vnd.github+json" 2>/dev/null)
+
+  local _found
+  _found=$(python3 -c "
+import json,sys
+try:
+  data=json.load(sys.stdin)
+  name='''${_ruleset_name}'''
+  print('yes' if any(r.get('name')==name for r in (data if isinstance(data,list) else [])) else 'no')
+except: print('no')
+" <<< "$_existing" 2>/dev/null)
+
+  if [ "$_found" = "yes" ]; then
+    touch "$_flag_file"
+    return 0
+  fi
+
+  # Buat ruleset baru
+  local _payload
+  _payload=$(python3 -c "
+import json
+print(json.dumps({
+  'name': '${_ruleset_name}',
+  'target': 'branch',
+  'enforcement': 'active',
+  'bypass_actors': [
+    {'actor_id': 5, 'actor_type': 'RepositoryRole', 'bypass_mode': 'always'}
+  ],
+  'conditions': {
+    'ref_name': {
+      'include': ['refs/heads/${_branch}'],
+      'exclude': []
+    }
+  },
+  'rules': [
+    {'type': 'deletion'},
+    {'type': 'non_fast_forward'}
+  ]
+}))" 2>/dev/null)
+
+  [ -z "$_payload" ] && return 1
+
+  local _resp
+  _resp=$(curl -s --max-time 10 \
+    -X POST "https://api.github.com/repos/${REPO_OWNER}/${REPO}/rulesets" \
+    -H "Authorization: token ${TOKEN}" \
+    -H "Accept: application/vnd.github+json" \
+    -H "Content-Type: application/json" \
+    -d "$_payload" 2>/dev/null)
+
+  local _id
+  _id=$(python3 -c "
+import json,sys
+try: print(json.loads(sys.stdin.read()).get('id',''))
+except: print('')
+" <<< "$_resp" 2>/dev/null)
+
+  if [ -n "$_id" ]; then
+    echo -e "  ${C_GREEN}🛡️  Branch ruleset dibuat:${C_RESET} ${C_DIM}\"${_ruleset_name}\" (id: ${_id})${C_RESET}"
+    echo -e "  ${C_DIM}   ✅ Restrict deletions  ✅ Block force pushes  (bypass: repo admin)${C_RESET}"
+    touch "$_flag_file"
+  fi
+}
+
+# ===== Setup wizard interaktif untuk Auto PR (.autopr) =====
+# Dipanggil setelah token valid.
+# - Kalau .autopr belum ada → tampilkan wizard setup (wajib sekali)
+# - Kalau sudah ada         → skip (langsung lanjut)
+# Bisa dipanggil ulang dari menu untuk re-konfigurasi.
+# $1 = "force" → tampilkan wizard meskipun .autopr sudah ada
+init_autopr_config() {
+  local _force="${1:-}"
+  [ -f .autopr ] && [ "$_force" != "force" ] && return 0
+
+  # Baca nilai lama kalau ada (untuk tampilkan default saat re-konfigurasi)
+  local _old_enabled="true" _old_base="auto" _old_draft="false"
+  if [ -f .autopr ]; then
+    _old_enabled=$(grep -E '^enabled=' .autopr 2>/dev/null | cut -d= -f2 | tr -d ' \r\n')
+    _old_base=$(grep -E '^base=' .autopr 2>/dev/null | cut -d= -f2 | tr -d ' \r\n')
+    _old_draft=$(grep -E '^draft=' .autopr 2>/dev/null | cut -d= -f2 | tr -d ' \r\n')
+  fi
+
+  clear >/dev/tty 2>/dev/null || true
+  echo -e "${C_BOLD}╔══════════════════════════════════════════════════╗${C_RESET}" >&2
+  echo -e "${C_BOLD}║       🔀  SETUP AUTO PR — BANG WILY              ║${C_RESET}" >&2
+  echo -e "${C_BOLD}╚══════════════════════════════════════════════════╝${C_RESET}" >&2
+  echo "" >&2
+  echo -e "  ${C_DIM}Setiap push ke branch non-default akan otomatis${C_RESET}" >&2
+  echo -e "  ${C_DIM}membuat Pull Request ke GitHub. Atur di sini.${C_RESET}" >&2
+  echo "" >&2
+  echo -e "${C_DIM}  ─────────────────────────────────────────────────${C_RESET}" >&2
+
+  echo -e "  ${C_DIM}Ketik ${C_BOLD}0${C_RESET}${C_DIM} di pertanyaan mana saja untuk kembali ke menu.${C_RESET}" >&2
+  echo "" >&2
+
+  # ── [1] Aktifkan Auto PR? ──────────────────────────────────────────────────
+  local _def_en="y"; [ "$_old_enabled" = "false" ] && _def_en="n"
+  echo -e "  ${C_CYAN}[1]${C_RESET} ${C_BOLD}Aktifkan Auto PR?${C_RESET}" >&2
+  echo -e "      ${C_DIM}Setiap push berhasil → PR otomatis dibuat di GitHub${C_RESET}" >&2
+  printf "      ${C_BOLD}true / false${C_RESET}  ${C_DIM}[sekarang: %s | 0 = kembali]${C_RESET}  ▸ " "$_old_enabled" >&2
+  local _ans_en=""
+  read -r _ans_en </dev/tty
+  _ans_en=$(echo "$_ans_en" | tr -d ' \r\n' | tr '[:upper:]' '[:lower:]')
+  if [ "$_ans_en" = "0" ]; then
+    echo -e "\n  ${C_DIM}↩ Kembali ke menu...${C_RESET}" >&2
+    sleep 0.5
+    return 0
+  fi
+  local _cfg_enabled
+  case "$_ans_en" in
+    false|f|n|no)  _cfg_enabled="false" ;;
+    *)             _cfg_enabled="true"  ;;
+  esac
+
+  # ── [2] Base branch ────────────────────────────────────────────────────────
+  echo "" >&2
+  echo -e "  ${C_CYAN}[2]${C_RESET} ${C_BOLD}Base branch${C_RESET} ${C_DIM}(PR akan merge ke branch ini)${C_RESET}" >&2
+  echo -e "      ${C_DIM}Kosongkan / ketik 'auto' → pakai default branch repo (${DEFAULT_BRANCH})${C_RESET}" >&2
+  printf "      ${C_BOLD}Nama branch / auto${C_RESET}  ${C_DIM}[sekarang: %s | 0 = kembali]${C_RESET}  ▸ " "$_old_base" >&2
+  local _ans_base=""
+  read -r _ans_base </dev/tty
+  _ans_base=$(echo "$_ans_base" | tr -d ' \r\n')
+  if [ "$_ans_base" = "0" ]; then
+    echo -e "\n  ${C_DIM}↩ Kembali ke menu...${C_RESET}" >&2
+    sleep 0.5
+    return 0
+  fi
+  local _cfg_base
+  if [ -z "$_ans_base" ] || [ "$_ans_base" = "auto" ]; then
+    _cfg_base="auto"
+  else
+    _cfg_base="$_ans_base"
+  fi
+
+  # ── [3] Draft PR? ──────────────────────────────────────────────────────────
+  echo "" >&2
+  echo -e "  ${C_CYAN}[3]${C_RESET} ${C_BOLD}Buat PR sebagai Draft?${C_RESET}" >&2
+  echo -e "      ${C_DIM}Draft = PR belum siap merge, untuk review dulu${C_RESET}" >&2
+  printf "      ${C_BOLD}true / false${C_RESET}  ${C_DIM}[sekarang: %s | 0 = kembali]${C_RESET}  ▸ " "$_old_draft" >&2
+  local _ans_draft=""
+  read -r _ans_draft </dev/tty
+  _ans_draft=$(echo "$_ans_draft" | tr -d ' \r\n' | tr '[:upper:]' '[:lower:]')
+  if [ "$_ans_draft" = "0" ]; then
+    echo -e "\n  ${C_DIM}↩ Kembali ke menu...${C_RESET}" >&2
+    sleep 0.5
+    return 0
+  fi
+  local _cfg_draft
+  case "$_ans_draft" in
+    true|t|y|yes|1)  _cfg_draft="true"  ;;
+    *)               _cfg_draft="false" ;;
+  esac
+
+  # ── Simpan ke .autopr ──────────────────────────────────────────────────────
+  cat > .autopr << AUTOPREOF
+# Konfigurasi Auto PR — push.sh
+# Dibuat/diupdate via wizard interaktif. Bisa diedit manual kapan saja.
+
+# Aktifkan/matikan auto PR: true / false
+enabled=${_cfg_enabled}
+
+# Branch tujuan PR (base). "auto" = pakai DEFAULT_BRANCH script
+base=${_cfg_base}
+
+# Buat PR sebagai draft: true / false
+draft=${_cfg_draft}
+AUTOPREOF
+
+  # ── Tampilkan ringkasan ────────────────────────────────────────────────────
+  echo "" >&2
+  echo -e "${C_DIM}  ─────────────────────────────────────────────────${C_RESET}" >&2
+  echo -e "  ${C_GREEN}✅ Konfigurasi Auto PR disimpan ke .autopr${C_RESET}" >&2
+  echo "" >&2
+  local _en_label; [ "$_cfg_enabled" = "true" ] && _en_label="${C_GREEN}✅ Aktif${C_RESET}" || _en_label="${C_RED}❌ Nonaktif${C_RESET}"
+  local _base_label; [ "$_cfg_base" = "auto" ] && _base_label="${DEFAULT_BRANCH} (auto)" || _base_label="$_cfg_base"
+  local _draft_label; [ "$_cfg_draft" = "true" ] && _draft_label="${C_YELLOW}Draft${C_RESET}" || _draft_label="Normal PR"
+  echo -e "  ${C_DIM}Auto PR   :${C_RESET} ${_en_label}" >&2
+  echo -e "  ${C_DIM}Base      :${C_RESET} ${C_BOLD}${_base_label}${C_RESET}" >&2
+  echo -e "  ${C_DIM}Mode      :${C_RESET} ${_draft_label}" >&2
+  echo "" >&2
+  printf "  ${C_DIM}Tekan ${C_RESET}${C_BOLD}Enter${C_RESET}${C_DIM} untuk kembali ke menu...${C_RESET}" >&2
+  read -r </dev/tty
+}
 # ── Buat file .autopr jika belum ada (setelah token valid) ───────────────────
 init_autopr_config
 
@@ -1884,212 +2090,6 @@ except: print('unknown error')
   return 1
 }
 
-# ===== Auto-setup Branch Ruleset di GitHub =====
-# Dipanggil sekali setelah token valid.
-# - Cek apakah ruleset "Protect <branch>" sudah ada
-# - Kalau belum → buat otomatis via GitHub API
-# - Kalau sudah → skip (tidak overwrite)
-# Rules yang diaktifkan:
-#   ✅ deletion       — cegah branch dihapus tidak sengaja
-#   ✅ non_fast_forward — block force push (bypass: repo admin)
-setup_branch_ruleset() {
-  local _branch="${1:-$DEFAULT_BRANCH}"
-  local _ruleset_name="Protect ${_branch}"
-  local _flag_file=".ruleset_${_branch}.ok"
-
-  # Skip kalau flag sudah ada (tidak perlu hit API setiap run)
-  [ -f "$_flag_file" ] && return 0
-
-  [ -z "$TOKEN" ] && return 0
-
-  # Cek apakah ruleset dengan nama ini sudah ada
-  local _existing
-  _existing=$(curl -s --max-time 8 \
-    "https://api.github.com/repos/${REPO_OWNER}/${REPO}/rulesets" \
-    -H "Authorization: token ${TOKEN}" \
-    -H "Accept: application/vnd.github+json" 2>/dev/null)
-
-  local _found
-  _found=$(python3 -c "
-import json,sys
-try:
-  data=json.load(sys.stdin)
-  name='''${_ruleset_name}'''
-  print('yes' if any(r.get('name')==name for r in (data if isinstance(data,list) else [])) else 'no')
-except: print('no')
-" <<< "$_existing" 2>/dev/null)
-
-  if [ "$_found" = "yes" ]; then
-    touch "$_flag_file"
-    return 0
-  fi
-
-  # Buat ruleset baru
-  local _payload
-  _payload=$(python3 -c "
-import json
-print(json.dumps({
-  'name': '${_ruleset_name}',
-  'target': 'branch',
-  'enforcement': 'active',
-  'bypass_actors': [
-    {'actor_id': 5, 'actor_type': 'RepositoryRole', 'bypass_mode': 'always'}
-  ],
-  'conditions': {
-    'ref_name': {
-      'include': ['refs/heads/${_branch}'],
-      'exclude': []
-    }
-  },
-  'rules': [
-    {'type': 'deletion'},
-    {'type': 'non_fast_forward'}
-  ]
-}))" 2>/dev/null)
-
-  [ -z "$_payload" ] && return 1
-
-  local _resp
-  _resp=$(curl -s --max-time 10 \
-    -X POST "https://api.github.com/repos/${REPO_OWNER}/${REPO}/rulesets" \
-    -H "Authorization: token ${TOKEN}" \
-    -H "Accept: application/vnd.github+json" \
-    -H "Content-Type: application/json" \
-    -d "$_payload" 2>/dev/null)
-
-  local _id
-  _id=$(python3 -c "
-import json,sys
-try: print(json.loads(sys.stdin.read()).get('id',''))
-except: print('')
-" <<< "$_resp" 2>/dev/null)
-
-  if [ -n "$_id" ]; then
-    echo -e "  ${C_GREEN}🛡️  Branch ruleset dibuat:${C_RESET} ${C_DIM}\"${_ruleset_name}\" (id: ${_id})${C_RESET}"
-    echo -e "  ${C_DIM}   ✅ Restrict deletions  ✅ Block force pushes  (bypass: repo admin)${C_RESET}"
-    touch "$_flag_file"
-  fi
-}
-
-# ===== Setup wizard interaktif untuk Auto PR (.autopr) =====
-# Dipanggil setelah token valid.
-# - Kalau .autopr belum ada → tampilkan wizard setup (wajib sekali)
-# - Kalau sudah ada         → skip (langsung lanjut)
-# Bisa dipanggil ulang dari menu untuk re-konfigurasi.
-# $1 = "force" → tampilkan wizard meskipun .autopr sudah ada
-init_autopr_config() {
-  local _force="${1:-}"
-  [ -f .autopr ] && [ "$_force" != "force" ] && return 0
-
-  # Baca nilai lama kalau ada (untuk tampilkan default saat re-konfigurasi)
-  local _old_enabled="true" _old_base="auto" _old_draft="false"
-  if [ -f .autopr ]; then
-    _old_enabled=$(grep -E '^enabled=' .autopr 2>/dev/null | cut -d= -f2 | tr -d ' \r\n')
-    _old_base=$(grep -E '^base=' .autopr 2>/dev/null | cut -d= -f2 | tr -d ' \r\n')
-    _old_draft=$(grep -E '^draft=' .autopr 2>/dev/null | cut -d= -f2 | tr -d ' \r\n')
-  fi
-
-  clear >/dev/tty 2>/dev/null || true
-  echo -e "${C_BOLD}╔══════════════════════════════════════════════════╗${C_RESET}" >&2
-  echo -e "${C_BOLD}║       🔀  SETUP AUTO PR — BANG WILY              ║${C_RESET}" >&2
-  echo -e "${C_BOLD}╚══════════════════════════════════════════════════╝${C_RESET}" >&2
-  echo "" >&2
-  echo -e "  ${C_DIM}Setiap push ke branch non-default akan otomatis${C_RESET}" >&2
-  echo -e "  ${C_DIM}membuat Pull Request ke GitHub. Atur di sini.${C_RESET}" >&2
-  echo "" >&2
-  echo -e "${C_DIM}  ─────────────────────────────────────────────────${C_RESET}" >&2
-
-  echo -e "  ${C_DIM}Ketik ${C_BOLD}0${C_RESET}${C_DIM} di pertanyaan mana saja untuk kembali ke menu.${C_RESET}" >&2
-  echo "" >&2
-
-  # ── [1] Aktifkan Auto PR? ──────────────────────────────────────────────────
-  local _def_en="y"; [ "$_old_enabled" = "false" ] && _def_en="n"
-  echo -e "  ${C_CYAN}[1]${C_RESET} ${C_BOLD}Aktifkan Auto PR?${C_RESET}" >&2
-  echo -e "      ${C_DIM}Setiap push berhasil → PR otomatis dibuat di GitHub${C_RESET}" >&2
-  printf "      ${C_BOLD}true / false${C_RESET}  ${C_DIM}[sekarang: %s | 0 = kembali]${C_RESET}  ▸ " "$_old_enabled" >&2
-  local _ans_en=""
-  read -r _ans_en </dev/tty
-  _ans_en=$(echo "$_ans_en" | tr -d ' \r\n' | tr '[:upper:]' '[:lower:]')
-  if [ "$_ans_en" = "0" ]; then
-    echo -e "\n  ${C_DIM}↩ Kembali ke menu...${C_RESET}" >&2
-    sleep 0.5
-    return 0
-  fi
-  local _cfg_enabled
-  case "$_ans_en" in
-    false|f|n|no)  _cfg_enabled="false" ;;
-    *)             _cfg_enabled="true"  ;;
-  esac
-
-  # ── [2] Base branch ────────────────────────────────────────────────────────
-  echo "" >&2
-  echo -e "  ${C_CYAN}[2]${C_RESET} ${C_BOLD}Base branch${C_RESET} ${C_DIM}(PR akan merge ke branch ini)${C_RESET}" >&2
-  echo -e "      ${C_DIM}Kosongkan / ketik 'auto' → pakai default branch repo (${DEFAULT_BRANCH})${C_RESET}" >&2
-  printf "      ${C_BOLD}Nama branch / auto${C_RESET}  ${C_DIM}[sekarang: %s | 0 = kembali]${C_RESET}  ▸ " "$_old_base" >&2
-  local _ans_base=""
-  read -r _ans_base </dev/tty
-  _ans_base=$(echo "$_ans_base" | tr -d ' \r\n')
-  if [ "$_ans_base" = "0" ]; then
-    echo -e "\n  ${C_DIM}↩ Kembali ke menu...${C_RESET}" >&2
-    sleep 0.5
-    return 0
-  fi
-  local _cfg_base
-  if [ -z "$_ans_base" ] || [ "$_ans_base" = "auto" ]; then
-    _cfg_base="auto"
-  else
-    _cfg_base="$_ans_base"
-  fi
-
-  # ── [3] Draft PR? ──────────────────────────────────────────────────────────
-  echo "" >&2
-  echo -e "  ${C_CYAN}[3]${C_RESET} ${C_BOLD}Buat PR sebagai Draft?${C_RESET}" >&2
-  echo -e "      ${C_DIM}Draft = PR belum siap merge, untuk review dulu${C_RESET}" >&2
-  printf "      ${C_BOLD}true / false${C_RESET}  ${C_DIM}[sekarang: %s | 0 = kembali]${C_RESET}  ▸ " "$_old_draft" >&2
-  local _ans_draft=""
-  read -r _ans_draft </dev/tty
-  _ans_draft=$(echo "$_ans_draft" | tr -d ' \r\n' | tr '[:upper:]' '[:lower:]')
-  if [ "$_ans_draft" = "0" ]; then
-    echo -e "\n  ${C_DIM}↩ Kembali ke menu...${C_RESET}" >&2
-    sleep 0.5
-    return 0
-  fi
-  local _cfg_draft
-  case "$_ans_draft" in
-    true|t|y|yes|1)  _cfg_draft="true"  ;;
-    *)               _cfg_draft="false" ;;
-  esac
-
-  # ── Simpan ke .autopr ──────────────────────────────────────────────────────
-  cat > .autopr << AUTOPREOF
-# Konfigurasi Auto PR — push.sh
-# Dibuat/diupdate via wizard interaktif. Bisa diedit manual kapan saja.
-
-# Aktifkan/matikan auto PR: true / false
-enabled=${_cfg_enabled}
-
-# Branch tujuan PR (base). "auto" = pakai DEFAULT_BRANCH script
-base=${_cfg_base}
-
-# Buat PR sebagai draft: true / false
-draft=${_cfg_draft}
-AUTOPREOF
-
-  # ── Tampilkan ringkasan ────────────────────────────────────────────────────
-  echo "" >&2
-  echo -e "${C_DIM}  ─────────────────────────────────────────────────${C_RESET}" >&2
-  echo -e "  ${C_GREEN}✅ Konfigurasi Auto PR disimpan ke .autopr${C_RESET}" >&2
-  echo "" >&2
-  local _en_label; [ "$_cfg_enabled" = "true" ] && _en_label="${C_GREEN}✅ Aktif${C_RESET}" || _en_label="${C_RED}❌ Nonaktif${C_RESET}"
-  local _base_label; [ "$_cfg_base" = "auto" ] && _base_label="${DEFAULT_BRANCH} (auto)" || _base_label="$_cfg_base"
-  local _draft_label; [ "$_cfg_draft" = "true" ] && _draft_label="${C_YELLOW}Draft${C_RESET}" || _draft_label="Normal PR"
-  echo -e "  ${C_DIM}Auto PR   :${C_RESET} ${_en_label}" >&2
-  echo -e "  ${C_DIM}Base      :${C_RESET} ${C_BOLD}${_base_label}${C_RESET}" >&2
-  echo -e "  ${C_DIM}Mode      :${C_RESET} ${_draft_label}" >&2
-  echo "" >&2
-  printf "  ${C_DIM}Tekan ${C_RESET}${C_BOLD}Enter${C_RESET}${C_DIM} untuk kembali ke menu...${C_RESET}" >&2
-  read -r </dev/tty
-}
 
 # ===== Bersihkan stale index.lock (sisa run sebelumnya yang ke-interrupt) =====
 cleanup_stale_lock() {
