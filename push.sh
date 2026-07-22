@@ -1668,6 +1668,19 @@ append_commit_no() {
   echo "${_base_msg} (#${_no})"
 }
 
+# Ubah (#NNNN) di pesan commit jadi HTML link ke commit GitHub
+# agar bisa diklik di Telegram (parse_mode=HTML).
+# Usage: tg_linkify_commit "feat: add stuff (#42)" "abc1234"
+tg_linkify_commit() {
+  local _msg="$1"
+  local _sha="${2:-}"
+  if [ -z "$_sha" ]; then
+    echo "$_msg"
+    return
+  fi
+  echo "$_msg" | sed -E "s|\(#([0-9]+)\)|(<a href=\"https://github.com/${REPO_OWNER}/${REPO}/commit/${_sha}\">#\1</a>)|g"
+}
+
 # ===== Bersihkan stale index.lock (sisa run sebelumnya yang ke-interrupt) =====
 cleanup_stale_lock() {
   local lock=".git/index.lock"
@@ -2981,11 +2994,13 @@ action_quick_push() {
     log_push_event "$DEFAULT_BRANCH" "OK" "$_msg" "$_changed"
     local _btn_pushok='{"inline_keyboard":[[{"text":"🔗 Lihat Branch","url":"https://github.com/'"${USER}"'/'"${REPO}"'/tree/'"${DEFAULT_BRANCH}"'"},{"text":"📊 Commits","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commits/'"${DEFAULT_BRANCH}"'"}],[{"text":"🔀 Compare","url":"https://github.com/'"${USER}"'/'"${REPO}"'/compare"},{"text":"📥 Pull Request","url":"https://github.com/'"${USER}"'/'"${REPO}"'/pulls"}]]}'
     local _qp_detail; _qp_detail=$(_build_push_detail 2>/dev/null || true)
+    local _qp_sha; _qp_sha=$(git rev-parse HEAD 2>/dev/null || echo "")
+    local _msg_tg; _msg_tg=$(tg_linkify_commit "$_msg" "$_qp_sha")
     send_telegram_photo "https://w.wallhaven.cc/full/je/wallhaven-je9x7y.jpg" "✅ <b>PUSH BERHASIL</b>
 ━━━━━━━━━━━━━━━━━━━━
 📁 <code>${USER}/${REPO}</code>
 🌿 Branch: <code>${DEFAULT_BRANCH}</code>
-📝 ${_msg}
+📝 ${_msg_tg}
 ${_qp_detail}
 🕐 ${_ts_now}" "$_btn_pushok"
   else
@@ -5987,11 +6002,12 @@ push_head_to_branch() {
     echo -e "  ${C_BLUE}🔗 https://github.com/${REPO_OWNER}/${REPO}/tree/${branch}${C_RESET}"
     log_push_event "$branch" "OK" "$_log_msg" "$_log_files"
     local _btn_pbr='{"inline_keyboard":[[{"text":"🔗 Lihat Branch","url":"https://github.com/'"${USER}"'/'"${REPO}"'/tree/'"${branch}"'"},{"text":"📊 Commits","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commits/'"${branch}"'"}],[{"text":"🔀 Compare","url":"https://github.com/'"${USER}"'/'"${REPO}"'/compare"},{"text":"📥 Pull Request","url":"https://github.com/'"${USER}"'/'"${REPO}"'/pulls"}]]}'
+    local _log_msg_tg; _log_msg_tg=$(tg_linkify_commit "$_log_msg" "$(git rev-parse HEAD 2>/dev/null || echo '')")
     send_telegram_photo "https://w.wallhaven.cc/full/yj/wallhaven-yje2lk.png" "✅ <b>PUSH BERHASIL</b>
 ━━━━━━━━━━━━━━━━━━━━
 📁 <code>${USER}/${REPO}</code>
 🌿 Branch: <code>${branch}</code>
-📝 ${_log_msg}
+📝 ${_log_msg_tg}
 ${_push_detail}
 🕐 ${_tg_ts}" "$_btn_pbr"
     return 0
@@ -6035,11 +6051,12 @@ ${_push_detail}
     echo -e "  ${C_BLUE}🔗 https://github.com/${REPO_OWNER}/${REPO}/tree/${branch}${C_RESET}"
     log_push_event "$branch" "OK(graft)" "$_log_msg" "$_log_files"
     local _btn_pgraft='{"inline_keyboard":[[{"text":"🔗 Lihat Branch","url":"https://github.com/'"${USER}"'/'"${REPO}"'/tree/'"${branch}"'"},{"text":"📊 Commits","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commits/'"${branch}"'"}],[{"text":"🔀 Compare","url":"https://github.com/'"${USER}"'/'"${REPO}"'/compare"},{"text":"📥 Pull Request","url":"https://github.com/'"${USER}"'/'"${REPO}"'/pulls"}]]}'
+    local _log_msg_tg_g; _log_msg_tg_g=$(tg_linkify_commit "$_log_msg" "${_new_commit:-}")
     send_telegram_photo "https://w.wallhaven.cc/full/yj/wallhaven-yje2lk.png" "✅ <b>PUSH BERHASIL</b>
 ━━━━━━━━━━━━━━━━━━━━
 📁 <code>${USER}/${REPO}</code>
 🌿 Branch: <code>${branch}</code>
-📝 ${_log_msg}
+📝 ${_log_msg_tg_g}
 ${_push_detail}
 ✔️ Histori remote tetap terjaga
 🕐 ${_tg_ts}" "$_btn_pgraft"
@@ -6058,11 +6075,12 @@ ${_push_detail}
     echo -e "  ${C_BLUE}🔗 https://github.com/${REPO_OWNER}/${REPO}/tree/${branch}${C_RESET}"
     log_push_event "$branch" "OK(force)" "$_log_msg" "$_log_files"
     local _btn_pforce='{"inline_keyboard":[[{"text":"🔗 Lihat Branch","url":"https://github.com/'"${USER}"'/'"${REPO}"'/tree/'"${branch}"'"},{"text":"📊 Commits","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commits/'"${branch}"'"}],[{"text":"⚠️ Security","url":"https://github.com/'"${USER}"'/'"${REPO}"'/security"},{"text":"🔀 Compare","url":"https://github.com/'"${USER}"'/'"${REPO}"'/compare"}]]}'
+    local _log_msg_tg_f; _log_msg_tg_f=$(tg_linkify_commit "$_log_msg" "$(git rev-parse HEAD 2>/dev/null || echo '')")
     send_telegram_photo "https://w.wallhaven.cc/full/yj/wallhaven-yjr3kk.png" "⚡ <b>PUSH BERHASIL (FORCE)</b>
 ━━━━━━━━━━━━━━━━━━━━
 📁 <code>${USER}/${REPO}</code>
 🌿 Branch: <code>${branch}</code>
-📝 ${_log_msg}
+📝 ${_log_msg_tg_f}
 ${_push_detail}
 ⚠️ Force push — history lama ditimpa
 🕐 ${_tg_ts}" "$_btn_pforce"

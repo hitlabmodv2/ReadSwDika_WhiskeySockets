@@ -3,6 +3,20 @@
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ━━━━━━━━━━━━━━━━━━
+📦 *[22 Juli 2026] — Update 4*
+━━━━━━━━━━━━━━━━━━
+
+🔗 *push.sh — `(#NNNN)` di Notif Telegram Jadi Link Klikabel*
+┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+*File:*
+• `push.sh`
+
+*Perubahan:*
+• Tambah fungsi `tg_linkify_commit()` — ubah `(#NNNN)` di pesan commit jadi HTML link `<a href="...commit/SHA">#NNNN</a>`
+• Diterapkan ke semua 4 titik notif push sukses: _quick push_, _normal push_, _graft push_, _force push_
+• Klik `#NNNN` di Telegram langsung buka commit GitHub yang bersangkutan
+
+━━━━━━━━━━━━━━━━━━
 📦 *[22 Juli 2026] — Update 3*
 ━━━━━━━━━━━━━━━━━━
 
