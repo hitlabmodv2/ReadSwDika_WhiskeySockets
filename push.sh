@@ -1364,6 +1364,11 @@ _sbar_sweep 33 38 0.02 "Konfigurasi git user ..."
 git config user.name "$USER"
 git config user.email "${USER}@users.noreply.github.com"
 git config checkout.defaultRemote origin
+# Override env var yang diinjek Replit/platform (supaya nama author di commit = GitHub username, bukan nama Replit)
+export GIT_AUTHOR_NAME="$USER"
+export GIT_AUTHOR_EMAIL="${USER}@users.noreply.github.com"
+export GIT_COMMITTER_NAME="$USER"
+export GIT_COMMITTER_EMAIL="${USER}@users.noreply.github.com"
 _sbar_sweep 39 44 0.02 "Setup git remote ..."
 if git remote get-url origin >/dev/null 2>&1; then
   git remote set-url origin "$REMOTE_URL"
@@ -1627,6 +1632,23 @@ classify_commit() {
 # Alias untuk kompatibilitas (dipanggil di beberapa tempat sebagai generate_commit_msg)
 generate_commit_msg() {
   classify_commit "$@"
+}
+
+# ===== Nomor commit berikutnya — realtime dari git log lokal (#NNNN) =====
+# Menghitung total commit di repo lalu +1 → angka ini ditempel di akhir commit message
+# supaya commit punya referensi unik seperti pola GitHub PR/commit (#5198)
+next_commit_no() {
+  local _count
+  _count=$(git rev-list --count HEAD 2>/dev/null || echo "0")
+  echo $(( _count + 1 ))
+}
+
+# Tempel (#NNNN) ke pesan commit
+append_commit_no() {
+  local _base_msg="$1"
+  local _no
+  _no=$(next_commit_no)
+  echo "${_base_msg} (#${_no})"
 }
 
 # ===== Bersihkan stale index.lock (sisa run sebelumnya yang ke-interrupt) =====
@@ -2924,6 +2946,7 @@ action_quick_push() {
   local _msg
   _msg=$(generate_commit_msg 2>/dev/null || echo "chore: quick push via Bang Wily")
   [ -z "$_msg" ] && _msg="chore: quick push via Bang Wily"
+  _msg=$(append_commit_no "$_msg")
 
   echo -e "  ${C_CYAN}▸ Commit: ${C_RESET}${C_DIM}${_msg}${C_RESET}"
   git commit -m "$_msg" --allow-empty >/dev/null 2>&1 || true
@@ -5852,9 +5875,9 @@ commit_pending_changes() {
 
     local MSG
     if [ -n "$CUSTOM_MSG" ]; then
-      MSG="$CUSTOM_MSG"
+      MSG=$(append_commit_no "$CUSTOM_MSG")
     else
-      MSG=$(classify_commit)
+      MSG=$(append_commit_no "$(classify_commit)")
     fi
 
     mini_bar_start "Menyimpan commit ..." 0.006
@@ -6680,6 +6703,7 @@ action_delete_file_folder() {
         if [ "${#_msg}" -gt 200 ]; then
           _msg="chore: hapus ${ok_count} file/folder"
         fi
+        _msg=$(append_commit_no "$_msg")
         git commit -m "$_msg" --allow-empty >/dev/null 2>&1 || true
 
         echo -e "  ${C_CYAN}▸ Push ke ${C_RESET}${C_GREEN}${DEFAULT_BRANCH}${C_RESET}${C_CYAN}...${C_RESET}"
@@ -6986,6 +7010,7 @@ action_restore_deleted() {
       if [ "${#_msg_r}" -gt 200 ]; then
         _msg_r="revert: restore ${_ok_r} file/folder (dari ${_target_hash:0:7})"
       fi
+      _msg_r=$(append_commit_no "$_msg_r")
       git commit -m "$_msg_r" --allow-empty >/dev/null 2>&1 || true
 
       echo -e "  ${C_CYAN}▸ Push ke ${C_RESET}${C_GREEN}${DEFAULT_BRANCH}${C_RESET}${C_CYAN}...${C_RESET}"
