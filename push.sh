@@ -29,6 +29,7 @@
 # ─────────────────────────────────────────────────────────────
 
 USER="harunsya"
+REPO_OWNER="hitlabmodv2"   # Pemilik repo GitHub (untuk URL API)
 REPO="ReadSwDika_WhiskeySockets"
 # DEFAULT_BRANCH di-auto-detect realtime dari GitHub (lihat detect_default_branch).
 # Nilai di sini cuma fallback kalau koneksi ke GitHub bermasalah.
@@ -1288,7 +1289,7 @@ _sbar_sweep 1 8 0.03 "Inisialisasi ..."
   _ts_login=$(TZ=Asia/Jakarta date '+%d %b %Y • %H:%M WIB' 2>/dev/null || date '+%d %b %Y • %H:%M')
 
   # Ambil info realtime dari GitHub API
-  _gh_base="https://api.github.com/repos/${USER}/${REPO}"
+  _gh_base="https://api.github.com/repos/${REPO_OWNER}/${REPO}"
   _repo_json=$(curl -s --max-time 6 \
     -H "Authorization: token ${TOKEN}" \
     -H "Accept: application/vnd.github+json" \
@@ -1643,7 +1644,7 @@ next_commit_no() {
   # Coba ambil dari GitHub API — 1 request ringan, cukup baca header Link
   # Link: <...?page=N>; rel="last" → N = total commit (karena per_page=1)
   _link_header=$(curl -s -I \
-    "https://api.github.com/repos/${USER}/${REPO}/commits?sha=${DEFAULT_BRANCH}&per_page=1" \
+    "https://api.github.com/repos/${REPO_OWNER}/${REPO}/commits?sha=${DEFAULT_BRANCH}&per_page=1" \
     -H "Authorization: token ${TOKEN}" \
     -H "Accept: application/vnd.github+json" \
     --max-time 8 2>/dev/null | grep -i '^link:')
@@ -2022,7 +2023,7 @@ fetch_branches() {
       -H "Authorization: token ${TOKEN}" \
       -H "Accept: application/vnd.github+json" \
       -H "X-GitHub-Api-Version: 2022-11-28" \
-      "https://api.github.com/repos/${USER}/${REPO}/branches?per_page=${per_page}&page=${page}" \
+      "https://api.github.com/repos/${REPO_OWNER}/${REPO}/branches?per_page=${per_page}&page=${page}" \
       2>/dev/null)
 
     # Cek apakah response valid (array JSON, ada field "name")
@@ -2078,7 +2079,7 @@ fetch_branches_recent() {
     -H "Authorization: token ${TOKEN}" \
     -H "Accept: application/vnd.github+json" \
     -H "X-GitHub-Api-Version: 2022-11-28" \
-    "https://api.github.com/repos/${USER}/${REPO}/branches?per_page=100" 2>/dev/null)
+    "https://api.github.com/repos/${REPO_OWNER}/${REPO}/branches?per_page=100" 2>/dev/null)
 
   if [ "$http_code" != "200" ]; then
     rm -f "$tmp_list"
@@ -2106,7 +2107,7 @@ fetch_branches_recent() {
       -H "Authorization: token ${TOKEN}" \
       -H "Accept: application/vnd.github+json" \
       -H "X-GitHub-Api-Version: 2022-11-28" \
-      "https://api.github.com/repos/${USER}/${REPO}/git/commits/${all_shas[$i]}" \
+      "https://api.github.com/repos/${REPO_OWNER}/${REPO}/git/commits/${all_shas[$i]}" \
       2>/dev/null &
   done
   wait
@@ -3200,7 +3201,7 @@ action_rename_repo() {
     -H "Authorization: token ${TOKEN}" \
     -H "Accept: application/vnd.github+json" \
     -H "X-GitHub-Api-Version: 2022-11-28" \
-    "https://api.github.com/repos/${USER}/${REPO}" \
+    "https://api.github.com/repos/${REPO_OWNER}/${REPO}" \
     -d "{\"name\":\"${new_name}\"}" 2>/dev/null)
 
   relogin_if_needed "$api_http" "rename repo" || return
@@ -3384,7 +3385,7 @@ action_switch_default() {
       -H "Authorization: token ${TOKEN}" \
       -H "Accept: application/vnd.github+json" \
       -H "X-GitHub-Api-Version: 2022-11-28" \
-      "https://api.github.com/repos/${USER}/${REPO}/git/ref/heads/${name}" \
+      "https://api.github.com/repos/${REPO_OWNER}/${REPO}/git/ref/heads/${name}" \
       2>/dev/null)
     if [ "$chk_http" != "200" ]; then
       echo -e "${C_RED}✖ Branch '${name}' tidak ditemukan di GitHub.${C_RESET}"
@@ -3407,7 +3408,7 @@ action_switch_default() {
     -H "Authorization: token ${TOKEN}" \
     -H "Accept: application/vnd.github+json" \
     -H "X-GitHub-Api-Version: 2022-11-28" \
-    "https://api.github.com/repos/${USER}/${REPO}" \
+    "https://api.github.com/repos/${REPO_OWNER}/${REPO}" \
     -d "{\"default_branch\":\"${new_default}\"}" 2>/dev/null)
   api_http="${api_resp}"
 
@@ -3519,7 +3520,7 @@ action_list_branches() {
     -H "Authorization: token ${TOKEN}" \
     -H "Accept: application/vnd.github+json" \
     -H "X-GitHub-Api-Version: 2022-11-28" \
-    "https://api.github.com/repos/${USER}/${REPO}/branches?per_page=100" 2>/dev/null)
+    "https://api.github.com/repos/${REPO_OWNER}/${REPO}/branches?per_page=100" 2>/dev/null)
 
   relogin_if_needed "$http_code" "ambil branch" || return
   if [ "$http_code" != "200" ]; then
@@ -3585,7 +3586,7 @@ action_list_branches() {
       -H "Authorization: token ${TOKEN}" \
       -H "Accept: application/vnd.github+json" \
       -H "X-GitHub-Api-Version: 2022-11-28" \
-      "https://api.github.com/repos/${USER}/${REPO}/git/commits/${def_sha}" 2>/dev/null &
+      "https://api.github.com/repos/${REPO_OWNER}/${REPO}/git/commits/${def_sha}" 2>/dev/null &
   fi
   for (( i=0; i<total_nd; i++ )); do
     local sha="${nd_shas[$i]}"
@@ -3594,7 +3595,7 @@ action_list_branches() {
       -H "Authorization: token ${TOKEN}" \
       -H "Accept: application/vnd.github+json" \
       -H "X-GitHub-Api-Version: 2022-11-28" \
-      "https://api.github.com/repos/${USER}/${REPO}/git/commits/${sha}" 2>/dev/null &
+      "https://api.github.com/repos/${REPO_OWNER}/${REPO}/git/commits/${sha}" 2>/dev/null &
   done
   wait
   mini_bar_ok "Data commit siap"
@@ -3676,7 +3677,7 @@ action_list_branches() {
         -H "Authorization: token ${TOKEN}" \
         -H "Accept: application/vnd.github+json" \
         -H "X-GitHub-Api-Version: 2022-11-28" \
-        "https://api.github.com/repos/${USER}/${REPO}/compare/${DEFAULT_BRANCH}...${b_enc}?per_page=1" \
+        "https://api.github.com/repos/${REPO_OWNER}/${REPO}/compare/${DEFAULT_BRANCH}...${b_enc}?per_page=1" \
         2>/dev/null &
       pids+=("$!")
     done
@@ -3790,7 +3791,7 @@ action_list_branches() {
               -H "Authorization: token ${TOKEN}" \
               -H "Accept: application/vnd.github+json" \
               -H "X-GitHub-Api-Version: 2022-11-28" \
-              "https://api.github.com/repos/${USER}/${REPO}/compare/${DEFAULT_BRANCH}...${_sel_enc}?per_page=1" \
+              "https://api.github.com/repos/${REPO_OWNER}/${REPO}/compare/${DEFAULT_BRANCH}...${_sel_enc}?per_page=1" \
               2>/dev/null)
             _sel_behind=$(printf '%s' "$_sel_cmp" | grep -oE '"behind_by"[[:space:]]*:[[:space:]]*[0-9]+' | head -1 | grep -oE '[0-9]+$')
             _sel_ahead=$(printf '%s'  "$_sel_cmp" | grep -oE '"ahead_by"[[:space:]]*:[[:space:]]*[0-9]+'  | head -1 | grep -oE '[0-9]+$')
@@ -4339,7 +4340,7 @@ action_import_repo() {
     -H "X-GitHub-Api-Version: 2022-11-28" \
     -H "Content-Type: application/json" \
     -d "$imp_payload" \
-    "https://api.github.com/repos/${USER}/${imp_repo_name}/import" 2>/dev/null)
+    "https://api.github.com/repos/${REPO_OWNER}/${imp_repo_name}/import" 2>/dev/null)
   imp_code=$(printf '%s' "$imp_resp" | tail -1)
   local imp_body
   imp_body=$(printf '%s' "$imp_resp" | sed '$d')
@@ -4429,7 +4430,7 @@ action_import_repo() {
         -H "Authorization: token ${TOKEN}" \
         -H "Accept: application/vnd.github+json" \
         -H "X-GitHub-Api-Version: 2022-11-28" \
-        "https://api.github.com/repos/${USER}/${imp_repo_name}/import" 2>/dev/null)
+        "https://api.github.com/repos/${REPO_OWNER}/${imp_repo_name}/import" 2>/dev/null)
       poll_status=$(printf '%s' "$poll_raw" \
         | grep -oE '"status"[[:space:]]*:[[:space:]]*"[^"]*"' | head -1 \
         | sed 's/.*"status"[[:space:]]*:[[:space:]]*"//;s/".*//')
@@ -5296,7 +5297,7 @@ action_rename_branch() {
     -H "Authorization: token ${TOKEN}" \
     -H "Accept: application/vnd.github+json" \
     -H "X-GitHub-Api-Version: 2022-11-28" \
-    "https://api.github.com/repos/${USER}/${REPO}/branches/${old_name}/rename" \
+    "https://api.github.com/repos/${REPO_OWNER}/${REPO}/branches/${old_name}/rename" \
     -d "{\"new_name\":\"${new_name}\"}" 2>/dev/null)
 
   if [ "$api_http" = "201" ]; then
@@ -5379,7 +5380,7 @@ action_create_branch() {
     -H "Authorization: token ${TOKEN}" \
     -H "Accept: application/vnd.github+json" \
     -H "X-GitHub-Api-Version: 2022-11-28" \
-    "https://api.github.com/repos/${USER}/${REPO}/git/ref/heads/${name}" \
+    "https://api.github.com/repos/${REPO_OWNER}/${REPO}/git/ref/heads/${name}" \
     2>/dev/null)
   if [ "$chk_http" = "200" ]; then
     mini_bar2_fail "Branch sudah ada" "Branch '${name}' sudah exist di GitHub"
@@ -5395,7 +5396,7 @@ action_create_branch() {
     -H "Authorization: token ${TOKEN}" \
     -H "Accept: application/vnd.github+json" \
     -H "X-GitHub-Api-Version: 2022-11-28" \
-    "https://api.github.com/repos/${USER}/${REPO}/git/ref/heads/${DEFAULT_BRANCH}" \
+    "https://api.github.com/repos/${REPO_OWNER}/${REPO}/git/ref/heads/${DEFAULT_BRANCH}" \
     2>/dev/null)
   if [ "$sha_resp" != "200" ]; then
     mini_bar2_fail "Gagal ambil SHA" "HTTP ${sha_resp} dari GitHub"
@@ -5420,7 +5421,7 @@ action_create_branch() {
     -H "Authorization: token ${TOKEN}" \
     -H "Accept: application/vnd.github+json" \
     -H "X-GitHub-Api-Version: 2022-11-28" \
-    "https://api.github.com/repos/${USER}/${REPO}/git/refs" \
+    "https://api.github.com/repos/${REPO_OWNER}/${REPO}/git/refs" \
     -d "{\"ref\":\"refs/heads/${name}\",\"sha\":\"${sha}\"}" \
     2>/dev/null)
   if [ "$create_http" != "201" ]; then
@@ -7134,7 +7135,7 @@ action_releases_tags() {
       -H "Authorization: token ${TOKEN}" \
       -H "Accept: application/vnd.github+json" \
       -H "X-GitHub-Api-Version: 2022-11-28" \
-      "https://api.github.com/repos/${USER}/${REPO}/releases?per_page=20" 2>/dev/null)
+      "https://api.github.com/repos/${REPO_OWNER}/${REPO}/releases?per_page=20" 2>/dev/null)
 
     relogin_if_needed "$http" "ambil releases" || return
     if [ "$http" != "200" ]; then
@@ -7239,7 +7240,7 @@ action_releases_tags() {
       -H "Authorization: token ${TOKEN}" \
       -H "Accept: application/vnd.github+json" \
       -H "X-GitHub-Api-Version: 2022-11-28" \
-      "https://api.github.com/repos/${USER}/${REPO}/releases" \
+      "https://api.github.com/repos/${REPO_OWNER}/${REPO}/releases" \
       -d "$payload" 2>/dev/null)
 
     relogin_if_needed "$http" "buat release" || return
@@ -7289,7 +7290,7 @@ action_releases_tags() {
       -H "Authorization: token ${TOKEN}" \
       -H "Accept: application/vnd.github+json" \
       -H "X-GitHub-Api-Version: 2022-11-28" \
-      "https://api.github.com/repos/${USER}/${REPO}/releases?per_page=20" 2>/dev/null)
+      "https://api.github.com/repos/${REPO_OWNER}/${REPO}/releases?per_page=20" 2>/dev/null)
 
     if [ "$http" != "200" ]; then
       echo -e "  ${C_RED}❌ Gagal ambil releases (HTTP ${http})${C_RESET}"
@@ -7342,7 +7343,7 @@ action_releases_tags() {
       -H "Authorization: token ${TOKEN}" \
       -H "Accept: application/vnd.github+json" \
       -H "X-GitHub-Api-Version: 2022-11-28" \
-      "https://api.github.com/repos/${USER}/${REPO}/releases/${sel_id}" 2>/dev/null)
+      "https://api.github.com/repos/${REPO_OWNER}/${REPO}/releases/${sel_id}" 2>/dev/null)
 
     local _rt_ts; _rt_ts=$(TZ=Asia/Jakarta date '+%d %b %Y • %H:%M WIB' 2>/dev/null || date '+%d %b %Y • %H:%M')
     if [ "$del_http" = "204" ]; then
@@ -7373,7 +7374,7 @@ action_releases_tags() {
       -H "Authorization: token ${TOKEN}" \
       -H "Accept: application/vnd.github+json" \
       -H "X-GitHub-Api-Version: 2022-11-28" \
-      "https://api.github.com/repos/${USER}/${REPO}/tags?per_page=30" 2>/dev/null)
+      "https://api.github.com/repos/${REPO_OWNER}/${REPO}/tags?per_page=30" 2>/dev/null)
 
     if [ "$http" != "200" ]; then
       echo -e "  ${C_RED}❌ Gagal ambil tags (HTTP ${http})${C_RESET}"
@@ -7427,7 +7428,7 @@ action_releases_tags() {
       -H "Authorization: token ${TOKEN}" \
       -H "Accept: application/vnd.github+json" \
       -H "X-GitHub-Api-Version: 2022-11-28" \
-      "https://api.github.com/repos/${USER}/${REPO}/git/ref/heads/${DEFAULT_BRANCH}" 2>/dev/null)
+      "https://api.github.com/repos/${REPO_OWNER}/${REPO}/git/ref/heads/${DEFAULT_BRANCH}" 2>/dev/null)
 
     if [ "$sha_http" != "200" ]; then
       echo -e "  ${C_RED}❌ Gagal ambil SHA (HTTP ${sha_http})${C_RESET}"
@@ -7455,7 +7456,7 @@ action_releases_tags() {
       -H "Authorization: token ${TOKEN}" \
       -H "Accept: application/vnd.github+json" \
       -H "X-GitHub-Api-Version: 2022-11-28" \
-      "https://api.github.com/repos/${USER}/${REPO}/git/refs" \
+      "https://api.github.com/repos/${REPO_OWNER}/${REPO}/git/refs" \
       -d "{\"ref\":\"refs/tags/${tname}\",\"sha\":\"${sha}\"}" 2>/dev/null)
 
     local _rt_ts; _rt_ts=$(TZ=Asia/Jakarta date '+%d %b %Y • %H:%M WIB' 2>/dev/null || date '+%d %b %Y • %H:%M')
@@ -7494,7 +7495,7 @@ action_releases_tags() {
       -H "Authorization: token ${TOKEN}" \
       -H "Accept: application/vnd.github+json" \
       -H "X-GitHub-Api-Version: 2022-11-28" \
-      "https://api.github.com/repos/${USER}/${REPO}/tags?per_page=30" 2>/dev/null)
+      "https://api.github.com/repos/${REPO_OWNER}/${REPO}/tags?per_page=30" 2>/dev/null)
 
     if [ "$http" != "200" ]; then
       echo -e "  ${C_RED}❌ Gagal ambil tags (HTTP ${http})${C_RESET}"
@@ -7545,7 +7546,7 @@ action_releases_tags() {
       -H "Authorization: token ${TOKEN}" \
       -H "Accept: application/vnd.github+json" \
       -H "X-GitHub-Api-Version: 2022-11-28" \
-      "https://api.github.com/repos/${USER}/${REPO}/git/refs/tags/${sel_tag}" 2>/dev/null)
+      "https://api.github.com/repos/${REPO_OWNER}/${REPO}/git/refs/tags/${sel_tag}" 2>/dev/null)
 
     local _rt_ts; _rt_ts=$(TZ=Asia/Jakarta date '+%d %b %Y • %H:%M WIB' 2>/dev/null || date '+%d %b %Y • %H:%M')
     if [ "$del_http" = "204" ]; then
