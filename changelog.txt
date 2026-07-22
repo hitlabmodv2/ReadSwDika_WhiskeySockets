@@ -10,6 +10,7 @@
 ┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 *File:*
 • `SEMUA_FITUR/anime/nekopoi-monitor.cjs`
+• `SEMUA_FITUR/menu/menu_utama.js`
 • `SEMUA_FITUR/menu/menupages.cjs`
 
 *Perubahan:*
@@ -18,9 +19,10 @@
    - Sebelum: `├ 🗂️ Kategori: _Hentai_` (campur ada trailing space ada tidak)
    - Sesudah: `├ 🗂️ *Kategori* : _Hentai_` (semua seragam)
 
-2. 📋 *Nekopoinotif ditambahkan ke menu bot*
-   - `.allmenu` → section Owner Only: `nekopoinotif` sudah masuk
-   - `.ownermenu` → entri lengkap: `*.nekopoinotif on/off/test/status*`
+2. 📋 *Nekopoinotif ditambahkan ke .menu bot* (`menu_utama.js`)
+   - Seksi 🔞 KONTEN 18+: `.nekopoinotif on/off`
+   - Seksi 👑 OWNER ONLY: `.nekopoinotif`
+   - `.allmenu` & `.ownermenu` (`menupages.cjs`): juga sudah ditambahkan
 
 ━━━━━━━━━━━━━━━━━━
 📦 *[22 Juli 2026] — Update 1*

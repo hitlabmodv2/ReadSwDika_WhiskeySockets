@@ -164,6 +164,7 @@ export function buildMenuUtama({ pushName, isOwner, uptimeStr, tgl, jam, browser
 │ .cosplay
 │ .cosplayrandom
 │ .pixivr18
+│ .nekopoinotif on/off
 ├═════════════════════┤
 ║   🎙️ *TEXT TO SPEECH*   
 ├═════════════════════┤
@@ -200,6 +201,7 @@ export function buildMenuUtama({ pushName, isOwner, uptimeStr, tgl, jam, browser
 │ .tvone
 │ .malnews
 │ .alqanimenotif
+│ .nekopoinotif
 │ .cekauto
 │ .ceksw
 │ .wilyai
