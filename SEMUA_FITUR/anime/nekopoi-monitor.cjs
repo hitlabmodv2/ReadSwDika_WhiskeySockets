@@ -491,7 +491,7 @@ module.exports = {
 
 // ── COMMAND HANDLER ───────────────────────────────────────────────────────────
 
-async function handleNekopoinotif({ hisoka, m, query, tolak, logCommand, sendConfirmWithButtons, fs: fsMod, path: pathMod, loadConfig, pendingNekpoiNotifChoices }) {
+async function handleNekopoinotif({ hisoka, m, query, tolak, logCommand, Button, fs: fsMod, path: pathMod, loadConfig, pendingNekpoiNotifChoices }) {
     if (!m.isOwner) { await tolak(hisoka, m, '❌ Hanya owner yang bisa gunakan perintah ini.'); return; }
 
     const cfgPath = pathMod.join(process.cwd(), 'config.json');
@@ -512,43 +512,54 @@ async function handleNekopoinotif({ hisoka, m, query, tolak, logCommand, sendCon
 
             if (isActive) {
                 // Sudah aktif → tawarkan nonaktifkan
-                await sendConfirmWithButtons(hisoka, m,
+                const _bodyAktif =
                     `╭─「 🎌 *NEKOPOI NOTIF* 」\n│\n` +
                     `│ Status grup ini : ✅ *AKTIF*\n│\n` +
                     `│ Fitur ini sudah aktif di grup ini.\n` +
                     `│ Notif anime dari nekopoi.care akan\n` +
                     `│ otomatis masuk ke sini.\n│\n` +
                     `│ Ketik *${pfx}nekopoinotif off* untuk matikan.\n│\n` +
-                    `╰──────────────────────`,
-                    [{ text: '❌ Nonaktifkan di GC ini', id: '__nknotif_off__' }]
-                );
+                    `╰──────────────────────`;
+                try {
+                    await new Button()
+                        .setBody(_bodyAktif)
+                        .setFooter('🎌 Nekopoi Notif')
+                        .addReply('❌ Nonaktifkan di GC ini', '__nknotif_off__')
+                        .run(m.from, hisoka, m);
+                } catch (_) { await tolak(hisoka, m, _bodyAktif); }
             } else if (isReg) {
                 // ID ada tapi belum aktif → tawarkan aktifkan
-                await sendConfirmWithButtons(hisoka, m,
+                const _bodyReg =
                     `╭─「 🎌 *NEKOPOI NOTIF* 」\n│\n` +
                     `│ Status grup ini : ❌ *BELUM AKTIF*\n│\n` +
                     `│ ⚠️ ID grup ini sudah ada di daftar,\n` +
                     `│    tapi fitur belum diaktifkan.\n│\n` +
                     `│ Aktifkan notif nekopoi di GC ini?\n│\n` +
-                    `╰──────────────────────`,
-                    [
-                        { text: '✅ Ya, Aktifkan', id: '__nknotif_on__' },
-                        { text: '❌ Tidak',        id: '__nknotif_cancel__' },
-                    ]
-                );
+                    `╰──────────────────────`;
+                try {
+                    await new Button()
+                        .setBody(_bodyReg)
+                        .setFooter('🎌 Nekopoi Notif')
+                        .addReply('✅ Ya, Aktifkan',  '__nknotif_on__')
+                        .addReply('❌ Tidak, Batal',  '__nknotif_cancel__')
+                        .run(m.from, hisoka, m);
+                } catch (_) { await tolak(hisoka, m, _bodyReg + `\n\n✅ Ketik *${pfx}nekopoinotif on* untuk aktifkan.`); }
             } else {
                 // Belum terdaftar sama sekali
-                await sendConfirmWithButtons(hisoka, m,
+                const _bodyBaru =
                     `╭─「 🎌 *NEKOPOI NOTIF* 」\n│\n` +
                     `│ Status grup ini : ➕ *BELUM TERDAFTAR*\n│\n` +
                     `│ Fitur ini belum aktif di grup ini.\n│\n` +
                     `│ Aktifkan notif nekopoi di GC ini?\n│\n` +
-                    `╰──────────────────────`,
-                    [
-                        { text: '✅ Ya, Aktifkan', id: '__nknotif_on__' },
-                        { text: '❌ Tidak',        id: '__nknotif_cancel__' },
-                    ]
-                );
+                    `╰──────────────────────`;
+                try {
+                    await new Button()
+                        .setBody(_bodyBaru)
+                        .setFooter('🎌 Nekopoi Notif')
+                        .addReply('✅ Ya, Aktifkan', '__nknotif_on__')
+                        .addReply('❌ Tidak, Batal', '__nknotif_cancel__')
+                        .run(m.from, hisoka, m);
+                } catch (_) { await tolak(hisoka, m, _bodyBaru + `\n\n✅ Ketik *${pfx}nekopoinotif on* untuk aktifkan.`); }
             }
             logCommand(m, hisoka, 'nekopoinotif-menu');
             return;

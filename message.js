@@ -2046,7 +2046,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                         case 'nekopoinotif': {
                                 const { handleNekopoinotif } = _require(path.resolve('./SEMUA_FITUR/anime/nekopoi-monitor.cjs'));
-                                await handleNekopoinotif({ hisoka, m, query, tolak, logCommand, sendConfirmWithButtons, fs, path, loadConfig, pendingNekpoiNotifChoices });
+                                await handleNekopoinotif({ hisoka, m, query, tolak, logCommand, Button, fs, path, loadConfig, pendingNekpoiNotifChoices });
                                 break;
                         }
 
