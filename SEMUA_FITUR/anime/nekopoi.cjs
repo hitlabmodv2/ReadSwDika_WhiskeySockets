@@ -83,7 +83,8 @@ function parseCategoryListing(md, defaultKategori) {
             .replace(/\s{2,}/g, ' ')
             .trim();
 
-        const kategori = defaultKategori || deteksiKategori(url);
+        const detected = deteksiKategori(url);
+        const kategori = (detected !== 'hentai') ? detected : (defaultKategori || 'hentai');
         results.push({ title, url, kategori });
     }
     return results;
@@ -174,7 +175,7 @@ function parseDetailPost(md, url) {
 
     // Judul utama dari H1
     const titleM = md.match(/^# ([^\n]+)/m);
-    const title  = titleM ? titleM[1].replace(/\d+\s+kali\s*$/, '').trim() : '';
+    const title  = titleM ? titleM[1].replace(/[\d.]+\s+kali\s*$/, '').trim() : '';
 
     // View count — posisi H1: "TITLE 1234 kali"
     // atau sebelum tanggal: "1234 kali Senin, 20 Juli 2026"

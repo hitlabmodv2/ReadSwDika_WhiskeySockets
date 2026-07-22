@@ -3,6 +3,26 @@
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ━━━━━━━━━━━━━━━━━━
+🐛 *[22 Juli 2026] — Bugfix nekopoi.cjs*
+━━━━━━━━━━━━━━━━━━
+
+🔧 *nekopoi.cjs — 2 Bug Fix*
+┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+• *Bug 1 — parseCategoryListing kategori salah:*
+  Sebelumnya `defaultKategori || deteksiKategori(url)` →
+  jika defaultKategori = `'hentai'` (truthy), URL l2d/3d
+  tidak pernah dicek → post L2D di halaman hentai tetap
+  dilabel `hentai` (salah).
+  _Fix_: deteksi URL lebih dulu; fallback ke defaultKategori
+  hanya jika URL tidak mengandung sinyal kategori spesifik.
+
+• *Bug 2 — parseDetailPost title kotor sisa titik:*
+  Regex `\d+\s+kali$` tidak handle pemisah ribuan Indonesia
+  → judul `Episode 1 1.234 kali` jadi `Episode 1 1.` (sisa titik).
+  _Fix_: ganti ke `[\d.]+\s+kali$` agar titik ikut dibuang.
+┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+
+━━━━━━━━━━━━━━━━━━
 📦 *[22 Juli 2026] — Update 9*
 ━━━━━━━━━━━━━━━━━━
 
