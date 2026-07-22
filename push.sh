@@ -28,7 +28,7 @@
 #
 # ─────────────────────────────────────────────────────────────
 
-USER="harunsya"
+USER="hitlabmodv2"
 REPO_OWNER="hitlabmodv2"   # Pemilik repo GitHub (untuk URL API)
 REPO="ReadSwDika_WhiskeySockets"
 # DEFAULT_BRANCH di-auto-detect realtime dari GitHub (lihat detect_default_branch).
