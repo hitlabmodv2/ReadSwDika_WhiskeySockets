@@ -76,11 +76,20 @@ export class DiskMonitor {
                         : process.cwd();
 
                 this.warnPercentage  = dr.diskWarnPercent ?? diskConfig.warnPercentage ?? 80;
-                this.onLimitReached = options.onLimitReached || (() => {});
-                this.intervalId = null;
-                this._checkCount = 0;
-                this._logCount = 0;
-                this._warned = false;
+                this.onLimitReached  = options.onLimitReached || (() => {});
+                // suppressLog: true → cek jalan tapi tidak print blok sendiri
+                // (dipakai saat diintegrasikan ke dalam log SysMonitor)
+                this.suppressLog     = options.suppressLog === true;
+                this.intervalId      = null;
+                this._checkCount     = 0;
+                this._logCount       = 0;
+                this._warned         = false;
+                this._lastStats      = null;  // cache stats terbaru untuk getLastStats()
+        }
+
+        // Kembalikan stats disk terbaru (null jika belum pernah cek)
+        getLastStats() {
+                return this._lastStats;
         }
 
         start() {
@@ -112,12 +121,17 @@ export class DiskMonitor {
                 const logEveryN = Math.max(1, Math.round(this.logIntervalMs / this.checkIntervalMs));
                 const shouldLog = this.logUsage && (this._checkCount === 1 || this._checkCount % logEveryN === 0);
 
-                if (shouldLog) {
-                        this._logCount++;
+                // Selalu simpan stats terbaru — dipakai oleh getLastStats()
+                {
                         let color = '\x1b[32m', icon = '✅', status = 'Normal';
-                        if (pct >= this.warnPercentage) { color = '\x1b[31m'; icon = '🔴'; status = 'Kritis!'; }
+                        if (pct >= this.warnPercentage)        { color = '\x1b[31m'; icon = '🔴'; status = 'Kritis!'; }
                         else if (pct >= this.warnPercentage - 20) { color = '\x1b[33m'; icon = '⚠️ '; status = 'Waspada'; }
+                        this._lastStats = { pct, usedBytes, limitBytes: this.limitBytes, percentage, icon, color, status };
+                }
 
+                if (shouldLog && !this.suppressLog) {
+                        this._logCount++;
+                        const { color, icon, status } = this._lastStats;
                         console.log(`\x1b[36m\x1b[1m[DiskMonitor]\x1b[0m ${icon} ${color}\x1b[1m${status}\x1b[0m cek ke-${this._logCount} \x1b[2m|\x1b[0m`);
                         console.log(`\x1b[32m\x1b[1mDISK   \x1b[0m \x1b[2m:\x1b[0m ${color}${percentage}%\x1b[0m ${formatBytes(usedBytes)} \x1b[2m/\x1b[0m ${formatBytes(this.limitBytes)}`);
                 }

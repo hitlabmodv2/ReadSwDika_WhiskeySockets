@@ -3,6 +3,40 @@
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ━━━━━━━━━━━━━━━━━━
+📦 *[22 Juli 2026] — Update 3*
+━━━━━━━━━━━━━━━━━━
+
+🖥️ *SysMonitor — Gabung Log Memory + Disk jadi Satu Blok*
+┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+*File:*
+• `src/helper/memoryMonitor.js`
+• `src/helper/diskMonitor.js`
+• `index.js`
+
+*Sebelum:*
+```
+[MemoryMonitor] ✅ Normal cek ke-5 |
+uptime  : 19m
+BOT/SYS/Heap/...
+[DiskMonitor] ✅ Normal cek ke-5 |
+DISK    : 0.2% 400.97 MB / 256.00 GB
+```
+
+*Sesudah — satu blok:*
+```
+[SysMonitor] ✅ Normal cek ke-5 |
+uptime  : 19m
+BOT/SYS/Heap/...
+FreeMem : 61.3% (4.77 GB)
+DISK    : 0.2% 400.97 MB / 256.00 GB
+```
+
+*Detail perubahan:*
+1. `DiskMonitor` — tambah `getLastStats()` + `suppressLog: true` mode (cek tetap jalan, tidak print terpisah)
+2. `MemoryMonitor` — terima `getDiskStats` callback, append baris DISK di akhir log, header otomatis `[SysMonitor]`
+3. `index.js` — pasang via closure: `getDiskStats: () => diskMonitor?.getLastStats()`, DiskMonitor pakai `suppressLog: true`
+
+━━━━━━━━━━━━━━━━━━
 📦 *[22 Juli 2026] — Update 2*
 ━━━━━━━━━━━━━━━━━━
 

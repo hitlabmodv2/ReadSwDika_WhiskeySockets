@@ -506,18 +506,20 @@ async function main() {
                 memoryMonitor.stop();
         }
         memoryMonitor = new MemoryMonitor({
-                // ini baru
                 onLimitReached: async () => {
                         console.log('Restarting cleanly...');
-                if (global.hisokaClient) {
-                        try {
-                                global.hisokaClient.ev.removeAllListeners();
-                                global.hisokaClient.ws?.close();
-                        } catch {}
-                }
+                        if (global.hisokaClient) {
+                                try {
+                                        global.hisokaClient.ev.removeAllListeners();
+                                        global.hisokaClient.ws?.close();
+                                } catch {}
+                        }
                         process.exit(1);
-                }
-        }); // sampe sini
+                },
+                // Closure: diskMonitor belum ada saat ini dibuat, tapi saat callback
+                // dipanggil (saat log dicetak) diskMonitor sudah tersedia di scope luar
+                getDiskStats: () => diskMonitor?.getLastStats?.() ?? null,
+        });
         memoryMonitor.start();
         global.memoryMonitor = memoryMonitor;
 
@@ -527,7 +529,9 @@ async function main() {
         diskMonitor = new DiskMonitor({
                 onLimitReached: () => {
                         console.log('\x1b[31m[DiskMonitor] Disk hampir penuh, cek/hapus file yang tidak perlu.\x1b[0m');
-                }
+                },
+                // suppressLog: log disk tidak dicetak terpisah — sudah gabung di [SysMonitor]
+                suppressLog: true,
         });
         diskMonitor.start();
         global.diskMonitor = diskMonitor;
