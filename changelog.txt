@@ -3,6 +3,24 @@
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ━━━━━━━━━━━━━━━━━━
+📦 *[22 Juli 2026] — Update 7*
+━━━━━━━━━━━━━━━━━━
+
+🛡️ *push.sh — Auto Branch Ruleset Setup*
+┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+• Ruleset `Protect ReadSwDika_V29` berhasil dibuat di GitHub
+  (id: 19541444)
+• Tambah fungsi `setup_branch_ruleset()` di push.sh:
+  otomatis buat ruleset saat pertama kali token valid
+• Rules yang diaktifkan:
+  ✅ `deletion` — cegah branch dihapus tidak sengaja
+  ✅ `non_fast_forward` — block force push
+  👤 Bypass: repo admin (actor_id 5)
+• Flag file `.ruleset_<branch>.ok` → skip API kalau sudah ada
+• `.gitignore` diupdate: `.ruleset_*.ok` tidak ikut commit
+┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+
+━━━━━━━━━━━━━━━━━━
 📦 *[22 Juli 2026] — Update 6*
 ━━━━━━━━━━━━━━━━━━
 

@@ -1207,6 +1207,9 @@ done
 # ── Buat file .autopr jika belum ada (setelah token valid) ───────────────────
 init_autopr_config
 
+# ── Auto-setup branch ruleset di GitHub (sekali, pakai flag file) ────────────
+setup_branch_ruleset "$DEFAULT_BRANCH" &
+
 # ── Auto-install node_modules jika belum ada setelah token valid ─────────────
 _auto_nm_needed=0
 if [ ! -d node_modules ] || [ ! -d node_modules/.bin ]; then
@@ -1851,6 +1854,93 @@ except: print('unknown error')
 " <<< "$_resp" 2>/dev/null)
   echo -e "  ${C_YELLOW}⚠️  Auto PR gagal: ${_err}${C_RESET}"
   return 1
+}
+
+# ===== Auto-setup Branch Ruleset di GitHub =====
+# Dipanggil sekali setelah token valid.
+# - Cek apakah ruleset "Protect <branch>" sudah ada
+# - Kalau belum → buat otomatis via GitHub API
+# - Kalau sudah → skip (tidak overwrite)
+# Rules yang diaktifkan:
+#   ✅ deletion       — cegah branch dihapus tidak sengaja
+#   ✅ non_fast_forward — block force push (bypass: repo admin)
+setup_branch_ruleset() {
+  local _branch="${1:-$DEFAULT_BRANCH}"
+  local _ruleset_name="Protect ${_branch}"
+  local _flag_file=".ruleset_${_branch}.ok"
+
+  # Skip kalau flag sudah ada (tidak perlu hit API setiap run)
+  [ -f "$_flag_file" ] && return 0
+
+  [ -z "$TOKEN" ] && return 0
+
+  # Cek apakah ruleset dengan nama ini sudah ada
+  local _existing
+  _existing=$(curl -s --max-time 8 \
+    "https://api.github.com/repos/${REPO_OWNER}/${REPO}/rulesets" \
+    -H "Authorization: token ${TOKEN}" \
+    -H "Accept: application/vnd.github+json" 2>/dev/null)
+
+  local _found
+  _found=$(python3 -c "
+import json,sys
+try:
+  data=json.load(sys.stdin)
+  name='''${_ruleset_name}'''
+  print('yes' if any(r.get('name')==name for r in (data if isinstance(data,list) else [])) else 'no')
+except: print('no')
+" <<< "$_existing" 2>/dev/null)
+
+  if [ "$_found" = "yes" ]; then
+    touch "$_flag_file"
+    return 0
+  fi
+
+  # Buat ruleset baru
+  local _payload
+  _payload=$(python3 -c "
+import json
+print(json.dumps({
+  'name': '${_ruleset_name}',
+  'target': 'branch',
+  'enforcement': 'active',
+  'bypass_actors': [
+    {'actor_id': 5, 'actor_type': 'RepositoryRole', 'bypass_mode': 'always'}
+  ],
+  'conditions': {
+    'ref_name': {
+      'include': ['refs/heads/${_branch}'],
+      'exclude': []
+    }
+  },
+  'rules': [
+    {'type': 'deletion'},
+    {'type': 'non_fast_forward'}
+  ]
+}))" 2>/dev/null)
+
+  [ -z "$_payload" ] && return 1
+
+  local _resp
+  _resp=$(curl -s --max-time 10 \
+    -X POST "https://api.github.com/repos/${REPO_OWNER}/${REPO}/rulesets" \
+    -H "Authorization: token ${TOKEN}" \
+    -H "Accept: application/vnd.github+json" \
+    -H "Content-Type: application/json" \
+    -d "$_payload" 2>/dev/null)
+
+  local _id
+  _id=$(python3 -c "
+import json,sys
+try: print(json.loads(sys.stdin.read()).get('id',''))
+except: print('')
+" <<< "$_resp" 2>/dev/null)
+
+  if [ -n "$_id" ]; then
+    echo -e "  ${C_GREEN}🛡️  Branch ruleset dibuat:${C_RESET} ${C_DIM}\"${_ruleset_name}\" (id: ${_id})${C_RESET}"
+    echo -e "  ${C_DIM}   ✅ Restrict deletions  ✅ Block force pushes  (bypass: repo admin)${C_RESET}"
+    touch "$_flag_file"
+  fi
 }
 
 # ===== Setup wizard interaktif untuk Auto PR (.autopr) =====
