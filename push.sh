@@ -28,7 +28,7 @@
 #
 # ─────────────────────────────────────────────────────────────
 
-USER="hitlabmodv2"
+USER="harunsya"
 REPO="ReadSwDika_WhiskeySockets"
 # DEFAULT_BRANCH di-auto-detect realtime dari GitHub (lihat detect_default_branch).
 # Nilai di sini cuma fallback kalau koneksi ke GitHub bermasalah.
