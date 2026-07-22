@@ -1810,25 +1810,106 @@ except: print('unknown error')
   return 1
 }
 
-# ===== Init file config Auto PR (.autopr) =====
-# Dipanggil sekali setelah token valid — buat .autopr kalau belum ada.
-# User bisa edit file itu kapan saja untuk matikan/nyalakan auto PR.
+# ===== Setup wizard interaktif untuk Auto PR (.autopr) =====
+# Dipanggil setelah token valid.
+# - Kalau .autopr belum ada → tampilkan wizard setup (wajib sekali)
+# - Kalau sudah ada         → skip (langsung lanjut)
+# Bisa dipanggil ulang dari menu untuk re-konfigurasi.
+# $1 = "force" → tampilkan wizard meskipun .autopr sudah ada
 init_autopr_config() {
-  [ -f .autopr ] && return 0
-  cat > .autopr << 'EOF'
-# Konfigurasi Auto PR — push.sh (dibuat otomatis saat login)
-# Edit file ini untuk mengatur perilaku Pull Request otomatis.
+  local _force="${1:-}"
+  [ -f .autopr ] && [ "$_force" != "force" ] && return 0
+
+  # Baca nilai lama kalau ada (untuk tampilkan default saat re-konfigurasi)
+  local _old_enabled="true" _old_base="auto" _old_draft="false"
+  if [ -f .autopr ]; then
+    _old_enabled=$(grep -E '^enabled=' .autopr 2>/dev/null | cut -d= -f2 | tr -d ' \r\n')
+    _old_base=$(grep -E '^base=' .autopr 2>/dev/null | cut -d= -f2 | tr -d ' \r\n')
+    _old_draft=$(grep -E '^draft=' .autopr 2>/dev/null | cut -d= -f2 | tr -d ' \r\n')
+  fi
+
+  clear >/dev/tty 2>/dev/null || true
+  echo -e "${C_BOLD}╔══════════════════════════════════════════════════╗${C_RESET}" >&2
+  echo -e "${C_BOLD}║       🔀  SETUP AUTO PR — BANG WILY              ║${C_RESET}" >&2
+  echo -e "${C_BOLD}╚══════════════════════════════════════════════════╝${C_RESET}" >&2
+  echo "" >&2
+  echo -e "  ${C_DIM}Setiap push ke branch non-default akan otomatis${C_RESET}" >&2
+  echo -e "  ${C_DIM}membuat Pull Request ke GitHub. Atur di sini.${C_RESET}" >&2
+  echo "" >&2
+  echo -e "${C_DIM}  ─────────────────────────────────────────────────${C_RESET}" >&2
+
+  # ── [1] Aktifkan Auto PR? ──────────────────────────────────────────────────
+  local _def_en="y"; [ "$_old_enabled" = "false" ] && _def_en="n"
+  echo "" >&2
+  echo -e "  ${C_CYAN}[1]${C_RESET} ${C_BOLD}Aktifkan Auto PR?${C_RESET}" >&2
+  echo -e "      ${C_DIM}Setiap push berhasil → PR otomatis dibuat di GitHub${C_RESET}" >&2
+  printf "      ${C_BOLD}true / false${C_RESET}  ${C_DIM}[sekarang: %s]${C_RESET}  ▸ " "$_old_enabled" >&2
+  local _ans_en=""
+  read -r _ans_en </dev/tty
+  _ans_en=$(echo "$_ans_en" | tr -d ' \r\n' | tr '[:upper:]' '[:lower:]')
+  local _cfg_enabled
+  case "$_ans_en" in
+    false|f|n|no|0)  _cfg_enabled="false" ;;
+    *)               _cfg_enabled="true"  ;;
+  esac
+
+  # ── [2] Base branch ────────────────────────────────────────────────────────
+  echo "" >&2
+  echo -e "  ${C_CYAN}[2]${C_RESET} ${C_BOLD}Base branch${C_RESET} ${C_DIM}(PR akan merge ke branch ini)${C_RESET}" >&2
+  echo -e "      ${C_DIM}Kosongkan / ketik 'auto' → pakai default branch repo (${DEFAULT_BRANCH})${C_RESET}" >&2
+  printf "      ${C_BOLD}Nama branch / auto${C_RESET}  ${C_DIM}[sekarang: %s]${C_RESET}  ▸ " "$_old_base" >&2
+  local _ans_base=""
+  read -r _ans_base </dev/tty
+  _ans_base=$(echo "$_ans_base" | tr -d ' \r\n')
+  local _cfg_base
+  if [ -z "$_ans_base" ] || [ "$_ans_base" = "auto" ]; then
+    _cfg_base="auto"
+  else
+    _cfg_base="$_ans_base"
+  fi
+
+  # ── [3] Draft PR? ──────────────────────────────────────────────────────────
+  echo "" >&2
+  echo -e "  ${C_CYAN}[3]${C_RESET} ${C_BOLD}Buat PR sebagai Draft?${C_RESET}" >&2
+  echo -e "      ${C_DIM}Draft = PR belum siap merge, untuk review dulu${C_RESET}" >&2
+  printf "      ${C_BOLD}true / false${C_RESET}  ${C_DIM}[sekarang: %s]${C_RESET}  ▸ " "$_old_draft" >&2
+  local _ans_draft=""
+  read -r _ans_draft </dev/tty
+  _ans_draft=$(echo "$_ans_draft" | tr -d ' \r\n' | tr '[:upper:]' '[:lower:]')
+  local _cfg_draft
+  case "$_ans_draft" in
+    true|t|y|yes|1)  _cfg_draft="true"  ;;
+    *)               _cfg_draft="false" ;;
+  esac
+
+  # ── Simpan ke .autopr ──────────────────────────────────────────────────────
+  cat > .autopr << AUTOPREOF
+# Konfigurasi Auto PR — push.sh
+# Dibuat/diupdate via wizard interaktif. Bisa diedit manual kapan saja.
 
 # Aktifkan/matikan auto PR: true / false
-enabled=true
+enabled=${_cfg_enabled}
 
 # Branch tujuan PR (base). "auto" = pakai DEFAULT_BRANCH script
-base=auto
+base=${_cfg_base}
 
 # Buat PR sebagai draft: true / false
-draft=false
-EOF
-  echo -e "  ${C_GREEN}✅ File .autopr dibuat${C_RESET} ${C_DIM}— konfigurasi Auto PR tersimpan${C_RESET}" >&2
+draft=${_cfg_draft}
+AUTOPREOF
+
+  # ── Tampilkan ringkasan ────────────────────────────────────────────────────
+  echo "" >&2
+  echo -e "${C_DIM}  ─────────────────────────────────────────────────${C_RESET}" >&2
+  echo -e "  ${C_GREEN}✅ Konfigurasi Auto PR disimpan ke .autopr${C_RESET}" >&2
+  echo "" >&2
+  local _en_label; [ "$_cfg_enabled" = "true" ] && _en_label="${C_GREEN}✅ Aktif${C_RESET}" || _en_label="${C_RED}❌ Nonaktif${C_RESET}"
+  local _base_label; [ "$_cfg_base" = "auto" ] && _base_label="${DEFAULT_BRANCH} (auto)" || _base_label="$_cfg_base"
+  local _draft_label; [ "$_cfg_draft" = "true" ] && _draft_label="${C_YELLOW}Draft${C_RESET}" || _draft_label="Normal PR"
+  echo -e "  ${C_DIM}Auto PR   :${C_RESET} ${_en_label}" >&2
+  echo -e "  ${C_DIM}Base      :${C_RESET} ${C_BOLD}${_base_label}${C_RESET}" >&2
+  echo -e "  ${C_DIM}Mode      :${C_RESET} ${_draft_label}" >&2
+  echo "" >&2
+  sleep 1.5
 }
 
 # ===== Bersihkan stale index.lock (sisa run sebelumnya yang ke-interrupt) =====
@@ -2778,6 +2859,15 @@ show_main_menu() {
   printf "  ${C_YELLOW} c${C_RESET} › %-16s  ${C_CYAN} n${C_RESET} › %-16s  %b\n" \
     "Bersihkan history" "$_nm_label" "$_nm_status_str"
   printf "  ${C_RED} d${C_RESET} › %-16s  ${C_MAGENTA} r${C_RESET} › %s\n" "Hapus file/folder" "Restore/undo hapus"
+  # Tampilkan status Auto PR di samping opsi
+  local _apr_status
+  if [ -f .autopr ]; then
+    local _apr_en; _apr_en=$(grep -E '^enabled=' .autopr 2>/dev/null | cut -d= -f2 | tr -d ' \r\n')
+    [ "$_apr_en" = "false" ] && _apr_status="${C_RED}off${C_RESET}" || _apr_status="${C_GREEN}on${C_RESET}"
+  else
+    _apr_status="${C_DIM}belum setup${C_RESET}"
+  fi
+  printf "  ${C_CYAN} a${C_RESET} › %-16s  %b\n" "Setting Auto PR" "$_apr_status"
   if [ -n "$_upd_ver" ]; then
     printf "  ${C_GREEN} u${C_RESET} › ${C_BOLD}%-16s${C_RESET}  ${C_DIM}versi sekarang: %s → baru: %s${C_RESET}\n" \
       "Update script" "$SCRIPT_VERSION" "$_upd_ver"
@@ -2811,6 +2901,7 @@ show_main_menu() {
     n|N) action_install_node_modules ;;
     d|D) action_delete_file_folder ;;
     r|R) action_restore_deleted ;;
+    a|A) init_autopr_config "force" ;;
     u|U) action_self_update "$_upd_ver" "$_upd_url" ;;
     0|q|Q|exit) goodbye_prompt ;;
     *)
