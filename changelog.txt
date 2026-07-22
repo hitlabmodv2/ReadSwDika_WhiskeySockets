@@ -6,6 +6,19 @@
 📦 *[22 Juli 2026] — Update 4*
 ━━━━━━━━━━━━━━━━━━
 
+🔀 *push.sh — Auto Pull Request setelah Push ke Branch*
+┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+*File:*
+• `push.sh`
+
+*Perubahan:*
+• Tambah fungsi `auto_create_pr()` — otomatis buat PR via GitHub API setelah push berhasil
+• Kalau PR sudah ada di branch itu → notif "PR diupdate" + link PR lama
+• Kalau belum ada → buat PR baru + notif Telegram dengan tombol _Buka PR_ dan _Merge PR_
+• Kalau push ke `DEFAULT_BRANCH` sendiri → skip otomatis (tidak perlu PR)
+• Diterapkan ke 3 skenario push: _normal_, _graft_, _force_
+
+━━━━━━━━━━━━━━━━━━
 🔗 *push.sh — `(#NNNN)` di Notif Telegram Jadi Link Klikabel*
 ┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 *File:*

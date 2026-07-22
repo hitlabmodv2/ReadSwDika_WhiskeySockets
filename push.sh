@@ -1681,6 +1681,112 @@ tg_linkify_commit() {
   echo "$_msg" | sed -E "s|\(#([0-9]+)\)|(<a href=\"https://github.com/${REPO_OWNER}/${REPO}/commit/${_sha}\">#\1</a>)|g"
 }
 
+# ===== Auto-buat Pull Request setelah push ke non-default branch =====
+# Usage: auto_create_pr "head_branch" "commit_msg_title"
+# - Kalau push ke DEFAULT_BRANCH sendiri → skip (tidak perlu PR)
+# - Kalau sudah ada PR open → tampilkan link PR yang ada
+# - Kalau belum ada → buat PR baru via GitHub API + notif Telegram
+auto_create_pr() {
+  local _head="$1"
+  local _title="${2:-chore: update}"
+  local _base="$DEFAULT_BRANCH"
+  local _tg_ts; _tg_ts=$(date '+%H:%M:%S %d %b %Y')
+
+  # Skip kalau push ke default branch sendiri
+  [ "$_head" = "$_base" ] && return 0
+
+  # ── Cek apakah sudah ada PR open untuk branch ini ──
+  local _existing_json
+  _existing_json=$(curl -s --max-time 8 \
+    "https://api.github.com/repos/${REPO_OWNER}/${REPO}/pulls?state=open&head=${REPO_OWNER}:${_head}&base=${_base}" \
+    -H "Authorization: token ${TOKEN}" \
+    -H "Accept: application/vnd.github+json" 2>/dev/null)
+
+  local _pr_url _pr_no
+  _pr_url=$(python3 -c "
+import json,sys
+try:
+  a=json.loads(sys.stdin.read())
+  print(a[0]['html_url'] if a else '')
+except: print('')
+" <<< "$_existing_json" 2>/dev/null)
+  _pr_no=$(python3 -c "
+import json,sys
+try:
+  a=json.loads(sys.stdin.read())
+  print(a[0]['number'] if a else '')
+except: print('')
+" <<< "$_existing_json" 2>/dev/null)
+
+  if [ -n "$_pr_url" ]; then
+    # PR sudah ada — tampilkan saja
+    echo -e "  ${C_CYAN}🔀 PR sudah ada:${C_RESET} ${C_BLUE}${_pr_url}${C_RESET}"
+    local _btn_exist='{"inline_keyboard":[[{"text":"🔀 Lihat PR #'"${_pr_no}"'","url":"'"${_pr_url}"'"},{"text":"📊 All PRs","url":"https://github.com/'"${REPO_OWNER}"'/'"${REPO}"'/pulls"}]]}'
+    send_telegram "🔀 <b>PR SUDAH ADA — BRANCH DIUPDATE</b>
+━━━━━━━━━━━━━━━━━━━━
+📁 <code>${REPO_OWNER}/${REPO}</code>
+🌿 <code>${_head}</code> → <code>${_base}</code>
+🔗 <a href=\"${_pr_url}\">#${_pr_no} — ${_title}</a>
+🕐 ${_tg_ts}" "$_btn_exist"
+    return 0
+  fi
+
+  # ── Buat PR baru ──
+  local _pr_body="Auto-PR dari \`push.sh\` — commit terbaru di branch \`${_head}\` siap di-merge ke \`${_base}\`."
+  local _payload
+  _payload=$(python3 -c "
+import json,sys
+print(json.dumps({
+  'title': sys.argv[1],
+  'head':  sys.argv[2],
+  'base':  sys.argv[3],
+  'body':  sys.argv[4]
+}))" "$_title" "$_head" "$_base" "$_pr_body" 2>/dev/null)
+
+  [ -z "$_payload" ] && return 1
+
+  local _resp
+  _resp=$(curl -s --max-time 10 \
+    -X POST "https://api.github.com/repos/${REPO_OWNER}/${REPO}/pulls" \
+    -H "Authorization: token ${TOKEN}" \
+    -H "Accept: application/vnd.github+json" \
+    -H "Content-Type: application/json" \
+    -d "$_payload" 2>/dev/null)
+
+  _pr_url=$(python3 -c "
+import json,sys
+try: print(json.loads(sys.stdin.read()).get('html_url',''))
+except: print('')
+" <<< "$_resp" 2>/dev/null)
+  _pr_no=$(python3 -c "
+import json,sys
+try: print(json.loads(sys.stdin.read()).get('number',''))
+except: print('')
+" <<< "$_resp" 2>/dev/null)
+
+  if [ -n "$_pr_url" ]; then
+    echo -e "  ${C_GREEN}🔀 PR baru dibuat:${C_RESET} ${C_BLUE}${_pr_url}${C_RESET}"
+    local _btn_new='{"inline_keyboard":[[{"text":"🔀 Buka PR #'"${_pr_no}"'","url":"'"${_pr_url}"'"},{"text":"✅ Merge PR","url":"'"${_pr_url}"'"}],[{"text":"📊 All PRs","url":"https://github.com/'"${REPO_OWNER}"'/'"${REPO}"'/pulls"},{"text":"📁 Repo","url":"https://github.com/'"${REPO_OWNER}"'/'"${REPO}"'"}]]}'
+    send_telegram_photo "https://w.wallhaven.cc/full/pk/wallhaven-pkgq8e.png" "🔀 <b>PULL REQUEST DIBUAT</b>
+━━━━━━━━━━━━━━━━━━━━
+📁 <code>${REPO_OWNER}/${REPO}</code>
+🌿 <code>${_head}</code> → <code>${_base}</code>
+📝 <a href=\"${_pr_url}\">#${_pr_no} — ${_title}</a>
+🕐 ${_tg_ts}" "$_btn_new"
+    return 0
+  fi
+
+  # Error (misal branch tidak ada commit beda, atau token kurang scope)
+  local _err
+  _err=$(python3 -c "
+import json,sys
+try: print(json.loads(sys.stdin.read()).get('message','unknown error'))
+except: print('unknown error')
+" <<< "$_resp" 2>/dev/null)
+  echo -e "  ${C_YELLOW}⚠️  Auto PR gagal: ${_err}${C_RESET}"
+  return 1
+}
+
 # ===== Bersihkan stale index.lock (sisa run sebelumnya yang ke-interrupt) =====
 cleanup_stale_lock() {
   local lock=".git/index.lock"
@@ -6010,6 +6116,7 @@ push_head_to_branch() {
 📝 ${_log_msg_tg}
 ${_push_detail}
 🕐 ${_tg_ts}" "$_btn_pbr"
+    auto_create_pr "$branch" "$_log_msg" &
     return 0
   fi
 
@@ -6060,6 +6167,7 @@ ${_push_detail}
 ${_push_detail}
 ✔️ Histori remote tetap terjaga
 🕐 ${_tg_ts}" "$_btn_pgraft"
+    auto_create_pr "$branch" "$_log_msg" &
     return 0
   fi
 
@@ -6084,6 +6192,7 @@ ${_push_detail}
 ${_push_detail}
 ⚠️ Force push — history lama ditimpa
 🕐 ${_tg_ts}" "$_btn_pforce"
+    auto_create_pr "$branch" "$_log_msg" &
     return 0
   fi
 
