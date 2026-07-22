@@ -1999,29 +1999,41 @@ init_autopr_config() {
   echo "" >&2
   echo -e "${C_DIM}  ─────────────────────────────────────────────────${C_RESET}" >&2
 
+  echo -e "  ${C_DIM}Ketik ${C_BOLD}0${C_RESET}${C_DIM} di pertanyaan mana saja untuk kembali ke menu.${C_RESET}" >&2
+  echo "" >&2
+
   # ── [1] Aktifkan Auto PR? ──────────────────────────────────────────────────
   local _def_en="y"; [ "$_old_enabled" = "false" ] && _def_en="n"
-  echo "" >&2
   echo -e "  ${C_CYAN}[1]${C_RESET} ${C_BOLD}Aktifkan Auto PR?${C_RESET}" >&2
   echo -e "      ${C_DIM}Setiap push berhasil → PR otomatis dibuat di GitHub${C_RESET}" >&2
-  printf "      ${C_BOLD}true / false${C_RESET}  ${C_DIM}[sekarang: %s]${C_RESET}  ▸ " "$_old_enabled" >&2
+  printf "      ${C_BOLD}true / false${C_RESET}  ${C_DIM}[sekarang: %s | 0 = kembali]${C_RESET}  ▸ " "$_old_enabled" >&2
   local _ans_en=""
   read -r _ans_en </dev/tty
   _ans_en=$(echo "$_ans_en" | tr -d ' \r\n' | tr '[:upper:]' '[:lower:]')
+  if [ "$_ans_en" = "0" ]; then
+    echo -e "\n  ${C_DIM}↩ Kembali ke menu...${C_RESET}" >&2
+    sleep 0.5
+    return 0
+  fi
   local _cfg_enabled
   case "$_ans_en" in
-    false|f|n|no|0)  _cfg_enabled="false" ;;
-    *)               _cfg_enabled="true"  ;;
+    false|f|n|no)  _cfg_enabled="false" ;;
+    *)             _cfg_enabled="true"  ;;
   esac
 
   # ── [2] Base branch ────────────────────────────────────────────────────────
   echo "" >&2
   echo -e "  ${C_CYAN}[2]${C_RESET} ${C_BOLD}Base branch${C_RESET} ${C_DIM}(PR akan merge ke branch ini)${C_RESET}" >&2
   echo -e "      ${C_DIM}Kosongkan / ketik 'auto' → pakai default branch repo (${DEFAULT_BRANCH})${C_RESET}" >&2
-  printf "      ${C_BOLD}Nama branch / auto${C_RESET}  ${C_DIM}[sekarang: %s]${C_RESET}  ▸ " "$_old_base" >&2
+  printf "      ${C_BOLD}Nama branch / auto${C_RESET}  ${C_DIM}[sekarang: %s | 0 = kembali]${C_RESET}  ▸ " "$_old_base" >&2
   local _ans_base=""
   read -r _ans_base </dev/tty
   _ans_base=$(echo "$_ans_base" | tr -d ' \r\n')
+  if [ "$_ans_base" = "0" ]; then
+    echo -e "\n  ${C_DIM}↩ Kembali ke menu...${C_RESET}" >&2
+    sleep 0.5
+    return 0
+  fi
   local _cfg_base
   if [ -z "$_ans_base" ] || [ "$_ans_base" = "auto" ]; then
     _cfg_base="auto"
@@ -2033,10 +2045,15 @@ init_autopr_config() {
   echo "" >&2
   echo -e "  ${C_CYAN}[3]${C_RESET} ${C_BOLD}Buat PR sebagai Draft?${C_RESET}" >&2
   echo -e "      ${C_DIM}Draft = PR belum siap merge, untuk review dulu${C_RESET}" >&2
-  printf "      ${C_BOLD}true / false${C_RESET}  ${C_DIM}[sekarang: %s]${C_RESET}  ▸ " "$_old_draft" >&2
+  printf "      ${C_BOLD}true / false${C_RESET}  ${C_DIM}[sekarang: %s | 0 = kembali]${C_RESET}  ▸ " "$_old_draft" >&2
   local _ans_draft=""
   read -r _ans_draft </dev/tty
   _ans_draft=$(echo "$_ans_draft" | tr -d ' \r\n' | tr '[:upper:]' '[:lower:]')
+  if [ "$_ans_draft" = "0" ]; then
+    echo -e "\n  ${C_DIM}↩ Kembali ke menu...${C_RESET}" >&2
+    sleep 0.5
+    return 0
+  fi
   local _cfg_draft
   case "$_ans_draft" in
     true|t|y|yes|1)  _cfg_draft="true"  ;;
@@ -2070,7 +2087,8 @@ AUTOPREOF
   echo -e "  ${C_DIM}Base      :${C_RESET} ${C_BOLD}${_base_label}${C_RESET}" >&2
   echo -e "  ${C_DIM}Mode      :${C_RESET} ${_draft_label}" >&2
   echo "" >&2
-  sleep 1.5
+  printf "  ${C_DIM}Tekan ${C_RESET}${C_BOLD}Enter${C_RESET}${C_DIM} untuk kembali ke menu...${C_RESET}" >&2
+  read -r </dev/tty
 }
 
 # ===== Bersihkan stale index.lock (sisa run sebelumnya yang ke-interrupt) =====
