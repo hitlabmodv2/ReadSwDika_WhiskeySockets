@@ -3,27 +3,6 @@
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ━━━━━━━━━━━━━━━━━━
-✨ *[22 Juli 2026] — Fitur Auto-Delete Notif Nekopoi*
-━━━━━━━━━━━━━━━━━━
-
-🆕 *index.js + nekopoi-monitor.cjs — Auto-Delete Pesan Notif Lama*
-┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
-• Setiap kali notif baru dikirim ke grup, pesan notif
-  sebelumnya otomatis *dihapus dulu* sebelum kirim yang baru.
-  → Tidak ada spam tumpukan notif di grup.
-
-• Cara kerja:
-  - Key pesan terakhir disimpan per JID di `data/nekopoinotif/state.json`
-  - Sebelum kirim → `{ delete: prevKey }` → hapus pesan lama
-  - Setelah kirim → simpan key baru untuk siklus berikutnya
-
-• Aman terhadap edge case:
-  - Belum ada pesan lama → langsung kirim, tidak error
-  - DELETE gagal (expired/bukan admin) → tetap kirim pesan baru
-  - SEND gagal (network) → tidak crash
-┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
-
-━━━━━━━━━━━━━━━━━━
 🐛 *[22 Juli 2026] — Bugfix nekopoi-monitor.cjs (Button Kontekstual)*
 ━━━━━━━━━━━━━━━━━━
 
