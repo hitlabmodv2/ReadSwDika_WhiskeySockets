@@ -257,22 +257,22 @@ async function cariKontenBaru() {
 }
 
 // ── SIMULASI ──────────────────────────────────────────────────────────────────
-
-async function simulasi() {
+// slug: 'hentai' | '2d-animation' | '3d-hentai' (default: 'hentai')
+async function simulasi(slug) {
     const { getCategoryPosts, getDetailNekopoi } = require('./nekopoi.cjs');
 
-    // Ambil post pertama dari kategori hentai untuk simulasi
-    const posts = await getCategoryPosts('hentai');
-    if (!posts.length) throw new Error('Tidak ada post dari nekopoi.care/category/hentai/');
+    const katSlug = slug || 'hentai';
+    const posts   = await getCategoryPosts(katSlug);
+    if (!posts.length) throw new Error(`Tidak ada post dari nekopoi.care/category/${katSlug}/`);
 
     const post   = posts[0];
     const id     = buatId(post.url);
     const detail = await getDetailNekopoi(post.url);
 
-    const item = { id, url: post.url, title: detail.title || post.title, kategori: detail.kategori || 'hentai', ...detail };
+    const item      = { id, url: post.url, title: detail.title || post.title, kategori: detail.kategori || katSlug, ...detail };
     const caption   = buatCaption(item);
     const urlGambar = item.thumbnail || null;
-    return { caption, urlGambar };
+    return { caption, urlGambar, item };
 }
 
 // ── FORMAT CAPTION ────────────────────────────────────────────────────────────
@@ -318,10 +318,11 @@ function buatCaption(data) {
         title, kategori, tanggal, sinopsis,
         genre, producers, durasi, ukuran, status,
         episode, tayang, judulJp, url,
+        downloads = [],
     } = data;
 
-    const katInfo      = getKatInfo(kategori);
-    const headerWaktu  = waktuSekarang();
+    const katInfo     = getKatInfo(kategori);
+    const headerWaktu = waktuSekarang();
 
     // Sinopsis
     const sinopsisBlok = potongTeks(sinopsis, 350)
@@ -331,7 +332,7 @@ function buatCaption(data) {
     const infoBlok = buatBarisInfo([
         ['🗂️ Kategori', katInfo.label],
         ['🇯🇵 Judul JP', judulJp   || null],
-        ['🎬 Anime   ', (title && !judulJp) ? null : (data.anime || null)],
+        ['🎬 Anime   ', (!judulJp && data.anime && data.anime !== title) ? data.anime : null],
         ['🏢 Produser', producers  || null],
         ['📡 Status  ', status     || null],
         ['📺 Episode ', episode    || null],
@@ -340,6 +341,29 @@ function buatCaption(data) {
         ['🎭 Genre   ', genre      || null],
         ['💾 Ukuran  ', ukuran     || null],
     ]);
+
+    // Download blok — tampilkan per resolusi dengan semua host
+    let dlBlok = '';
+    if (downloads && downloads.length) {
+        dlBlok  = `${SEP}\n`;
+        dlBlok += `📥 *DOWNLOAD*\n`;
+        dlBlok += `${SEP2}\n`;
+        downloads.forEach((dl, i) => {
+            const isLast  = i === downloads.length - 1;
+            const prefix  = isLast ? '╰' : '├';
+            const hostStr = dl.links
+                .slice(0, 4)
+                .map(h => `[${h.host}](${h.url})`)
+                .join('  ');
+            dlBlok += `${prefix} *${dl.resolusi}* → ${hostStr}\n`;
+        });
+        dlBlok = dlBlok.trimEnd();
+    }
+
+    // Streaming blok — konstruksi dari URL post
+    const streamBlok = url
+        ? `▶️ *Streaming* : [Server 1](${url}#nk-stream-1)  [Server 2](${url}#nk-stream-2)  [Server 3](${url}#nk-stream-3)`
+        : null;
 
     const baris = [
         katInfo.header,
@@ -356,9 +380,11 @@ function buatCaption(data) {
         `📋 *Info*`,
         SEP2,
         infoBlok || '-',
-        SEP,
-        `🔗 *Tonton* : ${url}`,
-        `🌐 *Source* : nekopoi.care`,
+        dlBlok     ? dlBlok     : null,
+        `${SEP}`,
+        streamBlok ? streamBlok : null,
+        `🔗 *Post*    : ${url}`,
+        `🌐 *Source*  : nekopoi.care`,
     ];
 
     return baris.filter(b => b !== null && b !== undefined).join('\n');
@@ -624,6 +650,30 @@ async function handleNekopoinotif({ hisoka, m, query, tolak, logCommand, sendCon
             console.error('[NekopoinNotif] status error:', err?.message);
             await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
             await tolak(hisoka, m, `❌ Gagal ambil list grup: ${err?.message || err}`);
+        }
+        return;
+    }
+
+    // ── TEST per kategori (test hentai / test 2d / test 3d) ──────────────────
+    if (/^test\s+(hentai|2d|3d|2d-animation|3d-hentai)$/.test(sub)) {
+        const katArg = sub.split(/\s+/)[1];
+        const katSlug = katArg === '2d' ? '2d-animation' : katArg === '3d' ? '3d-hentai' : 'hentai';
+        await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
+        try {
+            const hasil = await simulasi(katSlug);
+            const imgBuf = hasil.urlGambar ? await downloadImageBuffer(hasil.urlGambar) : null;
+            if (imgBuf) {
+                await hisoka.sendMessage(m.from, { image: imgBuf, mimetype: 'image/jpeg', caption: hasil.caption }, { quoted: m });
+            } else if (hasil.urlGambar) {
+                await hisoka.sendMessage(m.from, { image: { url: buatProxyUrl(hasil.urlGambar) }, caption: hasil.caption }, { quoted: m });
+            } else {
+                await tolak(hisoka, m, hasil.caption);
+            }
+            await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+            logCommand(m, hisoka, `nekopoinotif-test-${katSlug}`);
+        } catch (err) {
+            await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
+            await tolak(hisoka, m, `❌ Gagal: ${err?.message || err}`);
         }
         return;
     }

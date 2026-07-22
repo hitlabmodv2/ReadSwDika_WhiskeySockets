@@ -1164,7 +1164,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                         case 'restart':
                         case 'rebot':
-                        case 'rb': {
+                        case 'rb1': {
                                 const { handleRb } = _require(path.resolve('./SEMUA_FITUR/system/shutdown.cjs'));
                                 await handleRb({ hisoka, m, tolak, logCommand, _require, Button, pendingShutdownConfirm });
                                 break;

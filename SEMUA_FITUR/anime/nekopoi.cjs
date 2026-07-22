@@ -114,6 +114,47 @@ function parseHomepageEpisodeTerbaru(md) {
     return results;
 }
 
+// ── Parse section # Unduh (download links per resolusi) ───────────────────────
+// Format markdown:
+//   Title [720p]
+//   **LINK**
+//   [Mp4Upload](https://ouo.io/xxx)[Pixeldrain](https://ouo.io/xxx)[Mirror](https://ouo.io/xxx)
+function parseDownloadLinks(md) {
+    const downloads = [];
+
+    // Cari section # Unduh
+    const unduhM = md.match(/# Unduh\s*\n+([\s\S]+?)(?=\n# |\n## |$)/);
+    if (!unduhM) return downloads;
+
+    const content = unduhM[1];
+
+    // Tiap blok: judul + [Resolusi]\n**LINK**\n[Host](URL)...
+    const blockRegex = /\[(4K|1080p|720p|480p|360p)\]\s*\n+\*\*LINK\*\*\s*\n+([^\n]+)/gi;
+    let m;
+    while ((m = blockRegex.exec(content)) !== null) {
+        const resolusi = m[1].toLowerCase().replace('4k', '4K');
+        const linkLine = m[2];
+
+        const links = [];
+        const linkRe = /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g;
+        let lm;
+        while ((lm = linkRe.exec(linkLine)) !== null) {
+            links.push({ host: lm[1].trim(), url: lm[2].trim() });
+        }
+        if (links.length) downloads.push({ resolusi, links });
+    }
+
+    // Urutkan: 4K → 1080p → 720p → 480p → 360p
+    const URUTAN = ['4K', '1080p', '720p', '480p', '360p'];
+    downloads.sort((a, b) => {
+        const ia = URUTAN.indexOf(a.resolusi);
+        const ib = URUTAN.indexOf(b.resolusi);
+        return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
+    });
+
+    return downloads;
+}
+
 // ── Parse halaman detail post ──────────────────────────────────────────────────
 function parseDetailPost(md, url) {
     // Thumbnail — ambil dari wp-content/uploads, skip logo/app
@@ -179,12 +220,16 @@ function parseDetailPost(md, url) {
     const tayangM = md.match(/\*\*Tayang\*\*\s*:\s*([^\n]+)/i);
     const tayang  = tayangM ? tayangM[1].trim() : '';
 
+    // Download links
+    const downloads = parseDownloadLinks(md);
+
     // Kategori dari URL
     const kategori = deteksiKategori(url);
 
     return {
         title, thumbnail, tanggal, sinopsis, genre, anime, judulJp,
         producers, durasi, ukuran, status, episode, tayang, kategori, url,
+        downloads,
     };
 }
 
