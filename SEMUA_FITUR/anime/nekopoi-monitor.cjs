@@ -339,25 +339,25 @@ function buatCaption(data) {
         ? potongTeks(sinOpsi, 350).split('\n').map(b => b.trim() ? `> ${b}` : '').filter(Boolean).join('\n')
         : null;
 
-    // ── Info items (├ ╰ tree, nilai _italic_) ─────────────────────────────────
+    // ── Info items (├ ╰ tree, label *bold*, nilai _italic_) ──────────────────
     const infoItems = [
-        ['🗂️ Kategori', katInfo.label],
-        ['🇯🇵 Judul JP', judulJp                                          || null],
-        ['🎬 Anime   ', (!judulJp && anime && anime !== title) ? anime    : null],
-        ['🏢 Produser', producers                                          || null],
-        ['📡 Status  ', status                                             || null],
-        ['📺 Episode ', episode                                            || null],
-        ['🗓️ Tayang  ', tayang                                             || null],
-        ['⏱️ Durasi  ', durasi                                             || null],
-        ['🎭 Genre   ', genre                                              || null],
-        ['💾 Ukuran  ', ukuran                                             || null],
+        ['🗂️ *Kategori*', katInfo.label],
+        ['🇯🇵 *Judul JP*', judulJp                                           || null],
+        ['🎬 *Anime*',     (!judulJp && anime && anime !== title) ? anime     : null],
+        ['🏢 *Produser*',  producers                                           || null],
+        ['📡 *Status*',    status                                              || null],
+        ['📺 *Episode*',   episode                                             || null],
+        ['🗓️ *Tayang*',    tayang                                              || null],
+        ['⏱️ *Durasi*',    durasi                                              || null],
+        ['🎭 *Genre*',     genre                                               || null],
+        ['💾 *Ukuran*',    ukuran                                              || null],
         // View count realtime dari scraper (berapa kali halaman dilihat)
-        ['👁️ Dilihat ', viewCount ? `${formatAngka(viewCount)} kali`      : null],
+        ['👁️ *Dilihat*',  viewCount ? `${formatAngka(viewCount)} kali`        : null],
     ].filter(([, v]) => v && v !== '' && v !== '-');
 
     const infoBlok = infoItems.map(([label, val], i) => {
         const prefix = i === infoItems.length - 1 ? '╰' : '├';
-        return `${prefix} ${label}: _${val}_`;
+        return `${prefix} ${label} : _${val}_`;
     }).join('\n');
 
     // ── Download (daftar bernomor, resolusi `monospace`) ──────────────────────

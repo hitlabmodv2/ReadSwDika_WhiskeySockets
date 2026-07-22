@@ -99,7 +99,7 @@ jadibot [nomor] [durasi] | upbot [nomor],[durasi] | downbot [nomor],[durasi] | s
 
 「 👑 *OWNER ONLY* 」
 listowner | addowner | delowner
-all | swgrup/statusgroup | infowibu | animasu | tvone | alqanimenotif | malnews | ceksw | cekauto | cekauto gc
+all | swgrup/statusgroup | infowibu | animasu | tvone | alqanimenotif | nekopoinotif | malnews | ceksw | cekauto | cekauto gc
 wily | simi | wilyai on/off | wilyai pm/gc/all | wilyai reset
 emoji | emojiadd | emojidel | emojiclear | emojilist | emojidefault | emojicustom
 upbot | restart/rebot | backup | ceksesi | clearsesi/cs | eval | bash
@@ -179,6 +179,8 @@ async function handleOwnermenu({ hisoka, m, query, loadConfig, logCommand, fs, p
 │   _Auto notif berita dari TV One_
 ├➤ *.alqanimenotif on/off/test/status*
 │   _Auto notif episode Sub Indo dari Alqanime_
+├➤ *.nekopoinotif on/off/test/status*
+│   _Auto notif konten baru NekoPoi (🎌 Hentai · 🎥 2D · 🧊 3D)_
 ├➤ *.ceksw on/off/reset*
 │   _Statistik & tracking story WA kontak_
 ├➤ *.cekauto*

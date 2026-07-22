@@ -3,7 +3,27 @@
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ━━━━━━━━━━━━━━━━━━
-📦 *[22 Juli 2026]*
+📦 *[22 Juli 2026] — Update 2*
+━━━━━━━━━━━━━━━━━━
+
+🎌 *Nekopoi — Fix INFO alignment + Tambah ke Menu*
+┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+*File:*
+• `SEMUA_FITUR/anime/nekopoi-monitor.cjs`
+• `SEMUA_FITUR/menu/menupages.cjs`
+
+*Perubahan:*
+
+1. 📋 *INFO section rapi* — label kini `*bold*` tanpa trailing space, nilai `_italic_`, separator ` : ` konsisten
+   - Sebelum: `├ 🗂️ Kategori: _Hentai_` (campur ada trailing space ada tidak)
+   - Sesudah: `├ 🗂️ *Kategori* : _Hentai_` (semua seragam)
+
+2. 📋 *Nekopoinotif ditambahkan ke menu bot*
+   - `.allmenu` → section Owner Only: `nekopoinotif` sudah masuk
+   - `.ownermenu` → entri lengkap: `*.nekopoinotif on/off/test/status*`
+
+━━━━━━━━━━━━━━━━━━
+📦 *[22 Juli 2026] — Update 1*
 ━━━━━━━━━━━━━━━━━━
 
 🎌 *Nekopoi — Perbaikan Caption & Scraper View Count*
