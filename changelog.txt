@@ -3,6 +3,28 @@
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ━━━━━━━━━━━━━━━━━━
+✨ *[22 Juli 2026] — Fitur Baru: Button Quick Edit Kategori Nekopoi Notif*
+━━━━━━━━━━━━━━━━━━
+
+🔧 *nekopoi-monitor.cjs — Button Quick Edit Kategori*
+┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+• Saat *mengaktifkan* atau *menonaktifkan* nekopoi notif (via command
+  `.nekopoinotif on/off` maupun tap button), sekarang muncul *3 button
+  quick edit kategori* langsung di bawah pesan konfirmasi.
+• Label button menampilkan status aktif/nonaktif tiap kategori:
+  _✅ 🎌 Hentai_ · _✅ 🎥 2D Anim_ · _✅ 🧊 3D Hentai_
+  (❌ jika kategori itu sedang nonaktif)
+• Tap salah satu button → kategori di-*toggle* (aktif jadi nonaktif
+  atau sebaliknya) tanpa perlu ketik perintah panjang.
+• Setelah toggle, bot kirim konfirmasi + button kategori diperbarui
+  sesuai state terbaru (bisa toggle bolak-balik).
+• Callback baru: `__nknotif_kat_hentai__` · `__nknotif_kat_2d__`
+  · `__nknotif_kat_3d__`
+• Helper baru: `_tambahBtnKat()` & `_bodyKatInfo()` — dipakai di
+  semua jalur ON/OFF agar konsisten.
+┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+
+━━━━━━━━━━━━━━━━━━
 🐛 *[22 Juli 2026] — Bugfix nekopoi-monitor.cjs (Button Kontekstual)*
 ━━━━━━━━━━━━━━━━━━
 
