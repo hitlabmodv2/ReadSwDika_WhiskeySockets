@@ -3,6 +3,21 @@
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ━━━━━━━━━━━━━━━━━━
+📦 *[22 Juli 2026] — Update 9*
+━━━━━━━━━━━━━━━━━━
+
+🔗 *push.sh + git hook — (#N) Jadi Link Biru GitHub*
+┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+• Sebelumnya `(#NNNN)` pakai hitungan commit → tidak biru
+• Sekarang setiap commit *otomatis buat GitHub Issue*
+  → nomor issue dipakai sebagai `(#N)` → link biru ke Issues
+• `next_commit_no()` → tetap sebagai fallback offline
+• `buat_issue_commit()` → fungsi baru di push.sh
+• `append_commit_no()` → diupdate pakai `buat_issue_commit()`
+• `prepare-commit-msg` hook → diupdate buat issue via API
+┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+
+━━━━━━━━━━━━━━━━━━
 📦 *[22 Juli 2026] — Update 8*
 ━━━━━━━━━━━━━━━━━━
 

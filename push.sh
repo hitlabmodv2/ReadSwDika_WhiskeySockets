@@ -1641,36 +1641,64 @@ generate_commit_msg() {
   classify_commit "$@"
 }
 
-# ===== Nomor commit berikutnya — realtime dari GitHub API (#NNNN) =====
-# Ambil total commit langsung dari GitHub (bukan local git) supaya angka selalu akurat
-# walau ada commit dari device/mesin lain. Fallback ke local count kalau offline/API error.
+# ===== Buat GitHub Issue otomatis & ambil nomornya (#N) =====
+# Setiap commit otomatis dapat GitHub Issue → (#N) jadi link biru di GitHub.
+# Fallback ke hitungan commit lokal kalau API gagal / offline.
 next_commit_no() {
-  local _api_count _local_count _link_header
+  # Fallback: hitung dari local git (dipakai kalau issue gagal dibuat)
+  local _local_count
+  _local_count=$(git rev-list --count HEAD 2>/dev/null || echo "0")
+  echo $(( _local_count + 1 ))
+}
 
-  # Coba ambil dari GitHub API — 1 request ringan, cukup baca header Link
-  # Link: <...?page=N>; rel="last" → N = total commit (karena per_page=1)
-  _link_header=$(curl -s -I \
-    "https://api.github.com/repos/${REPO_OWNER}/${REPO}/commits?sha=${DEFAULT_BRANCH}&per_page=1" \
+# Buat GitHub Issue dengan judul = pesan commit, return nomor issue
+# Kalau gagal → fallback ke next_commit_no (hitungan lokal)
+buat_issue_commit() {
+  local _title="$1"
+  [ -z "$_title" ] && { next_commit_no; return; }
+  [ -z "$TOKEN" ]  && { next_commit_no; return; }
+
+  # Bersihkan judul dari (#NNNN) yang mungkin sudah ada
+  local _clean_title
+  _clean_title=$(echo "$_title" | sed -E 's/ \(#[0-9]+\)$//')
+
+  local _payload _resp _no
+  _payload=$(python3 -c "
+import json,sys
+title=sys.argv[1]
+print(json.dumps({
+  'title': title,
+  'labels': ['enhancement'],
+  'body': '📝 Issue otomatis untuk commit tracking.\n\n> Dibuat oleh push.sh — Bang Wily'
+}))" "$_clean_title" 2>/dev/null)
+
+  [ -z "$_payload" ] && { next_commit_no; return; }
+
+  _resp=$(curl -s --max-time 10 \
+    -X POST "https://api.github.com/repos/${REPO_OWNER}/${REPO}/issues" \
     -H "Authorization: token ${TOKEN}" \
     -H "Accept: application/vnd.github+json" \
-    --max-time 8 2>/dev/null | grep -i '^link:')
+    -H "Content-Type: application/json" \
+    -d "$_payload" 2>/dev/null)
 
-  _api_count=$(echo "$_link_header" | grep -oE 'page=[0-9]+' | tail -1 | cut -d= -f2)
+  _no=$(python3 -c "
+import json,sys
+try: print(json.loads(sys.stdin.read()).get('number',''))
+except: print('')
+" <<< "$_resp" 2>/dev/null)
 
-  if [ -n "$_api_count" ] && [ "$_api_count" -gt 0 ] 2>/dev/null; then
-    echo $(( _api_count + 1 ))
+  if [ -n "$_no" ] && [ "$_no" -gt 0 ] 2>/dev/null; then
+    echo "$_no"
   else
-    # Fallback: hitung dari local git
-    _local_count=$(git rev-list --count HEAD 2>/dev/null || echo "0")
-    echo $(( _local_count + 1 ))
+    next_commit_no
   fi
 }
 
-# Tempel (#NNNN) ke pesan commit
+# Tempel (#N) ke pesan commit — N = nomor GitHub Issue (link biru)
 append_commit_no() {
   local _base_msg="$1"
   local _no
-  _no=$(next_commit_no)
+  _no=$(buat_issue_commit "$_base_msg")
   echo "${_base_msg} (#${_no})"
 }
 
