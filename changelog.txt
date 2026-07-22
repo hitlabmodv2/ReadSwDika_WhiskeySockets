@@ -3,6 +3,21 @@
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ━━━━━━━━━━━━━━━━━━
+📦 *[22 Juli 2026] — Update 8*
+━━━━━━━━━━━━━━━━━━
+
+✨ *animasu.cjs — Formatting WA di Teks Output*
+┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+• `*bold*` → judul, angka penting, status ON/OFF, label utama
+• `_italic_` → waktu, sumber, info sekunder, hint
+• `` `monospace` `` → semua contoh perintah (`.animasu on`, dll)
+• `> kutip` → catatan info & urutan list di menu help
+• List bernomor → daftar perintah di menu help (1. 2. 3. 4. 5.)
+• `~coret~` → sisa episode tidak diketahui (~?~)
+• `*bold*` → resolusi batch (`1080p`, `720p`) pakai monospace
+┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+
+━━━━━━━━━━━━━━━━━━
 📦 *[22 Juli 2026] — Update 7*
 ━━━━━━━━━━━━━━━━━━
 

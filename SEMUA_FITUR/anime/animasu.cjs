@@ -790,7 +790,7 @@ function buatCaption(data) {
         batchBlok += `${SEP2}\n`;
         for (const r of batchDownload.resolutions) {
             const mirrors = r.links.map(l => l.label).join(' · ');
-            batchBlok += `├ [${r.res}] ${mirrors}\n`;
+            batchBlok += `├ \`${r.res}\` ${mirrors}\n`;
         }
         const firstLink = batchDownload.resolutions[0]?.links[0];
         if (firstLink) {
@@ -940,14 +940,14 @@ async function handleAnimasu({ hisoka, m, query, tolak, logCommand, sendConfirmW
                         `│ Status di grup ini: ${aktif ? '✅ *Aktif*' : '❌ *Nonaktif*'}\n` +
                         `│\n` +
                         `│ *Perintah:*\n` +
-                        `│ • ${pfx}animasu on — aktifkan\n` +
-                        `│ • ${pfx}animasu off — nonaktifkan\n` +
-                        `│ • ${pfx}animasu test — preview format notif ke sini\n` +
-                        `│ • ${pfx}animasu test grup — kirim test ke semua grup aktif\n` +
-                        `│ • ${pfx}animasu status — lihat semua grup\n` +
+                        `│ 1. \`${pfx}animasu on\` — _aktifkan_\n` +
+                        `│ 2. \`${pfx}animasu off\` — _nonaktifkan_\n` +
+                        `│ 3. \`${pfx}animasu test\` — _preview notif ke sini_\n` +
+                        `│ 4. \`${pfx}animasu test grup\` — _kirim ke semua grup aktif_\n` +
+                        `│ 5. \`${pfx}animasu status\` — _lihat semua grup_\n` +
                         `│\n` +
-                        `│ 💡 Bot memantau 2 widget di web Animasu\n` +
-                        `│    secara terpisah & realtime:\n` +
+                        `│ > 💡 Bot memantau *2 widget* di _animasu.app_\n` +
+                        `│ > secara terpisah & *realtime:*\n` +
                         `│ 🔥 *Sedang Tayang* — episode baru rilis\n` +
                         `│ 🆕🔄 *Baru Ditambah & Diperbarui* — anime\n` +
                         `│    baru masuk atau datanya diupdate\n` +
@@ -967,10 +967,10 @@ async function handleAnimasu({ hisoka, m, query, tolak, logCommand, sendConfirmW
                         `│ Status sekarang   : ✅ *ON*\n` +
                         `│\n` +
                         (sebelumnyaAM
-                                ? `│ ℹ️ Fitur ini sebelumnya sudah aktif,\n│    tidak ada perubahan.\n`
-                                : `│ ✅ Fitur berhasil diaktifkan!\n│    Bot akan kirim notif otomatis\n│    saat episode Sub Indo baru tersedia.\n`) +
+                                ? `│ > ℹ️ _Fitur ini sebelumnya sudah aktif,_\n│ > _tidak ada perubahan._\n`
+                                : `│ ✅ *Fitur berhasil diaktifkan!*\n│    _Bot akan kirim notif otomatis_\n│    _saat episode Sub Indo baru tersedia._\n`) +
                         `│\n` +
-                        `│ Ketik *${pfx}animasu off* untuk menonaktifkan.\n` +
+                        `│ Ketik \`${pfx}animasu off\` untuk menonaktifkan.\n` +
                         `╰──────────────────────`,
                         [{ text: '➕ Aktifkan Semua Grup', id: '__addallgrp__animasu' }]
                 );
@@ -990,10 +990,10 @@ async function handleAnimasu({ hisoka, m, query, tolak, logCommand, sendConfirmW
                         `│ Status sekarang   : ❌ *OFF*\n` +
                         `│\n` +
                         (sebelumnyaAM
-                                ? `│ ❌ Fitur berhasil dinonaktifkan.\n│    Bot tidak akan kirim notif lagi\n│    di grup ini.\n`
-                                : `│ ℹ️ Fitur ini sebelumnya sudah nonaktif,\n│    tidak ada perubahan.\n`) +
+                                ? `│ ❌ *Fitur berhasil dinonaktifkan.*\n│    _Bot tidak akan kirim notif lagi_\n│    _di grup ini._\n`
+                                : `│ > ℹ️ _Fitur ini sebelumnya sudah nonaktif,_\n│ > _tidak ada perubahan._\n`) +
                         `│\n` +
-                        `│ Ketik *${pfx}animasu on* untuk mengaktifkan kembali.\n` +
+                        `│ Ketik \`${pfx}animasu on\` untuk mengaktifkan kembali.\n` +
                         `╰──────────────────────`
                 );
                 await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
@@ -1008,8 +1008,8 @@ async function handleAnimasu({ hisoka, m, query, tolak, logCommand, sendConfirmW
                         loadingMsg = await hisoka.sendMessage(m.from, {
                                 text: `⏳ *Memuat status anime...*\n` +
                                       `┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n` +
-                                      `📡 Mengambil data realtime dari Animasu\n` +
-                                      `🔄 Harap tunggu sebentar...`,
+                                      `📡 _Mengambil data realtime dari_ *Animasu*\n` +
+                                      `🔄 _Harap tunggu sebentar..._`,
                         }, { quoted: m });
 
                         const daftarAnime = await getAiringStatus(40);
@@ -1030,15 +1030,15 @@ async function handleAnimasu({ hisoka, m, query, tolak, logCommand, sendConfirmW
                         let txt = `╭─「 📺 *STATUS ANIME ANIMASU* 」\n`;
                         txt += `│ 🕐 _${waktu} WIB_\n`;
                         txt += `│ 📊 Total: *${daftarAnime.length} anime* terpantau\n`;
-                        txt += `│ 📶 Sumber: _animasu.app (realtime)_\n`;
-                        txt += `│ _(diurutkan: sisa episode terbanyak di atas)_\n`;
+                        txt += `│ 📶 Sumber: _animasu.app_ *(realtime)*\n`;
+                        txt += `│ > _diurutkan: sisa episode terbanyak di atas_\n`;
                         txt += `│\n`;
 
                         for (let i = 0; i < daftarAnime.length; i++) {
                                 const a       = daftarAnime[i];
                                 const no      = String(i + 1).padStart(2, '0');
-                                const epStr   = a.totalSeri ? `Ep ${a.epTerbaru}/${a.totalSeri}` : `Ep ${a.epTerbaru || '?'}`;
-                                const sisaStr = a.sisaEp !== null ? `Sisa *${a.sisaEp} ep*` : `Sisa *?*`;
+                                const epStr   = a.totalSeri ? `Ep *${a.epTerbaru}*/${a.totalSeri}` : `Ep *${a.epTerbaru || '?'}*`;
+                                const sisaStr = a.sisaEp !== null ? `Sisa *${a.sisaEp} ep*` : `Sisa ~?~`;
                                 const musimStr = a.musim && a.musim !== '-' ? ` · _${a.musim}_` : '';
                                 txt += `│ *${no}.* ${a.judul}\n`;
                                 txt += `│     📺 ${epStr} | ${sisaStr}${musimStr}\n`;
@@ -1049,7 +1049,7 @@ async function handleAnimasu({ hisoka, m, query, tolak, logCommand, sendConfirmW
                                         txt += `│     📦 *Batch Tersedia!*\n`;
                                         for (const r of a.batchDownload.resolutions) {
                                                 const mirrors = r.links.map(l => l.label).join(' · ');
-                                                txt += `│         [${r.res}] ${mirrors}\n`;
+                                                txt += `│         \`${r.res}\` ${mirrors}\n`;
                                         }
                                         const firstRes = a.batchDownload.resolutions[0];
                                         if (firstRes?.links[0]) txt += `│         🔗 ${firstRes.links[0].url}\n`;
@@ -1064,7 +1064,7 @@ async function handleAnimasu({ hisoka, m, query, tolak, logCommand, sendConfirmW
                 } catch (err) {
                         if (loadingMsg) { try { await hisoka.sendMessage(m.from, { delete: loadingMsg.key }); } catch (_) {} }
                         await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
-                        await tolak(hisoka, m, `❌ Gagal ambil status anime: ${err?.message || err}`);
+                        await tolak(hisoka, m, `❌ *Gagal ambil status anime.*\n_${err?.message || err}_`);
                 }
                 return;
         }
@@ -1075,7 +1075,7 @@ async function handleAnimasu({ hisoka, m, query, tolak, logCommand, sendConfirmW
                         const daftarGrup = getEnabledGroups();
                         if (!daftarGrup.length) {
                                 await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
-                                await tolak(hisoka, m, `❌ Belum ada grup yang mengaktifkan Animasu.\nKetik *${pfx}animasu on* di grup tujuan dulu.`);
+                                await tolak(hisoka, m, `❌ *Belum ada grup yang mengaktifkan Animasu.*\n_Ketik_ \`${pfx}animasu on\` _di grup tujuan dulu._`);
                                 return;
                         }
                         const hasil = await simulasi();
@@ -1097,13 +1097,13 @@ async function handleAnimasu({ hisoka, m, query, tolak, logCommand, sendConfirmW
                         await hisoka.sendMessage(m.from, {
                                 text: `✅ *Test Animasu selesai!*\n\n` +
                                       `📤 Terkirim ke: *${berhasil}/${daftarGrup.length} grup*` +
-                                      (gagal ? `\n❌ Gagal: ${gagal} grup` : ''),
+                                      (gagal ? `\n❌ ~Gagal:~ _${gagal} grup tidak terkirim_` : ''),
                         }, { quoted: m });
                         await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
                         logCommand(m, hisoka, 'animasu-test-grup');
                 } catch (err) {
                         await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
-                        await tolak(hisoka, m, `❌ Gagal fetch Animasu: ${err?.message || err}`);
+                        await tolak(hisoka, m, `❌ *Gagal fetch Animasu.*\n_${err?.message || err}_`);
                 }
                 return;
         }
@@ -1129,12 +1129,12 @@ async function handleAnimasu({ hisoka, m, query, tolak, logCommand, sendConfirmW
                         logCommand(m, hisoka, 'animasu-test');
                 } catch (err) {
                         await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
-                        await tolak(hisoka, m, `❌ Gagal fetch Animasu: ${err?.message || err}`);
+                        await tolak(hisoka, m, `❌ *Gagal fetch Animasu.*\n_${err?.message || err}_`);
                 }
                 return;
         }
 
-        await tolak(hisoka, m, `❌ Sub-perintah tidak dikenal. Ketik *${pfx}animasu* untuk bantuan.`);
+        await tolak(hisoka, m, `❌ *Sub-perintah tidak dikenal.*\n_Ketik_ \`${pfx}animasu\` _untuk bantuan._`);
 }
 
 module.exports.handleAnimasu = handleAnimasu;
