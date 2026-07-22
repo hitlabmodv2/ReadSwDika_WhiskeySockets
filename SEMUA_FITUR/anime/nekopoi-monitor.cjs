@@ -503,18 +503,65 @@ async function handleNekopoinotif({ hisoka, m, query, tolak, logCommand, sendCon
     if (!cfg.nekopoinotif.groups)    cfg.nekopoinotif.groups    = {};
     if (!cfg.nekopoinotif.categories) cfg.nekopoinotif.categories = ['hentai', '2d-animation', '3d-hentai'];
 
-    // ── HELP ──────────────────────────────────────────────────────────────────
+    // ── NO SUBCOMMAND di grup → button status & aktifkan/nonaktifkan ─────────
     if (!sub || sub === 'help') {
-        const aktifDiSini = m.isGroup
-            ? (cfg.nekopoinotif.groups[m.from]?.enabled === true ? '✅ Aktif' : '❌ Nonaktif')
-            : '-';
+        if (m.isGroup) {
+            const gcEntry   = cfg.nekopoinotif.groups[m.from];
+            const isReg     = gcEntry !== undefined;
+            const isActive  = gcEntry?.enabled === true;
+
+            if (isActive) {
+                // Sudah aktif → tawarkan nonaktifkan
+                await sendConfirmWithButtons(hisoka, m,
+                    `╭─「 🎌 *NEKOPOI NOTIF* 」\n│\n` +
+                    `│ Status grup ini : ✅ *AKTIF*\n│\n` +
+                    `│ Fitur ini sudah aktif di grup ini.\n` +
+                    `│ Notif anime dari nekopoi.care akan\n` +
+                    `│ otomatis masuk ke sini.\n│\n` +
+                    `│ Ketik *${pfx}nekopoinotif off* untuk matikan.\n│\n` +
+                    `╰──────────────────────`,
+                    [{ text: '❌ Nonaktifkan di GC ini', id: '__nknotif_off__' }]
+                );
+            } else if (isReg) {
+                // ID ada tapi belum aktif → tawarkan aktifkan
+                await sendConfirmWithButtons(hisoka, m,
+                    `╭─「 🎌 *NEKOPOI NOTIF* 」\n│\n` +
+                    `│ Status grup ini : ❌ *BELUM AKTIF*\n│\n` +
+                    `│ ⚠️ ID grup ini sudah ada di daftar,\n` +
+                    `│    tapi fitur belum diaktifkan.\n│\n` +
+                    `│ Aktifkan notif nekopoi di GC ini?\n│\n` +
+                    `╰──────────────────────`,
+                    [
+                        { text: '✅ Ya, Aktifkan', id: '__nknotif_on__' },
+                        { text: '❌ Tidak',        id: '__nknotif_cancel__' },
+                    ]
+                );
+            } else {
+                // Belum terdaftar sama sekali
+                await sendConfirmWithButtons(hisoka, m,
+                    `╭─「 🎌 *NEKOPOI NOTIF* 」\n│\n` +
+                    `│ Status grup ini : ➕ *BELUM TERDAFTAR*\n│\n` +
+                    `│ Fitur ini belum aktif di grup ini.\n│\n` +
+                    `│ Aktifkan notif nekopoi di GC ini?\n│\n` +
+                    `╰──────────────────────`,
+                    [
+                        { text: '✅ Ya, Aktifkan', id: '__nknotif_on__' },
+                        { text: '❌ Tidak',        id: '__nknotif_cancel__' },
+                    ]
+                );
+            }
+            logCommand(m, hisoka, 'nekopoinotif-menu');
+            return;
+        }
+
+        // Private chat → tampilkan help biasa
         const katAktif = (cfg.nekopoinotif.categories || []).join(', ') || 'semua';
         await tolak(hisoka, m,
             `╭─「 🎌 *NEKOPOI NOTIF* 」\n` +
             `│\n` +
-            (m.isGroup ? `│ Status grup ini  : *${aktifDiSini}*\n│\n` : '') +
             `│ Kategori aktif   : _${katAktif}_\n│\n` +
-            `│ *Perintah:*\n` +
+            `│ *Perintah (jalankan di GC):*\n` +
+            `│ • ${pfx}nekopoinotif — menu aktifkan/nonaktifkan\n` +
             `│ • ${pfx}nekopoinotif on — aktifkan GC ini\n` +
             `│ • ${pfx}nekopoinotif off — nonaktifkan GC ini\n` +
             `│ • ${pfx}nekopoinotif status — list semua GC\n` +
