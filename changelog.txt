@@ -3,6 +3,32 @@
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ━━━━━━━━━━━━━━━━━━
+🐛 *[22 Juli 2026] — Bugfix nekopoi-monitor.cjs (Button Kontekstual)*
+━━━━━━━━━━━━━━━━━━
+
+🔧 *nekopoi-monitor.cjs — 3 Bug Fix Button Kontekstual*
+┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+• *Bug 1 — Handler `__addallgrp__nekopoinotif` tidak ada:*
+  Button "➕ Aktifkan Semua GC" muncul di UI tapi tap-nya
+  tidak melakukan apapun karena handler belum dibuat.
+  _Fix_: Tambah handler baru → fetch semua grup bot,
+  aktifkan semua, kirim konfirmasi + button balik kontekstual.
+
+• *Bug 2 — `__delallgrp__nekopoinotif` belum ada sama sekali:*
+  Button "❌ Matikan Semua GC" tidak pernah muncul dan
+  tidak ada handler-nya.
+  _Fix_: Tambah button + handler lengkap → nonaktifkan semua
+  grup, kirim konfirmasi + button balik.
+
+• *Bug 3 — Button tidak berubah konteks saat semua GC aktif:*
+  Setelah semua GC diaktifkan, button tetap hilang begitu saja.
+  Seharusnya berubah jadi "❌ Matikan Semua GC".
+  _Fix_: Logika button di `__nknotif_list__` diperbarui:
+  ada GC nonaktif → "➕ Aktifkan Semua GC"
+  semua aktif     → "❌ Matikan Semua GC" *(kontekstual)*
+┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+
+━━━━━━━━━━━━━━━━━━
 🐛 *[22 Juli 2026] — Bugfix nekopoi.cjs*
 ━━━━━━━━━━━━━━━━━━
 

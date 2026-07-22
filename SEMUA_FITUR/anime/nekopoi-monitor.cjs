@@ -913,7 +913,8 @@ async function handleNekpoiNotifReply({ hisoka, m, pendingNekpoiNotifChoices, ge
 async function handleNekopoinotifCallbacks({ hisoka, m, tolak, logCommand, Button, loadConfig, fs: fsMod, path: pathMod }) {
     if (!m.isOwner) return false;
     const txt = typeof m.text === 'string' ? m.text.trim() : '';
-    if (!['__nknotif_on__', '__nknotif_off__', '__nknotif_cancel__', '__nknotif_list__'].includes(txt)) return false;
+    if (!['__nknotif_on__', '__nknotif_off__', '__nknotif_cancel__', '__nknotif_list__',
+           '__addallgrp__nekopoinotif', '__delallgrp__nekopoinotif'].includes(txt)) return false;
 
     const pfx     = m.prefix || '.';
     const cfgPath = pathMod.join(process.cwd(), 'config.json');
@@ -1021,9 +1022,13 @@ async function handleNekopoinotifCallbacks({ hisoka, m, tolak, logCommand, Butto
             if (gcAktif)         _btnList.addReply('❌ Nonaktifkan GC Ini',  '__nknotif_off__');
             if (gcNonaktif || gcBelum) _btnList.addReply('✅ Aktifkan GC Ini', '__nknotif_on__');
 
-            // Button 2: aktifkan semua (hanya kalau ada yg belum aktif)
-            if (nonJids.length || gcBelum || gcNonaktif)
+            // Button 2: kontekstual — Aktifkan Semua ↔ Matikan Semua
+            const _adaYgNonaktif = nonJids.length > 0 || gcBelum || gcNonaktif;
+            const _semuaAktif    = aktifJids.length > 0 && !_adaYgNonaktif;
+            if (_adaYgNonaktif)
                 _btnList.addReply('➕ Aktifkan Semua GC', '__addallgrp__nekopoinotif');
+            else if (_semuaAktif)
+                _btnList.addReply('❌ Matikan Semua GC',  '__delallgrp__nekopoinotif');
 
             // Button 3: refresh selalu ada
             _btnList.addReply('🔄 Refresh', '__nknotif_list__');
@@ -1036,6 +1041,81 @@ async function handleNekopoinotifCallbacks({ hisoka, m, tolak, logCommand, Butto
         } catch (e) {
             await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
             await tolak(hisoka, m, `❌ Gagal ambil list GC: ${e.message}`);
+        }
+        return true;
+    }
+
+    // ── AKTIFKAN SEMUA GRUP ───────────────────────────────────────────────────
+    if (txt === '__addallgrp__nekopoinotif') {
+        await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
+        try {
+            const allGroupsRaw = await hisoka.groupFetchAllParticipating();
+            const allJids      = Object.keys(allGroupsRaw || {});
+            if (!allJids.length) {
+                await tolak(hisoka, m, '❌ Bot tidak ada di grup manapun.');
+                return true;
+            }
+            const cfg = loadConfig();
+            if (!cfg.nekopoinotif)        cfg.nekopoinotif        = { groups: {}, categories: ['hentai', '2d-animation', '3d-hentai'] };
+            if (!cfg.nekopoinotif.groups) cfg.nekopoinotif.groups = {};
+            for (const jid of allJids)
+                cfg.nekopoinotif.groups[jid] = { enabled: true, diubahPada: Date.now() };
+            fsMod.writeFileSync(cfgPath, JSON.stringify(cfg, null, 2));
+            await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+            const _body =
+                `╭─「 🎌 *NEKOPOI NOTIF* 」\n│\n` +
+                `│ ✅ *${allJids.length} grup berhasil diaktifkan!*\n│\n` +
+                `│ Notif anime nekopoi.care akan masuk\n` +
+                `│ ke semua GC yang ada bot.\n│\n` +
+                `╰──────────────────────`;
+            try {
+                await new Button()
+                    .setBody(_body)
+                    .setFooter('🎌 Nekopoi Notif')
+                    .addReply('❌ Matikan Semua GC', '__delallgrp__nekopoinotif')
+                    .addReply('📋 Lihat GC Aktif',   '__nknotif_list__')
+                    .run(m.from, hisoka, m);
+            } catch (_) { await tolak(hisoka, m, _body); }
+            logCommand(m, hisoka, 'nekopoinotif-addallgrp');
+        } catch (e) {
+            await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
+            await tolak(hisoka, m, `❌ Gagal: ${e.message}`);
+        }
+        return true;
+    }
+
+    // ── NONAKTIFKAN SEMUA GRUP ────────────────────────────────────────────────
+    if (txt === '__delallgrp__nekopoinotif') {
+        await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
+        try {
+            const allGroupsRaw = await hisoka.groupFetchAllParticipating();
+            const allJids      = Object.keys(allGroupsRaw || {});
+            const cfg = loadConfig();
+            if (!cfg.nekopoinotif)        cfg.nekopoinotif        = { groups: {}, categories: ['hentai', '2d-animation', '3d-hentai'] };
+            if (!cfg.nekopoinotif.groups) cfg.nekopoinotif.groups = {};
+            for (const jid of allJids)
+                cfg.nekopoinotif.groups[jid] = { enabled: false, diubahPada: Date.now() };
+            fsMod.writeFileSync(cfgPath, JSON.stringify(cfg, null, 2));
+            await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+            const _body =
+                `╭─「 🎌 *NEKOPOI NOTIF* 」\n│\n` +
+                `│ ❌ *${allJids.length} grup dinonaktifkan.*\n│\n` +
+                `│ Notif tidak akan masuk ke GC manapun.\n│\n` +
+                `│ Ketik *${pfx}nekopoinotif on* di GC yang\n` +
+                `│ ingin diaktifkan kembali.\n│\n` +
+                `╰──────────────────────`;
+            try {
+                await new Button()
+                    .setBody(_body)
+                    .setFooter('🎌 Nekopoi Notif')
+                    .addReply('➕ Aktifkan Semua GC', '__addallgrp__nekopoinotif')
+                    .addReply('📋 Lihat GC Aktif',    '__nknotif_list__')
+                    .run(m.from, hisoka, m);
+            } catch (_) { await tolak(hisoka, m, _body); }
+            logCommand(m, hisoka, 'nekopoinotif-delallgrp');
+        } catch (e) {
+            await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
+            await tolak(hisoka, m, `❌ Gagal: ${e.message}`);
         }
         return true;
     }
