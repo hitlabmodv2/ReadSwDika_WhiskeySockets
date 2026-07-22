@@ -131,7 +131,8 @@ const pendingMusikaiCache  = new Map(); // key → { results, params, ts }
 const pendingMusikai2Cache = new Map(); // key → { results, params, ts } (musikai2)
 const pendingAlqDlChoices = new Map();
 const pendingAlqUpdateChoices = new Map();
-const pendingAlqNotifChoices = new Map();
+const pendingAlqNotifChoices   = new Map();
+const pendingNekpoiNotifChoices = new Map();
 const pendingAntilinkChoices = new Map();
 const pendingCosplayChoices = new Map();
 const pendingKomikChoices = new Map();
@@ -836,6 +837,12 @@ export default async function ({ message, type: messagesType }, hisoka) {
                 {
                         const { handleAlqNotifReply } = _require(path.resolve('./SEMUA_FITUR/anime/alqanime-monitor.cjs'));
                         if (await handleAlqNotifReply({ hisoka, m, pendingAlqNotifChoices, getQuotedStanzaId, tolak, logCommand, loadConfig, fs, path })) return;
+                }
+
+                // ── Handle reply ke status nekopoinotif (add/del GC) ──
+                {
+                        const { handleNekpoiNotifReply } = _require(path.resolve('./SEMUA_FITUR/anime/nekopoi-monitor.cjs'));
+                        if (await handleNekpoiNotifReply({ hisoka, m, pendingNekpoiNotifChoices, getQuotedStanzaId, tolak, logCommand, loadConfig, fs, path })) return;
                 }
 
                 // ── Handle pending hentaidad choice → hentaidad.cjs ──
@@ -2034,6 +2041,12 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'alqanimenotif': {
                                 const { handleAlqanimeNotif } = _require(path.resolve('./SEMUA_FITUR/anime/alqanime-monitor.cjs'));
                                 await handleAlqanimeNotif({ hisoka, m, query, tolak, logCommand, sendConfirmWithButtons, fs, path, loadConfig, pendingAlqNotifChoices, getQuotedStanzaId });
+                                break;
+                        }
+
+                        case 'nekopoinotif': {
+                                const { handleNekopoinotif } = _require(path.resolve('./SEMUA_FITUR/anime/nekopoi-monitor.cjs'));
+                                await handleNekopoinotif({ hisoka, m, query, tolak, logCommand, sendConfirmWithButtons, fs, path, loadConfig, pendingNekpoiNotifChoices });
                                 break;
                         }
 

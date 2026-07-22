@@ -2,34 +2,18 @@
   "events": [
     {
       "type": "connected",
-      "connectedAt": "2026-07-21T04:39:31.357Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-21T04:36:35.718Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-21T04:34:09.277Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-21T02:36:33.258Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-20T15:03:31.707Z"
+      "connectedAt": "2026-07-22T05:48:49.994Z"
     },
     {
       "type": "pairing",
       "code": "WILY-CODE",
       "number": "6285159438825",
-      "startAt": "2026-07-20T15:03:14.834Z",
-      "expireAt": "2026-07-20T15:06:14.834Z",
+      "startAt": "2026-07-22T05:48:28.150Z",
+      "expireAt": "2026-07-22T05:51:28.150Z",
       "durationSeconds": 180,
-      "sessionExpireAt": "2026-07-20T15:06:14.834Z"
+      "sessionExpireAt": "2026-07-22T05:51:28.150Z"
     }
   ],
-  "lastUpdated": "2026-07-21T04:39:31.358Z",
-  "sessionStart": "2026-07-20T15:03:14.835Z"
+  "lastUpdated": "2026-07-22T05:48:49.994Z",
+  "sessionStart": "2026-07-22T05:48:28.173Z"
 }

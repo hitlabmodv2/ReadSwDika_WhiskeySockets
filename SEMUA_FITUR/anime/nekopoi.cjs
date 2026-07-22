@@ -1,0 +1,216 @@
+/**
+ * ───────────────────────────────
+ *  Recode By   : Bang Wilykun
+ *  WhatsApp    : 6289688206739
+ *  Telegram    : @Wilykun1994
+ * ───────────────────────────────
+ *
+ *  nekopoi.cjs — Scraper NekoPoi.care
+ *  Scrape konten terbaru dari nekopoi.care per kategori:
+ *  Hentai, 2D Animation, 3D Hentai
+ * ───────────────────────────────
+ */
+'use strict';
+
+const axios = require('axios');
+
+const BASE = 'https://nekopoi.care';
+const JINA = 'https://r.jina.ai';
+
+const HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+    'Accept': 'text/plain, */*',
+    'Accept-Language': 'id-ID,id;q=0.9,en;q=0.8',
+    'Referer': 'https://nekopoi.care/',
+};
+
+// Kategori yang didukung
+const KATEGORI_MAP = {
+    'hentai'       : { label: '🎌 Hentai',        slug: 'hentai',        emoji: '🎌' },
+    '2d-animation' : { label: '🎥 2D Animation',   slug: '2d-animation',  emoji: '🎥' },
+    '3d-hentai'    : { label: '🧊 3D Hentai',      slug: '3d-hentai',     emoji: '🧊' },
+};
+
+async function fetchMarkdown(url) {
+    const jinaUrl = `${JINA}/${url}`;
+    const res = await axios.get(jinaUrl, {
+        headers: HEADERS,
+        timeout: 30000,
+    });
+    return res.data || '';
+}
+
+// ── Deteksi kategori dari URL ──────────────────────────────────────────────────
+function deteksiKategori(url) {
+    const u = (url || '').toLowerCase();
+    if (/\/l2d-|l2d-sub-indo|-l2d-|\/category\/2d-animation/.test(u)) return '2d-animation';
+    if (/\/3d-|-3d-|\/category\/3d-hentai/.test(u)) return '3d-hentai';
+    return 'hentai';
+}
+
+// ── Parse listing kategori ─────────────────────────────────────────────────────
+// Format markdown dari r.jina.ai:
+// *   ## [[4K] Title Sinopsis : ...](URL)
+// *   ## [Title Sinopsis : ...](URL)
+// Judul bisa mengandung [4K], [BATCH], [L2D] dll — pakai greedy [^\n]+ + backtrack
+function parseCategoryListing(md, defaultKategori) {
+    const results = [];
+    const seen    = new Set();
+
+    // Pakai greedy [^\n]+ agar backtrack bisa menemukan ](URL) di akhir baris
+    // Cocok dengan judul yang mengandung [] seperti [4K], [BATCH], [L2D]
+    const regex = /##\s+\[([^\n]+)\]\((https?:\/\/nekopoi\.care\/[^\s)]+)\)/g;
+    let m;
+    while ((m = regex.exec(md)) !== null) {
+        const url = m[2].trim().replace(/\/+$/, '');
+        // Skip halaman kategori/list/nav
+        if (seen.has(url)) continue;
+        if (/\/(category|genre|hentai-list|jav-list|jadwal|privacy-policy|2257|random)/.test(url)) continue;
+        if (url === BASE || url === BASE + '/') continue;
+        seen.add(url);
+
+        // Bersihkan judul — strip sinopsis snippet, original title, dll
+        let title = m[1].trim();
+        title = title
+            .replace(/\s+Sinopsis\s*:.*/i, '')       // "Sinopsis : ..."
+            .replace(/\s+Sinopsis\s+.*/i, '')         // "Sinopsis Suatu hari..."
+            .replace(/\s+Original Title\s*:.*/i, '')
+            .replace(/\s+Parody\s*:.*/i, '')
+            .replace(/\s+Producers?\s*:.*/i, '')
+            .replace(/\s+Duration\s*:.*/i, '')
+            .replace(/\s+Genre\s*:.*/i, '')
+            .replace(/\s*Subtitle Indonesia\s*/gi, ' Sub Indo')
+            .replace(/\s{2,}/g, ' ')
+            .trim();
+
+        const kategori = defaultKategori || deteksiKategori(url);
+        results.push({ title, url, kategori });
+    }
+    return results;
+}
+
+// ── Parse homepage — ambil "Episode Terbaru" ──────────────────────────────────
+function parseHomepageEpisodeTerbaru(md) {
+    const results = [];
+    const seen    = new Set();
+
+    // Cari section "# Episode Terbaru"
+    const sectionM = md.match(/# Episode Terbaru\s*\n([\s\S]*?)(?:\n# [^\n]|\n## Posts pagination|$)/);
+    if (!sectionM) return results;
+
+    const section = sectionM[1];
+    // Tiap post: ## [Title](URL)\nDate
+    const regex = /## \[([^\]]+)\]\((https?:\/\/nekopoi\.care\/[^)]+)\)\s*\n+([^\n]+)/g;
+    let m;
+    while ((m = regex.exec(section)) !== null) {
+        const url = m[2].trim().replace(/\/+$/, '');
+        if (seen.has(url)) continue;
+        seen.add(url);
+        const title    = m[1].trim();
+        const tanggal  = m[3].trim();
+        const kategori = deteksiKategori(url);
+        results.push({ title, url, tanggal, kategori });
+    }
+    return results;
+}
+
+// ── Parse halaman detail post ──────────────────────────────────────────────────
+function parseDetailPost(md, url) {
+    // Thumbnail — ambil dari wp-content/uploads, skip logo/app
+    // Pakai regex URL langsung agar tidak terpengaruh [4K] di alt text
+    let thumbnail = null;
+    const thumbRegex = /\]\((https:\/\/nekopoi\.care\/wp-content\/uploads\/[^)"\s]+)\)/g;
+    let tm;
+    while ((tm = thumbRegex.exec(md)) !== null) {
+        const imgUrl = tm[1];
+        if (/logo\.png|app\.png|histats/.test(imgUrl)) continue;
+        thumbnail = imgUrl;
+        break;
+    }
+
+    // Judul utama dari H1
+    const titleM = md.match(/^# ([^\n]+)/m);
+    const title  = titleM ? titleM[1].replace(/\d+\s+kali\s*$/, '').trim() : '';
+
+    // Tanggal posting — format: "N kali Senin, 20 Juli 2026" atau standalone
+    const dateM   = md.match(/((?:Senin|Selasa|Rabu|Kamis|Jumat|Sabtu|Minggu),\s+\d+\s+\w+\s+\d{4})/);
+    const tanggal = dateM ? dateM[1].trim() : '';
+
+    // Sinopsis — format bisa **Sinopsis** atau **Sinopsis :**
+    let sinopsis = '';
+    const sinM = md.match(/\*\*Sinopsis\s*:?\*\*\s*\n+([\s\S]+?)(?=\n\n|\*\*Genre|\*\*Anime\s*:|#\s|$)/i);
+    if (sinM) {
+        sinopsis = sinM[1].replace(/\n/g, ' ').replace(/\s{2,}/g, ' ').trim();
+    }
+
+    // Genre — bisa mengandung link [Genre](URL) — strip ke teks saja
+    const genreM  = md.match(/\*\*Genre\s*:?\*\*\s*([^\n]+)/i);
+    const genre   = genreM ? genreM[1].replace(/\[([^\]]+)\]\([^)]+\)/g, '$1').replace(/,\s*/g, ', ').trim() : '';
+
+    // Judul anime (original)
+    const animeM  = md.match(/\*\*Anime\s*:?\*\*\s*([^\n]+)/i);
+    const anime   = animeM ? animeM[1].trim() : '';
+
+    // Judul Jepang
+    const jpM     = md.match(/\*\*Judul Jepang\*\*\s*:\s*([^\n]+)/i);
+    const judulJp = jpM ? jpM[1].trim() : '';
+
+    // Producers
+    const prodM     = md.match(/\*\*Producers?\*\*\s*:?\s*([^\n]+)/i);
+    const producers = prodM ? prodM[1].trim() : '';
+
+    // Duration
+    const durM    = md.match(/\*\*Duration\s*:?\*\*\s*([^\n]+)/i);
+    const durasi  = durM ? durM[1].trim() : '';
+
+    // Size — strip bold markers
+    const sizeM   = md.match(/\*\*Size\s*:?\*\*\s*([^\n]+)/i);
+    const ukuran  = sizeM ? sizeM[1].replace(/\*\*/g, '').trim() : '';
+
+    // Status
+    const statusM = md.match(/\*\*Status\*\*\s*:\s*([^\n]+)/i);
+    const status  = statusM ? statusM[1].trim() : '';
+
+    // Episode info
+    const epM     = md.match(/\*\*Episode\*\*\s*:\s*([^\n]*)/i);
+    const episode = epM ? epM[1].trim() : '';
+
+    // Tayang
+    const tayangM = md.match(/\*\*Tayang\*\*\s*:\s*([^\n]+)/i);
+    const tayang  = tayangM ? tayangM[1].trim() : '';
+
+    // Kategori dari URL
+    const kategori = deteksiKategori(url);
+
+    return {
+        title, thumbnail, tanggal, sinopsis, genre, anime, judulJp,
+        producers, durasi, ukuran, status, episode, tayang, kategori, url,
+    };
+}
+
+// ── API Publik ─────────────────────────────────────────────────────────────────
+
+async function getHomepageData() {
+    const md = await fetchMarkdown(`${BASE}/`);
+    const episodeTerbaru = parseHomepageEpisodeTerbaru(md);
+    return { episodeTerbaru };
+}
+
+async function getCategoryPosts(slug) {
+    // slug: 'hentai' | '2d-animation' | '3d-hentai'
+    const md = await fetchMarkdown(`${BASE}/category/${slug}/`);
+    return parseCategoryListing(md, slug);
+}
+
+async function getDetailNekopoi(url) {
+    const md = await fetchMarkdown(url);
+    return parseDetailPost(md, url);
+}
+
+module.exports = {
+    KATEGORI_MAP,
+    deteksiKategori,
+    getHomepageData,
+    getCategoryPosts,
+    getDetailNekopoi,
+};

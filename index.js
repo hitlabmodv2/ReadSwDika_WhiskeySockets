@@ -1674,6 +1674,87 @@ async function main() {
                         }
                         /* ================= END AUTO ALQANIME NOTIF SCHEDULER ================= */
 
+                        /* =================== AUTO NEKOPOI NOTIF SCHEDULER =================== */
+                        if (global.nekopoinotifInterval) {
+                                clearInterval(global.nekopoinotifInterval);
+                                global.nekopoinotifInterval = null;
+                        }
+                        {
+                                const NEKO_PATH        = path.join(process.cwd(), 'SEMUA_FITUR', 'anime', 'nekopoi-monitor.cjs');
+                                const NEKO_SCRAPE_PATH = path.join(process.cwd(), 'SEMUA_FITUR', 'anime', 'nekopoi.cjs');
+                                const NEKO_INTERVAL_MS = 2 * 60 * 1000; // 2 menit
+
+                                const runNekopoinotif = async () => {
+                                        if (global.nekopoinotifRunning) return;
+                                        global.nekopoinotifRunning = true;
+                                        try {
+                                                delete _require.cache[_require.resolve(NEKO_PATH)];
+                                                try { delete _require.cache[_require.resolve(NEKO_SCRAPE_PATH)]; } catch (_) {}
+                                                const _neko = _require(NEKO_PATH);
+
+                                                const daftarGrup = _neko.getEnabledGroups();
+                                                if (!daftarGrup.length) return;
+
+                                                const kontenBaru = await _neko.cariKontenBaru();
+                                                if (!kontenBaru.length) return;
+
+                                                const sudahKirim = new Set();
+                                                const unikList   = kontenBaru.filter(item => {
+                                                        const key = item.id || item.url;
+                                                        if (sudahKirim.has(key)) return false;
+                                                        sudahKirim.add(key);
+                                                        return true;
+                                                });
+
+                                                for (const item of unikList) {
+                                                        const caption   = _neko.buatCaption(item);
+                                                        const urlGambar = item.thumbnail || null;
+
+                                                        let imgBuffer  = null;
+                                                        let imgSendUrl = null;
+                                                        if (urlGambar) {
+                                                                imgBuffer  = await _neko.downloadImageBuffer(urlGambar);
+                                                                if (!imgBuffer) imgSendUrl = _neko.buatProxyUrl(urlGambar);
+                                                        }
+
+                                                        const BATCH = 5;
+                                                        for (let i = 0; i < daftarGrup.length; i += BATCH) {
+                                                                const chunk = daftarGrup.slice(i, i + BATCH);
+                                                                await Promise.allSettled(chunk.map(async jid => {
+                                                                        try {
+                                                                                if (imgBuffer) {
+                                                                                        await hisoka.sendMessage(jid, { image: imgBuffer, mimetype: 'image/jpeg', caption });
+                                                                                } else if (imgSendUrl) {
+                                                                                        await hisoka.sendMessage(jid, { image: { url: imgSendUrl }, caption });
+                                                                                } else {
+                                                                                        await hisoka.sendMessage(jid, { text: caption });
+                                                                                }
+                                                                        } catch (e) {
+                                                                                console.error(`[NekopoinNotif] Gagal kirim ke ${jid}:`, e?.message);
+                                                                        }
+                                                                }));
+                                                                if (i + BATCH < daftarGrup.length) await new Promise(r => setTimeout(r, 1000));
+                                                        }
+
+                                                        _neko.tandaiDanLog(item, daftarGrup);
+                                                        console.log(`[NekopoinNotif] ✅ "${item.title}" [${item.kategori}] terkirim ke ${daftarGrup.length} grup`);
+                                                        await new Promise(r => setTimeout(r, 2000));
+                                                }
+                                        } catch (err) {
+                                                console.error('[NekopoinNotif] Error scheduler:', err?.message);
+                                        } finally {
+                                                global.nekopoinotifRunning = false;
+                                        }
+                                };
+
+                                // Mulai 60 detik setelah start (setelah alqanime)
+                                setTimeout(() => {
+                                        runNekopoinotif();
+                                        global.nekopoinotifInterval = setInterval(runNekopoinotif, NEKO_INTERVAL_MS);
+                                }, 60000);
+                        }
+                        /* ================= END AUTO NEKOPOI NOTIF SCHEDULER ================= */
+
                         /* ===================== AUTO TVONENEWS SCHEDULER ===================== */
                         if (global.tvoneInterval) {
                                 clearInterval(global.tvoneInterval);
