@@ -1686,7 +1686,7 @@ async function main() {
                         {
                                 const NEKO_PATH        = path.join(process.cwd(), 'SEMUA_FITUR', 'anime', 'nekopoi-monitor.cjs');
                                 const NEKO_SCRAPE_PATH = path.join(process.cwd(), 'SEMUA_FITUR', 'anime', 'nekopoi.cjs');
-                                const NEKO_INTERVAL_MS = 2 * 60 * 1000; // 2 menit
+                                const NEKO_INTERVAL_MS = 1 * 60 * 1000; // 1 menit
 
                                 const runNekopoinotif = async () => {
                                         if (global.nekopoinotifRunning) return;
