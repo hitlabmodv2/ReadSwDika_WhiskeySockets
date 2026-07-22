@@ -1356,7 +1356,7 @@ _sbar_sweep 1 8 0.03 "Inisialisasi ..."
 
 # ── 9→25% : setup REMOTE_URL ──
 _sbar_sweep 9 25 0.025 "Setup remote URL ..."
-REMOTE_URL="https://${USER}:${TOKEN}@github.com/${USER}/${REPO}.git"
+REMOTE_URL="https://${REPO_OWNER}:${TOKEN}@github.com/${REPO_OWNER}/${REPO}.git"
 
 # ── 26→44% : git init + config ──
 _sbar_sweep 26 32 0.02 "Init git repo ..."
@@ -2977,7 +2977,7 @@ action_quick_push() {
   local _ts_now; _ts_now=$(date '+%H:%M:%S %d %b %Y')
   if [ "$_push_ok" -eq 1 ]; then
     echo -e "  ${C_GREEN}✅ Push berhasil!${C_RESET}"
-    echo -e "  ${C_BLUE}🔗 https://github.com/${USER}/${REPO}/tree/${DEFAULT_BRANCH}${C_RESET}"
+    echo -e "  ${C_BLUE}🔗 https://github.com/${REPO_OWNER}/${REPO}/tree/${DEFAULT_BRANCH}${C_RESET}"
     log_push_event "$DEFAULT_BRANCH" "OK" "$_msg" "$_changed"
     local _btn_pushok='{"inline_keyboard":[[{"text":"🔗 Lihat Branch","url":"https://github.com/'"${USER}"'/'"${REPO}"'/tree/'"${DEFAULT_BRANCH}"'"},{"text":"📊 Commits","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commits/'"${DEFAULT_BRANCH}"'"}],[{"text":"🔀 Compare","url":"https://github.com/'"${USER}"'/'"${REPO}"'/compare"},{"text":"📥 Pull Request","url":"https://github.com/'"${USER}"'/'"${REPO}"'/pulls"}]]}'
     local _qp_detail; _qp_detail=$(_build_push_detail 2>/dev/null || true)
@@ -3213,13 +3213,13 @@ action_rename_repo() {
     sed -i "s|^REPO=.*|REPO=\"${new_name}\"|" "$0" 2>/dev/null || true
 
     # Update remote URL lokal agar tidak putus
-    local new_url="https://${USER}:${TOKEN}@github.com/${USER}/${new_name}.git"
+    local new_url="https://${REPO_OWNER}:${TOKEN}@github.com/${REPO_OWNER}/${new_name}.git"
     git remote set-url origin "$new_url" 2>/dev/null || true
 
     echo ""
     echo -e "  ${C_GREEN}✅ Repository berhasil di-rename di GitHub!${C_RESET}"
     echo -e "     ${C_DIM}${USER}/${old_repo}${C_RESET} ${C_BOLD}→${C_RESET} ${C_GREEN}${USER}/${new_name}${C_RESET}"
-    echo -e "  ${C_BLUE}🔗 https://github.com/${USER}/${new_name}${C_RESET}"
+    echo -e "  ${C_BLUE}🔗 https://github.com/${REPO_OWNER}/${new_name}${C_RESET}"
     echo -e "  ${C_DIM}Remote URL lokal sudah diperbarui otomatis.${C_RESET}"
     echo -e "  ${C_DIM}Perubahan nama disimpan permanen di push.sh${C_RESET}"
     local _ts_rr; _ts_rr=$(date '+%H:%M:%S %d %b %Y')
@@ -3228,7 +3228,7 @@ action_rename_repo() {
 ━━━━━━━━━━━━━━━━━━━━
 👤 <code>${USER}</code>
 🔄 <code>${old_repo}</code> → <code>${new_name}</code>
-🔗 github.com/${USER}/${new_name}
+🔗 github.com/${REPO_OWNER}/${new_name}
 🕐 ${_ts_rr}" "$_btn_rr" 2>/dev/null &
   else
     local api_msg
@@ -3421,7 +3421,7 @@ action_switch_default() {
     echo ""
     echo -e "  ${C_GREEN}✅ Default branch berhasil diubah di GitHub!${C_RESET}"
     echo -e "     ${C_DIM}${old_default}${C_RESET} ${C_BOLD}→${C_RESET} ${C_GREEN}${new_default}${C_RESET}"
-    echo -e "  ${C_BLUE}🔗 https://github.com/${USER}/${REPO}${C_RESET}"
+    echo -e "  ${C_BLUE}🔗 https://github.com/${REPO_OWNER}/${REPO}${C_RESET}"
     echo -e "  ${C_DIM}Perubahan juga disimpan permanen di push.sh${C_RESET}"
     local _ts_sd; _ts_sd=$(date '+%H:%M:%S %d %b %Y')
     local _btn_sd='{"inline_keyboard":[[{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"},{"text":"🌿 Branches","url":"https://github.com/'"${USER}"'/'"${REPO}"'/branches"}],[{"text":"🔀 New PR","url":"https://github.com/'"${USER}"'/'"${REPO}"'/compare"},{"text":"📊 Compare","url":"https://github.com/'"${USER}"'/'"${REPO}"'/compare/'"${old_default}"'...'"${new_default}"'"}]]}'
@@ -3429,7 +3429,7 @@ action_switch_default() {
 ━━━━━━━━━━━━━━━━━━━━
 📁 <code>${USER}/${REPO}</code>
 🔄 <code>${old_default}</code> → <code>${new_default}</code>
-🔗 github.com/${USER}/${REPO}
+🔗 github.com/${REPO_OWNER}/${REPO}
 🕐 ${_ts_sd}" "$_btn_sd" 2>/dev/null &
   else
     # Gagal — tampilkan error dari API
@@ -3834,7 +3834,7 @@ action_list_branches() {
                 run_upload
                 ;;
               2)
-                local gh_url="https://github.com/${USER}/${REPO}/tree/${_sel_name}"
+                local gh_url="https://github.com/${REPO_OWNER}/${REPO}/tree/${_sel_name}"
                 if ! open_url "$gh_url"; then
                   echo -e "  ${C_DIM}URL: ${gh_url}${C_RESET}"
                   sleep 2
@@ -4094,12 +4094,12 @@ action_create_repo() {
     echo -e "${C_DIM}  ──────────────────────────────────${C_RESET}"
     printf "  ${C_DIM}Nama    ${C_RESET}${C_BOLD}%s${C_RESET}\n"       "${full_name:-${USER}/${new_repo_name}}"
     printf "  ${C_DIM}Visib.  ${C_RESET}%s\n"                           "$vis_label"
-    printf "  ${C_DIM}URL     ${C_RESET}${C_CYAN}%s${C_RESET}\n"       "${html_url:-https://github.com/${USER}/${new_repo_name}}"
-    printf "  ${C_DIM}Clone   ${C_RESET}${C_DIM}%s${C_RESET}\n"        "${clone_url:-https://github.com/${USER}/${new_repo_name}.git}"
+    printf "  ${C_DIM}URL     ${C_RESET}${C_CYAN}%s${C_RESET}\n"       "${html_url:-https://github.com/${REPO_OWNER}/${new_repo_name}}"
+    printf "  ${C_DIM}Clone   ${C_RESET}${C_DIM}%s${C_RESET}\n"        "${clone_url:-https://github.com/${REPO_OWNER}/${new_repo_name}.git}"
     echo -e "${C_DIM}  ──────────────────────────────────${C_RESET}"
     echo ""
     echo -e "  ${C_DIM}▸ Clone dengan:${C_RESET}"
-    echo -e "  ${C_BOLD}git clone ${clone_url:-https://github.com/${USER}/${new_repo_name}.git}${C_RESET}"
+    echo -e "  ${C_BOLD}git clone ${clone_url:-https://github.com/${REPO_OWNER}/${new_repo_name}.git}${C_RESET}"
     local _ts_cr; _ts_cr=$(date '+%H:%M:%S %d %b %Y')
     local _btn_cr='{"inline_keyboard":[[{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${new_repo_name}"'"},{"text":"⚙️ Settings","url":"https://github.com/'"${USER}"'/'"${new_repo_name}"'/settings"}],[{"text":"📋 Issues","url":"https://github.com/'"${USER}"'/'"${new_repo_name}"'/issues"},{"text":"🌿 Branches","url":"https://github.com/'"${USER}"'/'"${new_repo_name}"'/branches"}]]}'
     send_telegram_photo "https://w.wallhaven.cc/full/rd/wallhaven-rd5vz1.jpg" "📦 <b>REPO BARU DIBUAT</b>
@@ -4107,7 +4107,7 @@ action_create_repo() {
 👤 <code>${USER}</code>
 📁 <code>${full_name:-${USER}/${new_repo_name}}</code>
 🔒 ${vis_label}
-🔗 ${html_url:-github.com/${USER}/${new_repo_name}}
+🔗 ${html_url:-github.com/${REPO_OWNER}/${new_repo_name}}
 🕐 ${_ts_cr}" "$_btn_cr" 2>/dev/null &
   else
     # Ekstrak pesan error dari GitHub
@@ -4469,7 +4469,7 @@ action_import_repo() {
 ━━━━━━━━━━━━━━━━━━━━
 👤 <code>${USER}</code>
 📁 <code>${USER}/${imp_repo_name}</code>
-🔗 github.com/${USER}/${imp_repo_name}
+🔗 github.com/${REPO_OWNER}/${imp_repo_name}
 ✅ Import berhasil 100%
 🕐 ${_ts_ir2}" "$_btn_ir2" 2>/dev/null &
     elif [ -n "$_poll_final" ]; then
@@ -5305,14 +5305,14 @@ action_rename_branch() {
     echo ""
     echo -e "  ${C_GREEN}✅ Branch berhasil di-rename di GitHub!${C_RESET}"
     echo -e "  ${C_DIM}${old_name}${C_RESET} ${C_BOLD}→${C_RESET} ${C_GREEN}${new_name}${C_RESET}"
-    echo -e "  ${C_BLUE}🔗 https://github.com/${USER}/${REPO}/tree/${new_name}${C_RESET}"
+    echo -e "  ${C_BLUE}🔗 https://github.com/${REPO_OWNER}/${REPO}/tree/${new_name}${C_RESET}"
     local _ts_rb; _ts_rb=$(date '+%H:%M:%S %d %b %Y')
     local _btn_rb='{"inline_keyboard":[[{"text":"🌿 Lihat Branch Baru","url":"https://github.com/'"${USER}"'/'"${REPO}"'/tree/'"${new_name}"'"},{"text":"📋 Semua Branches","url":"https://github.com/'"${USER}"'/'"${REPO}"'/branches"}],[{"text":"🔀 Pull Request","url":"https://github.com/'"${USER}"'/'"${REPO}"'/compare/'"${new_name}"'"},{"text":"📊 Commits","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commits/'"${new_name}"'"}]]}'
     send_telegram_photo "https://w.wallhaven.cc/full/vp/wallhaven-vpxgk5.png" "✏️ <b>BRANCH DI-RENAME</b>
 ━━━━━━━━━━━━━━━━━━━━
 📁 <code>${USER}/${REPO}</code>
 🔄 <code>${old_name}</code> → <code>${new_name}</code>
-🔗 github.com/${USER}/${REPO}/tree/${new_name}
+🔗 github.com/${REPO_OWNER}/${REPO}/tree/${new_name}
 🕐 ${_ts_rb}" "$_btn_rb" 2>/dev/null &
 
     # Kalau yang di-rename adalah default branch, update variabel & script
@@ -5457,7 +5457,7 @@ action_create_branch() {
 📁 <code>${USER}/${REPO}</code>
 🌿 Branch baru: <code>${name}</code>
 📤 File lokal sudah ter-upload
-🔗 github.com/${USER}/${REPO}/tree/${name}
+🔗 github.com/${REPO_OWNER}/${REPO}/tree/${name}
 ━━━━━━━━━━━━━━━━━━━━
 🕐 ${_ts_cb}" "$_btn_cb" 2>/dev/null &
 
@@ -5927,7 +5927,7 @@ push_head_to_branch() {
     remote_sha=$(git rev-parse "refs/remotes/origin/${branch}" 2>/dev/null)
     if [ "$local_sha" = "$remote_sha" ] && [ "$COMMIT_DONE" = "no" ]; then
       echo -e "  ${C_DIM}ℹ️  HEAD sudah identik dengan origin/${branch}${C_RESET}"
-      echo -e "  ${C_GREEN}✅ Sudah up-to-date${C_RESET} → ${C_BLUE}https://github.com/${USER}/${REPO}/tree/${branch}${C_RESET}"
+      echo -e "  ${C_GREEN}✅ Sudah up-to-date${C_RESET} → ${C_BLUE}https://github.com/${REPO_OWNER}/${REPO}/tree/${branch}${C_RESET}"
       return 0
     fi
 
@@ -5984,7 +5984,7 @@ push_head_to_branch() {
   progress_stop "$( [ $_push_rc -eq 0 ] && echo ok || echo fail )"
   if [ $_push_rc -eq 0 ]; then
     echo -e "  ${C_GREEN}🎉 Sukses!${C_RESET} ${C_BOLD}${branch}${C_RESET} ${C_DIM}(${HEAD_SHA})${C_RESET}"
-    echo -e "  ${C_BLUE}🔗 https://github.com/${USER}/${REPO}/tree/${branch}${C_RESET}"
+    echo -e "  ${C_BLUE}🔗 https://github.com/${REPO_OWNER}/${REPO}/tree/${branch}${C_RESET}"
     log_push_event "$branch" "OK" "$_log_msg" "$_log_files"
     local _btn_pbr='{"inline_keyboard":[[{"text":"🔗 Lihat Branch","url":"https://github.com/'"${USER}"'/'"${REPO}"'/tree/'"${branch}"'"},{"text":"📊 Commits","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commits/'"${branch}"'"}],[{"text":"🔀 Compare","url":"https://github.com/'"${USER}"'/'"${REPO}"'/compare"},{"text":"📥 Pull Request","url":"https://github.com/'"${USER}"'/'"${REPO}"'/pulls"}]]}'
     send_telegram_photo "https://w.wallhaven.cc/full/yj/wallhaven-yje2lk.png" "✅ <b>PUSH BERHASIL</b>
@@ -6032,7 +6032,7 @@ ${_push_detail}
     rm -f "$push_log"
     local _new_sha="${_new_commit:0:7}"
     echo -e "  ${C_GREEN}🎉 Sukses!${C_RESET} ${C_BOLD}${branch}${C_RESET} ${C_DIM}(${_new_sha} • histori terjaga)${C_RESET}"
-    echo -e "  ${C_BLUE}🔗 https://github.com/${USER}/${REPO}/tree/${branch}${C_RESET}"
+    echo -e "  ${C_BLUE}🔗 https://github.com/${REPO_OWNER}/${REPO}/tree/${branch}${C_RESET}"
     log_push_event "$branch" "OK(graft)" "$_log_msg" "$_log_files"
     local _btn_pgraft='{"inline_keyboard":[[{"text":"🔗 Lihat Branch","url":"https://github.com/'"${USER}"'/'"${REPO}"'/tree/'"${branch}"'"},{"text":"📊 Commits","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commits/'"${branch}"'"}],[{"text":"🔀 Compare","url":"https://github.com/'"${USER}"'/'"${REPO}"'/compare"},{"text":"📥 Pull Request","url":"https://github.com/'"${USER}"'/'"${REPO}"'/pulls"}]]}'
     send_telegram_photo "https://w.wallhaven.cc/full/yj/wallhaven-yje2lk.png" "✅ <b>PUSH BERHASIL</b>
@@ -6055,7 +6055,7 @@ ${_push_detail}
   if [ "$_force_rc" -eq 0 ]; then
     rm -f "$push_log"
     echo -e "  ${C_GREEN}🎉 Sukses!${C_RESET} ${C_BOLD}${branch}${C_RESET} ${C_DIM}(${HEAD_SHA})${C_RESET}"
-    echo -e "  ${C_BLUE}🔗 https://github.com/${USER}/${REPO}/tree/${branch}${C_RESET}"
+    echo -e "  ${C_BLUE}🔗 https://github.com/${REPO_OWNER}/${REPO}/tree/${branch}${C_RESET}"
     log_push_event "$branch" "OK(force)" "$_log_msg" "$_log_files"
     local _btn_pforce='{"inline_keyboard":[[{"text":"🔗 Lihat Branch","url":"https://github.com/'"${USER}"'/'"${REPO}"'/tree/'"${branch}"'"},{"text":"📊 Commits","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commits/'"${branch}"'"}],[{"text":"⚠️ Security","url":"https://github.com/'"${USER}"'/'"${REPO}"'/security"},{"text":"🔀 Compare","url":"https://github.com/'"${USER}"'/'"${REPO}"'/compare"}]]}'
     send_telegram_photo "https://w.wallhaven.cc/full/yj/wallhaven-yjr3kk.png" "⚡ <b>PUSH BERHASIL (FORCE)</b>
@@ -6081,12 +6081,12 @@ ${_push_detail}
     if [ -n "$unblock_url" ]; then
       echo -e "  ${C_BLUE}${unblock_url}${C_RESET}"
     else
-      echo -e "  ${C_DIM}Cek di: https://github.com/${USER}/${REPO}/security/secret-scanning${C_RESET}"
+      echo -e "  ${C_DIM}Cek di: https://github.com/${REPO_OWNER}/${REPO}/security/secret-scanning${C_RESET}"
     fi
     echo -e "  ${C_DIM}   Setelah allow → jalankan push.sh lagi, langsung bisa.${C_RESET}"
     echo ""
     local _tg_ts_secret; _tg_ts_secret=$(date '+%H:%M:%S %d %b %Y')
-    local _unblock_btn_url="${unblock_url:-https://github.com/${USER}/${REPO}/security/secret-scanning}"
+    local _unblock_btn_url="${unblock_url:-https://github.com/${REPO_OWNER}/${REPO}/security/secret-scanning}"
     local _btn_secret='{"inline_keyboard":[[{"text":"🔓 Allow Secret","url":"'"${_unblock_btn_url}"'"},{"text":"🔒 Secret Scanning","url":"https://github.com/'"${USER}"'/'"${REPO}"'/security/secret-scanning"}],[{"text":"🔑 Kelola Token","url":"https://github.com/settings/tokens"},{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"}]]}'
     send_telegram_photo "https://w.wallhaven.cc/full/e7/wallhaven-e7k68k.jpg" "🔐 <b>PUSH DITOLAK — SECRET SCANNING</b>
 ━━━━━━━━━━━━━━━━━━━━
@@ -7167,7 +7167,7 @@ action_releases_tags() {
         console.log('  #' + (i+1) + '  ' + badge + '  ' + r.tag_name);
         console.log('     Judul : ' + name);
         console.log('     Tanggal: ' + dt);
-        console.log('     URL   : https://github.com/${USER}/${REPO}/releases/tag/' + r.tag_name);
+        console.log('     URL   : https://github.com/${REPO_OWNER}/${REPO}/releases/tag/' + r.tag_name);
         console.log('');
       });
     " 2>/dev/null
@@ -7462,7 +7462,7 @@ action_releases_tags() {
     local _rt_ts; _rt_ts=$(TZ=Asia/Jakarta date '+%d %b %Y • %H:%M WIB' 2>/dev/null || date '+%d %b %Y • %H:%M')
     if [ "$http" = "201" ]; then
       echo -e "  ${C_GREEN}✅ Tag ${C_BOLD}${tname}${C_RESET}${C_GREEN} berhasil dibuat!${C_RESET}"
-      echo -e "  ${C_BLUE}🔗 https://github.com/${USER}/${REPO}/releases/tag/${tname}${C_RESET}"
+      echo -e "  ${C_BLUE}🔗 https://github.com/${REPO_OWNER}/${REPO}/releases/tag/${tname}${C_RESET}"
       local _btn_tag='{"inline_keyboard":[[{"text":"🏷️ Lihat Tag","url":"https://github.com/'"${USER}"'/'"${REPO}"'/releases/tag/'"${tname}"'"},{"text":"📋 Semua Tags","url":"https://github.com/'"${USER}"'/'"${REPO}"'/tags"}],[{"text":"🚀 Buat Release","url":"https://github.com/'"${USER}"'/'"${REPO}"'/releases/new"},{"text":"📦 Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"}]]}'
       send_telegram_photo "https://w.wallhaven.cc/full/o5/wallhaven-o5l5j7.jpg" "🏷️ <b>TAG BARU DIBUAT</b>
 ━━━━━━━━━━━━━━━━━━━━
@@ -7918,7 +7918,7 @@ check_token_realtime() {
     [ "$TOKEN" = "__EXIT__" ] && exit 0
   done
 
-  REMOTE_URL="https://${USER}:${TOKEN}@github.com/${USER}/${REPO}.git"
+  REMOTE_URL="https://${REPO_OWNER}:${TOKEN}@github.com/${REPO_OWNER}/${REPO}.git"
   git remote set-url origin "$REMOTE_URL" 2>/dev/null || true
 
   printf "\n  \033[32m✅ Re-login berhasil! Melanjutkan...\033[0m\n"
@@ -7951,7 +7951,7 @@ relogin_if_needed() {
     [ "$TOKEN" = "__EXIT__" ] && exit 0
   done
 
-  REMOTE_URL="https://${USER}:${TOKEN}@github.com/${USER}/${REPO}.git"
+  REMOTE_URL="https://${REPO_OWNER}:${TOKEN}@github.com/${REPO_OWNER}/${REPO}.git"
   git remote set-url origin "$REMOTE_URL" 2>/dev/null || true
 
   printf "\n  \033[32m✅ Re-login berhasil! Operasi %s dapat diulang.\033[0m\n" "$context"
