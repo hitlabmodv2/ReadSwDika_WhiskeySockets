@@ -3,6 +3,19 @@
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ━━━━━━━━━━━━━━━━━━
+📦 *[22 Juli 2026] — Update 6*
+━━━━━━━━━━━━━━━━━━
+
+🔧 *Git — Auto `(#NNNN)` + Auto PR dari replit-agent*
+┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+• Commit `#1681` sudah di-amend: sekarang ada `(#1681)` di pesan commit
+• Buat PR #1 di GitHub: `ReadSwDika_V29` → `ReadSwDika_V25`
+  https://github.com/hitlabmodv2/ReadSwDika_WhiskeySockets/pull/1
+• Pasang `prepare-commit-msg` git hook → setiap commit agent
+  berikutnya otomatis dapat `(#NNNN)` tanpa perlu push.sh
+┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+
+━━━━━━━━━━━━━━━━━━
 📦 *[22 Juli 2026] — Update 5*
 ━━━━━━━━━━━━━━━━━━
 
