@@ -607,13 +607,11 @@ async function handleNekopoinotif({ hisoka, m, query, tolak, logCommand, Button,
             (sebelumnya
                 ? `│ ℹ️ Sudah aktif sebelumnya.\n`
                 : `│ ✅ Berhasil diaktifkan!\n│    Notif otomatis akan masuk ke GC ini.\n`) +
-            `│\n│ Ketik *${pfx}nekopoinotif off* untuk nonaktifkan.\n│\n` +
-            `│ ✏️ *Edit Kategori (tap tombol):*\n` +
-            `│ ${_bodyKatInfo(katAktifOn, pfx)}` +
+            `│\n│ Kategori : ${_katInfoLine(katAktifOn)}\n│\n` +
             `╰──────────────────────`;
         try {
             const _btn = new Button().setBody(_bodyOn).setFooter('🎌 Nekopoi Notif');
-            _tambahBtnKat(_btn, katAktifOn);
+            _tambahBtnOnOff(_btn, true);
             await _btn.run(m.from, hisoka, m);
         } catch (_) { await tolak(hisoka, m, _bodyOn); }
         await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
@@ -633,13 +631,11 @@ async function handleNekopoinotif({ hisoka, m, query, tolak, logCommand, Button,
             `│ Status sebelumnya : ${sebelumnya ? '✅ ON' : '❌ OFF'}\n` +
             `│ Status sekarang   : ❌ *OFF*\n│\n` +
             (sebelumnya ? `│ ❌ Berhasil dinonaktifkan.\n` : `│ ℹ️ Sudah nonaktif sebelumnya.\n`) +
-            `│\n│ Ketik *${pfx}nekopoinotif on* untuk aktifkan.\n│\n` +
-            `│ ✏️ *Edit Kategori (tap tombol):*\n` +
-            `│ ${_bodyKatInfo(katAktifOff, pfx)}` +
+            `│\n│ Kategori : ${_katInfoLine(katAktifOff)}\n│\n` +
             `╰──────────────────────`;
         try {
             const _btn = new Button().setBody(_bodyOff).setFooter('🎌 Nekopoi Notif');
-            _tambahBtnKat(_btn, katAktifOff);
+            _tambahBtnOnOff(_btn, false);
             await _btn.run(m.from, hisoka, m);
         } catch (_) { await tolak(hisoka, m, _bodyOff); }
         await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
@@ -918,21 +914,31 @@ async function handleNekpoiNotifReply({ hisoka, m, pendingNekpoiNotifChoices, ge
 }
 
 // ── HELPER: BUTTON KATEGORI ───────────────────────────────────────────────────
-// Tambah 3 button toggle kategori ke objek Button (maks 3 button WA)
 const _KAT_META = {
     'hentai'      : { id: '__nknotif_kat_hentai__', emoji: '🎌', nama: 'Hentai'    },
     '2d-animation': { id: '__nknotif_kat_2d__',     emoji: '🎥', nama: '2D Anim'   },
     '3d-hentai'   : { id: '__nknotif_kat_3d__',     emoji: '🧊', nama: '3D Hentai' },
 };
+// Tambah 3 button toggle kategori ke objek Button (dipakai di layar kategori)
 function _tambahBtnKat(btn, katAktif) {
     for (const [slug, meta] of Object.entries(_KAT_META)) {
         const aktif = katAktif.includes(slug);
         btn.addReply(`${aktif ? '✅' : '❌'} ${meta.emoji} ${meta.nama}`, meta.id);
     }
 }
-function _bodyKatInfo(katAktif, pfx) {
-    const aktifStr = katAktif.map(s => _KAT_META[s]?.emoji + ' ' + (_KAT_META[s]?.nama || s)).join(', ') || 'tidak ada';
-    return `│ Kategori aktif   : _${aktifStr}_\n│ Tap tombol di bawah untuk toggle kategori.\n`;
+// Tambah button toggle + Edit Kategori + Lihat GC (dipakai di layar ON/OFF)
+function _tambahBtnOnOff(btn, isActive) {
+    if (isActive) {
+        btn.addReply('❌ Matikan GC Ini',  '__nknotif_off__');
+    } else {
+        btn.addReply('✅ Aktifkan GC Ini', '__nknotif_on__');
+    }
+    btn.addReply('✏️ Edit Kategori',   '__nknotif_kat_menu__');
+    btn.addReply('📋 Lihat GC Aktif', '__nknotif_list__');
+}
+function _katInfoLine(katAktif) {
+    const aktifStr = katAktif.map(s => (_KAT_META[s]?.emoji || '') + ' ' + (_KAT_META[s]?.nama || s)).join(', ') || 'tidak ada';
+    return `_${aktifStr}_`;
 }
 
 // ── BUTTON CALLBACK HANDLER ───────────────────────────────────────────────────
@@ -950,6 +956,7 @@ async function handleNekopoinotifCallbacks({ hisoka, m, tolak, logCommand, Butto
     const _VALID_CBS = [
         '__nknotif_on__', '__nknotif_off__', '__nknotif_cancel__', '__nknotif_list__',
         '__addallgrp__nekopoinotif', '__delallgrp__nekopoinotif',
+        '__nknotif_kat_menu__',
         '__nknotif_kat_hentai__', '__nknotif_kat_2d__', '__nknotif_kat_3d__',
     ];
     if (!_VALID_CBS.includes(txt)) return false;
@@ -1158,6 +1165,29 @@ async function handleNekopoinotifCallbacks({ hisoka, m, tolak, logCommand, Butto
         return true;
     }
 
+    // ── MENU KATEGORI ─────────────────────────────────────────────────────────
+    if (txt === '__nknotif_kat_menu__') {
+        try {
+            const cfg      = loadConfig();
+            const katAktif = cfg?.nekopoinotif?.categories || ['hentai', '2d-animation', '3d-hentai'];
+            await hisoka.sendMessage(m.from, { react: { text: '✏️', key: m.key } });
+            const _bodyMenu =
+                `╭─「 🎌 *NEKOPOI NOTIF — KATEGORI* 」\n│\n` +
+                `│ Kategori aktif :\n│ ${_katInfoLine(katAktif)}\n│\n` +
+                `│ Tap tombol untuk aktifkan / matikan\n│ masing-masing kategori.\n│\n` +
+                `╰──────────────────────`;
+            try {
+                const _btn = new Button().setBody(_bodyMenu).setFooter('🎌 Nekopoi Notif');
+                _tambahBtnKat(_btn, katAktif);
+                await _btn.run(m.from, hisoka, m);
+            } catch (_) { await tolak(hisoka, m, _bodyMenu); }
+            logCommand(m, hisoka, 'nekopoinotif-kat-menu');
+        } catch (e) {
+            await tolak(hisoka, m, `❌ Gagal: ${e.message}`);
+        }
+        return true;
+    }
+
     // ── TOGGLE KATEGORI ───────────────────────────────────────────────────────
     const _katSlugMap = {
         '__nknotif_kat_hentai__': 'hentai',
@@ -1224,13 +1254,11 @@ async function handleNekopoinotifCallbacks({ hisoka, m, tolak, logCommand, Butto
                 `│ Status : ✅ *BERHASIL DIAKTIFKAN!*\n│\n` +
                 `│ Notif anime dari nekopoi.care akan\n` +
                 `│ otomatis masuk ke grup ini. 🎌\n│\n` +
-                `│ Ketik *${pfx}nekopoinotif off* untuk matikan.\n│\n` +
-                `│ ✏️ *Edit Kategori (tap tombol):*\n` +
-                `│ ${_bodyKatInfo(katAktif, pfx)}` +
+                `│ Kategori : ${_katInfoLine(katAktif)}\n│\n` +
                 `╰──────────────────────`;
             try {
                 const _btn = new Button().setBody(_body).setFooter('🎌 Nekopoi Notif');
-                _tambahBtnKat(_btn, katAktif);
+                _tambahBtnOnOff(_btn, true);
                 await _btn.run(m.from, hisoka, m);
             } catch (_) { await tolak(hisoka, m, _body); }
         } else {
@@ -1240,13 +1268,11 @@ async function handleNekopoinotifCallbacks({ hisoka, m, tolak, logCommand, Butto
                 `│ Status : ❌ *DINONAKTIFKAN*\n│\n` +
                 `│ Notif nekopoi tidak akan masuk ke\n` +
                 `│ grup ini lagi.\n│\n` +
-                `│ Ketik *${pfx}nekopoinotif on* untuk aktifkan ulang.\n│\n` +
-                `│ ✏️ *Edit Kategori (tap tombol):*\n` +
-                `│ ${_bodyKatInfo(katAktif, pfx)}` +
+                `│ Kategori : ${_katInfoLine(katAktif)}\n│\n` +
                 `╰──────────────────────`;
             try {
                 const _btn = new Button().setBody(_bodyOff).setFooter('🎌 Nekopoi Notif');
-                _tambahBtnKat(_btn, katAktif);
+                _tambahBtnOnOff(_btn, false);
                 await _btn.run(m.from, hisoka, m);
             } catch (_) { await tolak(hisoka, m, _bodyOff); }
         }
