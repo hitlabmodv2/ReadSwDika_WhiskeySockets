@@ -136,10 +136,13 @@ function parseDownloadLinks(md) {
         const linkLine = m[2];
 
         const links = [];
-        const linkRe = /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g;
+        // Host bisa mengandung [ouo] → pakai pola yang izinkan satu level inner bracket
+        const linkRe = /\[((?:[^\[\]]|\[[^\[\]]*\])+)\]\((https?:\/\/[^)]+)\)/g;
         let lm;
         while ((lm = linkRe.exec(linkLine)) !== null) {
-            links.push({ host: lm[1].trim(), url: lm[2].trim() });
+            // Bersihkan suffix [ouo], [ouo.io] dll dari nama host
+            const host = lm[1].trim().replace(/\s*\[ouo(?:\.io)?\]/gi, '').trim();
+            links.push({ host, url: lm[2].trim() });
         }
         if (links.length) downloads.push({ resolusi, links });
     }
@@ -188,7 +191,15 @@ function parseDetailPost(md, url) {
     const genreM  = md.match(/\*\*Genre\s*:?\*\*\s*([^\n]+)/i);
     const genre   = genreM ? genreM[1].replace(/\[([^\]]+)\]\([^)]+\)/g, '$1').replace(/,\s*/g, ', ').trim() : '';
 
-    // Judul anime (original)
+    // Original Title (biasanya ada di konten 2D / 3D sebagai pengganti anime)
+    const origM       = md.match(/\*\*Original Title\s*:?\*\*\s*([^\n]+)/i);
+    const originalTitle = origM ? origM[1].replace(/\[([^\]]+)\]\([^)]+\)/g, '$1').trim() : '';
+
+    // Parody (anime/game yang di-parody — ada di 2D & 3D)
+    const parodyM = md.match(/\*\*Parody\s*:?\*\*\s*([^\n]+)/i);
+    const parody  = parodyM ? parodyM[1].trim().replace(/^–$/, '') : '';
+
+    // Judul anime (original — field khusus hentai series)
     const animeM  = md.match(/\*\*Anime\s*:?\*\*\s*([^\n]+)/i);
     const anime   = animeM ? animeM[1].trim() : '';
 
@@ -196,8 +207,8 @@ function parseDetailPost(md, url) {
     const jpM     = md.match(/\*\*Judul Jepang\*\*\s*:\s*([^\n]+)/i);
     const judulJp = jpM ? jpM[1].trim() : '';
 
-    // Producers
-    const prodM     = md.match(/\*\*Producers?\*\*\s*:?\s*([^\n]+)/i);
+    // Producers / Studio — strip leading colon kalau ada (format: **Producers**: value)
+    const prodM     = md.match(/\*\*(?:Producers?|Studio)\s*:?\*\*\s*:?\s*([^\n]+)/i);
     const producers = prodM ? prodM[1].trim() : '';
 
     // Duration
@@ -227,9 +238,11 @@ function parseDetailPost(md, url) {
     const kategori = deteksiKategori(url);
 
     return {
-        title, thumbnail, tanggal, sinopsis, genre, anime, judulJp,
-        producers, durasi, ukuran, status, episode, tayang, kategori, url,
-        downloads,
+        title, thumbnail, tanggal, sinopsis, genre,
+        originalTitle, parody,
+        anime, judulJp,
+        producers, durasi, ukuran, status, episode, tayang,
+        kategori, url, downloads,
     };
 }
 

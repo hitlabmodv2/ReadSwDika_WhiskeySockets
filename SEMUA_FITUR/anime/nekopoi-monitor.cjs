@@ -319,14 +319,24 @@ function buatCaption(data) {
         genre, producers, durasi, ukuran, status,
         episode, tayang, judulJp, url,
         downloads = [],
+        originalTitle = '', parody = '',
     } = data;
 
     const katInfo     = getKatInfo(kategori);
     const headerWaktu = waktuSekarang();
 
-    // Sinopsis
-    const sinopsisBlok = potongTeks(sinopsis, 350)
-        .split('\n').map(b => b.trim() ? `> ${b}` : '').join('\n') || '> -';
+    // Sinopsis — untuk konten 2D/3D yang tidak punya sinopsis,
+    // pakai kombinasi Original Title + Parody sebagai gantinya
+    let sinOpsi = sinopsis || '';
+    if (!sinOpsi) {
+        const bagian = [];
+        if (originalTitle && originalTitle !== '-') bagian.push(`Original: *${originalTitle}*`);
+        if (parody && parody !== '-')               bagian.push(`Parody: *${parody}*`);
+        sinOpsi = bagian.join('\n') || '';
+    }
+    const sinopsisBlok = sinOpsi
+        ? potongTeks(sinOpsi, 350).split('\n').map(b => b.trim() ? `> ${b}` : '').join('\n')
+        : null; // null = sembunyikan blok sinopsis jika benar-benar kosong
 
     // Info blok
     const infoBlok = buatBarisInfo([
@@ -373,9 +383,9 @@ function buatCaption(data) {
         ``,
         `*${title || '-'}*`,
         ``,
-        `📖 *Sinopsis*`,
-        sinopsisBlok,
-        ``,
+        sinopsisBlok ? `📖 *Sinopsis*` : null,
+        sinopsisBlok || null,
+        sinopsisBlok ? `` : null,
         SEP,
         `📋 *Info*`,
         SEP2,
