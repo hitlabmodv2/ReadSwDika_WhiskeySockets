@@ -1,0 +1,46 @@
+{
+  "AC8D354D5D998E2048CD378C50EFBBDF": {
+    "id": "AC8D354D5D998E2048CD378C50EFBBDF",
+    "sender": "6285723459839@s.whatsapp.net",
+    "name": "Yuki Aoi",
+    "type": "videoMessage",
+    "arrivedAt": "2026-07-23T11:37:26.643Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🏬",
+    "resolve": "Signal Lib ✓",
+    "source": "status",
+    "number": "6285723459839",
+    "resolvedPn": "6285723459839@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285723459839@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC8D354D5D998E2048CD378C50EFBBDF",
+      "participant": "243829689085972@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-23T11:37:57.018Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285723459839@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC8D354D5D998E2048CD378C50EFBBDF",
+        "participant": "243829689085972@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285723459839@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC8D354D5D998E2048CD378C50EFBBDF",
+        "participant": "6285723459839@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-23T11:37:44.438Z",
+    "deleted": true,
+    "deletedAt": "2026-07-23T11:37:57.018Z"
+  }
+}

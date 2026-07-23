@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 23/07/2026, 06.43.13  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 23/07/2026, 11.41.04  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  console.error
+│  #001  —  command:jadibot1
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [31m[HotReload] ✗ Gagal reload 'message.js', pakai versi lama.[39m
+│  not-acceptable
 │
 │  DETAIL
-│  Sumber      : console.error
+│  Sumber      : command:jadibot1
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 23/07/2026, 06.43.13
-│  Terakhir    : 23/07/2026, 06.43.13
+│  Pertama     : 23/07/2026, 11.41.04
+│  Terakhir    : 23/07/2026, 11.41.04
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [31m[HotReload] ✗ Gagal reload 'message.js', pakai versi lama.[39m
-│     at console.error (file:///home/runner/workspace/index.js:434:27)
-│     at Timeout._onTimeout (file:///home/runner/workspace/src/helper/hotReload.js:311:33)
+│  ▶  Error: not-acceptable
+│     at assertNodeErrorFree (file:///home/runner/workspace/node_modules/@whiskeysockets/baileys/lib/WABinary/generic-utils.js:57:15)
+│     at query (file:///home/runner/workspace/node_modules/@whiskeysockets/baileys/lib/Socket/socket.js:134:13)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 23/07/2026, 06.43.13
+  Terakhir diperbarui: 23/07/2026, 11.41.04
 ════════════════════════════════════════════════════════════════════════
