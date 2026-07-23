@@ -2812,6 +2812,9 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
 
     for (const msg of messages) {
       if (!msg.message) continue
+      // Guard: jadibot sudah logout/disconnect → skip pesan yang masih di queue
+      // Mencegah race condition: pesan masuk sebelum logout, diproses setelah socket mati
+      if (aborted || !jadibotMap.has(number)) continue
       // Blokir pesan yang dikirim oleh kode bot sendiri (ada di _botSentIds)
       // fromMe=true bisa juga dari WA user asli (multi-device) — jangan skip itu
       if (msg.key?.fromMe && sock._botSentIds?.has(msg.key?.id)) continue
@@ -3387,6 +3390,8 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
     }
     for (const msg of messages) {
       if (!msg.message) continue
+      // Guard: jadibot (QR mode) sudah logout/disconnect → skip pesan di queue
+      if (!jadibotMap.has(number)) continue
       // Blokir pesan yang dikirim oleh kode bot sendiri (ada di _botSentIds)
       // fromMe=true bisa juga dari WA user asli (multi-device) — jangan skip itu
       if (msg.key?.fromMe && sock._botSentIds?.has(msg.key?.id)) continue
