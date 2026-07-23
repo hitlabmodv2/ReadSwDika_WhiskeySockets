@@ -64,7 +64,7 @@ import { useSingleFileAuthState } from './authState.js'
 import JSONDB from '../db/json.js'
 import { cleanStaleSessionFiles } from './cleaner.js'
 import { logError } from '../db/errorLog.js'
-import { getJadibotAnticall, getJadibotAnticallvid, getJadibotNumber, getJadibotReadsw, getJadibotAutoOnline, getJadibotEmojis, getJadibotRandomEmoji, getJadibotAutoTyping, getJadibotAutoRecording, getJadibotReadchat, getJadibotEmojiMode } from './jadibotSettings.js'
+import { getJadibotAnticall, getJadibotAnticallvid, getJadibotNumber, getJadibotReadsw, getJadibotAutoOnline, getJadibotEmojis, getJadibotRandomEmoji, getJadibotAutoTyping, getJadibotAutoRecording, getJadibotReadchat, getJadibotEmojiMode, getJadibotAntidel } from './jadibotSettings.js'
 import { getHandler } from './hotReload.js'
 import { kvGet, kvSet } from '../db/datadb.js'
 
