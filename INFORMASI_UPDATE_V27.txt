@@ -1,9 +1,9 @@
 📢 *INFORMASI RILIS*
-_📅 Selasa, 22 Juli 2026_ 🌙
+_📅 Rabu, 23 Juli 2026_ 🌙
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V27*
 ✨ *3 Fitur Baru*
-🐛 *1 Bug Fix*
+🐛 *4 Bug Fix*
 🚀 *1 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
@@ -36,7 +36,23 @@ _Kalau jadibot logout paksa dari WhatsApp (hapus perangkat tertaut / logout otom
 ━━━━━━━━━━━━━━━━━━━━━━
 🐛 *BUG FIX*
 ━━━━━━━━━━━━━━━━━━━━━━
-*1. 🐛 .nekopoinotif — Button Konfirmasi ON/OFF Langsung Tampilkan Kategori (Layout Salah)*
+*1. 🐛 .jadibot — Hilang Tanpa Notif Saat Bot Restart*
+_Jadibot tiba-tiba hilang tanpa kirim notif expired ke user/owner ketika bot mati lalu dijalankan ulang._
+1. ~Folder sesi jadibot dihapus dulu (data di realtime.json sudah tiada) → saat restart folder masih ada → terdeteksi "orphan" → dihapus paksa~
+2. ~Notif expired tidak terkirim karena main sock belum tersedia saat startup cleanup~
+3. Urutan penghapusan dibalik: folder dihapus *dulu* (sync), baru data di realtime.json — kalau crash di antara keduanya, folder sudah tiada → tidak ada orphan palsu
+4. Tambah sistem *pending notification queue* (`data_jadibot/pending_expire_notifs.json`) — notif yang gagal kirim (sock null saat startup) disimpan, dikirim otomatis begitu bot konek ke WhatsApp
+5. Notif ke owner juga ikut di-queue dan terkirim setelah bot online
+> Jadibot tidak lagi hilang diam-diam — user & owner selalu dapat notif meski bot sempat mati
+
+*2. 🐛 .alqanimenotif — Error 403 Gagal Fetch Homepage*
+_Monitor alqanime tidak bisa ambil data rilisan terbaru karena Jina.ai memblokir request._
+1. ~`Accept: text/plain` + `User-Agent: Chrome/124` pada header Jina menyebabkan 403 — Cloudflare di sisi Jina memblokir kombinasi header tersebut~
+2. Header diperbaiki: hapus User-Agent browser, ganti ke `X-Return-Format: markdown` — Jina bypass CF dengan benar dan kembalikan markdown
+3. Berlaku di `alqanime.cjs` (scraper utama) dan `alqanime-monitor.cjs` (monitor notif)
+> Monitor rilisan baru alqanime kembali normal
+
+*3. 🐛 .nekopoinotif — Button Konfirmasi ON/OFF Langsung Tampilkan Kategori (Layout Salah)*
 _Setelah tap "Ya, Aktifkan", yang muncul adalah 3 tombol kategori — bukan tombol untuk matikan/aktifkan ulang._
 1. ~Konfirmasi ON langsung tampilkan 3 tombol toggle kategori — tidak ada tombol untuk matikan lagi~
 2. ~Konfirmasi OFF juga sama — tidak ada tombol untuk aktifkan ulang~

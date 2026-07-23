@@ -62,10 +62,11 @@ const RETRY_TTL_MS  = 30 * 60 * 1000;  // 30 menit
 const INIT_WINDOW_MS = 30 * 60 * 1000; // 30 menit
 
 const JINA_BASE = 'https://r.jina.ai';
+// Catatan: jangan tambahkan User-Agent Chrome/Safari ke HEADERS Jina.
+// Jina (r.jina.ai) memblokir request dengan UA browser spesifik → 403.
 const HEADERS   = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-    'Accept'    : 'text/plain, */*',
     'Accept-Language': 'id-ID,id;q=0.9,en;q=0.8',
+    'X-Return-Format': 'markdown',
 };
 
 // ── BACA / SIMPAN DATA ────────────────────────────────────────────────────────

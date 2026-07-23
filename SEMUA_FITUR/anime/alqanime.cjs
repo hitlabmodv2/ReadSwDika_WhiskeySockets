@@ -37,10 +37,12 @@ const axios = require('axios');
 const BASE    = 'https://alqanime.net';
 const JINA    = 'https://r.jina.ai';
 
+// Catatan: jangan tambahkan User-Agent Chrome/Safari ke HEADERS Jina.
+// Jina (r.jina.ai) memblokir request dengan UA browser spesifik → 403.
+// Pakai X-Return-Format: markdown agar dapat teks markdown langsung tanpa JSON parsing.
 const HEADERS = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-    'Accept': 'text/plain, */*',
     'Accept-Language': 'id-ID,id;q=0.9,en;q=0.8',
+    'X-Return-Format': 'markdown',
 };
 
 async function fetchMarkdown(url) {
@@ -48,7 +50,7 @@ async function fetchMarkdown(url) {
         headers: HEADERS,
         timeout: 30000,
     });
-    return res.data;
+    return typeof res.data === 'string' ? res.data : (res.data?.data?.content ?? '');
 }
 
 function parseAnimeCards(md) {
