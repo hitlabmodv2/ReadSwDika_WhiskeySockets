@@ -173,7 +173,7 @@ function getPhoneCountryInfo(number = '') {
     return { flag: '🌐', name: 'Tidak diketahui' };
 }
 
-async function handleJadibot({ hisoka, m, query, tolak, logCommand, isMainBot, path, fs, jadibotMap, parseJadibotDuration, startJadibot, maskNumber, getJadibotExpirySummary, scheduleJadibotExpiry, setPermanentJadibot, removeJadibotExpiry, ensureJadibotExpiry, getLogoutSavedMs, formatRemainingTime }) {
+async function handleJadibot({ hisoka, m, query, tolak, logCommand, isMainBot, path, fs, jadibotMap, parseJadibotDuration, startJadibot, maskNumber, getJadibotExpirySummary, getJadibotExpiry, scheduleJadibotExpiry, setPermanentJadibot, removeJadibotExpiry, ensureJadibotExpiry, getLogoutSavedMs, formatRemainingTime }) {
         if (!isMainBot(hisoka)) return;
         if (!m.isOwner) return;
 
@@ -387,6 +387,67 @@ async function handleJadibot({ hisoka, m, query, tolak, logCommand, isMainBot, p
         }
 
         try { await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } }); } catch {}
+
+        // ── Cek: nomor sudah punya waktu aktif di realtime.json (bot tidak sedang running) ──
+        // Kalau owner kasih durasi baru tapi waktu lama belum habis → pakai waktu lama
+        if (!durationInfo.isDefault && getJadibotExpiry) {
+                const existingMeta = getJadibotExpiry(number);
+                if (existingMeta) {
+                        const stillValid = existingMeta.permanent === true || Number(existingMeta.expiresAt) > Date.now();
+                        if (stillValid) {
+                                let sisaLabel = '';
+                                let tipeMeta = '';
+                                if (existingMeta.permanent === true) {
+                                        sisaLabel = 'Permanent ♾️';
+                                        tipeMeta = 'permanent';
+                                } else {
+                                        const remMs = Number(existingMeta.expiresAt) - Date.now();
+                                        sisaLabel = formatRemainingTime ? formatRemainingTime(remMs) : `${Math.ceil(remMs / 60000)} menit`;
+                                        tipeMeta = 'berbatas waktu';
+                                }
+                                await tolak(hisoka, m,
+                                        `╔══════════════════════╗\n` +
+                                        `║   ⚠️  *J A D I B O T*  ║\n` +
+                                        `╚══════════════════════╝\n\n` +
+                                        `📱 *Nomor:* +${maskNumber(number)}\n\n` +
+                                        `⚠️ *Maaf, waktu jadibot nomor ini masih ada!*\n` +
+                                        `_Data waktu (${tipeMeta}) masih tersimpan di sistem._\n\n` +
+                                        `⏳ *Sisa waktu:* _${sisaLabel}_\n\n` +
+                                        `✅ *Bot otomatis mengikuti waktu yang sudah ada*\n` +
+                                        `_(durasi baru \`${durationInfo.label || finalDurationInput}\` diabaikan)_\n\n` +
+                                        `━━━━━━━━━━━━━━━━━━━━━\n` +
+                                        `💡 Untuk *override* waktu, gunakan:\n` +
+                                        `• \`.upbot ${number} ${finalDurationInput}\` — perpanjang\n` +
+                                        `• \`.downbot ${number} ${finalDurationInput}\` — persingkat`
+                                );
+                                // Lanjut start dengan waktu yang sudah ada (tidak override)
+                                // finalDurationMs tetap undefined agar startJadibot pakai data realtime.json
+                                await startJadibot(
+                                        number,
+                                        async (msg) => {
+                                                try {
+                                                        const payload = typeof msg === 'string' ? { text: msg } : msg;
+                                                        return await hisoka.sendMessage(m.from, payload, { quoted: m });
+                                                } catch (e) {
+                                                        console.error('[JADIBOT][v1-notif] Gagal kirim ke GC:', e?.message);
+                                                }
+                                        },
+                                        mainNum,
+                                        async (key, text) => {
+                                                try { await hisoka.sendMessage(m.from, { edit: key, text }); } catch {}
+                                        },
+                                        null,
+                                        undefined, // pakai waktu dari realtime.json, bukan override
+                                        hisoka,
+                                        async (emoji) => {
+                                                try { await hisoka.sendMessage(m.from, { react: { text: emoji, key: m.key } }); } catch {}
+                                        },
+                                        m.sender
+                                );
+                                return;
+                        }
+                }
+        }
 
         // Cek apakah ada sisa waktu tersimpan dari logout sebelumnya
         let finalDurationMs = durationInfo.ms;

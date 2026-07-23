@@ -1944,6 +1944,49 @@ function msgOwnerLogout(number, savedLabel = '') {
       remainingList.map((v, i) => `${i + 1}. \`+${v}\``).join('\n') + `\n`
     : `> ❌ _Tidak ada jadibot lain yang aktif saat ini._\n`
 
+  // ── Info waktu sesi user jadibot ──
+  const meta = getJadibotExpiry(number)
+  let sesiPart = ''
+  if (meta) {
+    if (meta.permanent === true) {
+      const createdAt = meta.createdAt
+        ? new Date(meta.createdAt).toLocaleString('id-ID', {
+            timeZone: 'Asia/Jakarta', day: '2-digit', month: '2-digit',
+            year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit'
+          }) + ' WIB'
+        : 'Tidak diketahui'
+      sesiPart =
+        `━━━━━━━━━━━━━━━━━━━━━\n` +
+        `📋 *Info Sesi Jadibot:*\n` +
+        `⏱️ *Durasi    :* _Permanent_\n` +
+        `📅 *Mulai     :* _${createdAt}_\n` +
+        `♾️ *Berakhir  :* _Permanent (tidak ada batas waktu)_\n\n`
+    } else {
+      const createdAt = meta.createdAt
+        ? new Date(meta.createdAt).toLocaleString('id-ID', {
+            timeZone: 'Asia/Jakarta', day: '2-digit', month: '2-digit',
+            year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit'
+          }) + ' WIB'
+        : 'Tidak diketahui'
+      const expiresAt = meta.expiresAt
+        ? new Date(Number(meta.expiresAt)).toLocaleString('id-ID', {
+            timeZone: 'Asia/Jakarta', day: '2-digit', month: '2-digit',
+            year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit'
+          }) + ' WIB'
+        : 'Tidak diketahui'
+      const durationText = meta.durationText || 'Tidak diketahui'
+      const remMs = Number(meta.expiresAt) - Date.now()
+      const sisaWaktu = remMs > 0 ? formatRemainingTime(remMs) : '0 (sudah habis saat logout)'
+      sesiPart =
+        `━━━━━━━━━━━━━━━━━━━━━\n` +
+        `📋 *Info Sesi Jadibot:*\n` +
+        `⏱️ *Durasi    :* _${durationText}_\n` +
+        `📅 *Mulai     :* _${createdAt}_\n` +
+        `⌛ *Berakhir  :* _${expiresAt}_\n` +
+        `⏳ *Tersisa   :* _${sisaWaktu}_\n\n`
+    }
+  }
+
   return (
     `╔══════════════════════╗\n` +
     `║  🚨  *JADIBOT LOGOUT!* ║\n` +
@@ -1956,6 +1999,7 @@ function msgOwnerLogout(number, savedLabel = '') {
     `━━━━━━━━━━━━━━━━━━━━━\n` +
     `❌ *Fitur yang Berhenti di Nomor Ini:*\n` +
     `${buildJadibotFeatureStatus(number).stoppedFeaturesText}\n\n` +
+    `${sesiPart}` +
     `━━━━━━━━━━━━━━━━━━━━━\n` +
     `${listPart}\n` +
     `━━━━━━━━━━━━━━━━━━━━━\n` +

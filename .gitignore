@@ -26,8 +26,6 @@ zipFile.zip
 attached_assets/
 
 
-# Jadibot runtime data — jangan di-commit
-data_jadibot/
 
 .token
 .token.secret
