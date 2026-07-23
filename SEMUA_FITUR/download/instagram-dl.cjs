@@ -33,6 +33,72 @@
  *                            buildIgVisionPrompt, buildIgCaptionPrompt,
  *                            buildIgFallbackCaption, parseIgMetaHtml, formatIgCount }
  */
+
+// ── Primary scraper: alwayscodex savefrom API ─────────────────────────────────
+async function fetchAlwayscodex(url) {
+    try {
+        const res = await fetch('https://api.alwayscodex.my.id/api/downloader/savefrom', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url, type: 'vidio' }),
+            signal: AbortSignal.timeout(20000),
+        });
+        if (!res.ok) return null;
+        const json = await res.json();
+        if (!json?.status || !Array.isArray(json?.data) || json.data.length === 0) return null;
+
+        // Normalisasi ke format igData.info[]
+        return {
+            media_type: 'reel',
+            title: json.data[0]?.title || '',
+            thumbnail: json.data[0]?.thumbnail || null,
+            info: json.data
+                .filter(item => item.url && !item.is_audio)
+                .map(item => ({
+                    url: item.url,
+                    media_format: item.format === 'mp4' ? 'video' : 'image',
+                    quality: item.quality || '',
+                    title: item.title || '',
+                })),
+        };
+    } catch {
+        return null;
+    }
+}
+
+// ── Fallback scraper 1: vdraw.ai ──────────────────────────────────────────────
+async function fetchVdraw(url) {
+    const res = await fetch('https://vdraw.ai/api/v1/instagram/ins-info', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url, type: 'video' }),
+        signal: AbortSignal.timeout(15000),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = await res.json();
+    if (json.code === 100000 && json.data) return json.data;
+    throw new Error('No data from vdraw');
+}
+
+// ── Fallback scraper 2: archive.lick.eu.org ───────────────────────────────────
+async function fetchArchive(url) {
+    const res = await fetch(
+        `https://archive.lick.eu.org/api/download/instagram?url=${encodeURIComponent(url)}`,
+        { signal: AbortSignal.timeout(12000) }
+    );
+    const json = await res.json();
+    if (!json?.status || !json?.result) return null;
+    const r = json.result;
+    return {
+        media_type: r.isVideo ? 'reel' : 'photo',
+        info: (r.url || []).map(u => ({
+            url: typeof u === 'object' ? (u.url || u.src) : u,
+            media_format: r.isVideo ? 'video' : 'image',
+        })),
+        _archiveMeta: r,
+    };
+}
+
 async function handleInstagramDl(hisoka, m, query, ctx) {
     const {
         gemini, tolak, logCommand, exec, util,
@@ -60,23 +126,11 @@ async function handleInstagramDl(hisoka, m, query, ctx) {
 
     const loadingMsg = await tolak(hisoka, m, '⏳ Sedang mengunduh dari Instagram...');
 
-    async function fetchVdraw(url) {
-        const res = await fetch('https://vdraw.ai/api/v1/instagram/ins-info', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ url, type: 'video' }),
-            signal: AbortSignal.timeout(15000),
-        });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const json = await res.json();
-        if (json.code === 100000 && json.data) return json.data;
-        throw new Error('No data from vdraw');
-    }
-
-    const [vdrawResult, archiveResult, metaHtmlResult] = await Promise.allSettled([
+    // ── Fetch semua sumber secara paralel ────────────────────────────────────
+    const [alwayscodexResult, vdrawResult, archiveResult, metaHtmlResult] = await Promise.allSettled([
+        fetchAlwayscodex(igUrl),
         fetchVdraw(igUrl),
-        fetch(`https://archive.lick.eu.org/api/download/instagram?url=${encodeURIComponent(igUrl)}`, { signal: AbortSignal.timeout(12000) })
-            .then(r => r.json()).catch(() => null),
+        fetchArchive(igUrl),
         fetch(igUrl, {
             signal: AbortSignal.timeout(10000),
             headers: {
@@ -86,20 +140,32 @@ async function handleInstagramDl(hisoka, m, query, ctx) {
         }).then(r => r.text()).catch(() => ''),
     ]);
 
-    let igData = vdrawResult.status === 'fulfilled' ? vdrawResult.value : null;
-    const archiveJson = archiveResult.status === 'fulfilled' ? archiveResult.value : null;
-    const metaHtml = metaHtmlResult.status === 'fulfilled' ? metaHtmlResult.value : '';
+    // ── Prioritas: alwayscodex → vdraw → archive ─────────────────────────────
+    let igData = null;
+    let archiveMeta = {};
 
-    if (!igData && archiveJson?.status && archiveJson?.result) {
-        const r = archiveJson.result;
-        igData = {
-            media_type: r.isVideo ? 'reel' : 'photo',
-            info: (r.url || []).map(u => ({
-                url: typeof u === 'object' ? (u.url || u.src) : u,
-                media_format: r.isVideo ? 'video' : 'image',
-            })),
-        };
+    const acData = alwayscodexResult.status === 'fulfilled' ? alwayscodexResult.value : null;
+    if (acData?.info?.length) {
+        igData = acData;
+        console.log('[IG] ✅ Scraper: alwayscodex');
     }
+
+    if (!igData) {
+        const vd = vdrawResult.status === 'fulfilled' ? vdrawResult.value : null;
+        if (vd?.info?.length) {
+            igData = vd;
+            console.log('[IG] ✅ Scraper: vdraw (fallback)');
+        }
+    }
+
+    const archiveData = archiveResult.status === 'fulfilled' ? archiveResult.value : null;
+    if (!igData && archiveData?.info?.length) {
+        igData = archiveData;
+        console.log('[IG] ✅ Scraper: archive (fallback)');
+    }
+    if (archiveData?._archiveMeta) archiveMeta = archiveData._archiveMeta;
+
+    const metaHtml = metaHtmlResult.status === 'fulfilled' ? metaHtmlResult.value : '';
 
     if (!igData?.info?.length) {
         await m.reply({ edit: loadingMsg.key, text: '❌ Gagal mengunduh. Pastikan link benar dan akun tidak private, lalu coba lagi.' });
@@ -109,9 +175,8 @@ async function handleInstagramDl(hisoka, m, query, ctx) {
     const mediaItems = igData.info;
     const mediaType  = igData.media_type || 'reel';
 
-    const archiveMeta = archiveJson?.result || {};
+    // ── Metadata caption ──────────────────────────────────────────────────────
     const parsedMeta  = parseIgMetaHtml(metaHtml);
-
     const fullName    = parsedMeta.fullName || '';
     const username    = archiveMeta.username || parsedMeta.username || '';
     const caption     = archiveMeta.caption  || parsedMeta.caption  || '';
@@ -121,25 +186,16 @@ async function handleInstagramDl(hisoka, m, query, ctx) {
     const likesStr    = parsedMeta.likes   || (likesNum    ? formatIgCount(likesNum)    : '');
     const commentsStr = commentsNum ? formatIgCount(commentsNum) : (parsedMeta.comments || '');
 
-    let infoText = `╭═══ *INSTAGRAM DOWNLOADER* ═══╮\n`;
-    if (fullName || username) infoText += `│ 👤 ${fullName ? fullName + (username ? ' (@' + username + ')' : '') : '@' + username}\n`;
-    if (likesStr)    infoText += `│ ❤️ ${likesStr} likes\n`;
-    if (commentsStr) infoText += `│ 💬 ${commentsStr} comments\n`;
-    if (caption) {
-        const shortCaption = caption.length > 200 ? caption.substring(0, 200) + '...' : caption;
-        infoText += `│\n│ 📝 ${shortCaption}\n`;
-    }
-    infoText += `╰════════════════════════╯`;
-
     await m.reply({ edit: loadingMsg.key, text: '✅ Berhasil! Mengirim media...' });
 
-    let igThumbUrl = igData.cover_url || igData.thumbnail_url || igData.cover || igData.thumb || igData.thumbnail || null;
+    // ── Thumbnail untuk Gemini vision ─────────────────────────────────────────
+    let igThumbUrl = igData.thumbnail
+        || igData.cover_url || igData.thumbnail_url || igData.cover || igData.thumb || null;
 
     if (!igThumbUrl && Array.isArray(mediaItems) && mediaItems[0]) {
         const first = mediaItems[0];
         igThumbUrl = first.cover || first.cover_url || first.thumbnail_url || first.thumbnail || null;
     }
-
     if (!igThumbUrl && Array.isArray(mediaItems)) {
         const firstPhoto = mediaItems.find(it => it.media_format === 'image' || it.media_format === 'photo');
         if (firstPhoto) igThumbUrl = firstPhoto.url || firstPhoto.src;
@@ -157,15 +213,12 @@ async function handleInstagramDl(hisoka, m, query, ctx) {
             const thumbBuf = Buffer.from(thumbRes.data);
             if (thumbBuf.length > 500) {
                 const mimeThumb = thumbRes.headers['content-type']?.split(';')[0] || 'image/jpeg';
-                igVisualDesc = await gemini.askWithImage(
-                    buildIgVisionPrompt(),
-                    thumbBuf,
-                    mimeThumb,
-                );
+                igVisualDesc = await gemini.askWithImage(buildIgVisionPrompt(), thumbBuf, mimeThumb);
             }
         } catch (_) {}
     }
 
+    // ── AI caption ────────────────────────────────────────────────────────────
     let finalCaptionIG = buildIgFallbackCaption({
         fullName, username,
         likes: likesStr, comments: commentsStr,
@@ -182,6 +235,7 @@ async function handleInstagramDl(hisoka, m, query, ctx) {
         if (aiCaptionIG?.trim()) finalCaptionIG = aiCaptionIG.trim();
     } catch (_) {}
 
+    // ── Kirim media ───────────────────────────────────────────────────────────
     let firstVideoUrl = null;
 
     for (let i = 0; i < mediaItems.length; i++) {
@@ -217,7 +271,7 @@ async function handleInstagramDl(hisoka, m, query, ctx) {
         }
     }
 
-
+    // ── Kirim audio (ekstrak dari video via ffmpeg) ───────────────────────────
     if (firstVideoUrl) {
         try {
             const execAsync = util.promisify(exec);

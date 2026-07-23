@@ -34,6 +34,8 @@ function resolveThumbnailMedia(thumbnailUrl) {
 function startTyping(hisoka, m) {
         const jid = m?.from;
         if (!hisoka || !jid) return () => {};
+        // Blokir composing saat stealth mode aktif agar bot tidak terlihat online
+        if (hisoka.__stealthMode) return () => {};
         let active = true;
         try { hisoka.sendPresenceUpdate('composing', jid); } catch (_) {}
         const interval = setInterval(() => {

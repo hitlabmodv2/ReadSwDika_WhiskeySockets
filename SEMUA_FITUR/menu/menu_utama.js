@@ -160,9 +160,15 @@ export function buildMenuUtama({ pushName, isOwner, uptimeStr, tgl, jam, browser
 │ .nhget
 │ .nhrand
 │ .nhdl
+│ .hentaidad
 │ .cosplay
 │ .cosplayrandom
 │ .pixivr18
+│ .nekopoinotif on/off
+├═════════════════════┤
+║   🎙️ *TEXT TO SPEECH*   
+├═════════════════════┤
+│ .tts
 ├═════════════════════┤
 ║   🌐 *WEB & TOOLS*   
 ├═════════════════════┤
@@ -195,6 +201,7 @@ export function buildMenuUtama({ pushName, isOwner, uptimeStr, tgl, jam, browser
 │ .tvone
 │ .malnews
 │ .alqanimenotif
+│ .nekopoinotif
 │ .cekauto
 │ .ceksw
 │ .wilyai

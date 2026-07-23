@@ -53,7 +53,7 @@ import gemini from './src/helper/gemini.js';
 import { updateUserName, getUserName } from './src/db/userDb.js';
 import { loadUserMemory, detectAndUpdateMemory, clearUserMemory, clearAllUserMemory, memoryToReadable } from './src/helper/userMemory.js';
 import { searchAndGetImage, searchAndGetImages, extractImagesFromText } from './src/helper/imageSearch.js';
-import { extractSongsFromText, extractVideosFromText, extractReplyStickersFromText, extractTikTokFromText, extractInstagramFromText, extractYouTubeAudioFromText, hasMediaDownloadMarker, hasSocialDLMarker, hasStickerMarker, extractVoiceNotesFromText, extractStickersFromText } from './src/helper/aiTools.js';
+import { extractSongsFromText, extractVideosFromText, extractReplyStickersFromText, extractTikTokFromText, extractInstagramFromText, extractFacebookFromText, extractYouTubeAudioFromText, hasMediaDownloadMarker, hasSocialDLMarker, hasStickerMarker, extractVoiceNotesFromText, extractStickersFromText, hasCuacaMarker, extractCuacaFromText } from './src/helper/aiTools.js';
 import { getHistory, addToHistory, clearHistory, clearAllHistory, countHistory, getSessionKey, buildHistoryMeta, wrapCurrentUserMessage } from './src/db/aiHistory.js';
 import { kvGet, kvSet } from './src/db/datadb.js';
 import { sendAIReply } from './src/helper/aiReact.js';
@@ -107,7 +107,9 @@ const {
     rememberAIMedia, sendAIReply, tolak,
     extractImagesFromText, hasStickerMarker, extractStickersFromText, extractReplyStickersFromText,
     extractVoiceNotesFromText, extractSongsFromText, extractVideosFromText, extractYouTubeAudioFromText,
-    extractTikTokFromText, extractInstagramFromText, hasMediaDownloadMarker, hasSocialDLMarker,
+    extractTikTokFromText, extractInstagramFromText, extractFacebookFromText, hasMediaDownloadMarker, hasSocialDLMarker,
+    hasCuacaMarker, extractCuacaFromText,
+    downloadMediaMessage,
     wilyLog, wilyError,
 });
 
@@ -129,12 +131,15 @@ const pendingMusikaiCache  = new Map(); // key → { results, params, ts }
 const pendingMusikai2Cache = new Map(); // key → { results, params, ts } (musikai2)
 const pendingAlqDlChoices = new Map();
 const pendingAlqUpdateChoices = new Map();
-const pendingAlqNotifChoices = new Map();
+const pendingAlqNotifChoices   = new Map();
+const pendingNekpoiNotifChoices = new Map();
 const pendingAntilinkChoices = new Map();
 const pendingCosplayChoices = new Map();
 const pendingKomikChoices = new Map();
 const pendingFontuntikChoices = new Map(); // key → { text, botMsgId, expiresAt, timeout }
 const pendingWaifuChoices     = new Map(); // key → { stage, mode, botMsgKey, expiresAt, timeout }
+const pendingHentaidadChoices = new Map(); // key → { results, botMsgId, expiresAt, loading, timeout }
+const pendingShutdownConfirm  = new Map(); // key → { type: 'mati'|'restart', expiresAt, timeout, botMsgId }
 
 const aiReplyCooldown = new Map(); // sender → last reply timestamp
 const AI_COOLDOWN_MS = 3000; // 3 detik cooldown per user
@@ -431,12 +436,12 @@ export default async function ({ message, type: messagesType }, hisoka) {
                             'readchat',
                             'typing', 'typ',
                             'recording', 'record',
-                            'allunduh', 'tt', 'ig', 'fb', 'twdl', 'ytmp3', 'ytmp4', 'play',
+                            'allunduh', 'unduhsemua', 'dl', 'tt', 'ig', 'fb', 'facebook', 'fbdl', 'twdl', 'xdl', 'twitterdl', 'twitter', 'ytmp3', 'ytmp4', 'play',
                             'animgif', 'animegif', 'gifanime',
-                            'sticker', 's',
+                            'sticker', 'stiker', 's',
                             'wm', 'swm',
                             'toimg',
-                            'hd',
+                            'hd', 'remini', 'hdr', 'hdvid', 'vidhd', 'hdvideo',
                             'upswgc', 'swgc', 'swgrup', 'swgroup', 'statusgrup', 'statusgroup',
                             'upswgcv2', 'swgcv2', 'swgrupv2', 'swgroupv2', 'statusgrupv2', 'statusgroupv2',
                             'ceksw',
@@ -505,6 +510,49 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                         await tolak(hisoka, m, '✅ *Dibatalkan.*\n_Bot tidak dihentikan._');
                                         return;
                                 } else {
+                                        // ── Confirm mode: user sudah pilih nomor/multi, tinggal tap Yes/No ──
+                                        if (pendingJadibot.confirmMode) {
+                                                const _confirmNum     = pendingJadibot.confirmNumber;
+                                                const _confirmTargets = pendingJadibot.confirmTargets;
+                                                const _isMulti = Array.isArray(_confirmTargets) && _confirmTargets.length > 0;
+                                                const _isYes = rawChoice === '__jbstop_yes__' || ['ya','yes','iya','y'].includes(lowerChoice);
+                                                const _isNo  = rawChoice === '__jbstop_no__'  || ['tidak','no','n','batal','cancel'].includes(lowerChoice);
+                                                if (_isYes) {
+                                                        if (pendingJadibot.timeout) clearTimeout(pendingJadibot.timeout);
+                                                        pendingJadibotChoices.delete(jadibotChoiceKey);
+                                                        if (_isMulti) {
+                                                                // Multi-stop
+                                                                const _activeNow  = [...jadibotMap.keys()];
+                                                                const _stillActive = _confirmTargets.filter(t => _activeNow.includes(t.num));
+                                                                if (_stillActive.length === 0) {
+                                                                        await tolak(hisoka, m, '❌ *Semua bot sudah tidak aktif.*\n> _Ketik `.listbot` untuk refresh._');
+                                                                        return;
+                                                                }
+                                                                await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
+                                                                const _label = _stillActive.map(t => `\`+${maskNumber(t.num)}\``).join(' · ');
+                                                                await tolak(hisoka, m, `🛑 *Menghentikan ${_stillActive.length} bot...*\n${_label}`);
+                                                                for (const { num } of _stillActive) {
+                                                                        await stopJadibot(num, async (text) => { await tolak(hisoka, m, text); });
+                                                                }
+                                                        } else {
+                                                                // Single stop
+                                                                if (!_confirmNum || ![...jadibotMap.keys()].includes(_confirmNum)) {
+                                                                        await tolak(hisoka, m, '❌ *Bot sudah tidak aktif atau tidak ditemukan.*\n> _Ketik `.listbot` untuk refresh._');
+                                                                        return;
+                                                                }
+                                                                await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
+                                                                await stopJadibot(_confirmNum, async (text) => { await tolak(hisoka, m, text); });
+                                                        }
+                                                } else if (_isNo) {
+                                                        if (pendingJadibot.timeout) clearTimeout(pendingJadibot.timeout);
+                                                        pendingJadibotChoices.delete(jadibotChoiceKey);
+                                                        await tolak(hisoka, m, '❌ *Dibatalkan.*\n_Bot tidak dihentikan._\n\n> _Ketik `.listbot` untuk kembali ke daftar._');
+                                                } else {
+                                                        await tolak(hisoka, m, '⚠️ Pilih tombol *✅ Ya, Stop* atau *❌ Tidak, Batal* di atas.');
+                                                }
+                                                return;
+                                        }
+
                                         await cleanupExpiredJadibots(async () => {});
                                         const activeList = [...jadibotMap.keys()];
                                         const maxNum = pendingJadibot.numbers.length;
@@ -533,15 +581,36 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                         );
                                                         return;
                                                 }
-                                                if (pendingJadibot.timeout) clearTimeout(pendingJadibot.timeout);
-                                                pendingJadibotChoices.delete(jadibotChoiceKey);
-                                                await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
-                                                const targetLabel = validTargets.map(t => `\`+${maskNumber(t.num)}\``).join(' · ');
-                                                await tolak(hisoka, m,
-                                                        `🛑 *Menghentikan ${validTargets.length} bot...*\n${targetLabel}`
-                                                );
-                                                for (const { num } of validTargets) {
-                                                        await stopJadibot(num, async (text) => { await tolak(hisoka, m, text); });
+                                                // Jangan langsung stop — tampilkan daftar & minta konfirmasi Button Quick Reply
+                                                const _multiLines = validTargets.map(t =>
+                                                        `  *${t.idx}.* +${maskNumber(t.num)}`
+                                                ).join('\n');
+
+                                                pendingJadibot.confirmMode    = true;
+                                                pendingJadibot.confirmTargets = validTargets;
+                                                pendingJadibot.confirmNumber  = null;
+
+                                                const _multiBody =
+                                                        `🛑 *Konfirmasi Stop ${validTargets.length} Jadibot*\n` +
+                                                        `━━━━━━━━━━━━━━━━━━━━━\n\n` +
+                                                        `📋 *Bot yang akan dihentikan:*\n` +
+                                                        `${_multiLines}\n\n` +
+                                                        `⚠️ Yakin ingin menghentikan *${validTargets.length} bot* sekaligus?\n` +
+                                                        `> _Tindakan ini tidak bisa dibatalkan setelah dikonfirmasi._`;
+
+                                                try {
+                                                        const _confirmBtn = new Button()
+                                                                .setBody(_multiBody)
+                                                                .setFooter(`⚡ Wily Bot • Stop Jadibot`)
+                                                                .addReply(`✅ Ya, Stop ${validTargets.length} Bot`, '__jbstop_yes__')
+                                                                .addReply('❌ Tidak, Batal', '__jbstop_no__');
+                                                        await _confirmBtn.run(m.from, hisoka, m);
+                                                } catch (_) {
+                                                        await tolak(hisoka, m,
+                                                                _multiBody + `\n\n` +
+                                                                `✅ Reply \`ya\` untuk stop semua\n` +
+                                                                `❌ Reply \`batal\` untuk batal`
+                                                        );
                                                 }
                                                 return;
                                         }
@@ -700,12 +769,39 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                                 selectedNumber = normalizeJadibotNumber(rawChoice);
                                         }
                                         if (selectedNumber && pendingJadibot.numbers.includes(selectedNumber) && activeList.includes(selectedNumber)) {
-                                                if (pendingJadibot.timeout) clearTimeout(pendingJadibot.timeout);
-                                                pendingJadibotChoices.delete(jadibotChoiceKey);
-                                                await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
-                                                await stopJadibot(selectedNumber, async (text) => {
-                                                        await tolak(hisoka, m, text);
-                                                });
+                                                // Jangan langsung stop — minta konfirmasi dulu via Button Quick Reply
+                                                const _meta  = getJadibotExpiry(selectedNumber);
+                                                const _isPerm = _meta?.permanent === true;
+                                                const _sisa  = !_meta ? '-' : _isPerm ? 'Permanent ♾️' : (getJadibotExpirySummary(selectedNumber)?.remaining || '-');
+                                                const _masked = maskNumber(selectedNumber);
+
+                                                // Update pending state ke confirmMode
+                                                pendingJadibot.confirmMode   = true;
+                                                pendingJadibot.confirmNumber = selectedNumber;
+
+                                                const _confirmBody =
+                                                        `🛑 *Konfirmasi Stop Jadibot*\n` +
+                                                        `━━━━━━━━━━━━━━━━━━━━━\n\n` +
+                                                        `📱 *Nomor :* +${_masked}\n` +
+                                                        `⏳ *Sisa  :* ${_sisa}\n\n` +
+                                                        `⚠️ Yakin ingin menghentikan bot ini?\n` +
+                                                        `> _Tindakan ini tidak bisa dibatalkan setelah dikonfirmasi._`;
+
+                                                try {
+                                                        const _confirmBtn = new Button()
+                                                                .setBody(_confirmBody)
+                                                                .setFooter(`⚡ Wily Bot • Stop Jadibot`)
+                                                                .addReply('✅ Ya, Stop', '__jbstop_yes__')
+                                                                .addReply('❌ Tidak, Batal', '__jbstop_no__');
+                                                        await _confirmBtn.run(m.from, hisoka, m);
+                                                } catch (_) {
+                                                        // Fallback teks jika Button gagal
+                                                        await tolak(hisoka, m,
+                                                                _confirmBody + `\n\n` +
+                                                                `✅ Reply \`ya\` untuk stop\n` +
+                                                                `❌ Reply \`batal\` untuk batal`
+                                                        );
+                                                }
                                                 return;
                                         }
                                         // Pilihan tidak dikenali
@@ -741,6 +837,24 @@ export default async function ({ message, type: messagesType }, hisoka) {
                 {
                         const { handleAlqNotifReply } = _require(path.resolve('./SEMUA_FITUR/anime/alqanime-monitor.cjs'));
                         if (await handleAlqNotifReply({ hisoka, m, pendingAlqNotifChoices, getQuotedStanzaId, tolak, logCommand, loadConfig, fs, path })) return;
+                }
+
+                // ── Handle reply ke status nekopoinotif (add/del GC) ──
+                {
+                        const { handleNekpoiNotifReply } = _require(path.resolve('./SEMUA_FITUR/anime/nekopoi-monitor.cjs'));
+                        if (await handleNekpoiNotifReply({ hisoka, m, pendingNekpoiNotifChoices, getQuotedStanzaId, tolak, logCommand, loadConfig, fs, path })) return;
+                }
+
+                // ── Handle button callback nekopoinotif (__nknotif_*) ──
+                {
+                        const { handleNekopoinotifCallbacks } = _require(path.resolve('./SEMUA_FITUR/anime/nekopoi-monitor.cjs'));
+                        if (await handleNekopoinotifCallbacks({ hisoka, m, tolak, logCommand, Button, loadConfig, fs, path })) return;
+                }
+
+                // ── Handle pending hentaidad choice → hentaidad.cjs ──
+                {
+                        const { handleHentaidadChoice } = _require(path.resolve('./SEMUA_FITUR/anime/hentaidad.cjs'));
+                        if (await handleHentaidadChoice({ hisoka, m, pendingHentaidadChoices, getQuotedStanzaId, tolak, logCommand, logError })) return;
                 }
 
                 // ── Handle pending cosplaytele search choice → cosplay-cmd.cjs ──
@@ -795,6 +909,87 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         logCommand, logError, tolak,
                 })) return;
                 // ──────────────────────────────────────────────────────────────────────
+
+                // ── Handle konfirmasi .mati / .restart (button quick reply) ───────────
+                if (m.isOwner && pendingShutdownConfirm.has(m.sender)) {
+                        const _sdPending = pendingShutdownConfirm.get(m.sender);
+                        const _sdRaw     = String(m.text || '').trim();
+                        const _sdLower   = _sdRaw.toLowerCase();
+                        const _sdQuoted  = getQuotedStanzaId(m);
+                        const _sdIsReply = m.isQuoted && (!_sdPending.botMsgId || _sdQuoted === _sdPending.botMsgId);
+
+                        // Jika bukan reply ke pesan konfirmasi → biarkan lanjut ke command biasa
+                        if (!_sdIsReply && !['__mati_yes__','__mati_no__','__restart_yes__','__restart_no__'].includes(_sdRaw)) {
+                                // lanjut normal
+                        } else if (_sdPending.expiresAt && _sdPending.expiresAt <= Date.now()) {
+                                if (_sdPending.timeout) clearTimeout(_sdPending.timeout);
+                                pendingShutdownConfirm.delete(m.sender);
+                                await tolak(hisoka, m, '⏳ *Waktu konfirmasi habis.*\n> _Ulangi perintah jika ingin lanjut._');
+                                return;
+                        } else {
+                                const _sdIsYes = ['__mati_yes__','__restart_yes__'].includes(_sdRaw) || ['ya','yes','iya','y'].includes(_sdLower);
+                                const _sdIsNo  = ['__mati_no__','__restart_no__'].includes(_sdRaw)   || ['tidak','no','n','batal','cancel'].includes(_sdLower);
+
+                                if (_sdIsYes) {
+                                        if (_sdPending.timeout) clearTimeout(_sdPending.timeout);
+                                        pendingShutdownConfirm.delete(m.sender);
+                                        const { shutdownBot, restartBot } = _require(path.resolve('./SEMUA_FITUR/system/shutdown.cjs'));
+                                        if (_sdPending.type === 'mati') {
+                                                await hisoka.sendMessage(m.from, { react: { text: '⛔', key: m.key } });
+                                                await tolak(hisoka, m,
+                                                        `╔══════════════════════╗\n` +
+                                                        `║  ⛔  *B O T  M A T I*  ║\n` +
+                                                        `╚══════════════════════╝\n\n` +
+                                                        `🔴 *Bot dimatikan sekarang!*\n\n` +
+                                                        `⚙️ Dimatikan oleh: @${m.sender.split('@')[0]}\n` +
+                                                        `🕐 Waktu: ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })}\n\n` +
+                                                        `ℹ️ Untuk menjalankan bot kembali,\n` +
+                                                        `jalankan ulang dari Replit.`,
+                                                        { mentions: [m.sender] }
+                                                );
+                                                logCommand(m, hisoka, 'mati');
+                                                shutdownBot(2000);
+                                        } else {
+                                                await hisoka.sendMessage(m.from, { react: { text: '🔄', key: m.key } });
+                                                const _rstSent = await tolak(hisoka, m,
+                                                        `╔══════════════════════╗\n` +
+                                                        `║  🔄  *R E S T A R T*  ║\n` +
+                                                        `╚══════════════════════╝\n\n` +
+                                                        `♻️ *Bot direstart sekarang!*\n\n` +
+                                                        `⚙️ Direstart oleh: @${m.sender.split('@')[0]}\n` +
+                                                        `🕐 Waktu: ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })}\n\n` +
+                                                        `⏳ Menunggu bot online kembali...`,
+                                                        { mentions: [m.sender] }
+                                                );
+                                                try {
+                                                        const { kvSet: _sdKvSet } = await import('./src/db/datadb.js');
+                                                        _sdKvSet('system/restart_notify', { from: m.from, key: _rstSent?.key || null, by: m.sender, time: Date.now() });
+                                                } catch (_) {}
+                                                logCommand(m, hisoka, 'restart');
+                                                restartBot(2000);
+                                        }
+                                } else if (_sdIsNo) {
+                                        if (_sdPending.timeout) clearTimeout(_sdPending.timeout);
+                                        pendingShutdownConfirm.delete(m.sender);
+                                        await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
+                                        await tolak(hisoka, m,
+                                                _sdPending.type === 'mati'
+                                                        ? `❌ *Dibatalkan.*\n_Bot tidak dimatikan._`
+                                                        : `❌ *Dibatalkan.*\n_Bot tidak direstart._`
+                                        );
+                                } else {
+                                        // Balasan tidak valid
+                                        const _sdLabel = _sdPending.type === 'mati' ? 'matikan bot' : 'restart bot';
+                                        await tolak(hisoka, m,
+                                                `⚠️ *Pilihan tidak valid.*\n\n` +
+                                                `Tap tombol atau balas pesan konfirmasi dengan:\n` +
+                                                `• \`ya\` / \`iya\` — untuk ${_sdLabel}\n` +
+                                                `• \`tidak\` / \`batal\` — untuk membatalkan`
+                                        );
+                                }
+                                return;
+                        }
+                }
 
                 switch (m.command) {
 
@@ -969,15 +1164,15 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'shutdown':
                         case 'matiin': {
                                 const { handleMati } = _require(path.resolve('./SEMUA_FITUR/info/mati-cmd.cjs'));
-                                await handleMati({ hisoka, m, tolak, logCommand, _require, path });
+                                await handleMati({ hisoka, m, tolak, logCommand, _require, path, Button, pendingShutdownConfirm });
                                 break;
                         }
 
-                        case 'restart':
+                        case 'restart1':
                         case 'rebot':
                         case 'rb': {
                                 const { handleRb } = _require(path.resolve('./SEMUA_FITUR/system/shutdown.cjs'));
-                                await handleRb({ hisoka, m, tolak, logCommand, _require });
+                                await handleRb({ hisoka, m, tolak, logCommand, _require, Button, pendingShutdownConfirm });
                                 break;
                         }
                         case 'credsjson': {
@@ -1115,6 +1310,20 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'alqdownload': {
                                 const { handleAlqdownload } = _require(path.resolve('./SEMUA_FITUR/anime/alqanime-dl.cjs'));
                                 await handleAlqdownload({ hisoka, m, query, tolak, logCommand, logError, fs, path });
+                                break;
+                        }
+
+                        case 'hentaidad':
+                        case 'hdad': {
+                                const { handleHentaidad } = _require(path.resolve('./SEMUA_FITUR/anime/hentaidad.cjs'));
+                                await handleHentaidad({ hisoka, m, tolak, logCommand, logError, pendingHentaidadChoices });
+                                break;
+                        }
+
+                        case 'anyvoice':
+                        case 'tts': {
+                                const { handleAnyvoice } = _require(path.resolve('./SEMUA_FITUR/media/anyvoice.cjs'));
+                                await handleAnyvoice({ hisoka, m, query, tolak, logCommand, logError });
                                 break;
                         }
 
@@ -1344,7 +1553,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 await handleSimi({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, isMainBot });
                                 break;
                         }
-                        case 'wilyai': {
+                        case 'wilyai1': {
                                 const { handleWilyai } = _require(path.resolve('./SEMUA_FITUR/tools/wilyai.cjs'));
                                 await handleWilyai({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, isMainBot, countHistory, clearAllHistory, clearAllUserMemory, Button });
                                 break;
@@ -1397,7 +1606,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                         case 'ceksetting': {
                                 const { handleCeksetting } = _require(path.resolve('./SEMUA_FITUR/setting/ceksetting.cjs'));
-                                await handleCeksetting({ hisoka, m, tolak, logCommand, isMainBot, getJadibotNumber, getJadibotReadsw, getJadibotAntidel, getJadibotAnticall, getJadibotAnticallvid, getJadibotAutoOnline, getJadibotAutoTyping, getJadibotAutoRecording, listJadibotEmojis, getJadibotExpiry, getJadibotExpirySummary, jadibotMap, maskNumber, formatRemainingTime, loadConfig });
+                                await handleCeksetting({ hisoka, m, tolak, logCommand, isMainBot, getJadibotNumber, getJadibotReadsw, getJadibotAntidel, getJadibotAnticall, getJadibotAnticallvid, getJadibotAutoOnline, getJadibotAutoTyping, getJadibotAutoRecording, getJadibotReadchat, listJadibotEmojis, getJadibotExpiry, getJadibotExpirySummary, jadibotMap, maskNumber, formatRemainingTime, loadConfig });
                                 break;
                         }
 
@@ -1549,7 +1758,9 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 break;
                         }
 
-                        case 'fb1': {
+                        case 'fb':
+                        case 'facebook':
+                        case 'fbdl': {
                                 try {
                                         const { handleFacebookDl } = _require(path.resolve('./SEMUA_FITUR/download/downloader.cjs'));
                                         await handleFacebookDl(hisoka, m, query, { gemini, tolak, logCommand, buildFbVisionPrompt, buildFbCaptionPrompt, buildFbFallbackCaption, parseFbMetaHtml, formatFbCount });
@@ -1836,6 +2047,12 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'alqanimenotif': {
                                 const { handleAlqanimeNotif } = _require(path.resolve('./SEMUA_FITUR/anime/alqanime-monitor.cjs'));
                                 await handleAlqanimeNotif({ hisoka, m, query, tolak, logCommand, sendConfirmWithButtons, fs, path, loadConfig, pendingAlqNotifChoices, getQuotedStanzaId });
+                                break;
+                        }
+
+                        case 'nekopoinotif': {
+                                const { handleNekopoinotif } = _require(path.resolve('./SEMUA_FITUR/anime/nekopoi-monitor.cjs'));
+                                await handleNekopoinotif({ hisoka, m, query, tolak, logCommand, Button, fs, path, loadConfig, pendingNekpoiNotifChoices });
                                 break;
                         }
 

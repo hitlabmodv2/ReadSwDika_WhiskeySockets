@@ -175,15 +175,32 @@ export function startJadibotAutoOnline(sock, jadibotNum) {
     autoOnlineIntervalMap.delete(jadibotNum)
   }
   const aoSettings = getJadibotAutoOnline(jadibotNum)
-  const presence = aoSettings.enabled ? 'available' : 'unavailable'
   const intervalMs = Math.max(10000, (aoSettings.intervalSeconds || 30) * 1000)
-  // Kirim presence langsung saat dipanggil
-  try { if (sock?.user) sock.sendPresenceUpdate(presence) } catch {}
-  // Jadwalkan secara periodik
-  const iv = setInterval(() => {
-    try { if (sock?.user) sock.sendPresenceUpdate(presence) } catch {}
-  }, intervalMs)
-  autoOnlineIntervalMap.set(jadibotNum, iv)
+  // Flag stealth per-socket — dibaca event.js & interactive-msg.cjs
+  sock.__stealthMode = !aoSettings.enabled
+  if (aoSettings.enabled) {
+    // Mode ON: kirim available berkala → kontak lihat online realtime
+    if (sock?.user) sock.updateOnlinePrivacy('all').catch(() => {})
+    try { if (sock?.user) sock.sendPresenceUpdate('available') } catch {}
+    const iv = setInterval(() => {
+      try { if (sock?.user) sock.sendPresenceUpdate('available') } catch {}
+    }, intervalMs)
+    autoOnlineIntervalMap.set(jadibotNum, iv)
+  } else {
+    // Mode STEALTH (off):
+    // Set privacy online → match_last_seen agar perangkat tertautan jadibot juga tidak
+    // terlihat online. Terisolasi per-socket jadibot, tidak mempengaruhi bot utama/jadibot lain.
+    // Kirim unavailable berkala setiap 5 detik untuk lawan keepalive WA (25s)
+    // — tanpa ini bot flash online ~3-5 detik tiap 25s lalu offline terus-menerus
+    if (sock?.user) sock.updateOnlinePrivacy('match_last_seen').catch(() => {})
+    try { if (sock?.user) sock.sendPresenceUpdate('unavailable') } catch {}
+    const iv = setInterval(() => {
+      // Skip saat typing/recording aktif — jangan potong delay
+      if (sock.__typingActive > 0) return;
+      try { if (sock?.user) sock.sendPresenceUpdate('unavailable') } catch {}
+    }, 5000)
+    autoOnlineIntervalMap.set(jadibotNum, iv)
+  }
 }
 
 export function stopJadibotAutoOnline(jadibotNum) {
@@ -310,22 +327,102 @@ function clearJadibotExpiryWarningTimers(number) {
   expiryWarningTimers.delete(number)
 }
 
-// direct=true → pesan dikirim langsung ke nomor jadibot (v2 mode)
-// direct=false → pesan dikirim ke GC/owner (v1 mode)
+// ── Helper realtime: baca setting per-jadibot → list fitur aktif & berhenti ─
+// Semua fungsi notif pakai ini — tidak ada lagi hardcode daftar fitur
+// Total auto fitur: 7 (readsw, antidel, anticall, anticallvid, online, typing, recording)
+// → konsisten dengan counter di menu-cmd.cjs (_jbAutoList.length = 7)
+function buildJadibotFeatureStatus(number) {
+  const readsw      = getJadibotReadsw(number)
+  const antidel     = getJadibotAntidel(number)
+  const autoTyping  = getJadibotAutoTyping(number)
+  const autoRec     = getJadibotAutoRecording(number)
+  const autoOnline  = getJadibotAutoOnline(number)
+  const anticall    = getJadibotAnticall(number)
+  const anticallvid = getJadibotAnticallvid(number)
+
+  const swOn    = readsw.enabled !== false
+  const reactOn = swOn && readsw.autoReaction !== false
+
+  // swStatus string — format inline untuk baris fitur
+  const swStatus = !swOn
+    ? `~ReadSW~ ~ReactionSW~ _(nonaktif)_`
+    : reactOn ? `*ReadSW + ReactionSW* ✅`
+              : `*ReadSW* ✅ _— tanpa reaksi_`
+
+  const antidelOn      = antidel.enabled === true
+  const typingOn       = autoTyping.enabled === true
+  const recOn          = autoRec.enabled === true
+  const onlineOn       = autoOnline.enabled === true
+  const anticallOn     = anticall.enabled === true
+  const anticallvidOn  = anticallvid.enabled === true
+
+  // Fitur yang AKTIF — numbered list, untuk notif connect/reconnect/welcome
+  const activeLines = []
+  if (swOn)           activeLines.push(`👁️ ${swStatus}`)
+  if (antidelOn)      activeLines.push(`🔕 *Anti-Delete* — Tangkap pesan yang dihapus`)
+  if (typingOn)       activeLines.push(`💬 *Auto Typing* — Indikator mengetik realtime`)
+  if (recOn)          activeLines.push(`🎙️ *Auto Recording* — Indikator merekam realtime`)
+  if (onlineOn)       activeLines.push(`🟢 *Auto Online* — Selalu tampil online`)
+  if (anticallOn)     activeLines.push(`🚫 *Anti Call* — Tolak panggilan suara otomatis`)
+  if (anticallvidOn)  activeLines.push(`📵 *Anti Call Video* — Tolak panggilan video otomatis`)
+  activeLines.push(`🤖 *Full Command Bot* — Semua perintah aktif`)
+  const activeFeaturesText = activeLines.map((l, i) => `${i + 1}. ${l}`).join('\n')
+
+  // Fitur yang BERHENTI — bullet ~strikethrough~, untuk notif stop/expired/warning
+  // Hanya fitur yang sedang ON yang masuk daftar ini
+  const stoppedLines = []
+  if (swOn)            stoppedLines.push(`~ReadSW${reactOn ? ' + ReactionSW' : ''}~`)
+  if (antidelOn)       stoppedLines.push(`~Anti-Delete~`)
+  if (typingOn || recOn) stoppedLines.push(`~Auto Typing${recOn ? ' / Recording' : ''}~`)
+  if (onlineOn)        stoppedLines.push(`~Auto Online~`)
+  if (anticallOn)      stoppedLines.push(`~Anti Call~`)
+  if (anticallvidOn)   stoppedLines.push(`~Anti Call Video~`)
+  stoppedLines.push(`~Semua command bot~`)
+  const stoppedFeaturesText = stoppedLines.map(l => `• ${l}`).join('\n')
+
+  return { activeFeaturesText, stoppedFeaturesText, swStatus, swOn, reactOn }
+}
+
+// direct=true → pesan dikirim langsung ke nomor jadibot (user)
+// direct=false → pesan dikirim ke GC/owner
 function msgJadibotExpiryWarning(number, remainingText, expiresAtText, durationLabel = '1 hari', direct = false) {
-  const ownerLine = direct
-    ? `💡 Hubungi owner untuk perpanjang masa aktif:\n${getOwnerContact()}`
-    : `💡 Perpanjang dengan:\n*.jadibot ${number} ${durationLabel}*`
+  const masked = maskNumber(number)
+  const ver = loadConfig().botVersion || 'V25'
+
+  if (direct) {
+    // ── Ke USER jadibot (personal, kasual) ──
+    return (
+      `╔══════════════════════╗\n` +
+      `║  ⏰  *HAMPIR HABIS!*   ║\n` +
+      `╚══════════════════════╝\n\n` +
+      `📱 *Nomor kamu:* \`+${number}\`\n` +
+      `⏳ *Sisa waktu:* *${remainingText}*\n` +
+      `📅 *Habis pada:* _${expiresAtText}_\n\n` +
+      `⚠️ *Masa aktif jadibot kamu akan segera berakhir!*\n\n` +
+      `_Jika tidak diperpanjang, fitur berikut akan berhenti:_\n` +
+      `${buildJadibotFeatureStatus(number).stoppedFeaturesText}\n\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `> 💡 _Hubungi owner sekarang untuk perpanjang masa aktif:_\n` +
+      `📞 ${getOwnerContact()}\n\n` +
+      `> _Notif otomatis — Wily Bot ${ver}_ 🤖`
+    )
+  }
+
+  // ── Ke GC/owner (monitoring, dengan command) ──
   return (
     `╔══════════════════════╗\n` +
-    `║  ⚠️  *JADIBOT HAMPIR HABIS* ║\n` +
+    `║  ⏰  *HAMPIR EXPIRED*  ║\n` +
     `╚══════════════════════╝\n\n` +
-    `📱 *Nomor:* +${maskNumber(number)}\n` +
-    `⏳ *Sisa waktu:* ${remainingText}\n` +
-    `📅 *Habis pada:* ${expiresAtText}\n\n` +
-    `⚠️ Masa aktif jadibot hampir habis.\n` +
-    `Bot akan otomatis berhenti dan sesi dihapus saat waktunya habis.\n\n` +
-    ownerLine
+    `📱 *Nomor  :* \`+${number}\`\n` +
+    `⏳ *Sisa   :* *${remainingText}*\n` +
+    `📅 *Habis  :* _${expiresAtText}_\n\n` +
+    `⚠️ *Masa aktif jadibot +${masked} akan segera habis!*\n` +
+    `_Bot otomatis berhenti dan sesi dihapus saat waktu tiba._\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━━━\n` +
+    `🛠️ *Perpanjang Sekarang:*\n` +
+    `• \`.upbot ${number} ${durationLabel}\` — perpanjang durasi\n` +
+    `• \`.upbot ${number} p\` — ubah ke permanent\n\n` +
+    `> _Notif otomatis — Wily Bot ${ver}_ 🤖`
   )
 }
 
@@ -334,6 +431,26 @@ async function sendDirectJadibotNotice(sock, number, text) {
   try {
     await sock.sendMessage(`${number}@s.whatsapp.net`, { text })
   } catch {}
+}
+
+// Kirim pesan langsung ke nomor jadibot via main bot, dengan resolve JID (LID support)
+async function sendDirectToUser(mainBotSock, number, text) {
+  const sock = getActiveMainSock(mainBotSock)
+  if (!sock) return false
+  try {
+    await delay(800)
+    let jid = `${number}@s.whatsapp.net`
+    try {
+      const [res] = await sock.onWhatsApp(`${number}@s.whatsapp.net`)
+      if (res?.exists && res?.jid) jid = res.jid
+    } catch {}
+    await sock.sendMessage(jid, { text })
+    console.log(`[JADIBOT] ✅ Notif user terkirim ke +${number} (jid: ${jid})`)
+    return true
+  } catch (e) {
+    console.log(`[JADIBOT] ⚠️ Gagal kirim notif user ke +${number}: ${e?.message}`)
+    return false
+  }
 }
 
 function getJadibotExpirySummary(number) {
@@ -606,17 +723,84 @@ function isJadibotExpired(number) {
 // direct=true → pesan dikirim langsung ke nomor jadibot (v2 mode)
 // direct=false → pesan dikirim ke GC/owner (v1 mode)
 function msgJadibotExpired(number, direct = false) {
-  const ownerLine = direct
-    ? `💡 Hubungi owner untuk aktifkan kembali:\n${getOwnerContact()}`
-    : `💡 Ketik *.jadibot ${number} 1 hari* untuk aktifkan lagi.`
+  const masked = maskNumber(number)
+  const ver = loadConfig().botVersion || 'V25'
+  const now = new Date().toLocaleString('id-ID', {
+    timeZone: 'Asia/Jakarta',
+    day: '2-digit', month: '2-digit', year: 'numeric',
+    hour: '2-digit', minute: '2-digit', second: '2-digit'
+  })
+
+  if (direct) {
+    // ── Ke USER jadibot (personal, kasual) ──
+    return (
+      `╔══════════════════════╗\n` +
+      `║  ❌  *JADIBOT BERAKHIR* ║\n` +
+      `╚══════════════════════╝\n\n` +
+      `📱 *Nomor kamu:* \`+${number}\`\n` +
+      `🕐 *Waktu:* _${now} WIB_\n\n` +
+      `🚨 *Masa aktif jadibot kamu telah berakhir!*\n` +
+      `🗑️ ~Sesi otomatis dihapus dari server.~\n\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `❌ *Fitur yang Berhenti:*\n` +
+      `${buildJadibotFeatureStatus(number).stoppedFeaturesText}\n\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `> 💡 _Hubungi owner untuk mengaktifkan kembali:_\n` +
+      `📞 ${getOwnerContact()}\n\n` +
+      `> _Notif otomatis — Wily Bot ${ver}_ 🤖`
+    )
+  }
+
+  // ── Ke GC/owner (monitoring, dengan command) ──
   return (
     `╔══════════════════════╗\n` +
-    `║  ⏰  *JADIBOT EXPIRED* ║\n` +
+    `║  ❌  *JADIBOT EXPIRED* ║\n` +
     `╚══════════════════════╝\n\n` +
-    `📱 *Nomor:* +${maskNumber(number)}\n\n` +
-    `❌ Masa berlaku jadibot sudah habis.\n` +
-    `🗑️ Sesi dan data jadibot otomatis dihapus realtime.\n\n` +
-    ownerLine
+    `📱 *Nomor  :* \`+${number}\`\n` +
+    `🕐 *Waktu  :* _${now} WIB_\n\n` +
+    `⏰ *Masa berlaku jadibot +${masked} telah habis.*\n` +
+    `🗑️ ~Sesi dan data otomatis dihapus realtime.~\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━━━\n` +
+    `❌ *Fitur yang Berhenti:*\n` +
+    `${buildJadibotFeatureStatus(number).stoppedFeaturesText}\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━━━\n` +
+    `💡 *Aktifkan Kembali:*\n` +
+    `• \`.jadibot ${number} 1h\` — aktifkan 1 hari\n` +
+    `• \`.jadibot ${number} p\` — aktifkan permanent\n\n` +
+    `> _Notif otomatis — Wily Bot ${ver}_ 🤖`
+  )
+}
+
+// ── Notif expired → ke OWNER DM (alert monitoring) ──────────────────────────
+function msgOwnerExpired(number) {
+  const cfg    = loadConfig()
+  const ver    = cfg.botVersion || 'V25'
+  const masked = maskNumber(number)
+  const remainingList = [...jadibotMap.keys()]
+
+  const listPart = remainingList.length > 0
+    ? `📊 *Jadibot Masih Aktif (${remainingList.length}):*\n` +
+      remainingList.map((v, i) => `${i + 1}. \`+${v}\``).join('\n') + `\n`
+    : `> ❌ _Tidak ada jadibot lain yang aktif saat ini._\n`
+
+  return (
+    `╔══════════════════════╗\n` +
+    `║  ❌  *JADIBOT EXPIRED!* ║\n` +
+    `╚══════════════════════╝\n\n` +
+    `📱 *Nomor :* \`+${number}\`\n` +
+    `🕐 *Waktu :* _${_nowStr()}_\n\n` +
+    `⏰ *Masa berlaku jadibot +${masked} telah habis secara otomatis.*\n` +
+    `🗑️ ~Sesi dihapus dari server secara realtime.~\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━━\n` +
+    `❌ *Fitur yang Berhenti di Nomor Ini:*\n` +
+    `${buildJadibotFeatureStatus(number).stoppedFeaturesText}\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━━\n` +
+    `${listPart}\n` +
+    `━━━━━━━━━━━━━━━━━━━━━\n` +
+    `💡 *Aktifkan Kembali:*\n` +
+    `• \`.jadibot ${number} 1h\` — aktifkan 1 hari\n` +
+    `• \`.jadibot ${number} p\` — aktifkan permanent\n\n` +
+    `> _Notif otomatis — Wily Bot ${ver}_ 🤖`
   )
 }
 
@@ -641,21 +825,31 @@ async function expireJadibot(number, sendReply = null) {
   // masuk sebagai "note to self" di WA, tidak muncul sebagai chat biasa
   const _expireMainSock = getActiveMainSock()
 
-  if (expiryMode === 'v2') {
-    // V2: kirim notif expired langsung ke nomor target via MAIN BOT
-    const expiredMsgDirect = msgJadibotExpired(number, true)
-    if (_expireMainSock) {
-      try {
-        await _expireMainSock.sendMessage(`${number}@s.whatsapp.net`, { text: expiredMsgDirect })
-        console.log(`[JADIBOT][V2] ✅ Notif expired terkirim ke +${number}`)
-      } catch (e) {
-        console.log(`[JADIBOT][V2] ⚠️ Gagal kirim notif expired ke +${number}: ${e?.message}`)
-      }
-    } else {
-      console.log(`[JADIBOT][V2] ⚠️ Main sock tidak tersedia, notif expired ke +${number} dilewati`)
+  // Helper: resolve JID & kirim notif expired ke nomor user jadibot via main bot
+  const _sendExpiredDirect = async () => {
+    if (!_expireMainSock) {
+      console.log(`[JADIBOT] ⚠️ Main sock tidak tersedia, notif expired ke +${number} dilewati`)
+      return
     }
+    try {
+      // Resolve JID (support LID/linked device)
+      let _expJid = `${number}@s.whatsapp.net`
+      try {
+        const [_waRes] = await _expireMainSock.onWhatsApp(`${number}@s.whatsapp.net`)
+        if (_waRes?.exists && _waRes?.jid) _expJid = _waRes.jid
+      } catch (_) {}
+      await _expireMainSock.sendMessage(_expJid, { text: msgJadibotExpired(number, true) })
+      console.log(`[JADIBOT] ✅ Notif expired terkirim ke +${number} (jid: ${_expJid})`)
+    } catch (e) {
+      console.log(`[JADIBOT] ⚠️ Gagal kirim notif expired ke +${number}: ${e?.message}`)
+    }
+  }
+
+  if (expiryMode === 'v2') {
+    // V2: kirim notif expired langsung ke nomor user jadibot via main bot
+    await _sendExpiredDirect()
   } else {
-    // V1: kirim notif expired ke GC/owner (pakai command bot)
+    // V1: kirim notif expired ke GC/owner
     if (sendReply) {
       try {
         await sendReply(expiredMsg)
@@ -664,15 +858,16 @@ async function expireJadibot(number, sendReply = null) {
         console.log(`[JADIBOT][V1] ⚠️ Gagal kirim notif expired ke GC/owner: ${e?.message}`)
       }
     }
-    // V1: JUGA kirim langsung ke nomor target via MAIN BOT
-    if (_expireMainSock) {
-      try {
-        await _expireMainSock.sendMessage(`${number}@s.whatsapp.net`, { text: msgJadibotExpired(number, true) })
-        console.log(`[JADIBOT][V1] ✅ Notif expired terkirim langsung ke +${number}`)
-      } catch (e) {
-        console.log(`[JADIBOT][V1] ⚠️ Gagal kirim notif expired langsung ke +${number}: ${e?.message}`)
-      }
-    }
+    // V1: JUGA kirim langsung ke nomor user jadibot via main bot
+    await _sendExpiredDirect()
+  }
+
+  // Notif ke semua owner via DM (selalu dikirim di semua mode)
+  try {
+    await sendOwnerNotif(null, msgOwnerExpired(number), [number])
+    console.log(`[JADIBOT] ✅ Notif expired terkirim ke semua owner`)
+  } catch (e) {
+    console.log(`[JADIBOT] ⚠️ Gagal kirim notif expired ke owner: ${e?.message}`)
   }
 
   // Langkah 3: tutup socket
@@ -1239,47 +1434,119 @@ async function handleJadibotSW(msg, sock, swSet, number) {
 }
 
 /* ================= PESAN RAPIH ================= */
-function msgPairingCode(code, number) {
+// direct=true → dikirim ke nomor tujuan (user jadibot) — footer sopan, tanpa command owner
+// direct=false → dikirim ke GC/owner — footer dengan command .jadibot
+function msgPairingCode(code, number, direct = false) {
   const formatted = formatPairingCode(code)
   const masked = maskNumber(number)
+  const ver = loadConfig().botVersion || 'V25'
+
+  const footer = direct
+    ? (
+        `━━━━━━━━━━━━━━━━━━━━━━\n` +
+        `⏳ *Segera masukkan kode sebelum kedaluwarsa!*\n` +
+        `> _Kode hanya berlaku ±3 menit — jangan ditunda._\n\n` +
+        `📌 *Catatan penting:*\n` +
+        `• Pastikan kamu membuka WhatsApp yang sesuai nomor di atas\n` +
+        `• Jangan bagikan kode ini ke siapapun\n` +
+        `• ~Kode tidak bisa dipakai ulang~ setelah digunakan atau expired\n\n` +
+        `💡 *Kode sudah habis atau ada kendala?*\n` +
+        `📞 Hubungi owner: ${getOwnerContact()}\n\n` +
+        `> _Powered by Wily Bot ${ver}_ 🤖`
+      )
+    : (
+        `⏳ *Batas waktu: 3 menit*\n` +
+        `⚠️ Jika gagal, ketik *.jadibot* ulang`
+      )
+
   return (
     `╔══════════════════════╗\n` +
     `║   🤖  *J A D I B O T*   ║\n` +
     `╚══════════════════════╝\n\n` +
-    `📱 *Nomor:* ${masked}\n\n` +
+    `📱 *Nomor:* \`${masked}\`\n\n` +
     `🔑 *Kode Pairing:*\n` +
     `┌─────────────────┐\n` +
     `│   *${formatted}*   │\n` +
     `└─────────────────┘\n\n` +
     `📋 *Cara Memasukkan Kode:*\n` +
     `1️⃣ Buka WhatsApp di HP kamu\n` +
-    `2️⃣ Ketuk ⋮ (titik tiga) → *Perangkat Tertaut*\n` +
+    `2️⃣ Ketuk ⋮ *(titik tiga)* → *Perangkat Tertaut*\n` +
     `3️⃣ Ketuk *Tautkan Perangkat*\n` +
     `4️⃣ Pilih *Tautkan dengan nomor telepon*\n` +
     `5️⃣ Masukkan kode di atas\n\n` +
-    `⏳ *Batas waktu: 3 menit*\n` +
-    `⚠️ Jika gagal, ketik *.jadibot* ulang`
+    footer
   )
 }
 
 
+// ── Notif pairing expired → ke OWNER DM (monitoring, beda dari versi user/GC) ─
+function msgOwnerPairingExpired(number) {
+  const cfg    = loadConfig()
+  const ver    = cfg.botVersion || 'V25'
+  const masked = maskNumber(number)
+  return (
+    `╔══════════════════════╗\n` +
+    `║   ⏰  *PAIRING TIMEOUT*  ║\n` +
+    `╚══════════════════════╝\n\n` +
+    `📱 *Nomor  :* \`+${number}\`\n` +
+    `🕐 *Waktu  :* _${_nowStr()}_\n\n` +
+    `⚠️ *Kode pairing +${masked} tidak dimasukkan dalam 3 menit.*\n` +
+    `> _Sesi otomatis dihapus dari server — tidak ada data yang tersisa._\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━━\n` +
+    `📋 *Kemungkinan penyebab:*\n` +
+    `• Pengguna tidak sempat membuka pesan kode\n` +
+    `• Kode terlambat dimasukkan ke WhatsApp\n` +
+    `• Pengguna salah langkah saat scan/input kode\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━━\n` +
+    `🔄 *Aktifkan ulang jika diperlukan:*\n` +
+    `• \`.jadibot ${number} <durasi>\` — coba pairing lagi\n\n` +
+    `> _Notif otomatis — Wily Bot ${ver}_ 🤖`
+  )
+}
+
 // direct=true → dikirim ke nomor target (v2): tampilkan link owner, bukan command bot
 // direct=false → dikirim ke GC/owner (v1): tampilkan command bot
 function msgPairingExpired(number, direct = false) {
-  const masked = maskNumber(number)
-  const hintLine = direct
-    ? `💡 Hubungi owner untuk aktifkan kembali:\n📞 ${getOwnerContact()}`
-    : `💡 Ketik *.jadibot ${number}* untuk coba lagi.`
+  const masked  = maskNumber(number)
+  const ver     = loadConfig().botVersion || 'V25'
+
+  if (direct) {
+    // Versi lengkap → dikirim ke nomor tujuan (user jadibot)
+    return (
+      `╔══════════════════════╗\n` +
+      `║   ⏰  *WAKTU HABIS!*   ║\n` +
+      `╚══════════════════════╝\n\n` +
+      `📱 *Nomor kamu:* \`+${number}\`\n` +
+      `🕐 *Waktu:* _${_nowStr()}_\n\n` +
+      `❌ *Kode pairing sudah kedaluwarsa!*\n` +
+      `> _Kode tidak dimasukkan dalam batas waktu *3 menit*, sehingga sesi otomatis dibatalkan._\n\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `🗑️ *Yang terjadi:*\n` +
+      `• ~Kode pairing sudah tidak berlaku~\n` +
+      `• ~Sesi dihapus otomatis dari server~\n` +
+      `• ~Jadibot belum aktif di nomormu~\n\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `📋 *Kemungkinan penyebab:*\n` +
+      `1. Terlambat membuka pesan kode\n` +
+      `2. Salah langkah saat input di WhatsApp\n` +
+      `3. Koneksi internet terganggu saat proses\n\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `💡 *Ingin coba lagi?*\n` +
+      `📞 Hubungi owner — mereka akan kirimkan kode baru:\n` +
+      `${getOwnerContact()}\n\n` +
+      `> _Notif otomatis — Wily Bot ${ver}_ 🤖`
+    )
+  }
+
+  // Versi singkat → dikirim ke GC/owner chat
   return (
     `╔══════════════════════╗\n` +
     `║   ⏰  *WAKTU HABIS*   ║\n` +
     `╚══════════════════════╝\n\n` +
-    `📱 *Nomor:* ${masked}\n\n` +
-    `❌ Kode pairing sudah *kedaluwarsa*\n` +
-    `karena tidak dimasukkan dalam *3 menit*.\n\n` +
-    `🔄 Sesi otomatis dihapus.\n\n` +
-    `😔 Waktu habis sebelum kode sempat dimasukkan.\n` +
-    hintLine
+    `📱 *Nomor:* \`${masked}\`\n\n` +
+    `❌ Kode pairing *kedaluwarsa* — tidak dimasukkan dalam *3 menit*.\n` +
+    `🔄 ~Sesi otomatis dihapus.~\n\n` +
+    `💡 Ketik *.jadibot ${number} <durasi>* untuk coba lagi.`
   )
 }
 
@@ -1292,47 +1559,36 @@ function msgConnected(number) {
   })
 
   const config = loadConfig()
-  const story = config.autoReadStory || {}
-  const storyOn = story.enabled !== false
-  const reactOn = storyOn && story.autoReaction !== false
+  const ver = config.botVersion || 'V25'
+  const { activeFeaturesText } = buildJadibotFeatureStatus(number)
   const expiry = getJadibotExpiry(number)
-  const expiryLine = expiry
-    ? `⏳ *Masa Berlaku:* ${formatRemainingTime(Number(expiry.expiresAt) - Date.now())}\n`
-    : ''
-
-  let swStatus
-  if (!storyOn) {
-    swStatus = `❌ *AutoRead SW:* Nonaktif`
-  } else if (reactOn) {
-    swStatus = `✅ *AutoRead SW:* Aktif — Mode *Read + Reaction* 🎉`
-  } else {
-    swStatus = `✅ *AutoRead SW:* Aktif — Mode *Read Only* 👁️`
+  let expiryLine = ''
+  if (expiry?.permanent === true) {
+    expiryLine = `♾️ *Masa Berlaku:* Permanent\n`
+  } else if (expiry?.expiresAt) {
+    const rem = Number(expiry.expiresAt) - Date.now()
+    if (rem > 0) expiryLine = `⏳ *Masa Berlaku:* ${formatRemainingTime(rem)}\n`
   }
 
   return (
     `╔══════════════════════╗\n` +
     `║  ✅  *JADIBOT AKTIF*  ║\n` +
     `╚══════════════════════╝\n\n` +
-    `📱 *Nomor:* ${masked}\n` +
-    `🕐 *Waktu:* ${now} WIB\n\n` +
-    expiryLine +
-    `🎉 Jadibot berhasil terhubung!\n` +
-    `Bot sudah siap menerima perintah.\n\n` +
+    `📱 *Nomor  :* \`+${number}\`\n` +
+    `🕐 *Waktu  :* _${now} WIB_\n` +
+    (expiryLine ? expiryLine : '') +
+    `\n` +
+    `🎉 *Jadibot +${masked} berhasil terhubung dan siap digunakan!*\n\n` +
     `━━━━━━━━━━━━━━━━━━━━━━\n` +
-    `📊 *Status Fitur Otomatis:*\n` +
-    `${swStatus}\n` +
-    `━━━━━━━━━━━━━━━━━━━━━━\n\n` +
-    `🛠️ *Fitur Jadibot:*\n` +
-    `• 👁️ Auto baca & reaction story/SW kontak\n` +
-    `• 🔕 Anti-delete pesan (jika aktif)\n` +
-    `• 🤖 Semua command bot bisa diakses\n` +
-    `   _(hanya oleh owner via bot utama)_\n\n` +
-    `📌 *Kontrol Jadibot (dari bot utama):*\n` +
-    `• *.menu* — Lihat semua fitur\n` +
-    `• *.readsw* — Kelola AutoRead SW\n` +
-    `• *.stopbot ${number}* — Matikan jadibot\n` +
-    `• *.listbot* — Daftar jadibot aktif\n\n` +
-    `_Powered by Wily Bot ${loadConfig().botVersion || 'V25'}_ 🤖`
+    `🤖 *Fitur Otomatis yang Aktif:*\n` +
+    `${activeFeaturesText}\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━━━\n` +
+    `🛠️ *Kontrol Jadibot:*\n` +
+    `• \`.menu\` — Lihat semua fitur\n` +
+    `• \`.readsw\` — Kelola ReadSW / ReactionSW\n` +
+    `• \`.listbot\` — Daftar jadibot aktif\n` +
+    `• \`.stopbot ${number}\` — Matikan jadibot\n\n` +
+    `> _Notif otomatis — Wily Bot ${ver}_ 🤖`
   )
 }
 
@@ -1342,40 +1598,42 @@ function msgDirectWelcome(number) {
     day: '2-digit', month: '2-digit', year: 'numeric',
     hour: '2-digit', minute: '2-digit', second: '2-digit'
   })
+  const ver = loadConfig().botVersion || 'V25'
+  const { activeFeaturesText } = buildJadibotFeatureStatus(number)
   const expiry = getJadibotExpiry(number)
   let expiryLine = ''
   if (expiry?.permanent === true) {
-    expiryLine = `♾️ *Masa berlaku:* Permanent\n`
+    expiryLine = `♾️ *Masa Aktif:* Permanent\n`
   } else if (expiry?.expiresAt) {
     const remaining = Number(expiry.expiresAt) - Date.now()
     if (remaining > 0) {
-      expiryLine = `⏳ *Aktif selama:* ${formatRemainingTime(remaining)}\n`
+      expiryLine = `⏳ *Masa Aktif:* ${formatRemainingTime(remaining)}\n`
     }
   }
   return (
     `╔══════════════════════╗\n` +
     `║  🤖  *J A D I B O T*  ║\n` +
     `╚══════════════════════╝\n\n` +
-    `🎉 *Nomor kamu sudah aktif sebagai Jadibot!*\n\n` +
-    `📱 *Nomor:* +${number}\n` +
-    `🕐 *Aktif:* ${now} WIB\n` +
-    expiryLine +
+    `👋 *Halo! Nomormu kini aktif sebagai Jadibot!*\n\n` +
+    `📱 *Nomor  :* \`+${number}\`\n` +
+    `🕐 *Aktif  :* _${now} WIB_\n` +
+    (expiryLine ? expiryLine : '') +
     `\n` +
     `━━━━━━━━━━━━━━━━━━━━━━\n` +
-    `🛠️ *Fitur yang aktif di nomormu:*\n` +
-    `• 👁️ Auto baca & reaction status/SW\n` +
-    `• 🔕 Anti-delete pesan\n` +
-    `• 🤖 Semua fitur bot tersedia\n\n` +
-    `📌 *Command tersedia (kirim ke bot utama):*\n` +
-    `• *.p* / *.ping* — Cek bot aktif\n` +
-    `• *.menu* — Daftar semua fitur\n` +
-    `• *.readsw* — Kelola auto baca status\n` +
-    `• *.antidel* — Anti hapus pesan\n` +
-    `• *.sticker* — Buat stiker\n` +
-    `• *.stopbot ${number}* — Matikan jadibot\n\n` +
-    `⚠️ _Jangan logout dari Perangkat Tertaut_\n` +
-    `_agar jadibot tetap aktif._\n\n` +
-    `_Powered by Wily Bot ${loadConfig().botVersion || 'V25'}_ 🤖`
+    `✨ *Fitur yang Berjalan Otomatis di Nomormu:*\n` +
+    `${activeFeaturesText}\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━━━\n` +
+    `📌 *Command (kirim ke bot utama):*\n` +
+    `• \`.ping\` — Cek bot aktif\n` +
+    `• \`.menu\` — Daftar semua fitur\n` +
+    `• \`.readsw\` — Kelola ReadSW / ReactionSW\n` +
+    `• \`.antidel\` — Kelola Anti-Delete\n` +
+    `• \`.sticker\` — Buat stiker\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━━━\n` +
+    `> ⚠️ _Jangan hapus bot ini dari *Perangkat Tertaut* WhatsApp-mu, agar jadibot tetap aktif!_\n\n` +
+    `💡 *Perlu bantuan? Hubungi owner:*\n` +
+    `📞 ${getOwnerContact()}\n\n` +
+    `> _Powered by Wily Bot ${ver}_ 🤖`
   )
 }
 
@@ -1386,32 +1644,31 @@ function msgLoggedOut(number, remainingList) {
     day: '2-digit', month: '2-digit', year: 'numeric',
     hour: '2-digit', minute: '2-digit', second: '2-digit'
   })
+  const ver = loadConfig().botVersion || 'V25'
 
-  let listPart
-  if (remainingList.length === 0) {
-    listPart = `❌ Tidak ada jadibot aktif saat ini.`
-  } else {
-    const items = remainingList.map((v, i) => `│ ${i + 1}. +${v}`).join('\n')
-    listPart = (
-      `📊 *Jadibot Masih Aktif (${remainingList.length}):*\n` +
-      `┌─────────────────────\n` +
-      `${items}\n` +
-      `└─────────────────────`
-    )
-  }
+  const listPart = remainingList.length === 0
+    ? `> ❌ _Tidak ada jadibot lain yang aktif saat ini._`
+    : `📊 *Jadibot Masih Aktif (${remainingList.length}):*\n` +
+      remainingList.map((v, i) => `${i + 1}. \`+${v}\``).join('\n')
 
   return (
     `╔══════════════════════╗\n` +
     `║  ⚠️  *JADIBOT LOGOUT*  ║\n` +
     `╚══════════════════════╝\n\n` +
-    `📱 *Nomor:* ${masked}\n` +
-    `🕐 *Waktu:* ${now} WIB\n\n` +
-    `🚨 Jadibot ini telah *di-logout* dari\n` +
-    `WhatsApp (Perangkat Tertaut dihapus).\n\n` +
-    `🗑️ Sesi otomatis dihapus.\n\n` +
+    `📱 *Nomor  :* \`+${number}\`\n` +
+    `🕐 *Waktu  :* _${now} WIB_\n\n` +
+    `🚨 *Jadibot +${masked} telah logout dari WhatsApp!*\n` +
+    `_Perangkat Tertaut dihapus atau sesi berakhir._\n\n` +
+    `🗑️ ~Sesi otomatis dihapus dari server.~\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━━━\n` +
+    `❌ *Fitur yang Berhenti:*\n` +
+    `${buildJadibotFeatureStatus(number).stoppedFeaturesText}\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━━━\n` +
     `${listPart}\n\n` +
-    `💡 Ketik *.jadibot ${number}* untuk\n` +
-    `menghubungkan kembali.`
+    `━━━━━━━━━━━━━━━━━━━━━━\n` +
+    `💡 *Aktifkan Kembali:*\n` +
+    `• Ketik \`.jadibot ${number}\` di chat bot ini\n\n` +
+    `> _Notif otomatis — Wily Bot ${ver}_ 🤖`
   )
 }
 
@@ -1421,18 +1678,171 @@ function msgLoggedOutDirect(number) {
     day: '2-digit', month: '2-digit', year: 'numeric',
     hour: '2-digit', minute: '2-digit', second: '2-digit'
   })
+  const ver = loadConfig().botVersion || 'V25'
   return (
     `╔══════════════════════╗\n` +
     `║  ⚠️  *JADIBOT LOGOUT*  ║\n` +
     `╚══════════════════════╝\n\n` +
-    `📱 *Nomor kamu:* +${number}\n` +
-    `🕐 *Waktu:* ${now} WIB\n\n` +
-    `🚨 *Jadibot kamu telah logout!*\n` +
-    `Nomor kamu dihapus dari Perangkat Tertaut\n` +
-    `atau melakukan logout dari sisi WhatsApp.\n\n` +
-    `🗑️ Sesi jadibot otomatis dihapus.\n\n` +
-    `💡 Hubungi owner untuk aktifkan kembali:\n` +
-    `📞 ${getOwnerContact()}`
+    `📱 *Nomor kamu:* \`+${number}\`\n` +
+    `🕐 *Waktu logout:* _${now} WIB_\n\n` +
+    `🚨 *Sesi jadibot kamu telah berakhir!*\n\n` +
+    `_Kemungkinan penyebab:_\n` +
+    `• Kamu menghapus bot dari *Perangkat Tertaut*\n` +
+    `• WhatsApp melakukan logout otomatis\n` +
+    `• Sesi kadaluarsa atau tergantikan perangkat lain\n\n` +
+    `🗑️ ~Sesi otomatis dihapus dari server.~\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━━━\n` +
+    `❌ *Fitur yang Berhenti:*\n` +
+    `${buildJadibotFeatureStatus(number).stoppedFeaturesText}\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━━━\n` +
+    `> 💡 _Hubungi owner untuk mengaktifkan kembali:_\n` +
+    `📞 ${getOwnerContact()}\n\n` +
+    `> _Notif otomatis — Wily Bot ${ver}_ 🤖`
+  )
+}
+
+// ── Kirim notif ke semua owner di config.owners[] via main bot ──────────────
+// excludeNumbers: nomor yang skip (misal nomor jadibot itu sendiri)
+async function sendOwnerNotif(mainBotSock, text, excludeNumbers = []) {
+  const sock = getActiveMainSock(mainBotSock)
+  if (!sock) return
+  const cfg = loadConfig()
+  const owners = (cfg.owners || []).map(n => String(n).replace(/[^0-9]/g, '')).filter(Boolean)
+  for (const ownerNum of owners) {
+    if (excludeNumbers.includes(ownerNum)) continue
+    try {
+      await sock.sendMessage(`${ownerNum}@s.whatsapp.net`, { text })
+      console.log(`[JADIBOT][OWNER-NOTIF] ✅ Notif terkirim ke owner +${ownerNum}`)
+    } catch (e) {
+      console.log(`[JADIBOT][OWNER-NOTIF] ⚠️ Gagal kirim ke +${ownerNum}: ${e?.message}`)
+    }
+  }
+}
+
+function _nowStr() {
+  const d = new Date()
+  const hari  = d.toLocaleDateString('id-ID', { weekday: 'short', timeZone: 'Asia/Jakarta' })
+  const tgl   = d.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Asia/Jakarta' })
+  const waktu = d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Asia/Jakarta' }).replace(/\./g, ':')
+  return `${hari}, ${tgl} | ${waktu} WIB`
+}
+
+// ── Notif terhubung → ke OWNER (managerial/monitoring) ───────────────────────
+function msgOwnerConnected(number, isReconnect = false) {
+  const cfg    = loadConfig()
+  const ver    = cfg.botVersion || 'V25'
+  const masked = maskNumber(number)
+  const meta   = getJadibotExpiry(number)
+  const isPerm = meta?.permanent === true
+  const sisa   = !meta ? '_Tidak ada data_'
+    : isPerm ? '*Permanent* ♾️'
+    : `*${formatRemainingTime(Math.max(0, Number(meta.expiresAt) - Date.now()))}*`
+  const { activeFeaturesText } = buildJadibotFeatureStatus(number)
+
+  if (isReconnect) {
+    return (
+      `╔══════════════════════╗\n` +
+      `║  🔄  *JADIBOT ONLINE*  ║\n` +
+      `╚══════════════════════╝\n\n` +
+      `📱 *Nomor  :* \`+${number}\`\n` +
+      `🕐 *Waktu  :* _${_nowStr()}_\n` +
+      `⏳ *Sisa   :* ${sisa}\n\n` +
+      `🔄 *Jadibot +${masked} reconnect dan kembali online secara otomatis.*\n` +
+      `> _Tidak perlu tindakan — semua fitur lanjut berjalan normal._\n\n` +
+      `━━━━━━━━━━━━━━━━━━━━━\n` +
+      `✨ *Fitur yang Lanjut Berjalan:*\n` +
+      `${activeFeaturesText}\n\n` +
+      `━━━━━━━━━━━━━━━━━━━━━\n` +
+      `🛠️ *Kontrol Cepat (Owner):*\n` +
+      `• \`.listbot\` — Cek semua jadibot aktif\n` +
+      `• \`.stopbot ${number}\` — Hentikan jika diperlukan\n` +
+      `• \`.upbot ${number} <durasi>\` — Perpanjang masa aktif\n\n` +
+      `> _Notif otomatis — Wily Bot ${ver}_ 🤖`
+    )
+  }
+
+  return (
+    `╔══════════════════════╗\n` +
+    `║  ✅  *JADIBOT AKTIF*   ║\n` +
+    `╚══════════════════════╝\n\n` +
+    `📱 *Nomor  :* \`+${number}\`\n` +
+    `🕐 *Waktu  :* _${_nowStr()}_\n` +
+    `⏳ *Durasi :* ${sisa}\n\n` +
+    `🎉 *Jadibot +${masked} berhasil terhubung dan siap beroperasi!*\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━━\n` +
+    `🤖 *Fitur Otomatis yang Berjalan:*\n` +
+    `${activeFeaturesText}\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━━\n` +
+    `🛠️ *Kontrol Jadibot (Owner):*\n` +
+    `• \`.listbot\` — Cek semua jadibot aktif\n` +
+    `• \`.stopbot ${number}\` — Hentikan jadibot\n` +
+    `• \`.upbot ${number} <durasi>\` — Perpanjang masa aktif\n` +
+    `• \`.downbot ${number} <durasi>\` — Kurangi masa aktif\n\n` +
+    `> _Notif otomatis — Wily Bot ${ver}_ 🤖`
+  )
+}
+
+// ── Notif reconnect → ke USER JADIBOT (personal, beda dari versi owner) ──────
+function msgDirectReconnect(number) {
+  const cfg    = loadConfig()
+  const ver    = cfg.botVersion || 'V25'
+  const { activeFeaturesText } = buildJadibotFeatureStatus(number)
+
+  const meta   = getJadibotExpiry(number)
+  const isPerm = meta?.permanent === true
+  const sisa   = !meta ? '_Tidak ada data_'
+    : isPerm ? '*Permanent* ♾️'
+    : `*${formatRemainingTime(Math.max(0, Number(meta.expiresAt) - Date.now()))}*`
+
+  return (
+    `╔══════════════════════╗\n` +
+    `║  🔄  *JADIBOT ONLINE*  ║\n` +
+    `╚══════════════════════╝\n\n` +
+    `📱 *Nomor kamu:* \`+${number}\`\n` +
+    `🕐 *Waktu:* _${_nowStr()}_\n` +
+    `⏳ *Sisa Masa Aktif:* ${sisa}\n\n` +
+    `🔄 *Nomormu kembali online secara otomatis!*\n` +
+    `> _Semua fitur lanjut berjalan — tidak perlu tindakan apapun._\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━━\n` +
+    `✨ *Fitur yang Lanjut Berjalan:*\n` +
+    `${activeFeaturesText}\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━━\n` +
+    `💡 *Ingin perpanjang atau ada pertanyaan?*\n` +
+    `📞 Hubungi owner: ${getOwnerContact()}\n\n` +
+    `> _Notif otomatis — Wily Bot ${ver}_ 🤖`
+  )
+}
+
+// ── Notif logout → ke OWNER (alert monitoring) ───────────────────────────────
+function msgOwnerLogout(number) {
+  const cfg    = loadConfig()
+  const ver    = cfg.botVersion || 'V25'
+  const masked = maskNumber(number)
+  const remainingList = [...jadibotMap.keys()]
+
+  const listPart = remainingList.length > 0
+    ? `📊 *Jadibot Masih Aktif (${remainingList.length}):*\n` +
+      remainingList.map((v, i) => `${i + 1}. \`+${v}\``).join('\n') + `\n`
+    : `> ❌ _Tidak ada jadibot lain yang aktif saat ini._\n`
+
+  return (
+    `╔══════════════════════╗\n` +
+    `║  🚨  *JADIBOT LOGOUT!* ║\n` +
+    `╚══════════════════════╝\n\n` +
+    `📱 *Nomor :* \`+${number}\`\n` +
+    `🕐 *Waktu :* _${_nowStr()}_\n\n` +
+    `⚠️ *Jadibot +${masked} telah keluar dari Perangkat Tertaut WhatsApp.*\n` +
+    `_Kemungkinan: logout manual, hapus perangkat, atau sesi kadaluarsa._\n` +
+    `🗑️ ~Sesi otomatis dihapus secara permanen.~\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━━\n` +
+    `❌ *Fitur yang Berhenti di Nomor Ini:*\n` +
+    `${buildJadibotFeatureStatus(number).stoppedFeaturesText}\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━━\n` +
+    `${listPart}\n` +
+    `━━━━━━━━━━━━━━━━━━━━━\n` +
+    `💡 *Aktifkan Kembali:*\n` +
+    `• Ketik \`.jadibot ${number}\` di chat bot\n\n` +
+    `> _Notif otomatis — Wily Bot ${ver}_ 🤖`
   )
 }
 
@@ -1528,6 +1938,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
     'recording', 'record',
     'tt', 'ig', 'fb', 'ytmp3', 'ytmp4', 'play',
     'allunduh', 'twdl',
+    'animgif', 'animegif', 'gifanime',
     'sticker', 's',
     'wm', 'swm',
     'toimg', 'hd',
@@ -1607,11 +2018,11 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
                   }
                 } catch (_) {}
 
-                await _pairSock.sendMessage(targetJid, { text: msgPairingCode(code, number) })
+                await _pairSock.sendMessage(targetJid, { text: msgPairingCode(code, number, true) })
                 directPairingSent = true
                 console.log(`[JADIBOT][V2] ✅ Pairing code terkirim realtime ke +${number} (jid: ${targetJid})`)
 
-                // Notif singkat ke owner bahwa kode sudah dikirim ke nomor tujuan
+                // Notif singkat ke GC/owner chat bahwa kode sudah dikirim ke nomor tujuan
                 try {
                   const sentInfo = await sendReply(
                     `╔══════════════════════╗\n` +
@@ -1626,6 +2037,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
                   )
                   if (sentInfo?.key) pairingMsgKey = sentInfo.key
                 } catch {}
+
               } catch (e) {
                 console.log(`[JADIBOT][V2] ⚠️ Gagal kirim pairing code ke +${number}: ${e?.message}`)
                 // Fallback: kirim ke GC/owner jika pengiriman langsung gagal
@@ -1752,6 +2164,12 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
             }
           }
         }
+
+        // Owner DM — notif monitoring pairing timeout (berlaku untuk V1 & V2)
+        try {
+          await sendOwnerNotif(mainBotSock, msgOwnerPairingExpired(number), [number])
+          console.log(`[JADIBOT][EXPIRED] ✅ Notif pairing timeout terkirim ke owner DM`)
+        } catch {}
       }, PAIRING_TIMEOUT_MS)
 
       pairingTimeout.set(number, timeout)
@@ -1853,52 +2271,69 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
         const connCfg = loadConfig()
         const connPairingMode = (connCfg.jadibotPairingMode || 'v2').toLowerCase()
 
-        if (connPairingMode === 'v2') {
-          // Kirim notifikasi langsung ke nomor jadibot via main bot
-          let directNotifSent = false
-          const _welcomeSock = getActiveMainSock(mainBotSock)
-          if (_welcomeSock) {
+        // Helper: kirim msgDirectWelcome ke nomor jadibot via main bot (dengan resolve JID)
+        const _sendWelcomeDirect = async (_sock) => {
+          if (!_sock) return false
+          try {
+            await delay(800)
+            // Resolve JID yang benar dulu (support LID/linked device)
+            let _jid = `${number}@s.whatsapp.net`
             try {
-              await delay(800)
-
-              // Resolve JID yang benar dulu (support LID/linked device)
-              let welcomeTargetJid = `${number}@s.whatsapp.net`
-              try {
-                const [waRes] = await _welcomeSock.onWhatsApp(`${number}@s.whatsapp.net`)
-                if (waRes?.exists && waRes?.jid) welcomeTargetJid = waRes.jid
-              } catch (_) {}
-
-              await _welcomeSock.sendMessage(welcomeTargetJid, {
-                text: msgDirectWelcome(number)
-              })
-              directNotifSent = true
-              console.log(`[JADIBOT][V2] ✅ Notif realtime terkirim ke +${number} via main bot (jid: ${welcomeTargetJid})`)
-            } catch (e) {
-              console.log(`[JADIBOT][V2] ⚠️ Gagal kirim notif ke +${number} via main bot: ${e?.message}`)
-            }
+              const [_waRes] = await _sock.onWhatsApp(`${number}@s.whatsapp.net`)
+              if (_waRes?.exists && _waRes?.jid) _jid = _waRes.jid
+            } catch (_) {}
+            await _sock.sendMessage(_jid, { text: msgDirectWelcome(number) })
+            console.log(`[JADIBOT] ✅ Notif welcome terkirim ke +${number} via main bot (jid: ${_jid})`)
+            return true
+          } catch (e) {
+            console.log(`[JADIBOT] ⚠️ Gagal kirim notif welcome ke +${number}: ${e?.message}`)
+            return false
           }
+        }
 
-          // Self-notif hanya jika main bot gagal kirim (fallback, cegah duplikat)
-          if (!directNotifSent) {
+        if (connPairingMode === 'v2') {
+          // V2: kirim welcome langsung ke nomor jadibot via main bot
+          const _welcomeSock = getActiveMainSock(mainBotSock)
+          const _sent = await _sendWelcomeDirect(_welcomeSock)
+
+          // Fallback jika main bot gagal: kirim via socket jadibot sendiri
+          if (!_sent) {
             try {
               await delay(300)
-              await sendDirectJadibotNotice(sock, number,
-                `🤖 *Jadibot aktif!*\n\n` +
-                `Nomor ini (+${number}) kini berjalan sebagai bot.\n` +
-                `Semua fitur bot tersedia via bot utama.\n\n` +
-                `_Pesan ini dikirim otomatis saat jadibot terhubung._`
-              )
+              await sendDirectJadibotNotice(sock, number, msgDirectWelcome(number))
+              console.log(`[JADIBOT][V2][FALLBACK] ✅ Notif welcome via self-sock ke +${number}`)
             } catch {}
           }
         } else {
-          // V1: kirim notif terhubung ke GC/owner
+          // V1: kirim notif ke GC/owner
           try {
             await sendReply(msgConnected(number))
             console.log(`[JADIBOT][V1] ✅ Notif terhubung terkirim ke GC/owner`)
           } catch (e) {
             console.log(`[JADIBOT][V1] ⚠️ Gagal kirim notif terhubung ke GC: ${e?.message}`)
           }
+          // V1: JUGA kirim langsung ke nomor jadibot via main bot
+          const _welcomeSockV1 = getActiveMainSock(mainBotSock)
+          await _sendWelcomeDirect(_welcomeSockV1)
         }
+      }
+
+      // Notif realtime ke semua owner di config.owners[] — fresh pairing & reconnect
+      try {
+        await sendOwnerNotif(mainBotSock, msgOwnerConnected(number, !isFreshPairing), [number])
+      } catch {}
+
+      // Reconnect: kirim notif langsung ke user jadibot (teks beda dari owner)
+      if (!isFreshPairing) {
+        try {
+          const _sentRecon = await sendDirectToUser(mainBotSock, number, msgDirectReconnect(number))
+          // Fallback via self-sock jika main bot tidak bisa kirim
+          if (!_sentRecon) {
+            await delay(300)
+            await sendDirectJadibotNotice(sock, number, msgDirectReconnect(number))
+            console.log(`[JADIBOT][RECONNECT][FALLBACK] ✅ Notif reconnect via self-sock ke +${number}`)
+          }
+        } catch {}
       }
     }
 
@@ -1948,6 +2383,12 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
               console.log(`[JADIBOT][PAIR-TIMEOUT] ⚠️ Gagal kirim ke GC/owner: ${e?.message}`)
             }
           }
+
+          // Owner DM — notif monitoring pairing timeout
+          try {
+            await sendOwnerNotif(mainBotSock, msgOwnerPairingExpired(number), [number])
+            console.log(`[JADIBOT][PAIR-TIMEOUT] ✅ Notif pairing timeout terkirim ke owner DM`)
+          } catch {}
         }
 
         // Cleanup session pairing yang gagal + stop semua proses terkait
@@ -2035,6 +2476,11 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
           }
         }
 
+        // Notif realtime logout ke semua owner di config.owners[]
+        try {
+          await sendOwnerNotif(mainBotSock, msgOwnerLogout(number), [number])
+        } catch {}
+
         // BARU setelah notif terkirim: tutup socket & hapus sesi
         cleanupSocket()
         setTimeout(() => {
@@ -2092,7 +2538,15 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
       setTimeout(() => {
         reconnectingJadibot.delete(number)
         activeOrStartingJadibot.delete(number)
-        startJadibot(number, sendReply, mainBotNumber, editMsg, sendPairingMsg, hasConnectedOnce ? undefined : durationMs, getActiveMainSock(mainBotSock), null, requesterNumber)
+        // .catch() wajib — startJadibot async, error di dalamnya tidak pernah
+        // nyangkut ke try/catch biasa dan akan jadi unhandledRejection yang
+        // (tanpa guard global) mematikan seluruh proses bot.
+        Promise.resolve(startJadibot(number, sendReply, mainBotNumber, editMsg, sendPairingMsg, hasConnectedOnce ? undefined : durationMs, getActiveMainSock(mainBotSock), null, requesterNumber))
+          .catch(err => {
+            console.log(`\x1b[31m[JADIBOT]\x1b[0m ❌ Reconnect ${number} gagal: ${err?.message}`)
+            activeOrStartingJadibot.delete(number)
+            startingSocketMap.delete(number)
+          })
       }, 3000)
     }
   })
@@ -2257,11 +2711,18 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
           const _arCfg = getJadibotAutoRecording(number)
           const _doType = _atCfg.enabled && (_atIsGroup ? _atCfg.groupChat !== false : _atCfg.privateChat !== false)
           const _doRecord = !_doType && _arCfg.enabled && (_atIsGroup ? _arCfg.groupChat !== false : _arCfg.privateChat !== false)
-          if (_doType || _doRecord) {
+          // Skip typing/recording saat stealth mode aktif — mencegah jadibot flash online sendiri
+          if ((_doType || _doRecord) && !sock.__stealthMode) {
             const _presence = _doType ? 'composing' : 'recording'
             const _delaySec = _doType ? (_atCfg.delaySeconds || 5) : (_arCfg.delaySeconds || 5)
+            const _delayMs  = Math.min(_delaySec * 1000, 30000)
+            // Tandai typing aktif → interval stealth skip unavailable agar delay tidak terpotong
+            sock.__typingActive = (sock.__typingActive || 0) + 1
             try { sock.sendPresenceUpdate(_presence, _atJid) } catch {}
-            setTimeout(() => { try { sock.sendPresenceUpdate('paused', _atJid) } catch {} }, Math.min(_delaySec * 1000, 30000))
+            setTimeout(() => {
+              try { sock.sendPresenceUpdate('paused', _atJid) } catch {}
+              sock.__typingActive = Math.max(0, (sock.__typingActive || 1) - 1)
+            }, _delayMs)
           }
         }
       } catch {}
@@ -2370,6 +2831,7 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
     'recording', 'record',
     'tt', 'ig', 'fb', 'ytmp3', 'ytmp4', 'play',
     'allunduh', 'twdl',
+    'animgif', 'animegif', 'gifanime',
     'sticker', 's',
     'wm', 'swm',
     'toimg', 'hd',
@@ -2486,43 +2948,50 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
       const connCfgQR = loadConfig()
       const connPairingModeQR = (connCfgQR.jadibotPairingMode || 'v2').toLowerCase()
 
-      if (connPairingModeQR === 'v2') {
-        // Kirim notifikasi langsung ke nomor jadibot via main bot
-        let directNotifSentQR = false
-        const _welcomeSockQR = getActiveMainSock(mainBotSock)
-        if (_welcomeSockQR) {
+      // Helper: kirim msgDirectWelcome ke nomor jadibot via main bot (dengan resolve JID)
+      const _sendWelcomeDirectQR = async (_sock) => {
+        if (!_sock) return false
+        try {
+          await delay(800)
+          // Resolve JID yang benar dulu (support LID/linked device)
+          let _jidQR = `${number}@s.whatsapp.net`
           try {
-            await delay(800)
-            await _welcomeSockQR.sendMessage(`${number}@s.whatsapp.net`, {
-              text: msgDirectWelcome(number)
-            })
-            directNotifSentQR = true
-            console.log(`[JADIBOT QR][V2] ✅ Notif realtime terkirim ke +${number} via main bot`)
-          } catch (e) {
-            console.log(`[JADIBOT QR][V2] ⚠️ Gagal kirim notif ke +${number} via main bot: ${e?.message}`)
-          }
+            const [_waResQR] = await _sock.onWhatsApp(`${number}@s.whatsapp.net`)
+            if (_waResQR?.exists && _waResQR?.jid) _jidQR = _waResQR.jid
+          } catch (_) {}
+          await _sock.sendMessage(_jidQR, { text: msgDirectWelcome(number) })
+          console.log(`[JADIBOT QR] ✅ Notif welcome terkirim ke +${number} via main bot (jid: ${_jidQR})`)
+          return true
+        } catch (e) {
+          console.log(`[JADIBOT QR] ⚠️ Gagal kirim notif welcome ke +${number}: ${e?.message}`)
+          return false
         }
+      }
 
-        // Self-notif hanya jika main bot gagal kirim (fallback, cegah duplikat)
-        if (!directNotifSentQR) {
+      if (connPairingModeQR === 'v2') {
+        // V2: kirim welcome langsung ke nomor jadibot via main bot
+        const _welcomeSockQR = getActiveMainSock(mainBotSock)
+        const _sentQR = await _sendWelcomeDirectQR(_welcomeSockQR)
+
+        // Fallback jika main bot gagal: kirim via socket jadibot sendiri
+        if (!_sentQR) {
           try {
             await delay(300)
-            await sendDirectJadibotNotice(sock, number,
-              `🤖 *Jadibot aktif!*\n\n` +
-              `Nomor ini (+${number}) kini berjalan sebagai bot.\n` +
-              `Semua fitur bot tersedia via bot utama.\n\n` +
-              `_Pesan ini dikirim otomatis saat jadibot terhubung._`
-            )
+            await sendDirectJadibotNotice(sock, number, msgDirectWelcome(number))
+            console.log(`[JADIBOT QR][V2][FALLBACK] ✅ Notif welcome via self-sock ke +${number}`)
           } catch {}
         }
       } else {
-        // V1: kirim notif terhubung ke GC/owner
+        // V1: kirim notif ke GC/owner
         try {
           await sendReply(msgConnected(number))
           console.log(`[JADIBOT QR][V1] ✅ Notif terhubung terkirim ke GC/owner`)
         } catch (e) {
           console.log(`[JADIBOT QR][V1] ⚠️ Gagal kirim notif terhubung ke GC: ${e?.message}`)
         }
+        // V1: JUGA kirim langsung ke nomor jadibot via main bot
+        const _welcomeSockV1QR = getActiveMainSock(mainBotSock)
+        await _sendWelcomeDirectQR(_welcomeSockV1QR)
       }
     }
 
@@ -2743,11 +3212,17 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
           const _arCfg = getJadibotAutoRecording(number)
           const _doType = _atCfg.enabled && (_atIsGroup ? _atCfg.groupChat !== false : _atCfg.privateChat !== false)
           const _doRecord = !_doType && _arCfg.enabled && (_atIsGroup ? _arCfg.groupChat !== false : _arCfg.privateChat !== false)
-          if (_doType || _doRecord) {
+          // Skip typing/recording saat stealth mode aktif — mencegah jadibot flash online sendiri
+          if ((_doType || _doRecord) && !sock.__stealthMode) {
             const _presence = _doType ? 'composing' : 'recording'
             const _delaySec = _doType ? (_atCfg.delaySeconds || 5) : (_arCfg.delaySeconds || 5)
+            const _delayMs  = Math.min(_delaySec * 1000, 30000)
+            sock.__typingActive = (sock.__typingActive || 0) + 1
             try { sock.sendPresenceUpdate(_presence, _atJid) } catch {}
-            setTimeout(() => { try { sock.sendPresenceUpdate('paused', _atJid) } catch {} }, Math.min(_delaySec * 1000, 30000))
+            setTimeout(() => {
+              try { sock.sendPresenceUpdate('paused', _atJid) } catch {}
+              sock.__typingActive = Math.max(0, (sock.__typingActive || 1) - 1)
+            }, _delayMs)
           }
         }
       } catch {}

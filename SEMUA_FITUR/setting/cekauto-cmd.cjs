@@ -464,14 +464,6 @@ function makeCekautoHelpers({
                                                         saveConfig(cfgToggle);
                                                         if (global.startAutoOnline) {
                                                                 global.startAutoOnline();
-                                                        } else if (action === 'off') {
-                                                                if (global.autoOnlineInterval) {
-                                                                        clearInterval(global.autoOnlineInterval);
-                                                                        global.autoOnlineInterval = null;
-                                                                }
-                                                                if (global.hisokaClient) global.hisokaClient.sendPresenceUpdate('unavailable');
-                                                        } else if (action === 'on' && global.hisokaClient) {
-                                                                global.hisokaClient.sendPresenceUpdate('available');
                                                         }
                                                 } else {
                                                         const currentVal = cfgToggle[configKey] || {};
@@ -770,6 +762,7 @@ function makeCekautoHelpers({
                                                 infowibu: 'Info Wibu', animasu: 'Animasu Notif',
                                                 alqanimenotif: 'Alqanime Notif', tvonenews: 'TV One News',
                                                 malnews: 'MAL News', anigame: 'AN1.COM Game Notif',
+                                                nekopoinotif: 'Nekopoi Notif',
                                                 welcome: 'Welcome', goodbye: 'Goodbye',
                                                 antiTagSWGrup: 'Anti Tag SW (Grup)',
                                         };

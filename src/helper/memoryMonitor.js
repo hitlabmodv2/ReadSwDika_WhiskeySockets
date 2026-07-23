@@ -100,6 +100,9 @@ export class MemoryMonitor {
                 }
 
                 this.onLimitReached = options.onLimitReached || (() => process.exit(1));
+                // getDiskStats: callback () => { pct, usedBytes, limitBytes, percentage, icon, color, status }
+                // Jika disuplai, baris DISK ditambahkan di bawah log ini dan header berubah ke [SysMonitor]
+                this.getDiskStats   = options.getDiskStats || null;
                 this.intervalId = null;
                 this.isShuttingDown = false;
                 this.config = config;
@@ -242,7 +245,9 @@ export class MemoryMonitor {
                         const val = (s, c = bright) => `${c}${s}${reset}`;
                         const col = `${dim}:${reset}`;
 
-                        console.log(`${cyan}${bold}[MemoryMonitor]${reset} ${icon} ${color}${bold}${status}${reset} ${cyan}${bold}cek ke-${this._logCount}${reset} ${dim}|${reset}`);
+                        // Header: [SysMonitor] jika disk terintegrasi, [MemoryMonitor] jika standalone
+                        const _headerLabel = this.getDiskStats ? 'SysMonitor' : 'MemoryMonitor';
+                        console.log(`${cyan}${bold}[${_headerLabel}]${reset} ${icon} ${color}${bold}${status}${reset} ${cyan}${bold}cek ke-${this._logCount}${reset} ${dim}|${reset}`);
                         console.log(`${lY('uptime ')} ${col} ${val(uptimeStr)}`);
                         console.log(`${lG('BOT    ')} ${col} ${val(percentage + '%', color)} ${val(formatBytes(currentUsage))} ${dim}/${reset} ${val(limitFmt)}`);
                         console.log(`${lG('SYS    ')} ${col} ${val(sysPercentage + '%', sysColor)} ${val(formatBytes(systemMem.used))} ${dim}/${reset} ${val(formatBytes(systemMem.total))} ${green2}${bold}free${reset} ${val(sysFreeFmt, green2)}`);
@@ -257,6 +262,13 @@ export class MemoryMonitor {
                         console.log(`${lM('Host   ')} ${col} ${val(hostname)}`);
                         console.log(`${lY('SysUp  ')} ${col} ${val(sysUptimeStr)}`);
                         console.log(`${lG('FreeMem')} ${col} ${val(freePct + '%', green2)} ${dim}(${reset}${val(sysFreeFmt, green2)}${dim})${reset}`);
+                        // Baris DISK — ditampilkan jika getDiskStats tersedia dan sudah punya data
+                        if (this.getDiskStats) {
+                                const _ds = this.getDiskStats();
+                                if (_ds) {
+                                        console.log(`${lG('DISK   ')} ${col} ${val(_ds.percentage + '%', _ds.color)} ${val(formatBytes(_ds.usedBytes))} ${dim}/${reset} ${val(formatBytes(_ds.limitBytes))}`);
+                                }
+                        }
                 }
 
                 if (currentUsage >= this.memoryLimit) {

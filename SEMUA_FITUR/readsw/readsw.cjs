@@ -25,6 +25,23 @@
  */
 'use strict';
 
+// ── Helper: font keren (pinjam style "Bold Sans" dari fontgenerator.cjs) ───────
+//    Dipakai untuk judul/section/label statis di dalam button — konsisten,
+//    tetap mudah dibaca, dan tidak menyentuh angka/emoji/tanda ✓ yang dinamis.
+let _fancyFontFn = null;
+function _fancy(text) {
+    try {
+        if (!_fancyFontFn) {
+            const { FONTS } = require('../tools/fontgenerator.cjs');
+            const style = FONTS.find(f => f.name === 'Bold Sans');
+            _fancyFontFn = style ? style.fn : (t => t);
+        }
+        return _fancyFontFn(text);
+    } catch (_) {
+        return text;
+    }
+}
+
 // ── Helper: ambil mode reaction (Custom/Default) ───────────────────────────────
 function _getReactionModeLabel(isJadibot, jadibotNum, getMainEmojiMode, getJadibotEmojiMode) {
     try {
@@ -67,7 +84,7 @@ function _buildBody(cfg, isJadibot, jadibotNum, getMainEmojiMode, getJadibotEmoj
     const jadibotNote = isJadibot ? `\n_⚙️ Setting jadibot +${jadibotNum}_` : '';
 
     return (
-        `╭═══『 📖 *AUTO READ STORY* 』═══╮\n` +
+        `╭═══『 📖 ${_fancy('AUTO READ STORY')} 』═══╮\n` +
         `│\n` +
         `│ ${statusIcon} *Status    :* ${statusText}\n` +
         `│ 🎭 *Mode      :* ${modeText}\n` +
@@ -124,45 +141,45 @@ async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, cfg) {
 
             const btn = new Button()
                 .setBody(bodyText)
-                .setFooter('⚡ Wily Bot • Auto Read Story')
-                .addSelection('🎛️ Pilih Pengaturan')
+                .setFooter(`⚡ ${_fancy('Wily Bot')} • Auto Read Story`)
+                .addSelection(`🎛️ ${_fancy('Pilih Pengaturan')}`)
 
                 // ── Section 1: Mode ───────────────────────────────────────
-                .makeSections('⚙️ Mode')
+                .makeSections(`⚙️ ${_fancy('Mode')}`)
                 .makeRow(
                     markMode('on') + '✅ Aktif',
-                    'Read + Reaksi',
+                    _fancy('Read + Reaksi'),
                     isMode('on')    ? activeDesc('Baca story + reaksi emoji otomatis') : 'Baca story + kirim reaksi emoji otomatis',
                     `${pref}readsw true`
                 )
                 .makeRow(
                     markMode('false') + '📖 Aktif',
-                    'Read Only',
+                    _fancy('Read Only'),
                     isMode('false') ? activeDesc('Hanya baca story, tanpa reaksi')     : 'Hanya baca story, tanpa reaksi',
                     `${pref}readsw false`
                 )
                 .makeRow(
                     markMode('off') + '❌ Nonaktif',
-                    'Matikan Auto Read Story',
+                    _fancy('Matikan Auto Read Story'),
                     isMode('off')   ? activeDesc('Bot tidak membaca story siapapun')   : 'Bot tidak akan membaca story siapapun',
                     `${pref}readsw off`
                 )
 
                 // ── Section 2: Delay Acak (preset) ───────────────────────
-                .makeSections('🎲 Delay Acak (Preset)');
+                .makeSections(`🎲 ${_fancy('Delay Acak (Preset)')}`);
 
             for (const p of _RANDOM_PRESETS) {
                 const aktif = isPreset(p);
                 btn.makeRow(
                     markRandom(p) + p.label,
-                    `Acak ${p.label}`,
+                    _fancy(`Acak ${p.label}`),
                     aktif ? activeDesc(p.desc) : p.desc,
                     `${pref}readsw delay ${p.min} ${p.max}`
                 );
             }
 
             // ── Section 3: Delay Tetap 1-20 detik ────────────────────────
-            btn.makeSections('⏱️ Delay Tetap (1–20 detik)');
+            btn.makeSections(`⏱️ ${_fancy('Delay Tetap (1-20 Detik)')}`);
 
             for (let i = 1; i <= 20; i++) {
                 let baseDesc;
@@ -173,7 +190,7 @@ async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, cfg) {
                 const aktif = isFixed(i);
                 btn.makeRow(
                     markFixed(i) + `${i} detik`,
-                    `Delay Tetap ${i} Detik`,
+                    _fancy(`Delay Tetap ${i} Detik`),
                     aktif ? activeDesc(baseDesc) : baseDesc,
                     `${pref}readsw delay ${i}`
                 );

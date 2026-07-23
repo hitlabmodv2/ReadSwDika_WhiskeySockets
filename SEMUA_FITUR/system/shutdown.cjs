@@ -66,23 +66,57 @@ module.exports = { shutdownBot, restartBot };
 
 // ── HANDLER: rb (restart bot) ─────────────────────────────────────────────────
 
-async function handleRb({ hisoka, m, tolak, logCommand }) {
+const CONFIRM_TIMEOUT_MS = 30_000; // 30 detik
+
+async function handleRb({ hisoka, m, tolak, logCommand, Button, pendingShutdownConfirm }) {
         if (!m.isOwner) return tolak(hisoka, m, '❌ Hanya owner yang bisa merestart bot!');
-        const _rstSent = await hisoka.sendMessage(m.from, {
-                text:
-                        `╔══════════════════════╗\n║  🔄  *R E S T A R T*  ║\n╚══════════════════════╝\n\n` +
-                        `♻️ Bot akan direstart sekarang!\n\n` +
-                        `⚙️ Direstart oleh: @${m.sender.split('@')[0]}\n` +
-                        `🕐 Waktu: ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })}\n\n` +
-                        `⏳ Menunggu bot online kembali...`,
-                mentions: [m.sender]
-        }, { quoted: m });
+
+        // Bersihkan pending lama milik sender ini (kalau ada)
+        const _old = pendingShutdownConfirm.get(m.sender);
+        if (_old?.timeout) clearTimeout(_old.timeout);
+
+        const _bodyText =
+                `╔══════════════════════╗\n` +
+                `║  🔄  *K O N F I R M A S I*  ║\n` +
+                `╚══════════════════════╝\n\n` +
+                `⚠️ *Yakin ingin merestart bot?*\n\n` +
+                `📌 Bot akan direstart otomatis.\n` +
+                `ℹ️ Semua jadibot aktif tetap berjalan.\n` +
+                `Bot akan kembali online dalam ~10 detik.\n\n` +
+                `⚙️ Diminta oleh: @${m.sender.split('@')[0]}\n` +
+                `🕐 Waktu: ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })}\n\n` +
+                `> ⏳ _Konfirmasi dalam 30 detik atau otomatis batal._`;
+
+        let botMsgId = null;
         try {
-                const { kvSet: _rstKvSet } = await import('../../src/db/datadb.js');
-                _rstKvSet('system/restart_notify', { from: m.from, key: _rstSent?.key || null, by: m.sender, time: Date.now() });
-        } catch (_) {}
+                const _btn = new Button()
+                        .setBody(_bodyText)
+                        .setFooter('⚡ Wily Bot • Restart')
+                        .addReply('✅ Ya, Restart Bot', '__restart_yes__')
+                        .addReply('❌ Tidak, Batal', '__restart_no__');
+                const _sent = await _btn.run(m.from, hisoka, m);
+                botMsgId = _sent?.key?.id || null;
+        } catch (_) {
+                // Fallback teks jika Button tidak didukung
+                await tolak(hisoka, m,
+                        _bodyText + `\n\n` +
+                        `✅ Balas \`ya\` untuk restart\n` +
+                        `❌ Balas \`tidak\` untuk batal`
+                );
+        }
+
+        const _timeout = setTimeout(() => {
+                pendingShutdownConfirm.delete(m.sender);
+        }, CONFIRM_TIMEOUT_MS);
+
+        pendingShutdownConfirm.set(m.sender, {
+                type: 'restart',
+                expiresAt: Date.now() + CONFIRM_TIMEOUT_MS,
+                timeout: _timeout,
+                botMsgId,
+        });
+
         logCommand(m, hisoka, m.command || 'restart');
-        restartBot(2000);
 }
 
 module.exports.handleRb = handleRb;

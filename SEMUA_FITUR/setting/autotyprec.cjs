@@ -25,6 +25,23 @@
  */
 'use strict';
 
+// ── Helper: font keren (pinjam style "Bold Sans" dari fontgenerator.cjs) ───────
+//    Dipakai untuk judul/section/label statis di dalam button — konsisten,
+//    tetap mudah dibaca, dan tidak menyentuh angka/emoji/tanda ✓ yang dinamis.
+let _fancyFontFn = null;
+function _fancy(text) {
+    try {
+        if (!_fancyFontFn) {
+            const { FONTS } = require('../tools/fontgenerator.cjs');
+            const style = FONTS.find(f => f.name === 'Bold Sans');
+            _fancyFontFn = style ? style.fn : (t => t);
+        }
+        return _fancyFontFn(text);
+    } catch (_) {
+        return text;
+    }
+}
+
 // ── Preset delay populer (detik) ────────────────────────────────────────────
 const _DELAY_PRESETS = [
     { sec: 1,  desc: 'Sangat cepat — hampir instan' },
@@ -39,7 +56,7 @@ const _DELAY_PRESETS = [
 function _buildBody(label, icon, cfg, isJadibot, jadibotNum) {
     const jadibotNote = isJadibot ? `\n> ⚙️ _Setting khusus jadibot +${jadibotNum}_` : '';
     return (
-        `╭═══『 ${icon} *AUTO ${label.toUpperCase()}* 』═══╮\n` +
+        `╭═══『 ${icon} ${_fancy(`AUTO ${label.toUpperCase()}`)} 』═══╮\n` +
         `│\n` +
         `│ ${cfg.enabled ? '✅' : '❌'} *Status      :* ${cfg.enabled ? '*Aktif*' : '*Nonaktif*'}\n` +
         `│ ⏱️ *Delay       :* \`${cfg.delaySeconds || 5} detik\`\n` +
@@ -83,58 +100,58 @@ async function _sendSelection({ hisoka, m, Button, tolak, bodyText, pref, cfg, c
             const btn = new Button()
                 .setBody(bodyText)
                 .setFooter(footer)
-                .addSelection('🎛️ Pilih Pengaturan')
+                .addSelection(`🎛️ ${_fancy('Pilih Pengaturan')}`)
 
                 // ── Section 1: Mode ──────────────────────────────────────
-                .makeSections('⚙️ Mode')
+                .makeSections(`⚙️ ${_fancy('Mode')}`)
                 .makeRow(
                     markMode('on') + '✅ Aktif',
-                    `Nyalakan Auto ${label}`,
+                    _fancy(`Nyalakan Auto ${label}`),
                     isMode('on')  ? activeDesc(`Auto ${label} aktif`) : `Aktifkan animasi auto ${label.toLowerCase()}`,
                     `${pref}${cmd} on`
                 )
                 .makeRow(
                     markMode('off') + '❌ Nonaktif',
-                    `Matikan Auto ${label}`,
+                    _fancy(`Matikan Auto ${label}`),
                     isMode('off') ? activeDesc(`Auto ${label} nonaktif`) : `Nonaktifkan animasi auto ${label.toLowerCase()}`,
                     `${pref}${cmd} off`
                 )
 
                 // ── Section 2: Target Chat ────────────────────────────────
-                .makeSections('🎯 Target Chat')
+                .makeSections(`🎯 ${_fancy('Target Chat')}`)
                 .makeRow(
                     markPriv('on') + (isPrivateOn ? '✅ Private ON' : '☑️ Private ON'),
-                    'Private Chat',
+                    _fancy('Private Chat'),
                     isPrivateOn ? activeDesc('Berlaku di private chat') : 'Aktifkan di private chat',
                     `${pref}${cmd} private on`
                 )
                 .makeRow(
                     markPriv('off') + (!isPrivateOn ? '✅ Private OFF' : '☑️ Private OFF'),
-                    'Private Chat',
+                    _fancy('Private Chat'),
                     !isPrivateOn ? activeDesc('Tidak berlaku di private chat') : 'Nonaktifkan di private chat',
                     `${pref}${cmd} private off`
                 )
                 .makeRow(
                     markGroup('on') + (isGroupOn ? '✅ Grup ON' : '☑️ Grup ON'),
-                    'Group Chat',
+                    _fancy('Group Chat'),
                     isGroupOn ? activeDesc('Berlaku di grup') : 'Aktifkan di grup',
                     `${pref}${cmd} group on`
                 )
                 .makeRow(
                     markGroup('off') + (!isGroupOn ? '✅ Grup OFF' : '☑️ Grup OFF'),
-                    'Group Chat',
+                    _fancy('Group Chat'),
                     !isGroupOn ? activeDesc('Tidak berlaku di grup') : 'Nonaktifkan di grup',
                     `${pref}${cmd} group off`
                 )
 
                 // ── Section 3: Delay ──────────────────────────────────────
-                .makeSections('⏱️ Delay Populer');
+                .makeSections(`⏱️ ${_fancy('Delay Populer')}`);
 
             for (const p of _DELAY_PRESETS) {
                 const aktif = isPreset(p.sec);
                 btn.makeRow(
                     markDelay(p.sec) + `${p.sec} detik`,
-                    `Set Delay ${p.sec} Detik`,
+                    _fancy(`Set Delay ${p.sec} Detik`),
                     aktif ? activeDesc(p.desc) : p.desc,
                     `${pref}${cmd} set ${p.sec}`
                 );
@@ -191,7 +208,7 @@ async function handleTyp({ hisoka, m, query, tolak, logCommand, loadConfig, save
 
         const args = query ? query.toLowerCase().trim().split(/\s+/).filter(Boolean) : [];
         const _send = (cfg, prefixText = '') => _sendSelection({
-            hisoka, m, Button, tolak, cmd: 'typing', label: 'Typing', footer: '⚡ Wily Bot • Auto Typing',
+            hisoka, m, Button, tolak, cmd: 'typing', label: 'Typing', footer: `⚡ ${_fancy('Wily Bot')} • Auto Typing`,
             bodyText: prefixText + _buildBody('Typing', '⌨️', cfg, _isJadibot, _jadibotNum),
             pref, cfg, lastMsgMap: _lastMsgMapTyping,
         });
@@ -262,7 +279,7 @@ async function handleRecord({ hisoka, m, query, tolak, logCommand, loadConfig, s
 
         const args = query ? query.toLowerCase().trim().split(/\s+/).filter(Boolean) : [];
         const _send = (cfg, prefixText = '') => _sendSelection({
-            hisoka, m, Button, tolak, cmd: 'recording', label: 'Recording', footer: '⚡ Wily Bot • Auto Recording',
+            hisoka, m, Button, tolak, cmd: 'recording', label: 'Recording', footer: `⚡ ${_fancy('Wily Bot')} • Auto Recording`,
             bodyText: prefixText + _buildBody('Recording', '🎙️', cfg, _isJadibot, _jadibotNum),
             pref, cfg, lastMsgMap: _lastMsgMapRecord,
         });

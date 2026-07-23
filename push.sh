@@ -29,6 +29,7 @@
 # ─────────────────────────────────────────────────────────────
 
 USER="hitlabmodv2"
+REPO_OWNER="hitlabmodv2"   # Pemilik repo GitHub (untuk URL API)
 REPO="ReadSwDika_WhiskeySockets"
 # DEFAULT_BRANCH di-auto-detect realtime dari GitHub (lihat detect_default_branch).
 # Nilai di sini cuma fallback kalau koneksi ke GitHub bermasalah.
@@ -1203,6 +1204,218 @@ while true; do
   [ "$TOKEN" = "__EXIT__" ] && exit 0
 done
 
+# ===== Auto-setup Branch Ruleset di GitHub =====
+# Dipanggil sekali setelah token valid.
+# - Cek apakah ruleset "Protect <branch>" sudah ada
+# - Kalau belum → buat otomatis via GitHub API
+# - Kalau sudah → skip (tidak overwrite)
+# Rules yang diaktifkan:
+#   ✅ deletion       — cegah branch dihapus tidak sengaja
+#   ✅ non_fast_forward — block force push (bypass: repo admin)
+setup_branch_ruleset() {
+  local _branch="${1:-$DEFAULT_BRANCH}"
+  local _ruleset_name="Protect ${_branch}"
+  local _flag_file=".ruleset_${_branch}.ok"
+
+  # Skip kalau flag sudah ada (tidak perlu hit API setiap run)
+  [ -f "$_flag_file" ] && return 0
+
+  [ -z "$TOKEN" ] && return 0
+
+  # Cek apakah ruleset dengan nama ini sudah ada
+  local _existing
+  _existing=$(curl -s --max-time 8 \
+    "https://api.github.com/repos/${REPO_OWNER}/${REPO}/rulesets" \
+    -H "Authorization: token ${TOKEN}" \
+    -H "Accept: application/vnd.github+json" 2>/dev/null)
+
+  local _found
+  _found=$(python3 -c "
+import json,sys
+try:
+  data=json.load(sys.stdin)
+  name='''${_ruleset_name}'''
+  print('yes' if any(r.get('name')==name for r in (data if isinstance(data,list) else [])) else 'no')
+except: print('no')
+" <<< "$_existing" 2>/dev/null)
+
+  if [ "$_found" = "yes" ]; then
+    touch "$_flag_file"
+    return 0
+  fi
+
+  # Buat ruleset baru
+  local _payload
+  _payload=$(python3 -c "
+import json
+print(json.dumps({
+  'name': '${_ruleset_name}',
+  'target': 'branch',
+  'enforcement': 'active',
+  'bypass_actors': [
+    {'actor_id': 5, 'actor_type': 'RepositoryRole', 'bypass_mode': 'always'}
+  ],
+  'conditions': {
+    'ref_name': {
+      'include': ['refs/heads/${_branch}'],
+      'exclude': []
+    }
+  },
+  'rules': [
+    {'type': 'deletion'},
+    {'type': 'non_fast_forward'}
+  ]
+}))" 2>/dev/null)
+
+  [ -z "$_payload" ] && return 1
+
+  local _resp
+  _resp=$(curl -s --max-time 10 \
+    -X POST "https://api.github.com/repos/${REPO_OWNER}/${REPO}/rulesets" \
+    -H "Authorization: token ${TOKEN}" \
+    -H "Accept: application/vnd.github+json" \
+    -H "Content-Type: application/json" \
+    -d "$_payload" 2>/dev/null)
+
+  local _id
+  _id=$(python3 -c "
+import json,sys
+try: print(json.loads(sys.stdin.read()).get('id',''))
+except: print('')
+" <<< "$_resp" 2>/dev/null)
+
+  if [ -n "$_id" ]; then
+    echo -e "  ${C_GREEN}🛡️  Branch ruleset dibuat:${C_RESET} ${C_DIM}\"${_ruleset_name}\" (id: ${_id})${C_RESET}"
+    echo -e "  ${C_DIM}   ✅ Restrict deletions  ✅ Block force pushes  (bypass: repo admin)${C_RESET}"
+    touch "$_flag_file"
+  fi
+}
+
+# ===== Setup wizard interaktif untuk Auto PR (.autopr) =====
+# Dipanggil setelah token valid.
+# - Kalau .autopr belum ada → tampilkan wizard setup (wajib sekali)
+# - Kalau sudah ada         → skip (langsung lanjut)
+# Bisa dipanggil ulang dari menu untuk re-konfigurasi.
+# $1 = "force" → tampilkan wizard meskipun .autopr sudah ada
+init_autopr_config() {
+  local _force="${1:-}"
+  [ -f .autopr ] && [ "$_force" != "force" ] && return 0
+
+  # Baca nilai lama kalau ada (untuk tampilkan default saat re-konfigurasi)
+  local _old_enabled="true" _old_base="auto" _old_draft="false"
+  if [ -f .autopr ]; then
+    _old_enabled=$(grep -E '^enabled=' .autopr 2>/dev/null | cut -d= -f2 | tr -d ' \r\n')
+    _old_base=$(grep -E '^base=' .autopr 2>/dev/null | cut -d= -f2 | tr -d ' \r\n')
+    _old_draft=$(grep -E '^draft=' .autopr 2>/dev/null | cut -d= -f2 | tr -d ' \r\n')
+  fi
+
+  clear >/dev/tty 2>/dev/null || true
+  echo -e "${C_BOLD}╔══════════════════════════════════════════════════╗${C_RESET}" >&2
+  echo -e "${C_BOLD}║       🔀  SETUP AUTO PR — BANG WILY              ║${C_RESET}" >&2
+  echo -e "${C_BOLD}╚══════════════════════════════════════════════════╝${C_RESET}" >&2
+  echo "" >&2
+  echo -e "  ${C_DIM}Setiap push ke branch non-default akan otomatis${C_RESET}" >&2
+  echo -e "  ${C_DIM}membuat Pull Request ke GitHub. Atur di sini.${C_RESET}" >&2
+  echo "" >&2
+  echo -e "${C_DIM}  ─────────────────────────────────────────────────${C_RESET}" >&2
+
+  echo -e "  ${C_DIM}Ketik ${C_BOLD}0${C_RESET}${C_DIM} di pertanyaan mana saja untuk kembali ke menu.${C_RESET}" >&2
+  echo "" >&2
+
+  # ── [1] Aktifkan Auto PR? ──────────────────────────────────────────────────
+  local _def_en="y"; [ "$_old_enabled" = "false" ] && _def_en="n"
+  echo -e "  ${C_CYAN}[1]${C_RESET} ${C_BOLD}Aktifkan Auto PR?${C_RESET}" >&2
+  echo -e "      ${C_DIM}Setiap push berhasil → PR otomatis dibuat di GitHub${C_RESET}" >&2
+  printf "      ${C_BOLD}true / false${C_RESET}  ${C_DIM}[sekarang: %s | 0 = kembali]${C_RESET}  ▸ " "$_old_enabled" >&2
+  local _ans_en=""
+  read -r _ans_en </dev/tty
+  _ans_en=$(echo "$_ans_en" | tr -d ' \r\n' | tr '[:upper:]' '[:lower:]')
+  if [ "$_ans_en" = "0" ]; then
+    echo -e "\n  ${C_DIM}↩ Kembali ke menu...${C_RESET}" >&2
+    sleep 0.5
+    return 0
+  fi
+  local _cfg_enabled
+  case "$_ans_en" in
+    false|f|n|no)  _cfg_enabled="false" ;;
+    *)             _cfg_enabled="true"  ;;
+  esac
+
+  # ── [2] Base branch ────────────────────────────────────────────────────────
+  echo "" >&2
+  echo -e "  ${C_CYAN}[2]${C_RESET} ${C_BOLD}Base branch${C_RESET} ${C_DIM}(PR akan merge ke branch ini)${C_RESET}" >&2
+  echo -e "      ${C_DIM}Kosongkan / ketik 'auto' → pakai default branch repo (${DEFAULT_BRANCH})${C_RESET}" >&2
+  printf "      ${C_BOLD}Nama branch / auto${C_RESET}  ${C_DIM}[sekarang: %s | 0 = kembali]${C_RESET}  ▸ " "$_old_base" >&2
+  local _ans_base=""
+  read -r _ans_base </dev/tty
+  _ans_base=$(echo "$_ans_base" | tr -d ' \r\n')
+  if [ "$_ans_base" = "0" ]; then
+    echo -e "\n  ${C_DIM}↩ Kembali ke menu...${C_RESET}" >&2
+    sleep 0.5
+    return 0
+  fi
+  local _cfg_base
+  if [ -z "$_ans_base" ] || [ "$_ans_base" = "auto" ]; then
+    _cfg_base="auto"
+  else
+    _cfg_base="$_ans_base"
+  fi
+
+  # ── [3] Draft PR? ──────────────────────────────────────────────────────────
+  echo "" >&2
+  echo -e "  ${C_CYAN}[3]${C_RESET} ${C_BOLD}Buat PR sebagai Draft?${C_RESET}" >&2
+  echo -e "      ${C_DIM}Draft = PR belum siap merge, untuk review dulu${C_RESET}" >&2
+  printf "      ${C_BOLD}true / false${C_RESET}  ${C_DIM}[sekarang: %s | 0 = kembali]${C_RESET}  ▸ " "$_old_draft" >&2
+  local _ans_draft=""
+  read -r _ans_draft </dev/tty
+  _ans_draft=$(echo "$_ans_draft" | tr -d ' \r\n' | tr '[:upper:]' '[:lower:]')
+  if [ "$_ans_draft" = "0" ]; then
+    echo -e "\n  ${C_DIM}↩ Kembali ke menu...${C_RESET}" >&2
+    sleep 0.5
+    return 0
+  fi
+  local _cfg_draft
+  case "$_ans_draft" in
+    true|t|y|yes|1)  _cfg_draft="true"  ;;
+    *)               _cfg_draft="false" ;;
+  esac
+
+  # ── Simpan ke .autopr ──────────────────────────────────────────────────────
+  cat > .autopr << AUTOPREOF
+# Konfigurasi Auto PR — push.sh
+# Dibuat/diupdate via wizard interaktif. Bisa diedit manual kapan saja.
+
+# Aktifkan/matikan auto PR: true / false
+enabled=${_cfg_enabled}
+
+# Branch tujuan PR (base). "auto" = pakai DEFAULT_BRANCH script
+base=${_cfg_base}
+
+# Buat PR sebagai draft: true / false
+draft=${_cfg_draft}
+AUTOPREOF
+
+  # ── Tampilkan ringkasan ────────────────────────────────────────────────────
+  echo "" >&2
+  echo -e "${C_DIM}  ─────────────────────────────────────────────────${C_RESET}" >&2
+  echo -e "  ${C_GREEN}✅ Konfigurasi Auto PR disimpan ke .autopr${C_RESET}" >&2
+  echo "" >&2
+  local _en_label; [ "$_cfg_enabled" = "true" ] && _en_label="${C_GREEN}✅ Aktif${C_RESET}" || _en_label="${C_RED}❌ Nonaktif${C_RESET}"
+  local _base_label; [ "$_cfg_base" = "auto" ] && _base_label="${DEFAULT_BRANCH} (auto)" || _base_label="$_cfg_base"
+  local _draft_label; [ "$_cfg_draft" = "true" ] && _draft_label="${C_YELLOW}Draft${C_RESET}" || _draft_label="Normal PR"
+  echo -e "  ${C_DIM}Auto PR   :${C_RESET} ${_en_label}" >&2
+  echo -e "  ${C_DIM}Base      :${C_RESET} ${C_BOLD}${_base_label}${C_RESET}" >&2
+  echo -e "  ${C_DIM}Mode      :${C_RESET} ${_draft_label}" >&2
+  echo "" >&2
+  printf "  ${C_DIM}Tekan ${C_RESET}${C_BOLD}Enter${C_RESET}${C_DIM} untuk kembali ke menu...${C_RESET}" >&2
+  read -r </dev/tty
+}
+# ── Buat file .autopr jika belum ada (setelah token valid) ───────────────────
+init_autopr_config
+
+# ── Auto-setup branch ruleset di GitHub (sekali, pakai flag file) ────────────
+setup_branch_ruleset "$DEFAULT_BRANCH" &
+
 # ── Auto-install node_modules jika belum ada setelah token valid ─────────────
 _auto_nm_needed=0
 if [ ! -d node_modules ] || [ ! -d node_modules/.bin ]; then
@@ -1288,7 +1501,7 @@ _sbar_sweep 1 8 0.03 "Inisialisasi ..."
   _ts_login=$(TZ=Asia/Jakarta date '+%d %b %Y • %H:%M WIB' 2>/dev/null || date '+%d %b %Y • %H:%M')
 
   # Ambil info realtime dari GitHub API
-  _gh_base="https://api.github.com/repos/${USER}/${REPO}"
+  _gh_base="https://api.github.com/repos/${REPO_OWNER}/${REPO}"
   _repo_json=$(curl -s --max-time 6 \
     -H "Authorization: token ${TOKEN}" \
     -H "Accept: application/vnd.github+json" \
@@ -1355,7 +1568,7 @@ _sbar_sweep 1 8 0.03 "Inisialisasi ..."
 
 # ── 9→25% : setup REMOTE_URL ──
 _sbar_sweep 9 25 0.025 "Setup remote URL ..."
-REMOTE_URL="https://${USER}:${TOKEN}@github.com/${USER}/${REPO}.git"
+REMOTE_URL="https://${REPO_OWNER}:${TOKEN}@github.com/${REPO_OWNER}/${REPO}.git"
 
 # ── 26→44% : git init + config ──
 _sbar_sweep 26 32 0.02 "Init git repo ..."
@@ -1364,6 +1577,11 @@ _sbar_sweep 33 38 0.02 "Konfigurasi git user ..."
 git config user.name "$USER"
 git config user.email "${USER}@users.noreply.github.com"
 git config checkout.defaultRemote origin
+# Override env var yang diinjek Replit/platform (supaya nama author di commit = GitHub username, bukan nama Replit)
+export GIT_AUTHOR_NAME="$USER"
+export GIT_AUTHOR_EMAIL="${USER}@users.noreply.github.com"
+export GIT_COMMITTER_NAME="$USER"
+export GIT_COMMITTER_EMAIL="${USER}@users.noreply.github.com"
 _sbar_sweep 39 44 0.02 "Setup git remote ..."
 if git remote get-url origin >/dev/null 2>&1; then
   git remote set-url origin "$REMOTE_URL"
@@ -1628,6 +1846,250 @@ classify_commit() {
 generate_commit_msg() {
   classify_commit "$@"
 }
+
+# ===== Buat GitHub Issue otomatis & ambil nomornya (#N) =====
+# Setiap commit otomatis dapat GitHub Issue → (#N) jadi link biru di GitHub.
+# Fallback ke hitungan commit lokal kalau API gagal / offline.
+next_commit_no() {
+  # Fallback: hitung dari local git (dipakai kalau issue gagal dibuat)
+  local _local_count
+  _local_count=$(git rev-list --count HEAD 2>/dev/null || echo "0")
+  echo $(( _local_count + 1 ))
+}
+
+# Buat GitHub Issue dengan judul = pesan commit, return nomor issue
+# Kalau gagal → fallback ke next_commit_no (hitungan lokal)
+buat_issue_commit() {
+  local _title="$1"
+  [ -z "$_title" ] && { next_commit_no; return; }
+  [ -z "$TOKEN" ]  && { next_commit_no; return; }
+
+  # Bersihkan judul dari (#NNNN) yang mungkin sudah ada
+  local _clean_title
+  _clean_title=$(echo "$_title" | sed -E 's/ \(#[0-9]+\)$//')
+
+  local _payload _resp _no
+  _payload=$(python3 -c "
+import json,sys
+title=sys.argv[1]
+print(json.dumps({
+  'title': title,
+  'labels': ['enhancement'],
+  'body': '📝 Issue otomatis untuk commit tracking.\n\n> Dibuat oleh push.sh — Bang Wily'
+}))" "$_clean_title" 2>/dev/null)
+
+  [ -z "$_payload" ] && { next_commit_no; return; }
+
+  _resp=$(curl -s --max-time 10 \
+    -X POST "https://api.github.com/repos/${REPO_OWNER}/${REPO}/issues" \
+    -H "Authorization: token ${TOKEN}" \
+    -H "Accept: application/vnd.github+json" \
+    -H "Content-Type: application/json" \
+    -d "$_payload" 2>/dev/null)
+
+  _no=$(python3 -c "
+import json,sys
+try: print(json.loads(sys.stdin.read()).get('number',''))
+except: print('')
+" <<< "$_resp" 2>/dev/null)
+
+  if [ -n "$_no" ] && [ "$_no" -gt 0 ] 2>/dev/null; then
+    echo "$_no"
+  else
+    next_commit_no
+  fi
+}
+
+# Tempel (#N) ke pesan commit — N = nomor GitHub Issue (link biru)
+append_commit_no() {
+  local _base_msg="$1"
+  local _no
+  _no=$(buat_issue_commit "$_base_msg")
+  echo "${_base_msg} (#${_no})"
+}
+
+# Ubah (#NNNN) di pesan commit jadi HTML link ke commit GitHub
+# agar bisa diklik di Telegram (parse_mode=HTML).
+# Usage: tg_linkify_commit "feat: add stuff (#42)" "abc1234"
+tg_linkify_commit() {
+  local _msg="$1"
+  local _sha="${2:-}"
+  if [ -z "$_sha" ]; then
+    echo "$_msg"
+    return
+  fi
+  echo "$_msg" | sed -E "s|\(#([0-9]+)\)|(<a href=\"https://github.com/${REPO_OWNER}/${REPO}/commit/${_sha}\">#\1</a>)|g"
+}
+
+# ===== Auto-buat Pull Request setelah push ke non-default branch =====
+# Usage: auto_create_pr "head_branch" "commit_msg_title"
+# - Kalau .autopr enabled=false → skip
+# - Kalau push ke DEFAULT_BRANCH sendiri → skip (tidak perlu PR)
+# - Kalau sudah ada PR open → tampilkan link PR yang ada
+# - Kalau belum ada → buat PR baru via GitHub API + notif Telegram
+auto_create_pr() {
+  local _head="$1"
+  local _title="${2:-chore: update}"
+  local _tg_ts; _tg_ts=$(date '+%H:%M:%S %d %b %Y')
+
+  # Baca konfigurasi dari .autopr
+  local _pr_enabled="true" _pr_draft="false" _pr_base_cfg="auto"
+  if [ -f .autopr ]; then
+    _pr_enabled=$(grep -E '^enabled=' .autopr 2>/dev/null | cut -d= -f2 | tr -d ' \r\n')
+    _pr_draft=$(grep -E '^draft=' .autopr 2>/dev/null | cut -d= -f2 | tr -d ' \r\n')
+    _pr_base_cfg=$(grep -E '^base=' .autopr 2>/dev/null | cut -d= -f2 | tr -d ' \r\n')
+  fi
+
+  # Skip kalau disabled di .autopr
+  [ "$_pr_enabled" = "false" ] && return 0
+
+  # Tentukan base branch
+  local _base
+  if [ "$_pr_base_cfg" = "auto" ] || [ -z "$_pr_base_cfg" ]; then
+    _base="$DEFAULT_BRANCH"
+  else
+    _base="$_pr_base_cfg"
+  fi
+
+  # Skip kalau push ke default branch sendiri
+  [ "$_head" = "$_base" ] && return 0
+
+  # ── Cek base branch ada di remote ────────────────────────────────────────
+  local _base_check
+  _base_check=$(curl -s --max-time 6 \
+    "https://api.github.com/repos/${REPO_OWNER}/${REPO}/branches/${_base}" \
+    -H "Authorization: token ${TOKEN}" \
+    -H "Accept: application/vnd.github+json" 2>/dev/null)
+  local _base_exists
+  _base_exists=$(python3 -c "
+import json,sys
+try: print('yes' if 'name' in json.loads(sys.stdin.read()) else 'no')
+except: print('no')
+" <<< "$_base_check" 2>/dev/null)
+  if [ "$_base_exists" != "yes" ]; then
+    echo -e "  ${C_YELLOW}⚠️  Auto PR skip: base branch '${_base}' tidak ditemukan di remote.${C_RESET}" \
+      "${C_DIM}(Ubah setting via menu [a])${C_RESET}"
+    return 0
+  fi
+
+  # ── Cek ada commit beda antara head dan base ──────────────────────────────
+  local _compare_json
+  _compare_json=$(curl -s --max-time 6 \
+    "https://api.github.com/repos/${REPO_OWNER}/${REPO}/compare/${_base}...${_head}" \
+    -H "Authorization: token ${TOKEN}" \
+    -H "Accept: application/vnd.github+json" 2>/dev/null)
+  local _ahead
+  _ahead=$(python3 -c "
+import json,sys
+try: print(json.loads(sys.stdin.read()).get('ahead_by', 0))
+except: print(0)
+" <<< "$_compare_json" 2>/dev/null)
+  if [ "${_ahead:-0}" -eq 0 ]; then
+    echo -e "  ${C_DIM}ℹ️  Auto PR skip: branch '${_head}' tidak ada commit beda dari '${_base}'.${C_RESET}"
+    return 0
+  fi
+
+  # ── Cek apakah sudah ada PR open untuk branch ini ──
+  local _existing_json
+  _existing_json=$(curl -s --max-time 8 \
+    "https://api.github.com/repos/${REPO_OWNER}/${REPO}/pulls?state=open&head=${REPO_OWNER}:${_head}&base=${_base}" \
+    -H "Authorization: token ${TOKEN}" \
+    -H "Accept: application/vnd.github+json" 2>/dev/null)
+
+  local _pr_url _pr_no
+  _pr_url=$(python3 -c "
+import json,sys
+try:
+  a=json.loads(sys.stdin.read())
+  print(a[0]['html_url'] if a else '')
+except: print('')
+" <<< "$_existing_json" 2>/dev/null)
+  _pr_no=$(python3 -c "
+import json,sys
+try:
+  a=json.loads(sys.stdin.read())
+  print(a[0]['number'] if a else '')
+except: print('')
+" <<< "$_existing_json" 2>/dev/null)
+
+  if [ -n "$_pr_url" ]; then
+    # PR sudah ada — tampilkan saja
+    echo -e "  ${C_CYAN}🔀 PR sudah ada:${C_RESET} ${C_BLUE}${_pr_url}${C_RESET}"
+    local _btn_exist='{"inline_keyboard":[[{"text":"🔀 Lihat PR #'"${_pr_no}"'","url":"'"${_pr_url}"'"},{"text":"📊 All PRs","url":"https://github.com/'"${REPO_OWNER}"'/'"${REPO}"'/pulls"}]]}'
+    send_telegram "🔀 <b>PR SUDAH ADA — BRANCH DIUPDATE</b>
+━━━━━━━━━━━━━━━━━━━━
+📁 <code>${REPO_OWNER}/${REPO}</code>
+🌿 <code>${_head}</code> → <code>${_base}</code>
+🔗 <a href=\"${_pr_url}\">#${_pr_no} — ${_title}</a>
+🕐 ${_tg_ts}" "$_btn_exist"
+    return 0
+  fi
+
+  # ── Buat PR baru ──
+  local _pr_body="Auto-PR dari \`push.sh\` — commit terbaru di branch \`${_head}\` siap di-merge ke \`${_base}\`."
+  local _payload
+  _payload=$(python3 -c "
+import json,sys
+print(json.dumps({
+  'title': sys.argv[1],
+  'head':  sys.argv[2],
+  'base':  sys.argv[3],
+  'body':  sys.argv[4],
+  'draft': sys.argv[5] == 'true'
+}))" "$_title" "$_head" "$_base" "$_pr_body" "$_pr_draft" 2>/dev/null)
+
+  [ -z "$_payload" ] && return 1
+
+  local _resp
+  _resp=$(curl -s --max-time 10 \
+    -X POST "https://api.github.com/repos/${REPO_OWNER}/${REPO}/pulls" \
+    -H "Authorization: token ${TOKEN}" \
+    -H "Accept: application/vnd.github+json" \
+    -H "Content-Type: application/json" \
+    -d "$_payload" 2>/dev/null)
+
+  _pr_url=$(python3 -c "
+import json,sys
+try: print(json.loads(sys.stdin.read()).get('html_url',''))
+except: print('')
+" <<< "$_resp" 2>/dev/null)
+  _pr_no=$(python3 -c "
+import json,sys
+try: print(json.loads(sys.stdin.read()).get('number',''))
+except: print('')
+" <<< "$_resp" 2>/dev/null)
+
+  if [ -n "$_pr_url" ]; then
+    echo -e "  ${C_GREEN}🔀 PR baru dibuat:${C_RESET} ${C_BLUE}${_pr_url}${C_RESET}"
+    local _btn_new='{"inline_keyboard":[[{"text":"🔀 Buka PR #'"${_pr_no}"'","url":"'"${_pr_url}"'"},{"text":"✅ Merge PR","url":"'"${_pr_url}"'"}],[{"text":"📊 All PRs","url":"https://github.com/'"${REPO_OWNER}"'/'"${REPO}"'/pulls"},{"text":"📁 Repo","url":"https://github.com/'"${REPO_OWNER}"'/'"${REPO}"'"}]]}'
+    send_telegram_photo "https://w.wallhaven.cc/full/pk/wallhaven-pkgq8e.png" "🔀 <b>PULL REQUEST DIBUAT</b>
+━━━━━━━━━━━━━━━━━━━━
+📁 <code>${REPO_OWNER}/${REPO}</code>
+🌿 <code>${_head}</code> → <code>${_base}</code>
+📝 <a href=\"${_pr_url}\">#${_pr_no} — ${_title}</a>
+🕐 ${_tg_ts}" "$_btn_new"
+    return 0
+  fi
+
+  # Error — tampilkan message + detail errors[] dari GitHub
+  local _err
+  _err=$(python3 -c "
+import json,sys
+try:
+  r=json.loads(sys.stdin.read())
+  msg=r.get('message','unknown error')
+  errs=r.get('errors',[])
+  detail='; '.join(
+    e.get('message','') or e.get('field','') or str(e)
+    for e in errs if e
+  )
+  print(msg + (' — ' + detail if detail else ''))
+except: print('unknown error')
+" <<< "$_resp" 2>/dev/null)
+  echo -e "  ${C_YELLOW}⚠️  Auto PR gagal: ${_err}${C_RESET}"
+  return 1
+}
+
 
 # ===== Bersihkan stale index.lock (sisa run sebelumnya yang ke-interrupt) =====
 cleanup_stale_lock() {
@@ -1922,7 +2384,7 @@ prepare_stage() {
   # Force-add file penting yang biasanya di-ignore.
   # CATATAN: .token.secret SENGAJA TIDAK di-force-add (keamanan token).
   for forced in package-lock.json .env \
-                attached_assets .agents \
+                .agents \
                 jadibot \
                 data \
                 .replit; do
@@ -1984,7 +2446,7 @@ fetch_branches() {
       -H "Authorization: token ${TOKEN}" \
       -H "Accept: application/vnd.github+json" \
       -H "X-GitHub-Api-Version: 2022-11-28" \
-      "https://api.github.com/repos/${USER}/${REPO}/branches?per_page=${per_page}&page=${page}" \
+      "https://api.github.com/repos/${REPO_OWNER}/${REPO}/branches?per_page=${per_page}&page=${page}" \
       2>/dev/null)
 
     # Cek apakah response valid (array JSON, ada field "name")
@@ -2040,7 +2502,7 @@ fetch_branches_recent() {
     -H "Authorization: token ${TOKEN}" \
     -H "Accept: application/vnd.github+json" \
     -H "X-GitHub-Api-Version: 2022-11-28" \
-    "https://api.github.com/repos/${USER}/${REPO}/branches?per_page=100" 2>/dev/null)
+    "https://api.github.com/repos/${REPO_OWNER}/${REPO}/branches?per_page=100" 2>/dev/null)
 
   if [ "$http_code" != "200" ]; then
     rm -f "$tmp_list"
@@ -2068,7 +2530,7 @@ fetch_branches_recent() {
       -H "Authorization: token ${TOKEN}" \
       -H "Accept: application/vnd.github+json" \
       -H "X-GitHub-Api-Version: 2022-11-28" \
-      "https://api.github.com/repos/${USER}/${REPO}/git/commits/${all_shas[$i]}" \
+      "https://api.github.com/repos/${REPO_OWNER}/${REPO}/git/commits/${all_shas[$i]}" \
       2>/dev/null &
   done
   wait
@@ -2576,6 +3038,15 @@ show_main_menu() {
   printf "  ${C_YELLOW} c${C_RESET} › %-16s  ${C_CYAN} n${C_RESET} › %-16s  %b\n" \
     "Bersihkan history" "$_nm_label" "$_nm_status_str"
   printf "  ${C_RED} d${C_RESET} › %-16s  ${C_MAGENTA} r${C_RESET} › %s\n" "Hapus file/folder" "Restore/undo hapus"
+  # Tampilkan status Auto PR di samping opsi
+  local _apr_status
+  if [ -f .autopr ]; then
+    local _apr_en; _apr_en=$(grep -E '^enabled=' .autopr 2>/dev/null | cut -d= -f2 | tr -d ' \r\n')
+    [ "$_apr_en" = "false" ] && _apr_status="${C_RED}off${C_RESET}" || _apr_status="${C_GREEN}on${C_RESET}"
+  else
+    _apr_status="${C_DIM}belum setup${C_RESET}"
+  fi
+  printf "  ${C_CYAN} a${C_RESET} › %-16s  %b\n" "Setting Auto PR" "$_apr_status"
   if [ -n "$_upd_ver" ]; then
     printf "  ${C_GREEN} u${C_RESET} › ${C_BOLD}%-16s${C_RESET}  ${C_DIM}versi sekarang: %s → baru: %s${C_RESET}\n" \
       "Update script" "$SCRIPT_VERSION" "$_upd_ver"
@@ -2609,6 +3080,7 @@ show_main_menu() {
     n|N) action_install_node_modules ;;
     d|D) action_delete_file_folder ;;
     r|R) action_restore_deleted ;;
+    a|A) init_autopr_config "force" ;;
     u|U) action_self_update "$_upd_ver" "$_upd_url" ;;
     0|q|Q|exit) goodbye_prompt ;;
     *)
@@ -2924,6 +3396,7 @@ action_quick_push() {
   local _msg
   _msg=$(generate_commit_msg 2>/dev/null || echo "chore: quick push via Bang Wily")
   [ -z "$_msg" ] && _msg="chore: quick push via Bang Wily"
+  _msg=$(append_commit_no "$_msg")
 
   echo -e "  ${C_CYAN}▸ Commit: ${C_RESET}${C_DIM}${_msg}${C_RESET}"
   git commit -m "$_msg" --allow-empty >/dev/null 2>&1 || true
@@ -2937,15 +3410,17 @@ action_quick_push() {
   local _ts_now; _ts_now=$(date '+%H:%M:%S %d %b %Y')
   if [ "$_push_ok" -eq 1 ]; then
     echo -e "  ${C_GREEN}✅ Push berhasil!${C_RESET}"
-    echo -e "  ${C_BLUE}🔗 https://github.com/${USER}/${REPO}/tree/${DEFAULT_BRANCH}${C_RESET}"
+    echo -e "  ${C_BLUE}🔗 https://github.com/${REPO_OWNER}/${REPO}/tree/${DEFAULT_BRANCH}${C_RESET}"
     log_push_event "$DEFAULT_BRANCH" "OK" "$_msg" "$_changed"
     local _btn_pushok='{"inline_keyboard":[[{"text":"🔗 Lihat Branch","url":"https://github.com/'"${USER}"'/'"${REPO}"'/tree/'"${DEFAULT_BRANCH}"'"},{"text":"📊 Commits","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commits/'"${DEFAULT_BRANCH}"'"}],[{"text":"🔀 Compare","url":"https://github.com/'"${USER}"'/'"${REPO}"'/compare"},{"text":"📥 Pull Request","url":"https://github.com/'"${USER}"'/'"${REPO}"'/pulls"}]]}'
     local _qp_detail; _qp_detail=$(_build_push_detail 2>/dev/null || true)
+    local _qp_sha; _qp_sha=$(git rev-parse HEAD 2>/dev/null || echo "")
+    local _msg_tg; _msg_tg=$(tg_linkify_commit "$_msg" "$_qp_sha")
     send_telegram_photo "https://w.wallhaven.cc/full/je/wallhaven-je9x7y.jpg" "✅ <b>PUSH BERHASIL</b>
 ━━━━━━━━━━━━━━━━━━━━
 📁 <code>${USER}/${REPO}</code>
 🌿 Branch: <code>${DEFAULT_BRANCH}</code>
-📝 ${_msg}
+📝 ${_msg_tg}
 ${_qp_detail}
 🕐 ${_ts_now}" "$_btn_pushok"
   else
@@ -3161,7 +3636,7 @@ action_rename_repo() {
     -H "Authorization: token ${TOKEN}" \
     -H "Accept: application/vnd.github+json" \
     -H "X-GitHub-Api-Version: 2022-11-28" \
-    "https://api.github.com/repos/${USER}/${REPO}" \
+    "https://api.github.com/repos/${REPO_OWNER}/${REPO}" \
     -d "{\"name\":\"${new_name}\"}" 2>/dev/null)
 
   relogin_if_needed "$api_http" "rename repo" || return
@@ -3173,13 +3648,13 @@ action_rename_repo() {
     sed -i "s|^REPO=.*|REPO=\"${new_name}\"|" "$0" 2>/dev/null || true
 
     # Update remote URL lokal agar tidak putus
-    local new_url="https://${USER}:${TOKEN}@github.com/${USER}/${new_name}.git"
+    local new_url="https://${REPO_OWNER}:${TOKEN}@github.com/${REPO_OWNER}/${new_name}.git"
     git remote set-url origin "$new_url" 2>/dev/null || true
 
     echo ""
     echo -e "  ${C_GREEN}✅ Repository berhasil di-rename di GitHub!${C_RESET}"
     echo -e "     ${C_DIM}${USER}/${old_repo}${C_RESET} ${C_BOLD}→${C_RESET} ${C_GREEN}${USER}/${new_name}${C_RESET}"
-    echo -e "  ${C_BLUE}🔗 https://github.com/${USER}/${new_name}${C_RESET}"
+    echo -e "  ${C_BLUE}🔗 https://github.com/${REPO_OWNER}/${new_name}${C_RESET}"
     echo -e "  ${C_DIM}Remote URL lokal sudah diperbarui otomatis.${C_RESET}"
     echo -e "  ${C_DIM}Perubahan nama disimpan permanen di push.sh${C_RESET}"
     local _ts_rr; _ts_rr=$(date '+%H:%M:%S %d %b %Y')
@@ -3188,7 +3663,7 @@ action_rename_repo() {
 ━━━━━━━━━━━━━━━━━━━━
 👤 <code>${USER}</code>
 🔄 <code>${old_repo}</code> → <code>${new_name}</code>
-🔗 github.com/${USER}/${new_name}
+🔗 github.com/${REPO_OWNER}/${new_name}
 🕐 ${_ts_rr}" "$_btn_rr" 2>/dev/null &
   else
     local api_msg
@@ -3345,7 +3820,7 @@ action_switch_default() {
       -H "Authorization: token ${TOKEN}" \
       -H "Accept: application/vnd.github+json" \
       -H "X-GitHub-Api-Version: 2022-11-28" \
-      "https://api.github.com/repos/${USER}/${REPO}/git/ref/heads/${name}" \
+      "https://api.github.com/repos/${REPO_OWNER}/${REPO}/git/ref/heads/${name}" \
       2>/dev/null)
     if [ "$chk_http" != "200" ]; then
       echo -e "${C_RED}✖ Branch '${name}' tidak ditemukan di GitHub.${C_RESET}"
@@ -3368,7 +3843,7 @@ action_switch_default() {
     -H "Authorization: token ${TOKEN}" \
     -H "Accept: application/vnd.github+json" \
     -H "X-GitHub-Api-Version: 2022-11-28" \
-    "https://api.github.com/repos/${USER}/${REPO}" \
+    "https://api.github.com/repos/${REPO_OWNER}/${REPO}" \
     -d "{\"default_branch\":\"${new_default}\"}" 2>/dev/null)
   api_http="${api_resp}"
 
@@ -3381,7 +3856,7 @@ action_switch_default() {
     echo ""
     echo -e "  ${C_GREEN}✅ Default branch berhasil diubah di GitHub!${C_RESET}"
     echo -e "     ${C_DIM}${old_default}${C_RESET} ${C_BOLD}→${C_RESET} ${C_GREEN}${new_default}${C_RESET}"
-    echo -e "  ${C_BLUE}🔗 https://github.com/${USER}/${REPO}${C_RESET}"
+    echo -e "  ${C_BLUE}🔗 https://github.com/${REPO_OWNER}/${REPO}${C_RESET}"
     echo -e "  ${C_DIM}Perubahan juga disimpan permanen di push.sh${C_RESET}"
     local _ts_sd; _ts_sd=$(date '+%H:%M:%S %d %b %Y')
     local _btn_sd='{"inline_keyboard":[[{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"},{"text":"🌿 Branches","url":"https://github.com/'"${USER}"'/'"${REPO}"'/branches"}],[{"text":"🔀 New PR","url":"https://github.com/'"${USER}"'/'"${REPO}"'/compare"},{"text":"📊 Compare","url":"https://github.com/'"${USER}"'/'"${REPO}"'/compare/'"${old_default}"'...'"${new_default}"'"}]]}'
@@ -3389,7 +3864,7 @@ action_switch_default() {
 ━━━━━━━━━━━━━━━━━━━━
 📁 <code>${USER}/${REPO}</code>
 🔄 <code>${old_default}</code> → <code>${new_default}</code>
-🔗 github.com/${USER}/${REPO}
+🔗 github.com/${REPO_OWNER}/${REPO}
 🕐 ${_ts_sd}" "$_btn_sd" 2>/dev/null &
   else
     # Gagal — tampilkan error dari API
@@ -3480,7 +3955,7 @@ action_list_branches() {
     -H "Authorization: token ${TOKEN}" \
     -H "Accept: application/vnd.github+json" \
     -H "X-GitHub-Api-Version: 2022-11-28" \
-    "https://api.github.com/repos/${USER}/${REPO}/branches?per_page=100" 2>/dev/null)
+    "https://api.github.com/repos/${REPO_OWNER}/${REPO}/branches?per_page=100" 2>/dev/null)
 
   relogin_if_needed "$http_code" "ambil branch" || return
   if [ "$http_code" != "200" ]; then
@@ -3546,7 +4021,7 @@ action_list_branches() {
       -H "Authorization: token ${TOKEN}" \
       -H "Accept: application/vnd.github+json" \
       -H "X-GitHub-Api-Version: 2022-11-28" \
-      "https://api.github.com/repos/${USER}/${REPO}/git/commits/${def_sha}" 2>/dev/null &
+      "https://api.github.com/repos/${REPO_OWNER}/${REPO}/git/commits/${def_sha}" 2>/dev/null &
   fi
   for (( i=0; i<total_nd; i++ )); do
     local sha="${nd_shas[$i]}"
@@ -3555,7 +4030,7 @@ action_list_branches() {
       -H "Authorization: token ${TOKEN}" \
       -H "Accept: application/vnd.github+json" \
       -H "X-GitHub-Api-Version: 2022-11-28" \
-      "https://api.github.com/repos/${USER}/${REPO}/git/commits/${sha}" 2>/dev/null &
+      "https://api.github.com/repos/${REPO_OWNER}/${REPO}/git/commits/${sha}" 2>/dev/null &
   done
   wait
   mini_bar_ok "Data commit siap"
@@ -3637,7 +4112,7 @@ action_list_branches() {
         -H "Authorization: token ${TOKEN}" \
         -H "Accept: application/vnd.github+json" \
         -H "X-GitHub-Api-Version: 2022-11-28" \
-        "https://api.github.com/repos/${USER}/${REPO}/compare/${DEFAULT_BRANCH}...${b_enc}?per_page=1" \
+        "https://api.github.com/repos/${REPO_OWNER}/${REPO}/compare/${DEFAULT_BRANCH}...${b_enc}?per_page=1" \
         2>/dev/null &
       pids+=("$!")
     done
@@ -3751,7 +4226,7 @@ action_list_branches() {
               -H "Authorization: token ${TOKEN}" \
               -H "Accept: application/vnd.github+json" \
               -H "X-GitHub-Api-Version: 2022-11-28" \
-              "https://api.github.com/repos/${USER}/${REPO}/compare/${DEFAULT_BRANCH}...${_sel_enc}?per_page=1" \
+              "https://api.github.com/repos/${REPO_OWNER}/${REPO}/compare/${DEFAULT_BRANCH}...${_sel_enc}?per_page=1" \
               2>/dev/null)
             _sel_behind=$(printf '%s' "$_sel_cmp" | grep -oE '"behind_by"[[:space:]]*:[[:space:]]*[0-9]+' | head -1 | grep -oE '[0-9]+$')
             _sel_ahead=$(printf '%s'  "$_sel_cmp" | grep -oE '"ahead_by"[[:space:]]*:[[:space:]]*[0-9]+'  | head -1 | grep -oE '[0-9]+$')
@@ -3794,7 +4269,7 @@ action_list_branches() {
                 run_upload
                 ;;
               2)
-                local gh_url="https://github.com/${USER}/${REPO}/tree/${_sel_name}"
+                local gh_url="https://github.com/${REPO_OWNER}/${REPO}/tree/${_sel_name}"
                 if ! open_url "$gh_url"; then
                   echo -e "  ${C_DIM}URL: ${gh_url}${C_RESET}"
                   sleep 2
@@ -4054,12 +4529,12 @@ action_create_repo() {
     echo -e "${C_DIM}  ──────────────────────────────────${C_RESET}"
     printf "  ${C_DIM}Nama    ${C_RESET}${C_BOLD}%s${C_RESET}\n"       "${full_name:-${USER}/${new_repo_name}}"
     printf "  ${C_DIM}Visib.  ${C_RESET}%s\n"                           "$vis_label"
-    printf "  ${C_DIM}URL     ${C_RESET}${C_CYAN}%s${C_RESET}\n"       "${html_url:-https://github.com/${USER}/${new_repo_name}}"
-    printf "  ${C_DIM}Clone   ${C_RESET}${C_DIM}%s${C_RESET}\n"        "${clone_url:-https://github.com/${USER}/${new_repo_name}.git}"
+    printf "  ${C_DIM}URL     ${C_RESET}${C_CYAN}%s${C_RESET}\n"       "${html_url:-https://github.com/${REPO_OWNER}/${new_repo_name}}"
+    printf "  ${C_DIM}Clone   ${C_RESET}${C_DIM}%s${C_RESET}\n"        "${clone_url:-https://github.com/${REPO_OWNER}/${new_repo_name}.git}"
     echo -e "${C_DIM}  ──────────────────────────────────${C_RESET}"
     echo ""
     echo -e "  ${C_DIM}▸ Clone dengan:${C_RESET}"
-    echo -e "  ${C_BOLD}git clone ${clone_url:-https://github.com/${USER}/${new_repo_name}.git}${C_RESET}"
+    echo -e "  ${C_BOLD}git clone ${clone_url:-https://github.com/${REPO_OWNER}/${new_repo_name}.git}${C_RESET}"
     local _ts_cr; _ts_cr=$(date '+%H:%M:%S %d %b %Y')
     local _btn_cr='{"inline_keyboard":[[{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${new_repo_name}"'"},{"text":"⚙️ Settings","url":"https://github.com/'"${USER}"'/'"${new_repo_name}"'/settings"}],[{"text":"📋 Issues","url":"https://github.com/'"${USER}"'/'"${new_repo_name}"'/issues"},{"text":"🌿 Branches","url":"https://github.com/'"${USER}"'/'"${new_repo_name}"'/branches"}]]}'
     send_telegram_photo "https://w.wallhaven.cc/full/rd/wallhaven-rd5vz1.jpg" "📦 <b>REPO BARU DIBUAT</b>
@@ -4067,7 +4542,7 @@ action_create_repo() {
 👤 <code>${USER}</code>
 📁 <code>${full_name:-${USER}/${new_repo_name}}</code>
 🔒 ${vis_label}
-🔗 ${html_url:-github.com/${USER}/${new_repo_name}}
+🔗 ${html_url:-github.com/${REPO_OWNER}/${new_repo_name}}
 🕐 ${_ts_cr}" "$_btn_cr" 2>/dev/null &
   else
     # Ekstrak pesan error dari GitHub
@@ -4300,7 +4775,7 @@ action_import_repo() {
     -H "X-GitHub-Api-Version: 2022-11-28" \
     -H "Content-Type: application/json" \
     -d "$imp_payload" \
-    "https://api.github.com/repos/${USER}/${imp_repo_name}/import" 2>/dev/null)
+    "https://api.github.com/repos/${REPO_OWNER}/${imp_repo_name}/import" 2>/dev/null)
   imp_code=$(printf '%s' "$imp_resp" | tail -1)
   local imp_body
   imp_body=$(printf '%s' "$imp_resp" | sed '$d')
@@ -4390,7 +4865,7 @@ action_import_repo() {
         -H "Authorization: token ${TOKEN}" \
         -H "Accept: application/vnd.github+json" \
         -H "X-GitHub-Api-Version: 2022-11-28" \
-        "https://api.github.com/repos/${USER}/${imp_repo_name}/import" 2>/dev/null)
+        "https://api.github.com/repos/${REPO_OWNER}/${imp_repo_name}/import" 2>/dev/null)
       poll_status=$(printf '%s' "$poll_raw" \
         | grep -oE '"status"[[:space:]]*:[[:space:]]*"[^"]*"' | head -1 \
         | sed 's/.*"status"[[:space:]]*:[[:space:]]*"//;s/".*//')
@@ -4429,7 +4904,7 @@ action_import_repo() {
 ━━━━━━━━━━━━━━━━━━━━
 👤 <code>${USER}</code>
 📁 <code>${USER}/${imp_repo_name}</code>
-🔗 github.com/${USER}/${imp_repo_name}
+🔗 github.com/${REPO_OWNER}/${imp_repo_name}
 ✅ Import berhasil 100%
 🕐 ${_ts_ir2}" "$_btn_ir2" 2>/dev/null &
     elif [ -n "$_poll_final" ]; then
@@ -5257,7 +5732,7 @@ action_rename_branch() {
     -H "Authorization: token ${TOKEN}" \
     -H "Accept: application/vnd.github+json" \
     -H "X-GitHub-Api-Version: 2022-11-28" \
-    "https://api.github.com/repos/${USER}/${REPO}/branches/${old_name}/rename" \
+    "https://api.github.com/repos/${REPO_OWNER}/${REPO}/branches/${old_name}/rename" \
     -d "{\"new_name\":\"${new_name}\"}" 2>/dev/null)
 
   if [ "$api_http" = "201" ]; then
@@ -5265,14 +5740,14 @@ action_rename_branch() {
     echo ""
     echo -e "  ${C_GREEN}✅ Branch berhasil di-rename di GitHub!${C_RESET}"
     echo -e "  ${C_DIM}${old_name}${C_RESET} ${C_BOLD}→${C_RESET} ${C_GREEN}${new_name}${C_RESET}"
-    echo -e "  ${C_BLUE}🔗 https://github.com/${USER}/${REPO}/tree/${new_name}${C_RESET}"
+    echo -e "  ${C_BLUE}🔗 https://github.com/${REPO_OWNER}/${REPO}/tree/${new_name}${C_RESET}"
     local _ts_rb; _ts_rb=$(date '+%H:%M:%S %d %b %Y')
     local _btn_rb='{"inline_keyboard":[[{"text":"🌿 Lihat Branch Baru","url":"https://github.com/'"${USER}"'/'"${REPO}"'/tree/'"${new_name}"'"},{"text":"📋 Semua Branches","url":"https://github.com/'"${USER}"'/'"${REPO}"'/branches"}],[{"text":"🔀 Pull Request","url":"https://github.com/'"${USER}"'/'"${REPO}"'/compare/'"${new_name}"'"},{"text":"📊 Commits","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commits/'"${new_name}"'"}]]}'
     send_telegram_photo "https://w.wallhaven.cc/full/vp/wallhaven-vpxgk5.png" "✏️ <b>BRANCH DI-RENAME</b>
 ━━━━━━━━━━━━━━━━━━━━
 📁 <code>${USER}/${REPO}</code>
 🔄 <code>${old_name}</code> → <code>${new_name}</code>
-🔗 github.com/${USER}/${REPO}/tree/${new_name}
+🔗 github.com/${REPO_OWNER}/${REPO}/tree/${new_name}
 🕐 ${_ts_rb}" "$_btn_rb" 2>/dev/null &
 
     # Kalau yang di-rename adalah default branch, update variabel & script
@@ -5340,7 +5815,7 @@ action_create_branch() {
     -H "Authorization: token ${TOKEN}" \
     -H "Accept: application/vnd.github+json" \
     -H "X-GitHub-Api-Version: 2022-11-28" \
-    "https://api.github.com/repos/${USER}/${REPO}/git/ref/heads/${name}" \
+    "https://api.github.com/repos/${REPO_OWNER}/${REPO}/git/ref/heads/${name}" \
     2>/dev/null)
   if [ "$chk_http" = "200" ]; then
     mini_bar2_fail "Branch sudah ada" "Branch '${name}' sudah exist di GitHub"
@@ -5356,7 +5831,7 @@ action_create_branch() {
     -H "Authorization: token ${TOKEN}" \
     -H "Accept: application/vnd.github+json" \
     -H "X-GitHub-Api-Version: 2022-11-28" \
-    "https://api.github.com/repos/${USER}/${REPO}/git/ref/heads/${DEFAULT_BRANCH}" \
+    "https://api.github.com/repos/${REPO_OWNER}/${REPO}/git/ref/heads/${DEFAULT_BRANCH}" \
     2>/dev/null)
   if [ "$sha_resp" != "200" ]; then
     mini_bar2_fail "Gagal ambil SHA" "HTTP ${sha_resp} dari GitHub"
@@ -5381,7 +5856,7 @@ action_create_branch() {
     -H "Authorization: token ${TOKEN}" \
     -H "Accept: application/vnd.github+json" \
     -H "X-GitHub-Api-Version: 2022-11-28" \
-    "https://api.github.com/repos/${USER}/${REPO}/git/refs" \
+    "https://api.github.com/repos/${REPO_OWNER}/${REPO}/git/refs" \
     -d "{\"ref\":\"refs/heads/${name}\",\"sha\":\"${sha}\"}" \
     2>/dev/null)
   if [ "$create_http" != "201" ]; then
@@ -5417,7 +5892,7 @@ action_create_branch() {
 📁 <code>${USER}/${REPO}</code>
 🌿 Branch baru: <code>${name}</code>
 📤 File lokal sudah ter-upload
-🔗 github.com/${USER}/${REPO}/tree/${name}
+🔗 github.com/${REPO_OWNER}/${REPO}/tree/${name}
 ━━━━━━━━━━━━━━━━━━━━
 🕐 ${_ts_cb}" "$_btn_cb" 2>/dev/null &
 
@@ -5852,9 +6327,9 @@ commit_pending_changes() {
 
     local MSG
     if [ -n "$CUSTOM_MSG" ]; then
-      MSG="$CUSTOM_MSG"
+      MSG=$(append_commit_no "$CUSTOM_MSG")
     else
-      MSG=$(classify_commit)
+      MSG=$(append_commit_no "$(classify_commit)")
     fi
 
     mini_bar_start "Menyimpan commit ..." 0.006
@@ -5887,7 +6362,7 @@ push_head_to_branch() {
     remote_sha=$(git rev-parse "refs/remotes/origin/${branch}" 2>/dev/null)
     if [ "$local_sha" = "$remote_sha" ] && [ "$COMMIT_DONE" = "no" ]; then
       echo -e "  ${C_DIM}ℹ️  HEAD sudah identik dengan origin/${branch}${C_RESET}"
-      echo -e "  ${C_GREEN}✅ Sudah up-to-date${C_RESET} → ${C_BLUE}https://github.com/${USER}/${REPO}/tree/${branch}${C_RESET}"
+      echo -e "  ${C_GREEN}✅ Sudah up-to-date${C_RESET} → ${C_BLUE}https://github.com/${REPO_OWNER}/${REPO}/tree/${branch}${C_RESET}"
       return 0
     fi
 
@@ -5944,16 +6419,18 @@ push_head_to_branch() {
   progress_stop "$( [ $_push_rc -eq 0 ] && echo ok || echo fail )"
   if [ $_push_rc -eq 0 ]; then
     echo -e "  ${C_GREEN}🎉 Sukses!${C_RESET} ${C_BOLD}${branch}${C_RESET} ${C_DIM}(${HEAD_SHA})${C_RESET}"
-    echo -e "  ${C_BLUE}🔗 https://github.com/${USER}/${REPO}/tree/${branch}${C_RESET}"
+    echo -e "  ${C_BLUE}🔗 https://github.com/${REPO_OWNER}/${REPO}/tree/${branch}${C_RESET}"
     log_push_event "$branch" "OK" "$_log_msg" "$_log_files"
     local _btn_pbr='{"inline_keyboard":[[{"text":"🔗 Lihat Branch","url":"https://github.com/'"${USER}"'/'"${REPO}"'/tree/'"${branch}"'"},{"text":"📊 Commits","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commits/'"${branch}"'"}],[{"text":"🔀 Compare","url":"https://github.com/'"${USER}"'/'"${REPO}"'/compare"},{"text":"📥 Pull Request","url":"https://github.com/'"${USER}"'/'"${REPO}"'/pulls"}]]}'
+    local _log_msg_tg; _log_msg_tg=$(tg_linkify_commit "$_log_msg" "$(git rev-parse HEAD 2>/dev/null || echo '')")
     send_telegram_photo "https://w.wallhaven.cc/full/yj/wallhaven-yje2lk.png" "✅ <b>PUSH BERHASIL</b>
 ━━━━━━━━━━━━━━━━━━━━
 📁 <code>${USER}/${REPO}</code>
 🌿 Branch: <code>${branch}</code>
-📝 ${_log_msg}
+📝 ${_log_msg_tg}
 ${_push_detail}
 🕐 ${_tg_ts}" "$_btn_pbr"
+    auto_create_pr "$branch" "$_log_msg" &
     return 0
   fi
 
@@ -5992,17 +6469,19 @@ ${_push_detail}
     rm -f "$push_log"
     local _new_sha="${_new_commit:0:7}"
     echo -e "  ${C_GREEN}🎉 Sukses!${C_RESET} ${C_BOLD}${branch}${C_RESET} ${C_DIM}(${_new_sha} • histori terjaga)${C_RESET}"
-    echo -e "  ${C_BLUE}🔗 https://github.com/${USER}/${REPO}/tree/${branch}${C_RESET}"
+    echo -e "  ${C_BLUE}🔗 https://github.com/${REPO_OWNER}/${REPO}/tree/${branch}${C_RESET}"
     log_push_event "$branch" "OK(graft)" "$_log_msg" "$_log_files"
     local _btn_pgraft='{"inline_keyboard":[[{"text":"🔗 Lihat Branch","url":"https://github.com/'"${USER}"'/'"${REPO}"'/tree/'"${branch}"'"},{"text":"📊 Commits","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commits/'"${branch}"'"}],[{"text":"🔀 Compare","url":"https://github.com/'"${USER}"'/'"${REPO}"'/compare"},{"text":"📥 Pull Request","url":"https://github.com/'"${USER}"'/'"${REPO}"'/pulls"}]]}'
+    local _log_msg_tg_g; _log_msg_tg_g=$(tg_linkify_commit "$_log_msg" "${_new_commit:-}")
     send_telegram_photo "https://w.wallhaven.cc/full/yj/wallhaven-yje2lk.png" "✅ <b>PUSH BERHASIL</b>
 ━━━━━━━━━━━━━━━━━━━━
 📁 <code>${USER}/${REPO}</code>
 🌿 Branch: <code>${branch}</code>
-📝 ${_log_msg}
+📝 ${_log_msg_tg_g}
 ${_push_detail}
 ✔️ Histori remote tetap terjaga
 🕐 ${_tg_ts}" "$_btn_pgraft"
+    auto_create_pr "$branch" "$_log_msg" &
     return 0
   fi
 
@@ -6015,17 +6494,19 @@ ${_push_detail}
   if [ "$_force_rc" -eq 0 ]; then
     rm -f "$push_log"
     echo -e "  ${C_GREEN}🎉 Sukses!${C_RESET} ${C_BOLD}${branch}${C_RESET} ${C_DIM}(${HEAD_SHA})${C_RESET}"
-    echo -e "  ${C_BLUE}🔗 https://github.com/${USER}/${REPO}/tree/${branch}${C_RESET}"
+    echo -e "  ${C_BLUE}🔗 https://github.com/${REPO_OWNER}/${REPO}/tree/${branch}${C_RESET}"
     log_push_event "$branch" "OK(force)" "$_log_msg" "$_log_files"
     local _btn_pforce='{"inline_keyboard":[[{"text":"🔗 Lihat Branch","url":"https://github.com/'"${USER}"'/'"${REPO}"'/tree/'"${branch}"'"},{"text":"📊 Commits","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commits/'"${branch}"'"}],[{"text":"⚠️ Security","url":"https://github.com/'"${USER}"'/'"${REPO}"'/security"},{"text":"🔀 Compare","url":"https://github.com/'"${USER}"'/'"${REPO}"'/compare"}]]}'
+    local _log_msg_tg_f; _log_msg_tg_f=$(tg_linkify_commit "$_log_msg" "$(git rev-parse HEAD 2>/dev/null || echo '')")
     send_telegram_photo "https://w.wallhaven.cc/full/yj/wallhaven-yjr3kk.png" "⚡ <b>PUSH BERHASIL (FORCE)</b>
 ━━━━━━━━━━━━━━━━━━━━
 📁 <code>${USER}/${REPO}</code>
 🌿 Branch: <code>${branch}</code>
-📝 ${_log_msg}
+📝 ${_log_msg_tg_f}
 ${_push_detail}
 ⚠️ Force push — history lama ditimpa
 🕐 ${_tg_ts}" "$_btn_pforce"
+    auto_create_pr "$branch" "$_log_msg" &
     return 0
   fi
 
@@ -6041,12 +6522,12 @@ ${_push_detail}
     if [ -n "$unblock_url" ]; then
       echo -e "  ${C_BLUE}${unblock_url}${C_RESET}"
     else
-      echo -e "  ${C_DIM}Cek di: https://github.com/${USER}/${REPO}/security/secret-scanning${C_RESET}"
+      echo -e "  ${C_DIM}Cek di: https://github.com/${REPO_OWNER}/${REPO}/security/secret-scanning${C_RESET}"
     fi
     echo -e "  ${C_DIM}   Setelah allow → jalankan push.sh lagi, langsung bisa.${C_RESET}"
     echo ""
     local _tg_ts_secret; _tg_ts_secret=$(date '+%H:%M:%S %d %b %Y')
-    local _unblock_btn_url="${unblock_url:-https://github.com/${USER}/${REPO}/security/secret-scanning}"
+    local _unblock_btn_url="${unblock_url:-https://github.com/${REPO_OWNER}/${REPO}/security/secret-scanning}"
     local _btn_secret='{"inline_keyboard":[[{"text":"🔓 Allow Secret","url":"'"${_unblock_btn_url}"'"},{"text":"🔒 Secret Scanning","url":"https://github.com/'"${USER}"'/'"${REPO}"'/security/secret-scanning"}],[{"text":"🔑 Kelola Token","url":"https://github.com/settings/tokens"},{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"}]]}'
     send_telegram_photo "https://w.wallhaven.cc/full/e7/wallhaven-e7k68k.jpg" "🔐 <b>PUSH DITOLAK — SECRET SCANNING</b>
 ━━━━━━━━━━━━━━━━━━━━
@@ -6680,6 +7161,7 @@ action_delete_file_folder() {
         if [ "${#_msg}" -gt 200 ]; then
           _msg="chore: hapus ${ok_count} file/folder"
         fi
+        _msg=$(append_commit_no "$_msg")
         git commit -m "$_msg" --allow-empty >/dev/null 2>&1 || true
 
         echo -e "  ${C_CYAN}▸ Push ke ${C_RESET}${C_GREEN}${DEFAULT_BRANCH}${C_RESET}${C_CYAN}...${C_RESET}"
@@ -6986,6 +7468,7 @@ action_restore_deleted() {
       if [ "${#_msg_r}" -gt 200 ]; then
         _msg_r="revert: restore ${_ok_r} file/folder (dari ${_target_hash:0:7})"
       fi
+      _msg_r=$(append_commit_no "$_msg_r")
       git commit -m "$_msg_r" --allow-empty >/dev/null 2>&1 || true
 
       echo -e "  ${C_CYAN}▸ Push ke ${C_RESET}${C_GREEN}${DEFAULT_BRANCH}${C_RESET}${C_CYAN}...${C_RESET}"
@@ -7093,7 +7576,7 @@ action_releases_tags() {
       -H "Authorization: token ${TOKEN}" \
       -H "Accept: application/vnd.github+json" \
       -H "X-GitHub-Api-Version: 2022-11-28" \
-      "https://api.github.com/repos/${USER}/${REPO}/releases?per_page=20" 2>/dev/null)
+      "https://api.github.com/repos/${REPO_OWNER}/${REPO}/releases?per_page=20" 2>/dev/null)
 
     relogin_if_needed "$http" "ambil releases" || return
     if [ "$http" != "200" ]; then
@@ -7125,7 +7608,7 @@ action_releases_tags() {
         console.log('  #' + (i+1) + '  ' + badge + '  ' + r.tag_name);
         console.log('     Judul : ' + name);
         console.log('     Tanggal: ' + dt);
-        console.log('     URL   : https://github.com/${USER}/${REPO}/releases/tag/' + r.tag_name);
+        console.log('     URL   : https://github.com/${REPO_OWNER}/${REPO}/releases/tag/' + r.tag_name);
         console.log('');
       });
     " 2>/dev/null
@@ -7198,7 +7681,7 @@ action_releases_tags() {
       -H "Authorization: token ${TOKEN}" \
       -H "Accept: application/vnd.github+json" \
       -H "X-GitHub-Api-Version: 2022-11-28" \
-      "https://api.github.com/repos/${USER}/${REPO}/releases" \
+      "https://api.github.com/repos/${REPO_OWNER}/${REPO}/releases" \
       -d "$payload" 2>/dev/null)
 
     relogin_if_needed "$http" "buat release" || return
@@ -7248,7 +7731,7 @@ action_releases_tags() {
       -H "Authorization: token ${TOKEN}" \
       -H "Accept: application/vnd.github+json" \
       -H "X-GitHub-Api-Version: 2022-11-28" \
-      "https://api.github.com/repos/${USER}/${REPO}/releases?per_page=20" 2>/dev/null)
+      "https://api.github.com/repos/${REPO_OWNER}/${REPO}/releases?per_page=20" 2>/dev/null)
 
     if [ "$http" != "200" ]; then
       echo -e "  ${C_RED}❌ Gagal ambil releases (HTTP ${http})${C_RESET}"
@@ -7301,7 +7784,7 @@ action_releases_tags() {
       -H "Authorization: token ${TOKEN}" \
       -H "Accept: application/vnd.github+json" \
       -H "X-GitHub-Api-Version: 2022-11-28" \
-      "https://api.github.com/repos/${USER}/${REPO}/releases/${sel_id}" 2>/dev/null)
+      "https://api.github.com/repos/${REPO_OWNER}/${REPO}/releases/${sel_id}" 2>/dev/null)
 
     local _rt_ts; _rt_ts=$(TZ=Asia/Jakarta date '+%d %b %Y • %H:%M WIB' 2>/dev/null || date '+%d %b %Y • %H:%M')
     if [ "$del_http" = "204" ]; then
@@ -7332,7 +7815,7 @@ action_releases_tags() {
       -H "Authorization: token ${TOKEN}" \
       -H "Accept: application/vnd.github+json" \
       -H "X-GitHub-Api-Version: 2022-11-28" \
-      "https://api.github.com/repos/${USER}/${REPO}/tags?per_page=30" 2>/dev/null)
+      "https://api.github.com/repos/${REPO_OWNER}/${REPO}/tags?per_page=30" 2>/dev/null)
 
     if [ "$http" != "200" ]; then
       echo -e "  ${C_RED}❌ Gagal ambil tags (HTTP ${http})${C_RESET}"
@@ -7386,7 +7869,7 @@ action_releases_tags() {
       -H "Authorization: token ${TOKEN}" \
       -H "Accept: application/vnd.github+json" \
       -H "X-GitHub-Api-Version: 2022-11-28" \
-      "https://api.github.com/repos/${USER}/${REPO}/git/ref/heads/${DEFAULT_BRANCH}" 2>/dev/null)
+      "https://api.github.com/repos/${REPO_OWNER}/${REPO}/git/ref/heads/${DEFAULT_BRANCH}" 2>/dev/null)
 
     if [ "$sha_http" != "200" ]; then
       echo -e "  ${C_RED}❌ Gagal ambil SHA (HTTP ${sha_http})${C_RESET}"
@@ -7414,13 +7897,13 @@ action_releases_tags() {
       -H "Authorization: token ${TOKEN}" \
       -H "Accept: application/vnd.github+json" \
       -H "X-GitHub-Api-Version: 2022-11-28" \
-      "https://api.github.com/repos/${USER}/${REPO}/git/refs" \
+      "https://api.github.com/repos/${REPO_OWNER}/${REPO}/git/refs" \
       -d "{\"ref\":\"refs/tags/${tname}\",\"sha\":\"${sha}\"}" 2>/dev/null)
 
     local _rt_ts; _rt_ts=$(TZ=Asia/Jakarta date '+%d %b %Y • %H:%M WIB' 2>/dev/null || date '+%d %b %Y • %H:%M')
     if [ "$http" = "201" ]; then
       echo -e "  ${C_GREEN}✅ Tag ${C_BOLD}${tname}${C_RESET}${C_GREEN} berhasil dibuat!${C_RESET}"
-      echo -e "  ${C_BLUE}🔗 https://github.com/${USER}/${REPO}/releases/tag/${tname}${C_RESET}"
+      echo -e "  ${C_BLUE}🔗 https://github.com/${REPO_OWNER}/${REPO}/releases/tag/${tname}${C_RESET}"
       local _btn_tag='{"inline_keyboard":[[{"text":"🏷️ Lihat Tag","url":"https://github.com/'"${USER}"'/'"${REPO}"'/releases/tag/'"${tname}"'"},{"text":"📋 Semua Tags","url":"https://github.com/'"${USER}"'/'"${REPO}"'/tags"}],[{"text":"🚀 Buat Release","url":"https://github.com/'"${USER}"'/'"${REPO}"'/releases/new"},{"text":"📦 Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"}]]}'
       send_telegram_photo "https://w.wallhaven.cc/full/o5/wallhaven-o5l5j7.jpg" "🏷️ <b>TAG BARU DIBUAT</b>
 ━━━━━━━━━━━━━━━━━━━━
@@ -7453,7 +7936,7 @@ action_releases_tags() {
       -H "Authorization: token ${TOKEN}" \
       -H "Accept: application/vnd.github+json" \
       -H "X-GitHub-Api-Version: 2022-11-28" \
-      "https://api.github.com/repos/${USER}/${REPO}/tags?per_page=30" 2>/dev/null)
+      "https://api.github.com/repos/${REPO_OWNER}/${REPO}/tags?per_page=30" 2>/dev/null)
 
     if [ "$http" != "200" ]; then
       echo -e "  ${C_RED}❌ Gagal ambil tags (HTTP ${http})${C_RESET}"
@@ -7504,7 +7987,7 @@ action_releases_tags() {
       -H "Authorization: token ${TOKEN}" \
       -H "Accept: application/vnd.github+json" \
       -H "X-GitHub-Api-Version: 2022-11-28" \
-      "https://api.github.com/repos/${USER}/${REPO}/git/refs/tags/${sel_tag}" 2>/dev/null)
+      "https://api.github.com/repos/${REPO_OWNER}/${REPO}/git/refs/tags/${sel_tag}" 2>/dev/null)
 
     local _rt_ts; _rt_ts=$(TZ=Asia/Jakarta date '+%d %b %Y • %H:%M WIB' 2>/dev/null || date '+%d %b %Y • %H:%M')
     if [ "$del_http" = "204" ]; then
@@ -7876,7 +8359,7 @@ check_token_realtime() {
     [ "$TOKEN" = "__EXIT__" ] && exit 0
   done
 
-  REMOTE_URL="https://${USER}:${TOKEN}@github.com/${USER}/${REPO}.git"
+  REMOTE_URL="https://${REPO_OWNER}:${TOKEN}@github.com/${REPO_OWNER}/${REPO}.git"
   git remote set-url origin "$REMOTE_URL" 2>/dev/null || true
 
   printf "\n  \033[32m✅ Re-login berhasil! Melanjutkan...\033[0m\n"
@@ -7909,7 +8392,7 @@ relogin_if_needed() {
     [ "$TOKEN" = "__EXIT__" ] && exit 0
   done
 
-  REMOTE_URL="https://${USER}:${TOKEN}@github.com/${USER}/${REPO}.git"
+  REMOTE_URL="https://${REPO_OWNER}:${TOKEN}@github.com/${REPO_OWNER}/${REPO}.git"
   git remote set-url origin "$REMOTE_URL" 2>/dev/null || true
 
   printf "\n  \033[32m✅ Re-login berhasil! Operasi %s dapat diulang.\033[0m\n" "$context"

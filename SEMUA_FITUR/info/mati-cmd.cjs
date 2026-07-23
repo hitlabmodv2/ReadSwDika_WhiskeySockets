@@ -24,23 +24,57 @@
  */
 'use strict';
 
-async function handleMati({ hisoka, m, tolak, logCommand, _require, path }) {
+const CONFIRM_TIMEOUT_MS = 30_000; // 30 detik
+
+async function handleMati({ hisoka, m, tolak, logCommand, Button, pendingShutdownConfirm }) {
         if (!m.isOwner) return tolak(hisoka, m, '❌ Hanya owner yang bisa mematikan bot!');
-        const { shutdownBot } = _require(path.resolve('./SEMUA_FITUR/system/shutdown.cjs'));
-        await hisoka.sendMessage(m.from, {
-                text:
-                        `╔══════════════════════╗\n` +
-                        `║  ⛔  *B O T  M A T I*  ║\n` +
-                        `╚══════════════════════╝\n\n` +
-                        `🔴 Bot akan dimatikan sekarang!\n\n` +
-                        `⚙️ Dimatikan oleh: @${m.sender.split('@')[0]}\n` +
-                        `🕐 Waktu: ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })}\n\n` +
-                        `ℹ️ Untuk menjalankan bot kembali,\n` +
-                        `jalankan ulang dari Replit.`,
-                mentions: [m.sender]
-        }, { quoted: m });
-        logCommand(m, hisoka, m.command || 'mati');
-        shutdownBot(2000);
+
+        // Bersihkan pending lama milik sender ini (kalau ada)
+        const _old = pendingShutdownConfirm.get(m.sender);
+        if (_old?.timeout) clearTimeout(_old.timeout);
+
+        const _bodyText =
+                `╔══════════════════════╗\n` +
+                `║  ⛔  *K O N F I R M A S I*  ║\n` +
+                `╚══════════════════════╝\n\n` +
+                `⚠️ *Yakin ingin mematikan bot?*\n\n` +
+                `📌 Bot akan berhenti total.\n` +
+                `ℹ️ Untuk aktifkan kembali, jalankan\n` +
+                `ulang secara manual dari Replit.\n\n` +
+                `⚙️ Diminta oleh: @${m.sender.split('@')[0]}\n` +
+                `🕐 Waktu: ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })}\n\n` +
+                `> ⏳ _Konfirmasi dalam 30 detik atau otomatis batal._`;
+
+        let botMsgId = null;
+        try {
+                const _btn = new Button()
+                        .setBody(_bodyText)
+                        .setFooter('⚡ Wily Bot • Shutdown')
+                        .addReply('✅ Ya, Matikan Bot', '__mati_yes__')
+                        .addReply('❌ Tidak, Batal', '__mati_no__');
+                const _sent = await _btn.run(m.from, hisoka, m);
+                botMsgId = _sent?.key?.id || null;
+        } catch (_) {
+                // Fallback teks jika Button tidak didukung
+                await tolak(hisoka, m,
+                        _bodyText + `\n\n` +
+                        `✅ Balas \`ya\` untuk matikan\n` +
+                        `❌ Balas \`tidak\` untuk batal`
+                );
+        }
+
+        const _timeout = setTimeout(() => {
+                pendingShutdownConfirm.delete(m.sender);
+        }, CONFIRM_TIMEOUT_MS);
+
+        pendingShutdownConfirm.set(m.sender, {
+                type: 'mati',
+                expiresAt: Date.now() + CONFIRM_TIMEOUT_MS,
+                timeout: _timeout,
+                botMsgId,
+        });
+
+        logCommand(m, hisoka, 'mati');
 }
 
 module.exports = { handleMati };

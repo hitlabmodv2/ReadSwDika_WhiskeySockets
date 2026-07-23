@@ -1,16 +1,15 @@
 {
-  "botVersion": "V25",
-  "botNumber": "6289667923162",
+  "botVersion": "V26",
+  "botNumber": "",
   "browserDevice": {
-    "selected": "v4"
+    "selected": "v1"
   },
-  "pairedBrowserKey": "v4",
+  "pairedBrowserKey": "v1",
   "pairingCode": "WILYCODE",
   "jadibotPairingMode": "v2",
   "cekswTracking": true,
   "owners": [
-    "62896810084111",
-    "6289667923162",
+    "6285159438825",
     "6289688206739"
   ],
   "sticker": {
@@ -18,13 +17,13 @@
     "author": "Anda Siapa?"
   },
   "autoOnline": {
-    "enabled": true,
+    "enabled": false,
     "intervalSeconds": 15
   },
   "autoTyping": {
     "enabled": false,
-    "delaySeconds": 1,
-    "privateChat": true,
+    "delaySeconds": 30,
+    "privateChat": false,
     "groupChat": true
   },
   "autoRecording": {
@@ -87,7 +86,7 @@
     "enabled": false,
     "autoReply": true,
     "privateReply": false,
-    "scope": "gc",
+    "scope": "all",
     "persona": {
       "name": "WilyAI",
       "greeting": "Siap! WilyAI di sini ✨"
@@ -228,5 +227,22 @@
       "6289688206739@s.whatsapp.net": "safe",
       "6289667923162@s.whatsapp.net": "safe"
     }
+  },
+  "nekopoinotif": {
+    "groups": {
+      "120363383540766761@g.us": {
+        "enabled": true,
+        "diubahPada": 1784720131505
+      },
+      "120363192554714254@g.us": {
+        "enabled": false,
+        "diubahPada": 1784730444711
+      }
+    },
+    "categories": [
+      "hentai",
+      "2d-animation",
+      "3d-hentai"
+    ]
   }
 }

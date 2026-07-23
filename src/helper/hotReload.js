@@ -159,6 +159,7 @@ const WATCHED_FILES = [
     { key: 'cjs:getsw',        rel: 'SEMUA_FITUR/media/getsw.cjs',         type: 'cjs' },
     { key: 'cjs:audioconvert', rel: 'SEMUA_FITUR/media/audioconvert.cjs',  type: 'cjs' },
     { key: 'cjs:viewonce',     rel: 'SEMUA_FITUR/media/viewonce.cjs',      type: 'cjs' },
+    { key: 'cjs:anyvoice',     rel: 'SEMUA_FITUR/media/anyvoice.cjs',      type: 'cjs' },
     // Download
     { key: 'cjs:downloader',   rel: 'SEMUA_FITUR/download/downloader.cjs', type: 'cjs' },
     { key: 'cjs:hdvid',        rel: 'SEMUA_FITUR/download/hdvid.cjs',      type: 'cjs' },
@@ -180,6 +181,8 @@ const WATCHED_FILES = [
     { key: 'cjs:alqanime',     rel: 'SEMUA_FITUR/anime/alqanime.cjs',      type: 'cjs' },
     { key: 'cjs:alqanimeDl',   rel: 'SEMUA_FITUR/anime/alqanime-dl.cjs',   type: 'cjs' },
     { key: 'cjs:alqanimeMonitor',rel:'SEMUA_FITUR/anime/alqanime-monitor.cjs',type:'cjs'},
+    { key: 'cjs:nekopoi',        rel: 'SEMUA_FITUR/anime/nekopoi.cjs',         type: 'cjs' },
+    { key: 'cjs:nekopoinotif',   rel: 'SEMUA_FITUR/anime/nekopoi-monitor.cjs', type: 'cjs' },
     { key: 'cjs:animasu',      rel: 'SEMUA_FITUR/anime/animasu.cjs',       type: 'cjs' },
     { key: 'cjs:bluearchive',  rel: 'SEMUA_FITUR/anime/bluearchive.cjs',   type: 'cjs' },
     { key: 'cjs:cosplaytele',  rel: 'SEMUA_FITUR/anime/cosplaytele.cjs',   type: 'cjs' },
@@ -189,6 +192,7 @@ const WATCHED_FILES = [
     { key: 'cjs:kusonimePdf',  rel: 'SEMUA_FITUR/anime/kusonime-pdf.cjs',  type: 'cjs' },
     { key: 'cjs:tenorGif',     rel: 'SEMUA_FITUR/anime/tenor-gif.cjs',     type: 'cjs' },
     { key: 'cjs:nhentai',      rel: 'SEMUA_FITUR/anime/nhentai.cjs',       type: 'cjs' },
+    { key: 'cjs:hentaidad',    rel: 'SEMUA_FITUR/anime/hentaidad.cjs',     type: 'cjs' },
     { key: 'cjs:pixiv',        rel: 'SEMUA_FITUR/anime/pixiv.cjs',         type: 'cjs' },
     { key: 'cjs:pixivr18',     rel: 'SEMUA_FITUR/anime/pixivr18.cjs',      type: 'cjs' },
     // AI

@@ -38,7 +38,7 @@ import { createRequire } from 'module';
 const _require = createRequire(import.meta.url);
 const { jidNormalizedUser, toNumber, jidDecode, proto, isJidGroup, delay } = _require('@whiskeysockets/baileys');
 import { isPnUser } from '../../src/helper/socketCompat.js';
-import { getJadibotReadchat, getJadibotNumber, getJadibotEmojiMode } from '../../src/helper/jadibotSettings.js';
+import { getJadibotReadchat, getJadibotNumber, getJadibotEmojiMode, getJadibotAutoTyping, getJadibotAutoRecording } from '../../src/helper/jadibotSettings.js';
 
 import { telegram } from '../../src/helper/index.js';
 import { isNumber } from '../../src/helper/text.js';
@@ -207,46 +207,52 @@ export default async function (m, hisoka) {
                         }
                 }
 
-                if (!m.isOwner && !m.isBot && !m.status && m.message && m.type && m.type !== 'protocolMessage' && m.type !== 'reactionMessage') {
+                if (!m.key?.fromMe && !m.status && m.message && m.type && m.type !== 'protocolMessage' && m.type !== 'reactionMessage') {
                         const config = loadConfig();
-                        const autoTyping = config.autoTyping || {};
-                        const autoRecording = config.autoRecording || {};
-                        
-                        const isPrivate = isPnUser(m.from);
-                        const isGroup = isJidGroup(m.from);
-                        
-                        const shouldAutoType = autoTyping.enabled && 
-                                ((isPrivate && autoTyping.privateChat) || (isGroup && autoTyping.groupChat));
-                        
-                        const shouldAutoRecord = autoRecording.enabled && 
-                                ((isPrivate && autoRecording.privateChat) || (isGroup && autoRecording.groupChat));
-                        
-                        if (shouldAutoType || shouldAutoRecord) {
-                                (async () => {
-                                        try {
-                                                if (shouldAutoType && !shouldAutoRecord) {
-                                                        await hisoka.sendPresenceUpdate('composing', m.from);
-                                                        const delayMs = (autoTyping.delaySeconds || 5) * 1000;
-                                                        await delay(delayMs);
-                                                        await hisoka.sendPresenceUpdate('paused', m.from);
-                                                } else if (shouldAutoRecord && !shouldAutoType) {
-                                                        await hisoka.sendPresenceUpdate('recording', m.from);
-                                                        const delayMs = (autoRecording.delaySeconds || 5) * 1000;
-                                                        await delay(delayMs);
-                                                        await hisoka.sendPresenceUpdate('paused', m.from);
-                                                } else if (shouldAutoType && shouldAutoRecord) {
-                                                        await hisoka.sendPresenceUpdate('composing', m.from);
-                                                        const typingDelayMs = (autoTyping.delaySeconds || 5) * 1000;
-                                                        await delay(typingDelayMs);
-                                                        await hisoka.sendPresenceUpdate('recording', m.from);
-                                                        const recordingDelayMs = (autoRecording.delaySeconds || 5) * 1000;
-                                                        await delay(recordingDelayMs);
-                                                        await hisoka.sendPresenceUpdate('paused', m.from);
+                        // isPnUser cek @pn — tapi Baileys modern pakai @s.whatsapp.net untuk private
+                        // Fix: private = bukan grup DAN bukan status broadcast
+                        const isGroup   = isJidGroup(m.from);
+                        const isPrivate = !isGroup && m.from !== 'status@broadcast' && typeof m.from === 'string';
+
+                        // ── Auto Typing / Recording ─────────────────────────────────────────
+                        // Jadibot: skip di sini — sudah ditangani langsung di jadibot.js (pakai setting per-jadibot)
+                        // Bot utama: baca dari config.json
+                        if (hisoka.isMainBot !== false) {
+                                const autoTyping    = config.autoTyping    || {};
+                                const autoRecording = config.autoRecording || {};
+
+                                const shouldAutoType   = autoTyping.enabled   && ((isPrivate && autoTyping.privateChat)   || (isGroup && autoTyping.groupChat));
+                                const shouldAutoRecord = autoRecording.enabled && ((isPrivate && autoRecording.privateChat) || (isGroup && autoRecording.groupChat));
+
+                                // Skip typing/recording saat stealth mode aktif — mencegah bot flash online sendiri
+                                if ((shouldAutoType || shouldAutoRecord) && !hisoka.__stealthMode) {
+                                        (async () => {
+                                                try {
+                                                        // Tandai typing aktif → interval stealth skip kirim unavailable
+                                                        // agar delay tidak dipotong paksa oleh keepalive counter
+                                                        hisoka.__typingActive = (hisoka.__typingActive || 0) + 1;
+                                                        if (shouldAutoType && !shouldAutoRecord) {
+                                                                await hisoka.sendPresenceUpdate('composing', m.from);
+                                                                await delay((autoTyping.delaySeconds || 5) * 1000);
+                                                                await hisoka.sendPresenceUpdate('paused', m.from);
+                                                        } else if (shouldAutoRecord && !shouldAutoType) {
+                                                                await hisoka.sendPresenceUpdate('recording', m.from);
+                                                                await delay((autoRecording.delaySeconds || 5) * 1000);
+                                                                await hisoka.sendPresenceUpdate('paused', m.from);
+                                                        } else {
+                                                                await hisoka.sendPresenceUpdate('composing', m.from);
+                                                                await delay((autoTyping.delaySeconds || 5) * 1000);
+                                                                await hisoka.sendPresenceUpdate('recording', m.from);
+                                                                await delay((autoRecording.delaySeconds || 5) * 1000);
+                                                                await hisoka.sendPresenceUpdate('paused', m.from);
+                                                        }
+                                                } catch (err) {
+                                                        console.error('\x1b[31m[AutoTyping/Recording] Error:\x1b[39m', err.message);
+                                                } finally {
+                                                        hisoka.__typingActive = Math.max(0, (hisoka.__typingActive || 1) - 1);
                                                 }
-                                        } catch (err) {
-                                                console.error('\x1b[31m[AutoTyping/Recording] Error:\x1b[39m', err.message);
-                                        }
-                                })();
+                                        })();
+                                }
                         }
 
                         // ── Auto Read Chat (private only) ──────────────────────────────────
@@ -419,6 +425,14 @@ export default async function (m, hisoka) {
                                         const isCC = (e) => { const s = e?.message || String(e); return s.includes('Connection Closed') || s.includes('Connection closed') || s.includes('EPIPE') || s.includes('Socket closed'); };
                                         let retriedCount = 0;
                                         let lastResolve = null;
+                                        // Cek ulang setting mode SAAT INI — kalau sejak story ini masuk,
+                                        // reaksi sudah dimatikan (Read Only), retry jangan tetap kirim
+                                        // reaksi (data harus ikut kondisi realtime, bukan kondisi lama).
+                                        // Nilai ini juga dipakai buat kotak notif supaya akurat menampilkan
+                                        // Mode & Reaksi yang sebenarnya berlaku saat retry ini, bukan cuma
+                                        // label generik "Retry" yang bikin dikira ada reaksi padahal Read Only.
+                                        const retryShouldReact = storyConfig.autoReaction !== false;
+                                        let anyReacted = false;
                                         for (const miss of missed) {
                                                 try {
                                                         const mk = miss.receiptKeys || [];
@@ -429,10 +443,6 @@ export default async function (m, hisoka) {
                                                                 ]);
                                                         }
                                                         const mp = miss.resolvedPn;
-                                                        // Cek ulang setting mode SAAT INI — kalau sejak story ini masuk,
-                                                        // reaksi sudah dimatikan (Read Only), retry jangan tetap kirim
-                                                        // reaksi (data harus ikut kondisi realtime, bukan kondisi lama).
-                                                        const retryShouldReact = storyConfig.autoReaction !== false;
                                                         let retryEmoji = null;
                                                         if (retryShouldReact && !miss.reacted && mp && miss.messageKey) {
                                                                 retryEmoji = getRandomEmoji('status') || '❤️';
@@ -440,6 +450,7 @@ export default async function (m, hisoka) {
                                                                         { react: { key: miss.messageKey, text: retryEmoji } },
                                                                         { statusJidList: [jidNormalizedUser(hisoka.user.id), jidNormalizedUser(mp)] }
                                                                 ).catch(() => { retryEmoji = null; });
+                                                                if (retryEmoji) anyReacted = true;
                                                                 updateSwUserEntry(trackNumber, miss.id, { read: true, reacted: true, emoji: retryEmoji, retriedAt: new Date().toISOString() });
                                                         } else if (mk.length > 0) {
                                                                 updateSwUserEntry(trackNumber, miss.id, { read: true, retriedAt: new Date().toISOString() });
@@ -460,6 +471,8 @@ export default async function (m, hisoka) {
                                                         storyCount: getStoryCountToday(lastMiss.number || trackNumber),
                                                         resolve: lastResolve,
                                                         emojiMode: getMode(),
+                                                        mode: retryShouldReact ? 'Read+Reaction ✓' : 'Read Only 👁️',
+                                                        reaction: retryShouldReact ? (anyReacted ? 'Retry Berhasil ♻️' : 'Off ❌') : 'Off ❌',
                                                 });
                                         }
                                 }
@@ -798,7 +811,8 @@ ${m.text ? `<b>Caption :</b>\n\n${m.text}` : ''}`.trim();
                                         success: gsReactionSuccess ? 'Grup SW ✓' : (shouldReact ? 'Baca ✓' : 'Baca ✓'),
                                         reaction: shouldReact ? usedReaction : 'Off ❌',
                                         delaySeconds,
-                                        mode: `${mode} [📢 ${groupName}]`,
+                                        mode,
+                                        groupName,
                                         emojiMode: getMode(),
                                 });
 

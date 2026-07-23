@@ -232,7 +232,7 @@ function formatCosplayteleCaption(post, { imgIndex, imgTotal } = {}) {
     const link  = post.link  || '';
     const vidHint = post.hasVideos ? ` • ada video` : '';
     return `📸 *${title}*\n` +
-           `🖼️ ${imgIndex + 1}/${imgTotal}${vidHint}\n` +
+           `🖼️ _${imgIndex + 1}/${imgTotal}${vidHint}_\n` +
            `🔗 ${link}`;
 }
 
@@ -257,20 +257,20 @@ async function handleCosplay({ hisoka, m, query, tolak, logCommand, logError, _r
                 `╭─「 👘 *COSPLAYTELE SEARCH* 」\n` +
                 `│\n` +
                 `│ Cari foto & video cosplay dari\n` +
-                `│ cosplaytele.com secara realtime.\n` +
+                `│ _cosplaytele.com_ secara realtime.\n` +
                 `│\n` +
                 `│ *Format:*\n` +
-                `│ • ${pfx}cosplay <keyword>\n` +
-                `│ • ${pfx}cosplay random\n` +
+                `│ • \`${pfx}cosplay <keyword>\`\n` +
+                `│ • \`${pfx}cosplay random\`\n` +
                 `│\n` +
                 `│ *Contoh:*\n` +
-                `│ • ${pfx}cosplay mitsuri\n` +
-                `│ • ${pfx}cosplay rem re:zero\n` +
-                `│ • ${pfx}cosplay velma\n` +
-                `│ • ${pfx}cosplay random\n` +
+                `│ 1. \`${pfx}cosplay mitsuri\`\n` +
+                `│ 2. \`${pfx}cosplay rem re:zero\`\n` +
+                `│ 3. \`${pfx}cosplay velma\`\n` +
+                `│ 4. \`${pfx}cosplay random\`\n` +
                 `│\n` +
-                `│ ℹ️ Hasil dikirim sebagai album\n` +
-                `│    (foto + video terpisah).\n` +
+                `│ > ℹ️ Hasil dikirim sebagai *album*\n` +
+                `│ > _(foto + video terpisah)._\n` +
                 `╰──────────────────────`
             );
             return;
@@ -278,7 +278,7 @@ async function handleCosplay({ hisoka, m, query, tolak, logCommand, logError, _r
 
         if (isRandom) {
             await hisoka.sendMessage(m.from, { react: { text: '🎲', key: m.key } });
-            const loadMsg = await tolak(hisoka, m, `🎲 Mengambil cosplay *random* dari cosplaytele.com...`);
+            const loadMsg = await tolak(hisoka, m, `🎲 Mengambil cosplay *random* dari _cosplaytele.com_...`);
             try {
                 const post = await cosplayteleRandom();
                 if (loadMsg?.key) {
@@ -288,10 +288,10 @@ async function handleCosplay({ hisoka, m, query, tolak, logCommand, logError, _r
                 const caption0 =
                     `╭─「 🎲 *COSPLAY RANDOM* 」\n` +
                     `│ 📌 *${post.title.slice(0, 80)}*\n` +
-                    `│ 🖼️ ${post.totalImages} foto${vidInfo}\n` +
+                    `│ 🖼️ *${post.totalImages}* foto${vidInfo}\n` +
                     `│ 🔗 ${post.link}\n` +
                     `│\n` +
-                    `│ ℹ️ Mengirim ${post.images.length} foto...\n` +
+                    `│ > ℹ️ _Mengirim *${post.images.length}* foto..._\n` +
                     `╰──────────────────────`;
                 await tolak(hisoka, m, caption0);
                 await hisoka.sendMessage(m.from, { react: { text: '📸', key: m.key } });
@@ -300,7 +300,7 @@ async function handleCosplay({ hisoka, m, query, tolak, logCommand, logError, _r
                 }
                 if (post.hasVideos && post.cossoraIds?.length > 0) {
                     await hisoka.sendMessage(m.from, {
-                        text: `╭─「 🎬 *VIDEO COSPLAY* 」\n│ Tonton video dari post ini:\n│\n${post.cossoraIds.map((u, i) => `│ ${i + 1}. ${u}`).join('\n')}\n╰──────────────────────`,
+                        text: `╭─「 🎬 *VIDEO COSPLAY* 」\n│ _Tonton video dari post ini:_\n│\n${post.cossoraIds.map((u, i) => `│ ${i + 1}. ${u}`).join('\n')}\n╰──────────────────────`,
                     }, { quoted: m });
                 }
                 await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
@@ -312,13 +312,13 @@ async function handleCosplay({ hisoka, m, query, tolak, logCommand, logError, _r
                     try { await hisoka.sendMessage(m.from, { delete: loadMsg.key }); } catch (_) {}
                 }
                 await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } }).catch(() => {});
-                await tolak(hisoka, m, `❌ Gagal ambil cosplay random.\n_${err.message}_`);
+                await tolak(hisoka, m, `❌ *Gagal ambil cosplay random.*\n_${err.message}_`);
             }
             return;
         }
 
         await hisoka.sendMessage(m.from, { react: { text: '🔍', key: m.key } });
-        const loadMsg = await tolak(hisoka, m, `🔍 Mencari cosplay *"${input}"* di cosplaytele.com...`);
+        const loadMsg = await tolak(hisoka, m, `🔍 Mencari cosplay *"${input}"* di _cosplaytele.com_...`);
         const results = await cosplayteleSearch(input, { perPage: 8 });
         if (loadMsg?.key) {
             try { await hisoka.sendMessage(m.from, { delete: loadMsg.key }); } catch (_) {}
@@ -327,18 +327,18 @@ async function handleCosplay({ hisoka, m, query, tolak, logCommand, logError, _r
         const listText =
             `╭─「 👘 *COSPLAYTELE* 」\n` +
             `│ 🔍 Hasil: *"${input}"*\n` +
-            `│ Ditemukan ${results.length} post\n` +
+            `│ Ditemukan *${results.length}* post\n` +
             `│\n` +
             results.map((r, i) => {
                 const match = r.title.match(/(\d+\s*photos?\s*(?:and\s*\d+\s*videos?)?)/i);
-                const count = match ? ` [${match[1]}]` : '';
+                const count = match ? ` [\`${match[1]}\`]` : '';
                 const cleanTitle = r.title.replace(/"[^"]*"/g, '').replace(/\s{2,}/g, ' ').trim();
                 return `│ *${i + 1}.* ${cleanTitle.slice(0, 65)}${count}`;
             }).join('\n') + '\n' +
             `│\n` +
-            `│ 📩 *Balas pesan ini* dengan angka\n` +
-            `│    pilihan kamu (1–${results.length})\n` +
-            `│ ⏳ Menu berlaku 3 menit\n` +
+            `│ > 📩 *Balas pesan ini* dengan angka\n` +
+            `│ > pilihan kamu _(1–${results.length})_\n` +
+            `│ ⏳ Menu berlaku _3 menit_\n` +
             `╰──────────────────────`;
 
         const menuMsg = await tolak(hisoka, m, listText);

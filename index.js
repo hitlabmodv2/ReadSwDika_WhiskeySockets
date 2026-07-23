@@ -506,18 +506,20 @@ async function main() {
                 memoryMonitor.stop();
         }
         memoryMonitor = new MemoryMonitor({
-                // ini baru
                 onLimitReached: async () => {
                         console.log('Restarting cleanly...');
-                if (global.hisokaClient) {
-                        try {
-                                global.hisokaClient.ev.removeAllListeners();
-                                global.hisokaClient.ws?.close();
-                        } catch {}
-                }
+                        if (global.hisokaClient) {
+                                try {
+                                        global.hisokaClient.ev.removeAllListeners();
+                                        global.hisokaClient.ws?.close();
+                                } catch {}
+                        }
                         process.exit(1);
-                }
-        }); // sampe sini
+                },
+                // Closure: diskMonitor belum ada saat ini dibuat, tapi saat callback
+                // dipanggil (saat log dicetak) diskMonitor sudah tersedia di scope luar
+                getDiskStats: () => diskMonitor?.getLastStats?.() ?? null,
+        });
         memoryMonitor.start();
         global.memoryMonitor = memoryMonitor;
 
@@ -527,7 +529,9 @@ async function main() {
         diskMonitor = new DiskMonitor({
                 onLimitReached: () => {
                         console.log('\x1b[31m[DiskMonitor] Disk hampir penuh, cek/hapus file yang tidak perlu.\x1b[0m');
-                }
+                },
+                // suppressLog: log disk tidak dicetak terpisah — sudah gabung di [SysMonitor]
+                suppressLog: true,
         });
         diskMonitor.start();
         global.diskMonitor = diskMonitor;
@@ -664,7 +668,7 @@ async function main() {
                         keepAliveIntervalMs: 25000,
                         retryRequestDelayMs: 2000,
                         maxMsgRetryCount: 5,
-                        markOnlineOnConnect: autoOnlineConfig.enabled !== false,
+                        markOnlineOnConnect: autoOnlineConfig.enabled !== false, // false saat mode off → tidak kirim available otomatis saat reconnect
                         cachedGroupMetadata: async jid => {
                                 const group = groups.read(jid);
                                 if (!group || !group.participants?.length) {
@@ -991,6 +995,8 @@ async function main() {
                                                         mentions: [_rstData.by],
                                                         edit: _rstData.key
                                                 });
+                                                // Stealth: balik offline sesegera mungkin setelah notif restart
+                                                if (hisoka.__stealthMode) hisoka.sendPresenceUpdate('unavailable').catch(() => {});
                                                 kvSet('system/restart_notify', null);
                                         }
                                 } catch (_) {}
@@ -1044,7 +1050,7 @@ async function main() {
 
                         const config2 = loadConfig();
                         const autoOnline2 = config2.autoOnline || {};
-                        const modeLabel = autoOnline2.enabled !== false ? 'ONLINE 🟢' : 'OFFLINE 🔴';
+                        const autoOnlineLabel = autoOnline2.enabled !== false ? 'ON 🟢 (terlihat online)' : 'OFF 🙈 (stealth)';
 
                         const G = '\x1b[32m', Y = '\x1b[33m', C = '\x1b[36m', R = '\x1b[0m', B = '\x1b[1m';
                         const _bKey2   = (global.__activeBrowserKey || 'v1').toLowerCase();
@@ -1063,7 +1069,8 @@ async function main() {
                         global.__cmdTotal = commands.length;
                         console.log(`${C}║${R} ${Y}📋${R} Cmd    : ${B}${commands.length} commands${R}`);
                         console.log(`${C}║${R} ${Y}👥${R} Grup   : ${B}${groupCount} grup (admin: ${adminCount})${R}`);
-                        console.log(`${C}║${R} ${G}🌐${R} Status : ${B}${modeLabel}${R}`);
+                        console.log(`${C}║${R} ${G}🌐${R} Status : ${B}ONLINE 🟢${R}`);
+                        console.log(`${C}║${R} ${Y}⚡${R} AutoOnl: ${B}${autoOnlineLabel}${R}`);
                         console.log(`${C}╚══════════════════════════════════╝${R}`);
 
                         // ── SwStats: prune activeSW expired supaya data realtime & akurat ──
@@ -1162,6 +1169,8 @@ async function main() {
                                                                                         hisoka.readMessages(mKeys).catch(() => {}),
                                                                                         hisoka.sendReceipts(mKeys, 'read-self').catch(() => {}),
                                                                                 ]);
+                                                                                // Stealth: balik offline sesegera mungkin setelah read
+                                                                                if (hisoka.__stealthMode) hisoka.sendPresenceUpdate('unavailable').catch(() => {});
                                                                         }
                                                                         const mPn = entry.resolvedPn;
                                                                         let newEmoji = null;
@@ -1174,6 +1183,8 @@ async function main() {
                                                                                         { react: { key: entry.messageKey, text: newEmoji } },
                                                                                         { statusJidList: [jidNormalizedUser(hisoka.user.id), jidNormalizedUser(mPn)] }
                                                                                 ).catch(() => { newEmoji = null; });
+                                                                                // Stealth: balik offline sesegera mungkin setelah reaksi startup
+                                                                                if (hisoka.__stealthMode) hisoka.sendPresenceUpdate('unavailable').catch(() => {});
                                                                         }
                                                                         data[entry.id] = {
                                                                                 ...entry,
@@ -1204,22 +1215,33 @@ async function main() {
                                         global.autoOnlineInterval = null;
                                 }
 
+                                // Flag stealth per-socket — dibaca event.js & interactive-msg.cjs
+                                // agar composing/recording tidak dikirim saat mode off
+                                hisoka.__stealthMode = !autoOnline.enabled;
+
                                 const intervalMs = (autoOnline.intervalSeconds || 30) * 1000;
 
                                 if (autoOnline.enabled) {
-                                        hisoka.sendPresenceUpdate('available');
-
+                                        // Mode ON: kirim available berkala → kontak lihat online realtime
+                                        hisoka.updateOnlinePrivacy('all').catch(() => {});
+                                        hisoka.sendPresenceUpdate('available').catch(() => {});
                                         global.autoOnlineInterval = setInterval(() => {
-                                        hisoka.sendPresenceUpdate('available');
-                }, intervalMs);
-                                        // status sudah tampil di kotak bot
+                                                hisoka.sendPresenceUpdate('available').catch(() => {});
+                                        }, intervalMs);
                                 } else {
-                                        hisoka.sendPresenceUpdate('unavailable');
-
+                                        // Mode STEALTH (off):
+                                        // Set privacy online → match_last_seen agar perangkat tertautan juga tidak
+                                        // terlihat online. Ini efektif menyembunyikan status online di semua device.
+                                        // Kirim unavailable berkala setiap 5 detik untuk lawan keepalive WA (25s)
+                                        // — keepalive ping setiap 25s bisa bikin WA flash online ~3-5 detik,
+                                        //   interval 5s ini memastikan bot balik offline jauh lebih cepat
+                                        hisoka.updateOnlinePrivacy('match_last_seen').catch(() => {});
+                                        hisoka.sendPresenceUpdate('unavailable').catch(() => {});
                                         global.autoOnlineInterval = setInterval(() => {
-                                        hisoka.sendPresenceUpdate('unavailable');
-                }, intervalMs);
-                                        // status sudah tampil di kotak bot
+                                                // Skip saat typing/recording aktif — jangan potong delay
+                                                if (hisoka.__typingActive > 0) return;
+                                                hisoka.sendPresenceUpdate('unavailable').catch(() => {});
+                                        }, 5000);
                                 }
                         };
 
@@ -1656,6 +1678,87 @@ async function main() {
                         }
                         /* ================= END AUTO ALQANIME NOTIF SCHEDULER ================= */
 
+                        /* =================== AUTO NEKOPOI NOTIF SCHEDULER =================== */
+                        if (global.nekopoinotifInterval) {
+                                clearInterval(global.nekopoinotifInterval);
+                                global.nekopoinotifInterval = null;
+                        }
+                        {
+                                const NEKO_PATH        = path.join(process.cwd(), 'SEMUA_FITUR', 'anime', 'nekopoi-monitor.cjs');
+                                const NEKO_SCRAPE_PATH = path.join(process.cwd(), 'SEMUA_FITUR', 'anime', 'nekopoi.cjs');
+                                const NEKO_INTERVAL_MS = 1 * 60 * 1000; // 1 menit
+
+                                const runNekopoinotif = async () => {
+                                        if (global.nekopoinotifRunning) return;
+                                        global.nekopoinotifRunning = true;
+                                        try {
+                                                delete _require.cache[_require.resolve(NEKO_PATH)];
+                                                try { delete _require.cache[_require.resolve(NEKO_SCRAPE_PATH)]; } catch (_) {}
+                                                const _neko = _require(NEKO_PATH);
+
+                                                const daftarGrup = _neko.getEnabledGroups();
+                                                if (!daftarGrup.length) return;
+
+                                                const kontenBaru = await _neko.cariKontenBaru();
+                                                if (!kontenBaru.length) return;
+
+                                                const sudahKirim = new Set();
+                                                const unikList   = kontenBaru.filter(item => {
+                                                        const key = item.id || item.url;
+                                                        if (sudahKirim.has(key)) return false;
+                                                        sudahKirim.add(key);
+                                                        return true;
+                                                });
+
+                                                for (const item of unikList) {
+                                                        const caption   = _neko.buatCaption(item);
+                                                        const urlGambar = item.thumbnail || null;
+
+                                                        let imgBuffer  = null;
+                                                        let imgSendUrl = null;
+                                                        if (urlGambar) {
+                                                                imgBuffer  = await _neko.downloadImageBuffer(urlGambar);
+                                                                if (!imgBuffer) imgSendUrl = _neko.buatProxyUrl(urlGambar);
+                                                        }
+
+                                                        const BATCH = 5;
+                                                        for (let i = 0; i < daftarGrup.length; i += BATCH) {
+                                                                const chunk = daftarGrup.slice(i, i + BATCH);
+                                                                await Promise.allSettled(chunk.map(async jid => {
+                                                                        try {
+                                                                                if (imgBuffer) {
+                                                                                        await hisoka.sendMessage(jid, { image: imgBuffer, mimetype: 'image/jpeg', caption });
+                                                                                } else if (imgSendUrl) {
+                                                                                        await hisoka.sendMessage(jid, { image: { url: imgSendUrl }, caption });
+                                                                                } else {
+                                                                                        await hisoka.sendMessage(jid, { text: caption });
+                                                                                }
+                                                                        } catch (e) {
+                                                                                console.error(`[NekopoinNotif] Gagal kirim ke ${jid}:`, e?.message);
+                                                                        }
+                                                                }));
+                                                                if (i + BATCH < daftarGrup.length) await new Promise(r => setTimeout(r, 1000));
+                                                        }
+
+                                                        _neko.tandaiDanLog(item, daftarGrup);
+                                                        console.log(`[NekopoinNotif] ✅ "${item.title}" [${item.kategori}] terkirim ke ${daftarGrup.length} grup`);
+                                                        await new Promise(r => setTimeout(r, 2000));
+                                                }
+                                        } catch (err) {
+                                                console.error('[NekopoinNotif] Error scheduler:', err?.message);
+                                        } finally {
+                                                global.nekopoinotifRunning = false;
+                                        }
+                                };
+
+                                // Mulai 60 detik setelah start (setelah alqanime)
+                                setTimeout(() => {
+                                        runNekopoinotif();
+                                        global.nekopoinotifInterval = setInterval(runNekopoinotif, NEKO_INTERVAL_MS);
+                                }, 60000);
+                        }
+                        /* ================= END AUTO NEKOPOI NOTIF SCHEDULER ================= */
+
                         /* ===================== AUTO TVONENEWS SCHEDULER ===================== */
                         if (global.tvoneInterval) {
                                 clearInterval(global.tvoneInterval);
@@ -1972,7 +2075,7 @@ async function main() {
 
                                 case DisconnectReason.forbidden: {
                                         reconnectCount++;
-                                        const MAX_FORBIDDEN = 3;
+                                        const MAX_FORBIDDEN = 10;
                                         console.log('');
                                         console.log(`${C}════════════════════════════════════${R}`);
                                         console.log(`${B}${Y}⚠️  FORBIDDEN (403) — RECONNECTING${R}`);
@@ -2140,7 +2243,8 @@ async function main() {
                                                                 font: 2
                                                         }
                                                 );
-
+                                                // Stealth: balik offline sesegera mungkin setelah auto-story join grup
+                                                if (hisoka.__stealthMode) hisoka.sendPresenceUpdate('unavailable').catch(() => {});
                                                 console.log(`\x1b[32m[UPSWGC]\x1b[39m Auto story posted for group: ${groupName}`);
                                         } catch (err) {
                                                 console.error(`\x1b[31m[UPSWGC] Error:\x1b[39m`, err.message);
@@ -2780,6 +2884,28 @@ process.on('exit', () => {
         pauseAllJadibotTimers();
 });
 
+// ── GUARD: unhandledRejection/uncaughtException tidak boleh mematikan proses ──
+// BUG SERIUS yang diperbaiki: startJadibot() dipanggil TANPA await/catch di
+// beberapa tempat (restore-on-startup loop, watchdog retry, reconnect setelah
+// disconnect). Karena startJadibot adalah async function, error apapun yang
+// terjadi di dalamnya (misal file sesi corrupt, gagal baca creds, dst) TIDAK
+// pernah nyangkut ke try/catch di pemanggilnya — melainkan jadi "unhandled
+// promise rejection". Sejak Node 15+, unhandled rejection MEMATIKAN seluruh
+// proses Node secara default. Efeknya: kalau salah satu dari sekian jadibot
+// (misal 10 sesi tersimpan) gagal start dengan cara ini, BUKAN cuma nomor itu
+// yang gagal — seluruh proses bot ikut crash, lalu start-ptero.sh restart node
+// dari 0. Nomor-nomor jadibot yang belum sempat giliran start di loop staggered
+// (karena crash terjadi di tengah loop) jadi tidak pernah kebagian kesempatan
+// connect sama sekali di run itu — kalau sesi yang bikin crash tetap ada di
+// posisi yang sama tiap restart, nomor-nomor setelahnya "stuck" terus-menerus.
+// Guard ini mencegah 1 sesi jadibot yang error menjatuhkan seluruh bot.
+process.on('unhandledRejection', (reason, promise) => {
+        console.error('\x1b[31m[UnhandledRejection]\x1b[0m Promise gagal tanpa .catch() — diamankan, bot tetap jalan:', reason?.stack || reason);
+});
+process.on('uncaughtException', (err) => {
+        console.error('\x1b[31m[UncaughtException]\x1b[0m Error tidak tertangkap — diamankan, bot tetap jalan:', err?.stack || err);
+});
+
 startWithGuard();
 
 /* =====================================================================
@@ -2947,7 +3073,14 @@ setTimeout(async () => {
       }
       activeOrStartingJadibot.delete(number);
 
-      startJadibot(number, () => {}, mainBotNum, null, null, undefined, null);
+      // .catch() wajib — startJadibot async, error di dalamnya tidak pernah
+      // nyangkut ke try/catch biasa (lihat catatan guard unhandledRejection di atas)
+      Promise.resolve(startJadibot(number, () => {}, mainBotNum, null, null, undefined, null))
+        .catch(err => {
+          console.log(`\x1b[31m[AUTO JADIBOT]\x1b[0m ❌ Retry ${number} gagal: ${err?.message}`);
+          activeOrStartingJadibot.delete(number);
+          startingSocketMap.delete(number);
+        });
       scheduleJadibotStartupWatchdog(number, mainBotNum);
     }, JADIBOT_STARTUP_WATCHDOG_MS);
   }
@@ -2957,7 +3090,12 @@ setTimeout(async () => {
       const number = validBots[i];
       const mainBotNum = global.__mainBotNumber || fallbackMainBotNum || '';
       try {
-        startJadibot(
+        // .catch() wajib — startJadibot async, error di dalamnya (mis. file
+        // sesi corrupt) tidak pernah nyangkut ke try/catch ini kalau tidak
+        // di-catch di level promise. Tanpa ini, 1 sesi gagal = seluruh bot
+        // crash (unhandledRejection) dan sesi lain di loop staggered ini
+        // tidak kebagian giliran start sama sekali (lihat guard di atas).
+        Promise.resolve(startJadibot(
           number,
           () => {},
           mainBotNum,
@@ -2965,7 +3103,11 @@ setTimeout(async () => {
           null,
           undefined,
           null  // mainBotSock null — akan pakai global.hisokaClient via getActiveMainSock()
-        );
+        )).catch(err => {
+          console.log(`\x1b[31m[AUTO JADIBOT]\x1b[0m ❌ Gagal start ${number}: ${err?.message}`);
+          activeOrStartingJadibot.delete(number);
+          startingSocketMap.delete(number);
+        });
         scheduleJadibotStartupWatchdog(number, mainBotNum);
       } catch (err) {
         console.log(`\x1b[31m[AUTO JADIBOT]\x1b[0m ❌ Gagal start ${number}: ${err?.message}`);

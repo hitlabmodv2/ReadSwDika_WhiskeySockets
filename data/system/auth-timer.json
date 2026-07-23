@@ -1,12 +1,91 @@
 {
   "events": [
     {
-      "type": "qr_session_start",
-      "startAt": "2026-07-13T07:52:37.940Z",
-      "expireAt": "2026-07-13T07:55:37.940Z",
-      "durationSeconds": 180
+      "type": "connected",
+      "connectedAt": "2026-07-23T06:18:29.050Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-23T05:38:53.852Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-23T05:35:44.480Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-22T14:09:53.232Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-22T14:03:16.999Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-22T13:37:13.229Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-22T11:10:09.545Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-22T11:03:50.152Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-22T10:37:09.620Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-22T10:04:14.113Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-22T09:25:03.429Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-22T08:43:59.948Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-22T07:10:44.184Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-22T07:01:54.936Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-22T07:01:15.555Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-22T06:37:00.379Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-22T06:24:06.044Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-22T06:16:06.992Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-22T05:48:49.994Z"
+    },
+    {
+      "type": "pairing",
+      "code": "WILY-CODE",
+      "number": "6285159438825",
+      "startAt": "2026-07-22T05:48:28.150Z",
+      "expireAt": "2026-07-22T05:51:28.150Z",
+      "durationSeconds": 180,
+      "sessionExpireAt": "2026-07-22T05:51:28.150Z"
     }
   ],
-  "lastUpdated": "2026-07-13T07:52:37.941Z",
-  "sessionStart": "2026-07-13T07:52:37.941Z"
+  "lastUpdated": "2026-07-23T06:18:29.050Z",
+  "sessionStart": "2026-07-22T05:48:28.173Z"
 }

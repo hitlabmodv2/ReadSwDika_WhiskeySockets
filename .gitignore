@@ -6,7 +6,6 @@ vite.config.ts.*
 .upm
 tmp/
 bin/
-replit.md
 .local
 .cache
 .cache/
@@ -23,9 +22,9 @@ zipFile.zip
 *.zip
 *.pdf
 
+# Folder asset AI Replit — jangan di-push ke GitHub
+attached_assets/
 
-# Sessions — auth credentials, jangan pernah di-commit
-sessions/
 
 # Jadibot runtime data — jangan di-commit
 data_jadibot/
@@ -33,6 +32,8 @@ data_jadibot/
 .token
 .token.secret
 .repo.last
+.autopr
+.ruleset_*.ok
 
 # node_modules — exclude semua (install ulang via npm install)
 node_modules/
