@@ -1862,7 +1862,7 @@ function msgDirectReconnect(number) {
 }
 
 // ── Notif logout → ke OWNER (alert monitoring) ───────────────────────────────
-function msgOwnerLogout(number) {
+function msgOwnerLogout(number, savedLabel = '') {
   const cfg    = loadConfig()
   const ver    = cfg.botVersion || 'V25'
   const masked = maskNumber(number)
@@ -1888,6 +1888,11 @@ function msgOwnerLogout(number) {
     `━━━━━━━━━━━━━━━━━━━━━\n` +
     `${listPart}\n` +
     `━━━━━━━━━━━━━━━━━━━━━\n` +
+    (savedLabel
+      ? `💾 *Sisa waktu tersimpan:* _${savedLabel}_\n` +
+        `🔄 Ketik \`.jadibot ${number}\` → waktu otomatis dilanjutkan!\n\n` +
+        `━━━━━━━━━━━━━━━━━━━━━\n`
+      : '') +
     `💡 *Aktifkan Kembali:*\n` +
     `• Ketik \`.jadibot ${number}\` di chat bot\n\n` +
     `> _Notif otomatis — Wily Bot ${ver}_ 🤖`
