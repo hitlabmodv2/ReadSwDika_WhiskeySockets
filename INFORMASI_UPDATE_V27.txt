@@ -2,7 +2,7 @@
 _📅 Selasa, 22 Juli 2026_ 🌙
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V27*
-✨ *2 Fitur Baru*
+✨ *3 Fitur Baru*
 🐛 *1 Bug Fix*
 🚀 *1 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -22,6 +22,16 @@ _Di layar Edit Kategori, ada tombol keempat untuk balik ke layar ON/OFF tanpa pe
 2. Tap `🔙 Kembali` → bot cek status grup saat ini → tampilkan layar ON/OFF yang sesuai (Aktifkan atau Matikan)
 3. Bisa navigasi bolak-balik: ON/OFF → Edit Kategori → Kembali → Edit Kategori → dst
 > Tidak perlu ketik `.nekopoinotif` ulang setelah edit kategori
+
+*3. 💾 .jadibot — Sisa Waktu Tersimpan Otomatis Saat Logout*
+_Kalau jadibot logout paksa dari WhatsApp (hapus perangkat tertaut / logout otomatis), sisa waktu aktifnya tidak hilang — tersimpan otomatis dan dilanjutkan saat konek ulang._
+1. Bot logout paksa → sisa waktu (atau status Permanent) tersimpan di `data_jadibot/realtime.json`
+2. Notif logout ke user & owner sekarang menampilkan: `💾 Sisa waktu tersimpan: X jam — Konek ulang → waktu otomatis dilanjutkan!`
+3. Owner ketik `.jadibot 628xxx` tanpa durasi → bot otomatis pakai sisa waktu yang tersimpan
+4. Sebelum `startJadibot`, muncul notif konfirmasi: `💾 Sisa waktu tersimpan ditemukan! ⏳ Sisa: X — Bot akan melanjutkan dari sisa waktu tersebut`
+5. Setelah bot berhasil konek ulang → data tersimpan dibersihkan otomatis
+6. Kalau owner ketik `.jadibot 628xxx,2j` (ada durasi baru) → pakai durasi baru, abaikan sisa simpanan
+> Tidak ada lagi sisa waktu yang hangus sia-sia karena logout paksa
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🐛 *BUG FIX*

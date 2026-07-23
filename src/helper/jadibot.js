@@ -64,7 +64,7 @@ import { useSingleFileAuthState } from './authState.js'
 import JSONDB from '../db/json.js'
 import { cleanStaleSessionFiles } from './cleaner.js'
 import { logError } from '../db/errorLog.js'
-import { getJadibotAnticall, getJadibotAnticallvid, getJadibotNumber, getJadibotReadsw, getJadibotAutoOnline, getJadibotEmojis, getJadibotRandomEmoji, getJadibotAutoTyping, getJadibotAutoRecording, getJadibotReadchat, getJadibotEmojiMode } from './jadibotSettings.js'
+import { getJadibotAnticall, getJadibotAnticallvid, getJadibotNumber, getJadibotReadsw, getJadibotAutoOnline, getJadibotEmojis, getJadibotRandomEmoji, getJadibotAutoTyping, getJadibotAutoRecording, getJadibotReadchat, getJadibotEmojiMode, getJadibotAntidel } from './jadibotSettings.js'
 import { getHandler } from './hotReload.js'
 import { kvGet, kvSet } from '../db/datadb.js'
 
@@ -708,6 +708,44 @@ function removeJadibotExpiry(number) {
   if (data.bots[number]) {
     delete data.bots[number]
     saveJadibotRealtimeData(data)
+  }
+}
+
+// ── Simpan sisa waktu jadibot saat logout paksa (agar bisa dilanjutkan saat konek ulang) ──
+function saveLogoutRemainingMs(number) {
+  number = String(number || '').replace(/[^0-9]/g, '')
+  const data = loadJadibotRealtimeData()
+  const meta = data.bots[number]
+  if (!meta) return
+  if (!data.logoutSaved) data.logoutSaved = {}
+  const now = Date.now()
+  if (meta.permanent === true) {
+    data.logoutSaved[number] = { permanent: true, savedAt: now }
+  } else {
+    const remainingMs = Number(meta.expiresAt) - now
+    if (remainingMs <= 0) return // sudah expired, tidak perlu disimpan
+    data.logoutSaved[number] = { remainingMs, permanent: false, savedAt: now }
+  }
+  saveJadibotRealtimeData(data)
+  console.log(`[JADIBOT] 💾 Sisa waktu +${number} tersimpan (${meta.permanent ? 'Permanent' : formatRemainingTime(Number(meta.expiresAt) - now)})`)
+}
+
+// ── Ambil data sisa waktu yang tersimpan dari logout sebelumnya ──
+function getLogoutSavedMs(number) {
+  number = String(number || '').replace(/[^0-9]/g, '')
+  const data = loadJadibotRealtimeData()
+  if (!data.logoutSaved) return null
+  return data.logoutSaved[number] || null
+}
+
+// ── Hapus data sisa waktu setelah berhasil dipakai ──
+function clearLogoutSavedMs(number) {
+  number = String(number || '').replace(/[^0-9]/g, '')
+  const data = loadJadibotRealtimeData()
+  if (data.logoutSaved?.[number]) {
+    delete data.logoutSaved[number]
+    saveJadibotRealtimeData(data)
+    console.log(`[JADIBOT] 🗑️ Data sisa waktu tersimpan +${number} dibersihkan (sudah dipakai)`)
   }
 }
 
@@ -1637,7 +1675,7 @@ function msgDirectWelcome(number) {
   )
 }
 
-function msgLoggedOut(number, remainingList) {
+function msgLoggedOut(number, remainingList, savedLabel = '') {
   const masked = maskNumber(number)
   const now = new Date().toLocaleString('id-ID', {
     timeZone: 'Asia/Jakarta',
@@ -1666,13 +1704,18 @@ function msgLoggedOut(number, remainingList) {
     `━━━━━━━━━━━━━━━━━━━━━━\n` +
     `${listPart}\n\n` +
     `━━━━━━━━━━━━━━━━━━━━━━\n` +
+    (savedLabel
+      ? `💾 *Sisa waktu +${masked} tersimpan:* _${savedLabel}_\n` +
+        `🔄 Konek ulang → waktu otomatis dilanjutkan!\n\n` +
+        `━━━━━━━━━━━━━━━━━━━━━━\n`
+      : '') +
     `💡 *Aktifkan Kembali:*\n` +
     `• Ketik \`.jadibot ${number}\` di chat bot ini\n\n` +
     `> _Notif otomatis — Wily Bot ${ver}_ 🤖`
   )
 }
 
-function msgLoggedOutDirect(number) {
+function msgLoggedOutDirect(number, savedLabel = '') {
   const now = new Date().toLocaleString('id-ID', {
     timeZone: 'Asia/Jakarta',
     day: '2-digit', month: '2-digit', year: 'numeric',
@@ -1695,6 +1738,11 @@ function msgLoggedOutDirect(number) {
     `❌ *Fitur yang Berhenti:*\n` +
     `${buildJadibotFeatureStatus(number).stoppedFeaturesText}\n\n` +
     `━━━━━━━━━━━━━━━━━━━━━━\n` +
+    (savedLabel
+      ? `💾 *Sisa waktu tersimpan:* _${savedLabel}_\n` +
+        `🔄 Konek ulang → waktu otomatis dilanjutkan!\n\n` +
+        `━━━━━━━━━━━━━━━━━━━━━━\n`
+      : '') +
     `> 💡 _Hubungi owner untuk mengaktifkan kembali:_\n` +
     `📞 ${getOwnerContact()}\n\n` +
     `> _Notif otomatis — Wily Bot ${ver}_ 🤖`
@@ -1814,7 +1862,7 @@ function msgDirectReconnect(number) {
 }
 
 // ── Notif logout → ke OWNER (alert monitoring) ───────────────────────────────
-function msgOwnerLogout(number) {
+function msgOwnerLogout(number, savedLabel = '') {
   const cfg    = loadConfig()
   const ver    = cfg.botVersion || 'V25'
   const masked = maskNumber(number)
@@ -1840,6 +1888,11 @@ function msgOwnerLogout(number) {
     `━━━━━━━━━━━━━━━━━━━━━\n` +
     `${listPart}\n` +
     `━━━━━━━━━━━━━━━━━━━━━\n` +
+    (savedLabel
+      ? `💾 *Sisa waktu tersimpan:* _${savedLabel}_\n` +
+        `🔄 Ketik \`.jadibot ${number}\` → waktu otomatis dilanjutkan!\n\n` +
+        `━━━━━━━━━━━━━━━━━━━━━\n`
+      : '') +
     `💡 *Aktifkan Kembali:*\n` +
     `• Ketik \`.jadibot ${number}\` di chat bot\n\n` +
     `> _Notif otomatis — Wily Bot ${ver}_ 🤖`
@@ -2225,6 +2278,9 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
         setTimeout(() => expireJadibot(number, sendReply), 500)
       }
 
+      // Hapus data sisa waktu yang tersimpan dari logout sebelumnya (sudah berhasil konek ulang)
+      clearLogoutSavedMs(number)
+
       if (pairingTimeout.has(number)) {
         clearTimeout(pairingTimeout.get(number))
         pairingTimeout.delete(number)
@@ -2421,6 +2477,18 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
 
       /* ===== LOGOUT PAKSA DARI WHATSAPP ===== */
       if (reason === DisconnectReason.loggedOut) {
+        // Hitung sisa waktu SEBELUM dihapus, untuk ditampilkan di notif dan disimpan
+        const _logoutMeta = getJadibotExpiry(number)
+        let _savedRemainingLabel = ''
+        if (_logoutMeta) {
+          if (_logoutMeta.permanent === true) {
+            _savedRemainingLabel = 'Permanent ♾️'
+          } else {
+            const _rem = Number(_logoutMeta.expiresAt) - Date.now()
+            if (_rem > 0) _savedRemainingLabel = formatRemainingTime(_rem)
+          }
+        }
+
         // Hapus dari map DULU baru ambil sisa list (agar nomor ini tidak muncul di list)
         jadibotMap.delete(number)
         stopJadibotAutoOnline(number)
@@ -2430,6 +2498,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
         const _C = '\x1b[36m', _R2 = '\x1b[0m', _B2 = '\x1b[1m';
         console.log(`${_C}╠══════════════════════════════════╣${_R2}`);
         console.log(`${_C}║${_R2} 🚫 ${_B2}+${number}${_R2} LOGOUT PAKSA → sesi dihapus`);
+        if (_savedRemainingLabel) console.log(`${_C}║${_R2} 💾 Sisa waktu tersimpan: ${_savedRemainingLabel}`);
         console.log(`${_C}╚══════════════════════════════════╝${_R2}`);
 
         // Beri tahu owner via react ❌ (realtime)
@@ -2445,7 +2514,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
           if (_logoutSock) {
             try {
               await _logoutSock.sendMessage(`${number}@s.whatsapp.net`, {
-                text: msgLoggedOutDirect(number)
+                text: msgLoggedOutDirect(number, _savedRemainingLabel)
               })
               console.log(`[JADIBOT][V2] ✅ Notif logout terkirim ke +${number}`)
             } catch (e) {
@@ -2456,7 +2525,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
           // V1: kirim notif ke GC/owner
           const remainingList = [...jadibotMap.keys()]
           try {
-            await sendReply(msgLoggedOut(number, remainingList))
+            await sendReply(msgLoggedOut(number, remainingList, _savedRemainingLabel))
             console.log(`[JADIBOT][V1] ✅ Notif logout terkirim ke GC/owner`)
           } catch (e) {
             console.log(`[JADIBOT][V1] ⚠️ Gagal kirim notif logout ke GC: ${e?.message}`)
@@ -2467,7 +2536,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
           if (_logoutSockV1) {
             try {
               await _logoutSockV1.sendMessage(`${number}@s.whatsapp.net`, {
-                text: msgLoggedOutDirect(number)
+                text: msgLoggedOutDirect(number, _savedRemainingLabel)
               })
               console.log(`[JADIBOT][V1] ✅ Notif logout terkirim langsung ke +${number}`)
             } catch (e) {
@@ -2481,13 +2550,14 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
           await sendOwnerNotif(mainBotSock, msgOwnerLogout(number), [number])
         } catch {}
 
-        // BARU setelah notif terkirim: tutup socket & hapus sesi
+        // BARU setelah notif terkirim: simpan sisa waktu, tutup socket & hapus sesi
         cleanupSocket()
         setTimeout(() => {
           if (fs.existsSync(sessionDir)) {
             fs.rmSync(sessionDir, { recursive: true, force: true })
           }
           try { if (fs.existsSync(sessionFile)) fs.unlinkSync(sessionFile) } catch {}
+          saveLogoutRemainingMs(number) // ← simpan sisa waktu sebelum data expiry dihapus
           removeJadibotExpiry(number)
         }, 300)
         return
@@ -2926,6 +2996,10 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
         console.log(`[JADIBOT QR] ⚠️ ${number} tidak ada data expiry saat konek → sesi dihentikan (bukan permanent)`)
         setTimeout(() => expireJadibot(number, sendReply), 500)
       }
+
+      // Hapus data sisa waktu yang tersimpan dari logout sebelumnya (sudah berhasil konek ulang)
+      clearLogoutSavedMs(number)
+
       // ── Combined connection + expiry box (QR mode) ──
       {
         const _LC2 = '\x1b[36m', _LR2 = '\x1b[0m', _LB2 = '\x1b[1m'
@@ -3011,6 +3085,18 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
       }
 
       if (reason === DisconnectReason.loggedOut) {
+        // Hitung sisa waktu SEBELUM dihapus, untuk ditampilkan di notif dan disimpan
+        const _logoutMetaQR = getJadibotExpiry(number)
+        let _savedRemainingLabelQR = ''
+        if (_logoutMetaQR) {
+          if (_logoutMetaQR.permanent === true) {
+            _savedRemainingLabelQR = 'Permanent ♾️'
+          } else {
+            const _remQR = Number(_logoutMetaQR.expiresAt) - Date.now()
+            if (_remQR > 0) _savedRemainingLabelQR = formatRemainingTime(_remQR)
+          }
+        }
+
         jadibotMap.delete(number)
         stopJadibotAutoOnline(number)
         stopJadibotSwPrune(number)
@@ -3018,6 +3104,7 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
         const _C = '\x1b[36m', _R2 = '\x1b[0m', _B2 = '\x1b[1m';
         console.log(`${_C}╠══════════════════════════════════╣${_R2}`);
         console.log(`${_C}║${_R2} 🚫 ${_B2}+${number}${_R2} LOGOUT PAKSA → sesi dihapus`);
+        if (_savedRemainingLabelQR) console.log(`${_C}║${_R2} 💾 Sisa waktu tersimpan: ${_savedRemainingLabelQR}`);
         console.log(`${_C}╚══════════════════════════════════╝${_R2}`);
 
         // Beri tahu owner via react ❌ (realtime)
@@ -3033,7 +3120,7 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
           if (_logoutSockQR) {
             try {
               await _logoutSockQR.sendMessage(`${number}@s.whatsapp.net`, {
-                text: msgLoggedOutDirect(number)
+                text: msgLoggedOutDirect(number, _savedRemainingLabelQR)
               })
               console.log(`[JADIBOT QR][V2] ✅ Notif logout terkirim ke +${number}`)
             } catch (e) {
@@ -3044,19 +3131,20 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
           // V1: kirim notif ke GC/owner
           const remainingListQR = [...jadibotMap.keys()]
           try {
-            await sendReply(msgLoggedOut(number, remainingListQR))
+            await sendReply(msgLoggedOut(number, remainingListQR, _savedRemainingLabelQR))
             console.log(`[JADIBOT QR][V1] ✅ Notif logout terkirim ke GC/owner`)
           } catch (e) {
             console.log(`[JADIBOT QR][V1] ⚠️ Gagal kirim notif logout ke GC: ${e?.message}`)
           }
         }
 
-        // BARU hapus sesi setelah notif terkirim
+        // BARU hapus sesi setelah notif terkirim, simpan sisa waktu terlebih dulu
         setTimeout(() => {
           if (fs.existsSync(sessionDir)) {
             fs.rmSync(sessionDir, { recursive: true, force: true })
           }
           try { if (fs.existsSync(sessionFile)) fs.unlinkSync(sessionFile) } catch {}
+          saveLogoutRemainingMs(number) // ← simpan sisa waktu sebelum data expiry dihapus
           removeJadibotExpiry(number)
         }, 300)
         return
@@ -3429,5 +3517,8 @@ export {
   resumeAllJadibotTimers,
   restoreConnectedAtMap,
   reconnectingJadibot,
-  startingSocketMap
+  startingSocketMap,
+  saveLogoutRemainingMs,
+  getLogoutSavedMs,
+  clearLogoutSavedMs
 }

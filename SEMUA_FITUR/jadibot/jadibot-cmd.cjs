@@ -173,7 +173,7 @@ function getPhoneCountryInfo(number = '') {
     return { flag: '🌐', name: 'Tidak diketahui' };
 }
 
-async function handleJadibot({ hisoka, m, query, tolak, logCommand, isMainBot, path, fs, jadibotMap, parseJadibotDuration, startJadibot, maskNumber, getJadibotExpirySummary, scheduleJadibotExpiry, setPermanentJadibot, removeJadibotExpiry, ensureJadibotExpiry }) {
+async function handleJadibot({ hisoka, m, query, tolak, logCommand, isMainBot, path, fs, jadibotMap, parseJadibotDuration, startJadibot, maskNumber, getJadibotExpirySummary, scheduleJadibotExpiry, setPermanentJadibot, removeJadibotExpiry, ensureJadibotExpiry, getLogoutSavedMs, formatRemainingTime }) {
         if (!isMainBot(hisoka)) return;
         if (!m.isOwner) return;
 
@@ -388,6 +388,42 @@ async function handleJadibot({ hisoka, m, query, tolak, logCommand, isMainBot, p
 
         try { await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } }); } catch {}
 
+        // Cek apakah ada sisa waktu tersimpan dari logout sebelumnya
+        let finalDurationMs = durationInfo.ms;
+        let isResumedFromLogout = false;
+        let savedRemainingLabel = '';
+
+        if (getLogoutSavedMs && durationInfo.isDefault) {
+                const savedLogout = getLogoutSavedMs(number);
+                if (savedLogout) {
+                        if (savedLogout.permanent === true) {
+                                finalDurationMs = 'permanent';
+                                isResumedFromLogout = true;
+                                savedRemainingLabel = 'Permanent ♾️';
+                        } else if (savedLogout.remainingMs > 0) {
+                                finalDurationMs = savedLogout.remainingMs;
+                                isResumedFromLogout = true;
+                                savedRemainingLabel = formatRemainingTime ? formatRemainingTime(savedLogout.remainingMs) : `${Math.ceil(savedLogout.remainingMs / 60000)} menit`;
+                        }
+                }
+        }
+
+        // Notif ke owner/GC bahwa waktu jadibot dilanjutkan dari sisa sebelumnya
+        if (isResumedFromLogout) {
+                try {
+                        await tolak(hisoka, m,
+                                `╔══════════════════════╗\n` +
+                                `║   🔄  *J A D I B O T*  ║\n` +
+                                `╚══════════════════════╝\n\n` +
+                                `💾 *Sisa waktu tersimpan ditemukan!*\n` +
+                                `📱 +${maskNumber(number)}\n\n` +
+                                `⏳ Sisa waktu: *${savedRemainingLabel}*\n\n` +
+                                `✅ Bot akan melanjutkan dari sisa waktu tersebut\n` +
+                                `(bukan mulai dari awal)`
+                        );
+                } catch {}
+        }
+
         await startJadibot(
                 number,
                 async (msg) => {
@@ -405,7 +441,7 @@ async function handleJadibot({ hisoka, m, query, tolak, logCommand, isMainBot, p
                         } catch {}
                 },
                 null,
-                durationInfo.ms,
+                finalDurationMs,
                 hisoka,
                 async (emoji) => {
                         try { await hisoka.sendMessage(m.from, { react: { text: emoji, key: m.key } }); } catch {}
