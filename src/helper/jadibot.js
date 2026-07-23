@@ -118,6 +118,7 @@ const PAIRING_TIMEOUT_MS = 3 * 60 * 1000 // 3 menit
 const DEFAULT_JADIBOT_DURATION_MS = 24 * 60 * 60 * 1000
 const MAX_TIMER_MS = 2147483647
 const JADIBOT_DATA_PATH = path.join(process.cwd(), 'data_jadibot', 'realtime.json')
+const PENDING_EXPIRE_NOTIFS_PATH = path.join(process.cwd(), 'data_jadibot', 'pending_expire_notifs.json')
 fs.mkdirSync(path.join(process.cwd(), 'data_jadibot'), { recursive: true })
 const JADIBOT_EXPIRY_WARNING_THRESHOLDS = [
   { ms: 10 * 60 * 1000, label: '10 menit' },
@@ -711,6 +712,70 @@ function removeJadibotExpiry(number) {
   }
 }
 
+// ── Pending expire notif queue — kirim notif saat bot offline/restart ──
+// Saat expireJadibot dipanggil tapi main sock belum tersedia (bot belum konek),
+// simpan notif ke file ini. Saat bot connect, drain queue dan kirim semua.
+function savePendingExpireNotif(number, mode = 'v2') {
+  number = String(number || '').replace(/[^0-9]/g, '')
+  try {
+    let queue = []
+    if (fs.existsSync(PENDING_EXPIRE_NOTIFS_PATH)) {
+      try { queue = JSON.parse(fs.readFileSync(PENDING_EXPIRE_NOTIFS_PATH, 'utf-8')) } catch {}
+    }
+    if (!Array.isArray(queue)) queue = []
+    // Hindari duplikat
+    if (!queue.some(e => e.number === number)) {
+      queue.push({ number, mode, expiredAt: Date.now() })
+      fs.writeFileSync(PENDING_EXPIRE_NOTIFS_PATH, JSON.stringify(queue, null, 2), 'utf-8')
+      console.log(`[JADIBOT] 📥 Pending notif expired +${number} disimpan (akan dikirim saat bot konek)`)
+    }
+  } catch (e) {
+    console.log(`[JADIBOT] ⚠️ Gagal simpan pending notif untuk +${number}: ${e?.message}`)
+  }
+}
+
+async function drainPendingExpireNotifs(sock) {
+  if (!sock) return
+  if (!fs.existsSync(PENDING_EXPIRE_NOTIFS_PATH)) return
+  let queue = []
+  try {
+    queue = JSON.parse(fs.readFileSync(PENDING_EXPIRE_NOTIFS_PATH, 'utf-8'))
+  } catch { return }
+  if (!Array.isArray(queue) || !queue.length) return
+  // Hapus file dulu sebelum kirim (biar tidak re-drain saat crash di tengah)
+  try { fs.unlinkSync(PENDING_EXPIRE_NOTIFS_PATH) } catch {}
+  console.log(`[JADIBOT] 📤 Drain ${queue.length} pending notif expired...`)
+  const cfg = loadConfig()
+  const owners = (cfg.owners || []).map(n => String(n).replace(/[^0-9]/g, '')).filter(Boolean)
+  for (const entry of queue) {
+    const { number } = entry
+    // Kirim notif ke user jadibot
+    try {
+      let _jid = `${number}@s.whatsapp.net`
+      try {
+        const [_res] = await sock.onWhatsApp(`${number}@s.whatsapp.net`)
+        if (_res?.exists && _res?.jid) _jid = _res.jid
+      } catch {}
+      await sock.sendMessage(_jid, { text: msgJadibotExpired(number, true) })
+      console.log(`[JADIBOT] ✅ Pending notif expired terkirim ke +${number}`)
+    } catch (e) {
+      console.log(`[JADIBOT] ⚠️ Gagal kirim pending notif expired ke +${number}: ${e?.message}`)
+    }
+    await new Promise(r => setTimeout(r, 800))
+    // Kirim notif ke semua owner (kecuali kalau owner = user jadibot itu sendiri)
+    for (const ownerNum of owners) {
+      if (ownerNum === number) continue
+      try {
+        await sock.sendMessage(`${ownerNum}@s.whatsapp.net`, { text: msgOwnerExpired(number) })
+        console.log(`[JADIBOT][OWNER-NOTIF] ✅ Pending owner notif expired terkirim ke +${ownerNum}`)
+      } catch (e) {
+        console.log(`[JADIBOT][OWNER-NOTIF] ⚠️ Gagal kirim pending owner notif ke +${ownerNum}: ${e?.message}`)
+      }
+      await new Promise(r => setTimeout(r, 800))
+    }
+  }
+}
+
 // ── Simpan sisa waktu jadibot saat logout paksa (agar bisa dilanjutkan saat konek ulang) ──
 function saveLogoutRemainingMs(number) {
   number = String(number || '').replace(/[^0-9]/g, '')
@@ -866,7 +931,10 @@ async function expireJadibot(number, sendReply = null) {
   // Helper: resolve JID & kirim notif expired ke nomor user jadibot via main bot
   const _sendExpiredDirect = async () => {
     if (!_expireMainSock) {
-      console.log(`[JADIBOT] ⚠️ Main sock tidak tersedia, notif expired ke +${number} dilewati`)
+      // Sock belum tersedia (bot offline/restart) — simpan ke pending queue,
+      // akan dikirim otomatis saat bot konek kembali
+      console.log(`[JADIBOT] ⚠️ Main sock tidak tersedia, notif expired +${number} → pending queue`)
+      savePendingExpireNotif(number, expiryCfg.jadibotPairingMode || 'v2')
       return
     }
     try {
@@ -931,19 +999,22 @@ async function expireJadibot(number, sendReply = null) {
     global.autoStartedJadibot.delete(number)
   }
 
-  // Langkah 5: hapus data expiry dari JSON
-  removeJadibotExpiry(number)
+  // Langkah 5: hapus folder sesi + file json DULU (sync, sebelum hapus data)
+  // PENTING: urutan ini sengaja dibalik vs sebelumnya.
+  // Dulu: hapus data realtime.json → setTimeout 500ms → hapus folder
+  //   → kalau bot crash dalam 500ms: data hilang tapi folder masih ada → "orphan" di restart berikutnya
+  // Sekarang: hapus folder DULU (sync) → LALU hapus data dari realtime.json
+  //   → kalau crash di antara keduanya: folder sudah tiada, data masih ada → tidak orphan, tidak distart ulang karena folder tidak ada
+  try {
+    if (fs.existsSync(sessionDir)) fs.rmSync(sessionDir, { recursive: true, force: true })
+  } catch {}
+  try {
+    const _sf = sessionDir + '.json'
+    if (fs.existsSync(_sf)) fs.unlinkSync(_sf)
+  } catch {}
 
-  // Langkah 6: hapus folder sesi + file json (delay 500ms beri waktu socket close)
-  setTimeout(() => {
-    try {
-      if (fs.existsSync(sessionDir)) fs.rmSync(sessionDir, { recursive: true, force: true })
-    } catch {}
-    try {
-      const _sf = sessionDir + '.json'
-      if (fs.existsSync(_sf)) fs.unlinkSync(_sf)
-    } catch {}
-  }, 500)
+  // Langkah 6: hapus data expiry dari JSON (setelah folder sudah bersih)
+  removeJadibotExpiry(number)
 
   // Langkah 7: lepas guard setelah selesai
   setTimeout(() => {
@@ -3520,5 +3591,6 @@ export {
   startingSocketMap,
   saveLogoutRemainingMs,
   getLogoutSavedMs,
-  clearLogoutSavedMs
+  clearLogoutSavedMs,
+  drainPendingExpireNotifs
 }

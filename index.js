@@ -84,7 +84,7 @@ import { getPhoneRegion, formatPhoneWithRegion } from './src/helper/phoneRegion.
 import { ensureTmpDir, startAutoCleaner, stopAutoCleaner, restartAutoCleaner, cleanStaleSessionFiles } from './src/helper/cleaner.js'; // ini baru
 import { pruneSwStats } from './src/helper/swtrack.js';
 import { useSingleFileAuthState } from './src/helper/authState.js';
-import { startJadibot, jadibotMap, activeOrStartingJadibot, purgeExpiredJadibotSessions, getJadibotExpiry, formatRemainingTime, pauseAllJadibotTimers, resumeAllJadibotTimers, restoreConnectedAtMap, reconnectingJadibot, startingSocketMap } from './src/helper/jadibot.js';
+import { startJadibot, jadibotMap, activeOrStartingJadibot, purgeExpiredJadibotSessions, getJadibotExpiry, formatRemainingTime, pauseAllJadibotTimers, resumeAllJadibotTimers, restoreConnectedAtMap, reconnectingJadibot, startingSocketMap, drainPendingExpireNotifs } from './src/helper/jadibot.js';
 import { safeGetPNForLID } from './src/helper/socketCompat.js';
 import { saveViewOnceCache, cleanOldViewOnceCache, hasViewOnceCache } from './src/helper/voCache.js';
 // ini baru - yg bawah pindah ke sini
@@ -1248,6 +1248,10 @@ async function main() {
                         startAutoOnline();
                         global.startAutoOnline = startAutoOnline;
                         global.hisokaClient = hisoka;
+
+                        // Kirim pending notif expired yang tertunda saat bot offline/restart
+                        // (notif yang gagal terkirim karena sock belum ready saat expiry terjadi)
+                        setTimeout(() => drainPendingExpireNotifs(hisoka).catch(() => {}), 3000);
 
                         ensureTmpDir();
                         startAutoCleaner(6); // ini tambahan
