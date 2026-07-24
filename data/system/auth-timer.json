@@ -2,6 +2,14 @@
   "events": [
     {
       "type": "connected",
+      "connectedAt": "2026-07-24T12:06:45.943Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-24T12:06:12.395Z"
+    },
+    {
+      "type": "connected",
       "connectedAt": "2026-07-24T09:23:57.852Z"
     },
     {
@@ -191,21 +199,8 @@
     {
       "type": "connected",
       "connectedAt": "2026-07-22T06:16:06.992Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-22T05:48:49.994Z"
-    },
-    {
-      "type": "pairing",
-      "code": "WILY-CODE",
-      "number": "6285159438825",
-      "startAt": "2026-07-22T05:48:28.150Z",
-      "expireAt": "2026-07-22T05:51:28.150Z",
-      "durationSeconds": 180,
-      "sessionExpireAt": "2026-07-22T05:51:28.150Z"
     }
   ],
-  "lastUpdated": "2026-07-24T09:23:57.852Z",
+  "lastUpdated": "2026-07-24T12:06:45.944Z",
   "sessionStart": "2026-07-22T05:48:28.173Z"
 }

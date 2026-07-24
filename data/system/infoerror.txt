@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 24/07/2026, 08.58.31  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 24/07/2026, 12.07.35  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  Pixiv
+│  #001  —  NekopoinNotif
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [Pixiv] AI gagal: AI timeout
+│  [NekopoinNotif] Gagal kirim ke 120363383540766761@g.us: Connection Closed
 │
 │  DETAIL
-│  Sumber      : Pixiv
+│  Sumber      : NekopoinNotif
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 24/07/2026, 08.58.31
-│  Terakhir    : 24/07/2026, 08.58.31
+│  Pertama     : 24/07/2026, 12.07.35
+│  Terakhir    : 24/07/2026, 12.07.35
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [Pixiv] AI gagal: AI timeout
+│  ▶  Error: [NekopoinNotif] Gagal kirim ke 120363383540766761@g.us: Connection Closed
 │     at console.error (file:///home/runner/workspace/index.js:434:27)
-│     at analyzeIllustration (/home/runner/workspace/SEMUA_FITUR/anime/pixiv.cjs:56:17)
+│     at file:///home/runner/workspace/index.js:1744:89
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 24/07/2026, 08.58.31
+  Terakhir diperbarui: 24/07/2026, 12.07.35
 ════════════════════════════════════════════════════════════════════════
