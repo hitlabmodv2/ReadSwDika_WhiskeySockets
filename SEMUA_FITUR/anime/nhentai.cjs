@@ -73,7 +73,9 @@ function detectCdnExt(html) {
 }
 
 function detectCoverUrl(html) {
-    const m = html.match(/data-src="(https?:\/\/[^"]+\/galleries\/\d+\/cover\.[^"]+)"/);
+    // nhentai.to sekarang pakai src= bukan data-src= untuk cover
+    const m = html.match(/src="(https?:\/\/[^"]+\/galleries\/\d+\/cover\.[^"]+)"/) ||
+              html.match(/data-src="(https?:\/\/[^"]+\/galleries\/\d+\/cover\.[^"]+)"/);
     return m ? m[1] : null;
 }
 
@@ -81,7 +83,11 @@ function scrapeExtraInfo(html) {
     const likeMatch = html.match(/like-count[^>]*>(\d+)/);
     const likes = likeMatch ? parseInt(likeMatch[1]) : 0;
 
-    const favMatch = html.match(/Favorite \((\d+)\)/);
+    // Pattern favorites berubah di nhentai.to — coba beberapa pattern sekaligus
+    const favMatch = html.match(/data-count="(\d+)"[^>]*class="[^"]*fav/) ||
+                     html.match(/class="[^"]*fav[^"]*"[^>]*data-count="(\d+)"/) ||
+                     html.match(/>(\d+)<\/span>\s*Favorit/i) ||
+                     html.match(/Favorite\s*\((\d+)\)/);
     const favorites = favMatch ? parseInt(favMatch[1]) : 0;
 
     const fallbackMatch = html.match(/data-fallbacks="([^"]+)"/);
@@ -181,11 +187,31 @@ async function nhentaiGallery(id) {
 }
 
 async function nhentaiRandom() {
-    const html = await fetchHtml(`${BASE}/go`);
-    const ids = [...new Set([...html.matchAll(/href="\/g\/(\d+)\/"/g)].map(x => x[1]))];
-    if (!ids.length) throw new Error('Tidak ada gallery di halaman /go');
-    const picked = ids[Math.floor(Math.random() * ids.length)];
-    return nhentaiGallery(picked);
+    // Gunakan /random/ yang redirect langsung ke gallery acak
+    // Tangkap URL akhir setelah redirect untuk ambil ID-nya
+    let finalId = null;
+    try {
+        const res = await axios.get(`${BASE}/random/`, {
+            headers: HEADERS, timeout: 20000, maxRedirects: 10,
+        });
+        const finalUrl = res.request?.res?.responseUrl || res.request?.responseURL || '';
+        const mUrl = finalUrl.match(/\/g\/(\d+)/);
+        if (mUrl) {
+            finalId = mUrl[1];
+        } else {
+            // Fallback: parse ID dari halaman yang dikembalikan
+            const ids = [...new Set([...res.data.matchAll(/href="\/g\/(\d+)\/"/g)].map(x => x[1]))];
+            if (ids.length) finalId = ids[Math.floor(Math.random() * ids.length)];
+        }
+    } catch (_) {
+        // Fallback ke homepage jika /random/ gagal
+        const html = await fetchHtml(`${BASE}/`);
+        const ids = [...new Set([...html.matchAll(/href="\/g\/(\d+)\/"/g)].map(x => x[1]))];
+        if (!ids.length) throw new Error('Tidak ada gallery random tersedia');
+        finalId = ids[Math.floor(Math.random() * ids.length)];
+    }
+    if (!finalId) throw new Error('Tidak bisa mendapatkan ID gallery random');
+    return nhentaiGallery(finalId);
 }
 
 async function nhentaiCover(gallery) {
