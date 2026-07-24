@@ -2485,6 +2485,10 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
 
       // Kirim pesan sambutan hanya saat fresh pairing (bukan reconnect otomatis)
       if (isFreshPairing) {
+        // Tandai sekarang supaya SEMUA reconnect berikutnya (termasuk yang pertama)
+        // tidak pernah kirim notif "JADIBOT ONLINE" lagi.
+        markJadibotReconnectNotified(number)
+
         try { if (reactFn) await reactFn('✅') } catch {}
 
         // Cek mode pairing — v2 = kirim welcome ke nomor tujuan, v1 = tidak
@@ -2538,31 +2542,16 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
         }
       }
 
-      // Notif realtime ke semua owner di config.owners[] — fresh pairing & reconnect
-      // Untuk reconnect: hanya kirim sekali (saat pertama kali reconnect setelah pairing).
-      // Reconnect berikutnya (misal bot restart ulang) tidak kirim notif lagi.
-      const _reconnectAlreadyNotified = !isFreshPairing && isJadibotReconnectNotified(number)
-      if (!_reconnectAlreadyNotified) {
+      // Notif realtime ke semua owner di config.owners[] — hanya saat fresh pairing.
+      // Reconnect otomatis tidak kirim notif (flag reconnectNotifiedAt sudah di-set
+      // saat pairing pertama berhasil, sehingga isJadibotReconnectNotified() = true
+      // di semua reconnect berikutnya).
+      if (isFreshPairing) {
         try {
-          await sendOwnerNotif(mainBotSock, msgOwnerConnected(number, !isFreshPairing), [number])
+          await sendOwnerNotif(mainBotSock, msgOwnerConnected(number, false), [number])
         } catch {}
       }
-
-      // Reconnect: kirim notif langsung ke user jadibot (teks beda dari owner)
-      // Hanya dikirim SEKALI — saat pertama kali reconnect setelah pairing awal.
-      if (!isFreshPairing && !_reconnectAlreadyNotified) {
-        try {
-          const _sentRecon = await sendDirectToUser(mainBotSock, number, msgDirectReconnect(number))
-          // Fallback via self-sock jika main bot tidak bisa kirim
-          if (!_sentRecon) {
-            await delay(300)
-            await sendDirectJadibotNotice(sock, number, msgDirectReconnect(number))
-            console.log(`[JADIBOT][RECONNECT][FALLBACK] ✅ Notif reconnect via self-sock ke +${number}`)
-          }
-        } catch {}
-        // Tandai sudah dikirim — reconnect berikutnya tidak akan kirim notif lagi
-        markJadibotReconnectNotified(number)
-      }
+      // Reconnect: notif ke user & owner di-skip sepenuhnya — tidak ada notif reconnect.
     }
 
     /* ===== DISCONNECTED ===== */
