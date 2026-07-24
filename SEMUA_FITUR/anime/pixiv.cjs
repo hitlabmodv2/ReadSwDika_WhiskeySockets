@@ -33,25 +33,39 @@
 'use strict';
 
 const axios = require('axios');
-const { gemini } = require('../ai/gemini.cjs');
 
-const AI_PROMPT = `Analisis ilustrasi anime/manga ini.
-Identifikasi 3 hal: 1) karakter (nama & seri kalau dikenali), 2) gaya seni, 3) suasana/detail menonjol.
-
-WAJIB jawab dalam Bahasa Indonesia, SANGAT singkat (max 3 baris), persis format ini:
-🎭 Karakter: <nama> (<seri>) atau "Tidak dikenali"
-🎨 Gaya: <art style singkat, max 8 kata>
-✨ Detail: <suasana/detail menonjol, max 12 kata>
-
-Hanya 3 baris itu. Jangan tambah kalimat lain.`;
-
-async function analyzeIllustration(buffer) {
+// Analisis pakai metadata (title + tags + author) via API teks — tidak perlu kirim gambar
+// Retry otomatis 3x dengan jeda, fallback endpoint gemini-flash jika gemini gagal
+const AI_ENDPOINTS = [
+    'https://api.alwayscodex.my.id/api/ai/gemini',
+    'https://api.alwayscodex.my.id/api/ai/gemini-flash',
+];
+async function analyzeIllustration({ title, tags, author } = {}) {
     try {
-        const result = await Promise.race([
-            gemini.analyzeImage(buffer, AI_PROMPT),
-            new Promise((_, rej) => setTimeout(() => rej(new Error('AI timeout')), 20000)),
-        ]);
-        return String(result || '').trim();
+        const tagStr = (tags || []).slice(0, 8).join(', ');
+        const prompt =
+            `Judul: ${title || '-'}. Artist: ${author || '-'}. Tags: ${tagStr || '-'}.\n` +
+            `Berikan analisis singkat WAJIB dalam Bahasa Indonesia, persis 3 baris format ini:\n` +
+            `🎭 Karakter: <nama> (<seri>) atau "Tidak dikenali"\n` +
+            `🎨 Gaya: <art style singkat, max 8 kata>\n` +
+            `✨ Detail: <suasana/detail menonjol, max 12 kata>\n` +
+            `Hanya 3 baris itu. Jangan tambah kalimat lain.`;
+        const encoded = encodeURIComponent(prompt);
+
+        for (const ep of AI_ENDPOINTS) {
+            for (let attempt = 0; attempt < 2; attempt++) {
+                try {
+                    if (attempt > 0) await new Promise(r => setTimeout(r, 1200 * attempt));
+                    const res = await Promise.race([
+                        fetch(`${ep}?teks=${encoded}`),
+                        new Promise((_, rej) => setTimeout(() => rej(new Error('AI timeout')), 12000)),
+                    ]);
+                    const json = await res.json();
+                    if (json?.status && json?.result) return String(json.result).trim();
+                } catch (_) {}
+            }
+        }
+        return null;
     } catch (e) {
         console.error('[Pixiv] AI gagal:', e.message);
         return null;
@@ -174,7 +188,7 @@ async function pixivFetch(query, { safe = true, index = 0 } = {}) {
     const pick = results[index % results.length];
     const data = await fetchOnePick(pick);
     data.totalResults = results.length;
-    data.aiInfo = await analyzeIllustration(data.buffer);
+    data.aiInfo = await analyzeIllustration(data);
     return data;
 }
 
@@ -192,7 +206,7 @@ async function pixivFetchMultiple(query, { safe = true, count = 3 } = {}) {
 
     if (!successful.length) throw new Error('Gagal mengunduh semua gambar dari Pixiv.');
 
-    const aiResults = await Promise.all(successful.map(s => analyzeIllustration(s.buffer)));
+    const aiResults = await Promise.all(successful.map(s => analyzeIllustration(s)));
     successful.forEach((s, i) => { s.aiInfo = aiResults[i]; });
 
     return successful;

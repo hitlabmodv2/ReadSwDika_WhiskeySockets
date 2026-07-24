@@ -188,6 +188,23 @@ function isNoSpaceError(error) {
     return code === 'ENOSPC' || msg.includes('no space left') || msg.includes('enospc');
 }
 
+// Deteksi error "socket mati" — terjadi saat jadibot logout tapi masih ada pesan di queue
+// Contoh: not-acceptable (406), EPIPE, Connection Closed, dsb.
+// Jika ini terjadi, jangan log sebagai error besar & jangan coba reply (socket sudah mati)
+function isDeadSocketError(error) {
+    if (!error) return false;
+    const msg = (error.message || String(error)).toLowerCase();
+    const statusCode = error?.output?.statusCode ?? error?.data?.statusCode ?? 0;
+    return statusCode === 406
+        || msg === 'not-acceptable'
+        || msg.includes('not-acceptable')
+        || msg.includes('connection closed')
+        || msg.includes('socket closed')
+        || msg.includes('epipe')
+        || msg.includes('stream closed')
+        || msg.includes('websocket closed');
+}
+
 async function cleanupWritePressure() {
     try {
         await clearTmpFolder();
@@ -199,7 +216,11 @@ async function cleanupWritePressure() {
 
 async function getUserProfilePictureUrl(hisoka, jid) {
     try {
-        return await hisoka.profilePictureUrl(jid, 'image');
+        // Beri timeout 4 detik — tanpa ini bisa hang lama dan .menu tidak merespon
+        return await Promise.race([
+            hisoka.profilePictureUrl(jid, 'image'),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('pp_timeout')), 4000)),
+        ]);
     } catch (_) {
         return null;
     }
@@ -372,6 +393,16 @@ export default async function ({ message, type: messagesType }, hisoka) {
                 m = await injectMessage(hisoka, message);
 
                 if (!m || !m.message) return;
+
+                // Guard: jika ini jadibot socket tapi sudah logout dari jadibotMap → skip
+                // Mencegah pesan yang sudah masuk queue diproses setelah socket mati
+                if (hisoka?.isMainBot === false) {
+                        const _jbNum = typeof getJadibotNumber === 'function' ? getJadibotNumber(hisoka) : null;
+                        if (_jbNum && !jadibotMap.has(_jbNum)) return;
+                        // Tambahan: cek ws.readyState — 1 = OPEN, selain itu socket sudah mati
+                        const _wsState = hisoka?.ws?.readyState;
+                        if (typeof _wsState === 'number' && _wsState !== 1) return;
+                }
 
                 // Blokir semua pesan dari channel/saluran WhatsApp — bot tidak merespons di saluran
                 if (m.from?.endsWith('@newsletter')) return;
@@ -1232,7 +1263,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'nhentai':
                         case 'nh': {
                                 const { handleNh } = _require(path.resolve('./SEMUA_FITUR/anime/nhentai.cjs'));
-                                await handleNh({ hisoka, m, query, tolak, logError, _require, path });
+                                await handleNh({ hisoka, m, query, tolak, logCommand, logError, _require, path });
                                 break;
                         }
                         case 'nhrand': {
@@ -1860,7 +1891,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                         case 'jadibot1': {
                                 const { handleJadibot } = _require(path.resolve('./SEMUA_FITUR/jadibot/jadibot-cmd.cjs'));
-                                await handleJadibot({ hisoka, m, query, tolak, logCommand, isMainBot, path, fs, jadibotMap, parseJadibotDuration, startJadibot, maskNumber, getJadibotExpirySummary, scheduleJadibotExpiry, setPermanentJadibot, removeJadibotExpiry, ensureJadibotExpiry, getLogoutSavedMs, formatRemainingTime });
+                                await handleJadibot({ hisoka, m, query, tolak, logCommand, isMainBot, path, fs, jadibotMap, parseJadibotDuration, startJadibot, maskNumber, getJadibotExpirySummary, getJadibotExpiry, scheduleJadibotExpiry, setPermanentJadibot, removeJadibotExpiry, ensureJadibotExpiry, getLogoutSavedMs, formatRemainingTime });
                                 break;
                         }
 
@@ -2074,6 +2105,15 @@ export default async function ({ message, type: messagesType }, hisoka) {
         } catch (error) {
                 const errMsg = error?.message || String(error);
                 const cmdSrc = `command:${m?.command || '?'}`;
+
+                // Jika error karena socket mati (not-acceptable, EPIPE, dll):
+                // — Jangan log sebagai error besar (bukan bug kode, hanya race condition logout)
+                // — Jangan coba kirim reply (socket sudah mati, akan error lagi)
+                if (isDeadSocketError(error)) {
+                        console.warn(`\x1b[33m[Handler] Socket mati saat proses command "${m?.command || '?'}" → ${errMsg} (diabaikan)\x1b[39m`);
+                        return;
+                }
+
                 console.error(`\x1b[31m[Handler] Error on command "${m?.command || '?'}":\x1b[39m`, errMsg);
                 if (isNoSpaceError(error)) cleanupWritePressure();
                 logError(error, cmdSrc);

@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 23/07/2026, 06.43.13  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 24/07/2026, 08.58.31  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  console.error
+│  #001  —  Pixiv
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [31m[HotReload] ✗ Gagal reload 'message.js', pakai versi lama.[39m
+│  [Pixiv] AI gagal: AI timeout
 │
 │  DETAIL
-│  Sumber      : console.error
+│  Sumber      : Pixiv
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 23/07/2026, 06.43.13
-│  Terakhir    : 23/07/2026, 06.43.13
+│  Pertama     : 24/07/2026, 08.58.31
+│  Terakhir    : 24/07/2026, 08.58.31
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [31m[HotReload] ✗ Gagal reload 'message.js', pakai versi lama.[39m
+│  ▶  Error: [Pixiv] AI gagal: AI timeout
 │     at console.error (file:///home/runner/workspace/index.js:434:27)
-│     at Timeout._onTimeout (file:///home/runner/workspace/src/helper/hotReload.js:311:33)
+│     at analyzeIllustration (/home/runner/workspace/SEMUA_FITUR/anime/pixiv.cjs:56:17)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 23/07/2026, 06.43.13
+  Terakhir diperbarui: 24/07/2026, 08.58.31
 ════════════════════════════════════════════════════════════════════════

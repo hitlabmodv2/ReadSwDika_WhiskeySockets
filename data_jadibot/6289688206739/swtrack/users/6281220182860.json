@@ -1,0 +1,27 @@
+{
+  "ACB28A773DAD394444CE7B32180D9D97": {
+    "id": "ACB28A773DAD394444CE7B32180D9D97",
+    "sender": "6281220182860@s.whatsapp.net",
+    "name": ".",
+    "type": "imageMessage",
+    "arrivedAt": "2026-07-23T11:37:55.556Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "Signal Lib ✓",
+    "source": "status",
+    "number": "6281220182860",
+    "resolvedPn": "6281220182860@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6281220182860@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACB28A773DAD394444CE7B32180D9D97",
+      "participant": "223368380960826@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-23T11:38:04.602Z",
+    "deleted": true,
+    "deletedAt": "2026-07-23T11:38:04.602Z"
+  }
+}

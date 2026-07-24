@@ -173,7 +173,7 @@ function getPhoneCountryInfo(number = '') {
     return { flag: '🌐', name: 'Tidak diketahui' };
 }
 
-async function handleJadibot({ hisoka, m, query, tolak, logCommand, isMainBot, path, fs, jadibotMap, parseJadibotDuration, startJadibot, maskNumber, getJadibotExpirySummary, scheduleJadibotExpiry, setPermanentJadibot, removeJadibotExpiry, ensureJadibotExpiry, getLogoutSavedMs, formatRemainingTime }) {
+async function handleJadibot({ hisoka, m, query, tolak, logCommand, isMainBot, path, fs, jadibotMap, parseJadibotDuration, startJadibot, maskNumber, getJadibotExpirySummary, getJadibotExpiry, scheduleJadibotExpiry, setPermanentJadibot, removeJadibotExpiry, ensureJadibotExpiry, getLogoutSavedMs, formatRemainingTime }) {
         if (!isMainBot(hisoka)) return;
         if (!m.isOwner) return;
 
@@ -388,12 +388,76 @@ async function handleJadibot({ hisoka, m, query, tolak, logCommand, isMainBot, p
 
         try { await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } }); } catch {}
 
-        // Cek apakah ada sisa waktu tersimpan dari logout sebelumnya
+        // ── Cek: nomor masih punya waktu tersimpan (realtime.json ATAU logoutSaved) ──
+        // Kalau owner kasih durasi eksplisit tapi waktu lama belum habis → pakai waktu lama
+        // Dua sumber:
+        //   1. getJadibotExpiry   → bot masih ada di realtime.json (belum pernah logout)
+        //   2. getLogoutSavedMs   → bot sudah logout, sisa waktu disimpan sementara
         let finalDurationMs = durationInfo.ms;
         let isResumedFromLogout = false;
         let savedRemainingLabel = '';
+        let isBlockedByExisting = false;   // flag: ada waktu aktif → durasi baru diabaikan
 
-        if (getLogoutSavedMs && durationInfo.isDefault) {
+        if (!durationInfo.isDefault) {
+                // Cek sumber 1: realtime.json (bot sedang tidak running tapi waktu belum expired)
+                if (getJadibotExpiry) {
+                        const existingMeta = getJadibotExpiry(number);
+                        if (existingMeta) {
+                                const stillValid = existingMeta.permanent === true || Number(existingMeta.expiresAt) > Date.now();
+                                if (stillValid) {
+                                        isBlockedByExisting = true;
+                                        if (existingMeta.permanent === true) {
+                                                savedRemainingLabel = 'Permanent ♾️';
+                                        } else {
+                                                const remMs = Number(existingMeta.expiresAt) - Date.now();
+                                                savedRemainingLabel = formatRemainingTime ? formatRemainingTime(remMs) : `${Math.ceil(remMs / 60000)} menit`;
+                                        }
+                                        finalDurationMs = undefined; // pakai data realtime.json
+                                }
+                        }
+                }
+
+                // Cek sumber 2: logoutSaved (bot sudah logout, waktu belum dipakai habis)
+                if (!isBlockedByExisting && getLogoutSavedMs) {
+                        const savedLogout = getLogoutSavedMs(number);
+                        if (savedLogout) {
+                                if (savedLogout.permanent === true) {
+                                        isBlockedByExisting = true;
+                                        isResumedFromLogout = true;
+                                        savedRemainingLabel = 'Permanent ♾️';
+                                        finalDurationMs = 'permanent';
+                                } else if (savedLogout.remainingMs > 0) {
+                                        isBlockedByExisting = true;
+                                        isResumedFromLogout = true;
+                                        savedRemainingLabel = formatRemainingTime ? formatRemainingTime(savedLogout.remainingMs) : `${Math.ceil(savedLogout.remainingMs / 60000)} menit`;
+                                        finalDurationMs = savedLogout.remainingMs;
+                                }
+                        }
+                }
+
+                // Kalau ada waktu aktif → beritahu owner, jalankan dengan waktu lama
+                if (isBlockedByExisting) {
+                        const sumberLabel = isResumedFromLogout ? 'sisa dari logout sebelumnya' : 'masih aktif di sistem';
+                        await tolak(hisoka, m,
+                                `╔══════════════════════╗\n` +
+                                `║   ⚠️  *J A D I B O T*  ║\n` +
+                                `╚══════════════════════╝\n\n` +
+                                `📱 *Nomor:* +${maskNumber(number)}\n\n` +
+                                `⚠️ *Maaf, waktu jadibot nomor ini masih ada!*\n` +
+                                `_Data waktu (${sumberLabel}) masih tersimpan di sistem._\n\n` +
+                                `⏳ *Sisa waktu:* _${savedRemainingLabel}_\n\n` +
+                                `✅ *Bot otomatis melanjutkan dari sisa waktu tersebut*\n` +
+                                `_(durasi baru \`${durationInfo.label || finalDurationInput}\` diabaikan)_\n\n` +
+                                `━━━━━━━━━━━━━━━━━━━━━\n` +
+                                `💡 Untuk *override* waktu, gunakan:\n` +
+                                `• \`.upbot ${number} ${finalDurationInput}\` — perpanjang\n` +
+                                `• \`.downbot ${number} ${finalDurationInput}\` — persingkat`
+                        );
+                }
+        }
+
+        // Cek sisa waktu dari logout — hanya kalau durasi default (tidak ada override di atas)
+        if (!isBlockedByExisting && getLogoutSavedMs && durationInfo.isDefault) {
                 const savedLogout = getLogoutSavedMs(number);
                 if (savedLogout) {
                         if (savedLogout.permanent === true) {
@@ -409,7 +473,8 @@ async function handleJadibot({ hisoka, m, query, tolak, logCommand, isMainBot, p
         }
 
         // Notif ke owner/GC bahwa waktu jadibot dilanjutkan dari sisa sebelumnya
-        if (isResumedFromLogout) {
+        // (hanya kalau tidak ada notif blocked yang sudah dikirim di atas)
+        if (isResumedFromLogout && !isBlockedByExisting) {
                 try {
                         await tolak(hisoka, m,
                                 `╔══════════════════════╗\n` +

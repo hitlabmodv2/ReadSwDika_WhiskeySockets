@@ -1,0 +1,44 @@
+{
+  "A557F3DC7A1C000032DD1601EFE512F9": {
+    "id": "A557F3DC7A1C000032DD1601EFE512F9",
+    "sender": "60167331782@s.whatsapp.net",
+    "name": "Dreamy store",
+    "type": "videoMessage",
+    "arrivedAt": "2026-07-23T11:39:40.228Z",
+    "read": true,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "Signal Lib ✓",
+    "source": "status",
+    "number": "60167331782",
+    "resolvedPn": "60167331782@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "60167331782@s.whatsapp.net",
+      "fromMe": false,
+      "id": "A557F3DC7A1C000032DD1601EFE512F9",
+      "participant": "40892501078123@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-23T11:40:58.121Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "60167331782@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A557F3DC7A1C000032DD1601EFE512F9",
+        "participant": "40892501078123@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "60167331782@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A557F3DC7A1C000032DD1601EFE512F9",
+        "participant": "60167331782@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-23T11:40:58.121Z"
+  }
+}

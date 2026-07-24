@@ -91,12 +91,35 @@ async function scrapeGallery(href) {
     // Judul dari h1
     const title = $('h1').first().text().trim() || 'Untitled Gallery';
 
-    // Semua gambar dari /uploads/galleries/ (bukan thumbnail)
+    // Ambil semua gambar galeri
+    // Situs ganti path dari /uploads/galleries/ → /content/images/
+    // Selector paling akurat: .gallery-item img (tepat isi galeri saja)
+    // Fallback: img[src*/content/images/] + img[data-src*/content/images/] untuk lazy-load
     const images = [];
-    $('img[src*="/uploads/galleries/"]').each((i, el) => {
-        const src = $(el).attr('src') || '';
-        if (src && !images.includes(src)) images.push(src);
+    const seen   = new Set();
+
+    const addSrc = (src) => {
+        if (src && !seen.has(src)) { seen.add(src); images.push(src); }
+    };
+
+    // Prioritas 1: container .gallery-item (paling tepat, hanya gambar galeri)
+    $('.gallery-item img').each((_, el) => {
+        addSrc($(el).attr('src') || $(el).attr('data-src') || '');
     });
+
+    // Prioritas 2: fallback path baru /content/images/ jika .gallery-item kosong
+    if (!images.length) {
+        $('img[src*="/content/images/"], img[data-src*="/content/images/"]').each((_, el) => {
+            addSrc($(el).attr('src') || $(el).attr('data-src') || '');
+        });
+    }
+
+    // Prioritas 3: fallback path lama /uploads/galleries/ (jika situs rollback)
+    if (!images.length) {
+        $('img[src*="/uploads/galleries/"], img[data-src*="/uploads/galleries/"]').each((_, el) => {
+            addSrc($(el).attr('src') || $(el).attr('data-src') || '');
+        });
+    }
 
     return { title, images };
 }

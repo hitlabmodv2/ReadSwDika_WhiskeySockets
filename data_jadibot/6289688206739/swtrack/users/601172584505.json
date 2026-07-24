@@ -1,0 +1,46 @@
+{
+  "AC28FB2FC9144F942A5AAED1667C634C": {
+    "id": "AC28FB2FC9144F942A5AAED1667C634C",
+    "sender": "601172584505@s.whatsapp.net",
+    "name": "nico's girl🎀",
+    "type": "extendedTextMessage",
+    "arrivedAt": "2026-07-23T11:39:19.127Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🍛",
+    "resolve": "Signal Lib ✓",
+    "source": "status",
+    "number": "601172584505",
+    "resolvedPn": "601172584505@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "601172584505@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC28FB2FC9144F942A5AAED1667C634C",
+      "participant": "206755447455980@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-23T11:39:33.856Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "601172584505@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC28FB2FC9144F942A5AAED1667C634C",
+        "participant": "206755447455980@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "601172584505@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC28FB2FC9144F942A5AAED1667C634C",
+        "participant": "601172584505@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "deleted": true,
+    "deletedAt": "2026-07-23T11:39:33.231Z",
+    "processedAt": "2026-07-23T11:39:33.855Z"
+  }
+}
