@@ -216,7 +216,11 @@ async function cleanupWritePressure() {
 
 async function getUserProfilePictureUrl(hisoka, jid) {
     try {
-        return await hisoka.profilePictureUrl(jid, 'image');
+        // Beri timeout 4 detik — tanpa ini bisa hang lama dan .menu tidak merespon
+        return await Promise.race([
+            hisoka.profilePictureUrl(jid, 'image'),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('pp_timeout')), 4000)),
+        ]);
     } catch (_) {
         return null;
     }
