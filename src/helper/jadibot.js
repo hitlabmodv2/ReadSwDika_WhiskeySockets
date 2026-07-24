@@ -2854,7 +2854,6 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
                       const _tmpFp = _fp + '.tmp'
                       fs.writeFileSync(_tmpFp, JSON.stringify(_d, null, 2), 'utf-8')
                       fs.renameSync(_tmpFp, _fp)
-                      console.log(`${_color}[SwTrack][JB:${number}] SW dihapus (LRU): ${_lruOwner} → ${_deletedId}\x1b[39m`)
                     }
                   }
                 } catch {}
@@ -2873,8 +2872,6 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
                     const _tmpFp = _fp + '.tmp'
                     fs.writeFileSync(_tmpFp, JSON.stringify(_d, null, 2), 'utf-8')
                     fs.renameSync(_tmpFp, _fp)
-                    const _contactNum = _file.replace('.json', '')
-                    console.log(`${_color}[SwTrack][JB:${number}] SW dihapus: ${_contactNum} → ${_deletedId}\x1b[39m`)
                     break
                   }
                 } catch {}
