@@ -93,8 +93,8 @@ export function loadJadibotCekswConfig(jadibotNum) {
                 const p = path.join(process.cwd(), 'data_jadibot', jadibotNum, 'ceksw', 'config.json');
                 if (fs.existsSync(p)) return JSON.parse(fs.readFileSync(p, 'utf-8'));
         } catch {}
-        // Default: cekswTracking ON untuk jadibot baru
-        return { cekswTracking: true };
+        // Default: cekswTracking OFF untuk jadibot baru
+        return { cekswTracking: false };
 }
 
 export function saveJadibotCekswConfig(jadibotNum, cfg) {
@@ -106,7 +106,7 @@ export function saveJadibotCekswConfig(jadibotNum, cfg) {
 export function initJadibotCekswConfig(jadibotNum) {
         const p = path.join(process.cwd(), 'data_jadibot', jadibotNum, 'ceksw', 'config.json');
         if (!fs.existsSync(p)) {
-                saveJadibotCekswConfig(jadibotNum, { cekswTracking: true });
+                saveJadibotCekswConfig(jadibotNum, { cekswTracking: false });
         }
 }
 
