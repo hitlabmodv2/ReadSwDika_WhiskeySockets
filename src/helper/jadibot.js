@@ -168,6 +168,13 @@ const jadibotCleanerTimers = new Map()
 const autoOnlineIntervalMap = new Map()
 const swPruneIntervalMap = new Map()
 
+function claimPairingTimeoutNotification(number) {
+  if (pairingTimeoutNotified.has(number)) return false
+  pairingTimeoutNotified.add(number)
+  setTimeout(() => pairingTimeoutNotified.delete(number), 10000)
+  return true
+}
+
 // sendPresenceUpdate() mengembalikan Promise. Socket dapat tertutup setelah
 // pengecekan sock.user tetapi sebelum pengiriman selesai, jadi try/catch saja
 // tidak cukup untuk menangkap rejection "Connection Closed".
@@ -2064,6 +2071,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
     await delay(800)
   }
   activeOrStartingJadibot.add(number)
+  pairingTimeoutNotified.delete(number)
   if (!hasRequestedDuration && getJadibotExpiry(number)) {
     updateJadibotExpiryStatus(number, 'starting')
     scheduleJadibotExpiry(number, sendReply)
@@ -2281,6 +2289,10 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
       // ⏱️ AUTO STOP setelah 3 MENIT jika belum terhubung
       const timeout = setTimeout(async () => {
         if (state.creds?.registered || jadibotMap.has(number)) return
+        if (!claimPairingTimeoutNotification(number)) {
+          console.log(`[JADIBOT][PAIR-TIMEOUT] ⚠️ Notif sudah diklaim sebelumnya untuk +${number}, skip timer duplikat`)
+          return
+        }
 
         console.log(`[JADIBOT] ⏰ Pairing timeout 3 menit → ${number} → sesi dihapus`)
 
@@ -2351,16 +2363,14 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
           }
         }
 
-        // Owner DM — notif monitoring pairing timeout (berlaku untuk V1 & V2)
-        try {
-          // Chat peminta sudah menerima notifikasi timeout utama lewat sendReply.
-          // Jangan kirim pesan monitoring kedua jika peminta juga tercatat sebagai owner.
-          const _pairingNotifExclude = [number, requesterNumber]
-            .map(value => String(value || '').replace(/[^0-9]/g, ''))
-            .filter(Boolean)
-          await sendOwnerNotif(mainBotSock, msgOwnerPairingExpired(number), _pairingNotifExclude)
-          console.log(`[JADIBOT][EXPIRED] ✅ Notif pairing timeout terkirim ke owner DM`)
-        } catch {}
+        // Permintaan manual sudah mendapat satu pesan lewat sendReply.
+        // Auto-start tetap mengirim laporan monitoring ke owner.
+        if (!requesterNumber) {
+          try {
+            await sendOwnerNotif(mainBotSock, msgOwnerPairingExpired(number), [number])
+            console.log(`[JADIBOT][EXPIRED] ✅ Notif pairing timeout terkirim ke owner DM`)
+          } catch {}
+        }
       }, PAIRING_TIMEOUT_MS)
 
       pairingTimeout.set(number, timeout)
@@ -2567,13 +2577,10 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
       }
 
       if (_wasStillPairing) {
-        // Guard idempotensi: pastikan hanya kirim notif sekali meski ada race timer vs close
-        if (pairingTimeoutNotified.has(number)) {
+        // Guard atomik: timer dan connection.close hanya boleh mengklaim satu notif.
+        if (!claimPairingTimeoutNotification(number)) {
           console.log(`[JADIBOT][PAIR-TIMEOUT] ⚠️ Notif sudah dikirim sebelumnya untuk +${number}, skip duplikat`)
         } else {
-          pairingTimeoutNotified.add(number)
-          setTimeout(() => pairingTimeoutNotified.delete(number), 10000) // bersihkan setelah 10 detik
-
           console.log(`[JADIBOT] ⏰ Pairing socket close saat proses pairing → kirim notif timeout ke ${number}`)
           const _ptSock = getActiveMainSock(mainBotSock)
 
@@ -2597,15 +2604,14 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
             }
           }
 
-          // Owner DM — notif monitoring pairing timeout
-          try {
-            // Hindari pesan kedua di chat peminta saat nomor peminta adalah owner.
-            const _pairingNotifExclude = [number, requesterNumber]
-              .map(value => String(value || '').replace(/[^0-9]/g, ''))
-              .filter(Boolean)
-            await sendOwnerNotif(mainBotSock, msgOwnerPairingExpired(number), _pairingNotifExclude)
-            console.log(`[JADIBOT][PAIR-TIMEOUT] ✅ Notif pairing timeout terkirim ke owner DM`)
-          } catch {}
+          // Permintaan manual sudah mendapat satu pesan lewat sendReply.
+          // Auto-start tetap mengirim laporan monitoring ke owner.
+          if (!requesterNumber) {
+            try {
+              await sendOwnerNotif(mainBotSock, msgOwnerPairingExpired(number), [number])
+              console.log(`[JADIBOT][PAIR-TIMEOUT] ✅ Notif pairing timeout terkirim ke owner DM`)
+            } catch {}
+          }
         }
 
         // Cleanup session pairing yang gagal + stop semua proses terkait

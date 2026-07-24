@@ -9,3 +9,4 @@
 - [clearsesi/ceksesi auto-repopulate](clearsesi-ceksesi-autorepopulate.md) — groups/contacts refill fast via cachedGroupMetadata & contacts.upsert; not a bug unless sender-key/lid-mapping stay full too
 - [Jadibot pairing config scope](jadibot-pairing-config-scope.md) — callback pairing memuat config sendiri dan memakai pairingCode custom 8 karakter
 - [Jadibot presence Promise](jadibot-presence-promise.md) — sendPresenceUpdate harus diberi catch karena try/catch tidak menangkap rejection async
+- [Jadibot timeout dedup](jadibot-timeout-dedup.md) — timer 3 menit dan connection.close harus memakai satu klaim notifikasi atomik
