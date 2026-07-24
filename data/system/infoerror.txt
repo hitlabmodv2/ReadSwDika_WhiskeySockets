@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 23/07/2026, 11.41.04  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 24/07/2026, 07.59.30  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  command:jadibot1
+│  #001  —  nhentai-search
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  not-acceptable
+│  logCommand is not defined
 │
 │  DETAIL
-│  Sumber      : command:jadibot1
+│  Sumber      : nhentai-search
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 23/07/2026, 11.41.04
-│  Terakhir    : 23/07/2026, 11.41.04
+│  Pertama     : 24/07/2026, 07.59.30
+│  Terakhir    : 24/07/2026, 07.59.30
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: not-acceptable
-│     at assertNodeErrorFree (file:///home/runner/workspace/node_modules/@whiskeysockets/baileys/lib/WABinary/generic-utils.js:57:15)
-│     at query (file:///home/runner/workspace/node_modules/@whiskeysockets/baileys/lib/Socket/socket.js:134:13)
+│  ▶  ReferenceError: logCommand is not defined
+│     at handleNh (/home/runner/workspace/SEMUA_FITUR/anime/nhentai.cjs:437:25)
+│     at async default (file:///home/runner/workspace/message.js?t=1784879191980:1262:33)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 23/07/2026, 11.41.04
+  Terakhir diperbarui: 24/07/2026, 07.59.30
 ════════════════════════════════════════════════════════════════════════

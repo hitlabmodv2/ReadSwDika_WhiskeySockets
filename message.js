@@ -1259,7 +1259,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'nhentai':
                         case 'nh': {
                                 const { handleNh } = _require(path.resolve('./SEMUA_FITUR/anime/nhentai.cjs'));
-                                await handleNh({ hisoka, m, query, tolak, logError, _require, path });
+                                await handleNh({ hisoka, m, query, tolak, logCommand, logError, _require, path });
                                 break;
                         }
                         case 'nhrand': {

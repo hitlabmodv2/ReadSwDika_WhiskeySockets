@@ -1,13 +1,36 @@
 {
-  "A59625E024A8C35A6E235BE05EA971EC": {
-    "id": "A59625E024A8C35A6E235BE05EA971EC",
+  "A530224A875A16C1D5C00C7158D1ABE2": {
+    "id": "A530224A875A16C1D5C00C7158D1ABE2",
     "sender": "6285175463174@s.whatsapp.net",
-    "name": "sunshine.jpeg",
-    "type": "imageMessage",
-    "arrivedAt": "2026-07-01T11:44:29.977Z",
+    "name": "sunshine : Aku lagi sebar Dana Kaget nih ! Yuk, sikat segera sebelum melaya",
+    "type": "protocolMessage",
+    "arrivedAt": "2026-07-23T14:28:49.935Z",
     "read": true,
     "reacted": true,
-    "emoji": "⚽",
+    "emoji": "🐙",
+    "source": "group",
+    "number": "6285175463174",
+    "messageKey": {
+      "remoteJid": "120363383540766761@g.us",
+      "fromMe": false,
+      "id": "A530224A875A16C1D5C00C7158D1ABE2",
+      "participant": "156182794784889@lid",
+      "participantAlt": "6285175463174@s.whatsapp.net",
+      "addressingMode": "lid"
+    },
+    "resolvedPn": "6285175463174@s.whatsapp.net",
+    "updatedAt": "2026-07-23T14:29:00.976Z",
+    "processedAt": "2026-07-23T14:29:00.975Z"
+  },
+  "A50E4BA398C5311FE9FD4871BB17EA21": {
+    "id": "A50E4BA398C5311FE9FD4871BB17EA21",
+    "sender": "6285175463174@s.whatsapp.net",
+    "name": "sunshine : Aku lagi sebar Dana Kaget nih ! Yuk, sikat segera sebelum melaya",
+    "type": "imageMessage",
+    "arrivedAt": "2026-07-23T14:28:49.953Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐟",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6285175463174",
@@ -16,17 +39,17 @@
       "remoteJid": "status@broadcast",
       "remoteJidAlt": "6285175463174@s.whatsapp.net",
       "fromMe": false,
-      "id": "A59625E024A8C35A6E235BE05EA971EC",
+      "id": "A50E4BA398C5311FE9FD4871BB17EA21",
       "participant": "156182794784889@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-07-01T11:44:37.358Z",
+    "updatedAt": "2026-07-23T14:29:01.219Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6285175463174@s.whatsapp.net",
         "fromMe": false,
-        "id": "A59625E024A8C35A6E235BE05EA971EC",
+        "id": "A50E4BA398C5311FE9FD4871BB17EA21",
         "participant": "156182794784889@lid",
         "addressingMode": "lid"
       },
@@ -34,34 +57,11 @@
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6285175463174@s.whatsapp.net",
         "fromMe": false,
-        "id": "A59625E024A8C35A6E235BE05EA971EC",
+        "id": "A50E4BA398C5311FE9FD4871BB17EA21",
         "participant": "6285175463174@s.whatsapp.net",
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-07-01T11:44:37.357Z"
-  },
-  "A5AC83ED455D56F5CE52F9A26F3176FE": {
-    "id": "A5AC83ED455D56F5CE52F9A26F3176FE",
-    "sender": "6285175463174@s.whatsapp.net",
-    "name": "sunshine.jpeg",
-    "type": "protocolMessage",
-    "arrivedAt": "2026-07-01T11:44:34.250Z",
-    "read": true,
-    "reacted": true,
-    "emoji": "🎭",
-    "source": "group",
-    "number": "6285175463174",
-    "messageKey": {
-      "remoteJid": "120363383540766761@g.us",
-      "fromMe": false,
-      "id": "A5AC83ED455D56F5CE52F9A26F3176FE",
-      "participant": "156182794784889@lid",
-      "participantAlt": "6285175463174@s.whatsapp.net",
-      "addressingMode": "lid"
-    },
-    "resolvedPn": "6285175463174@s.whatsapp.net",
-    "updatedAt": "2026-07-01T11:44:53.656Z",
-    "processedAt": "2026-07-01T11:44:53.656Z"
+    "processedAt": "2026-07-23T14:29:01.219Z"
   }
 }
