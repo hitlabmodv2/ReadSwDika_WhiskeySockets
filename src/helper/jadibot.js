@@ -168,6 +168,19 @@ const jadibotCleanerTimers = new Map()
 const autoOnlineIntervalMap = new Map()
 const swPruneIntervalMap = new Map()
 
+// sendPresenceUpdate() mengembalikan Promise. Socket dapat tertutup setelah
+// pengecekan sock.user tetapi sebelum pengiriman selesai, jadi try/catch saja
+// tidak cukup untuk menangkap rejection "Connection Closed".
+function safeSendPresenceUpdate(sock, presence, jid = undefined) {
+  try {
+    if (!sock?.sendPresenceUpdate) return
+    const result = jid === undefined
+      ? sock.sendPresenceUpdate(presence)
+      : sock.sendPresenceUpdate(presence, jid)
+    if (result && typeof result.catch === 'function') result.catch(() => {})
+  } catch {}
+}
+
 /* ─── PER-JADIBOT AUTOONLINE ─── */
 export function startJadibotAutoOnline(sock, jadibotNum) {
   // Bersihkan interval lama dulu (reconnect / setting berubah)
@@ -182,9 +195,9 @@ export function startJadibotAutoOnline(sock, jadibotNum) {
   if (aoSettings.enabled) {
     // Mode ON: kirim available berkala → kontak lihat online realtime
     if (sock?.user) sock.updateOnlinePrivacy('all').catch(() => {})
-    try { if (sock?.user) sock.sendPresenceUpdate('available') } catch {}
+    if (sock?.user) safeSendPresenceUpdate(sock, 'available')
     const iv = setInterval(() => {
-      try { if (sock?.user) sock.sendPresenceUpdate('available') } catch {}
+      if (sock?.user) safeSendPresenceUpdate(sock, 'available')
     }, intervalMs)
     autoOnlineIntervalMap.set(jadibotNum, iv)
   } else {
@@ -194,11 +207,11 @@ export function startJadibotAutoOnline(sock, jadibotNum) {
     // Kirim unavailable berkala setiap 5 detik untuk lawan keepalive WA (25s)
     // — tanpa ini bot flash online ~3-5 detik tiap 25s lalu offline terus-menerus
     if (sock?.user) sock.updateOnlinePrivacy('match_last_seen').catch(() => {})
-    try { if (sock?.user) sock.sendPresenceUpdate('unavailable') } catch {}
+    if (sock?.user) safeSendPresenceUpdate(sock, 'unavailable')
     const iv = setInterval(() => {
       // Skip saat typing/recording aktif — jangan potong delay
       if (sock.__typingActive > 0) return;
-      try { if (sock?.user) sock.sendPresenceUpdate('unavailable') } catch {}
+      if (sock?.user) safeSendPresenceUpdate(sock, 'unavailable')
     }, 5000)
     autoOnlineIntervalMap.set(jadibotNum, iv)
   }
@@ -2340,7 +2353,12 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
 
         // Owner DM — notif monitoring pairing timeout (berlaku untuk V1 & V2)
         try {
-          await sendOwnerNotif(mainBotSock, msgOwnerPairingExpired(number), [number])
+          // Chat peminta sudah menerima notifikasi timeout utama lewat sendReply.
+          // Jangan kirim pesan monitoring kedua jika peminta juga tercatat sebagai owner.
+          const _pairingNotifExclude = [number, requesterNumber]
+            .map(value => String(value || '').replace(/[^0-9]/g, ''))
+            .filter(Boolean)
+          await sendOwnerNotif(mainBotSock, msgOwnerPairingExpired(number), _pairingNotifExclude)
           console.log(`[JADIBOT][EXPIRED] ✅ Notif pairing timeout terkirim ke owner DM`)
         } catch {}
       }, PAIRING_TIMEOUT_MS)
@@ -2581,7 +2599,11 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
 
           // Owner DM — notif monitoring pairing timeout
           try {
-            await sendOwnerNotif(mainBotSock, msgOwnerPairingExpired(number), [number])
+            // Hindari pesan kedua di chat peminta saat nomor peminta adalah owner.
+            const _pairingNotifExclude = [number, requesterNumber]
+              .map(value => String(value || '').replace(/[^0-9]/g, ''))
+              .filter(Boolean)
+            await sendOwnerNotif(mainBotSock, msgOwnerPairingExpired(number), _pairingNotifExclude)
             console.log(`[JADIBOT][PAIR-TIMEOUT] ✅ Notif pairing timeout terkirim ke owner DM`)
           } catch {}
         }
@@ -2922,9 +2944,9 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
             const _delayMs  = Math.min(_delaySec * 1000, 30000)
             // Tandai typing aktif → interval stealth skip unavailable agar delay tidak terpotong
             sock.__typingActive = (sock.__typingActive || 0) + 1
-            try { sock.sendPresenceUpdate(_presence, _atJid) } catch {}
+            safeSendPresenceUpdate(sock, _presence, _atJid)
             setTimeout(() => {
-              try { sock.sendPresenceUpdate('paused', _atJid) } catch {}
+              safeSendPresenceUpdate(sock, 'paused', _atJid)
               sock.__typingActive = Math.max(0, (sock.__typingActive || 1) - 1)
             }, _delayMs)
           }
@@ -3442,9 +3464,9 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
             const _delaySec = _doType ? (_atCfg.delaySeconds || 5) : (_arCfg.delaySeconds || 5)
             const _delayMs  = Math.min(_delaySec * 1000, 30000)
             sock.__typingActive = (sock.__typingActive || 0) + 1
-            try { sock.sendPresenceUpdate(_presence, _atJid) } catch {}
+            safeSendPresenceUpdate(sock, _presence, _atJid)
             setTimeout(() => {
-              try { sock.sendPresenceUpdate('paused', _atJid) } catch {}
+              safeSendPresenceUpdate(sock, 'paused', _atJid)
               sock.__typingActive = Math.max(0, (sock.__typingActive || 1) - 1)
             }, _delayMs)
           }
