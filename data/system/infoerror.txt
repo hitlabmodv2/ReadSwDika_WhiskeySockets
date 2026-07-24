@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 24/07/2026, 08.01.36  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 24/07/2026, 08.06.14  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -31,16 +31,16 @@
 │  DETAIL
 │  Sumber      : nhentai-search
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 24/07/2026, 08.01.36
-│  Terakhir    : 24/07/2026, 08.01.36
+│  Pertama     : 24/07/2026, 08.06.14
+│  Terakhir    : 24/07/2026, 08.06.14
 │
 │  STACK TRACE (3 baris pertama)
 │  ▶  ReferenceError: logCommand is not defined
 │     at handleNh (/home/runner/workspace/SEMUA_FITUR/anime/nhentai.cjs:437:25)
-│     at async default (file:///home/runner/workspace/message.js?t=1784880052486:1262:33)
+│     at async default (file:///home/runner/workspace/message.js?t=1784880355883:1262:33)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 24/07/2026, 08.01.36
+  Terakhir diperbarui: 24/07/2026, 08.06.14
 ════════════════════════════════════════════════════════════════════════

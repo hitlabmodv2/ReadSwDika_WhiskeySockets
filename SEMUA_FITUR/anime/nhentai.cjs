@@ -426,7 +426,7 @@ module.exports.handleNhdl = handleNhdl;
 
 // ── COMMAND HANDLER: NH SEARCH ─────────────────────────────────────────────────
 
-async function handleNh({ hisoka, m, query, tolak, logError }) {
+async function handleNh({ hisoka, m, query, tolak, logCommand, logError }) {
         try {
                 const input = (query || '').trim();
                 const pfx   = m.prefix || '.';
