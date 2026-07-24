@@ -2168,7 +2168,9 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
             const code = await sock.requestPairingCode(number)
             if (aborted) break
 
-            // Cek mode pairing dari config
+            // Cek mode pairing dari config terbaru (jangan pakai cfg yang tidak
+            // tersedia di scope callback pairing).
+            const cfg = loadConfig()
             const pairingMode = (cfg.jadibotPairingMode || 'v2').toLowerCase()
             // v1 = kirim pairing code ke GC/owner chat
             // v2 = kirim pairing code langsung ke nomor tujuan (private)

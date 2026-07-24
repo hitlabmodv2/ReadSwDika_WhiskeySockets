@@ -7,3 +7,4 @@
 - [WilyBot jadibot handler param shadowing](jadibot-duration-parameter-shadowing.md) — jangan destructure parseJadibotCommandQuery dari params di jadibot-cmd.cjs, bikin undefined & crash .upbot
 - [WilyBot CJS hot-reload registration](wilybot-hotreload-registration.md) — register new lazy-required .cjs feature files in hotReload.js WATCHED_FILES so edits apply live
 - [clearsesi/ceksesi auto-repopulate](clearsesi-ceksesi-autorepopulate.md) — groups/contacts refill fast via cachedGroupMetadata & contacts.upsert; not a bug unless sender-key/lid-mapping stay full too
+- [Jadibot pairing config scope](jadibot-pairing-config-scope.md) — callback pairing harus memuat konfigurasi sendiri sebelum membaca jadibotPairingMode
