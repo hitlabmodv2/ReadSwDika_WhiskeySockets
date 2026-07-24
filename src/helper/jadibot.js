@@ -709,6 +709,22 @@ function persistConnectedAt(number, ts) {
   saveJadibotRealtimeData(data)
 }
 
+// ── Tandai bahwa notif reconnect sudah pernah dikirim ke user/owner ──────────
+// Setelah flag ini di-set, reconnect berikutnya tidak akan kirim notif lagi.
+// Flag di-reset otomatis saat jadibot dihapus (removeJadibotExpiry).
+function markJadibotReconnectNotified(number) {
+  number = String(number || '').replace(/[^0-9]/g, '')
+  const data = loadJadibotRealtimeData()
+  if (!data.bots[number]) return
+  data.bots[number].reconnectNotifiedAt = Date.now()
+  saveJadibotRealtimeData(data)
+}
+
+function isJadibotReconnectNotified(number) {
+  number = String(number || '').replace(/[^0-9]/g, '')
+  return !!getJadibotExpiry(number)?.reconnectNotifiedAt
+}
+
 function restoreConnectedAtMap() {
   const data = loadJadibotRealtimeData()
   for (const [number, meta] of Object.entries(data.bots || {})) {
@@ -2523,12 +2539,18 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
       }
 
       // Notif realtime ke semua owner di config.owners[] — fresh pairing & reconnect
-      try {
-        await sendOwnerNotif(mainBotSock, msgOwnerConnected(number, !isFreshPairing), [number])
-      } catch {}
+      // Untuk reconnect: hanya kirim sekali (saat pertama kali reconnect setelah pairing).
+      // Reconnect berikutnya (misal bot restart ulang) tidak kirim notif lagi.
+      const _reconnectAlreadyNotified = !isFreshPairing && isJadibotReconnectNotified(number)
+      if (!_reconnectAlreadyNotified) {
+        try {
+          await sendOwnerNotif(mainBotSock, msgOwnerConnected(number, !isFreshPairing), [number])
+        } catch {}
+      }
 
       // Reconnect: kirim notif langsung ke user jadibot (teks beda dari owner)
-      if (!isFreshPairing) {
+      // Hanya dikirim SEKALI — saat pertama kali reconnect setelah pairing awal.
+      if (!isFreshPairing && !_reconnectAlreadyNotified) {
         try {
           const _sentRecon = await sendDirectToUser(mainBotSock, number, msgDirectReconnect(number))
           // Fallback via self-sock jika main bot tidak bisa kirim
@@ -2538,6 +2560,8 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
             console.log(`[JADIBOT][RECONNECT][FALLBACK] ✅ Notif reconnect via self-sock ke +${number}`)
           }
         } catch {}
+        // Tandai sudah dikirim — reconnect berikutnya tidak akan kirim notif lagi
+        markJadibotReconnectNotified(number)
       }
     }
 
