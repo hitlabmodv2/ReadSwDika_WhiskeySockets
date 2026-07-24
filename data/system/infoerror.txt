@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 24/07/2026, 08.06.14  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 24/07/2026, 08.58.31  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  nhentai-search
+│  #001  —  Pixiv
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  logCommand is not defined
+│  [Pixiv] AI gagal: AI timeout
 │
 │  DETAIL
-│  Sumber      : nhentai-search
+│  Sumber      : Pixiv
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 24/07/2026, 08.06.14
-│  Terakhir    : 24/07/2026, 08.06.14
+│  Pertama     : 24/07/2026, 08.58.31
+│  Terakhir    : 24/07/2026, 08.58.31
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  ReferenceError: logCommand is not defined
-│     at handleNh (/home/runner/workspace/SEMUA_FITUR/anime/nhentai.cjs:437:25)
-│     at async default (file:///home/runner/workspace/message.js?t=1784880355883:1262:33)
+│  ▶  Error: [Pixiv] AI gagal: AI timeout
+│     at console.error (file:///home/runner/workspace/index.js:434:27)
+│     at analyzeIllustration (/home/runner/workspace/SEMUA_FITUR/anime/pixiv.cjs:56:17)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 24/07/2026, 08.06.14
+  Terakhir diperbarui: 24/07/2026, 08.58.31
 ════════════════════════════════════════════════════════════════════════
