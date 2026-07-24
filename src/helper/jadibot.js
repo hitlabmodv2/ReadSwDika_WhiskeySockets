@@ -2161,9 +2161,11 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
         while (retries > 0) {
           if (aborted) break
           try {
-            const cfg = loadConfig()
-            const customCode = cfg.pairingCode && String(cfg.pairingCode).trim() ? String(cfg.pairingCode).trim().toUpperCase() : undefined
-            const code = await sock.requestPairingCode(number, customCode)
+            // ⚠️ JANGAN pakai customCode (cfg.pairingCode) untuk jadibot!
+            // cfg.pairingCode adalah config bot utama — jika dipakai untuk semua
+            // sesi jadibot (nomor berbeda), WhatsApp menolak karena kode statis
+            // tidak valid lintas sesi. Biarkan WA generate kode acak per sesi.
+            const code = await sock.requestPairingCode(number)
             if (aborted) break
 
             // Cek mode pairing dari config
@@ -2518,6 +2520,25 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
         !hasConnectedOnce &&
         !state.creds?.registered &&
         !jadibotMap.has(number)
+
+      // ── RACE CONDITION GUARD ──────────────────────────────────────────────────
+      // Saat user memasukkan kode pairing yang benar, WA mengirim:
+      //   connection='close' (reason 428) → lalu connection='open'
+      // Ini adalah handshake normal WA, BUKAN kegagalan pairing.
+      // Jika reason=428 (Connection Closed) → beri jeda 4 detik sebelum cleanup,
+      // sehingga 'connection=open' punya waktu untuk fire duluan.
+      // Jika dalam 4 detik sudah konek/registered → skip cleanup (pairing berhasil).
+      if (_wasStillPairing && reason === 428) {
+        console.log(`[JADIBOT] ⏸️ Close reason=428 saat pairing +${number} → tahan 4s (kemungkinan handshake WA)`)
+        await delay(4000)
+        // Re-check: kalau sudah berhasil konek setelah delay → skip cleanup
+        if (jadibotMap.has(number) || state.creds?.registered) {
+          console.log(`[JADIBOT] ✅ +${number} berhasil pairing setelah delay, skip cleanup`)
+          return
+        }
+        console.log(`[JADIBOT] ⏰ +${number} masih belum konek setelah 4s, lanjut cleanup`)
+      }
+      // ─────────────────────────────────────────────────────────────────────────
 
       if (pairingTimeout.has(number)) {
         clearTimeout(pairingTimeout.get(number))
