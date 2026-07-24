@@ -2161,16 +2161,17 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
         while (retries > 0) {
           if (aborted) break
           try {
-            // ⚠️ JANGAN pakai customCode (cfg.pairingCode) untuk jadibot!
-            // cfg.pairingCode adalah config bot utama — jika dipakai untuk semua
-            // sesi jadibot (nomor berbeda), WhatsApp menolak karena kode statis
-            // tidak valid lintas sesi. Biarkan WA generate kode acak per sesi.
-            const code = await sock.requestPairingCode(number)
+            // Gunakan kode pairing dari config.json, sama seperti bot utama.
+            // Baileys akan membuat kode acak hanya jika pairingCode kosong.
+            const cfg = loadConfig()
+            const customPairingCode = cfg.pairingCode
+              ? String(cfg.pairingCode).toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8).padEnd(8, '0')
+              : undefined
+            const code = await sock.requestPairingCode(number, customPairingCode)
             if (aborted) break
 
             // Cek mode pairing dari config terbaru (jangan pakai cfg yang tidak
             // tersedia di scope callback pairing).
-            const cfg = loadConfig()
             const pairingMode = (cfg.jadibotPairingMode || 'v2').toLowerCase()
             // v1 = kirim pairing code ke GC/owner chat
             // v2 = kirim pairing code langsung ke nomor tujuan (private)
