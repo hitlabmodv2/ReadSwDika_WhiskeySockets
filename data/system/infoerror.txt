@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 24/07/2026, 14.38.01  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 25/07/2026, 11.31.53  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  JADIBOT
+│  #001  —  NekopoinNotif
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [JADIBOT] Gagal request pairing code 6281368074650 (sisa retry: 0): cfg is not defined
+│  [NekopoinNotif] Gagal kirim ke 120363383540766761@g.us: Connection Closed
 │
 │  DETAIL
-│  Sumber      : JADIBOT
+│  Sumber      : NekopoinNotif
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 24/07/2026, 14.38.01
-│  Terakhir    : 24/07/2026, 14.38.01
+│  Pertama     : 25/07/2026, 11.31.53
+│  Terakhir    : 25/07/2026, 11.31.53
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [JADIBOT] Gagal request pairing code 6281368074650 (sisa retry: 0): cfg is not defined
+│  ▶  Error: [NekopoinNotif] Gagal kirim ke 120363383540766761@g.us: Connection Closed
 │     at console.error (file:///home/runner/workspace/index.js:434:27)
-│     at Timeout._onTimeout (file:///home/runner/workspace/src/helper/jadibot.js:2247:21)
+│     at file:///home/runner/workspace/index.js:1744:89
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 24/07/2026, 14.38.01
+  Terakhir diperbarui: 25/07/2026, 11.31.53
 ════════════════════════════════════════════════════════════════════════

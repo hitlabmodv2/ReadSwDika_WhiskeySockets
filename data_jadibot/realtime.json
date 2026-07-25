@@ -3,7 +3,7 @@
     "6289667923162": {
       "number": "6289667923162",
       "createdAt": 1784945356129,
-      "updatedAt": 1784945468235,
+      "updatedAt": 1784979012160,
       "expiresAt": 1787623720237,
       "durationMs": 2678252002,
       "durationText": "44638 menit",
@@ -13,7 +13,8 @@
       "addedDurationText": "30 hari",
       "previousRemainingMs": 86252002,
       "previousRemainingText": "23 jam 57 menit 33 detik",
-      "permanent": false
+      "permanent": false,
+      "connectedAt": 1784979012153
     }
   },
   "logoutSaved": {
@@ -21,6 +22,11 @@
       "remainingMs": 1008832,
       "permanent": false,
       "savedAt": 1784806799726
+    },
+    "6285700996045": {
+      "remainingMs": 3023973591,
+      "permanent": false,
+      "savedAt": 1784979212503
     }
   }
 }

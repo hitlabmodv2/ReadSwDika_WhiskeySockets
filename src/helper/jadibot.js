@@ -2232,18 +2232,40 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
                 directPairingSent = true
                 console.log(`[JADIBOT][V2] ✅ Pairing code terkirim realtime ke +${number} (jid: ${targetJid})`)
 
-                // Notif singkat ke GC/owner chat bahwa kode sudah dikirim ke nomor tujuan
+                // Notif ke GC/owner chat bahwa kode sudah dikirim ke nomor tujuan
                 try {
+                  // ── Hitung info durasi untuk notif owner ──
+                  const _pairNowMs = Date.now()
+                  const _pairExpiry = getJadibotExpiry(number)
+                  const _pairIsPerm = !hasRequestedDuration && _pairExpiry?.permanent === true
+                  const _pairDurMs = durationMs || (_pairExpiry?.durationMs) || DEFAULT_JADIBOT_DURATION_MS
+                  const _pairDurText = _pairIsPerm ? 'Permanent ♾️' : formatDurationMs(_pairDurMs)
+                  const _pairStartText = formatJadibotExpiryTime(_pairNowMs)
+                  const _pairEndText = _pairIsPerm
+                    ? 'Selamanya ♾️'
+                    : formatJadibotExpiryTime(_pairNowMs + _pairDurMs)
+                  const _pairVer = loadConfig().botVersion || 'V25'
+
                   const sentInfo = await sendReply(
                     `╔══════════════════════╗\n` +
                     `║   🤖  *J A D I B O T*  ║\n` +
                     `╚══════════════════════╝\n\n` +
                     `✅ *Kode pairing berhasil dikirim!*\n\n` +
-                    `📱 Kode langsung dikirim ke nomor:\n` +
-                    `*+${number}*\n\n` +
-                    `⏳ Suruh mereka segera buka kode tersebut\n` +
-                    `dan masukkan di WhatsApp → Perangkat Tertaut.\n\n` +
-                    `_Berlaku 3 menit_`
+                    `> 📱 Kode dikirim langsung ke nomor:\n` +
+                    `> \`+${number}\`\n\n` +
+                    `━━━━━━━━━━━━━━━━━━━━━━\n` +
+                    `📋 *Detail Sesi Jadibot:*\n` +
+                    `• *Durasi:* *${_pairDurText}*\n` +
+                    `• *Estimasi mulai:* _${_pairStartText}_\n` +
+                    `• *Estimasi berakhir:* _${_pairEndText}_\n` +
+                    `• *Status:* ~Belum terhubung~ ⏳\n\n` +
+                    `━━━━━━━━━━━━━━━━━━━━━━\n` +
+                    `📌 *Instruksi untuk mereka:*\n` +
+                    `1. Buka pesan kode yang dikirim ke nomor mereka\n` +
+                    `2. Buka WA → ⋮ → *Perangkat Tertaut*\n` +
+                    `3. Masukkan kode sebelum kedaluwarsa\n\n` +
+                    `> ⚠️ _Kode hanya berlaku *3 menit* — ~jangan ditunda!~_\n\n` +
+                    `> _Notif otomatis — Wily Bot ${_pairVer}_ 🤖`
                   )
                   if (sentInfo?.key) pairingMsgKey = sentInfo.key
                 } catch {}
