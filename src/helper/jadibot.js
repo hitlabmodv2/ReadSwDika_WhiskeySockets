@@ -153,6 +153,9 @@ const pairingTimeoutNotified = new Set() // guard idempotensi: cegah notif pairi
 const stoppingJadibot = new Set()
 const expiringJadibot = new Set()
 const reconnectingJadibot = new Set()
+// In-memory flag — sengaja TIDAK disimpan ke file agar reset tiap bot restart.
+// Tujuannya cuma cegah spam notif reconnect dalam SATU sesi, bukan lintas restart.
+const reconnectNotifiedSet = new Set()
 const activeOrStartingJadibot = new Set()
 const pairingTimeout = new Map()
 const pendingJadibotChoices = new Map()
@@ -711,18 +714,17 @@ function persistConnectedAt(number, ts) {
 
 // ── Tandai bahwa notif reconnect sudah pernah dikirim ke user/owner ──────────
 // Setelah flag ini di-set, reconnect berikutnya tidak akan kirim notif lagi.
-// Flag di-reset otomatis saat jadibot dihapus (removeJadibotExpiry).
+// Flag HANYA di memory — reset otomatis saat bot restart (by design).
+// Bug lama: flag disimpan ke realtime.json → setelah bot restart, flag tetap ada
+// → reconnect pertama setelah restart skip semua notif (owner & user jadibot tidak dapat notif).
 function markJadibotReconnectNotified(number) {
   number = String(number || '').replace(/[^0-9]/g, '')
-  const data = loadJadibotRealtimeData()
-  if (!data.bots[number]) return
-  data.bots[number].reconnectNotifiedAt = Date.now()
-  saveJadibotRealtimeData(data)
+  reconnectNotifiedSet.add(number)
 }
 
 function isJadibotReconnectNotified(number) {
   number = String(number || '').replace(/[^0-9]/g, '')
-  return !!getJadibotExpiry(number)?.reconnectNotifiedAt
+  return reconnectNotifiedSet.has(number)
 }
 
 function restoreConnectedAtMap() {
@@ -741,6 +743,7 @@ function removeJadibotExpiry(number) {
     expiryTimers.delete(number)
   }
   clearJadibotExpiryWarningTimers(number)
+  reconnectNotifiedSet.delete(number)
   const data = loadJadibotRealtimeData()
   if (data.bots[number]) {
     delete data.bots[number]
