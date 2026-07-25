@@ -130,5 +130,49 @@
       ],
       "processedAt": "2026-07-25T02:14:35.817Z"
     }
+  },
+  "6285695777114": {
+    "AC7646ECE7EFDE000D0279C87E3C79F8": {
+      "id": "AC7646ECE7EFDE000D0279C87E3C79F8",
+      "sender": "6285695777114@s.whatsapp.net",
+      "name": "效益||按 ー 流下",
+      "type": "imageMessage",
+      "arrivedAt": "2026-07-25T02:19:13.352Z",
+      "read": true,
+      "reacted": true,
+      "emoji": "😃",
+      "resolve": "Signal Lib ✓",
+      "source": "status",
+      "number": "6285695777114",
+      "resolvedPn": "6285695777114@s.whatsapp.net",
+      "messageKey": {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285695777114@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC7646ECE7EFDE000D0279C87E3C79F8",
+        "participant": "129334601846925@lid",
+        "addressingMode": "lid"
+      },
+      "updatedAt": "2026-07-25T02:19:16.580Z",
+      "receiptKeys": [
+        {
+          "remoteJid": "status@broadcast",
+          "remoteJidAlt": "6285695777114@s.whatsapp.net",
+          "fromMe": false,
+          "id": "AC7646ECE7EFDE000D0279C87E3C79F8",
+          "participant": "129334601846925@lid",
+          "addressingMode": "lid"
+        },
+        {
+          "remoteJid": "status@broadcast",
+          "remoteJidAlt": "6285695777114@s.whatsapp.net",
+          "fromMe": false,
+          "id": "AC7646ECE7EFDE000D0279C87E3C79F8",
+          "participant": "6285695777114@s.whatsapp.net",
+          "addressingMode": "lid"
+        }
+      ],
+      "processedAt": "2026-07-25T02:19:16.580Z"
+    }
   }
 }
