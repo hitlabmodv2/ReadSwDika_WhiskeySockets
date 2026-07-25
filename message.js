@@ -1897,13 +1897,13 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                         case 'upbot': {
                                 const { handleUpbot } = _require(path.resolve('./SEMUA_FITUR/jadibot/jadibot-cmd.cjs'));
-                                await handleUpbot({ hisoka, m, query, tolak, logCommand, isMainBot, jadibotMap, parseJadibotDuration, getJadibotExpirySummary, getJadibotExpiry, extendJadibotExpiry, setPermanentJadibot, scheduleJadibotExpiry, maskNumber, formatRemainingTime });
+                                await handleUpbot({ hisoka, m, query, tolak, logCommand, isMainBot, jadibotMap, parseJadibotDuration, getJadibotExpirySummary, getJadibotExpiry, extendJadibotExpiry, setPermanentJadibot, scheduleJadibotExpiry, maskNumber, formatRemainingTime, loadConfig });
                                 break;
                         }
 
                         case 'downbot': {
                                 const { handleDownbot } = _require(path.resolve('./SEMUA_FITUR/jadibot/jadibot-cmd.cjs'));
-                                await handleDownbot({ hisoka, m, query, tolak, logCommand, isMainBot, jadibotMap, parseJadibotDuration, maskNumber, getJadibotExpirySummary, getJadibotExpiry, reduceJadibotExpiry, scheduleJadibotExpiry });
+                                await handleDownbot({ hisoka, m, query, tolak, logCommand, isMainBot, jadibotMap, parseJadibotDuration, maskNumber, getJadibotExpirySummary, getJadibotExpiry, reduceJadibotExpiry, scheduleJadibotExpiry, loadConfig });
                                 break;
                         }
 

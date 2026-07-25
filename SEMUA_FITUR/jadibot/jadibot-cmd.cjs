@@ -519,7 +519,51 @@ async function handleJadibot({ hisoka, m, query, tolak, logCommand, isMainBot, p
 // tersedia sebagai fungsi top-level di file ini. Kalau didestrukturisasi di sini,
 // dia akan shadow fungsi aslinya jadi `undefined` setiap kali caller (message.js)
 // tidak mengirimkannya, dan `.upbot` akan selalu crash (bug lama yang sudah diperbaiki).
-async function handleUpbot({ hisoka, m, query, tolak, logCommand, isMainBot, jadibotMap, parseJadibotDuration, maskNumber, getJadibotExpirySummary, getJadibotExpiry, extendJadibotExpiry, scheduleJadibotExpiry, setPermanentJadibot }) {
+
+// ── Helper: format waktu sekarang (WIB) ──────────────────────────────────────
+function _nowStrCmd() {
+        const d = new Date()
+        const hari  = d.toLocaleDateString('id-ID', { weekday: 'short', timeZone: 'Asia/Jakarta' })
+        const tgl   = d.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Asia/Jakarta' })
+        const waktu = d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Asia/Jakarta' }).replace(/\./g, ':')
+        return `${hari}, ${tgl} | ${waktu} WIB`
+}
+
+// ── Helper: kirim notif ke semua owner + ke nomor jadibot (msg berbeda) ───────
+async function _kirimNotifDurasi({ hisoka, jadibotMap, loadConfig, number, msgOwner, msgUser }) {
+        const cfg    = loadConfig()
+        const owners = (cfg.owners || []).map(n => String(n).replace(/[^0-9]/g, '')).filter(Boolean)
+        const excl   = String(number).replace(/[^0-9]/g, '')
+
+        // Ke semua owner (skip jika owner = nomor jadibot itu sendiri)
+        for (const ownerNum of owners) {
+                if (ownerNum === excl) continue
+                try {
+                        await hisoka.sendMessage(`${ownerNum}@s.whatsapp.net`, { text: msgOwner })
+                        console.log(`[NOTIF-DURASI] ✅ Notif owner → +${ownerNum}`)
+                } catch (e) {
+                        console.log(`[NOTIF-DURASI] ⚠️ Gagal notif owner +${ownerNum}: ${e?.message}`)
+                }
+        }
+
+        // Ke nomor jadibot via main bot, fallback via socket jadibot sendiri
+        try {
+                await hisoka.sendMessage(`${number}@s.whatsapp.net`, { text: msgUser })
+                console.log(`[NOTIF-DURASI] ✅ Notif user → +${number}`)
+        } catch (_) {
+                const jSock = jadibotMap ? jadibotMap.get(number) : null
+                if (jSock) {
+                        try {
+                                await jSock.sendMessage(`${number}@s.whatsapp.net`, { text: msgUser })
+                                console.log(`[NOTIF-DURASI] ✅ Notif user via self-sock → +${number}`)
+                        } catch (e2) {
+                                console.log(`[NOTIF-DURASI] ⚠️ Gagal notif user +${number}: ${e2?.message}`)
+                        }
+                }
+        }
+}
+
+async function handleUpbot({ hisoka, m, query, tolak, logCommand, isMainBot, jadibotMap, parseJadibotDuration, maskNumber, getJadibotExpirySummary, getJadibotExpiry, extendJadibotExpiry, scheduleJadibotExpiry, setPermanentJadibot, loadConfig }) {
         if (!isMainBot(hisoka)) return;
         if (!m.isOwner) return;
 
@@ -597,6 +641,10 @@ async function handleUpbot({ hisoka, m, query, tolak, logCommand, isMainBot, jad
         const oldCmdInfo = getJadibotExpirySummary(upNum);
         const oldCmdLabel = oldCmdInfo?.remaining || 'Tidak ada data';
         const oldCmdExpire = oldCmdInfo?.expiresAtText || '-';
+        const _cfg     = loadConfig ? loadConfig() : {}
+        const _ver     = _cfg.botVersion || 'V26'
+        const _contact = (_cfg.botReply?.sourceUrl) || (_cfg.owners?.[0] ? `https://wa.me/${_cfg.owners[0]}` : 'https://wa.me/6289688206739')
+
         if (upDurationInfo.ms === 'permanent') {
                 setPermanentJadibot(upNum, 'active');
                 await sendUpBtn(
@@ -610,6 +658,32 @@ async function handleUpbot({ hisoka, m, query, tolak, logCommand, isMainBot, jad
                         `✨ Terbaru    : *Permanent* ♾️\n\n` +
                         `Bot tetap aktif tanpa batas waktu.`
                 );
+                // ── Notif ke owner & nomor jadibot ──
+                if (loadConfig) {
+                        const _ts = _nowStrCmd()
+                        await _kirimNotifDurasi({
+                                hisoka, jadibotMap, loadConfig, number: upNum,
+                                msgOwner:
+                                        `╔══════════════════════╗\n` +
+                                        `║   ⏫  *U P B O T*   ║\n` +
+                                        `╚══════════════════════╝\n\n` +
+                                        `📱 *Nomor  :* \`+${upNum}\`\n` +
+                                        `🕐 *Waktu  :* _${_ts}_\n` +
+                                        `⏮️ *Sebelum:* *${oldCmdLabel}*\n` +
+                                        `♾️ *Status  :* *Permanent — Tanpa batas waktu*\n\n` +
+                                        `> _Notif otomatis — Wily Bot ${_ver}_ 🤖`,
+                                msgUser:
+                                        `╔══════════════════════╗\n` +
+                                        `║   ⏫  *U P B O T*   ║\n` +
+                                        `╚══════════════════════╝\n\n` +
+                                        `🎉 *Botmu kini berstatus Permanent!*\n\n` +
+                                        `📱 *Nomor kamu:* \`+${upNum}\`\n` +
+                                        `🕐 *Waktu    :* _${_ts}_\n` +
+                                        `♾️ *Status   :* *Permanent — Aktif tanpa batas waktu*\n\n` +
+                                        `✅ Semua fitur lanjut berjalan normal.\n\n` +
+                                        `> _Notif otomatis — Wily Bot ${_ver}_ 🤖`,
+                        })
+                }
         } else {
                 extendJadibotExpiry(upNum, upDurationInfo.ms, 'active');
                 scheduleJadibotExpiry(upNum, upSendReplyFn);
@@ -628,6 +702,35 @@ async function handleUpbot({ hisoka, m, query, tolak, logCommand, isMainBot, jad
                         `   Exp baru   : ${upInfo.expiresAtText}\n\n` +
                         `Bot tetap aktif, durasi diperpanjang.`
                 );
+                // ── Notif ke owner & nomor jadibot ──
+                if (loadConfig) {
+                        const _ts = _nowStrCmd()
+                        await _kirimNotifDurasi({
+                                hisoka, jadibotMap, loadConfig, number: upNum,
+                                msgOwner:
+                                        `╔══════════════════════╗\n` +
+                                        `║   ⏫  *U P B O T*   ║\n` +
+                                        `╚══════════════════════╝\n\n` +
+                                        `📱 *Nomor  :* \`+${upNum}\`\n` +
+                                        `🕐 *Waktu  :* _${_ts}_\n` +
+                                        `⏮️ *Sebelum:* *${oldCmdLabel}*\n` +
+                                        `➕ *Ditambah:* *${upDurationInfo.label}*\n` +
+                                        `⏳ *Sisa baru:* *${upInfo.remaining}*\n\n` +
+                                        `> _Notif otomatis — Wily Bot ${_ver}_ 🤖`,
+                                msgUser:
+                                        `╔══════════════════════╗\n` +
+                                        `║   ⏫  *U P B O T*   ║\n` +
+                                        `╚══════════════════════╝\n\n` +
+                                        `🎉 *Masa aktif botmu diperpanjang!*\n\n` +
+                                        `📱 *Nomor kamu:* \`+${upNum}\`\n` +
+                                        `🕐 *Waktu    :* _${_ts}_\n` +
+                                        `➕ *Ditambah :* *${upDurationInfo.label}*\n` +
+                                        `⏳ *Sisa baru:* *${upInfo.remaining}*\n\n` +
+                                        `✅ Semua fitur lanjut berjalan normal.\n` +
+                                        `💡 Pertanyaan? Hubungi owner: ${_contact}\n\n` +
+                                        `> _Notif otomatis — Wily Bot ${_ver}_ 🤖`,
+                        })
+                }
         }
         logCommand(m, hisoka, 'upbot');
 }
@@ -636,7 +739,7 @@ async function handleUpbot({ hisoka, m, query, tolak, logCommand, isMainBot, jad
 // dipakai untuk bot permanent (harus di-upbot ke durasi tertentu dulu).
 // Sama seperti handleUpbot: parseJadibotCommandQuery TIDAK didestrukturisasi dari
 // parameter supaya tidak shadow fungsi top-level-nya sendiri.
-async function handleDownbot({ hisoka, m, query, tolak, logCommand, isMainBot, jadibotMap, parseJadibotDuration, maskNumber, getJadibotExpirySummary, getJadibotExpiry, reduceJadibotExpiry, scheduleJadibotExpiry }) {
+async function handleDownbot({ hisoka, m, query, tolak, logCommand, isMainBot, jadibotMap, parseJadibotDuration, maskNumber, getJadibotExpirySummary, getJadibotExpiry, reduceJadibotExpiry, scheduleJadibotExpiry, loadConfig }) {
         if (!isMainBot(hisoka)) return;
         if (!m.isOwner) return;
 
@@ -750,6 +853,10 @@ async function handleDownbot({ hisoka, m, query, tolak, logCommand, isMainBot, j
 
         scheduleJadibotExpiry(downNum, downSendReplyFn);
 
+        const _dcfg     = loadConfig ? loadConfig() : {}
+        const _dver     = _dcfg.botVersion || 'V26'
+        const _dcontact = (_dcfg.botReply?.sourceUrl) || (_dcfg.owners?.[0] ? `https://wa.me/${_dcfg.owners[0]}` : 'https://wa.me/6289688206739')
+
         if (downResult.expiredNow) {
                 await sendDownBtn(
                         `╔══════════════════════╗\n` +
@@ -764,6 +871,35 @@ async function handleDownbot({ hisoka, m, query, tolak, logCommand, isMainBot, j
                         `✨ Sisa baru  : *Kedaluwarsa*\n\n` +
                         `⚠️ Sisa waktu sudah habis, bot langsung dihentikan & sesi dihapus.`
                 );
+                // ── Notif ke owner & nomor jadibot (bot habis/dihentikan) ──
+                if (loadConfig) {
+                        const _ts = _nowStrCmd()
+                        await _kirimNotifDurasi({
+                                hisoka, jadibotMap, loadConfig, number: downNum,
+                                msgOwner:
+                                        `╔══════════════════════╗\n` +
+                                        `║   ⏬  *D O W N B O T*   ║\n` +
+                                        `╚══════════════════════╝\n\n` +
+                                        `📱 *Nomor  :* \`+${downNum}\`\n` +
+                                        `🕐 *Waktu  :* _${_ts}_\n` +
+                                        `⏮️ *Sebelum:* *${oldDownLabel}*\n` +
+                                        `➖ *Dikurangi:* *${downDurationInfo.label}*\n` +
+                                        `⏳ *Sisa   :* *Kedaluwarsa — Bot dihentikan*\n\n` +
+                                        `> _Notif otomatis — Wily Bot ${_dver}_ 🤖`,
+                                msgUser:
+                                        `╔══════════════════════╗\n` +
+                                        `║   ⏬  *D O W N B O T*   ║\n` +
+                                        `╚══════════════════════╝\n\n` +
+                                        `⚠️ *Masa aktif botmu telah habis!*\n\n` +
+                                        `📱 *Nomor kamu:* \`+${downNum}\`\n` +
+                                        `🕐 *Waktu    :* _${_ts}_\n` +
+                                        `➖ *Dikurangi:* *${downDurationInfo.label}*\n` +
+                                        `⏳ *Sisa     :* *Kedaluwarsa*\n\n` +
+                                        `🛑 Bot langsung dihentikan.\n` +
+                                        `💡 Hubungi owner untuk perpanjang: ${_dcontact}\n\n` +
+                                        `> _Notif otomatis — Wily Bot ${_dver}_ 🤖`,
+                        })
+                }
         } else {
                 const downInfo = getJadibotExpirySummary(downNum);
                 await sendDownBtn(
@@ -780,6 +916,34 @@ async function handleDownbot({ hisoka, m, query, tolak, logCommand, isMainBot, j
                         `   Exp baru   : ${downInfo.expiresAtText}\n\n` +
                         `Bot tetap aktif, durasi dikurangi.`
                 );
+                // ── Notif ke owner & nomor jadibot ──
+                if (loadConfig) {
+                        const _ts = _nowStrCmd()
+                        await _kirimNotifDurasi({
+                                hisoka, jadibotMap, loadConfig, number: downNum,
+                                msgOwner:
+                                        `╔══════════════════════╗\n` +
+                                        `║   ⏬  *D O W N B O T*   ║\n` +
+                                        `╚══════════════════════╝\n\n` +
+                                        `📱 *Nomor  :* \`+${downNum}\`\n` +
+                                        `🕐 *Waktu  :* _${_ts}_\n` +
+                                        `⏮️ *Sebelum:* *${oldDownLabel}*\n` +
+                                        `➖ *Dikurangi:* *${downDurationInfo.label}*\n` +
+                                        `⏳ *Sisa baru:* *${downInfo.remaining}*\n\n` +
+                                        `> _Notif otomatis — Wily Bot ${_dver}_ 🤖`,
+                                msgUser:
+                                        `╔══════════════════════╗\n` +
+                                        `║   ⏬  *D O W N B O T*   ║\n` +
+                                        `╚══════════════════════╝\n\n` +
+                                        `ℹ️ *Masa aktif botmu dikurangi oleh owner.*\n\n` +
+                                        `📱 *Nomor kamu:* \`+${downNum}\`\n` +
+                                        `🕐 *Waktu    :* _${_ts}_\n` +
+                                        `➖ *Dikurangi:* *${downDurationInfo.label}*\n` +
+                                        `⏳ *Sisa baru:* *${downInfo.remaining}*\n\n` +
+                                        `💡 Pertanyaan? Hubungi owner: ${_dcontact}\n\n` +
+                                        `> _Notif otomatis — Wily Bot ${_dver}_ 🤖`,
+                        })
+                }
         }
         logCommand(m, hisoka, 'downbot');
 }
