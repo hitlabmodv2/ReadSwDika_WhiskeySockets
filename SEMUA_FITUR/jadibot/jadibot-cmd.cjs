@@ -854,7 +854,11 @@ async function handleDownbot({ hisoka, m, query, tolak, logCommand, isMainBot, j
                 return;
         }
 
-        scheduleJadibotExpiry(downNum, downSendReplyFn);
+        // Hanya reschedule timer kalau sisa waktu masih ada.
+        // Kalau expiredNow=true, scheduleJadibotExpiry akan langsung trigger
+        // expireJadibot (double cleanup+notif). Fix: skip, biarkan branch
+        // expiredNow di bawah yang handle notif & cleanup-nya sendiri.
+        if (!downResult.expiredNow) scheduleJadibotExpiry(downNum, downSendReplyFn);
 
         const _dcfg     = loadConfig ? loadConfig() : {}
         const _dver     = _dcfg.botVersion || 'V26'

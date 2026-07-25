@@ -915,11 +915,22 @@ function msgOwnerExpired(number) {
   const cfg    = loadConfig()
   const ver    = cfg.botVersion || 'V25'
   const masked = maskNumber(number)
-  const remainingList = [...jadibotMap.keys()]
+  // Filter out nomor yg baru expired — jadibotMap.delete() dipanggil setelah fungsi ini,
+  // jadi tanpa filter, nomor yg expired masih muncul di list (bug realtime).
+  const remainingList = [...jadibotMap.keys()].filter(n => n !== number)
+  const _now = Date.now()
 
   const listPart = remainingList.length > 0
     ? `📊 *Jadibot Masih Aktif (${remainingList.length}):*\n` +
-      remainingList.map((v, i) => `${i + 1}. \`+${v}\``).join('\n') + `\n`
+      remainingList.map((v, i) => {
+        const _m = getJadibotExpiry(v)
+        const _isPerm = _m?.permanent === true
+        const _sisa = _isPerm
+          ? '♾️ Permanent'
+          : (_m?.expiresAt ? formatRemainingTime(Math.max(0, Number(_m.expiresAt) - _now)) : '?')
+        const _exp = _isPerm ? '' : (_m?.expiresAt ? ` _(s/d ${formatJadibotExpiryTime(_m.expiresAt)})_` : '')
+        return `${i + 1}. \`+${v}\` — *${_sisa}*${_exp}`
+      }).join('\n') + `\n`
     : `> ❌ _Tidak ada jadibot lain yang aktif saat ini._\n`
 
   return (
