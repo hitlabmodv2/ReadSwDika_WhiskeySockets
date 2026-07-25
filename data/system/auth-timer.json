@@ -1,39 +1,15 @@
 {
   "events": [
     {
-      "type": "connected",
-      "connectedAt": "2026-07-25T11:30:07.301Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-25T09:28:27.491Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-25T02:03:43.526Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-24T22:18:19.942Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-24T22:08:46.861Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-24T21:58:11.139Z"
-    },
-    {
       "type": "pairing",
       "code": "AAAA-AAAA",
       "number": "6285159438825",
-      "startAt": "2026-07-24T21:57:52.300Z",
-      "expireAt": "2026-07-24T22:00:52.300Z",
+      "startAt": "2026-07-25T11:43:00.760Z",
+      "expireAt": "2026-07-25T11:46:00.760Z",
       "durationSeconds": 180,
-      "sessionExpireAt": "2026-07-24T22:00:52.300Z"
+      "sessionExpireAt": "2026-07-25T11:46:00.760Z"
     }
   ],
-  "lastUpdated": "2026-07-25T11:30:07.301Z",
-  "sessionStart": "2026-07-24T21:57:52.320Z"
+  "lastUpdated": "2026-07-25T11:43:00.763Z",
+  "sessionStart": "2026-07-25T11:43:00.763Z"
 }
