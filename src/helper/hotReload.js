@@ -124,7 +124,7 @@ const WATCHED_FILES = [
     { key: 'cjs:sendstatus',   rel: 'SEMUA_FITUR/group/sendstatus.cjs',    type: 'cjs' },
     { key: 'cjs:setgoodbye',   rel: 'SEMUA_FITUR/group/setgoodbye.cjs',    type: 'cjs' },
     { key: 'cjs:upswgc',       rel: 'SEMUA_FITUR/group/upswgc.cjs',        type: 'cjs' },
-    { key: 'cjs:upswgcv2',     rel: 'SEMUA_FITUR/group/upswgcv2.cjs',      type: 'cjs' },
+
     // Jadibot
     { key: 'cjs:clearsesi',    rel: 'SEMUA_FITUR/jadibot/clearsesi.cjs',   type: 'cjs' },
     { key: 'cjs:ceksesi',      rel: 'SEMUA_FITUR/jadibot/ceksesi.cjs',     type: 'cjs' },

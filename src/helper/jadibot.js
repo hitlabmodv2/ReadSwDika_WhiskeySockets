@@ -2162,7 +2162,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
     'wm', 'swm',
     'toimg', 'hd',
     'upswgc', 'swgc', 'swgrup', 'swgroup', 'statusgrup', 'statusgroup',
-    'upswgcv2', 'swgcv2', 'swgrupv2', 'swgroupv2', 'statusgrupv2', 'statusgroupv2',
+
     'readchat',
     'ceksw',
     'ceksetting',
@@ -3125,7 +3125,7 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
     'wm', 'swm',
     'toimg', 'hd',
     'upswgc', 'swgc', 'swgrup', 'swgroup', 'statusgrup', 'statusgroup',
-    'upswgcv2', 'swgcv2', 'swgrupv2', 'swgroupv2', 'statusgrupv2', 'statusgroupv2',
+
     'readchat',
     'ceksw',
     'ceksetting',

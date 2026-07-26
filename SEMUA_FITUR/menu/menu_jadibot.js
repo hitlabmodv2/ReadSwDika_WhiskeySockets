@@ -106,8 +106,7 @@ export function getMenuJadibotBody() {
 ╰➤ *.emojicustom*
 
 ╭─「 📡 *STATUS & STORY* 」
-├➤ *.upswgc [caption]*
-╰➤ *.swgcv2 [teks]|[warna]|[grup]*
+╰➤ *.upswgc [caption]*
 
 ╭─「 🎌 *ANIME GIF* 」
 ├➤ *.animgif*
