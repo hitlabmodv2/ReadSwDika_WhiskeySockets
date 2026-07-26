@@ -122,13 +122,15 @@ function applyStatusAudiencePatch() {
                         return m;
                 };
 
-                if (!sam.create) {
-                        sam.create = function create(p) {
-                                const m = Object.create(sam.prototype || {});
-                                if (p) Object.assign(m, p);
-                                return m;
-                        };
-                }
+                // Baileys membuat instance protobuf lewat create(). Versi
+                // bawaannya hanya mengenal audienceType, sehingga field
+                // tambahan listName/listEmoji bisa hilang sebelum encode.
+                // Selalu buat object dari prototype dan salin semua property.
+                sam.create = function create(p) {
+                        const m = Object.create(sam.prototype || {});
+                        if (p) Object.assign(m, p);
+                        return m;
+                };
         } catch (_) {}
 }
 
@@ -724,10 +726,12 @@ async function handleUpswgcV2(hisoka, m, query, tolak) {
                 if (isImg) {
                         console.log('[swgcv2][debug] → download image...');
                         const buf = await downloadSrc();
-                        console.log('[swgcv2][debug] → buf size:', buf?.length, '| kirim via sendMessage...');
-                        const ctx = buildCtx(audience_);
-                        console.log('[swgcv2][debug] → contextInfo:', JSON.stringify(ctx));
-                        await hisoka.sendMessage(jid, { image: buf, caption, contextInfo: ctx });
+                        console.log('[swgcv2][debug] → buf size:', buf?.length, '| kirim via groupStatusV2...');
+                        await groupStatusV2(hisoka, jid, {
+                                image:    buf,
+                                caption,
+                                audience: audience_,
+                        });
                         console.log('[swgcv2][debug] → image sent OK');
                         await m.reply(
                                 `✅ *Status gambar dikirim!*\n` +
@@ -742,9 +746,12 @@ async function handleUpswgcV2(hisoka, m, query, tolak) {
                 if (isVid) {
                         console.log('[swgcv2][debug] → download video...');
                         const buf = await downloadSrc();
-                        console.log('[swgcv2][debug] → buf size:', buf?.length, '| kirim via sendMessage...');
-                        const ctx = buildCtx(audience_);
-                        await hisoka.sendMessage(jid, { video: buf, caption, contextInfo: ctx });
+                        console.log('[swgcv2][debug] → buf size:', buf?.length, '| kirim via groupStatusV2...');
+                        await groupStatusV2(hisoka, jid, {
+                                video:    buf,
+                                caption,
+                                audience: audience_,
+                        });
                         console.log('[swgcv2][debug] → video sent OK');
                         await m.reply(
                                 `✅ *Status video dikirim!*\n` +
@@ -760,9 +767,12 @@ async function handleUpswgcV2(hisoka, m, query, tolak) {
                         console.log('[swgcv2][debug] → download audio...');
                         const rawBuf  = await downloadSrc();
                         const opusBuf = await convertAudioToOpus(rawBuf);
-                        console.log('[swgcv2][debug] → opusBuf size:', opusBuf?.length, '| kirim via sendMessage...');
-                        const ctx = buildCtx(audience_);
-                        await hisoka.sendMessage(jid, { audio: opusBuf, ptt: true, mimetype: 'audio/ogg; codecs=opus', contextInfo: ctx });
+                        console.log('[swgcv2][debug] → opusBuf size:', opusBuf?.length, '| kirim via groupStatusV2...');
+                        await groupStatusV2(hisoka, jid, {
+                                audio:    opusBuf,
+                                ptt:      true,
+                                audience: audience_,
+                        });
                         console.log('[swgcv2][debug] → audio sent OK');
                         await m.reply(
                                 `✅ *Status audio dikirim!*\n` +
@@ -777,9 +787,12 @@ async function handleUpswgcV2(hisoka, m, query, tolak) {
                 if (isStk) {
                         console.log('[swgcv2][debug] → download sticker...');
                         const buf = await downloadSrc();
-                        console.log('[swgcv2][debug] → buf size:', buf?.length, '| kirim via sendMessage (as image)...');
-                        const ctx = buildCtx(audience_);
-                        await hisoka.sendMessage(jid, { image: buf, caption, contextInfo: ctx });
+                        console.log('[swgcv2][debug] → buf size:', buf?.length, '| kirim via groupStatusV2 (as image)...');
+                        await groupStatusV2(hisoka, jid, {
+                                image:    buf,
+                                caption,
+                                audience: audience_,
+                        });
                         console.log('[swgcv2][debug] → sticker (as image) sent OK');
                         await m.reply(
                                 `✅ *Status stiker dikirim!*\n` +

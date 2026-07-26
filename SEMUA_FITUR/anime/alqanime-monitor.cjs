@@ -343,8 +343,58 @@ async function simulasi() {
 const SEP  = '━━━━━━━━━━━━━━━━━━';
 const SEP2 = '┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄';
 
-function potongSinopsis(teks, maks = 9999) {
-    const t = (teks || '-').trim();
+ function bersihkanInline(teks) {
+     return String(teks ?? '')
+         .replace(/[*_~`]/g, '')
+         .replace(/\s{2,}/g, ' ')
+         .trim();
+ }
+
+ function formatMono(teks) {
+     const value = bersihkanInline(teks);
+     return value ? `\`${value}\`` : '';
+ }
+
+ function buatDaftarInfo(items) {
+     const valid = items
+         .map(([emoji, label, value, formatter]) => ({
+             emoji,
+             label,
+             value: bersihkanInline(value),
+             formatter,
+         }))
+         .filter(item => item.value && item.value !== '-');
+
+     return valid.map((item, index) => {
+         const value = item.formatter ? item.formatter(item.value) : item.value;
+         return `${index + 1}. ${item.emoji} *${item.label}:* ${value}`;
+     }).join('\n');
+ }
+
+ function buatDaftarDownload(episodes, tipe) {
+     if (!episodes.length) return '';
+
+     const epTerbaru = episodes[0];
+     const resolusiList = Object.entries(epTerbaru.links || {});
+     if (!resolusiList.length) return '';
+
+     const label = tipe === 'batch'
+         ? '📥 *DOWNLOAD BATCH*'
+         : `📥 *DOWNLOAD EP ${bersihkanInline(epTerbaru.episode || '?')}*`;
+
+     const rows = resolusiList.map(([res, hosts], index) => {
+         const hostStr = hosts
+             .slice(0, 3)
+             .map(host => `[${bersihkanInline(host.host || 'Link')}](${host.url})`)
+             .join('  ');
+         return `${index + 1}. ${formatMono(res.toUpperCase())} → ${hostStr}`;
+     });
+
+     return [SEP, label, SEP2, ...rows].join('\n');
+ }
+
+ function potongSinopsis(teks, maks = 9999) {
+     const t = bersihkanInline(teks);
     if (t.length <= maks) return t;
     return t.slice(0, maks).trimEnd() + '…';
 }
@@ -579,45 +629,47 @@ function buatCaptionGabung(data) {
     }
 
     // Judul alt — plain text di bawah judul utama
-    const judulAlt = info.judulAlt ? `${info.judulAlt}\n` : '';
+    const judulAlt = info.judulAlt ? `_${bersihkanInline(info.judulAlt)}_\n` : '';
 
     // Sinopsis
-    const sinopsisText = (sinopsis || '-').trim();
-    const sinopsisBlok = sinopsisText.split('\n').map(b => b.trim() ? `> ${b}` : '').join('\n');
+    const sinopsisText = potongSinopsis(sinopsis);
+    const sinopsisBlok = sinopsisText
+        ? sinopsisText.split('\n').map(b => b.trim() ? `> ${b}` : '').join('\n')
+        : '';
 
     // Info batch: jumlah episode
     const batchIsiStr = (tipe === 'batch' && batchTotal) ? `${batchTotal} Episode` : null;
     const formatStr   = isBD ? 'BD / Bluray' : null;
 
     // ── Info Grup 1: metadata utama ──
-    const seksi1 = buatBarisInfo([
-        ['🗂️ Tipe      ', info.Tipe                              || null],
-        ['📦 Episode   ', tipe === 'batch'
+    const seksi1 = buatDaftarInfo([
+        ['🗂️', 'Tipe', info.Tipe, formatMono],
+        ['📦', 'Episode', tipe === 'batch'
             ? (batchIsiStr || (totalSeri ? String(totalSeri) : null))
             : tipe === 'movie'
             ? null
-            : (totalSeri ? `${epNum || '?'}/${totalSeri}` : null)],
-        ['💿 Format    ', formatStr],
-        ['🗓️ Dirilis   ', info.Dirilis                           || null],
-        ['🌸 Musim     ', info.Musim                             || null],
-        ['📡 Status    ', info.Status                            || null],
-        ['🏢 Studio    ', info.Studio                            || null],
-        ['🗣️ Subtitle  ', info.Subtitle                          || null],
-        ['✏️ Credit    ', info.Credit                            || null],
+            : (totalSeri ? `${epNum || '?'}/${totalSeri}` : null), formatMono],
+        ['💿', 'Format', formatStr, formatMono],
+        ['🗓️', 'Dirilis', info.Dirilis],
+        ['🌸', 'Musim', info.Musim],
+        ['📡', 'Status', info.Status],
+        ['🏢', 'Studio', info.Studio],
+        ['🗣️', 'Subtitle', info.Subtitle],
+        ['✏️', 'Credit', info.Credit],
     ]);
 
     // ── Info Grup 2: score, genre, casts ──
-    const seksi2 = buatBarisInfo([
-        ['⭐ Score     ', info.Score ? `${info.Score}/10`        : null],
-        ['🎭 Genre     ', genreStr],
-        ['👥 Casts     ', info.Casts                             || null],
+    const seksi2 = buatDaftarInfo([
+        ['⭐', 'Score', info.Score ? `${info.Score}/10` : null, formatMono],
+        ['🎭', 'Genre', genreStr],
+        ['👥', 'Casts', info.Casts],
     ]);
 
     // ── Info Grup 3: info posting ──
-    const seksi3 = buatBarisInfo([
-        ['📤 Oleh         ', info['Diposting oleh']              || null],
-        ['🗓️ Diposting    ', info['Diposting pada']              || null],
-        ['🔄 Diperbarui   ', info['Diperbarui pada']             || null],
+    const seksi3 = buatDaftarInfo([
+        ['📤', 'Oleh', info['Diposting oleh']],
+        ['🗓️', 'Diposting', info['Diposting pada']],
+        ['🔄', 'Diperbarui', info['Diperbarui pada']],
     ]);
 
     const infoAnime = [
@@ -627,22 +679,7 @@ function buatCaptionGabung(data) {
     ].filter(Boolean).join('');
 
     // ── Download ──
-    let dlBlok = '';
-    if (episodes.length) {
-        const epTerbaru    = episodes[0];
-        const resolusiList = Object.entries(epTerbaru.links || {});
-        if (resolusiList.length) {
-            const dlLabel = tipe === 'batch'
-                ? `📥 *DOWNLOAD BATCH*`
-                : `📥 *DOWNLOAD EP ${epTerbaru.episode}*`;
-            dlBlok = `${SEP}\n${dlLabel}\n${SEP2}\n`;
-            for (const [res, hosts] of resolusiList) {
-                const hostStr = hosts.map(h => `[${h.host}](${h.url})`).join('  ');
-                dlBlok += `├ ${res.toUpperCase()} → ${hostStr}\n`;
-            }
-            dlBlok = dlBlok.trimEnd();
-        }
-    }
+    const dlBlok = buatDaftarDownload(episodes, tipe);
 
     // ── Rakitan caption ──
     const baris = [
@@ -650,22 +687,21 @@ function buatCaptionGabung(data) {
         `${SEP}`,
         `📅 _${headerWaktu}_`,
         `${SEP}`,
-        `🎌 *${judul}*`,
+        `🎌 *${bersihkanInline(judul)}*`,
         judulAlt ? judulAlt.trimEnd() : null,
         ``,
         badgeTipe,
         badgeStatus || null,
         `📺 *${epHeader || 'Episode ?'}*`,
         ``,
-        `📖 *Sinopsis*`,
-        sinopsisBlok,
+        sinopsisBlok ? `📖 *Sinopsis*\n${sinopsisBlok}` : null,
         ``,
         `${SEP}`,
         `📋 *Info Anime*`,
         infoAnime,
         `${SEP}`,
-        `▶️ *Tonton* : ${url}`,
-        `🔗 *Source* : alqanime.net`,
+        `▶️ *Tonton:* ${url}`,
+        `🔗 *Source:* ${formatMono('alqanime.net')}`,
         dlBlok ? dlBlok : null,
     ];
 
@@ -724,7 +760,7 @@ function buatCaptionHangat(newEntries, allHangat) {
         txt += `✨ *Baru Masuk Hot List:*\n`;
         newEntries.slice(0, 5).forEach((a, i) => {
             const scoreStr = a.score ? ` ⭐${a.score}` : '';
-            txt += `${i + 1}. *${a.title}*${scoreStr}\n`;
+            txt += `${i + 1}. *${bersihkanInline(a.title)}*${scoreStr}\n`;
         });
         txt += `\n`;
     }
@@ -734,10 +770,10 @@ function buatCaptionHangat(newEntries, allHangat) {
     txt += `${SEP2}\n`;
     allHangat.slice(0, 10).forEach((a, i) => {
         const scoreStr = a.score ? ` ⭐${a.score}` : '';
-        txt += `${i + 1}. ${a.title}${scoreStr}\n`;
+        txt += `${i + 1}. *${bersihkanInline(a.title)}*${scoreStr}\n`;
     });
     txt += `${SEP}\n`;
-    txt += `🌐 alqanime.net`;
+    txt += `🌐 ${formatMono('alqanime.net')}`;
 
     return txt.trim();
 }
