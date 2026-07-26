@@ -870,6 +870,12 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         if (await handleAlqNotifReply({ hisoka, m, pendingAlqNotifChoices, getQuotedStanzaId, tolak, logCommand, loadConfig, fs, path })) return;
                 }
 
+                // ── Handle button callback alqanimenotif (__alqnotif_*) ──
+                {
+                        const { handleAlqanimeNotifCallbacks } = _require(path.resolve('./SEMUA_FITUR/anime/alqanime-monitor.cjs'));
+                        if (await handleAlqanimeNotifCallbacks({ hisoka, m, tolak, logCommand, Button, loadConfig, fs, path })) return;
+                }
+
                 // ── Handle reply ke status nekopoinotif (add/del GC) ──
                 {
                         const { handleNekpoiNotifReply } = _require(path.resolve('./SEMUA_FITUR/anime/nekopoi-monitor.cjs'));
@@ -1322,7 +1328,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 const _alqSub = (query || '').trim().toLowerCase();
                                 if (['on', 'off', 'status', 'test', 'help', 'test grup', 'add', 'del'].includes(_alqSub) || /^(add|del)\s/.test(_alqSub)) {
                                         const { handleAlqanimeNotif } = _require(path.resolve('./SEMUA_FITUR/anime/alqanime-monitor.cjs'));
-                                        await handleAlqanimeNotif({ hisoka, m, query, tolak, logCommand, sendConfirmWithButtons, fs, path, loadConfig, pendingAlqNotifChoices, getQuotedStanzaId });
+                                        await handleAlqanimeNotif({ hisoka, m, query, tolak, logCommand, sendConfirmWithButtons, fs, path, loadConfig, pendingAlqNotifChoices, getQuotedStanzaId, Button });
                                 } else {
                                         const { handleAlq } = _require(path.resolve('./SEMUA_FITUR/anime/alqanime.cjs'));
                                         await handleAlq({ hisoka, m, query, tolak, logCommand, logError, path, pendingAlqDlChoices, getJadibotChoiceKey });
@@ -2077,7 +2083,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                         case 'alqanimenotif': {
                                 const { handleAlqanimeNotif } = _require(path.resolve('./SEMUA_FITUR/anime/alqanime-monitor.cjs'));
-                                await handleAlqanimeNotif({ hisoka, m, query, tolak, logCommand, sendConfirmWithButtons, fs, path, loadConfig, pendingAlqNotifChoices, getQuotedStanzaId });
+                                await handleAlqanimeNotif({ hisoka, m, query, tolak, logCommand, sendConfirmWithButtons, fs, path, loadConfig, pendingAlqNotifChoices, getQuotedStanzaId, Button });
                                 break;
                         }
 

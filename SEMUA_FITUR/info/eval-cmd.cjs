@@ -59,16 +59,7 @@ async function handleEval({ hisoka, m, query, text, tolak, logCommand, util }) {
 
 async function handleBash({ hisoka, m, query, tolak, logCommand, exec, util }) {
         try {
-                // Auto-fix: kalau query adalah nama file .sh tanpa prefix path atau interpreter
-                // (contoh: "start-ptero.sh") → otomatis jadi "bash ./start-ptero.sh"
-                // Ini mencegah error "/bin/sh: not found" karena shell cari di PATH, bukan cwd.
-                let cmd = query
-                if (/^([\w.-]+\.sh)(\s|$)/.test(cmd)) {
-                        cmd = 'bash ./' + cmd
-                }
-
-                const cwd = process.cwd()
-                exec(cmd, { cwd }, (error, stdout, stderr) => {
+                exec(query, (error, stdout, stderr) => {
                         if (error) {
                                 return m.throw(util.format(error));
                         }
