@@ -1,15 +1,23 @@
 {
   "events": [
     {
+      "type": "connected",
+      "connectedAt": "2026-07-26T06:55:36.018Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-25T23:37:25.626Z"
+    },
+    {
       "type": "pairing",
       "code": "AAAA-AAAA",
       "number": "6285159438825",
-      "startAt": "2026-07-25T11:43:00.760Z",
-      "expireAt": "2026-07-25T11:46:00.760Z",
+      "startAt": "2026-07-25T23:37:07.638Z",
+      "expireAt": "2026-07-25T23:40:07.638Z",
       "durationSeconds": 180,
-      "sessionExpireAt": "2026-07-25T11:46:00.760Z"
+      "sessionExpireAt": "2026-07-25T23:40:07.638Z"
     }
   ],
-  "lastUpdated": "2026-07-25T11:43:00.763Z",
-  "sessionStart": "2026-07-25T11:43:00.763Z"
+  "lastUpdated": "2026-07-26T06:55:36.019Z",
+  "sessionStart": "2026-07-25T23:37:07.661Z"
 }
