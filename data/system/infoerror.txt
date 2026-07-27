@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 27/07/2026, 10.27.41  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 27/07/2026, 14.08.42  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  AlqanimeNotif
+│  #001  —  command:❌
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [AlqanimeNotif] ❌ Gagal fetch homepage: Request failed with status code 503
+│  Identifier 'confirm' has already been declared
 │
 │  DETAIL
-│  Sumber      : AlqanimeNotif
+│  Sumber      : command:❌
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 27/07/2026, 10.27.41
-│  Terakhir    : 27/07/2026, 10.27.41
+│  Pertama     : 27/07/2026, 14.08.42
+│  Terakhir    : 27/07/2026, 14.08.42
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [AlqanimeNotif] ❌ Gagal fetch homepage: Request failed with status code 503
-│     at console.error (file:///home/runner/workspace/index.js:434:27)
-│     at Object.cariEpisodeBaru (/home/runner/workspace/SEMUA_FITUR/anime/alqanime-monitor.cjs:220:17)
+│  ▶  /home/runner/workspace/SEMUA_FITUR/anime/hentaidad.cjs:636
+│     const confirm = pendingHentaidadConfirm.get(m.sender);
+│     ^
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 27/07/2026, 10.27.41
+  Terakhir diperbarui: 27/07/2026, 14.08.42
 ════════════════════════════════════════════════════════════════════════

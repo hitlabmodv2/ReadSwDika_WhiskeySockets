@@ -25,11 +25,6 @@ const axios   = require('axios');
 const cheerio = require('cheerio');
 const sharp   = require('sharp');
 
-const {
-    generateWAMessageFromContent,
-    prepareWAMessageMedia,
-    proto,
-} = require('@whiskeysockets/baileys');
 
 const BASE    = 'https://hentaidad.com';
 const HEADERS = {
@@ -206,16 +201,18 @@ function txtDipilih(chosen, headerPilih) {
     );
 }
 
-/** Teks caption untuk pesan konfirmasi (thumbnail + tombol) */
+/** Teks caption untuk pesan konfirmasi (thumbnail + reply 1/2) */
 function txtConfirmCaption(chosen, galleryTitle, imageCount, headerPilih) {
     const judul = galleryTitle.length > 52 ? galleryTitle.slice(0, 52) + '…' : galleryTitle;
     return (
         `🔞 *HENTAIDAD — Konfirmasi*\n\n` +
         `${headerPilih}\n\n` +
-        `📌 *${judul}*\n\n` +
+        `📌 *${judul}*\n` +
         `- 📸 *Jumlah gambar:* \`${imageCount}\`\n\n` +
-        `❓ _Lanjutkan download & kirim semua ${imageCount} gambar?_\n` +
-        `> ⚠️ _Proses ini membutuhkan waktu beberapa menit_`
+        `❓ _Lanjutkan download & kirim semua ${imageCount} gambar?_\n\n` +
+        `> *Reply pesan ini:*\n` +
+        `> *1* — ✅ Lanjutkan\n` +
+        `> *2* — ❌ Tidak`
     );
 }
 
@@ -292,62 +289,27 @@ async function _editKey(hisoka, m, sentKey, text) {
     } catch (_) {}
 }
 
-// ── Kirim pesan konfirmasi: thumbnail (sendMessage) + tombol list (sendListMessage) ──
-//
-//  generateWAMessageFromContent dengan { quoted: m } tidak reliable di semua konteks,
-//  jadi kita pakai pendekatan yang sudah proven di bot ini:
-//    1. Kirim gambar + caption via sendMessage biasa
-//    2. Kirim tombol konfirmasi via sendListMessage (punya internal fallback, tidak pernah throw)
-//    3. Fallback plain text jika semua gagal
-//
+// ── Kirim pesan konfirmasi: thumbnail + teks (reply 1 = ya, 2 = tidak) ──────────
 async function _sendConfirmMsg(hisoka, m, captionText, thumbBuf) {
-    const { sendListMessage } = require('../helper/interactive-msg.cjs');
-
-    // ── Step 1: Kirim thumbnail + info sebagai gambar biasa ───────────────────
-    if (thumbBuf) {
-        try {
-            await hisoka.sendMessage(m.from, {
+    // Kirim sebagai gambar + caption jika ada thumbnail, fallback plain text
+    try {
+        if (thumbBuf) {
+            const sent = await hisoka.sendMessage(m.from, {
                 image  : thumbBuf,
                 caption: captionText,
             }, { quoted: m });
-        } catch (e) {
-            console.error('[HENTAIDAD] Gagal kirim thumbnail:', e?.message);
+            return { sent, mode: 'image' };
         }
-    }
-
-    // ── Step 2: Kirim tombol konfirmasi via sendListMessage ───────────────────
-    // sendListMessage punya 3 layer fallback internal (interactiveMessage →
-    // listMessage → plain text), tidak pernah throw ke luar.
-    const confirmBody = thumbBuf
-        ? `❓ *Lanjutkan download & kirim semua gambar?*`
-        : captionText + `\n\n❓ *Lanjutkan?*`;
-
-    try {
-        await sendListMessage(hisoka, m.from, m, {
-            body      : confirmBody,
-            buttonText: '📋 Konfirmasi',
-            footer    : '⚡ Tap tombol di bawah untuk memilih',
-            sections  : [{
-                title: 'Konfirmasi Download',
-                rows : [
-                    { rowId: 'hentaidad_yes', title: '✅ Lanjutkan', description: 'Download & kirim semua gambar' },
-                    { rowId: 'hentaidad_no',  title: '❌ Tidak',     description: 'Batalkan, kembali ke menu' },
-                ],
-            }],
-        });
-        return { sent: null, mode: 'list' };
     } catch (e) {
-        console.error('[HENTAIDAD] sendListMessage error:', e?.message);
+        console.error('[HENTAIDAD] Gagal kirim thumbnail, fallback text:', e?.message);
     }
 
-    // ── Fallback: plain text murni — tidak boleh gagal ────────────────────────
+    // Fallback: plain text
     try {
-        const fallbackText = (thumbBuf ? '' : captionText + '\n\n') +
-            `❓ *Konfirmasi:*\nBalas *lanjutkan* untuk download, atau *tidak* untuk batal`;
-        const sent = await hisoka.sendMessage(m.from, { text: fallbackText }, { quoted: m });
+        const sent = await hisoka.sendMessage(m.from, { text: captionText }, { quoted: m });
         return { sent, mode: 'text' };
     } catch (e) {
-        console.error('[HENTAIDAD] _sendConfirmMsg plain text fallback gagal:', e?.message);
+        console.error('[HENTAIDAD] _sendConfirmMsg gagal total:', e?.message);
     }
 
     return { sent: null, mode: 'failed' };
@@ -655,9 +617,9 @@ async function handleHentaidadConfirm({
 
     const raw  = String(m.text || '').trim().toLowerCase();
 
-    // Nilai konfirmasi yang dikenali
-    const YES_VALUES = ['hentaidad_yes', 'lanjutkan', 'ya', 'yes', 'lanjut', 'oke', 'ok'];
-    const NO_VALUES  = ['hentaidad_no',  'tidak', 'no', 'batal', 'cancel', 'gak', 'ga'];
+    // Nilai konfirmasi yang dikenali — 1 = ya, 2 = tidak
+    const YES_VALUES = ['1', 'ya', 'yes', 'lanjut', 'lanjutkan', 'oke', 'ok'];
+    const NO_VALUES  = ['2', 'tidak', 'no', 'batal', 'cancel', 'gak', 'ga'];
 
     const isYes = YES_VALUES.includes(raw);
     const isNo  = NO_VALUES.includes(raw);
@@ -665,6 +627,12 @@ async function handleHentaidadConfirm({
     if (!isYes && !isNo) return false;
 
     const confirm = pendingHentaidadConfirm.get(m.sender);
+
+    // Jika ada confirmMsgId, pastikan user reply ke pesan konfirmasi yang benar
+    if (confirm?.confirmMsgId && m.isQuoted) {
+        const quotedId = typeof getQuotedStanzaId === 'function' ? getQuotedStanzaId(m) : null;
+        if (quotedId && quotedId !== confirm.confirmMsgId) return false;
+    }
 
     // ── Expired ───────────────────────────────────────────────────────────────
     if (confirm.expiresAt <= Date.now()) {
