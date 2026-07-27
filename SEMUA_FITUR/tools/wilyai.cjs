@@ -101,7 +101,7 @@ async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, w, total
                     isEnabled
                         ? activeDesc('User bisa pakai .wily, .ai, .tanya')
                         : offDesc('User belum bisa pakai AI'),
-                    `${pref}wilyai1 on`
+                    `${pref}wilyai on`
                 )
                 .makeRow(
                     !isEnabled
@@ -111,7 +111,7 @@ async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, w, total
                     !isEnabled
                         ? activeDesc('Perintah AI dinonaktifkan')
                         : 'Matikan perintah AI — user tidak bisa pakai',
-                    `${pref}wilyai1 off`
+                    `${pref}wilyai off`
                 )
 
                 // ── Section 2: Auto Reply ─────────────────────────────────
@@ -124,7 +124,7 @@ async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, w, total
                     isAutoReply
                         ? activeDesc('Bot otomatis balas pesan sesuai scope')
                         : offDesc('Bot belum auto balas'),
-                    `${pref}wilyai1 replay on`
+                    `${pref}wilyai replay on`
                 )
                 .makeRow(
                     !isAutoReply
@@ -134,7 +134,7 @@ async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, w, total
                     !isAutoReply
                         ? activeDesc('.wily masih bisa dipakai manual')
                         : 'Matikan auto reply, .wily tetap bisa dipakai manual',
-                    `${pref}wilyai1 replay off`
+                    `${pref}wilyai replay off`
                 )
 
                 // ── Section 3: Scope ─────────────────────────────────────
@@ -143,19 +143,19 @@ async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, w, total
                     mark(scope === 'all') + '🌐 Semua (PM + GC)',
                     'Private + Grup',
                     scope === 'all' ? activeDesc('Auto reply aktif di PM dan Grup') : 'Auto reply di private chat dan grup',
-                    `${pref}wilyai1 all`
+                    `${pref}wilyai all`
                 )
                 .makeRow(
                     mark(scope === 'pm') + '📩 Private Only',
                     'Hanya Private Chat (DM)',
                     scope === 'pm' ? activeDesc('Auto reply hanya di private chat') : 'Auto reply hanya di private chat (DM)',
-                    `${pref}wilyai1 pm`
+                    `${pref}wilyai pm`
                 )
                 .makeRow(
                     mark(scope === 'gc') + '👥 Grup Only',
                     'Hanya Grup',
                     scope === 'gc' ? activeDesc('Auto reply hanya di grup') : 'Auto reply hanya di grup',
-                    `${pref}wilyai1 gc`
+                    `${pref}wilyai gc`
                 )
 
                 // ── Section 4: History ────────────────────────────────────
@@ -166,7 +166,7 @@ async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, w, total
                     totalSesi > 0
                         ? `Ada ${totalSesi} sesi aktif — tap untuk hapus semua`
                         : 'Tidak ada sesi tersimpan saat ini',
-                    `${pref}wilyai1 reset`
+                    `${pref}wilyai reset`
                 );
 
             await _deleteLastMsg(hisoka, m.from);

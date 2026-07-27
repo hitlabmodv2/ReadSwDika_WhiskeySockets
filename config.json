@@ -84,7 +84,7 @@
   },
   "wilyAI": {
     "enabled": false,
-    "autoReply": true,
+    "autoReply": false,
     "privateReply": false,
     "scope": "all",
     "persona": {
