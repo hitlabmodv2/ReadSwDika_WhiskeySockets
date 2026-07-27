@@ -10,7 +10,7 @@
   "cekswTracking": true,
   "owners": [
     "6285159438825",
-    "62896882067391"
+    "6289688206739"
   ],
   "sticker": {
     "pack": "Alamak",
@@ -83,7 +83,7 @@
     "footer": "Version V19"
   },
   "wilyAI": {
-    "enabled": true,
+    "enabled": false,
     "autoReply": true,
     "privateReply": false,
     "scope": "all",

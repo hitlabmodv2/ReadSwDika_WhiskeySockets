@@ -1631,7 +1631,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                         case 'ceksw': {
                                 const { handleCeksw } = _require(path.resolve('./SEMUA_FITUR/setting/ceksw.cjs'));
-                                await handleCeksw({ hisoka, m, query, tolak, logCommand, fs, path, loadConfig, saveConfig, getJadibotNumber, pruneSwStatsAt, countActiveSW, getJadibotEmojiMode });
+                                await handleCeksw({ hisoka, m, query, tolak, logCommand, fs, path, loadConfig, saveConfig, getJadibotNumber, pruneSwStatsAt, countActiveSW, getJadibotEmojiMode, getMainEmojiMode });
                                 break;
                         }
 

@@ -26,7 +26,7 @@
 
 // ── COMMAND HANDLER ───────────────────────────────────────────────────────────
 
-async function handleCeksw({ hisoka, m, query, tolak, logCommand, fs, path, loadConfig, saveConfig, getJadibotNumber, pruneSwStatsAt, countActiveSW, getJadibotEmojiMode }) {
+async function handleCeksw({ hisoka, m, query, tolak, logCommand, fs, path, loadConfig, saveConfig, getJadibotNumber, pruneSwStatsAt, countActiveSW, getJadibotEmojiMode, getMainEmojiMode }) {
         if (!m.isOwner) return;
         try {
                 const isJadibot    = hisoka?.isMainBot === false;
@@ -232,7 +232,9 @@ async function handleCeksw({ hisoka, m, query, tolak, logCommand, fs, path, load
                 } else {
                         trackingOn = loadConfig().cekswTracking !== false;
                 }
-                const _rawMode    = getJadibotEmojiMode ? getJadibotEmojiMode(_botNum) : 'default';
+                const _rawMode    = isJadibot
+                        ? (getJadibotEmojiMode ? getJadibotEmojiMode(_botNum) : 'default')
+                        : (getMainEmojiMode ? getMainEmojiMode() : 'default');
                 const _isCustom   = String(_rawMode).toLowerCase() === 'custom';
                 const _emojiLabel = _isCustom ? '🟢 Custom' : '🔵 Default';
                 text += `╰══════════════════════════╯\n`;
