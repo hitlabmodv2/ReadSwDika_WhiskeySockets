@@ -21,9 +21,10 @@
  */
 'use strict';
 
-const axios   = require('axios');
-const cheerio = require('cheerio');
-const sharp   = require('sharp');
+const axios       = require('axios');
+const cheerio     = require('cheerio');
+const sharp       = require('sharp');
+const PDFDocument = require('pdfkit');
 
 
 const BASE    = 'https://hentaidad.com';
@@ -201,7 +202,7 @@ function txtDipilih(chosen, headerPilih) {
     );
 }
 
-/** Teks caption untuk pesan konfirmasi (thumbnail + reply 1/2) */
+/** Teks caption untuk pesan konfirmasi (thumbnail + reply 1/2/3) */
 function txtConfirmCaption(chosen, galleryTitle, imageCount, headerPilih) {
     const judul = galleryTitle.length > 52 ? galleryTitle.slice(0, 52) + '…' : galleryTitle;
     return (
@@ -209,10 +210,11 @@ function txtConfirmCaption(chosen, galleryTitle, imageCount, headerPilih) {
         `${headerPilih}\n\n` +
         `📌 *${judul}*\n` +
         `- 📸 *Jumlah gambar:* \`${imageCount}\`\n\n` +
-        `❓ _Lanjutkan download & kirim semua ${imageCount} gambar?_\n\n` +
+        `❓ _Pilih format pengiriman:_\n\n` +
         `> *Reply pesan ini:*\n` +
-        `> *1* — ✅ Lanjutkan\n` +
-        `> *2* — ❌ Tidak`
+        `> *1* — 🖼️ Gambar _(album foto)_\n` +
+        `> *2* — 📄 PDF _(1 file PDF)_\n` +
+        `> *3* — ❌ Tidak jadi`
     );
 }
 
@@ -243,22 +245,37 @@ function txtSending(chosen, headerPilih, total) {
     );
 }
 
-function txtFinalCard({ title, berhasil, total, totalBytes, elapsedMs, failed, isSearch, query }) {
+function txtSendingPdf(chosen, headerPilih, total) {
+    const judul = chosen.title.length > 48 ? chosen.title.slice(0, 48) + '…' : chosen.title;
+    return (
+        `🔞 *HENTAIDAD*\n\n` +
+        `${headerPilih}\n\n` +
+        `✅ *Dipilih #${chosen.no}:*\n` +
+        `_${judul}_\n\n` +
+        `📄 *Membuat PDF* dari \`${total} gambar\`...\n` +
+        `> _Sebentar lagi_`
+    );
+}
+
+function txtFinalCard({ title, berhasil, total, totalBytes, elapsedMs, failed, isSearch, query, mode }) {
     const judul     = title.length > 52 ? title.slice(0, 52) + '…' : title;
     const gagalLine = failed > 0 ? `- ⚠️ *Gagal:* ~${failed} gambar~\n` : '';
     const qShort    = query && query.length > 24 ? query.slice(0, 24) + '…' : query;
     const hintLine  = isSearch
         ? `\n> 🔎 _Cari lagi:_ \`.hentaidad ${qShort}\`\n> 📋 _Atau_ \`.hentaidad\` _untuk latest_`
         : `\n> 🔎 _Cari judul:_ \`.hentaidad [judul]\`\n> 📋 _Atau_ \`.hentaidad\` _untuk latest terbaru_`;
+    const isPdf     = mode === 'pdf';
 
     return (
         `🔞 *HENTAIDAD*\n\n` +
         `📌 *${judul}*\n\n` +
-        `- 📸 *Gambar:* ${berhasil}${failed > 0 ? `/${total}` : ''} foto\n` +
+        (isPdf
+            ? `- 📄 *Halaman:* ${berhasil}${failed > 0 ? `/${total}` : ''} hal\n`
+            : `- 📸 *Gambar:* ${berhasil}${failed > 0 ? `/${total}` : ''} foto\n`) +
         `- 📦 *Ukuran:* \`${fmtBytes(totalBytes)}\`\n` +
         `- ⏱️ *Waktu:* \`${fmtDur(elapsedMs)}\`\n` +
         gagalLine +
-        `\n✅ *Selesai — album terkirim*` +
+        (isPdf ? `\n✅ *Selesai — PDF terkirim*` : `\n✅ *Selesai — album terkirim*`) +
         hintLine
     );
 }
@@ -315,15 +332,48 @@ async function _sendConfirmMsg(hisoka, m, captionText, thumbBuf) {
     return { sent: null, mode: 'failed' };
 }
 
-// ── Download + kirim album (reusable dari confirm handler) ──────────────────────
+// ── Generate PDF dari array Buffer gambar ────────────────────────────────────────
+async function _generatePdf(imageBuffers, title) {
+    // Konversi semua gambar ke JPEG dulu agar PDFKit bisa embed
+    const jpegBufs = await Promise.all(imageBuffers.map(async (buf) => {
+        try { return await sharp(buf).jpeg({ quality: 88 }).toBuffer(); }
+        catch { return buf; }
+    }));
+
+    return new Promise((resolve, reject) => {
+        const doc    = new PDFDocument({ autoFirstPage: false, margin: 0, compress: true });
+        const chunks = [];
+        doc.on('data', c => chunks.push(c));
+        doc.on('end',  () => resolve(Buffer.concat(chunks)));
+        doc.on('error', reject);
+
+        jpegBufs.forEach((jpegBuf) => {
+            try {
+                // Baca dimensi gambar pakai sharp untuk ukuran page yang tepat
+                doc.addPage({ size: 'A4', margin: 0 });
+                const pw = 595.28, ph = 841.89;
+                doc.image(jpegBuf, 0, 0, { width: pw, height: ph, cover: [pw, ph] });
+            } catch (e) {
+                doc.addPage({ size: 'A4', margin: 0 });
+                doc.fontSize(12).fillColor('#333').text('[Gagal memuat gambar]', 10, 10);
+            }
+        });
+
+        doc.end();
+    });
+}
+
+// ── Download + kirim album atau PDF (reusable dari confirm handler) ─────────────
 async function _doDownloadAndSend({
     hisoka, m,
     chosen, galleryData, headerPilih,
     sentKey, isSearch, query,
     logError,
+    mode, // 'image' | 'pdf'
 }) {
     const editMain = (text) => _editKey(hisoka, m, sentKey, text);
     const { title, images } = galleryData;
+    const isPdf = mode === 'pdf';
 
     const totalImg   = images.length;
     const CONCUR     = 8;
@@ -361,36 +411,69 @@ async function _doDownloadAndSend({
 
     const total      = allItems.length;
     const totalBytes = allItems.reduce((acc, buf) => acc + buf.length, 0);
-    await editMain(txtSending(chosen, headerPilih, total));
 
-    try {
-        const parentMsg = await hisoka.sendMessage(
-            m.from,
-            { album: { expectedImageCount: total, expectedVideoCount: 0 } },
-            { quoted: m }
-        );
-        await Promise.allSettled(
-            allItems.map(buf =>
-                hisoka.sendMessage(m.from, { image: buf, albumParentKey: parentMsg.key })
-            )
-        );
-    } catch (albumErr) {
-        console.error('[HENTAIDAD] Album API error:', albumErr?.message);
-        for (let i = 0; i < allItems.length; i++) {
-            try {
-                await hisoka.sendMessage(m.from, { image: allItems[i] },
-                    { quoted: i === 0 ? m : undefined });
-            } catch (_) {}
+    if (isPdf) {
+        // ── MODE PDF ────────────────────────────────────────────────────────────
+        await editMain(txtSendingPdf(chosen, headerPilih, total));
+
+        const pdfBuf = await _generatePdf(allItems, title);
+        const pdfBytes = pdfBuf.length;
+
+        // Sanitasi nama file
+        const safeName = title
+            .replace(/[^\w\s,!'\-]/g, '')
+            .replace(/\s+/g, '_')
+            .trim()
+            .slice(0, 60) || 'hentaidad_gallery';
+
+        await hisoka.sendMessage(m.from, {
+            document : pdfBuf,
+            mimetype : 'application/pdf',
+            fileName : `${safeName}.pdf`,
+            caption  : `📄 *${title.length > 60 ? title.slice(0, 60) + '…' : title}*\n📸 ${total} halaman`,
+        }, { quoted: m });
+
+        const elapsedMs = Date.now() - startTime;
+        await editMain(txtFinalCard({
+            title, berhasil: total, total: totalImg,
+            totalBytes: pdfBytes, elapsedMs, failed,
+            isSearch, query, mode: 'pdf',
+        }));
+        await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+
+    } else {
+        // ── MODE GAMBAR (album) ─────────────────────────────────────────────────
+        await editMain(txtSending(chosen, headerPilih, total));
+
+        try {
+            const parentMsg = await hisoka.sendMessage(
+                m.from,
+                { album: { expectedImageCount: total, expectedVideoCount: 0 } },
+                { quoted: m }
+            );
+            await Promise.allSettled(
+                allItems.map(buf =>
+                    hisoka.sendMessage(m.from, { image: buf, albumParentKey: parentMsg.key })
+                )
+            );
+        } catch (albumErr) {
+            console.error('[HENTAIDAD] Album API error:', albumErr?.message);
+            for (let i = 0; i < allItems.length; i++) {
+                try {
+                    await hisoka.sendMessage(m.from, { image: allItems[i] },
+                        { quoted: i === 0 ? m : undefined });
+                } catch (_) {}
+            }
         }
-    }
 
-    const elapsedMs = Date.now() - startTime;
-    await editMain(txtFinalCard({
-        title, berhasil: total, total: totalImg,
-        totalBytes, elapsedMs, failed,
-        isSearch, query,
-    }));
-    await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+        const elapsedMs = Date.now() - startTime;
+        await editMain(txtFinalCard({
+            title, berhasil: total, total: totalImg,
+            totalBytes, elapsedMs, failed,
+            isSearch, query, mode: 'image',
+        }));
+        await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+    }
 }
 
 // ── COMMAND HANDLER UTAMA ──────────────────────────────────────────────────────
@@ -617,14 +700,17 @@ async function handleHentaidadConfirm({
 
     const raw  = String(m.text || '').trim().toLowerCase();
 
-    // Nilai konfirmasi yang dikenali — 1 = ya, 2 = tidak
-    const YES_VALUES = ['1', 'ya', 'yes', 'lanjut', 'lanjutkan', 'oke', 'ok'];
-    const NO_VALUES  = ['2', 'tidak', 'no', 'batal', 'cancel', 'gak', 'ga'];
+    // Nilai konfirmasi yang dikenali
+    // 1 = gambar (album), 2 = PDF, 3 = tidak jadi
+    const YES_IMAGE_VALUES = ['1', 'g', 'gambar', 'ya', 'yes', 'lanjut', 'lanjutkan', 'oke', 'ok'];
+    const YES_PDF_VALUES   = ['2', 'p', 'pdf'];
+    const NO_VALUES        = ['3', 'tidak', 'no', 'batal', 'cancel', 'gak', 'ga'];
 
-    const isYes = YES_VALUES.includes(raw);
+    const isYes = YES_IMAGE_VALUES.includes(raw);
+    const isPdf = YES_PDF_VALUES.includes(raw);
     const isNo  = NO_VALUES.includes(raw);
 
-    if (!isYes && !isNo) return false;
+    if (!isYes && !isPdf && !isNo) return false;
 
     const confirm = pendingHentaidadConfirm.get(m.sender);
 
@@ -664,7 +750,7 @@ async function handleHentaidadConfirm({
         return true;
     }
 
-    // ── YA: download + kirim album ────────────────────────────────────────────
+    // ── YA (gambar atau PDF): download + kirim ───────────────────────────────
     try {
         await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
 
@@ -673,6 +759,7 @@ async function handleHentaidadConfirm({
             chosen, galleryData, headerPilih,
             sentKey, isSearch, query,
             logError,
+            mode: isPdf ? 'pdf' : 'image',
         });
 
     } catch (err) {
