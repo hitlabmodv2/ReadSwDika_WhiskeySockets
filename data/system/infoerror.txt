@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 25/07/2026, 11.31.53  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 27/07/2026, 21.40.16  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  NekopoinNotif
+│  #001  —  HENTAIDAD
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [NekopoinNotif] Gagal kirim ke 120363383540766761@g.us: Connection Closed
+│  [HENTAIDAD] Gagal download: Request failed with status code 500
 │
 │  DETAIL
-│  Sumber      : NekopoinNotif
+│  Sumber      : HENTAIDAD
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 25/07/2026, 11.31.53
-│  Terakhir    : 25/07/2026, 11.31.53
+│  Pertama     : 27/07/2026, 21.40.16
+│  Terakhir    : 27/07/2026, 21.40.16
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [NekopoinNotif] Gagal kirim ke 120363383540766761@g.us: Connection Closed
+│  ▶  Error: [HENTAIDAD] Gagal download: Request failed with status code 500
 │     at console.error (file:///home/runner/workspace/index.js:434:27)
-│     at file:///home/runner/workspace/index.js:1744:89
+│     at _doDownloadAndSend (/home/runner/workspace/SEMUA_FITUR/anime/hentaidad.cjs:395:38)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 25/07/2026, 11.31.53
+  Terakhir diperbarui: 27/07/2026, 21.40.16
 ════════════════════════════════════════════════════════════════════════

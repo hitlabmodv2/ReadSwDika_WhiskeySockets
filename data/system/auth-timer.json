@@ -2,6 +2,90 @@
   "events": [
     {
       "type": "connected",
+      "connectedAt": "2026-07-27T21:40:56.710Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-27T21:40:43.222Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-27T21:40:37.066Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-27T21:40:30.885Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-27T21:33:28.946Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-27T20:56:05.612Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-27T14:09:04.001Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-27T13:37:22.397Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-27T11:03:31.228Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-27T10:38:03.287Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-27T10:33:13.865Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-27T10:18:46.681Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-27T10:16:02.267Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-27T10:12:38.107Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-27T10:02:47.002Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-27T09:52:57.969Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-27T09:49:46.050Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-27T09:46:11.711Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-27T09:41:36.765Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-27T09:20:56.536Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-27T08:19:54.382Z"
+    },
+    {
+      "type": "connected",
       "connectedAt": "2026-07-27T08:14:04.040Z"
     },
     {
@@ -118,6 +202,6 @@
       "sessionExpireAt": "2026-07-26T07:07:39.398Z"
     }
   ],
-  "lastUpdated": "2026-07-27T08:14:04.041Z",
+  "lastUpdated": "2026-07-27T21:40:56.710Z",
   "sessionStart": "2026-07-26T07:04:39.420Z"
 }
