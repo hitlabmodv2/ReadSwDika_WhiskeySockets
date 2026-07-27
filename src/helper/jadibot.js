@@ -712,11 +712,8 @@ function persistConnectedAt(number, ts) {
   saveJadibotRealtimeData(data)
 }
 
-// ── Tandai bahwa notif reconnect sudah pernah dikirim ke user/owner ──────────
-// Setelah flag ini di-set, reconnect berikutnya tidak akan kirim notif lagi.
-// Flag HANYA di memory — reset otomatis saat bot restart (by design).
-// Bug lama: flag disimpan ke realtime.json → setelah bot restart, flag tetap ada
-// → reconnect pertama setelah restart skip semua notif (owner & user jadibot tidak dapat notif).
+// ── Notif reconnect ke OWNER — in-memory saja ────────────────────────────────
+// Owner dapat notif sekali per restart (set kosong tiap restart = by design).
 function markJadibotReconnectNotified(number) {
   number = String(number || '').replace(/[^0-9]/g, '')
   reconnectNotifiedSet.add(number)
@@ -725,6 +722,38 @@ function markJadibotReconnectNotified(number) {
 function isJadibotReconnectNotified(number) {
   number = String(number || '').replace(/[^0-9]/g, '')
   return reconnectNotifiedSet.has(number)
+}
+
+// ── Notif reconnect ke USER JADIBOT — persistent ke realtime.json ─────────────
+// User hanya dapat notif SEKALI seumur sesi — tidak spam meski bot restart.
+// Flag di-clear saat fresh pairing sehingga setelah pair ulang user dapat notif lagi.
+function markJadibotUserReconnectNotified(number) {
+  number = String(number || '').replace(/[^0-9]/g, '')
+  try {
+    const data = loadJadibotRealtimeData()
+    if (!data.bots[number]) data.bots[number] = {}
+    data.bots[number].userReconnectNotified = true
+    saveJadibotRealtimeData(data)
+  } catch {}
+}
+
+function isJadibotUserReconnectNotified(number) {
+  number = String(number || '').replace(/[^0-9]/g, '')
+  try {
+    const data = loadJadibotRealtimeData()
+    return data.bots[number]?.userReconnectNotified === true
+  } catch { return false }
+}
+
+function clearJadibotUserReconnectNotified(number) {
+  number = String(number || '').replace(/[^0-9]/g, '')
+  try {
+    const data = loadJadibotRealtimeData()
+    if (data.bots[number]) {
+      delete data.bots[number].userReconnectNotified
+      saveJadibotRealtimeData(data)
+    }
+  } catch {}
 }
 
 function restoreConnectedAtMap() {
@@ -2441,6 +2470,8 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
       persistConnectedAt(number, _connectTs)
       startingSocketMap.delete(number)
       pairingRequested.delete(number)
+      // Fresh pairing → reset flag notif user agar reconnect berikutnya kirim notif lagi
+      if (isFreshPairing) clearJadibotUserReconnectNotified(number)
 
       // Start per-jadibot autoonline (isolated dari bot utama & jadibot lain)
       try { startJadibotAutoOnline(sock, number) } catch {}
@@ -2574,20 +2605,21 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
         }
       }
 
-      // Notif ke owner — fresh pairing & reconnect pertama saja.
-      // Reconnect ke-2 dst tidak kirim notif lagi (flag reconnectNotifiedAt sudah di-set).
-      const _skipReconnectNotif = !isFreshPairing && isJadibotReconnectNotified(number)
-      if (!_skipReconnectNotif) {
-        // ── Claim dulu sebelum await — cegah race condition jika connection='open'
-        // fire berulang cepat sebelum async selesai (semua goroutine lolos cek di atas).
+      // ── Notif reconnect ke OWNER — in-memory flag, sekali per restart ──────────
+      const _skipOwnerReconnectNotif = !isFreshPairing && isJadibotReconnectNotified(number)
+      if (!_skipOwnerReconnectNotif) {
+        // Claim dulu sebelum await — cegah race condition jika connection='open' fire cepat
         if (!isFreshPairing) markJadibotReconnectNotified(number)
         try {
           await sendOwnerNotif(mainBotSock, msgOwnerConnected(number, !isFreshPairing), [number])
         } catch {}
       }
 
-      // Reconnect pertama: kirim notif langsung ke nomor jadibot — sekali saja.
-      if (!isFreshPairing && !_skipReconnectNotif) {
+      // ── Notif reconnect ke USER JADIBOT — persistent flag, sekali seumur sesi ─
+      // Tidak dikirim ulang meski bot restart berkali-kali. Di-reset hanya saat fresh pairing.
+      if (!isFreshPairing && !isJadibotUserReconnectNotified(number)) {
+        // Claim persistent dulu sebelum await
+        markJadibotUserReconnectNotified(number)
         try {
           const _sentRecon = await sendDirectToUser(mainBotSock, number, msgDirectReconnect(number))
           if (!_sentRecon) {
