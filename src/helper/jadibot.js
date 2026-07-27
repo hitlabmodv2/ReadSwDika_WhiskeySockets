@@ -2262,14 +2262,10 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
             if (pairingMode === 'v2' && _pairSock) {
               // ── V2: Kirim kode langsung ke nomor tujuan ──
               try {
-                // Resolve JID yang benar dulu (support LID/linked device)
-                let targetJid = `${number}@s.whatsapp.net`
-                try {
-                  const [waResult] = await _pairSock.onWhatsApp(`${number}@s.whatsapp.net`)
-                  if (waResult?.exists && waResult?.jid) {
-                    targetJid = waResult.jid
-                  }
-                } catch (_) {}
+                // Pakai plain @s.whatsapp.net — jangan onWhatsApp() resolve dulu.
+                // onWhatsApp bisa return LID JID yang belum ada key-exchange-nya
+                // → sendMessage ke LID JID = not-acceptable dari WA server.
+                const targetJid = `${number}@s.whatsapp.net`
 
                 await _pairSock.sendMessage(targetJid, { text: msgPairingCode(code, number, true) })
                 directPairingSent = true
