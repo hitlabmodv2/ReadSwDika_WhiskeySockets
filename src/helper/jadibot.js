@@ -36,7 +36,8 @@ const {
   getContentType,
   downloadMediaMessage,
   delay,
-  Browsers
+  Browsers,
+  generateWAMessageFromContent
 } = _require('@whiskeysockets/baileys');
 
 import fs from 'fs'
@@ -1922,6 +1923,59 @@ async function sendOwnerNotif(mainBotSock, text, excludeNumbers = []) {
   }
 }
 
+// ── Kirim notif ke owner dengan Quick Reply button "Lanjutkan" ──────────────
+// Button otomatis kirim command tertentu (misal .jadibot <nomor>) saat ditekan.
+async function sendOwnerNotifWithButton(mainBotSock, text, buttonCommand, excludeNumbers = []) {
+  const sock = getActiveMainSock(mainBotSock)
+  if (!sock) return
+  const cfg = loadConfig()
+  const owners = (cfg.owners || []).map(n => String(n).replace(/[^0-9]/g, '')).filter(Boolean)
+  for (const ownerNum of owners) {
+    if (excludeNumbers.includes(ownerNum)) continue
+    const jid = `${ownerNum}@s.whatsapp.net`
+    try {
+      // Coba kirim dengan interactive button (quick reply)
+      const msg = generateWAMessageFromContent(jid, {
+        interactiveMessage: {
+          body:   { text },
+          footer: { text: '' },
+          header: { title: '', subtitle: '', hasMediaAttachment: false },
+          contextInfo: {},
+          nativeFlowMessage: {
+            messageParamsJson: JSON.stringify({}),
+            buttons: [{
+              name: 'quick_reply',
+              buttonParamsJson: JSON.stringify({
+                display_text: 'Lanjutkan',
+                id: buttonCommand
+              })
+            }]
+          }
+        }
+      }, {})
+      await sock.relayMessage(msg.key.remoteJid, msg.message, {
+        messageId: msg.key.id,
+        additionalNodes: [{
+          tag: 'biz',
+          attrs: {},
+          content: [{
+            tag: 'interactive',
+            attrs: { type: 'native_flow', v: '1' },
+            content: [{ tag: 'native_flow', attrs: { v: '9', name: 'mixed' } }]
+          }]
+        }]
+      })
+      console.log(`[JADIBOT][OWNER-NOTIF] ✅ Notif+button terkirim ke owner +${ownerNum}`)
+    } catch (e) {
+      // Fallback: kirim plain text jika button gagal
+      console.log(`[JADIBOT][OWNER-NOTIF] ⚠️ Button gagal, fallback plain text ke +${ownerNum}: ${e?.message}`)
+      try {
+        await sock.sendMessage(jid, { text })
+      } catch {}
+    }
+  }
+}
+
 function _nowStr() {
   const d = new Date()
   const hari  = d.toLocaleDateString('id-ID', { weekday: 'short', timeZone: 'Asia/Jakarta' })
@@ -2803,9 +2857,9 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
           }
         }
 
-        // Notif realtime logout ke semua owner di config.owners[]
+        // Notif realtime logout ke semua owner di config.owners[] + button Lanjutkan
         try {
-          await sendOwnerNotif(mainBotSock, msgOwnerLogout(number), [number])
+          await sendOwnerNotifWithButton(mainBotSock, msgOwnerLogout(number), `.jadibot ${number}`, [number])
         } catch {}
 
         // BARU setelah notif terkirim: simpan sisa waktu, tutup socket & hapus sesi
