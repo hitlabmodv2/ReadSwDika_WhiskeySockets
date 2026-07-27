@@ -173,15 +173,16 @@ function getPhoneCountryInfo(number = '') {
     return { flag: '🌐', name: 'Tidak diketahui' };
 }
 
-async function handleJadibot({ hisoka, m, query, tolak, logCommand, isMainBot, path, fs, jadibotMap, parseJadibotDuration, startJadibot, maskNumber, getJadibotExpirySummary, getJadibotExpiry, scheduleJadibotExpiry, setPermanentJadibot, removeJadibotExpiry, ensureJadibotExpiry, getLogoutSavedMs, formatRemainingTime }) {
+async function handleJadibot({ hisoka, m, query, tolak, logCommand, isMainBot, path, fs, jadibotMap, parseJadibotDuration, startJadibot, maskNumber, getJadibotExpirySummary, getJadibotExpiry, scheduleJadibotExpiry, setPermanentJadibot, removeJadibotExpiry, ensureJadibotExpiry, getLogoutSavedMs, formatRemainingTime, sendJbBtn: _extSendJbBtn, Button: _BtnClass }) {
         if (!isMainBot(hisoka)) return;
         if (!m.isOwner) return;
 
         const jbPfx = m.prefix || '.';
 
-        const sendJbBtn = async (bodyText) => {
-                await tolak(hisoka, m, bodyText);
-        };
+        // Gunakan sendJbBtn dari message.js jika dikirim — edit button cukup di message.js case .jadibot
+        const sendJbBtn = typeof _extSendJbBtn === 'function'
+                ? _extSendJbBtn
+                : async (bodyText) => { await tolak(hisoka, m, bodyText); };
 
         const { number: parsedJadibotNumber, durationInput, rawNumberPart, hasInvalidPhoneChars } = parseJadibotCommandQuery(query || '');
         let number = parsedJadibotNumber;
@@ -512,7 +513,8 @@ async function handleJadibot({ hisoka, m, query, tolak, logCommand, isMainBot, p
                         try { await hisoka.sendMessage(m.from, { react: { text: emoji, key: m.key } }); } catch {}
                 },
                 m.sender,
-                m.from
+                m.from,
+                _BtnClass
         );
 }
 
