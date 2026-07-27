@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 27/07/2026, 14.08.42  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 27/07/2026, 21.40.16  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  command:❌
+│  #001  —  HENTAIDAD
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  Identifier 'confirm' has already been declared
+│  [HENTAIDAD] Gagal download: Request failed with status code 500
 │
 │  DETAIL
-│  Sumber      : command:❌
+│  Sumber      : HENTAIDAD
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 27/07/2026, 14.08.42
-│  Terakhir    : 27/07/2026, 14.08.42
+│  Pertama     : 27/07/2026, 21.40.16
+│  Terakhir    : 27/07/2026, 21.40.16
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  /home/runner/workspace/SEMUA_FITUR/anime/hentaidad.cjs:636
-│     const confirm = pendingHentaidadConfirm.get(m.sender);
-│     ^
+│  ▶  Error: [HENTAIDAD] Gagal download: Request failed with status code 500
+│     at console.error (file:///home/runner/workspace/index.js:434:27)
+│     at _doDownloadAndSend (/home/runner/workspace/SEMUA_FITUR/anime/hentaidad.cjs:395:38)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 27/07/2026, 14.08.42
+  Terakhir diperbarui: 27/07/2026, 21.40.16
 ════════════════════════════════════════════════════════════════════════
