@@ -1935,7 +1935,7 @@ async function sendInteractiveButton(sock, jid, text, buttonCommand) {
           buttons: [{
             name: 'quick_reply',
             buttonParamsJson: JSON.stringify({
-              display_text: 'Lanjutkan',
+              display_text: '🔄 Jadibot Lagi',
               id: buttonCommand
             })
           }]
@@ -1983,7 +1983,7 @@ async function sendOwnerNotifWithButton(mainBotSock, text, buttonCommand, exclud
             buttons: [{
               name: 'quick_reply',
               buttonParamsJson: JSON.stringify({
-                display_text: 'Lanjutkan',
+                display_text: '🔄 Jadibot Lagi',
                 id: buttonCommand
               })
             }]
