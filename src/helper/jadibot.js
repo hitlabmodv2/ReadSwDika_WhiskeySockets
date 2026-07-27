@@ -115,7 +115,7 @@ async function preDownloadMediaForAntidel(msg, sock) {
 }
 
 /* ================= KONSTANTA ================= */
-const PAIRING_TIMEOUT_MS = 3 * 60 * 1000 // 3 menit
+const PAIRING_TIMEOUT_MS = 30 * 1000 // 30 detik (sementara untuk testing, nanti ubah ke 3 * 60 * 1000)
 const DEFAULT_JADIBOT_DURATION_MS = 24 * 60 * 60 * 1000
 const MAX_TIMER_MS = 2147483647
 const JADIBOT_DATA_PATH = path.join(process.cwd(), 'data_jadibot', 'realtime.json')
@@ -1921,15 +1921,18 @@ async function sendOwnerNotif(mainBotSock, text, excludeNumbers = []) {
 
 // ── Kirim interactive quick reply button ke satu JID tertentu ───────────────
 // Dipakai untuk notif di GC/chat owner dengan tombol "Lanjutkan" → auto kirim command.
-async function sendInteractiveButton(sock, jid, text, buttonCommand) {
+async function sendInteractiveButton(sock, jid, text, buttonCommand, quotedMsg = null) {
   if (!sock || !jid) return
+  const ctxInfo = (quotedMsg?.key?.id && quotedMsg?.message)
+    ? { stanzaId: quotedMsg.key.id, participant: quotedMsg.key.participant || quotedMsg.key.remoteJid, quotedMessage: quotedMsg.message }
+    : {}
   try {
     const msg = generateWAMessageFromContent(jid, {
       interactiveMessage: {
         body:   { text },
         footer: { text: '' },
         header: { title: '', subtitle: '', hasMediaAttachment: false },
-        contextInfo: {},
+        contextInfo: ctxInfo,
         nativeFlowMessage: {
           messageParamsJson: JSON.stringify({}),
           buttons: [{
@@ -2308,6 +2311,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
 
   /* ================= CONNECTION ================= */
   let pairingMsgKey = null
+  let pairingMsg    = null  // full message object untuk quoted reply
   let aborted = false
   let hasConnectedOnce = false
 
@@ -2402,7 +2406,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
                     `> ⚠️ _Kode hanya berlaku *3 menit* — ~jangan ditunda!~_\n\n` +
                     `> _Notif otomatis — Wily Bot ${_pairVer}_ 🤖`
                   )
-                  if (sentInfo?.key) pairingMsgKey = sentInfo.key
+                  if (sentInfo?.key) { pairingMsgKey = sentInfo.key; pairingMsg = sentInfo }
                 } catch {}
 
               } catch (e) {
@@ -2411,7 +2415,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
                 if (!directPairingSent) {
                   try {
                     const sentInfo = await sendReply(msgPairingCode(code, number))
-                    if (sentInfo?.key) pairingMsgKey = sentInfo.key
+                    if (sentInfo?.key) { pairingMsgKey = sentInfo.key; pairingMsg = sentInfo }
                     directPairingSent = true
                     console.log(`[JADIBOT][V2→V1] ✅ Fallback: pairing code dikirim ke GC/owner`)
                   } catch (e2) {
@@ -2425,12 +2429,12 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
             if (!directPairingSent) {
               if (sendPairingMsg) {
                 const sentInfo = await sendPairingMsg(code, number)
-                if (sentInfo?.key) pairingMsgKey = sentInfo.key
+                if (sentInfo?.key) { pairingMsgKey = sentInfo.key; pairingMsg = sentInfo }
               } else {
                 // V1: kirim plain text ke GC/owner
                 try {
                   const sentInfo = await sendReply(msgPairingCode(code, number))
-                  if (sentInfo?.key) pairingMsgKey = sentInfo.key
+                  if (sentInfo?.key) { pairingMsgKey = sentInfo.key; pairingMsg = sentInfo }
                 } catch (e) {
                   console.log(`[JADIBOT][V1] ⚠️ Gagal kirim pairing code ke GC: ${e?.message}`)
                 }
@@ -2510,7 +2514,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
             const _expText = msgPairingExpired(number, false)
             const _expBtnSock = getActiveMainSock(mainBotSock)
             if (replyJid && _expBtnSock) {
-              await sendInteractiveButton(_expBtnSock, replyJid, _expText, `.jadibot ${number}`)
+              await sendInteractiveButton(_expBtnSock, replyJid, _expText, `.jadibot ${number}`, pairingMsg)
             } else {
               await sendReply(_expText)
             }
@@ -2524,7 +2528,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
             const _expTextV1 = msgPairingExpired(number, false)
             const _expBtnSockV1 = getActiveMainSock(mainBotSock)
             if (replyJid && _expBtnSockV1) {
-              await sendInteractiveButton(_expBtnSockV1, replyJid, _expTextV1, `.jadibot ${number}`)
+              await sendInteractiveButton(_expBtnSockV1, replyJid, _expTextV1, `.jadibot ${number}`, pairingMsg)
             } else {
               await sendReply(_expTextV1)
             }
@@ -2794,7 +2798,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
               const _ptText = msgPairingExpired(number, false)
               const _ptSockBtn = getActiveMainSock(mainBotSock)
               if (replyJid && _ptSockBtn) {
-                await sendInteractiveButton(_ptSockBtn, replyJid, _ptText, `.jadibot ${number}`)
+                await sendInteractiveButton(_ptSockBtn, replyJid, _ptText, `.jadibot ${number}`, pairingMsg)
               } else {
                 await sendReply(_ptText)
               }
