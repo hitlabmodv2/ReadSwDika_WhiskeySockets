@@ -3961,5 +3961,73 @@
       ],
       "processedAt": "2026-07-27T10:26:34.670Z"
     }
+  },
+  "628997837500": {
+    "AC4F7C56D6B77FB04A2E68C494C3BE13": {
+      "id": "AC4F7C56D6B77FB04A2E68C494C3BE13",
+      "sender": "628997837500@s.whatsapp.net",
+      "name": "knight",
+      "type": "videoMessage",
+      "arrivedAt": "2026-07-27T10:28:35.532Z",
+      "read": true,
+      "reacted": true,
+      "emoji": "🧸",
+      "resolve": "Signal Lib ✓",
+      "source": "status",
+      "number": "628997837500",
+      "resolvedPn": "628997837500@s.whatsapp.net",
+      "messageKey": {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "628997837500@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC4F7C56D6B77FB04A2E68C494C3BE13",
+        "participant": "242150558159039@lid",
+        "addressingMode": "lid"
+      },
+      "updatedAt": "2026-07-27T10:28:52.707Z",
+      "receiptKeys": [
+        {
+          "remoteJid": "status@broadcast",
+          "remoteJidAlt": "628997837500@s.whatsapp.net",
+          "fromMe": false,
+          "id": "AC4F7C56D6B77FB04A2E68C494C3BE13",
+          "participant": "242150558159039@lid",
+          "addressingMode": "lid"
+        },
+        {
+          "remoteJid": "status@broadcast",
+          "remoteJidAlt": "628997837500@s.whatsapp.net",
+          "fromMe": false,
+          "id": "AC4F7C56D6B77FB04A2E68C494C3BE13",
+          "participant": "628997837500@s.whatsapp.net",
+          "addressingMode": "lid"
+        }
+      ],
+      "processedAt": "2026-07-27T10:28:52.707Z"
+    },
+    "AC4B740FF2BD38C96F689887AB5407C9": {
+      "id": "AC4B740FF2BD38C96F689887AB5407C9",
+      "sender": "628997837500@s.whatsapp.net",
+      "name": "knight",
+      "type": "groupStatusMentionMessage",
+      "arrivedAt": "2026-07-27T10:28:42.330Z",
+      "read": true,
+      "reacted": true,
+      "emoji": "🐣",
+      "resolve": "Signal Lib ✓",
+      "source": "group",
+      "number": "628997837500",
+      "resolvedPn": "628997837500@s.whatsapp.net",
+      "messageKey": {
+        "remoteJid": "120363363036005418@g.us",
+        "fromMe": false,
+        "id": "AC4B740FF2BD38C96F689887AB5407C9",
+        "participant": "242150558159039@lid",
+        "participantAlt": "628997837500@s.whatsapp.net",
+        "addressingMode": "lid"
+      },
+      "updatedAt": "2026-07-27T10:28:46.544Z",
+      "processedAt": "2026-07-27T10:28:46.542Z"
+    }
   }
 }
