@@ -1,5 +1,16 @@
 {
-  "bots": {},
+  "bots": {
+    "6289667923162": {
+      "number": "6289667923162",
+      "createdAt": 1785147421979,
+      "updatedAt": 1785147421979,
+      "expiresAt": 1787634409068,
+      "durationMs": 2486987089,
+      "durationText": "28 hari 18 jam 50 menit",
+      "status": "active",
+      "userReconnectNotified": true
+    }
+  },
   "logoutSaved": {
     "6289688206739": {
       "remainingMs": 1008832,
@@ -10,11 +21,6 @@
       "remainingMs": 3023973591,
       "permanent": false,
       "savedAt": 1784979212503
-    },
-    "6289667923162": {
-      "remainingMs": 2486987089,
-      "permanent": false,
-      "savedAt": 1785139102229
     }
   }
 }
