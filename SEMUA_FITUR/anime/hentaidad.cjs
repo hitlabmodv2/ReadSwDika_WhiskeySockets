@@ -669,7 +669,7 @@ async function handleHentaidadChoice({
             timeout       : confirmTimeout,
         });
 
-        await hisoka.sendMessage(m.from, { react: { text: '❓', key: m.key } });
+        await hisoka.sendMessage(m.from, { react: { text: '📋', key: m.key } });
 
     } catch (err) {
         console.error('[HENTAIDAD] Choice error:', err?.message);
