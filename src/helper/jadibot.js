@@ -1707,26 +1707,21 @@ function msgPairingExpired(number, direct = false) {
   if (direct) {
     // Versi lengkap → dikirim ke nomor tujuan (user jadibot)
     return (
-      `╔══════════════════════╗\n` +
-      `║   ⏰  *WAKTU HABIS!*   ║\n` +
-      `╚══════════════════════╝\n\n` +
+      `⏰ *Waktu Habis — Pairing Gagal*\n\n` +
       `📱 *Nomor kamu:* \`+${number}\`\n` +
-      `🕐 *Waktu:* _${_nowStr()}_\n\n` +
-      `❌ *Kode pairing sudah kedaluwarsa!*\n` +
-      `> _Kode tidak dimasukkan dalam batas waktu *3 menit*, sehingga sesi otomatis dibatalkan._\n\n` +
-      `━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `🕐 _${_nowStr()}_\n\n` +
+      `❌ ~Kode pairing sudah kedaluwarsa!~\n` +
+      `> _Kode tidak dimasukkan dalam *3 menit* — sesi otomatis dibatalkan._\n\n` +
       `🗑️ *Yang terjadi:*\n` +
-      `• ~Kode pairing sudah tidak berlaku~\n` +
-      `• ~Sesi dihapus otomatis dari server~\n` +
-      `• ~Jadibot belum aktif di nomormu~\n\n` +
-      `━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `- ~Kode tidak lagi berlaku~\n` +
+      `- ~Sesi dihapus otomatis dari server~\n` +
+      `- ~Jadibot belum aktif di nomormu~\n\n` +
       `📋 *Kemungkinan penyebab:*\n` +
       `1. Terlambat membuka pesan kode\n` +
       `2. Salah langkah saat input di WhatsApp\n` +
       `3. Koneksi internet terganggu saat proses\n\n` +
-      `━━━━━━━━━━━━━━━━━━━━━━\n` +
       `💡 *Ingin coba lagi?*\n` +
-      `📞 Hubungi owner — mereka akan kirimkan kode baru:\n` +
+      `📞 _Hubungi owner untuk kode baru:_\n` +
       `${getOwnerContact()}\n\n` +
       `> _Notif otomatis — Wily Bot ${ver}_ 🤖`
     )
@@ -1734,13 +1729,14 @@ function msgPairingExpired(number, direct = false) {
 
   // Versi singkat → dikirim ke GC/owner chat
   return (
-    `╔══════════════════════╗\n` +
-    `║   ⏰  *WAKTU HABIS*   ║\n` +
-    `╚══════════════════════╝\n\n` +
-    `📱 *Nomor:* \`${masked}\`\n\n` +
-    `❌ Kode pairing *kedaluwarsa* — tidak dimasukkan dalam *3 menit*.\n` +
-    `🔄 ~Sesi otomatis dihapus.~\n\n` +
-    `💡 Ketik *.jadibot ${number} <durasi>* untuk coba lagi.`
+    `⏰ *Waktu Habis — Pairing Gagal*\n\n` +
+    `📱 *Nomor:* \`${masked}\`\n` +
+    `🕐 _${_nowStr()}_\n\n` +
+    `❌ ~Kode pairing kedaluwarsa~ — tidak dimasukkan dalam *3 menit.*\n` +
+    `🗑️ ~Sesi otomatis dihapus dari server.~\n\n` +
+    `💡 *Aktifkan ulang:*\n` +
+    `- Ketik \`.jadibot ${number} <durasi>\`\n\n` +
+    `> _Notif otomatis — Wily Bot ${ver}_ 🤖`
   )
 }
 
