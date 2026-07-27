@@ -163,7 +163,7 @@ function fmtDur(ms) {
 /** Bangun kartu hasil setelah album selesai dikirim */
 function buildFinalCard({ title, berhasil, total, totalBytes, elapsedMs, failed, isSearch = false, query = null }) {
     const judul     = title.length > 52 ? title.slice(0, 52) + '…' : title;
-    const gagalLine = failed > 0 ? `• ⚠️ Gagal   : ~${failed} gambar~\n` : '';
+    const gagalLine = failed > 0 ? `- ⚠️ *Gagal:* ~${failed} gambar~\n` : '';
 
     // Footer hint — kontekstual sesuai mode (latest / search)
     const qShort  = query && query.length > 24 ? query.slice(0, 24) + '…' : query;
@@ -174,9 +174,9 @@ function buildFinalCard({ title, berhasil, total, totalBytes, elapsedMs, failed,
     return (
         `🔞 *HENTAIDAD*\n\n` +
         `📌 *${judul}*\n\n` +
-        `• 📸 Gambar  : *${berhasil}${failed > 0 ? `/${total}` : ''} foto*\n` +
-        `• 📦 Ukuran  : \`${fmtBytes(totalBytes)}\`\n` +
-        `• ⏱️ Waktu   : \`${fmtDur(elapsedMs)}\`\n` +
+        `- 📸 *Gambar:* ${berhasil}${failed > 0 ? `/${total}` : ''} foto\n` +
+        `- 📦 *Ukuran:* \`${fmtBytes(totalBytes)}\`\n` +
+        `- ⏱️ *Waktu:* \`${fmtDur(elapsedMs)}\`\n` +
         gagalLine +
         `\n✅ *Status: Terkirim*` +
         hintLine
@@ -233,14 +233,14 @@ async function handleHentaidad({ hisoka, m, tolak, logCommand, logError, pending
                 await hisoka.sendMessage(m.from, {
                     text:
                         `🔞 *HENTAIDAD*\n\n` +
-                        `🚫 *No Hentai Found*\n` +
-                        `~We couldn't find any hentai~\n` +
-                        `~matching "${query}"~\n\n` +
+                        `🚫 *Tidak Ditemukan*\n` +
+                        `_Tidak ada galeri yang cocok untuk:_\n` +
+                        `> _"${query}"_\n\n` +
                         `💡 *Saran pencarian:*\n` +
-                        `• Coba kata kunci _lebih pendek_\n` +
-                        `• Gunakan _nama karakter_ / _judul asli_\n` +
-                        `• Coba _bahasa Inggris_ (misal: \`re zero\`)\n\n` +
-                        `> Ketik \`.hentaidad\` untuk melihat latest`,
+                        `- Coba kata kunci _lebih pendek_\n` +
+                        `- Gunakan _nama karakter_ / _judul asli_\n` +
+                        `- Coba _bahasa Inggris_ (misal: \`re zero\`)\n\n` +
+                        `> Ketik \`.hentaidad\` untuk melihat _latest_`,
                 }, { quoted: m });
             } else {
                 await tolak(hisoka, m, `❌ _Gagal mengambil data. Coba lagi nanti._`);
@@ -381,7 +381,7 @@ async function handleHentaidadChoice({ hisoka, m, pendingHentaidadChoices, getQu
                 const doneNow = Math.min(i + CONCUR, totalImg);
                 await editLoading(
                     `⬇️ *Mendownload* \`${doneNow}/${totalImg} gambar\`...\n` +
-                    `> _Batch ${batchIdx}/${totalBatch} — sabar ya_`
+                    `> _Batch_ \`${batchIdx}/${totalBatch}\` _— sabar ya_`
                 );
             }
         }
