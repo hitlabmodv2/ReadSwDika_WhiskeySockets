@@ -68,9 +68,9 @@ async function handleCeksw({ hisoka, m, query, tolak, logCommand, fs, path, load
                         }
                         await hisoka.sendMessage(m.from, { react: { text: nowOn ? '✅' : '❌', key: m.key } });
                         await tolak(hisoka, m,
-                                `╭══『 📊 *CEK SW TRACKING* 』══╮\n│\n` +
-                                `│ ${nowOn ? '✅ Tracking *diaktifkan*' : '❌ Tracking *dinonaktifkan*'}\n│\n` +
-                                `│ _Data ${nowOn ? 'mulai direkam lagi' : 'tidak direkam sementara'}_\n│\n╰══════════════════════════╯`
+                                `📊 *CEK SW TRACKING*\n\n` +
+                                `${nowOn ? '✅ Tracking *diaktifkan*' : '❌ Tracking *dinonaktifkan*'}\n` +
+                                `_Data ${nowOn ? 'mulai direkam lagi' : 'tidak direkam sementara'}_`
                         );
                         logCommand(m, hisoka, `ceksw ${qLower}`);
                         return;
@@ -80,7 +80,9 @@ async function handleCeksw({ hisoka, m, query, tolak, logCommand, fs, path, load
                         if (fs.existsSync(swStatsPath)) fs.writeFileSync(swStatsPath, '{}', 'utf-8');
                         await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
                         await tolak(hisoka, m,
-                                `╭══『 🗑️ *RESET SW STATS* 』══╮\n│\n│ ✅ Data berhasil direset!\n│ Semua data mulai dari 0 lagi.\n│\n╰══════════════════════════╯`
+                                `🗑️ *RESET SW STATS*\n\n` +
+                                `✅ Data berhasil direset!\n` +
+                                `_Semua statistik mulai dari 0._`
                         );
                         logCommand(m, hisoka, 'ceksw reset');
                         return;
@@ -98,8 +100,10 @@ async function handleCeksw({ hisoka, m, query, tolak, logCommand, fs, path, load
 
                 if (entries.length === 0) {
                         await tolak(hisoka, m,
-                                `╭══『 📊 *CEK SW STATS* 』══╮\n│\n│ ⚠️ Belum ada data SW yang tercatat.\n│\n` +
-                                `│ _Pastikan Auto Read Story aktif_\n│ _ketik .readsw untuk cek status_\n│\n╰══════════════════════════╯`
+                                `📊 *CEK SW STATS*\n\n` +
+                                `⚠️ Belum ada data SW yang tercatat.\n` +
+                                `_Pastikan Auto Read Story aktif_\n` +
+                                `_Ketik .readsw untuk cek status_`
                         );
                         return;
                 }
@@ -151,7 +155,7 @@ async function handleCeksw({ hisoka, m, query, tolak, logCommand, fs, path, load
                 const totalReactions = entries.reduce((s, e) => s + (e.reactions || 0), 0);
                 const totalActiveSW  = entries.reduce((s, e) => s + getActiveSW(e), 0);
 
-                const topBySW = [...entries].filter(e => getActiveSW(e) > 0).sort((a, b) => getActiveSW(b) - getActiveSW(a)).slice(0, 10);
+                const topBySW  = [...entries].filter(e => getActiveSW(e) > 0).sort((a, b) => getActiveSW(b) - getActiveSW(a)).slice(0, 10);
                 const topRetry = Object.entries(swRetryMap).sort((a, b) => b[1].sukses - a[1].sukses || a[1].gagal - b[1].gagal || b[1].total - a[1].total).slice(0, 10);
                 const sortedEmojis = Object.entries(emojiStats).sort((a, b) => b[1] - a[1]).slice(0, 10);
 
@@ -160,69 +164,82 @@ async function handleCeksw({ hisoka, m, query, tolak, logCommand, fs, path, load
                         const p = (val / total) * 100;
                         return p >= 10 ? `${Math.round(p)}%` : `${p.toFixed(1)}%`;
                 };
-                const medals = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
                 const now = new Date().toLocaleString('id-ID', {
                         timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit',
                         day: '2-digit', month: 'short', year: 'numeric'
                 });
 
-                let text = `╭══『 📊 *CEK SW STATS* 』══╮\n│\n`;
-                text += `│ 🕐 *Update:* ${now} WIB\n│ 👥 *Total orang:* ${entries.length}\n`;
-                text += `│ 🗂️ *Terdaftar SwTrack:* ${swTrackedNums.size}\n│ 🟢 *SW aktif sekarang:* ${totalActiveSW} story\n`;
-                text += `│ 👁️ *Total read:* ${totalReads}\n│ ✨ *Total reaction:* ${totalReactions}\n│\n`;
+                // ── Header & ringkasan ──
+                let text = `📊 *CEK SW STATS*\n`;
+                text += `> 🕐 ${now} WIB\n\n`;
+                text += `*Ringkasan*\n`;
+                text += `- 👥 Total orang : *${entries.length}*\n`;
+                text += `- 🗂️ Terdaftar SwTrack : *${swTrackedNums.size}*\n`;
+                text += `- 🟢 SW aktif sekarang : *${totalActiveSW}* story\n`;
+                text += `- 👁️ Total read : *${totalReads}*\n`;
+                text += `- ✨ Total reaction : *${totalReactions}*\n`;
 
+                // ── SW Aktif Sekarang ──
                 if (topBySW.length > 0) {
-                        text += `├──『 🟢 *SW AKTIF SEKARANG* 』\n`;
+                        text += `\n━━━━━━━━━━━━━━━\n`;
+                        text += `🟢 *SW Aktif Sekarang*\n\n`;
                         for (let i = 0; i < topBySW.length; i++) {
-                                const e = topBySW[i]; const active = getActiveSW(e);
+                                const e = topBySW[i];
+                                const active = getActiveSW(e);
                                 const swt = isTracked(e.number) ? ' 🗂️' : '';
-                                text += `│ ${medals[i]} *${e.name || e.number}*${swt} : ${active} SW\n`;
+                                text += `${i + 1}. *${e.name || e.number}*${swt} — ${active} SW\n`;
                         }
-                        text += `│\n`;
                 }
 
-                text += `├──『 🏆 *TOP ${top10.length} TERBANYAK DI-REACT* 』\n`;
+                // ── Top terbanyak di-react ──
+                text += `\n━━━━━━━━━━━━━━━\n`;
+                text += `🏆 *Top ${top10.length} Terbanyak Di-React*\n\n`;
                 for (let i = 0; i < top10.length; i++) {
-                        const e = top10[i]; const swt = isTracked(e.number) ? ' 🗂️' : '';
-                        text += `│ ${medals[i]} ${e.name || e.number}${swt} : ×${e.reactions || 0}\n`;
+                        const e   = top10[i];
+                        const swt = isTracked(e.number) ? ' 🗂️' : '';
+                        text += `${i + 1}. ${e.name || e.number}${swt} — ×${e.reactions || 0}\n`;
                 }
-                text += `│\n`;
 
+                // ── Top Startup Retry ──
                 if (topRetry.length > 0) {
                         const totalAllRetry  = topRetry.reduce((s, [, r]) => s + r.total, 0);
                         const totalSuksesAll = topRetry.reduce((s, [, r]) => s + r.sukses, 0);
                         const totalGagalAll  = topRetry.reduce((s, [, r]) => s + r.gagal, 0);
-                        text += `├──『 ♻️ *TOP STARTUP RETRY* 』\n`;
-                        text += `│ 📦 Total: ${totalAllRetry} SW  ✅${totalSuksesAll} berhasil  ❌${totalGagalAll} gagal\n│\n`;
+                        text += `\n━━━━━━━━━━━━━━━\n`;
+                        text += `♻️ *Top Startup Retry*\n`;
+                        text += `> 📦 ${totalAllRetry} SW  ✅ ${totalSuksesAll} berhasil  ❌ ${totalGagalAll} gagal\n\n`;
                         for (let i = 0; i < topRetry.length; i++) {
-                                const [num, r] = topRetry[i]; const nama = r.name || num;
+                                const [num, r] = topRetry[i];
+                                const nama = r.name || num;
                                 let waktu = '';
                                 if (r.lastAt) {
                                         try { waktu = new Date(r.lastAt).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' }); } catch {}
                                 }
-                                const sukBadge  = r.sukses > 0 ? `✅ ${r.sukses} berhasil` : '';
-                                const gaiBadge  = r.gagal  > 0 ? `❌ ${r.gagal} gagal`    : '';
-                                const badge     = [sukBadge, gaiBadge].filter(Boolean).join('  ');
-                                const emojiLine = r.emojiCount && Object.keys(r.emojiCount).length > 0
-                                        ? '│    ' + Object.entries(r.emojiCount).sort((a, b) => b[1] - a[1]).map(([em, ct]) => ct > 1 ? `${em} ${ct}x` : em).join('  ')
-                                        : '';
-                                text += `│ ${medals[i]} *${nama}*\n│    ↳ ${r.total}x retry  ${badge}\n`;
-                                if (emojiLine) text += `${emojiLine}\n`;
-                                if (waktu)     text += `│    🕐 ${waktu} WIB\n`;
+                                const sukBadge = r.sukses > 0 ? `✅ ${r.sukses} berhasil` : '';
+                                const gaiBadge = r.gagal  > 0 ? `❌ ${r.gagal} gagal`    : '';
+                                const badge    = [sukBadge, gaiBadge].filter(Boolean).join('  ');
+                                text += `${i + 1}. *${nama}*\n`;
+                                text += `   ↳ ${r.total}x retry  ${badge}\n`;
+                                if (r.emojiCount && Object.keys(r.emojiCount).length > 0) {
+                                        const emojiStr = Object.entries(r.emojiCount).sort((a, b) => b[1] - a[1]).map(([em, ct]) => ct > 1 ? `${em} ${ct}x` : em).join('  ');
+                                        text += `   ↳ ${emojiStr}\n`;
+                                }
+                                if (waktu) text += `   🕐 _${waktu} WIB_\n`;
                         }
-                        text += `│\n`;
                 }
 
+                // ── Top Emoji Reaction ──
                 if (sortedEmojis.length > 0) {
                         const totalEmojiUsed = Object.values(emojiStats).reduce((s, c) => s + c, 0);
-                        text += `├──『 😎 *TOP EMOJI REACTION* 』\n`;
+                        text += `\n━━━━━━━━━━━━━━━\n`;
+                        text += `😎 *Top Emoji Reaction*\n\n`;
                         for (let i = 0; i < sortedEmojis.length; i++) {
                                 const [emoji, count] = sortedEmojis[i];
-                                text += `│ ${medals[i]} ${emoji}  ×${count}  (${fmtPct(count, totalEmojiUsed)})\n`;
+                                text += `${i + 1}. ${emoji}  ×${count}  _(${fmtPct(count, totalEmojiUsed)})_\n`;
                         }
-                        text += `│\n`;
                 }
 
+                // ── Footer ──
                 let trackingOn;
                 if (isJadibot && jadibotNum) {
                         const jbCfgPath = path.join(process.cwd(), 'data_jadibot', jadibotNum, 'ceksw', 'config.json');
@@ -237,10 +254,11 @@ async function handleCeksw({ hisoka, m, query, tolak, logCommand, fs, path, load
                         : (getMainEmojiMode ? getMainEmojiMode() : 'default');
                 const _isCustom   = String(_rawMode).toLowerCase() === 'custom';
                 const _emojiLabel = _isCustom ? '🟢 Custom' : '🔵 Default';
-                text += `╰══════════════════════════╯\n`;
-                text += `_💾 Realtime • Tracking: ${trackingOn ? '✅ ON • .ceksw off untuk matikan' : '❌ OFF • .ceksw on untuk aktifkan'} • .ceksw reset hapus data_\n`;
-                text += `_🗂️ = terdaftar SwTrack • ♻️ = SW diproses ulang saat bot nyala_\n`;
-                text += `_🎭 EmojiMode bot ini: *${_emojiLabel}*_`;
+                text += `\n━━━━━━━━━━━━━━━\n`;
+                text += `_💾 Realtime  •  Tracking: ${trackingOn ? '✅ ON' : '❌ OFF'}_\n`;
+                text += `_${trackingOn ? '.ceksw off untuk matikan' : '.ceksw on untuk aktifkan'}  •  .ceksw reset hapus data_\n`;
+                text += `_🗂️ = terdaftar SwTrack  •  ♻️ = diproses ulang saat startup_\n`;
+                text += `_🎭 EmojiMode: *${_emojiLabel}*_`;
 
                 await tolak(hisoka, m, text);
                 logCommand(m, hisoka, 'ceksw');
