@@ -25,6 +25,12 @@ const axios   = require('axios');
 const cheerio = require('cheerio');
 const sharp   = require('sharp');
 
+const {
+    generateWAMessageFromContent,
+    prepareWAMessageMedia,
+    proto,
+} = require('@whiskeysockets/baileys');
+
 const BASE    = 'https://hentaidad.com';
 const HEADERS = {
     'User-Agent'      : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -286,47 +292,97 @@ async function _editKey(hisoka, m, sentKey, text) {
     } catch (_) {}
 }
 
-// ── Kirim pesan konfirmasi: 1 pesan (thumbnail + info + 2 tombol) ───────────────
+// ── Kirim pesan konfirmasi: 1 pesan (thumbnail + info + 2 quick reply tombol) ───
+//
+//  Urutan try:
+//  1. interactiveMessage + image header (upload) + quick_reply ← 1 pesan, paling ideal
+//  2. interactiveMessage + quick_reply (tanpa image) + kirim gambar terpisah dulu
+//  3. single_select list (sendListMessage) + gambar terpisah
+//  4. plain text + gambar terpisah
+//
 async function _sendConfirmMsg(hisoka, m, captionText, thumbBuf) {
     const { sendListMessage } = require('../helper/interactive-msg.cjs');
 
-    // ── Coba 1: image + old buttons API (1 pesan, thumbnail terlihat) ──────────
+    const QUICK_BUTTONS = [
+        proto.Message.InteractiveMessage.NativeFlowMessage.NativeFlowButton.create({
+            name            : 'quick_reply',
+            buttonParamsJson: JSON.stringify({ display_text: '✅ Lanjutkan', id: 'hentaidad_yes' }),
+        }),
+        proto.Message.InteractiveMessage.NativeFlowMessage.NativeFlowButton.create({
+            name            : 'quick_reply',
+            buttonParamsJson: JSON.stringify({ display_text: '❌ Tidak', id: 'hentaidad_no' }),
+        }),
+    ];
+
+    // ── Coba 1: interactiveMessage + image header (upload) + quick_reply ───────
+    // → 1 pesan lengkap: thumbnail + caption + 2 tombol
     if (thumbBuf) {
         try {
-            const sent = await hisoka.sendMessage(m.from, {
-                image    : thumbBuf,
-                caption  : captionText,
-                buttons  : [
-                    { buttonId: 'hentaidad_yes', buttonText: { displayText: '✅ Lanjutkan' }, type: 1 },
-                    { buttonId: 'hentaidad_no',  buttonText: { displayText: '❌ Tidak' },    type: 1 },
-                ],
-                headerType : 4,
-                footer     : '⚡ Tap tombol untuk memilih',
-            }, { quoted: m });
-            if (sent?.key) return { sent, mode: 'buttons' };
+            const mediaMsg = await prepareWAMessageMedia(
+                { image: thumbBuf },
+                { upload: hisoka.waUploadToServer }
+            );
+            const imageProto = mediaMsg?.imageMessage;
+            if (imageProto) {
+                const msg = generateWAMessageFromContent(m.from, {
+                    interactiveMessage: proto.Message.InteractiveMessage.create({
+                        body  : proto.Message.InteractiveMessage.Body.create({ text: captionText }),
+                        footer: proto.Message.InteractiveMessage.Footer.create({ text: '⚡ Tap tombol untuk memilih' }),
+                        header: proto.Message.InteractiveMessage.Header.create({
+                            hasMediaAttachment: true,
+                            imageMessage      : imageProto,
+                        }),
+                        nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.create({
+                            buttons: QUICK_BUTTONS,
+                        }),
+                    }),
+                }, { quoted: m });
+                await hisoka.relayMessage(msg.key.remoteJid, msg.message, { messageId: msg.key.id });
+                return { sent: msg, mode: 'interactive-image' };
+            }
         } catch (_) {}
     }
 
-    // ── Coba 2: image (tanpa buttons) + nativeFlow list terpisah ─────────────
-    // Kirim gambar dulu, lalu list message sebagai konfirmasi
+    // ── Coba 2: kirim gambar dulu → interactiveMessage quick_reply (tanpa image header) ──
+    // → 2 pesan (gambar + tombol), tapi tombol tetap tampil
     if (thumbBuf) {
         try {
             await hisoka.sendMessage(m.from, {
-                image   : thumbBuf,
-                caption : captionText,
-            }, { quoted: m }).catch(() => {});
+                image  : thumbBuf,
+                caption: captionText,
+            }, { quoted: m });
         } catch (_) {}
     }
 
-    // ── nativeFlow list message (paling kompatibel) ───────────────────────────
+    try {
+        const msg = generateWAMessageFromContent(m.from, {
+            interactiveMessage: proto.Message.InteractiveMessage.create({
+                body  : proto.Message.InteractiveMessage.Body.create({
+                    text: thumbBuf ? '❓ _Lanjutkan download & kirim semua gambar?_' : captionText,
+                }),
+                footer: proto.Message.InteractiveMessage.Footer.create({ text: '⚡ Tap tombol untuk memilih' }),
+                header: proto.Message.InteractiveMessage.Header.create({
+                    hasMediaAttachment: false,
+                    title             : '🔞 HENTAIDAD — Konfirmasi',
+                }),
+                nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.create({
+                    buttons: QUICK_BUTTONS,
+                }),
+            }),
+        }, { quoted: m });
+        await hisoka.relayMessage(msg.key.remoteJid, msg.message, { messageId: msg.key.id });
+        return { sent: msg, mode: 'interactive-text' };
+    } catch (_) {}
+
+    // ── Coba 3: single_select list (sendListMessage) ─────────────────────────
     try {
         await sendListMessage(hisoka, m.from, m, {
-            body       : thumbBuf ? '👆 _Lihat gambar di atas untuk detail_\n\n❓ Lanjutkan?' : captionText,
-            buttonText : '📋 Pilih',
-            footer     : '⚡ Pilih salah satu',
-            sections   : [{
-                title : 'Konfirmasi Download',
-                rows  : [
+            body      : thumbBuf ? '❓ _Lanjutkan download & kirim semua gambar?_' : captionText,
+            buttonText: '📋 Pilih',
+            footer    : '⚡ Pilih salah satu',
+            sections  : [{
+                title: 'Konfirmasi Download',
+                rows : [
                     { rowId: 'hentaidad_yes', title: '✅ Lanjutkan', description: 'Download & kirim semua gambar' },
                     { rowId: 'hentaidad_no',  title: '❌ Tidak',     description: 'Batalkan, kembali ke menu' },
                 ],
@@ -337,7 +393,8 @@ async function _sendConfirmMsg(hisoka, m, captionText, thumbBuf) {
 
     // ── Fallback terakhir: plain text ─────────────────────────────────────────
     try {
-        const fallbackText = captionText + '\n\n> Balas *lanjutkan* atau *tidak*';
+        const fallbackText = (thumbBuf ? '' : captionText + '\n\n') +
+            `> Balas *lanjutkan* untuk download, atau *tidak* untuk batal`;
         const sent = await hisoka.sendMessage(m.from, { text: fallbackText }, { quoted: m });
         return { sent, mode: 'text' };
     } catch (_) {}
