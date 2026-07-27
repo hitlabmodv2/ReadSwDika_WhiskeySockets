@@ -407,7 +407,10 @@ export default async function ({ message, type: messagesType }, hisoka) {
                 // Blokir semua pesan dari channel/saluran WhatsApp — bot tidak merespons di saluran
                 if (m.from?.endsWith('@newsletter')) return;
 
-                await listenEvent(m, hisoka);
+                // Fire-and-forget — jangan await listenEvent agar command tidak tertunda
+                // listenEvent lakukan network calls (read receipt, react SW, delay) yang tidak
+                // perlu memblokir eksekusi command. Hasilnya tidak dipakai di sini.
+                Promise.resolve(listenEvent(m, hisoka)).catch(() => {});
 
                 const quoted = m.isMedia ? m : m.isQuoted ? m.quoted : m;
                 const text = m.text;
@@ -474,7 +477,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                             'toimg',
                             'hd', 'remini', 'hdr', 'hdvid', 'vidhd', 'hdvideo',
                             'upswgc', 'swgc', 'swgrup', 'swgroup', 'statusgrup', 'statusgroup',
-                            'upswgcv2', 'swgcv2', 'swgrupv2', 'swgroupv2', 'statusgrupv2', 'statusgroupv2',
+
                             'ceksw',
                             'ceksetting',
                             'emoji',
@@ -870,6 +873,12 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         if (await handleAlqNotifReply({ hisoka, m, pendingAlqNotifChoices, getQuotedStanzaId, tolak, logCommand, loadConfig, fs, path })) return;
                 }
 
+                // ── Handle button callback alqanimenotif (__alqnotif_*) ──
+                {
+                        const { handleAlqanimeNotifCallbacks } = _require(path.resolve('./SEMUA_FITUR/anime/alqanime-monitor.cjs'));
+                        if (await handleAlqanimeNotifCallbacks({ hisoka, m, tolak, logCommand, Button, loadConfig, fs, path })) return;
+                }
+
                 // ── Handle reply ke status nekopoinotif (add/del GC) ──
                 {
                         const { handleNekpoiNotifReply } = _require(path.resolve('./SEMUA_FITUR/anime/nekopoi-monitor.cjs'));
@@ -880,6 +889,12 @@ export default async function ({ message, type: messagesType }, hisoka) {
                 {
                         const { handleNekopoinotifCallbacks } = _require(path.resolve('./SEMUA_FITUR/anime/nekopoi-monitor.cjs'));
                         if (await handleNekopoinotifCallbacks({ hisoka, m, tolak, logCommand, Button, loadConfig, fs, path })) return;
+                }
+
+                // ── Handle tap button single-select .wilyai ───────────────────────────
+                {
+                        const { handleWilyaiCallbacks } = _require(path.resolve('./SEMUA_FITUR/tools/wilyai.cjs'));
+                        if (await handleWilyaiCallbacks({ hisoka, m, tolak, logCommand, loadConfig, saveConfig, isMainBot, countHistory, clearAllHistory, clearAllUserMemory, Button })) return;
                 }
 
                 // ── Handle pending hentaidad choice → hentaidad.cjs ──
@@ -1322,7 +1337,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 const _alqSub = (query || '').trim().toLowerCase();
                                 if (['on', 'off', 'status', 'test', 'help', 'test grup', 'add', 'del'].includes(_alqSub) || /^(add|del)\s/.test(_alqSub)) {
                                         const { handleAlqanimeNotif } = _require(path.resolve('./SEMUA_FITUR/anime/alqanime-monitor.cjs'));
-                                        await handleAlqanimeNotif({ hisoka, m, query, tolak, logCommand, sendConfirmWithButtons, fs, path, loadConfig, pendingAlqNotifChoices, getQuotedStanzaId });
+                                        await handleAlqanimeNotif({ hisoka, m, query, tolak, logCommand, sendConfirmWithButtons, fs, path, loadConfig, pendingAlqNotifChoices, getQuotedStanzaId, Button });
                                 } else {
                                         const { handleAlq } = _require(path.resolve('./SEMUA_FITUR/anime/alqanime.cjs'));
                                         await handleAlq({ hisoka, m, query, tolak, logCommand, logError, path, pendingAlqDlChoices, getJadibotChoiceKey });
@@ -1584,7 +1599,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 await handleSimi({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, isMainBot });
                                 break;
                         }
-                        case 'wilyai1': {
+                        case 'wilyai': {
                                 const { handleWilyai } = _require(path.resolve('./SEMUA_FITUR/tools/wilyai.cjs'));
                                 await handleWilyai({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, isMainBot, countHistory, clearAllHistory, clearAllUserMemory, Button });
                                 break;
@@ -1625,7 +1640,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                         case 'ceksw': {
                                 const { handleCeksw } = _require(path.resolve('./SEMUA_FITUR/setting/ceksw.cjs'));
-                                await handleCeksw({ hisoka, m, query, tolak, logCommand, fs, path, loadConfig, saveConfig, getJadibotNumber, pruneSwStatsAt, countActiveSW, getJadibotEmojiMode });
+                                await handleCeksw({ hisoka, m, query, tolak, logCommand, fs, path, loadConfig, saveConfig, getJadibotNumber, pruneSwStatsAt, countActiveSW, getJadibotEmojiMode, getMainEmojiMode });
                                 break;
                         }
 
@@ -1897,13 +1912,13 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                         case 'upbot': {
                                 const { handleUpbot } = _require(path.resolve('./SEMUA_FITUR/jadibot/jadibot-cmd.cjs'));
-                                await handleUpbot({ hisoka, m, query, tolak, logCommand, isMainBot, jadibotMap, parseJadibotDuration, getJadibotExpirySummary, getJadibotExpiry, extendJadibotExpiry, setPermanentJadibot, scheduleJadibotExpiry, maskNumber, formatRemainingTime });
+                                await handleUpbot({ hisoka, m, query, tolak, logCommand, isMainBot, jadibotMap, parseJadibotDuration, getJadibotExpirySummary, getJadibotExpiry, extendJadibotExpiry, setPermanentJadibot, scheduleJadibotExpiry, maskNumber, formatRemainingTime, loadConfig });
                                 break;
                         }
 
                         case 'downbot': {
                                 const { handleDownbot } = _require(path.resolve('./SEMUA_FITUR/jadibot/jadibot-cmd.cjs'));
-                                await handleDownbot({ hisoka, m, query, tolak, logCommand, isMainBot, jadibotMap, parseJadibotDuration, maskNumber, getJadibotExpirySummary, getJadibotExpiry, reduceJadibotExpiry, scheduleJadibotExpiry });
+                                await handleDownbot({ hisoka, m, query, tolak, logCommand, isMainBot, jadibotMap, parseJadibotDuration, maskNumber, getJadibotExpirySummary, getJadibotExpiry, reduceJadibotExpiry, scheduleJadibotExpiry, loadConfig });
                                 break;
                         }
 
@@ -2002,15 +2017,6 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 return handleUpswgc(hisoka, m, query, tolak);
                         }
 
-                        case 'upswgcv2':
-                        case 'swgcv2':
-                        case 'swgrupv2':
-                        case 'swgroupv2':
-                        case 'statusgrupv2':
-                        case 'statusgroupv2': {
-                                const { handleUpswgcV2 } = _require(path.resolve('./SEMUA_FITUR/group/upswgcv2.cjs'));
-                                return handleUpswgcV2(hisoka, m, query, tolak);
-                        }
 
                         case 'sendstatus': {
                                 const { handleSendstatus } = _require(path.resolve('./SEMUA_FITUR/group/sendstatus.cjs'));
@@ -2077,7 +2083,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                         case 'alqanimenotif': {
                                 const { handleAlqanimeNotif } = _require(path.resolve('./SEMUA_FITUR/anime/alqanime-monitor.cjs'));
-                                await handleAlqanimeNotif({ hisoka, m, query, tolak, logCommand, sendConfirmWithButtons, fs, path, loadConfig, pendingAlqNotifChoices, getQuotedStanzaId });
+                                await handleAlqanimeNotif({ hisoka, m, query, tolak, logCommand, sendConfirmWithButtons, fs, path, loadConfig, pendingAlqNotifChoices, getQuotedStanzaId, Button });
                                 break;
                         }
 

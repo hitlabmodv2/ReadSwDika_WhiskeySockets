@@ -93,8 +93,8 @@ export function loadJadibotCekswConfig(jadibotNum) {
                 const p = path.join(process.cwd(), 'data_jadibot', jadibotNum, 'ceksw', 'config.json');
                 if (fs.existsSync(p)) return JSON.parse(fs.readFileSync(p, 'utf-8'));
         } catch {}
-        // Default: cekswTracking ON untuk jadibot baru
-        return { cekswTracking: true };
+        // Default: cekswTracking OFF untuk jadibot baru
+        return { cekswTracking: false };
 }
 
 export function saveJadibotCekswConfig(jadibotNum, cfg) {
@@ -106,7 +106,7 @@ export function saveJadibotCekswConfig(jadibotNum, cfg) {
 export function initJadibotCekswConfig(jadibotNum) {
         const p = path.join(process.cwd(), 'data_jadibot', jadibotNum, 'ceksw', 'config.json');
         if (!fs.existsSync(p)) {
-                saveJadibotCekswConfig(jadibotNum, { cekswTracking: true });
+                saveJadibotCekswConfig(jadibotNum, { cekswTracking: false });
         }
 }
 
@@ -255,36 +255,77 @@ export function pruneSwStats() {
         pruneSwStatsAt(SW_STATS_PATH, 'Bot Utama');
 }
 
-// ─── SwTrack: per-user tracking di data/swtrack/users/ ───────────────────────
-export const SW_TRACK_USER_DIR = path.join(process.cwd(), 'data', 'swtrack', 'users');
+// ─── SwTrack: single-file tracking di data/swtrack/users.json ────────────────
+// Format: { "<nomor>": { "<msgId>": entry, ... }, ... }
+// Satu file per konteks (bot utama / per-jadibot) — lebih bersih, tidak bikin file baru per kontak
+export const SW_TRACK_USER_DIR = path.join(process.cwd(), 'data', 'swtrack', 'users'); // kept for compat
+export const SW_TRACK_USER_FILE = path.join(process.cwd(), 'data', 'swtrack', 'users.json');
 export const SW_ENTRY_TTL_MS = 26 * 60 * 60 * 1000; // 26 jam
 
-export function getSwUserPath(number) {
-        if (!number) return null;
-        const num = String(number).replace(/[^0-9]/g, '');
-        if (!num) return null;
-        if (!fs.existsSync(SW_TRACK_USER_DIR)) fs.mkdirSync(SW_TRACK_USER_DIR, { recursive: true });
-        return path.join(SW_TRACK_USER_DIR, `${num}.json`);
-}
-
-export function loadSwUser(number) {
+// ── Migrasi otomatis: gabungkan file lama users/<num>.json → single users.json ──
+function _migrateSwUsers(targetFile, sourceDir) {
         try {
-                const p = getSwUserPath(number);
-                if (p && fs.existsSync(p)) return JSON.parse(fs.readFileSync(p, 'utf-8'));
+                if (!fs.existsSync(sourceDir)) return;
+                if (!fs.statSync(sourceDir).isDirectory()) return;
+                const files = fs.readdirSync(sourceDir).filter(f => f.endsWith('.json'));
+                if (!files.length) return;
+                let merged = {};
+                try { if (fs.existsSync(targetFile)) merged = JSON.parse(fs.readFileSync(targetFile, 'utf-8')); } catch {}
+                for (const file of files) {
+                        try {
+                                const num = file.replace('.json', '');
+                                const data = JSON.parse(fs.readFileSync(path.join(sourceDir, file), 'utf-8'));
+                                merged[num] = { ...(merged[num] || {}), ...data };
+                                fs.unlinkSync(path.join(sourceDir, file));
+                        } catch {}
+                }
+                const dir = path.dirname(targetFile);
+                if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+                atomicWriteFileSync(targetFile, JSON.stringify(merged, null, 2));
+                try { fs.rmdirSync(sourceDir); } catch {}
+        } catch {}
+}
+_migrateSwUsers(SW_TRACK_USER_FILE, SW_TRACK_USER_DIR);
+
+// ── Helper internal: baca/tulis seluruh file ──
+function _loadAllSw(filePath) {
+        try {
+                if (fs.existsSync(filePath)) return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
         } catch {}
         return {};
 }
 
-export function saveSwUser(number, data) {
+function _saveAllSw(filePath, allData) {
         try {
-                const p = getSwUserPath(number);
-                if (!p) return;
+                const dir = path.dirname(filePath);
+                if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+                atomicWriteFileSync(filePath, JSON.stringify(allData, null, 2));
+        } catch {}
+}
+
+// ── Bot utama: baca/tulis entry per-nomor dari users.json ──
+export function loadSwUser(number) {
+        if (!number) return {};
+        const num = String(number).replace(/[^0-9]/g, '');
+        if (!num) return {};
+        try { return _loadAllSw(SW_TRACK_USER_FILE)[num] || {}; } catch {}
+        return {};
+}
+
+export function saveSwUser(number, data) {
+        if (!number) return;
+        const num = String(number).replace(/[^0-9]/g, '');
+        if (!num) return;
+        try {
                 const cutoff = Date.now() - SW_ENTRY_TTL_MS;
                 const pruned = {};
                 for (const [id, entry] of Object.entries(data)) {
                         if (new Date(entry.arrivedAt || 0).getTime() >= cutoff) pruned[id] = entry;
                 }
-                atomicWriteFileSync(p, JSON.stringify(pruned, null, 2));
+                const all = _loadAllSw(SW_TRACK_USER_FILE);
+                if (Object.keys(pruned).length > 0) all[num] = pruned;
+                else delete all[num];
+                _saveAllSw(SW_TRACK_USER_FILE, all);
         } catch {}
 }
 
@@ -336,15 +377,13 @@ export function extractSwNumber(jid) {
 }
 
 // Hitung berapa story dari kontak ini yang sudah dibaca hari ini (WIB)
-// userDir default = bot utama, bisa di-override untuk jadibot
-export function getStoryCountToday(number, userDir = SW_TRACK_USER_DIR) {
+// usersFile default = bot utama, bisa di-override untuk jadibot (path ke single .json)
+export function getStoryCountToday(number, usersFile = SW_TRACK_USER_FILE) {
         try {
                 const num = String(number).replace(/[^0-9]/g, '');
                 if (!num) return 0;
-                const filePath = path.join(userDir, `${num}.json`);
-                if (!fs.existsSync(filePath)) return 0;
-                const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-                // Ambil tanggal hari ini di zona WIB (UTC+7)
+                const all = _loadAllSw(usersFile);
+                const data = all[num] || {};
                 const nowWib = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }));
                 const todayStr = `${nowWib.getFullYear()}-${String(nowWib.getMonth()+1).padStart(2,'0')}-${String(nowWib.getDate()).padStart(2,'0')}`;
                 let count = 0;
@@ -358,46 +397,50 @@ export function getStoryCountToday(number, userDir = SW_TRACK_USER_DIR) {
         } catch { return 0; }
 }
 
-// ─── Factory: buat SwTracker dengan folder custom (untuk jadibot) ─────────────
-// Kembalikan { isSwUserTracked, markSwUserEntry, updateSwUserEntry, getMissedSwEntries }
-// yang semuanya terisolasi ke `userDir` — tidak campur dengan bot utama.
-export function createSwTracker(userDir) {
+// ─── Factory: buat SwTracker terisolasi per-jadibot (single file) ─────────────
+// usersFile = path ke data_jadibot/<num>/swtrack/users.json
+export function createSwTracker(usersFile) {
         const TTL = SW_ENTRY_TTL_MS;
 
-        function _getPath(number) {
-                if (!number) return null;
-                const num = String(number).replace(/[^0-9]/g, '');
-                if (!num) return null;
-                if (!fs.existsSync(userDir)) fs.mkdirSync(userDir, { recursive: true });
-                return path.join(userDir, `${num}.json`);
-        }
+        // Migrasi data lama jika masih ada folder users/ lama
+        const _oldDir = usersFile.replace(/\.json$/, '');
+        _migrateSwUsers(usersFile, _oldDir);
 
-        function _load(number) {
+        // Ekstrak nomor jadibot dari path (data_jadibot/<num>/swtrack/users.json → num)
+        const _jbNumMatch = usersFile.replace(/\\/g, '/').match(/data_jadibot\/([^/]+)\//);
+        const _jbNum = _jbNumMatch ? _jbNumMatch[1] : null;
+
+        function _loadAll() {
                 try {
-                        const p = _getPath(number);
-                        if (p && fs.existsSync(p)) return JSON.parse(fs.readFileSync(p, 'utf-8'));
+                        if (fs.existsSync(usersFile)) return JSON.parse(fs.readFileSync(usersFile, 'utf-8'));
                 } catch {}
                 return {};
         }
 
+        function _load(number) {
+                const num = String(number).replace(/[^0-9]/g, '');
+                return _loadAll()[num] || {};
+        }
+
         function _save(number, data) {
                 try {
-                        const p = _getPath(number);
-                        if (!p) return;
+                        const num = String(number).replace(/[^0-9]/g, '');
                         const cutoff = Date.now() - TTL;
                         const pruned = {};
                         for (const [id, entry] of Object.entries(data)) {
                                 if (new Date(entry.arrivedAt || 0).getTime() >= cutoff) pruned[id] = entry;
                         }
-                        atomicWriteFileSync(p, JSON.stringify(pruned, null, 2));
+                        const dir = path.dirname(usersFile);
+                        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+                        const all = _loadAll();
+                        if (Object.keys(pruned).length > 0) all[num] = pruned;
+                        else delete all[num];
+                        atomicWriteFileSync(usersFile, JSON.stringify(all, null, 2));
                 } catch {}
         }
 
-        // Ekstrak nomor jadibot dari userDir (data_jadibot/<num>/swtrack/users → num)
-        const _jbNumMatch = userDir.replace(/\\/g, '/').match(/data_jadibot\/([^/]+)\//);
-        const _jbNum = _jbNumMatch ? _jbNumMatch[1] : null;
-
         return {
+                usersFile,
                 isSwUserTracked(number, msgId) {
                         if (!number || !msgId) return false;
                         return !!_load(number)[msgId];
@@ -435,6 +478,7 @@ export function createSwTracker(userDir) {
                         } catch {}
                         return [];
                 },
+                loadAll: _loadAll,
         };
 }
 

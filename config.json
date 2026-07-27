@@ -17,8 +17,8 @@
     "author": "Anda Siapa?"
   },
   "autoOnline": {
-    "enabled": false,
-    "intervalSeconds": 15
+    "enabled": true,
+    "intervalSeconds": 10
   },
   "autoTyping": {
     "enabled": false,
@@ -84,9 +84,9 @@
   },
   "wilyAI": {
     "enabled": false,
-    "autoReply": true,
+    "autoReply": false,
     "privateReply": false,
-    "scope": "all",
+    "scope": "gc",
     "persona": {
       "name": "WilyAI",
       "greeting": "Siap! WilyAI di sini ✨"
@@ -167,8 +167,8 @@
         "diubahPada": 1784879213001
       },
       "120363383540766761@g.us": {
-        "enabled": false,
-        "diubahPada": 1784879213004
+        "enabled": true,
+        "diubahPada": 1785049750058
       },
       "120363419402989015@g.us": {
         "enabled": false,
@@ -231,8 +231,8 @@
   "nekopoinotif": {
     "groups": {
       "120363383540766761@g.us": {
-        "enabled": true,
-        "diubahPada": 1784720131505
+        "enabled": false,
+        "diubahPada": 1785049675550
       },
       "120363192554714254@g.us": {
         "enabled": false,

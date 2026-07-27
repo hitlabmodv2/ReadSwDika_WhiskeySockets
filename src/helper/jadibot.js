@@ -36,7 +36,8 @@ const {
   getContentType,
   downloadMediaMessage,
   delay,
-  Browsers
+  Browsers,
+  generateWAMessageFromContent
 } = _require('@whiskeysockets/baileys');
 
 import fs from 'fs'
@@ -153,6 +154,9 @@ const pairingTimeoutNotified = new Set() // guard idempotensi: cegah notif pairi
 const stoppingJadibot = new Set()
 const expiringJadibot = new Set()
 const reconnectingJadibot = new Set()
+// In-memory flag — sengaja TIDAK disimpan ke file agar reset tiap bot restart.
+// Tujuannya cuma cegah spam notif reconnect dalam SATU sesi, bukan lintas restart.
+const reconnectNotifiedSet = new Set()
 const activeOrStartingJadibot = new Set()
 const pairingTimeout = new Map()
 const pendingJadibotChoices = new Map()
@@ -168,6 +172,26 @@ const jadibotCleanerTimers = new Map()
 const autoOnlineIntervalMap = new Map()
 const swPruneIntervalMap = new Map()
 
+function claimPairingTimeoutNotification(number) {
+  if (pairingTimeoutNotified.has(number)) return false
+  pairingTimeoutNotified.add(number)
+  setTimeout(() => pairingTimeoutNotified.delete(number), 10000)
+  return true
+}
+
+// sendPresenceUpdate() mengembalikan Promise. Socket dapat tertutup setelah
+// pengecekan sock.user tetapi sebelum pengiriman selesai, jadi try/catch saja
+// tidak cukup untuk menangkap rejection "Connection Closed".
+function safeSendPresenceUpdate(sock, presence, jid = undefined) {
+  try {
+    if (!sock?.sendPresenceUpdate) return
+    const result = jid === undefined
+      ? sock.sendPresenceUpdate(presence)
+      : sock.sendPresenceUpdate(presence, jid)
+    if (result && typeof result.catch === 'function') result.catch(() => {})
+  } catch {}
+}
+
 /* ─── PER-JADIBOT AUTOONLINE ─── */
 export function startJadibotAutoOnline(sock, jadibotNum) {
   // Bersihkan interval lama dulu (reconnect / setting berubah)
@@ -182,9 +206,9 @@ export function startJadibotAutoOnline(sock, jadibotNum) {
   if (aoSettings.enabled) {
     // Mode ON: kirim available berkala → kontak lihat online realtime
     if (sock?.user) sock.updateOnlinePrivacy('all').catch(() => {})
-    try { if (sock?.user) sock.sendPresenceUpdate('available') } catch {}
+    if (sock?.user) safeSendPresenceUpdate(sock, 'available')
     const iv = setInterval(() => {
-      try { if (sock?.user) sock.sendPresenceUpdate('available') } catch {}
+      if (sock?.user) safeSendPresenceUpdate(sock, 'available')
     }, intervalMs)
     autoOnlineIntervalMap.set(jadibotNum, iv)
   } else {
@@ -194,11 +218,11 @@ export function startJadibotAutoOnline(sock, jadibotNum) {
     // Kirim unavailable berkala setiap 5 detik untuk lawan keepalive WA (25s)
     // — tanpa ini bot flash online ~3-5 detik tiap 25s lalu offline terus-menerus
     if (sock?.user) sock.updateOnlinePrivacy('match_last_seen').catch(() => {})
-    try { if (sock?.user) sock.sendPresenceUpdate('unavailable') } catch {}
+    if (sock?.user) safeSendPresenceUpdate(sock, 'unavailable')
     const iv = setInterval(() => {
       // Skip saat typing/recording aktif — jangan potong delay
       if (sock.__typingActive > 0) return;
-      try { if (sock?.user) sock.sendPresenceUpdate('unavailable') } catch {}
+      if (sock?.user) safeSendPresenceUpdate(sock, 'unavailable')
     }, 5000)
     autoOnlineIntervalMap.set(jadibotNum, iv)
   }
@@ -286,9 +310,14 @@ function saveJadibotRealtimeData(data) {
 
 function formatDurationMs(ms) {
   const totalMinutes = Math.max(1, Math.round(ms / 60000))
-  if (totalMinutes % 1440 === 0) return `${totalMinutes / 1440} hari`
-  if (totalMinutes % 60 === 0) return `${totalMinutes / 60} jam`
-  return `${totalMinutes} menit`
+  const days = Math.floor(totalMinutes / 1440)
+  const hours = Math.floor((totalMinutes % 1440) / 60)
+  const minutes = totalMinutes % 60
+  const parts = []
+  if (days) parts.push(`${days} hari`)
+  if (hours) parts.push(`${hours} jam`)
+  if (minutes) parts.push(`${minutes} menit`)
+  return parts.join(' ') || '1 menit'
 }
 
 function formatRemainingTime(ms) {
@@ -689,6 +718,50 @@ function persistConnectedAt(number, ts) {
   saveJadibotRealtimeData(data)
 }
 
+// ── Notif reconnect ke OWNER — in-memory saja ────────────────────────────────
+// Owner dapat notif sekali per restart (set kosong tiap restart = by design).
+function markJadibotReconnectNotified(number) {
+  number = String(number || '').replace(/[^0-9]/g, '')
+  reconnectNotifiedSet.add(number)
+}
+
+function isJadibotReconnectNotified(number) {
+  number = String(number || '').replace(/[^0-9]/g, '')
+  return reconnectNotifiedSet.has(number)
+}
+
+// ── Notif reconnect ke USER JADIBOT — persistent ke realtime.json ─────────────
+// User hanya dapat notif SEKALI seumur sesi — tidak spam meski bot restart.
+// Flag di-clear saat fresh pairing sehingga setelah pair ulang user dapat notif lagi.
+function markJadibotUserReconnectNotified(number) {
+  number = String(number || '').replace(/[^0-9]/g, '')
+  try {
+    const data = loadJadibotRealtimeData()
+    if (!data.bots[number]) data.bots[number] = {}
+    data.bots[number].userReconnectNotified = true
+    saveJadibotRealtimeData(data)
+  } catch {}
+}
+
+function isJadibotUserReconnectNotified(number) {
+  number = String(number || '').replace(/[^0-9]/g, '')
+  try {
+    const data = loadJadibotRealtimeData()
+    return data.bots[number]?.userReconnectNotified === true
+  } catch { return false }
+}
+
+function clearJadibotUserReconnectNotified(number) {
+  number = String(number || '').replace(/[^0-9]/g, '')
+  try {
+    const data = loadJadibotRealtimeData()
+    if (data.bots[number]) {
+      delete data.bots[number].userReconnectNotified
+      saveJadibotRealtimeData(data)
+    }
+  } catch {}
+}
+
 function restoreConnectedAtMap() {
   const data = loadJadibotRealtimeData()
   for (const [number, meta] of Object.entries(data.bots || {})) {
@@ -705,6 +778,7 @@ function removeJadibotExpiry(number) {
     expiryTimers.delete(number)
   }
   clearJadibotExpiryWarningTimers(number)
+  reconnectNotifiedSet.delete(number)
   const data = loadJadibotRealtimeData()
   if (data.bots[number]) {
     delete data.bots[number]
@@ -879,11 +953,22 @@ function msgOwnerExpired(number) {
   const cfg    = loadConfig()
   const ver    = cfg.botVersion || 'V25'
   const masked = maskNumber(number)
-  const remainingList = [...jadibotMap.keys()]
+  // Filter out nomor yg baru expired — jadibotMap.delete() dipanggil setelah fungsi ini,
+  // jadi tanpa filter, nomor yg expired masih muncul di list (bug realtime).
+  const remainingList = [...jadibotMap.keys()].filter(n => n !== number)
+  const _now = Date.now()
 
   const listPart = remainingList.length > 0
     ? `📊 *Jadibot Masih Aktif (${remainingList.length}):*\n` +
-      remainingList.map((v, i) => `${i + 1}. \`+${v}\``).join('\n') + `\n`
+      remainingList.map((v, i) => {
+        const _m = getJadibotExpiry(v)
+        const _isPerm = _m?.permanent === true
+        const _sisa = _isPerm
+          ? '♾️ Permanent'
+          : (_m?.expiresAt ? formatRemainingTime(Math.max(0, Number(_m.expiresAt) - _now)) : '?')
+        const _exp = _isPerm ? '' : (_m?.expiresAt ? ` _(s/d ${formatJadibotExpiryTime(_m.expiresAt)})_` : '')
+        return `${i + 1}. \`+${v}\` — *${_sisa}*${_exp}`
+      }).join('\n') + `\n`
     : `> ❌ _Tidak ada jadibot lain yang aktif saat ini._\n`
 
   return (
@@ -1151,8 +1236,8 @@ function getJadibotSwSet(number) {
 
 function getJadibotTracker(number) {
   if (!jadibotTrackers.has(number)) {
-    const userDir = path.join(process.cwd(), 'data_jadibot', number, 'swtrack', 'users')
-    jadibotTrackers.set(number, createSwTracker(userDir))
+    const usersFile = path.join(process.cwd(), 'data_jadibot', number, 'swtrack', 'users.json')
+    jadibotTrackers.set(number, createSwTracker(usersFile))
   }
   return jadibotTrackers.get(number)
 }
@@ -1393,7 +1478,7 @@ async function handleJadibotSW(msg, sock, swSet, number) {
               name: lastMiss.name || trackNumber,
               number: maskNumber(lastMiss.number || trackNumber),
               count: retriedCount,
-              storyCount: getStoryCountToday(lastMiss.number || trackNumber, path.join(process.cwd(), 'data_jadibot', number, 'swtrack', 'users')),
+              storyCount: getStoryCountToday(lastMiss.number || trackNumber, path.join(process.cwd(), 'data_jadibot', number, 'swtrack', 'users.json')),
               resolve: lastResolve,
               emojiMode: getJadibotEmojiMode(number),
             })
@@ -1518,7 +1603,7 @@ async function handleJadibotSW(msg, sock, swSet, number) {
         time: jakartaDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false }).replace(':', '.'),
         name: storyName,
         number: maskNumber(storyNumber),
-        storyCount: getStoryCountToday(storyNumber, path.join(process.cwd(), 'data_jadibot', number, 'swtrack', 'users')),
+        storyCount: getStoryCountToday(storyNumber, path.join(process.cwd(), 'data_jadibot', number, 'swtrack', 'users.json')),
         success: reactionSuccess ? 'Iya ✓' : (readOk ? 'Baca ✓' : 'Gagal ❌'),
         reaction: shouldReact ? usedReaction : 'Off ❌',
         resolve: resolveMethod,
@@ -1622,26 +1707,21 @@ function msgPairingExpired(number, direct = false) {
   if (direct) {
     // Versi lengkap → dikirim ke nomor tujuan (user jadibot)
     return (
-      `╔══════════════════════╗\n` +
-      `║   ⏰  *WAKTU HABIS!*   ║\n` +
-      `╚══════════════════════╝\n\n` +
+      `⏰ *Waktu Habis — Pairing Gagal*\n\n` +
       `📱 *Nomor kamu:* \`+${number}\`\n` +
-      `🕐 *Waktu:* _${_nowStr()}_\n\n` +
-      `❌ *Kode pairing sudah kedaluwarsa!*\n` +
-      `> _Kode tidak dimasukkan dalam batas waktu *3 menit*, sehingga sesi otomatis dibatalkan._\n\n` +
-      `━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `🕐 _${_nowStr()}_\n\n` +
+      `❌ ~Kode pairing sudah kedaluwarsa!~\n` +
+      `> _Kode tidak dimasukkan dalam *3 menit* — sesi otomatis dibatalkan._\n\n` +
       `🗑️ *Yang terjadi:*\n` +
-      `• ~Kode pairing sudah tidak berlaku~\n` +
-      `• ~Sesi dihapus otomatis dari server~\n` +
-      `• ~Jadibot belum aktif di nomormu~\n\n` +
-      `━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `- ~Kode tidak lagi berlaku~\n` +
+      `- ~Sesi dihapus otomatis dari server~\n` +
+      `- ~Jadibot belum aktif di nomormu~\n\n` +
       `📋 *Kemungkinan penyebab:*\n` +
       `1. Terlambat membuka pesan kode\n` +
       `2. Salah langkah saat input di WhatsApp\n` +
       `3. Koneksi internet terganggu saat proses\n\n` +
-      `━━━━━━━━━━━━━━━━━━━━━━\n` +
       `💡 *Ingin coba lagi?*\n` +
-      `📞 Hubungi owner — mereka akan kirimkan kode baru:\n` +
+      `📞 _Hubungi owner untuk kode baru:_\n` +
       `${getOwnerContact()}\n\n` +
       `> _Notif otomatis — Wily Bot ${ver}_ 🤖`
     )
@@ -1649,13 +1729,14 @@ function msgPairingExpired(number, direct = false) {
 
   // Versi singkat → dikirim ke GC/owner chat
   return (
-    `╔══════════════════════╗\n` +
-    `║   ⏰  *WAKTU HABIS*   ║\n` +
-    `╚══════════════════════╝\n\n` +
-    `📱 *Nomor:* \`${masked}\`\n\n` +
-    `❌ Kode pairing *kedaluwarsa* — tidak dimasukkan dalam *3 menit*.\n` +
-    `🔄 ~Sesi otomatis dihapus.~\n\n` +
-    `💡 Ketik *.jadibot ${number} <durasi>* untuk coba lagi.`
+    `⏰ *Waktu Habis — Pairing Gagal*\n\n` +
+    `📱 *Nomor:* \`${masked}\`\n` +
+    `🕐 _${_nowStr()}_\n\n` +
+    `❌ ~Kode pairing kedaluwarsa~ — tidak dimasukkan dalam *3 menit.*\n` +
+    `🗑️ ~Sesi otomatis dihapus dari server.~\n\n` +
+    `💡 *Aktifkan ulang:*\n` +
+    `- Ketik \`.jadibot ${number} <durasi>\`\n\n` +
+    `> _Notif otomatis — Wily Bot ${ver}_ 🤖`
   )
 }
 
@@ -1838,6 +1919,103 @@ async function sendOwnerNotif(mainBotSock, text, excludeNumbers = []) {
   }
 }
 
+// ── Kirim interactive quick reply button ke satu JID tertentu ───────────────
+// Dipakai untuk notif di GC/chat owner dengan tombol "Lanjutkan" → auto kirim command.
+async function sendInteractiveButton(sock, jid, text, buttonCommand, quotedMsg = null) {
+  if (!sock || !jid) return
+  const ctxInfo = (quotedMsg?.key?.id && quotedMsg?.message)
+    ? { stanzaId: quotedMsg.key.id, participant: quotedMsg.key.participant || quotedMsg.key.remoteJid, quotedMessage: quotedMsg.message }
+    : {}
+  try {
+    const msg = generateWAMessageFromContent(jid, {
+      interactiveMessage: {
+        body:   { text },
+        footer: { text: '' },
+        header: { title: '', subtitle: '', hasMediaAttachment: false },
+        contextInfo: ctxInfo,
+        nativeFlowMessage: {
+          messageParamsJson: JSON.stringify({}),
+          buttons: [{
+            name: 'quick_reply',
+            buttonParamsJson: JSON.stringify({
+              display_text: '🔄 Jadibot Lagi',
+              id: buttonCommand
+            })
+          }]
+        }
+      }
+    }, {})
+    await sock.relayMessage(msg.key.remoteJid, msg.message, {
+      messageId: msg.key.id,
+      additionalNodes: [{
+        tag: 'biz',
+        attrs: {},
+        content: [{
+          tag: 'interactive',
+          attrs: { type: 'native_flow', v: '1' },
+          content: [{ tag: 'native_flow', attrs: { v: '9', name: 'mixed' } }]
+        }]
+      }]
+    })
+  } catch (e) {
+    // Fallback: plain text jika button gagal
+    try { await sock.sendMessage(jid, { text }) } catch {}
+  }
+}
+
+// ── Kirim notif ke owner dengan Quick Reply button "Lanjutkan" ──────────────
+// Button otomatis kirim command tertentu (misal .jadibot <nomor>) saat ditekan.
+async function sendOwnerNotifWithButton(mainBotSock, text, buttonCommand, excludeNumbers = []) {
+  const sock = getActiveMainSock(mainBotSock)
+  if (!sock) return
+  const cfg = loadConfig()
+  const owners = (cfg.owners || []).map(n => String(n).replace(/[^0-9]/g, '')).filter(Boolean)
+  for (const ownerNum of owners) {
+    if (excludeNumbers.includes(ownerNum)) continue
+    const jid = `${ownerNum}@s.whatsapp.net`
+    try {
+      // Coba kirim dengan interactive button (quick reply)
+      const msg = generateWAMessageFromContent(jid, {
+        interactiveMessage: {
+          body:   { text },
+          footer: { text: '' },
+          header: { title: '', subtitle: '', hasMediaAttachment: false },
+          contextInfo: {},
+          nativeFlowMessage: {
+            messageParamsJson: JSON.stringify({}),
+            buttons: [{
+              name: 'quick_reply',
+              buttonParamsJson: JSON.stringify({
+                display_text: '🔄 Jadibot Lagi',
+                id: buttonCommand
+              })
+            }]
+          }
+        }
+      }, {})
+      await sock.relayMessage(msg.key.remoteJid, msg.message, {
+        messageId: msg.key.id,
+        additionalNodes: [{
+          tag: 'biz',
+          attrs: {},
+          content: [{
+            tag: 'interactive',
+            attrs: { type: 'native_flow', v: '1' },
+            content: [{ tag: 'native_flow', attrs: { v: '9', name: 'mixed' } }]
+          }]
+        }]
+      })
+      console.log(`[JADIBOT][OWNER-NOTIF] ✅ Notif+button terkirim ke owner +${ownerNum}`)
+    } catch (e) {
+      // Fallback: kirim plain text jika button gagal
+      console.log(`[JADIBOT][OWNER-NOTIF] ⚠️ Button gagal, fallback plain text ke +${ownerNum}: ${e?.message}`)
+      try {
+        await sock.sendMessage(jid, { text })
+      } catch {}
+    }
+  }
+}
+
 function _nowStr() {
   const d = new Date()
   const hari  = d.toLocaleDateString('id-ID', { weekday: 'short', timeZone: 'Asia/Jakarta' })
@@ -2015,7 +2193,7 @@ function msgOwnerLogout(number, savedLabel = '') {
 }
 
 /* ================= START JADIBOT ================= */
-async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, sendPairingMsg = null, durationMs = undefined, mainBotSock = null, reactFn = null, requesterNumber = null) {
+async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, sendPairingMsg = null, durationMs = undefined, mainBotSock = null, reactFn = null, requesterNumber = null, replyJid = null) {
   number = number.replace(/[^0-9]/g, '')
   const hasRequestedDuration = durationMs !== undefined && durationMs !== null
 
@@ -2051,6 +2229,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
     await delay(800)
   }
   activeOrStartingJadibot.add(number)
+  pairingTimeoutNotified.delete(number)
   if (!hasRequestedDuration && getJadibotExpiry(number)) {
     updateJadibotExpiryStatus(number, 'starting')
     scheduleJadibotExpiry(number, sendReply)
@@ -2111,7 +2290,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
     'wm', 'swm',
     'toimg', 'hd',
     'upswgc', 'swgc', 'swgrup', 'swgroup', 'statusgrup', 'statusgroup',
-    'upswgcv2', 'swgcv2', 'swgrupv2', 'swgroupv2', 'statusgrupv2', 'statusgroupv2',
+
     'readchat',
     'ceksw',
     'ceksetting',
@@ -2132,6 +2311,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
 
   /* ================= CONNECTION ================= */
   let pairingMsgKey = null
+  let pairingMsg    = null  // full message object untuk quoted reply
   let aborted = false
   let hasConnectedOnce = false
 
@@ -2161,12 +2341,17 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
         while (retries > 0) {
           if (aborted) break
           try {
+            // Gunakan kode pairing dari config.json, sama seperti bot utama.
+            // Baileys akan membuat kode acak hanya jika pairingCode kosong.
             const cfg = loadConfig()
-            const customCode = cfg.pairingCode && String(cfg.pairingCode).trim() ? String(cfg.pairingCode).trim().toUpperCase() : undefined
-            const code = await sock.requestPairingCode(number, customCode)
+            const customPairingCode = cfg.pairingCode
+              ? String(cfg.pairingCode).toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8).padEnd(8, '0')
+              : undefined
+            const code = await sock.requestPairingCode(number, customPairingCode)
             if (aborted) break
 
-            // Cek mode pairing dari config
+            // Cek mode pairing dari config terbaru (jangan pakai cfg yang tidak
+            // tersedia di scope callback pairing).
             const pairingMode = (cfg.jadibotPairingMode || 'v2').toLowerCase()
             // v1 = kirim pairing code ke GC/owner chat
             // v2 = kirim pairing code langsung ke nomor tujuan (private)
@@ -2177,33 +2362,51 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
             if (pairingMode === 'v2' && _pairSock) {
               // ── V2: Kirim kode langsung ke nomor tujuan ──
               try {
-                // Resolve JID yang benar dulu (support LID/linked device)
-                let targetJid = `${number}@s.whatsapp.net`
-                try {
-                  const [waResult] = await _pairSock.onWhatsApp(`${number}@s.whatsapp.net`)
-                  if (waResult?.exists && waResult?.jid) {
-                    targetJid = waResult.jid
-                  }
-                } catch (_) {}
+                // Pakai plain @s.whatsapp.net — jangan onWhatsApp() resolve dulu.
+                // onWhatsApp bisa return LID JID yang belum ada key-exchange-nya
+                // → sendMessage ke LID JID = not-acceptable dari WA server.
+                const targetJid = `${number}@s.whatsapp.net`
 
                 await _pairSock.sendMessage(targetJid, { text: msgPairingCode(code, number, true) })
                 directPairingSent = true
                 console.log(`[JADIBOT][V2] ✅ Pairing code terkirim realtime ke +${number} (jid: ${targetJid})`)
 
-                // Notif singkat ke GC/owner chat bahwa kode sudah dikirim ke nomor tujuan
+                // Notif ke GC/owner chat bahwa kode sudah dikirim ke nomor tujuan
                 try {
+                  // ── Hitung info durasi untuk notif owner ──
+                  const _pairNowMs = Date.now()
+                  const _pairExpiry = getJadibotExpiry(number)
+                  const _pairIsPerm = !hasRequestedDuration && _pairExpiry?.permanent === true
+                  const _pairDurMs = durationMs || (_pairExpiry?.durationMs) || DEFAULT_JADIBOT_DURATION_MS
+                  const _pairDurText = _pairIsPerm ? 'Permanent ♾️' : formatDurationMs(_pairDurMs)
+                  const _pairStartText = formatJadibotExpiryTime(_pairNowMs)
+                  const _pairEndText = _pairIsPerm
+                    ? 'Selamanya ♾️'
+                    : formatJadibotExpiryTime(_pairNowMs + _pairDurMs)
+                  const _pairVer = loadConfig().botVersion || 'V25'
+
                   const sentInfo = await sendReply(
                     `╔══════════════════════╗\n` +
                     `║   🤖  *J A D I B O T*  ║\n` +
                     `╚══════════════════════╝\n\n` +
                     `✅ *Kode pairing berhasil dikirim!*\n\n` +
-                    `📱 Kode langsung dikirim ke nomor:\n` +
-                    `*+${number}*\n\n` +
-                    `⏳ Suruh mereka segera buka kode tersebut\n` +
-                    `dan masukkan di WhatsApp → Perangkat Tertaut.\n\n` +
-                    `_Berlaku 3 menit_`
+                    `> 📱 Kode dikirim langsung ke nomor:\n` +
+                    `> \`+${number}\`\n\n` +
+                    `━━━━━━━━━━━━━━━━━━━━━━\n` +
+                    `📋 *Detail Sesi Jadibot:*\n` +
+                    `• *Durasi:* *${_pairDurText}*\n` +
+                    `• *Estimasi mulai:* _${_pairStartText}_\n` +
+                    `• *Estimasi berakhir:* _${_pairEndText}_\n` +
+                    `• *Status:* ~Belum terhubung~ ⏳\n\n` +
+                    `━━━━━━━━━━━━━━━━━━━━━━\n` +
+                    `📌 *Instruksi untuk mereka:*\n` +
+                    `1. Buka pesan kode yang dikirim ke nomor mereka\n` +
+                    `2. Buka WA → ⋮ → *Perangkat Tertaut*\n` +
+                    `3. Masukkan kode sebelum kedaluwarsa\n\n` +
+                    `> ⚠️ _Kode hanya berlaku *3 menit* — ~jangan ditunda!~_\n\n` +
+                    `> _Notif otomatis — Wily Bot ${_pairVer}_ 🤖`
                   )
-                  if (sentInfo?.key) pairingMsgKey = sentInfo.key
+                  if (sentInfo?.key) { pairingMsgKey = sentInfo.key; pairingMsg = sentInfo }
                 } catch {}
 
               } catch (e) {
@@ -2212,7 +2415,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
                 if (!directPairingSent) {
                   try {
                     const sentInfo = await sendReply(msgPairingCode(code, number))
-                    if (sentInfo?.key) pairingMsgKey = sentInfo.key
+                    if (sentInfo?.key) { pairingMsgKey = sentInfo.key; pairingMsg = sentInfo }
                     directPairingSent = true
                     console.log(`[JADIBOT][V2→V1] ✅ Fallback: pairing code dikirim ke GC/owner`)
                   } catch (e2) {
@@ -2226,12 +2429,12 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
             if (!directPairingSent) {
               if (sendPairingMsg) {
                 const sentInfo = await sendPairingMsg(code, number)
-                if (sentInfo?.key) pairingMsgKey = sentInfo.key
+                if (sentInfo?.key) { pairingMsgKey = sentInfo.key; pairingMsg = sentInfo }
               } else {
                 // V1: kirim plain text ke GC/owner
                 try {
                   const sentInfo = await sendReply(msgPairingCode(code, number))
-                  if (sentInfo?.key) pairingMsgKey = sentInfo.key
+                  if (sentInfo?.key) { pairingMsgKey = sentInfo.key; pairingMsg = sentInfo }
                 } catch (e) {
                   console.log(`[JADIBOT][V1] ⚠️ Gagal kirim pairing code ke GC: ${e?.message}`)
                 }
@@ -2263,6 +2466,10 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
       // ⏱️ AUTO STOP setelah 3 MENIT jika belum terhubung
       const timeout = setTimeout(async () => {
         if (state.creds?.registered || jadibotMap.has(number)) return
+        if (!claimPairingTimeoutNotification(number)) {
+          console.log(`[JADIBOT][PAIR-TIMEOUT] ⚠️ Notif sudah diklaim sebelumnya untuk +${number}, skip timer duplikat`)
+          return
+        }
 
         console.log(`[JADIBOT] ⏰ Pairing timeout 3 menit → ${number} → sesi dihapus`)
 
@@ -2304,7 +2511,13 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
           }
           // V2: JUGA notif ke GC/owner (yang request jadibot) agar tahu pairing gagal
           try {
-            await sendReply(msgPairingExpired(number, false))
+            const _expText = msgPairingExpired(number, false)
+            const _expBtnSock = getActiveMainSock(mainBotSock)
+            if (replyJid && _expBtnSock) {
+              await sendInteractiveButton(_expBtnSock, replyJid, _expText, `.jadibot ${number}`, pairingMsg)
+            } else {
+              await sendReply(_expText)
+            }
             console.log(`[JADIBOT][V2][EXPIRED] ✅ Notif pairing timeout terkirim ke GC/owner`)
           } catch (e) {
             console.log(`[JADIBOT][V2][EXPIRED] ⚠️ Gagal kirim notif ke GC/owner: ${e?.message}`)
@@ -2312,7 +2525,13 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
         } else {
           // V1: kirim ke GC/owner (direct=false → tampilkan command bot)
           try {
-            await sendReply(msgPairingExpired(number, false))
+            const _expTextV1 = msgPairingExpired(number, false)
+            const _expBtnSockV1 = getActiveMainSock(mainBotSock)
+            if (replyJid && _expBtnSockV1) {
+              await sendInteractiveButton(_expBtnSockV1, replyJid, _expTextV1, `.jadibot ${number}`, pairingMsg)
+            } else {
+              await sendReply(_expTextV1)
+            }
             console.log(`[JADIBOT][V1][EXPIRED] ✅ Notif pairing timeout terkirim ke GC/owner`)
           } catch (e) {
             console.log(`[JADIBOT][V1][EXPIRED] ⚠️ Gagal kirim notif ke GC/owner: ${e?.message}`)
@@ -2333,11 +2552,14 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
           }
         }
 
-        // Owner DM — notif monitoring pairing timeout (berlaku untuk V1 & V2)
-        try {
-          await sendOwnerNotif(mainBotSock, msgOwnerPairingExpired(number), [number])
-          console.log(`[JADIBOT][EXPIRED] ✅ Notif pairing timeout terkirim ke owner DM`)
-        } catch {}
+        // Permintaan manual sudah mendapat satu pesan lewat sendReply.
+        // Auto-start tetap mengirim laporan monitoring ke owner.
+        if (!requesterNumber) {
+          try {
+            await sendOwnerNotifWithButton(mainBotSock, msgOwnerPairingExpired(number), `.jadibot ${number}`, [number])
+            console.log(`[JADIBOT][EXPIRED] ✅ Notif pairing timeout terkirim ke owner DM`)
+          } catch {}
+        }
       }, PAIRING_TIMEOUT_MS)
 
       pairingTimeout.set(number, timeout)
@@ -2356,6 +2578,8 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
       persistConnectedAt(number, _connectTs)
       startingSocketMap.delete(number)
       pairingRequested.delete(number)
+      // Fresh pairing → reset flag notif user agar reconnect berikutnya kirim notif lagi
+      if (isFreshPairing) clearJadibotUserReconnectNotified(number)
 
       // Start per-jadibot autoonline (isolated dari bot utama & jadibot lain)
       try { startJadibotAutoOnline(sock, number) } catch {}
@@ -2489,16 +2713,23 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
         }
       }
 
-      // Notif realtime ke semua owner di config.owners[] — fresh pairing & reconnect
-      try {
-        await sendOwnerNotif(mainBotSock, msgOwnerConnected(number, !isFreshPairing), [number])
-      } catch {}
+      // ── Notif reconnect ke OWNER — in-memory flag, sekali per restart ──────────
+      const _skipOwnerReconnectNotif = !isFreshPairing && isJadibotReconnectNotified(number)
+      if (!_skipOwnerReconnectNotif) {
+        // Claim dulu sebelum await — cegah race condition jika connection='open' fire cepat
+        if (!isFreshPairing) markJadibotReconnectNotified(number)
+        try {
+          await sendOwnerNotif(mainBotSock, msgOwnerConnected(number, !isFreshPairing), [number])
+        } catch {}
+      }
 
-      // Reconnect: kirim notif langsung ke user jadibot (teks beda dari owner)
-      if (!isFreshPairing) {
+      // ── Notif reconnect ke USER JADIBOT — persistent flag, sekali seumur sesi ─
+      // Tidak dikirim ulang meski bot restart berkali-kali. Di-reset hanya saat fresh pairing.
+      if (!isFreshPairing && !isJadibotUserReconnectNotified(number)) {
+        // Claim persistent dulu sebelum await
+        markJadibotUserReconnectNotified(number)
         try {
           const _sentRecon = await sendDirectToUser(mainBotSock, number, msgDirectReconnect(number))
-          // Fallback via self-sock jika main bot tidak bisa kirim
           if (!_sentRecon) {
             await delay(300)
             await sendDirectJadibotNotice(sock, number, msgDirectReconnect(number))
@@ -2519,19 +2750,35 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
         !state.creds?.registered &&
         !jadibotMap.has(number)
 
+      // ── RACE CONDITION GUARD ──────────────────────────────────────────────────
+      // Saat user memasukkan kode pairing yang benar, WA mengirim:
+      //   connection='close' (reason 428) → lalu connection='open'
+      // Ini adalah handshake normal WA, BUKAN kegagalan pairing.
+      // Jika reason=428 (Connection Closed) → beri jeda 4 detik sebelum cleanup,
+      // sehingga 'connection=open' punya waktu untuk fire duluan.
+      // Jika dalam 4 detik sudah konek/registered → skip cleanup (pairing berhasil).
+      if (_wasStillPairing && reason === 428) {
+        console.log(`[JADIBOT] ⏸️ Close reason=428 saat pairing +${number} → tahan 4s (kemungkinan handshake WA)`)
+        await delay(4000)
+        // Re-check: kalau sudah berhasil konek setelah delay → skip cleanup
+        if (jadibotMap.has(number) || state.creds?.registered) {
+          console.log(`[JADIBOT] ✅ +${number} berhasil pairing setelah delay, skip cleanup`)
+          return
+        }
+        console.log(`[JADIBOT] ⏰ +${number} masih belum konek setelah 4s, lanjut cleanup`)
+      }
+      // ─────────────────────────────────────────────────────────────────────────
+
       if (pairingTimeout.has(number)) {
         clearTimeout(pairingTimeout.get(number))
         pairingTimeout.delete(number)
       }
 
       if (_wasStillPairing) {
-        // Guard idempotensi: pastikan hanya kirim notif sekali meski ada race timer vs close
-        if (pairingTimeoutNotified.has(number)) {
+        // Guard atomik: timer dan connection.close hanya boleh mengklaim satu notif.
+        if (!claimPairingTimeoutNotification(number)) {
           console.log(`[JADIBOT][PAIR-TIMEOUT] ⚠️ Notif sudah dikirim sebelumnya untuk +${number}, skip duplikat`)
         } else {
-          pairingTimeoutNotified.add(number)
-          setTimeout(() => pairingTimeoutNotified.delete(number), 10000) // bersihkan setelah 10 detik
-
           console.log(`[JADIBOT] ⏰ Pairing socket close saat proses pairing → kirim notif timeout ke ${number}`)
           const _ptSock = getActiveMainSock(mainBotSock)
 
@@ -2545,21 +2792,30 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
             }
           }
 
-          // Kirim ke GC/owner (direct=false → command bot)
+          // Kirim ke GC/owner (direct=false → command bot + button Lanjutkan)
           if (sendReply) {
             try {
-              await sendReply(msgPairingExpired(number, false))
+              const _ptText = msgPairingExpired(number, false)
+              const _ptSockBtn = getActiveMainSock(mainBotSock)
+              if (replyJid && _ptSockBtn) {
+                await sendInteractiveButton(_ptSockBtn, replyJid, _ptText, `.jadibot ${number}`, pairingMsg)
+              } else {
+                await sendReply(_ptText)
+              }
               console.log(`[JADIBOT][PAIR-TIMEOUT] ✅ Notif terkirim ke GC/owner`)
             } catch (e) {
               console.log(`[JADIBOT][PAIR-TIMEOUT] ⚠️ Gagal kirim ke GC/owner: ${e?.message}`)
             }
           }
 
-          // Owner DM — notif monitoring pairing timeout
-          try {
-            await sendOwnerNotif(mainBotSock, msgOwnerPairingExpired(number), [number])
-            console.log(`[JADIBOT][PAIR-TIMEOUT] ✅ Notif pairing timeout terkirim ke owner DM`)
-          } catch {}
+          // Permintaan manual sudah mendapat satu pesan lewat sendReply.
+          // Auto-start tetap mengirim laporan monitoring ke owner.
+          if (!requesterNumber) {
+            try {
+              await sendOwnerNotifWithButton(mainBotSock, msgOwnerPairingExpired(number), `.jadibot ${number}`, [number])
+              console.log(`[JADIBOT][PAIR-TIMEOUT] ✅ Notif pairing timeout terkirim ke owner DM`)
+            } catch {}
+          }
         }
 
         // Cleanup session pairing yang gagal + stop semua proses terkait
@@ -2660,9 +2916,9 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
           }
         }
 
-        // Notif realtime logout ke semua owner di config.owners[]
+        // Notif realtime logout ke semua owner di config.owners[] + button Lanjutkan
         try {
-          await sendOwnerNotif(mainBotSock, msgOwnerLogout(number), [number])
+          await sendOwnerNotifWithButton(mainBotSock, msgOwnerLogout(number), `.jadibot ${number}`, [number])
         } catch {}
 
         // BARU setelah notif terkirim: simpan sisa waktu, tutup socket & hapus sesi
@@ -2837,48 +3093,40 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
         const _deletedId = _protoMsg.key?.id
         if (_isStatusRevoke && _deletedId) {
           try {
-            const _jadibotUserDir = path.join(process.cwd(), 'data_jadibot', number, 'swtrack', 'users')
-            const _color = getJadibotLogColor(number)
+            const _jadibotUsersFile = path.join(process.cwd(), 'data_jadibot', number, 'swtrack', 'users.json')
             let _handled = false
-            // ── Fast path: LRU lookup (O(1), tanpa disk scan) ──
+            // ── Fast path: LRU lookup (O(1)) ──
             const _lruOwner = lookupSwMsgOwner(_deletedId, number)
-            if (_lruOwner) {
-              const _fp = path.join(_jadibotUserDir, `${_lruOwner}.json`)
-              if (fs.existsSync(_fp)) {
-                try {
-                  const _d = JSON.parse(fs.readFileSync(_fp, 'utf-8'))
-                  if (_d[_deletedId]) {
-                    _handled = true
-                    if (!_d[_deletedId].deleted) {
-                      _d[_deletedId] = { ..._d[_deletedId], deleted: true, deletedAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
-                      const _tmpFp = _fp + '.tmp'
-                      fs.writeFileSync(_tmpFp, JSON.stringify(_d, null, 2), 'utf-8')
-                      fs.renameSync(_tmpFp, _fp)
-                      console.log(`${_color}[SwTrack][JB:${number}] SW dihapus (LRU): ${_lruOwner} → ${_deletedId}\x1b[39m`)
-                    }
+            if (_lruOwner && fs.existsSync(_jadibotUsersFile)) {
+              try {
+                const _all = JSON.parse(fs.readFileSync(_jadibotUsersFile, 'utf-8'))
+                const _ownerNum = String(_lruOwner).replace(/[^0-9]/g, '')
+                if (_all[_ownerNum]?.[_deletedId]) {
+                  _handled = true
+                  if (!_all[_ownerNum][_deletedId].deleted) {
+                    _all[_ownerNum][_deletedId] = { ..._all[_ownerNum][_deletedId], deleted: true, deletedAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
+                    const _tmpFp = _jadibotUsersFile + '.tmp'
+                    fs.writeFileSync(_tmpFp, JSON.stringify(_all, null, 2), 'utf-8')
+                    fs.renameSync(_tmpFp, _jadibotUsersFile)
                   }
-                } catch {}
-              }
+                }
+              } catch {}
             }
-            // ── Slow path: full scan (LRU miss / file hilang / entry tidak ketemu) ──
-            if (!_handled && fs.existsSync(_jadibotUserDir)) {
-              const _files = fs.readdirSync(_jadibotUserDir).filter(f => f.endsWith('.json'))
-              for (const _file of _files) {
-                const _fp = path.join(_jadibotUserDir, _file)
-                try {
-                  const _d = JSON.parse(fs.readFileSync(_fp, 'utf-8'))
-                  if (_d[_deletedId]) {
-                    if (_d[_deletedId].deleted) break
-                    _d[_deletedId] = { ..._d[_deletedId], deleted: true, deletedAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
-                    const _tmpFp = _fp + '.tmp'
-                    fs.writeFileSync(_tmpFp, JSON.stringify(_d, null, 2), 'utf-8')
-                    fs.renameSync(_tmpFp, _fp)
-                    const _contactNum = _file.replace('.json', '')
-                    console.log(`${_color}[SwTrack][JB:${number}] SW dihapus: ${_contactNum} → ${_deletedId}\x1b[39m`)
+            // ── Slow path: scan semua key di single file ──
+            if (!_handled && fs.existsSync(_jadibotUsersFile)) {
+              try {
+                const _all = JSON.parse(fs.readFileSync(_jadibotUsersFile, 'utf-8'))
+                for (const _ownerNum of Object.keys(_all)) {
+                  if (_all[_ownerNum]?.[_deletedId]) {
+                    if (_all[_ownerNum][_deletedId].deleted) break
+                    _all[_ownerNum][_deletedId] = { ..._all[_ownerNum][_deletedId], deleted: true, deletedAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
+                    const _tmpFp = _jadibotUsersFile + '.tmp'
+                    fs.writeFileSync(_tmpFp, JSON.stringify(_all, null, 2), 'utf-8')
+                    fs.renameSync(_tmpFp, _jadibotUsersFile)
                     break
                   }
-                } catch {}
-              }
+                }
+              } catch {}
             }
           } catch {}
         }
@@ -2906,9 +3154,9 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
             const _delayMs  = Math.min(_delaySec * 1000, 30000)
             // Tandai typing aktif → interval stealth skip unavailable agar delay tidak terpotong
             sock.__typingActive = (sock.__typingActive || 0) + 1
-            try { sock.sendPresenceUpdate(_presence, _atJid) } catch {}
+            safeSendPresenceUpdate(sock, _presence, _atJid)
             setTimeout(() => {
-              try { sock.sendPresenceUpdate('paused', _atJid) } catch {}
+              safeSendPresenceUpdate(sock, 'paused', _atJid)
               sock.__typingActive = Math.max(0, (sock.__typingActive || 1) - 1)
             }, _delayMs)
           }
@@ -3024,7 +3272,7 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
     'wm', 'swm',
     'toimg', 'hd',
     'upswgc', 'swgc', 'swgrup', 'swgroup', 'statusgrup', 'statusgroup',
-    'upswgcv2', 'swgcv2', 'swgrupv2', 'swgroupv2', 'statusgrupv2', 'statusgroupv2',
+
     'readchat',
     'ceksw',
     'ceksetting',
@@ -3426,9 +3674,9 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
             const _delaySec = _doType ? (_atCfg.delaySeconds || 5) : (_arCfg.delaySeconds || 5)
             const _delayMs  = Math.min(_delaySec * 1000, 30000)
             sock.__typingActive = (sock.__typingActive || 0) + 1
-            try { sock.sendPresenceUpdate(_presence, _atJid) } catch {}
+            safeSendPresenceUpdate(sock, _presence, _atJid)
             setTimeout(() => {
-              try { sock.sendPresenceUpdate('paused', _atJid) } catch {}
+              safeSendPresenceUpdate(sock, 'paused', _atJid)
               sock.__typingActive = Math.max(0, (sock.__typingActive || 1) - 1)
             }, _delayMs)
           }

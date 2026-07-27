@@ -7,3 +7,8 @@
 - [WilyBot jadibot handler param shadowing](jadibot-duration-parameter-shadowing.md) — jangan destructure parseJadibotCommandQuery dari params di jadibot-cmd.cjs, bikin undefined & crash .upbot
 - [WilyBot CJS hot-reload registration](wilybot-hotreload-registration.md) — register new lazy-required .cjs feature files in hotReload.js WATCHED_FILES so edits apply live
 - [clearsesi/ceksesi auto-repopulate](clearsesi-ceksesi-autorepopulate.md) — groups/contacts refill fast via cachedGroupMetadata & contacts.upsert; not a bug unless sender-key/lid-mapping stay full too
+- [Jadibot pairing config scope](jadibot-pairing-config-scope.md) — callback pairing memuat config sendiri dan memakai pairingCode custom 8 karakter
+- [Jadibot presence Promise](jadibot-presence-promise.md) — sendPresenceUpdate harus diberi catch karena try/catch tidak menangkap rejection async
+- [Jadibot timeout dedup](jadibot-timeout-dedup.md) — timer 3 menit dan connection.close harus memakai satu klaim notifikasi atomik
+- [Alqanime caption semantics](alqanime-caption-semantics.md) — format WhatsApp dipakai sesuai makna konten; rilisan aktif tidak memakai coret
+- [Status audience path](status-audience-path.md) — semua media status harus melewati groupStatusV2 agar audience metadata ikut ter-encode

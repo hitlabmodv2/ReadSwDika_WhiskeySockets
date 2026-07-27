@@ -60,6 +60,7 @@ import {
         getMediaTypeEmoji,
         getStoryCountToday,
         lookupSwMsgOwner,
+        SW_TRACK_USER_FILE,
 } from '../../src/helper/swtrack.js';
 
 // ── Dedup log "SW dihapus": revoke story bisa terkirim >1x (notify + append,
@@ -160,45 +161,38 @@ export default async function (m, hisoka) {
                                                         let _handled = false;
                                                         // ── Fast path: LRU lookup (O(1), tanpa disk scan) ──
                                                         const _lruOwner = lookupSwMsgOwner(key.id, null);
-                                                        if (_lruOwner) {
-                                                                const fp = path.join(SW_TRACK_USER_DIR, `${_lruOwner}.json`);
-                                                                if (fs.existsSync(fp)) {
-                                                                        try {
-                                                                                const d = JSON.parse(fs.readFileSync(fp, 'utf-8'));
-                                                                                if (d[key.id]) {
-                                                                                        _recentSwRevoke.set(key.id, Date.now());
-                                                                                        _handled = true;
-                                                                                        if (!d[key.id].deleted) {
-                                                                                                d[key.id] = { ...d[key.id], deleted: true, deletedAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
-                                                                                                const _tmpFp = fp + '.tmp';
-                                                                                                fs.writeFileSync(_tmpFp, JSON.stringify(d, null, 2), 'utf-8');
-                                                                                                fs.renameSync(_tmpFp, fp);
-                                                                                                console.log(`\x1b[90m[SwTrack] SW dihapus (LRU): ${_lruOwner} → ${key.id}\x1b[39m`);
-                                                                                        }
+                                                        if (_lruOwner && fs.existsSync(SW_TRACK_USER_FILE)) {
+                                                                try {
+                                                                        const _all = JSON.parse(fs.readFileSync(SW_TRACK_USER_FILE, 'utf-8'));
+                                                                        const _ownerNum = String(_lruOwner).replace(/[^0-9]/g, '');
+                                                                        if (_all[_ownerNum]?.[key.id]) {
+                                                                                _recentSwRevoke.set(key.id, Date.now());
+                                                                                _handled = true;
+                                                                                if (!_all[_ownerNum][key.id].deleted) {
+                                                                                        _all[_ownerNum][key.id] = { ..._all[_ownerNum][key.id], deleted: true, deletedAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+                                                                                        const _tmpFp = SW_TRACK_USER_FILE + '.tmp';
+                                                                                        fs.writeFileSync(_tmpFp, JSON.stringify(_all, null, 2), 'utf-8');
+                                                                                        fs.renameSync(_tmpFp, SW_TRACK_USER_FILE);
                                                                                 }
-                                                                        } catch {}
-                                                                }
+                                                                        }
+                                                                } catch {}
                                                         }
-                                                        // ── Slow path: full scan (LRU miss / file hilang / entry tidak ketemu) ──
-                                                        if (!_handled && fs.existsSync(SW_TRACK_USER_DIR)) {
-                                                                const files = fs.readdirSync(SW_TRACK_USER_DIR).filter(f => f.endsWith('.json'));
-                                                                for (const file of files) {
-                                                                        const fp = path.join(SW_TRACK_USER_DIR, file);
-                                                                        try {
-                                                                                const d = JSON.parse(fs.readFileSync(fp, 'utf-8'));
-                                                                                if (d[key.id]) {
+                                                        // ── Slow path: scan semua key di single file ──
+                                                        if (!_handled && fs.existsSync(SW_TRACK_USER_FILE)) {
+                                                                try {
+                                                                        const _all = JSON.parse(fs.readFileSync(SW_TRACK_USER_FILE, 'utf-8'));
+                                                                        for (const _ownerNum of Object.keys(_all)) {
+                                                                                if (_all[_ownerNum]?.[key.id]) {
                                                                                         _recentSwRevoke.set(key.id, Date.now());
-                                                                                        if (d[key.id].deleted) break;
-                                                                                        d[key.id] = { ...d[key.id], deleted: true, deletedAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
-                                                                                        const _tmpFp = fp + '.tmp';
-                                                                                        fs.writeFileSync(_tmpFp, JSON.stringify(d, null, 2), 'utf-8');
-                                                                                        fs.renameSync(_tmpFp, fp);
-                                                                                        const num = file.replace('.json', '');
-                                                                                        console.log(`\x1b[90m[SwTrack] SW dihapus: ${num} → ${key.id}\x1b[39m`);
+                                                                                        if (_all[_ownerNum][key.id].deleted) break;
+                                                                                        _all[_ownerNum][key.id] = { ..._all[_ownerNum][key.id], deleted: true, deletedAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+                                                                                        const _tmpFp = SW_TRACK_USER_FILE + '.tmp';
+                                                                                        fs.writeFileSync(_tmpFp, JSON.stringify(_all, null, 2), 'utf-8');
+                                                                                        fs.renameSync(_tmpFp, SW_TRACK_USER_FILE);
                                                                                         break;
                                                                                 }
-                                                                        } catch {}
-                                                                }
+                                                                        }
+                                                                } catch {}
                                                         }
                                                 } catch {}
                                         }

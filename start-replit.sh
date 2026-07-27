@@ -39,19 +39,21 @@ if [ ! -d "node_modules" ]; then
   npm install --ignore-scripts
 fi
 
-# Install PM2 global jika belum ada
-if ! command -v pm2 &>/dev/null; then
-  echo "▶ PM2 tidak ditemukan, install PM2..."
-  npm install pm2 -g
+# Gunakan PM2 lokal (node_modules/.bin/pm2) supaya tidak perlu akses root/global
+# Cocok untuk Replit, Pterodactyl, atau server apa pun tanpa sudo
+PM2_BIN="./node_modules/.bin/pm2"
+if [ ! -f "$PM2_BIN" ]; then
+  echo "▶ PM2 lokal tidak ditemukan, install PM2..."
+  npm install pm2 --save-dev
 fi
 
 echo "▶ Update PM2..."
-pm2 update
+"$PM2_BIN" update
 
 echo "▶ Menjalankan bot dengan PM2..."
-pm2 delete wily-bot 2>/dev/null || true
-pm2 start ecosystem.config.cjs
-pm2 save
+"$PM2_BIN" delete wily-bot 2>/dev/null || true
+"$PM2_BIN" start ecosystem.config.cjs
+"$PM2_BIN" save
 echo "✅ Bot berjalan!"
 
 BOT_START_TIME=$(date +%s)
@@ -68,7 +70,7 @@ daily_report() {
     ELAPSED=$(( $(date +%s) - BOT_START_TIME ))
     UPTIME_STR=$(format_uptime $ELAPSED)
 
-    PM2_DATA=$(pm2 jlist 2>/dev/null | node -e "
+    PM2_DATA=$("$PM2_BIN" jlist 2>/dev/null | node -e "
       let d='';
       process.stdin.on('data',c=>d+=c);
       process.stdin.on('end',()=>{
@@ -113,7 +115,7 @@ echo "▶ Watchdog aktif — memantau proses PM2..."
 while true; do
   sleep 10
 
-  STATUS=$(pm2 jlist 2>/dev/null | node -e "
+  STATUS=$("$PM2_BIN" jlist 2>/dev/null | node -e "
     let d='';
     process.stdin.on('data',c=>d+=c);
     process.stdin.on('end',()=>{
@@ -144,9 +146,9 @@ Bot mati (status: \`${STATUS}\`), restart ke-$RESTART_COUNT...
 🕐 $NOW"
 
     sleep $RESTART_DELAY
-    pm2 delete wily-bot 2>/dev/null || true
-    pm2 start ecosystem.config.cjs
-    pm2 save
+    "$PM2_BIN" delete wily-bot 2>/dev/null || true
+    "$PM2_BIN" start ecosystem.config.cjs
+    "$PM2_BIN" save
 
     send_tg "✅ *Wily Bot - Replit*
 Bot berhasil di-restart (ke-$RESTART_COUNT).

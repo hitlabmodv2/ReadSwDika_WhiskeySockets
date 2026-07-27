@@ -189,6 +189,36 @@ async function handleAutoSimi({
                                         imageBuffer = null;
                                 }
 
+
+                                // ── AUTO STICKER: Deteksi intent "jadikan sticker" ─────────────────
+                                const _autoStkRgx = /\b(jadiin?|bikin|buat|ubah|tolong\s*(?:jadiin?|bikin|buat))\s*stik[ae]r\b|stik[ae]rin\b|jadi(?:kan)?\s+stik[ae]r\b/i;
+                                if (
+                                    imageBuffer && imageBuffer.length > 0 &&
+                                    mediaLabel !== 'video' &&
+                                    userMessage && _autoStkRgx.test(userMessage)
+                                ) {
+                                    try {
+                                        await hisoka.sendMessage(m.from, { react: { text: '🎭', key: m.key } });
+                                        const { Sticker, StickerTypes } = await import('wa-sticker-formatter');
+                                        const _cfg = loadConfig();
+                                        const _sc = _cfg.sticker || { pack: 'WhatsApp Bot', author: 'Wilykun' };
+                                        const _stickerObj = new Sticker(imageBuffer, {
+                                            pack: _sc.pack, author: _sc.author,
+                                            type: StickerTypes.FULL, categories: ['🎭'],
+                                            id: 'com.wilykun.wabot', quality: 90,
+                                        });
+                                        const _outBuf = await _stickerObj.toBuffer();
+                                        await hisoka.sendMessage(m.from, { sticker: _outBuf }, { quoted: m });
+                                        await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+                                        console.log(`\x1b[36m[AutoGemini]\x1b[0m 🎭 Auto-sticker dari intent ke ${m.pushName || m.sender}`);
+                                    } catch (_stkErr) {
+                                        console.error('\x1b[31m[AutoGemini]\x1b[0m Auto-sticker error:', _stkErr.message);
+                                        await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
+                                        await tolak(hisoka, m, `❌ Gagal buat sticker: ${_stkErr.message}`);
+                                    }
+                                    return false;
+                                }
+                                // ────────────────────────────────────────────────────────────────────
                                 if (!userMessage && !hasMedia) {
                                         userMessage = buildWilyFallbackUserPrompt(currentType);
                                 }
@@ -484,6 +514,36 @@ async function handleAutoSimi({
                                         imageBuffer = null;
                                 }
 
+
+                                // ── AUTO STICKER: Deteksi intent "jadikan sticker" ─────────────────
+                                const _autoStkRgx2 = /\b(jadiin?|bikin|buat|ubah|tolong\s*(?:jadiin?|bikin|buat))\s*stik[ae]r\b|stik[ae]rin\b|jadi(?:kan)?\s+stik[ae]r\b/i;
+                                if (
+                                    imageBuffer && imageBuffer.length > 0 &&
+                                    mediaLabel !== 'video' &&
+                                    userMessage && _autoStkRgx2.test(userMessage)
+                                ) {
+                                    try {
+                                        await hisoka.sendMessage(m.from, { react: { text: '🎭', key: m.key } });
+                                        const { Sticker, StickerTypes } = await import('wa-sticker-formatter');
+                                        const _cfg2 = loadConfig();
+                                        const _sc2 = _cfg2.sticker || { pack: 'WhatsApp Bot', author: 'Wilykun' };
+                                        const _stickerObj2 = new Sticker(imageBuffer, {
+                                            pack: _sc2.pack, author: _sc2.author,
+                                            type: StickerTypes.FULL, categories: ['🎭'],
+                                            id: 'com.wilykun.wabot', quality: 90,
+                                        });
+                                        const _outBuf2 = await _stickerObj2.toBuffer();
+                                        await hisoka.sendMessage(m.from, { sticker: _outBuf2 }, { quoted: m });
+                                        await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+                                        console.log(`\x1b[36m[AutoGemini]\x1b[0m 🎭 Auto-sticker dari intent ke ${m.pushName || m.sender}`);
+                                    } catch (_stkErr2) {
+                                        console.error('\x1b[31m[AutoGemini]\x1b[0m Auto-sticker error:', _stkErr2.message);
+                                        await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
+                                        await tolak(hisoka, m, `❌ Gagal buat sticker: ${_stkErr2.message}`);
+                                    }
+                                    return false;
+                                }
+                                // ────────────────────────────────────────────────────────────────────
                                 if (!userMessage && !hasMedia) {
                                         const _wilyFallbackType = _wilyTagAll ? 'tagall'
                                                 : _wilyWasMentionOnly ? 'mention-only'

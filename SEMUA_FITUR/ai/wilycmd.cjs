@@ -561,6 +561,45 @@ async function handleWily({
 
         const hasSticker = hasMedia && mediaLabel === 'sticker';
 
+        // ── AUTO STICKER: Deteksi intent "jadikan sticker" ──────────────────────
+        // Kalau ada gambar/sticker + user minta jadiin stiker → langsung buatin,
+        // jangan lempar ke AI (AI pasti cuma suruh ketik .s, bukan bikin stiker).
+        const _stickerIntentRgx = /\b(jadiin?|bikin|buat|ubah|tolong\s*(?:jadiin?|bikin|buat))\s*stik[ae]r\b|stik[ae]rin\b|jadi(?:kan)?\s+stik[ae]r\b/i;
+        if (
+            hasMedia &&
+            imageBuffer && imageBuffer.length > 0 &&
+            !isDocumentMode &&
+            mediaLabel !== 'video' &&
+            query && _stickerIntentRgx.test(query)
+        ) {
+            try {
+                await hisoka.sendMessage(m.from, { react: { text: '🎭', key: m.key } });
+                const { Sticker, StickerTypes } = await import('wa-sticker-formatter');
+                const cfg = loadConfig();
+                const sc = cfg.sticker || { pack: 'WhatsApp Bot', author: 'Wilykun' };
+                const stickerObj = new Sticker(imageBuffer, {
+                    pack: sc.pack,
+                    author: sc.author,
+                    type: StickerTypes.FULL,
+                    categories: ['🎭'],
+                    id: 'com.wilykun.wabot',
+                    quality: 90,
+                });
+                const outBuf = await stickerObj.toBuffer();
+                await hisoka.sendMessage(m.from, { sticker: outBuf }, { quoted: m });
+                await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+                console.log(`\x1b[36m[WilyAI]\x1b[0m 🎭 Auto-sticker dari intent "${query.substring(0, 50)}" ke ${m.sender}`);
+                logCommand(m, hisoka, 'wily');
+            } catch (stkErr) {
+                console.error('\x1b[31m[WilyAI]\x1b[0m Auto-sticker error:', stkErr.message);
+                await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
+                await tolak(hisoka, m, `❌ Gagal buat sticker: ${stkErr.message}`);
+                logCommand(m, hisoka, 'wily');
+            }
+            return;
+        }
+        // ─────────────────────────────────────────────────────────────────────────
+
         if (!userQuestion && hasMedia) {
                 userQuestion = buildWilyMediaUserPrompt({
                         mediaLabel,

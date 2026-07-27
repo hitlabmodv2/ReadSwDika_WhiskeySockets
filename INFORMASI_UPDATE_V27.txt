@@ -4,7 +4,7 @@ _📅 Rabu, 23 Juli 2026_ 🌙
 🤖 *WILY BOT — V27*
 ✨ *3 Fitur Baru*
 🐛 *4 Bug Fix*
-🚀 *1 Perubahan*
+🚀 *2 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -60,6 +60,12 @@ _Setelah tap "Ya, Aktifkan", yang muncul adalah 3 tombol kategori — bukan tomb
 4. Edit Kategori dipindah ke tombol tersendiri (`✏️ Edit Kategori`) — 2 langkah terpisah yang logis
 > Alur lebih intuitif: konfirmasi dulu, baru edit kategori kalau mau
 
+*4. 🐛 Fix Error — Error Tak Terduga Saat Eksekusi Command*
+_Beberapa kondisi error tak terduga yang bikin bot diam / tidak merespons sudah ditangani._
+1. Error yang sebelumnya tidak di-catch (unhandled rejection) sekarang ditangkap dan dilaporkan ke log
+2. Bot tidak lagi crash diam-diam di beberapa command tertentu
+> Bot lebih stabil, tidak mudah nge-hang tanpa sebab
+
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *PERUBAHAN*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -70,3 +76,29 @@ _Setiap kali tap tombol, pesan lama otomatis terhapus — chat tidak penuh denga
 3. Berlaku di semua callback: ON/OFF, Edit Kategori, Kembali, toggle per kategori, Lihat GC, Aktifkan/Matikan Semua
 4. Implementasi via `_prevBtnKey` Map (track key per grup) + `_autoClean()` + `_runBtn()` — tidak ada side effect ke fitur lain
 > Chat tetap bersih, hanya pesan terbaru yang terlihat — tidak spam
+
+*2. 🗑️ Hapus Fitur .upswgcv2 — Upload Status Grup v2 Dihapus*
+_Fitur .upswgcv2 (upload status ke grup pakai castleys-community) resmi dihapus dari bot._
+1. Command yang dihapus: `upswgcv2`, `swgcv2`, `swgrupv2`, `swgroupv2`, `statusgrupv2`, `statusgroupv2`
+2. File handler, case di message.js, entri hotReload, dan menu jadibot sudah dibersihkan semua
+> Untuk upload status ke grup, gunakan `.upswgc` seperti biasa
+
+━━━━━━━━━━━━━━━━━━━━━━
+📝 *RINGKASAN SIMPEL*
+_(Buat yang mau tau singkatnya aja)_
+━━━━━━━━━━━━━━━━━━━━━━
+
+✨ *3 HAL BARU:*
+1. *.nekopoinotif* — Setelah on/off notif, langsung muncul tombol. Gak perlu ketik lagi
+2. *.nekopoinotif* — Ada tombol Kembali buat bolak-balik menu tanpa repot
+3. *.jadibot* — Kalau bot tiba-tiba logout, sisa waktu sewa jadibot tidak hilang — otomatis tersimpan dan dilanjut saat konek ulang
+
+🐛 *4 BUG YANG DIPERBAIKI:*
+1. *.jadibot* — Dulu kalau bot mati/restart, jadibot bisa hilang diam-diam tanpa notif. Sekarang sudah pasti ada notifnya
+2. *.alqanimenotif* — Dulu error gagal ambil data rilisan anime. Sekarang sudah normal lagi
+3. *.nekopoinotif* — Dulu setelah tap tombol, tampilan menu salah urutan. Sekarang sudah benar
+4. *Fix Error* — Beberapa error tak terduga yang bikin bot diam / tidak merespons sudah diperbaiki
+
+🚀 *2 YANG DIUBAH / DIHAPUS:*
+1. *.nekopoinotif* — Setiap tap tombol, pesan menu lama otomatis terhapus biar chat tidak berantakan
+2. *.upswgcv2 DIHAPUS* — Fitur upload status grup v2 dihapus. Pakai `.upswgc` aja ya

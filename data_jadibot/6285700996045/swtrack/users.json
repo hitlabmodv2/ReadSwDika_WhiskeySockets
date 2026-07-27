@@ -1,0 +1,46 @@
+{
+  "6281225183701": {
+    "ACC0C70FF85CFBCBAFDBF8E53BF2178B": {
+      "id": "ACC0C70FF85CFBCBAFDBF8E53BF2178B",
+      "sender": "6281225183701@s.whatsapp.net",
+      "name": "Tya",
+      "type": "videoMessage",
+      "arrivedAt": "2026-07-25T11:31:50.988Z",
+      "read": true,
+      "reacted": true,
+      "emoji": "7️⃣",
+      "resolve": "Signal Lib ✓",
+      "source": "status",
+      "number": "6281225183701",
+      "resolvedPn": "6281225183701@s.whatsapp.net",
+      "messageKey": {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281225183701@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACC0C70FF85CFBCBAFDBF8E53BF2178B",
+        "participant": "252552784400530@lid",
+        "addressingMode": "lid"
+      },
+      "updatedAt": "2026-07-25T11:32:09.018Z",
+      "receiptKeys": [
+        {
+          "remoteJid": "status@broadcast",
+          "remoteJidAlt": "6281225183701@s.whatsapp.net",
+          "fromMe": false,
+          "id": "ACC0C70FF85CFBCBAFDBF8E53BF2178B",
+          "participant": "252552784400530@lid",
+          "addressingMode": "lid"
+        },
+        {
+          "remoteJid": "status@broadcast",
+          "remoteJidAlt": "6281225183701@s.whatsapp.net",
+          "fromMe": false,
+          "id": "ACC0C70FF85CFBCBAFDBF8E53BF2178B",
+          "participant": "6281225183701@s.whatsapp.net",
+          "addressingMode": "lid"
+        }
+      ],
+      "processedAt": "2026-07-25T11:32:09.018Z"
+    }
+  }
+}

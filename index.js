@@ -1080,10 +1080,11 @@ async function main() {
                         const swStartupTime = Date.now(); // Waktu bot connect — untuk filter entry lama vs baru
                         setTimeout(async () => {
                                 try {
-                                        const swUsersDir = path.join(process.cwd(), 'data', 'swtrack', 'users');
-                                        if (!fs.existsSync(swUsersDir)) return;
-                                        const userFiles = fs.readdirSync(swUsersDir).filter(f => f.endsWith('.json'));
-                                        if (!userFiles.length) return;
+                                        const swUsersFile = path.join(process.cwd(), 'data', 'swtrack', 'users.json');
+                                        if (!fs.existsSync(swUsersFile)) return;
+                                        let swAllData;
+                                        try { swAllData = JSON.parse(fs.readFileSync(swUsersFile, 'utf-8')); } catch { return; }
+                                        if (!swAllData || typeof swAllData !== 'object') return;
 
                                         const swCfg = loadConfig().autoReadStory || {};
                                         if (swCfg.enabled === false) return;
@@ -1100,13 +1101,10 @@ async function main() {
                                         const now = Date.now();
                                         let totalRetried = 0;
 
-                                        // Pass 1: kumpulkan semua pending entry dari semua file
+                                        // Pass 1: kumpulkan semua pending entry dari single file
                                         const swBatches = [];
-                                        for (const file of userFiles) {
+                                        for (const [contactNum, data] of Object.entries(swAllData)) {
                                                 try {
-                                                        const filePath = path.join(swUsersDir, file);
-                                                        const rawData = fs.readFileSync(filePath, 'utf-8');
-                                                        const data = JSON.parse(rawData);
                                                         const pending = Object.values(data).filter(e => {
                                                                 if (!e || e.deleted) return false;
                                                                 const arrived = new Date(e.arrivedAt || 0).getTime();
@@ -1114,7 +1112,7 @@ async function main() {
                                                                 if (arrived >= swStartupTime) return false;
                                                                 return !e.read || !e.reacted;
                                                         });
-                                                        if (pending.length) swBatches.push({ filePath, data, pending });
+                                                        if (pending.length) swBatches.push({ contactNum, data, pending });
                                                 } catch {}
                                         }
 
@@ -1148,7 +1146,7 @@ async function main() {
                                                 console.log(`${cy}│${rs} ${wh}⭔ Waktu       : ${_swPad(d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',hour12:false}).replace(':','.'),cW)}${rs}`);
                                                 console.log(`${cy}│${rs} ${wh}⭔ Nama        : ${_swPad(entry.name||num,cW)}${rs}`);
                                                 console.log(`${cy}│${rs} ${wh}⭔ Nomor       : ${_swPad(masked,cW)}${rs}`);
-                                                try { const _swCntF = path.join(process.cwd(),'data','swtrack','users',`${num}.json`); const _swCntD = fs.existsSync(_swCntF)?JSON.parse(fs.readFileSync(_swCntF,'utf-8')):{};const _swNow=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Jakarta'}));const _swTd=`${_swNow.getFullYear()}-${String(_swNow.getMonth()+1).padStart(2,'0')}-${String(_swNow.getDate()).padStart(2,'0')}`;const _swCnt=Object.values(_swCntD).filter(e=>{if(!e.arrivedAt)return false;const _d=new Date(new Date(e.arrivedAt).toLocaleString('en-US',{timeZone:'Asia/Jakarta'}));return `${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`===_swTd;}).length;if(_swCnt>0)console.log(`${cy}│${rs} ${wh}⭔ TotalStory  : ${_swPad(String(_swCnt),cW)}${rs}`); } catch {}
+                                                try { const _swCntD = swAllData[num] || {};const _swNow=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Jakarta'}));const _swTd=`${_swNow.getFullYear()}-${String(_swNow.getMonth()+1).padStart(2,'0')}-${String(_swNow.getDate()).padStart(2,'0')}`;const _swCnt=Object.values(_swCntD).filter(e=>{if(!e.arrivedAt)return false;const _d=new Date(new Date(e.arrivedAt).toLocaleString('en-US',{timeZone:'Asia/Jakarta'}));return `${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`===_swTd;}).length;if(_swCnt>0)console.log(`${cy}│${rs} ${wh}⭔ TotalStory  : ${_swPad(String(_swCnt),cW)}${rs}`); } catch {}
                                                 console.log(`${cy}│${rs} ${wh}⭔ Berhasil    : ${_swPad('Startup Retry ♻️',cW)}${rs}`);
                                                 console.log(`${cy}│${rs} ${wh}⭔ Reaksi      : ${_swPad(emoji||'Off ❌',cW)}${rs}`);
                                                 console.log(`${cy}│${rs} ${wh}⭔ Resolve     : ${rc}${_swPad((entry.resolve||'-')+' ♻️',cW)}${rs}`);
@@ -1156,7 +1154,7 @@ async function main() {
                                                 console.log(`${cy}└${'─'.repeat(13)}···${rs}`);
                                         };
 
-                                        for (const { filePath, data, pending } of swBatches) {
+                                        for (const { contactNum, data, pending } of swBatches) {
                                                 try {
                                                         for (const entry of pending) {
                                                                 try {
@@ -1169,7 +1167,6 @@ async function main() {
                                                                                         hisoka.readMessages(mKeys).catch(() => {}),
                                                                                         hisoka.sendReceipts(mKeys, 'read-self').catch(() => {}),
                                                                                 ]);
-                                                                                // Stealth: balik offline sesegera mungkin setelah read
                                                                                 if (hisoka.__stealthMode) hisoka.sendPresenceUpdate('unavailable').catch(() => {});
                                                                         }
                                                                         const mPn = entry.resolvedPn;
@@ -1183,7 +1180,6 @@ async function main() {
                                                                                         { react: { key: entry.messageKey, text: newEmoji } },
                                                                                         { statusJidList: [jidNormalizedUser(hisoka.user.id), jidNormalizedUser(mPn)] }
                                                                                 ).catch(() => { newEmoji = null; });
-                                                                                // Stealth: balik offline sesegera mungkin setelah reaksi startup
                                                                                 if (hisoka.__stealthMode) hisoka.sendPresenceUpdate('unavailable').catch(() => {});
                                                                         }
                                                                         data[entry.id] = {
@@ -1195,12 +1191,19 @@ async function main() {
                                                                                 retriedAt: new Date().toISOString(),
                                                                                 updatedAt: new Date().toISOString(),
                                                                         };
-                                                                        try { fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8'); } catch {}
+                                                                        // Update data in-memory lalu tulis balik ke single file
+                                                                        try {
+                                                                                swAllData[contactNum] = data;
+                                                                                fs.writeFileSync(swUsersFile, JSON.stringify(swAllData, null, 2), 'utf-8');
+                                                                        } catch {}
                                                                         totalRetried++;
                                                                         try { _swBox(entry, newEmoji||(entry.reacted?entry.emoji:null), usedDelay); } catch {}
                                                                 } catch {}
                                                         }
-                                                        fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');
+                                                        try {
+                                                                swAllData[contactNum] = data;
+                                                                fs.writeFileSync(swUsersFile, JSON.stringify(swAllData, null, 2), 'utf-8');
+                                                        } catch {}
                                                 } catch {}
                                         }
                                 } catch {}

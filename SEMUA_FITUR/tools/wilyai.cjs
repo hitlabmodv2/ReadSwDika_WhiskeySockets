@@ -101,7 +101,7 @@ async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, w, total
                     isEnabled
                         ? activeDesc('User bisa pakai .wily, .ai, .tanya')
                         : offDesc('User belum bisa pakai AI'),
-                    `${pref}wilyai on`
+                    '__wilyai_on__'
                 )
                 .makeRow(
                     !isEnabled
@@ -111,7 +111,7 @@ async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, w, total
                     !isEnabled
                         ? activeDesc('Perintah AI dinonaktifkan')
                         : 'Matikan perintah AI — user tidak bisa pakai',
-                    `${pref}wilyai off`
+                    '__wilyai_off__'
                 )
 
                 // ── Section 2: Auto Reply ─────────────────────────────────
@@ -124,7 +124,7 @@ async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, w, total
                     isAutoReply
                         ? activeDesc('Bot otomatis balas pesan sesuai scope')
                         : offDesc('Bot belum auto balas'),
-                    `${pref}wilyai replay on`
+                    '__wilyai_replay_on__'
                 )
                 .makeRow(
                     !isAutoReply
@@ -134,7 +134,7 @@ async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, w, total
                     !isAutoReply
                         ? activeDesc('.wily masih bisa dipakai manual')
                         : 'Matikan auto reply, .wily tetap bisa dipakai manual',
-                    `${pref}wilyai replay off`
+                    '__wilyai_replay_off__'
                 )
 
                 // ── Section 3: Scope ─────────────────────────────────────
@@ -143,19 +143,19 @@ async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, w, total
                     mark(scope === 'all') + '🌐 Semua (PM + GC)',
                     'Private + Grup',
                     scope === 'all' ? activeDesc('Auto reply aktif di PM dan Grup') : 'Auto reply di private chat dan grup',
-                    `${pref}wilyai all`
+                    '__wilyai_all__'
                 )
                 .makeRow(
                     mark(scope === 'pm') + '📩 Private Only',
                     'Hanya Private Chat (DM)',
                     scope === 'pm' ? activeDesc('Auto reply hanya di private chat') : 'Auto reply hanya di private chat (DM)',
-                    `${pref}wilyai pm`
+                    '__wilyai_pm__'
                 )
                 .makeRow(
                     mark(scope === 'gc') + '👥 Grup Only',
                     'Hanya Grup',
                     scope === 'gc' ? activeDesc('Auto reply hanya di grup') : 'Auto reply hanya di grup',
-                    `${pref}wilyai gc`
+                    '__wilyai_gc__'
                 )
 
                 // ── Section 4: History ────────────────────────────────────
@@ -166,7 +166,7 @@ async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, w, total
                     totalSesi > 0
                         ? `Ada ${totalSesi} sesi aktif — tap untuk hapus semua`
                         : 'Tidak ada sesi tersimpan saat ini',
-                    `${pref}wilyai reset`
+                    '__wilyai_reset__'
                 );
 
             await _deleteLastMsg(hisoka, m.from);
@@ -293,6 +293,105 @@ async function handleWilyai({ hisoka, m, query, tolak, logCommand, loadConfig, s
 }
 
 module.exports = { handleWilyai };
+
+// ── CALLBACK HANDLER: tombol single-select .wilyai ───────────────────────────
+// Dipanggil dari message.js di seksi callbacks, sebelum switch command.
+// Row IDs: __wilyai_on__, __wilyai_off__, __wilyai_replay_on__, __wilyai_replay_off__
+//          __wilyai_all__, __wilyai_pm__, __wilyai_gc__, __wilyai_reset__
+
+const _WILYAI_CBS = new Set([
+    '__wilyai_on__', '__wilyai_off__',
+    '__wilyai_replay_on__', '__wilyai_replay_off__',
+    '__wilyai_all__', '__wilyai_pm__', '__wilyai_gc__',
+    '__wilyai_reset__',
+]);
+
+async function handleWilyaiCallbacks({ hisoka, m, tolak, logCommand, loadConfig, saveConfig, isMainBot, countHistory, clearAllHistory, clearAllUserMemory, Button }) {
+    const txt = typeof m.text === 'string' ? m.text.trim() : '';
+    if (!_WILYAI_CBS.has(txt)) return false;
+    if (!isMainBot(hisoka)) return false;
+    if (!m.isOwner) return false;
+
+    try {
+        // Hapus pesan tap user agar tidak menumpuk
+        try { await hisoka.sendMessage(m.from, { delete: m.key }); } catch (_) {}
+
+        const cfg = loadConfig();
+        if (!cfg.wilyAI) cfg.wilyAI = { enabled: true, autoReply: true, scope: 'all' };
+        const w   = cfg.wilyAI;
+        const pref = m.prefix || '.';
+
+        const showButton = async (extraPrefix = '') => {
+            const totalSesi = countHistory();
+            const freshCfg  = loadConfig();
+            const freshW    = freshCfg.wilyAI || { enabled: true, autoReply: true, scope: 'all' };
+            const bodyText  = extraPrefix
+                ? extraPrefix + '\n\n' + _buildBody(freshW, totalSesi)
+                : _buildBody(freshW, totalSesi);
+            await _sendSelection(hisoka, m, Button, tolak, bodyText, pref, freshW, totalSesi);
+        };
+
+        // ── on / off ──────────────────────────────────────────────────────
+        if (txt === '__wilyai_on__' || txt === '__wilyai_off__') {
+            const aktif = txt === '__wilyai_on__';
+            if (w.enabled === aktif || (w.enabled !== false && aktif)) {
+                await showButton(`ℹ️ Fitur .wily sudah ${aktif ? 'aktif' : 'nonaktif'} sebelumnya.`);
+            } else {
+                cfg.wilyAI.enabled = aktif;
+                saveConfig(cfg);
+                await hisoka.sendMessage(m.from, { react: { text: aktif ? '✅' : '🚫', key: m.key } });
+                await showButton();
+            }
+            logCommand(m, hisoka, 'wilyai');
+            return true;
+        }
+
+        // ── replay on / off ───────────────────────────────────────────────
+        if (txt === '__wilyai_replay_on__' || txt === '__wilyai_replay_off__') {
+            const aktif = txt === '__wilyai_replay_on__';
+            cfg.wilyAI.autoReply = aktif;
+            saveConfig(cfg);
+            await hisoka.sendMessage(m.from, { react: { text: aktif ? '✅' : '🚫', key: m.key } });
+            await showButton();
+            logCommand(m, hisoka, 'wilyai');
+            return true;
+        }
+
+        // ── scope: all / pm / gc ─────────────────────────────────────────
+        if (txt === '__wilyai_all__' || txt === '__wilyai_pm__' || txt === '__wilyai_gc__') {
+            const scope = txt.replace('__wilyai_', '').replace('__', '');
+            cfg.wilyAI.scope = scope;
+            saveConfig(cfg);
+            await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
+            await showButton();
+            logCommand(m, hisoka, 'wilyai');
+            return true;
+        }
+
+        // ── reset ─────────────────────────────────────────────────────────
+        if (txt === '__wilyai_reset__') {
+            const totalSesi   = countHistory();
+            await clearAllHistory();
+            const totalMemori = clearAllUserMemory();
+            await hisoka.sendMessage(m.from, { react: { text: '🗑️', key: m.key } });
+            await showButton(
+                `🗑️ *Reset AI selesai!*\n\n` +
+                `• 💬 *${totalSesi} sesi* percakapan dihapus\n` +
+                `• 🧠 *${totalMemori} memori* user dihapus\n\n` +
+                `Semua user mulai dari awal — AI tidak ingat percakapan maupun preferensi siapapun.`
+            );
+            logCommand(m, hisoka, 'wilyai');
+            return true;
+        }
+
+    } catch (e) {
+        console.error(`[wilyai callback] ❌ ERROR | ${e.message}`);
+        try { await tolak(hisoka, m, `❌ Error: ${e.message}`); } catch (_) {}
+    }
+    return false;
+}
+
+module.exports.handleWilyaiCallbacks = handleWilyaiCallbacks;
 
 // ── HANDLER: autosimi ─────────────────────────────────────────────────────────
 

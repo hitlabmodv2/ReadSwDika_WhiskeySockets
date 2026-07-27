@@ -86,12 +86,21 @@ run_install() {
   return $exit_code
 }
 
+# ── PERINGATAN: PM2 TIDAK DIGUNAKAN di mode Pterodactyl ──────────────────────
+# Pterodactyl sudah punya manajemen proses sendiri (restart otomatis via panel).
+# PM2 akan fork proses ke background → panel kehilangan track → crash/loop.
+# Script ini memakai loop auto-restart bawaan sendiri, TANPA PM2.
+# Jangan tambah kode PM2 di sini!
+# ─────────────────────────────────────────────────────────────────────────────
+
 # Install node_modules jika belum ada
 if [ ! -d "node_modules" ]; then
   echo -e "${C_CYAN}────────────────────────────${C_RESET}"
   echo -e "  ${C_YELLOW}📦 node_modules belum ada${C_RESET}"
   echo -e "${C_CYAN}────────────────────────────${C_RESET}"
-  run_install "Menginstall dependencies (npm install)..." npm install
+  # --no-audit --no-fund   : skip cek keamanan & funding (hemat waktu ~10-20 detik)
+  # --prefer-offline       : pakai cache npm dulu sebelum download ulang
+  run_install "Menginstall dependencies..." npm install --no-audit --no-fund --prefer-offline
   install_exit=$?
   echo -e "${C_CYAN}────────────────────────────${C_RESET}"
   if [ $install_exit -eq 0 ]; then
