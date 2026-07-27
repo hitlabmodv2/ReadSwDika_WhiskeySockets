@@ -309,9 +309,14 @@ function saveJadibotRealtimeData(data) {
 
 function formatDurationMs(ms) {
   const totalMinutes = Math.max(1, Math.round(ms / 60000))
-  if (totalMinutes % 1440 === 0) return `${totalMinutes / 1440} hari`
-  if (totalMinutes % 60 === 0) return `${totalMinutes / 60} jam`
-  return `${totalMinutes} menit`
+  const days = Math.floor(totalMinutes / 1440)
+  const hours = Math.floor((totalMinutes % 1440) / 60)
+  const minutes = totalMinutes % 60
+  const parts = []
+  if (days) parts.push(`${days} hari`)
+  if (hours) parts.push(`${hours} jam`)
+  if (minutes) parts.push(`${minutes} menit`)
+  return parts.join(' ') || '1 menit'
 }
 
 function formatRemainingTime(ms) {
