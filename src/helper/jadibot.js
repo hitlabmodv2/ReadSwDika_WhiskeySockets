@@ -115,7 +115,7 @@ async function preDownloadMediaForAntidel(msg, sock) {
 }
 
 /* ================= KONSTANTA ================= */
-const PAIRING_TIMEOUT_MS = 30 * 1000 // 30 detik (sementara untuk testing, nanti ubah ke 3 * 60 * 1000)
+const PAIRING_TIMEOUT_MS = 3 * 60 * 1000 // 3 menit
 const DEFAULT_JADIBOT_DURATION_MS = 24 * 60 * 60 * 1000
 const MAX_TIMER_MS = 2147483647
 const JADIBOT_DATA_PATH = path.join(process.cwd(), 'data_jadibot', 'realtime.json')
