@@ -2979,6 +2979,14 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
       setTimeout(() => {
         reconnectingJadibot.delete(number)
         activeOrStartingJadibot.delete(number)
+        // Fix: hapus timer pairing lama sebelum startJadibot baru dipanggil.
+        // Tanpa ini, timer lama (T1) yang masih hidup bisa fire setelah guard
+        // pairingTimeoutNotified di-reset oleh startJadibot baru, menghasilkan
+        // dua notif "pairing gagal" sekaligus (double notification bug).
+        if (pairingTimeout.has(number)) {
+          clearTimeout(pairingTimeout.get(number))
+          pairingTimeout.delete(number)
+        }
         // .catch() wajib — startJadibot async, error di dalamnya tidak pernah
         // nyangkut ke try/catch biasa dan akan jadi unhandledRejection yang
         // (tanpa guard global) mematikan seluruh proses bot.
