@@ -1907,20 +1907,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'jadibot':
                         case 'jadibot1': {
                                 const { handleJadibot } = _require(path.resolve('./SEMUA_FITUR/jadibot/jadibot-cmd.cjs'));
-                                // sendJbBtn didefinisikan di sini — jadibot-cmd.cjs & jadibot.js ikutin ini.
-                                // Edit button/quick reply cukup di sini, tidak perlu edit file lain.
-                                const sendJbBtn = async (bodyText) => {
-                                        try {
-                                                await new Button()
-                                                        .setBody(bodyText)
-                                                        .addReply('🔄 Jadibot Lagi', `${m.prefix || '.'}jadibot`)
-                                                        .addReply('📋 List Bot', `${m.prefix || '.'}listbot`)
-                                                        .run(m.from, hisoka, m);
-                                        } catch {
-                                                await tolak(hisoka, m, bodyText);
-                                        }
-                                };
-                                await handleJadibot({ hisoka, m, query, tolak, logCommand, isMainBot, path, fs, jadibotMap, parseJadibotDuration, startJadibot, maskNumber, getJadibotExpirySummary, getJadibotExpiry, scheduleJadibotExpiry, setPermanentJadibot, removeJadibotExpiry, ensureJadibotExpiry, getLogoutSavedMs, formatRemainingTime, sendJbBtn, Button });
+                                await handleJadibot({ hisoka, m, query, tolak, logCommand, isMainBot, path, fs, jadibotMap, parseJadibotDuration, startJadibot, maskNumber, getJadibotExpirySummary, getJadibotExpiry, scheduleJadibotExpiry, setPermanentJadibot, removeJadibotExpiry, ensureJadibotExpiry, getLogoutSavedMs, formatRemainingTime });
                                 break;
                         }
 

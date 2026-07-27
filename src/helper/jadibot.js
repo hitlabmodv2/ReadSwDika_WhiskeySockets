@@ -1921,24 +1921,11 @@ async function sendOwnerNotif(mainBotSock, text, excludeNumbers = []) {
 
 // ── Kirim interactive quick reply button ke satu JID tertentu ───────────────
 // Dipakai untuk notif di GC/chat owner dengan tombol "Lanjutkan" → auto kirim command.
-async function sendInteractiveButton(sock, jid, text, buttonCommand, quotedMsg = null, ButtonClass = null) {
+async function sendInteractiveButton(sock, jid, text, buttonCommand, quotedMsg = null) {
   if (!sock || !jid) return
   const ctxInfo = (quotedMsg?.key?.id && quotedMsg?.message)
     ? { stanzaId: quotedMsg.key.id, participant: quotedMsg.key.participant || quotedMsg.key.remoteJid, quotedMessage: quotedMsg.message }
     : {}
-  // Jika ButtonClass dikirim dari message.js → gunakan Button class agar button ikut definisi di message.js
-  if (ButtonClass) {
-    try {
-      await new ButtonClass()
-        .setBody(text)
-        .setContextInfo(ctxInfo)
-        .addReply('🔄 Jadibot Lagi', buttonCommand)
-        .run(jid, sock, quotedMsg || '')
-      return
-    } catch (_) {
-      // fallback ke method lama di bawah
-    }
-  }
   try {
     const msg = generateWAMessageFromContent(jid, {
       interactiveMessage: {
@@ -1978,7 +1965,7 @@ async function sendInteractiveButton(sock, jid, text, buttonCommand, quotedMsg =
 
 // ── Kirim notif ke owner dengan Quick Reply button "Lanjutkan" ──────────────
 // Button otomatis kirim command tertentu (misal .jadibot <nomor>) saat ditekan.
-async function sendOwnerNotifWithButton(mainBotSock, text, buttonCommand, excludeNumbers = [], ButtonClass = null) {
+async function sendOwnerNotifWithButton(mainBotSock, text, buttonCommand, excludeNumbers = []) {
   const sock = getActiveMainSock(mainBotSock)
   if (!sock) return
   const cfg = loadConfig()
@@ -1986,19 +1973,6 @@ async function sendOwnerNotifWithButton(mainBotSock, text, buttonCommand, exclud
   for (const ownerNum of owners) {
     if (excludeNumbers.includes(ownerNum)) continue
     const jid = `${ownerNum}@s.whatsapp.net`
-    // Jika ButtonClass dikirim dari message.js → gunakan Button class agar button ikut definisi di message.js
-    if (ButtonClass) {
-      try {
-        await new ButtonClass()
-          .setBody(text)
-          .addReply('🔄 Jadibot Lagi', buttonCommand)
-          .run(jid, sock, '')
-        console.log(`[JADIBOT][OWNER-NOTIF] ✅ Notif+button terkirim ke owner +${ownerNum}`)
-        continue
-      } catch (_) {
-        // fallback ke method lama di bawah
-      }
-    }
     try {
       // Coba kirim dengan interactive button (quick reply)
       const msg = generateWAMessageFromContent(jid, {
@@ -2219,7 +2193,7 @@ function msgOwnerLogout(number, savedLabel = '') {
 }
 
 /* ================= START JADIBOT ================= */
-async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, sendPairingMsg = null, durationMs = undefined, mainBotSock = null, reactFn = null, requesterNumber = null, replyJid = null, ButtonClass = null) {
+async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, sendPairingMsg = null, durationMs = undefined, mainBotSock = null, reactFn = null, requesterNumber = null, replyJid = null) {
   number = number.replace(/[^0-9]/g, '')
   const hasRequestedDuration = durationMs !== undefined && durationMs !== null
 
@@ -2540,7 +2514,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
             const _expText = msgPairingExpired(number, false)
             const _expBtnSock = getActiveMainSock(mainBotSock)
             if (replyJid && _expBtnSock) {
-              await sendInteractiveButton(_expBtnSock, replyJid, _expText, `.jadibot ${number}`, pairingMsg, ButtonClass)
+              await sendInteractiveButton(_expBtnSock, replyJid, _expText, `.jadibot ${number}`, pairingMsg)
             } else {
               await sendReply(_expText)
             }
@@ -2554,7 +2528,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
             const _expTextV1 = msgPairingExpired(number, false)
             const _expBtnSockV1 = getActiveMainSock(mainBotSock)
             if (replyJid && _expBtnSockV1) {
-              await sendInteractiveButton(_expBtnSockV1, replyJid, _expTextV1, `.jadibot ${number}`, pairingMsg, ButtonClass)
+              await sendInteractiveButton(_expBtnSockV1, replyJid, _expTextV1, `.jadibot ${number}`, pairingMsg)
             } else {
               await sendReply(_expTextV1)
             }
@@ -2582,7 +2556,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
         // Auto-start tetap mengirim laporan monitoring ke owner.
         if (!requesterNumber) {
           try {
-            await sendOwnerNotifWithButton(mainBotSock, msgOwnerPairingExpired(number), `.jadibot ${number}`, [number], ButtonClass)
+            await sendOwnerNotifWithButton(mainBotSock, msgOwnerPairingExpired(number), `.jadibot ${number}`, [number])
             console.log(`[JADIBOT][EXPIRED] ✅ Notif pairing timeout terkirim ke owner DM`)
           } catch {}
         }
@@ -2824,7 +2798,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
               const _ptText = msgPairingExpired(number, false)
               const _ptSockBtn = getActiveMainSock(mainBotSock)
               if (replyJid && _ptSockBtn) {
-                await sendInteractiveButton(_ptSockBtn, replyJid, _ptText, `.jadibot ${number}`, pairingMsg, ButtonClass)
+                await sendInteractiveButton(_ptSockBtn, replyJid, _ptText, `.jadibot ${number}`, pairingMsg)
               } else {
                 await sendReply(_ptText)
               }
@@ -2838,7 +2812,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
           // Auto-start tetap mengirim laporan monitoring ke owner.
           if (!requesterNumber) {
             try {
-              await sendOwnerNotifWithButton(mainBotSock, msgOwnerPairingExpired(number), `.jadibot ${number}`, [number], ButtonClass)
+              await sendOwnerNotifWithButton(mainBotSock, msgOwnerPairingExpired(number), `.jadibot ${number}`, [number])
               console.log(`[JADIBOT][PAIR-TIMEOUT] ✅ Notif pairing timeout terkirim ke owner DM`)
             } catch {}
           }
@@ -2944,7 +2918,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
 
         // Notif realtime logout ke semua owner di config.owners[] + button Lanjutkan
         try {
-          await sendOwnerNotifWithButton(mainBotSock, msgOwnerLogout(number), `.jadibot ${number}`, [number], ButtonClass)
+          await sendOwnerNotifWithButton(mainBotSock, msgOwnerLogout(number), `.jadibot ${number}`, [number])
         } catch {}
 
         // BARU setelah notif terkirim: simpan sisa waktu, tutup socket & hapus sesi
