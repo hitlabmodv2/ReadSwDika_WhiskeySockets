@@ -139,6 +139,7 @@ const pendingKomikChoices = new Map();
 const pendingFontuntikChoices = new Map(); // key → { text, botMsgId, expiresAt, timeout }
 const pendingWaifuChoices     = new Map(); // key → { stage, mode, botMsgKey, expiresAt, timeout }
 const pendingHentaidadChoices = new Map(); // key → { results, botMsgId, expiresAt, loading, timeout }
+const pendingHentaidadConfirm = new Map(); // key → { chosen, galleryData, sentKey, confirmMsgId, expiresAt, loading, timeout }
 const pendingShutdownConfirm  = new Map(); // key → { type: 'mati'|'restart', expiresAt, timeout, botMsgId }
 
 const aiReplyCooldown = new Map(); // sender → last reply timestamp
@@ -897,10 +898,16 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         if (await handleWilyaiCallbacks({ hisoka, m, tolak, logCommand, loadConfig, saveConfig, isMainBot, countHistory, clearAllHistory, clearAllUserMemory, Button })) return;
                 }
 
+                // ── Handle pending hentaidad confirm (Lanjutkan/Tidak) → hentaidad.cjs ──
+                {
+                        const { handleHentaidadConfirm } = _require(path.resolve('./SEMUA_FITUR/anime/hentaidad.cjs'));
+                        if (await handleHentaidadConfirm({ hisoka, m, pendingHentaidadConfirm, getQuotedStanzaId, logError })) return;
+                }
+
                 // ── Handle pending hentaidad choice → hentaidad.cjs ──
                 {
                         const { handleHentaidadChoice } = _require(path.resolve('./SEMUA_FITUR/anime/hentaidad.cjs'));
-                        if (await handleHentaidadChoice({ hisoka, m, pendingHentaidadChoices, getQuotedStanzaId, tolak, logCommand, logError })) return;
+                        if (await handleHentaidadChoice({ hisoka, m, pendingHentaidadChoices, pendingHentaidadConfirm, getQuotedStanzaId, tolak, logCommand, logError })) return;
                 }
 
                 // ── Handle pending cosplaytele search choice → cosplay-cmd.cjs ──
