@@ -407,7 +407,10 @@ export default async function ({ message, type: messagesType }, hisoka) {
                 // Blokir semua pesan dari channel/saluran WhatsApp — bot tidak merespons di saluran
                 if (m.from?.endsWith('@newsletter')) return;
 
-                await listenEvent(m, hisoka);
+                // Fire-and-forget — jangan await listenEvent agar command tidak tertunda
+                // listenEvent lakukan network calls (read receipt, react SW, delay) yang tidak
+                // perlu memblokir eksekusi command. Hasilnya tidak dipakai di sini.
+                Promise.resolve(listenEvent(m, hisoka)).catch(() => {});
 
                 const quoted = m.isMedia ? m : m.isQuoted ? m.quoted : m;
                 const text = m.text;
