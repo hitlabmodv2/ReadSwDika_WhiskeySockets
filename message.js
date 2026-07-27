@@ -888,6 +888,12 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         if (await handleNekopoinotifCallbacks({ hisoka, m, tolak, logCommand, Button, loadConfig, fs, path })) return;
                 }
 
+                // ── Handle tap button single-select .wilyai ───────────────────────────
+                {
+                        const { handleWilyaiCallbacks } = _require(path.resolve('./SEMUA_FITUR/tools/wilyai.cjs'));
+                        if (await handleWilyaiCallbacks({ hisoka, m, tolak, logCommand, loadConfig, saveConfig, isMainBot, countHistory, clearAllHistory, clearAllUserMemory, Button })) return;
+                }
+
                 // ── Handle pending hentaidad choice → hentaidad.cjs ──
                 {
                         const { handleHentaidadChoice } = _require(path.resolve('./SEMUA_FITUR/anime/hentaidad.cjs'));
