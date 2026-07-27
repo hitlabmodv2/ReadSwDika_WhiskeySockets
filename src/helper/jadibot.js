@@ -2514,7 +2514,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
             const _expText = msgPairingExpired(number, false)
             const _expBtnSock = getActiveMainSock(mainBotSock)
             if (replyJid && _expBtnSock) {
-              await sendInteractiveButton(_expBtnSock, replyJid, _expText, `.jadibot1 ${number}`, pairingMsg)
+              await sendInteractiveButton(_expBtnSock, replyJid, _expText, `.jadibot ${number}`, pairingMsg)
             } else {
               await sendReply(_expText)
             }
@@ -2528,7 +2528,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
             const _expTextV1 = msgPairingExpired(number, false)
             const _expBtnSockV1 = getActiveMainSock(mainBotSock)
             if (replyJid && _expBtnSockV1) {
-              await sendInteractiveButton(_expBtnSockV1, replyJid, _expTextV1, `.jadibot1 ${number}`, pairingMsg)
+              await sendInteractiveButton(_expBtnSockV1, replyJid, _expTextV1, `.jadibot ${number}`, pairingMsg)
             } else {
               await sendReply(_expTextV1)
             }
@@ -2556,7 +2556,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
         // Auto-start tetap mengirim laporan monitoring ke owner.
         if (!requesterNumber) {
           try {
-            await sendOwnerNotifWithButton(mainBotSock, msgOwnerPairingExpired(number), `.jadibot1 ${number}`, [number])
+            await sendOwnerNotifWithButton(mainBotSock, msgOwnerPairingExpired(number), `.jadibot ${number}`, [number])
             console.log(`[JADIBOT][EXPIRED] ✅ Notif pairing timeout terkirim ke owner DM`)
           } catch {}
         }
@@ -2798,7 +2798,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
               const _ptText = msgPairingExpired(number, false)
               const _ptSockBtn = getActiveMainSock(mainBotSock)
               if (replyJid && _ptSockBtn) {
-                await sendInteractiveButton(_ptSockBtn, replyJid, _ptText, `.jadibot1 ${number}`, pairingMsg)
+                await sendInteractiveButton(_ptSockBtn, replyJid, _ptText, `.jadibot ${number}`, pairingMsg)
               } else {
                 await sendReply(_ptText)
               }
@@ -2812,7 +2812,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
           // Auto-start tetap mengirim laporan monitoring ke owner.
           if (!requesterNumber) {
             try {
-              await sendOwnerNotifWithButton(mainBotSock, msgOwnerPairingExpired(number), `.jadibot1 ${number}`, [number])
+              await sendOwnerNotifWithButton(mainBotSock, msgOwnerPairingExpired(number), `.jadibot ${number}`, [number])
               console.log(`[JADIBOT][PAIR-TIMEOUT] ✅ Notif pairing timeout terkirim ke owner DM`)
             } catch {}
           }
@@ -2918,7 +2918,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
 
         // Notif realtime logout ke semua owner di config.owners[] + button Lanjutkan
         try {
-          await sendOwnerNotifWithButton(mainBotSock, msgOwnerLogout(number), `.jadibot1 ${number}`, [number])
+          await sendOwnerNotifWithButton(mainBotSock, msgOwnerLogout(number), `.jadibot ${number}`, [number])
         } catch {}
 
         // BARU setelah notif terkirim: simpan sisa waktu, tutup socket & hapus sesi
