@@ -2578,6 +2578,9 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
       // Reconnect ke-2 dst tidak kirim notif lagi (flag reconnectNotifiedAt sudah di-set).
       const _skipReconnectNotif = !isFreshPairing && isJadibotReconnectNotified(number)
       if (!_skipReconnectNotif) {
+        // ── Claim dulu sebelum await — cegah race condition jika connection='open'
+        // fire berulang cepat sebelum async selesai (semua goroutine lolos cek di atas).
+        if (!isFreshPairing) markJadibotReconnectNotified(number)
         try {
           await sendOwnerNotif(mainBotSock, msgOwnerConnected(number, !isFreshPairing), [number])
         } catch {}
@@ -2593,8 +2596,6 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
             console.log(`[JADIBOT][RECONNECT][FALLBACK] ✅ Notif reconnect via self-sock ke +${number}`)
           }
         } catch {}
-        // Tandai — reconnect berikutnya tidak kirim notif lagi
-        markJadibotReconnectNotified(number)
       }
     }
 
