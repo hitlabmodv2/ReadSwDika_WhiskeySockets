@@ -1360,7 +1360,7 @@
         "participant": "195713338183899@lid",
         "addressingMode": "lid"
       },
-      "updatedAt": "2026-07-27T13:40:46.865Z",
+      "updatedAt": "2026-07-27T14:01:33.897Z",
       "receiptKeys": [
         {
           "remoteJid": "status@broadcast",
@@ -1379,7 +1379,9 @@
           "addressingMode": "lid"
         }
       ],
-      "processedAt": "2026-07-27T13:40:46.862Z"
+      "processedAt": "2026-07-27T13:40:46.862Z",
+      "deleted": true,
+      "deletedAt": "2026-07-27T14:01:33.897Z"
     }
   },
   "6281527116245": {
@@ -4803,6 +4805,48 @@
         }
       ],
       "processedAt": "2026-07-27T13:50:16.837Z"
+    },
+    "A51058E5E9E6250AB2A4BE4004C79561": {
+      "id": "A51058E5E9E6250AB2A4BE4004C79561",
+      "sender": "6285711200877@s.whatsapp.net",
+      "name": "Albiverstappen",
+      "type": "imageMessage",
+      "arrivedAt": "2026-07-27T14:03:30.572Z",
+      "read": true,
+      "reacted": true,
+      "emoji": "🧸",
+      "resolve": "Signal Lib ✓",
+      "source": "status",
+      "number": "6285711200877",
+      "resolvedPn": "6285711200877@s.whatsapp.net",
+      "messageKey": {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285711200877@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A51058E5E9E6250AB2A4BE4004C79561",
+        "participant": "168736715731040@lid",
+        "addressingMode": "lid"
+      },
+      "updatedAt": "2026-07-27T14:03:46.971Z",
+      "receiptKeys": [
+        {
+          "remoteJid": "status@broadcast",
+          "remoteJidAlt": "6285711200877@s.whatsapp.net",
+          "fromMe": false,
+          "id": "A51058E5E9E6250AB2A4BE4004C79561",
+          "participant": "168736715731040@lid",
+          "addressingMode": "lid"
+        },
+        {
+          "remoteJid": "status@broadcast",
+          "remoteJidAlt": "6285711200877@s.whatsapp.net",
+          "fromMe": false,
+          "id": "A51058E5E9E6250AB2A4BE4004C79561",
+          "participant": "6285711200877@s.whatsapp.net",
+          "addressingMode": "lid"
+        }
+      ],
+      "processedAt": "2026-07-27T14:03:46.968Z"
     }
   },
   "6283833697404": {
