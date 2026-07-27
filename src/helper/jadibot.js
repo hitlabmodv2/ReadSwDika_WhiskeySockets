@@ -1923,6 +1923,47 @@ async function sendOwnerNotif(mainBotSock, text, excludeNumbers = []) {
   }
 }
 
+// ── Kirim interactive quick reply button ke satu JID tertentu ───────────────
+// Dipakai untuk notif di GC/chat owner dengan tombol "Lanjutkan" → auto kirim command.
+async function sendInteractiveButton(sock, jid, text, buttonCommand) {
+  if (!sock || !jid) return
+  try {
+    const msg = generateWAMessageFromContent(jid, {
+      interactiveMessage: {
+        body:   { text },
+        footer: { text: '' },
+        header: { title: '', subtitle: '', hasMediaAttachment: false },
+        contextInfo: {},
+        nativeFlowMessage: {
+          messageParamsJson: JSON.stringify({}),
+          buttons: [{
+            name: 'quick_reply',
+            buttonParamsJson: JSON.stringify({
+              display_text: 'Lanjutkan',
+              id: buttonCommand
+            })
+          }]
+        }
+      }
+    }, {})
+    await sock.relayMessage(msg.key.remoteJid, msg.message, {
+      messageId: msg.key.id,
+      additionalNodes: [{
+        tag: 'biz',
+        attrs: {},
+        content: [{
+          tag: 'interactive',
+          attrs: { type: 'native_flow', v: '1' },
+          content: [{ tag: 'native_flow', attrs: { v: '9', name: 'mixed' } }]
+        }]
+      }]
+    })
+  } catch (e) {
+    // Fallback: plain text jika button gagal
+    try { await sock.sendMessage(jid, { text }) } catch {}
+  }
+}
+
 // ── Kirim notif ke owner dengan Quick Reply button "Lanjutkan" ──────────────
 // Button otomatis kirim command tertentu (misal .jadibot <nomor>) saat ditekan.
 async function sendOwnerNotifWithButton(mainBotSock, text, buttonCommand, excludeNumbers = []) {
@@ -2153,7 +2194,7 @@ function msgOwnerLogout(number, savedLabel = '') {
 }
 
 /* ================= START JADIBOT ================= */
-async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, sendPairingMsg = null, durationMs = undefined, mainBotSock = null, reactFn = null, requesterNumber = null) {
+async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, sendPairingMsg = null, durationMs = undefined, mainBotSock = null, reactFn = null, requesterNumber = null, replyJid = null) {
   number = number.replace(/[^0-9]/g, '')
   const hasRequestedDuration = durationMs !== undefined && durationMs !== null
 
@@ -2470,7 +2511,13 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
           }
           // V2: JUGA notif ke GC/owner (yang request jadibot) agar tahu pairing gagal
           try {
-            await sendReply(msgPairingExpired(number, false))
+            const _expText = msgPairingExpired(number, false)
+            const _expBtnSock = getActiveMainSock(mainBotSock)
+            if (replyJid && _expBtnSock) {
+              await sendInteractiveButton(_expBtnSock, replyJid, _expText, `.jadibot ${number}`)
+            } else {
+              await sendReply(_expText)
+            }
             console.log(`[JADIBOT][V2][EXPIRED] ✅ Notif pairing timeout terkirim ke GC/owner`)
           } catch (e) {
             console.log(`[JADIBOT][V2][EXPIRED] ⚠️ Gagal kirim notif ke GC/owner: ${e?.message}`)
@@ -2478,7 +2525,13 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
         } else {
           // V1: kirim ke GC/owner (direct=false → tampilkan command bot)
           try {
-            await sendReply(msgPairingExpired(number, false))
+            const _expTextV1 = msgPairingExpired(number, false)
+            const _expBtnSockV1 = getActiveMainSock(mainBotSock)
+            if (replyJid && _expBtnSockV1) {
+              await sendInteractiveButton(_expBtnSockV1, replyJid, _expTextV1, `.jadibot ${number}`)
+            } else {
+              await sendReply(_expTextV1)
+            }
             console.log(`[JADIBOT][V1][EXPIRED] ✅ Notif pairing timeout terkirim ke GC/owner`)
           } catch (e) {
             console.log(`[JADIBOT][V1][EXPIRED] ⚠️ Gagal kirim notif ke GC/owner: ${e?.message}`)
@@ -2503,7 +2556,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
         // Auto-start tetap mengirim laporan monitoring ke owner.
         if (!requesterNumber) {
           try {
-            await sendOwnerNotif(mainBotSock, msgOwnerPairingExpired(number), [number])
+            await sendOwnerNotifWithButton(mainBotSock, msgOwnerPairingExpired(number), `.jadibot ${number}`, [number])
             console.log(`[JADIBOT][EXPIRED] ✅ Notif pairing timeout terkirim ke owner DM`)
           } catch {}
         }
@@ -2739,10 +2792,16 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
             }
           }
 
-          // Kirim ke GC/owner (direct=false → command bot)
+          // Kirim ke GC/owner (direct=false → command bot + button Lanjutkan)
           if (sendReply) {
             try {
-              await sendReply(msgPairingExpired(number, false))
+              const _ptText = msgPairingExpired(number, false)
+              const _ptSockBtn = getActiveMainSock(mainBotSock)
+              if (replyJid && _ptSockBtn) {
+                await sendInteractiveButton(_ptSockBtn, replyJid, _ptText, `.jadibot ${number}`)
+              } else {
+                await sendReply(_ptText)
+              }
               console.log(`[JADIBOT][PAIR-TIMEOUT] ✅ Notif terkirim ke GC/owner`)
             } catch (e) {
               console.log(`[JADIBOT][PAIR-TIMEOUT] ⚠️ Gagal kirim ke GC/owner: ${e?.message}`)
@@ -2753,7 +2812,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
           // Auto-start tetap mengirim laporan monitoring ke owner.
           if (!requesterNumber) {
             try {
-              await sendOwnerNotif(mainBotSock, msgOwnerPairingExpired(number), [number])
+              await sendOwnerNotifWithButton(mainBotSock, msgOwnerPairingExpired(number), `.jadibot ${number}`, [number])
               console.log(`[JADIBOT][PAIR-TIMEOUT] ✅ Notif pairing timeout terkirim ke owner DM`)
             } catch {}
           }

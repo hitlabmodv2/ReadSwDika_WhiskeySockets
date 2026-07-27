@@ -511,7 +511,8 @@ async function handleJadibot({ hisoka, m, query, tolak, logCommand, isMainBot, p
                 async (emoji) => {
                         try { await hisoka.sendMessage(m.from, { react: { text: emoji, key: m.key } }); } catch {}
                 },
-                m.sender
+                m.sender,
+                m.from
         );
 }
 
