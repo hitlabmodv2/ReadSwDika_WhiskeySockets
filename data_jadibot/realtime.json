@@ -3,13 +3,16 @@
     "6289667923162": {
       "number": "6289667923162",
       "createdAt": 1785147421979,
-      "updatedAt": 1785279788460,
-      "expiresAt": 1787634409068,
+      "updatedAt": 1785279980719,
+      "expiresAt": 1787634466891,
       "durationMs": 2486987089,
       "durationText": "28 hari 18 jam 50 menit",
       "status": "starting",
       "userReconnectNotified": true,
-      "connectedAt": 1785240405674
+      "connectedAt": 1785240405674,
+      "isPaused": true,
+      "pausedAt": 1785279982604,
+      "pausedRemainingMs": 2354484287
     }
   },
   "logoutSaved": {
