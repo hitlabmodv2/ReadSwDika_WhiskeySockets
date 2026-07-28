@@ -2386,22 +2386,14 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
                   const _pairVer = loadConfig().botVersion || 'V25'
 
                   const sentInfo = await sendReply(
-                    `🤖 *J A D I B O T*\n` +
-                    `━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+                    `🤖 *J A D I B O T*\n\n` +
                     `✅ *Kode pairing berhasil dikirim!*\n` +
                     `📱 \`+${number}\`\n\n` +
-                    `📋 *Detail Sesi:*\n` +
-                    `▸ *Durasi     :* ${_pairDurText}\n` +
-                    `▸ *Mulai      :* _${_pairStartText}_\n` +
-                    `▸ *Berakhir   :* _${_pairEndText}_\n` +
-                    `▸ *Status     :* ~Belum terhubung~ ⏳\n\n` +
-                    `━━━━━━━━━━━━━━━━━━━━━━\n` +
-                    `📌 *Instruksi untuk mereka:*\n` +
-                    `1️⃣ Buka pesan kode yang dikirim ke nomor mereka\n` +
-                    `2️⃣ Buka WA → ⋮ → *Perangkat Tertaut*\n` +
-                    `3️⃣ Masukkan kode sebelum kedaluwarsa\n\n` +
-                    `> ⚠️ _Kode hanya berlaku *3 menit* — ~jangan ditunda!~_\n` +
-                    `> _Wily Bot ${_pairVer}_ 🤖`
+                    `⏱️ *Durasi :* ${_pairDurText}\n` +
+                    `📅 *Mulai  :* _${_pairStartText}_\n` +
+                    `📅 *Habis  :* _${_pairEndText}_\n\n` +
+                    `> ⚠️ _Buka WA → Perangkat Tertaut → masukkan kode_\n` +
+                    `> _Berlaku *3 menit* — ~jangan ditunda!~_`
                   )
                   if (sentInfo?.key) { pairingMsgKey = sentInfo.key; pairingMsg = sentInfo }
                 } catch {}

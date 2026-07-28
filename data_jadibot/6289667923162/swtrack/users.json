@@ -687,6 +687,48 @@
         }
       ],
       "processedAt": "2026-07-27T11:36:58.436Z"
+    },
+    "AC21B97467AD7998625670B5F359ED9E": {
+      "id": "AC21B97467AD7998625670B5F359ED9E",
+      "sender": "6289504802678@s.whatsapp.net",
+      "name": "Ard Holdeacon",
+      "type": "videoMessage",
+      "arrivedAt": "2026-07-28T07:27:56.477Z",
+      "read": true,
+      "reacted": true,
+      "emoji": "💚",
+      "resolve": "Signal Lib ✓",
+      "source": "status",
+      "number": "6289504802678",
+      "resolvedPn": "6289504802678@s.whatsapp.net",
+      "messageKey": {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289504802678@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC21B97467AD7998625670B5F359ED9E",
+        "participant": "263445207371837@lid",
+        "addressingMode": "lid"
+      },
+      "updatedAt": "2026-07-28T07:28:06.646Z",
+      "receiptKeys": [
+        {
+          "remoteJid": "status@broadcast",
+          "remoteJidAlt": "6289504802678@s.whatsapp.net",
+          "fromMe": false,
+          "id": "AC21B97467AD7998625670B5F359ED9E",
+          "participant": "263445207371837@lid",
+          "addressingMode": "lid"
+        },
+        {
+          "remoteJid": "status@broadcast",
+          "remoteJidAlt": "6289504802678@s.whatsapp.net",
+          "fromMe": false,
+          "id": "AC21B97467AD7998625670B5F359ED9E",
+          "participant": "6289504802678@s.whatsapp.net",
+          "addressingMode": "lid"
+        }
+      ],
+      "processedAt": "2026-07-28T07:28:06.645Z"
     }
   },
   "6285737453570": {
