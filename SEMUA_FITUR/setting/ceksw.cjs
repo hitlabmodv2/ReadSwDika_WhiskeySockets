@@ -176,9 +176,11 @@ async function handleCeksw({ hisoka, m, query, tolak, logCommand, fs, path, load
                         const clean = String(number).replace(/[^0-9]/g, '');
                         if (clean) mentions.push(clean + '@s.whatsapp.net');
                 };
+                // Kalau ada nama: tulis @number saja — WA otomatis render jadi nama kontak (biru, ada notif)
+                // Kalau tidak ada nama: tulis nomor saja
                 const fmtEntry = (number, name) => {
                         const clean = String(number).replace(/[^0-9]/g, '');
-                        return name ? `*${name}* @${clean}` : `*${number}*`;
+                        return name ? `@${clean}` : `${number}`;
                 };
 
                 let text = `📊 *CEK SW STATS*\n`;
