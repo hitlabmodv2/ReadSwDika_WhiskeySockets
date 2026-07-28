@@ -170,6 +170,17 @@ async function handleCeksw({ hisoka, m, query, tolak, logCommand, fs, path, load
                 });
 
                 // ── Header & ringkasan ──
+                const mentions = [];
+                const addMention = (number, name) => {
+                        if (!name) return;
+                        const clean = String(number).replace(/[^0-9]/g, '');
+                        if (clean) mentions.push(clean + '@s.whatsapp.net');
+                };
+                const fmtEntry = (number, name) => {
+                        const clean = String(number).replace(/[^0-9]/g, '');
+                        return name ? `*${name}* @${clean}` : `*${number}*`;
+                };
+
                 let text = `📊 *CEK SW STATS*\n`;
                 text += `> 🕐 ${now} WIB\n\n`;
                 text += `*Ringkasan*\n`;
@@ -187,7 +198,8 @@ async function handleCeksw({ hisoka, m, query, tolak, logCommand, fs, path, load
                                 const e = topBySW[i];
                                 const active = getActiveSW(e);
                                 const swt = isTracked(e.number) ? ' 🗂️' : '';
-                                text += `${i + 1}. *${e.number}*${swt} — ${active} SW\n`;
+                                addMention(e.number, e.name);
+                                text += `${i + 1}. ${fmtEntry(e.number, e.name)}${swt} — ${active} SW\n`;
                         }
                 }
 
@@ -197,7 +209,8 @@ async function handleCeksw({ hisoka, m, query, tolak, logCommand, fs, path, load
                 for (let i = 0; i < top10.length; i++) {
                         const e   = top10[i];
                         const swt = isTracked(e.number) ? ' 🗂️' : '';
-                        text += `${i + 1}. ${e.number}${swt} — ×${e.reactions || 0}\n`;
+                        addMention(e.number, e.name);
+                        text += `${i + 1}. ${fmtEntry(e.number, e.name)}${swt} — ×${e.reactions || 0}\n`;
                 }
 
                 // ── Top Startup Retry ──
@@ -210,7 +223,8 @@ async function handleCeksw({ hisoka, m, query, tolak, logCommand, fs, path, load
                         text += `> 📦 ${totalAllRetry} SW  ✅ ${totalSuksesAll} berhasil  ❌ ${totalGagalAll} gagal\n\n`;
                         for (let i = 0; i < topRetry.length; i++) {
                                 const [num, r] = topRetry[i];
-                                const nama = num;
+                                addMention(num, r.name);
+                                const namaTag = fmtEntry(num, r.name);
                                 let waktu = '';
                                 if (r.lastAt) {
                                         try { waktu = new Date(r.lastAt).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' }); } catch {}
@@ -218,7 +232,7 @@ async function handleCeksw({ hisoka, m, query, tolak, logCommand, fs, path, load
                                 const sukBadge = r.sukses > 0 ? `✅ ${r.sukses} berhasil` : '';
                                 const gaiBadge = r.gagal  > 0 ? `❌ ${r.gagal} gagal`    : '';
                                 const badge    = [sukBadge, gaiBadge].filter(Boolean).join('  ');
-                                text += `${i + 1}. *${nama}*\n`;
+                                text += `${i + 1}. ${namaTag}\n`;
                                 text += `   ↳ ${r.total}x retry  ${badge}\n`;
                                 if (r.emojiCount && Object.keys(r.emojiCount).length > 0) {
                                         const emojiStr = Object.entries(r.emojiCount).sort((a, b) => b[1] - a[1]).map(([em, ct]) => ct > 1 ? `${em} ${ct}x` : em).join('  ');
@@ -260,7 +274,8 @@ async function handleCeksw({ hisoka, m, query, tolak, logCommand, fs, path, load
                 text += `_🗂️ = terdaftar SwTrack  •  ♻️ = diproses ulang saat startup_\n`;
                 text += `_🎭 EmojiMode: *${_emojiLabel}*_`;
 
-                await tolak(hisoka, m, text);
+                const mentionJids = [...new Set(mentions)];
+                await hisoka.sendMessage(m.from, { text, mentions: mentionJids }, { quoted: m });
                 logCommand(m, hisoka, 'ceksw');
         } catch (error) {
                 console.error('\x1b[31m[CekSW] Error:\x1b[39m', error.message);
