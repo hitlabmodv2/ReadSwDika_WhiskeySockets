@@ -129,6 +129,48 @@
         }
       ],
       "processedAt": "2026-07-27T11:17:26.957Z"
+    },
+    "AC26BD16129D439C23B87D5723C68869": {
+      "id": "AC26BD16129D439C23B87D5723C68869",
+      "sender": "62882020696316@s.whatsapp.net",
+      "name": "lee",
+      "type": "imageMessage",
+      "arrivedAt": "2026-07-28T12:00:32.080Z",
+      "read": true,
+      "reacted": true,
+      "emoji": "🐣",
+      "resolve": "Signal Lib ✓",
+      "source": "status",
+      "number": "62882020696316",
+      "resolvedPn": "62882020696316@s.whatsapp.net",
+      "messageKey": {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62882020696316@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC26BD16129D439C23B87D5723C68869",
+        "participant": "9204131708977@lid",
+        "addressingMode": "lid"
+      },
+      "updatedAt": "2026-07-28T12:00:34.382Z",
+      "receiptKeys": [
+        {
+          "remoteJid": "status@broadcast",
+          "remoteJidAlt": "62882020696316@s.whatsapp.net",
+          "fromMe": false,
+          "id": "AC26BD16129D439C23B87D5723C68869",
+          "participant": "9204131708977@lid",
+          "addressingMode": "lid"
+        },
+        {
+          "remoteJid": "status@broadcast",
+          "remoteJidAlt": "62882020696316@s.whatsapp.net",
+          "fromMe": false,
+          "id": "AC26BD16129D439C23B87D5723C68869",
+          "participant": "62882020696316@s.whatsapp.net",
+          "addressingMode": "lid"
+        }
+      ],
+      "processedAt": "2026-07-28T12:00:34.377Z"
     }
   },
   "6285695777114": {
@@ -1046,9 +1088,9 @@
       "name": "Andini Arifah Hamidah",
       "type": "imageMessage",
       "arrivedAt": "2026-07-28T11:58:15.424Z",
-      "read": false,
-      "reacted": false,
-      "emoji": null,
+      "read": true,
+      "reacted": true,
+      "emoji": "🧸",
       "resolve": "Signal Lib ✓",
       "source": "status",
       "number": "6287768752790",
@@ -1061,7 +1103,7 @@
         "participant": "105420123283659@lid",
         "addressingMode": "lid"
       },
-      "updatedAt": "2026-07-28T11:58:22.178Z",
+      "updatedAt": "2026-07-28T11:58:22.726Z",
       "receiptKeys": [
         {
           "remoteJid": "status@broadcast",
@@ -1079,7 +1121,8 @@
           "participant": "6287768752790@s.whatsapp.net",
           "addressingMode": "lid"
         }
-      ]
+      ],
+      "processedAt": "2026-07-28T11:58:22.725Z"
     }
   },
   "6288705922833": {
@@ -3193,9 +3236,9 @@
       "name": "VONSYICHER CON VER",
       "type": "videoMessage",
       "arrivedAt": "2026-07-28T11:58:10.965Z",
-      "read": false,
-      "reacted": false,
-      "emoji": null,
+      "read": true,
+      "reacted": true,
+      "emoji": "💚",
       "resolve": "Signal Lib ✓",
       "source": "status",
       "number": "6282252134009",
@@ -3208,7 +3251,26 @@
         "participant": "76790290767977@lid",
         "addressingMode": "lid"
       },
-      "updatedAt": "2026-07-28T11:58:10.967Z"
+      "updatedAt": "2026-07-28T11:58:25.947Z",
+      "receiptKeys": [
+        {
+          "remoteJid": "status@broadcast",
+          "remoteJidAlt": "6282252134009@s.whatsapp.net",
+          "fromMe": false,
+          "id": "AC2A0EA983E7A73A107CC33E26FBC5AA",
+          "participant": "76790290767977@lid",
+          "addressingMode": "lid"
+        },
+        {
+          "remoteJid": "status@broadcast",
+          "remoteJidAlt": "6282252134009@s.whatsapp.net",
+          "fromMe": false,
+          "id": "AC2A0EA983E7A73A107CC33E26FBC5AA",
+          "participant": "6282252134009@s.whatsapp.net",
+          "addressingMode": "lid"
+        }
+      ],
+      "processedAt": "2026-07-28T11:58:25.945Z"
     }
   },
   "6282393354095": {

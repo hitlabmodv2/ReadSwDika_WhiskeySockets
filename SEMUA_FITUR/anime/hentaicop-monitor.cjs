@@ -421,6 +421,7 @@ function buatCaption(data) {
         katInfo.header,
         SEP,
         `📅 _${headerWaktu}_`,
+        url ? `🔗 ${url}` : null,
         SEP,
         ``,
         `*${title || '-'}*`,
@@ -439,7 +440,6 @@ function buatCaption(data) {
         dlBlok     ? `\n${dlBlok}`     : null,
         streamBlok ? `\n${streamBlok}` : null,
         `\n${SEP}`,
-        url ? `🌐 *Source:* [hentaicop.com](${url})` : `🌐 *Source:* \`hentaicop.com\``,
     ];
 
     return baris.filter(b => b !== null && b !== undefined).join('\n');
