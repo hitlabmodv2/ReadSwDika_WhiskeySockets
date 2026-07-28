@@ -479,8 +479,8 @@ async function handleJadibot({ hisoka, m, query, tolak, logCommand, isMainBot, p
                                 // Sisipkan info sisa waktu ke notif pairing jika dilanjutkan dari logout
                                 if (typeof msg === 'string' && isResumedFromLogout && savedRemainingLabel && msg.includes('Kode pairing berhasil dikirim')) {
                                         msg = msg.replace(
-                                                '✅ *Kode pairing berhasil dikirim!*\n',
-                                                `✅ *Kode pairing berhasil dikirim!*\n💾 *Sisa waktu dilanjutkan:* _${savedRemainingLabel}_\n`
+                                                `📱 \`+${number}\`\n\n`,
+                                                `📱 \`+${number}\`\n💾 *Sisa waktu dilanjutkan:* _${savedRemainingLabel}_\n_(melanjutkan — bukan mulai dari awal)_\n\n`
                                         );
                                 }
                                 const payload = typeof msg === 'string' ? { text: msg } : msg;

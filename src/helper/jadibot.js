@@ -1653,23 +1653,36 @@ function msgPairingCode(code, number, direct = false) {
         `⚠️ Jika gagal, ketik *.jadibot* ulang`
       )
 
-  return (
-    `╔══════════════════════╗\n` +
-    `║   🤖  *J A D I B O T*   ║\n` +
-    `╚══════════════════════╝\n\n` +
-    `📱 *Nomor:* \`${masked}\`\n\n` +
-    `🔑 *Kode Pairing:*\n` +
-    `┌─────────────────┐\n` +
-    `│   *${formatted}*   │\n` +
-    `└─────────────────┘\n\n` +
-    `📋 *Cara Memasukkan Kode:*\n` +
-    `1️⃣ Buka WhatsApp di HP kamu\n` +
-    `2️⃣ Ketuk ⋮ *(titik tiga)* → *Perangkat Tertaut*\n` +
-    `3️⃣ Ketuk *Tautkan Perangkat*\n` +
-    `4️⃣ Pilih *Tautkan dengan nomor telepon*\n` +
-    `5️⃣ Masukkan kode di atas\n\n` +
-    footer
-  )
+  return direct
+    ? (
+      // ── Pesan langsung ke USER JADIBOT ──────────────────────────────────────
+      `🤖 *J A D I B O T*\n` +
+      `━━━━━━━━━━━━━━━━━━━━━\n\n` +
+      `📱 *Nomor kamu:* \`+${number}\`\n\n` +
+      `🔑 *Kode Pairing:*\n` +
+      `> ✨ *${formatted}* ✨\n\n` +
+      `━━━━━━━━━━━━━━━━━━━━━\n` +
+      `📋 *Cara memasukkan kode:*\n` +
+      `1️⃣ Buka *WhatsApp* di HP kamu\n` +
+      `2️⃣ Ketuk ⋮ → *Perangkat Tertaut*\n` +
+      `3️⃣ Ketuk *Tautkan Perangkat*\n` +
+      `4️⃣ Pilih *Tautkan dengan nomor telepon*\n` +
+      `5️⃣ Masukkan kode di atas\n\n` +
+      `> ⚠️ _Berlaku *±3 menit* — ~jangan ditunda!~_\n` +
+      `> 🔒 _Jangan bagikan kode ini ke siapapun_\n\n` +
+      `💬 *Ada kendala?* Hubungi: ${getOwnerContact()}\n\n` +
+      `> _Powered by Wily Bot ${ver}_ 🤖`
+    )
+    : (
+      // ── Pesan ke GC/owner (fallback v1) ─────────────────────────────────────
+      `🤖 *J A D I B O T*\n` +
+      `━━━━━━━━━━━━━━━━━━━━━\n\n` +
+      `📱 *Nomor:* \`+${number}\`\n\n` +
+      `🔑 *Kode Pairing:*\n` +
+      `> ✨ *${formatted}* ✨\n\n` +
+      `> ⚠️ _Berlaku *3 menit* — ~jangan ditunda!~_\n` +
+      `> _Ketik .jadibot ulang jika gagal_`
+    )
 }
 
 
@@ -2386,14 +2399,25 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
                   const _pairVer = loadConfig().botVersion || 'V25'
 
                   const sentInfo = await sendReply(
-                    `🤖 *J A D I B O T*\n\n` +
+                    `🤖 *J A D I B O T*\n` +
+                    `━━━━━━━━━━━━━━━━━━━━━\n\n` +
                     `✅ *Kode pairing berhasil dikirim!*\n` +
+                    `📩 Kode dikirim langsung ke nomor:\n` +
                     `📱 \`+${number}\`\n\n` +
-                    `⏱️ *Durasi :* ${_pairDurText}\n` +
-                    `📅 *Mulai  :* _${_pairStartText}_\n` +
-                    `📅 *Habis  :* _${_pairEndText}_\n\n` +
-                    `> ⚠️ _Buka WA → Perangkat Tertaut → masukkan kode_\n` +
-                    `> _Berlaku *3 menit* — ~jangan ditunda!~_`
+                    `━━━━━━━━━━━━━━━━━━━━━\n` +
+                    `📋 *Detail Sesi Jadibot:*\n` +
+                    `⏱️ *Durasi    :* ${_pairDurText}\n` +
+                    `📅 *Mulai    :* _${_pairStartText}_\n` +
+                    `📅 *Berakhir :* _${_pairEndText}_\n` +
+                    `🔄 *Status   :* ~Belum terhubung~ ⏳\n\n` +
+                    `━━━━━━━━━━━━━━━━━━━━━\n` +
+                    `📌 *Instruksi untuk mereka:*\n` +
+                    `1️⃣ Buka pesan kode di nomor mereka\n` +
+                    `2️⃣ Buka WA → ⋮ → *Perangkat Tertaut*\n` +
+                    `3️⃣ *Tautkan Perangkat* → *Tautkan dengan nomor telepon*\n` +
+                    `4️⃣ Masukkan kode sebelum kedaluwarsa\n\n` +
+                    `> ⚠️ _Kode hanya berlaku *3 menit* — ~jangan ditunda!~_\n` +
+                    `> _Wily Bot ${_pairVer}_ 🤖`
                   )
                   if (sentInfo?.key) { pairingMsgKey = sentInfo.key; pairingMsg = sentInfo }
                 } catch {}
