@@ -2386,25 +2386,22 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
                   const _pairVer = loadConfig().botVersion || 'V25'
 
                   const sentInfo = await sendReply(
-                    `╔══════════════════════╗\n` +
-                    `║   🤖  *J A D I B O T*  ║\n` +
-                    `╚══════════════════════╝\n\n` +
-                    `✅ *Kode pairing berhasil dikirim!*\n\n` +
-                    `> 📱 Kode dikirim langsung ke nomor:\n` +
-                    `> \`+${number}\`\n\n` +
-                    `━━━━━━━━━━━━━━━━━━━━━━\n` +
-                    `📋 *Detail Sesi Jadibot:*\n` +
-                    `• *Durasi:* *${_pairDurText}*\n` +
-                    `• *Estimasi mulai:* _${_pairStartText}_\n` +
-                    `• *Estimasi berakhir:* _${_pairEndText}_\n` +
-                    `• *Status:* ~Belum terhubung~ ⏳\n\n` +
+                    `🤖 *J A D I B O T*\n` +
+                    `━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+                    `✅ *Kode pairing berhasil dikirim!*\n` +
+                    `📱 \`+${number}\`\n\n` +
+                    `📋 *Detail Sesi:*\n` +
+                    `▸ *Durasi     :* ${_pairDurText}\n` +
+                    `▸ *Mulai      :* _${_pairStartText}_\n` +
+                    `▸ *Berakhir   :* _${_pairEndText}_\n` +
+                    `▸ *Status     :* ~Belum terhubung~ ⏳\n\n` +
                     `━━━━━━━━━━━━━━━━━━━━━━\n` +
                     `📌 *Instruksi untuk mereka:*\n` +
-                    `1. Buka pesan kode yang dikirim ke nomor mereka\n` +
-                    `2. Buka WA → ⋮ → *Perangkat Tertaut*\n` +
-                    `3. Masukkan kode sebelum kedaluwarsa\n\n` +
-                    `> ⚠️ _Kode hanya berlaku *3 menit* — ~jangan ditunda!~_\n\n` +
-                    `> _Notif otomatis — Wily Bot ${_pairVer}_ 🤖`
+                    `1️⃣ Buka pesan kode yang dikirim ke nomor mereka\n` +
+                    `2️⃣ Buka WA → ⋮ → *Perangkat Tertaut*\n` +
+                    `3️⃣ Masukkan kode sebelum kedaluwarsa\n\n` +
+                    `> ⚠️ _Kode hanya berlaku *3 menit* — ~jangan ditunda!~_\n` +
+                    `> _Wily Bot ${_pairVer}_ 🤖`
                   )
                   if (sentInfo?.key) { pairingMsgKey = sentInfo.key; pairingMsg = sentInfo }
                 } catch {}

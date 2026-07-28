@@ -3211,7 +3211,7 @@
         "participant": "263483945930926@lid",
         "addressingMode": "lid"
       },
-      "updatedAt": "2026-07-27T07:04:02.525Z",
+      "updatedAt": "2026-07-28T07:24:10.741Z",
       "receiptKeys": [
         {
           "remoteJid": "status@broadcast",
@@ -3230,7 +3230,9 @@
           "addressingMode": "lid"
         }
       ],
-      "processedAt": "2026-07-27T07:04:02.523Z"
+      "processedAt": "2026-07-27T07:04:02.523Z",
+      "deleted": true,
+      "deletedAt": "2026-07-28T07:24:10.741Z"
     }
   },
   "6287722653514": {
@@ -3911,6 +3913,48 @@
         }
       ],
       "processedAt": "2026-07-27T10:20:25.263Z"
+    },
+    "ACAFFCEBD27ED1B42CD19060EED5F84D": {
+      "id": "ACAFFCEBD27ED1B42CD19060EED5F84D",
+      "sender": "6285876248925@s.whatsapp.net",
+      "name": "Ryu Lagi Beed mood",
+      "type": "videoMessage",
+      "arrivedAt": "2026-07-28T07:24:10.611Z",
+      "read": true,
+      "reacted": true,
+      "emoji": "🐣",
+      "resolve": "Signal Lib ✓",
+      "source": "status",
+      "number": "6285876248925",
+      "resolvedPn": "6285876248925@s.whatsapp.net",
+      "messageKey": {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285876248925@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACAFFCEBD27ED1B42CD19060EED5F84D",
+        "participant": "188716853289015@lid",
+        "addressingMode": "lid"
+      },
+      "updatedAt": "2026-07-28T07:24:16.652Z",
+      "receiptKeys": [
+        {
+          "remoteJid": "status@broadcast",
+          "remoteJidAlt": "6285876248925@s.whatsapp.net",
+          "fromMe": false,
+          "id": "ACAFFCEBD27ED1B42CD19060EED5F84D",
+          "participant": "188716853289015@lid",
+          "addressingMode": "lid"
+        },
+        {
+          "remoteJid": "status@broadcast",
+          "remoteJidAlt": "6285876248925@s.whatsapp.net",
+          "fromMe": false,
+          "id": "ACAFFCEBD27ED1B42CD19060EED5F84D",
+          "participant": "6285876248925@s.whatsapp.net",
+          "addressingMode": "lid"
+        }
+      ],
+      "processedAt": "2026-07-28T07:24:16.651Z"
     }
   },
   "6283185853963": {

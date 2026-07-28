@@ -472,27 +472,17 @@ async function handleJadibot({ hisoka, m, query, tolak, logCommand, isMainBot, p
                 }
         }
 
-        // Notif ke owner/GC bahwa waktu jadibot dilanjutkan dari sisa sebelumnya
-        // (hanya kalau tidak ada notif blocked yang sudah dikirim di atas)
-        if (isResumedFromLogout && !isBlockedByExisting) {
-                try {
-                        await tolak(hisoka, m,
-                                `╔══════════════════════╗\n` +
-                                `║   🔄  *J A D I B O T*  ║\n` +
-                                `╚══════════════════════╝\n\n` +
-                                `💾 *Sisa waktu tersimpan ditemukan!*\n` +
-                                `📱 +${maskNumber(number)}\n\n` +
-                                `⏳ Sisa waktu: *${savedRemainingLabel}*\n\n` +
-                                `✅ Bot akan melanjutkan dari sisa waktu tersebut\n` +
-                                `(bukan mulai dari awal)`
-                        );
-                } catch {}
-        }
-
         await startJadibot(
                 number,
                 async (msg) => {
                         try {
+                                // Sisipkan info sisa waktu ke notif pairing jika dilanjutkan dari logout
+                                if (typeof msg === 'string' && isResumedFromLogout && savedRemainingLabel && msg.includes('Kode pairing berhasil dikirim')) {
+                                        msg = msg.replace(
+                                                '✅ *Kode pairing berhasil dikirim!*\n',
+                                                `✅ *Kode pairing berhasil dikirim!*\n💾 *Sisa waktu dilanjutkan:* _${savedRemainingLabel}_\n`
+                                        );
+                                }
                                 const payload = typeof msg === 'string' ? { text: msg } : msg;
                                 return await hisoka.sendMessage(m.from, payload, { quoted: m });
                         } catch (e) {
