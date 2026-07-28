@@ -1814,11 +1814,10 @@ async function main() {
                                                                 const chunk = daftarGrup.slice(i, i + BATCH);
                                                                 await Promise.allSettled(chunk.map(async jid => {
                                                                         try {
-                                                                                const _hcCtx = _hc.buatCtxInfo ? _hc.buatCtxInfo(item) : undefined;
                                                                                 if (imgBuffer) {
-                                                                                        await hisoka.sendMessage(jid, { image: imgBuffer, mimetype: 'image/jpeg', caption, ...(_hcCtx ? { contextInfo: _hcCtx } : {}) });
+                                                                                        await hisoka.sendMessage(jid, { image: imgBuffer, mimetype: 'image/jpeg', caption });
                                                                                 } else if (imgSendUrl) {
-                                                                                        await hisoka.sendMessage(jid, { image: { url: imgSendUrl }, caption, ...(_hcCtx ? { contextInfo: _hcCtx } : {}) });
+                                                                                        await hisoka.sendMessage(jid, { image: { url: imgSendUrl }, caption });
                                                                                 } else {
                                                                                         await hisoka.sendMessage(jid, { text: caption });
                                                                                 }

@@ -811,11 +811,10 @@ async function handleHentaicopnotif({ hisoka, m, query, tolak, logCommand, Butto
         try {
             const hasil  = await simulasi(katSlug);
             const imgBuf = hasil.urlGambar ? await downloadImageBuffer(hasil.urlGambar) : null;
-            const _ctx1  = buatCtxInfo(hasil.item);
             if (imgBuf) {
-                await hisoka.sendMessage(m.from, { image: imgBuf, mimetype: 'image/jpeg', caption: hasil.caption, ...(_ctx1 ? { contextInfo: _ctx1 } : {}) }, { quoted: m });
+                await hisoka.sendMessage(m.from, { image: imgBuf, mimetype: 'image/jpeg', caption: hasil.caption }, { quoted: m });
             } else if (hasil.urlGambar) {
-                await hisoka.sendMessage(m.from, { image: { url: buatProxyUrl(hasil.urlGambar) }, caption: hasil.caption, ...(_ctx1 ? { contextInfo: _ctx1 } : {}) }, { quoted: m });
+                await hisoka.sendMessage(m.from, { image: { url: buatProxyUrl(hasil.urlGambar) }, caption: hasil.caption }, { quoted: m });
             } else {
                 await tolak(hisoka, m, hasil.caption);
             }
@@ -841,12 +840,11 @@ async function handleHentaicopnotif({ hisoka, m, query, tolak, logCommand, Butto
             const hasil      = await simulasi();
             const imgBuf     = hasil.urlGambar ? await downloadImageBuffer(hasil.urlGambar) : null;
             const proxyUrl   = hasil.urlGambar ? buatProxyUrl(hasil.urlGambar) : null;
-            const _ctxG      = buatCtxInfo(hasil.item);
             let berhasil = 0, gagal = 0;
             for (const jid of daftarGrup) {
                 try {
-                    if (imgBuf)       await hisoka.sendMessage(jid, { image: imgBuf, mimetype: 'image/jpeg', caption: hasil.caption, ...(_ctxG ? { contextInfo: _ctxG } : {}) });
-                    else if (proxyUrl) await hisoka.sendMessage(jid, { image: { url: proxyUrl }, caption: hasil.caption, ...(_ctxG ? { contextInfo: _ctxG } : {}) });
+                    if (imgBuf)       await hisoka.sendMessage(jid, { image: imgBuf, mimetype: 'image/jpeg', caption: hasil.caption });
+                    else if (proxyUrl) await hisoka.sendMessage(jid, { image: { url: proxyUrl }, caption: hasil.caption });
                     else               await hisoka.sendMessage(jid, { text: hasil.caption });
                     berhasil++;
                     await new Promise(r => setTimeout(r, 1500));
@@ -874,11 +872,10 @@ async function handleHentaicopnotif({ hisoka, m, query, tolak, logCommand, Butto
         try {
             const hasil  = await simulasi();
             const imgBuf = hasil.urlGambar ? await downloadImageBuffer(hasil.urlGambar) : null;
-            const _ctxT  = buatCtxInfo(hasil.item);
             if (imgBuf) {
-                await hisoka.sendMessage(m.from, { image: imgBuf, mimetype: 'image/jpeg', caption: hasil.caption, ...(_ctxT ? { contextInfo: _ctxT } : {}) }, { quoted: m });
+                await hisoka.sendMessage(m.from, { image: imgBuf, mimetype: 'image/jpeg', caption: hasil.caption }, { quoted: m });
             } else if (hasil.urlGambar) {
-                await hisoka.sendMessage(m.from, { image: { url: buatProxyUrl(hasil.urlGambar) }, caption: hasil.caption, ...(_ctxT ? { contextInfo: _ctxT } : {}) }, { quoted: m });
+                await hisoka.sendMessage(m.from, { image: { url: buatProxyUrl(hasil.urlGambar) }, caption: hasil.caption }, { quoted: m });
             } else {
                 await tolak(hisoka, m, hasil.caption);
             }
