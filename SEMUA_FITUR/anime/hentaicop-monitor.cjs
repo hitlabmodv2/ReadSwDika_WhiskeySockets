@@ -142,7 +142,7 @@ function getRecentLog(jumlah = 20) {
 // ── CARI KONTEN BARU ──────────────────────────────────────────────────────────
 
 async function cariKontenBaru() {
-    const { getCategoryPosts, getDetailHentaicop } = require('./hentaicop.cjs');
+    const { getCategoryPosts, getDetailHentaicop, getEpisodeDownloads } = require('./hentaicop.cjs');
 
     const now        = Date.now();
     const data       = bacaData();
@@ -206,7 +206,11 @@ async function cariKontenBaru() {
         }
         try {
             const detail = await getDetailHentaicop(gagal.url);
-            baru.push({ id: gagal.id, url: gagal.url, title: detail.title || gagal.title, kategori: detail.kategori || gagal.kategori, ...detail });
+            let episodeDownloads = [];
+            if (detail.latestEpUrl) {
+                try { episodeDownloads = await getEpisodeDownloads(detail.latestEpUrl); } catch (_) {}
+            }
+            baru.push({ id: gagal.id, url: gagal.url, title: detail.title || gagal.title, kategori: detail.kategori || gagal.kategori, episodeDownloads, ...detail });
             console.log(`[HentaicopNotif] 🔄 Retry berhasil: "${gagal.title}"`);
         } catch (e) {
             console.warn(`[HentaicopNotif] 🔄 Retry masih gagal "${gagal.title}":`, e?.message);
@@ -220,6 +224,10 @@ async function cariKontenBaru() {
 
         try {
             const detail = await getDetailHentaicop(post.url);
+            let episodeDownloads = [];
+            if (detail.latestEpUrl) {
+                try { episodeDownloads = await getEpisodeDownloads(detail.latestEpUrl); } catch (_) {}
+            }
             baru.push({
                 id      : post.id,
                 url     : post.url,
@@ -227,6 +235,7 @@ async function cariKontenBaru() {
                 kategori: detail.kategori || post.kategori || 'hentai',
                 thumbnail: detail.thumbnail || post.thumbnail,
                 epBadge : post.epBadge,
+                episodeDownloads,
                 ...detail,
             });
         } catch (e) {
@@ -252,7 +261,7 @@ async function cariKontenBaru() {
 // ── SIMULASI ──────────────────────────────────────────────────────────────────
 // slug: 'hentai' | 'jav' | '2d' (default: 'hentai')
 async function simulasi(slug) {
-    const { getCategoryPosts, getDetailHentaicop } = require('./hentaicop.cjs');
+    const { getCategoryPosts, getDetailHentaicop, getEpisodeDownloads } = require('./hentaicop.cjs');
     const katSlug = slug || 'hentai';
     const posts   = await getCategoryPosts(katSlug);
     if (!posts.length) throw new Error(`Tidak ada post dari hentaicop.com/${katSlug}/`);
@@ -261,7 +270,13 @@ async function simulasi(slug) {
     const id     = buatId(post.url, post.epBadge);
     const detail = await getDetailHentaicop(post.url);
 
-    const item    = { id, url: post.url, title: detail.title || post.title, kategori: detail.kategori || katSlug, thumbnail: detail.thumbnail || post.thumbnail, epBadge: post.epBadge, ...detail };
+    // Fetch link download realtime dari halaman episode terbaru
+    let episodeDownloads = [];
+    if (detail.latestEpUrl) {
+        try { episodeDownloads = await getEpisodeDownloads(detail.latestEpUrl); } catch (_) {}
+    }
+
+    const item    = { id, url: post.url, title: detail.title || post.title, kategori: detail.kategori || katSlug, thumbnail: detail.thumbnail || post.thumbnail, epBadge: post.epBadge, episodeDownloads, ...detail };
     const caption = buatCaption(item);
     return { caption, urlGambar: item.thumbnail || null, item };
 }
@@ -304,6 +319,7 @@ function buatCaption(data) {
         genres     = [], synopsis   = '', rating     = '',
         episodeList = [], latestEpUrl = null, latestEpNum = 0,
         epBadge    = '',
+        episodeDownloads = [],
     } = data;
 
     const katInfo     = getKatInfo(kategori);
@@ -330,6 +346,7 @@ function buatCaption(data) {
         ['📡 *Status*',   status || null                    ],
         ['🎭 *Tipe*',     censor ? `${censor}` : null       ],
         ['🏢 *Studio*',   studio || null                    ],
+        // BUG FIX: tampilkan released di info block, tanggal hanya jika released kosong
         ['🗓️ *Rilis*',    released || tanggal || null       ],
         ['⏱️ *Durasi*',   duration || null                  ],
         ['⭐ *Rating*',   rating ? `${rating}/10` : null    ],
@@ -351,7 +368,7 @@ function buatCaption(data) {
         epBlok += `📺 *DAFTAR EPISODE*\n`;
         epBlok += `${SEP2}\n`;
         tampil.forEach((ep, i) => {
-            const epNum   = String(ep.epNum).padStart(2, '0');
+            const epNum    = String(ep.epNum).padStart(2, '0');
             const isLatest = i === 0 ? ' ← *Terbaru*' : '';
             epBlok += `${i + 1}. \`Ep ${epNum}\` — [Tonton](${ep.url})${isLatest}\n`;
         });
@@ -359,18 +376,29 @@ function buatCaption(data) {
         epBlok = epBlok.trimEnd();
     }
 
-    // ── Download / Stream links ───────────────────────────────────────────────
-    // Hentaicop menggunakan JS untuk load link download — kita sediakan link langsung
+    // ── Download realtime (dari halaman episode) ──────────────────────────────
+    // Format: 1. `1080p` · _49.86 MB_ → [HepiDrive Cepat](url)
+    let dlBlok = '';
+    if (episodeDownloads && episodeDownloads.length) {
+        dlBlok  = `${SEP}\n`;
+        dlBlok += `📥 *DOWNLOAD*\n`;
+        dlBlok += `${SEP2}\n`;
+        episodeDownloads.forEach((dl, i) => {
+            dlBlok += `${i + 1}. \`${dl.quality}\` · _${dl.size}_ → [${dl.server}](${dl.url})\n`;
+        });
+        dlBlok = dlBlok.trimEnd();
+    }
+
+    // ── Streaming (pisah dari download) ──────────────────────────────────────
     const streamBlok = latestEpUrl
         ? `${SEP}\n` +
-          `📥 *DOWNLOAD / STREAMING*\n` +
+          `▶️ *STREAMING*\n` +
           `${SEP2}\n` +
-          `• [▶ Tonton Episode Terbaru](${latestEpUrl})\n` +
-          `• [📥 Download](${latestEpUrl}#Download)\n` +
+          `• [▶ Tonton Sekarang](${latestEpUrl})\n` +
           `• [📋 Semua Episode](${url})`
         : url
         ? `${SEP}\n` +
-          `▶️ *TONTON / DOWNLOAD*\n` +
+          `▶️ *TONTON*\n` +
           `${SEP2}\n` +
           `• [🔗 Buka Halaman Series](${url})`
         : null;
@@ -384,8 +412,9 @@ function buatCaption(data) {
         ``,
         `*${title || '-'}*`,
         epLabel ? epLabel : null,
-        tanggal ? `_🗓 Dirilis: ${tanggal}_` : null,
-        ``,
+        // BUG FIX: tanggal di bawah judul hanya tampil jika released kosong (hindari duplikat)
+        (!released && tanggal) ? `_🗓 Dirilis: ${tanggal}_` : null,
+        sinopsisBlok ? `` : null,
         sinopsisBlok ? `📖 *Sinopsis*` : null,
         sinopsisBlok || null,
         ``,
@@ -393,7 +422,8 @@ function buatCaption(data) {
         `📋 *INFO*`,
         SEP2,
         infoBlok || '-',
-        epBlok ? `\n${epBlok}` : null,
+        epBlok     ? `\n${epBlok}`     : null,
+        dlBlok     ? `\n${dlBlok}`     : null,
         streamBlok ? `\n${streamBlok}` : null,
         `\n${SEP}`,
         `🌐 *Source:* \`hentaicop.com\``,

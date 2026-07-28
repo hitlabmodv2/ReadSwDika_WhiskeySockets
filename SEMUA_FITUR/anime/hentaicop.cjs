@@ -63,8 +63,9 @@ function parseListing(md, defaultKategori) {
         if (SKIP_REGEX.test(url)) continue;
         seen.add(url);
 
-        // Ambil judul dari setelah ##
-        const titleM = line.match(/##\s+([^\]]+)\]/);
+        // Ambil judul dari setelah ## sampai sebelum ](https://hentaicop.com
+        // Pakai greedy agar judul yang mengandung [] seperti [UNCENSORED] ikut tertangkap
+        const titleM = line.match(/##\s+([^#]+?)\]\(https?:\/\/hentaicop\.com/);
         const title  = titleM ? titleM[1].trim() : slug;
 
         // Ambil ep badge — "Ep N Sub" → N, "Completed" → "completed", "Ongoing" → "ongoing"
@@ -123,7 +124,11 @@ function parseDetailSeries(md, url) {
     function parseMeta(field) {
         const r = new RegExp(`\\*\\*${field}:\\*\\*\\s*([^*]+?)(?=\\*\\*|\\n|$)`);
         const m = metaRaw.match(r);
-        return m ? m[1].replace(/\[([^\]]+)\]\([^)]+\)/g, '$1').replace(/,\s*/g, ', ').trim() : '';
+        return m ? m[1]
+            .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')  // strip link lengkap [teks](url)
+            .replace(/\[([^\]]+)\]\([^)]*$/g, '$1')    // strip link terpotong di akhir string
+            .replace(/,\s*/g, ', ')
+            .trim() : '';
     }
 
     const status    = parseMeta('Status');
@@ -201,6 +206,31 @@ function parseDetailSeries(md, url) {
     };
 }
 
+// ── Parse tabel download dari halaman episode ─────────────────────────────────
+// Format markdown tabel dari jina.ai:
+// | HepiDrive Cepat | [1080-Hentaicop-p](ep_url "...") | 296.58 MB | [Download](https://hepidrive.online/...) |
+function parseEpisodeDownloads(md) {
+    const downloads = [];
+    // Cocokkan tiap baris tabel: server | [Nnn-xxx](url) | size | [Download](dl_url)
+    const rowRegex = /\|\s*([^|]+?)\s*\|\s*\[(\d+)-[^\]]*\]\([^)]*\)\s*\|\s*([^|]+?)\s*\|\s*\[Download\]\((https?:\/\/[^)]+)\)\s*\|/gi;
+    let m;
+    while ((m = rowRegex.exec(md)) !== null) {
+        const server  = m[1].trim();
+        const quality = m[2].trim() + 'p'; // "1080" → "1080p"
+        const size    = m[3].trim();
+        const url     = m[4].trim();
+        downloads.push({ server, quality, size, url });
+    }
+    // Urutkan: 1080p → 720p → 480p → 360p → 240p
+    const ORDER = ['1080p', '720p', '480p', '360p', '240p'];
+    downloads.sort((a, b) => {
+        const ia = ORDER.indexOf(a.quality);
+        const ib = ORDER.indexOf(b.quality);
+        return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
+    });
+    return downloads;
+}
+
 // ── API Publik ─────────────────────────────────────────────────────────────────
 
 async function getCategoryPosts(slug) {
@@ -215,8 +245,15 @@ async function getDetailHentaicop(url) {
     return parseDetailSeries(md, url);
 }
 
+async function getEpisodeDownloads(url) {
+    // url: halaman episode (bukan series) — berisi tabel download realtime
+    const md = await fetchMarkdown(url);
+    return parseEpisodeDownloads(md);
+}
+
 module.exports = {
     KATEGORI_MAP,
     getCategoryPosts,
     getDetailHentaicop,
+    getEpisodeDownloads,
 };
