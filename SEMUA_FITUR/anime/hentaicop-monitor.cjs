@@ -325,11 +325,25 @@ function buatCaption(data) {
     const katInfo     = getKatInfo(kategori);
     const headerWaktu = waktuSekarang();
 
-    // ── Sinopsis (> kutip) ────────────────────────────────────────────────────
+    // ── Sinopsis (> kutip, potong per ~120 karakter biar enak dibaca) ───────────
     const sinopsisTeks = potongTeks(synopsis, 350);
-    const sinopsisBlok = sinopsisTeks
-        ? sinopsisTeks.split('\n').map(b => b.trim() ? `> ${b}` : '').filter(Boolean).join('\n')
-        : null;
+    let sinopsisBlok = null;
+    if (sinopsisTeks) {
+        // Pecah jadi baris ~120 karakter di batas spasi
+        const kata = sinopsisTeks.split(' ');
+        const barisSin = [];
+        let barisIni = '';
+        for (const k of kata) {
+            if ((barisIni + ' ' + k).trim().length > 120) {
+                if (barisIni) barisSin.push(barisIni.trim());
+                barisIni = k;
+            } else {
+                barisIni = barisIni ? barisIni + ' ' + k : k;
+            }
+        }
+        if (barisIni) barisSin.push(barisIni.trim());
+        sinopsisBlok = barisSin.map(b => `> ${b}`).join('\n');
+    }
 
     // ── Episode badge ─────────────────────────────────────────────────────────
     let epLabel = '';
@@ -355,9 +369,8 @@ function buatCaption(data) {
         ['👥 *Casts*',    casts ? potongTeks(casts, 80) : null],
     ].filter(([, v]) => v && v !== '' && v !== '-');
 
-    const infoBlok = infoItems.map(([label, val], i) => {
-        const prefix = i === infoItems.length - 1 ? '╰' : '├';
-        return `${prefix} ${label} : _${val}_`;
+    const infoBlok = infoItems.map(([label, val]) => {
+        return `${label} : _${val}_`;
     }).join('\n');
 
     // ── Episode list (daftar bernomor, maks 5 episode) ────────────────────────
