@@ -1774,7 +1774,7 @@ async function main() {
                         {
                                 const HC_PATH        = path.join(process.cwd(), 'SEMUA_FITUR', 'anime', 'hentaicop-monitor.cjs');
                                 const HC_SCRAPE_PATH = path.join(process.cwd(), 'SEMUA_FITUR', 'anime', 'hentaicop.cjs');
-                                const HC_INTERVAL_MS = 2 * 60 * 1000; // 2 menit
+                                const HC_INTERVAL_MS = 1 * 60 * 1000; // 1 menit
 
                                 const runHentaicopnotif = async () => {
                                         if (global.hentaicopnotifRunning) return;

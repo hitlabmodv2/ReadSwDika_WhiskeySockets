@@ -771,6 +771,29 @@
         }
       ],
       "processedAt": "2026-07-28T07:28:06.645Z"
+    },
+    "AC604608577A226CE1F7C33AC9D5A716": {
+      "id": "AC604608577A226CE1F7C33AC9D5A716",
+      "sender": "6289504802678@s.whatsapp.net",
+      "name": "Ard Holdeacon",
+      "type": "extendedTextMessage",
+      "arrivedAt": "2026-07-28T11:36:53.170Z",
+      "read": false,
+      "reacted": false,
+      "emoji": null,
+      "resolve": "Signal Lib ✓",
+      "source": "status",
+      "number": "6289504802678",
+      "resolvedPn": "6289504802678@s.whatsapp.net",
+      "messageKey": {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289504802678@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC604608577A226CE1F7C33AC9D5A716",
+        "participant": "263445207371837@lid",
+        "addressingMode": "lid"
+      },
+      "updatedAt": "2026-07-28T11:36:53.172Z"
     }
   },
   "6285737453570": {
