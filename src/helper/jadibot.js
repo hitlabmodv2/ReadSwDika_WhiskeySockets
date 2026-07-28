@@ -68,7 +68,6 @@ import { logError } from '../db/errorLog.js'
 import { getJadibotAnticall, getJadibotAnticallvid, getJadibotNumber, getJadibotReadsw, getJadibotAutoOnline, getJadibotEmojis, getJadibotRandomEmoji, getJadibotAutoTyping, getJadibotAutoRecording, getJadibotReadchat, getJadibotEmojiMode, getJadibotAntidel } from './jadibotSettings.js'
 import { getHandler } from './hotReload.js'
 import { kvGet, kvSet } from '../db/datadb.js'
-import { JADIBOT_CMD } from '../helper/jadibotConst.js'
 
 /* ================= LOGGER ================= */
 const silentLogger = pino({ level: 'silent' })
@@ -943,8 +942,8 @@ function msgJadibotExpired(number, direct = false) {
     `${buildJadibotFeatureStatus(number).stoppedFeaturesText}\n\n` +
     `━━━━━━━━━━━━━━━━━━━━━━\n` +
     `💡 *Aktifkan Kembali:*\n` +
-    `• \`.${JADIBOT_CMD} ${number} 1h\` — aktifkan 1 hari\n` +
-    `• \`.${JADIBOT_CMD} ${number} p\` — aktifkan permanent\n\n` +
+    `• \`.jadibot ${number} 1h\` — aktifkan 1 hari\n` +
+    `• \`.jadibot ${number} p\` — aktifkan permanent\n\n` +
     `> _Notif otomatis — Wily Bot ${ver}_ 🤖`
   )
 }
@@ -987,8 +986,8 @@ function msgOwnerExpired(number) {
     `${listPart}\n` +
     `━━━━━━━━━━━━━━━━━━━━━\n` +
     `💡 *Aktifkan Kembali:*\n` +
-    `• \`.${JADIBOT_CMD} ${number} 1h\` — aktifkan 1 hari\n` +
-    `• \`.${JADIBOT_CMD} ${number} p\` — aktifkan permanent\n\n` +
+    `• \`.jadibot ${number} 1h\` — aktifkan 1 hari\n` +
+    `• \`.jadibot ${number} p\` — aktifkan permanent\n\n` +
     `> _Notif otomatis — Wily Bot ${ver}_ 🤖`
   )
 }
@@ -1651,7 +1650,7 @@ function msgPairingCode(code, number, direct = false) {
       )
     : (
         `⏳ *Batas waktu: 3 menit*\n` +
-        `⚠️ Jika gagal, ketik *.${JADIBOT_CMD}* ulang`
+        `⚠️ Jika gagal, ketik *.jadibot* ulang`
       )
 
   return direct
@@ -1682,7 +1681,7 @@ function msgPairingCode(code, number, direct = false) {
       `🔑 *Kode Pairing:*\n` +
       `> ✨ *${formatted}* ✨\n\n` +
       `> ⚠️ _Berlaku *3 menit* — ~jangan ditunda!~_\n` +
-      `> _Ketik .${JADIBOT_CMD} ulang jika gagal_`
+      `> _Ketik .jadibot ulang jika gagal_`
     )
 }
 
@@ -1707,7 +1706,7 @@ function msgOwnerPairingExpired(number) {
     `• Pengguna salah langkah saat scan/input kode\n\n` +
     `━━━━━━━━━━━━━━━━━━━━━\n` +
     `🔄 *Aktifkan ulang jika diperlukan:*\n` +
-    `• \`.${JADIBOT_CMD} ${number} <durasi>\` — coba pairing lagi\n\n` +
+    `• \`.jadibot ${number} <durasi>\` — coba pairing lagi\n\n` +
     `> _Notif otomatis — Wily Bot ${ver}_ 🤖`
   )
 }
@@ -1749,7 +1748,7 @@ function msgPairingExpired(number, direct = false) {
     `❌ ~Kode pairing kedaluwarsa~ — tidak dimasukkan dalam *3 menit.*\n` +
     `🗑️ ~Sesi otomatis dihapus dari server.~\n\n` +
     `💡 *Aktifkan ulang:*\n` +
-    `- Ketik \`.${JADIBOT_CMD} ${number} <durasi>\`\n\n` +
+    `- Ketik \`.jadibot ${number} <durasi>\`\n\n` +
     `> _Notif otomatis — Wily Bot ${ver}_ 🤖`
   )
 }
@@ -1876,7 +1875,7 @@ function msgLoggedOut(number, remainingList, savedLabel = '') {
         `━━━━━━━━━━━━━━━━━━━━━━\n`
       : '') +
     `💡 *Aktifkan Kembali:*\n` +
-    `• Ketik \`.${JADIBOT_CMD} ${number}\` di chat bot ini\n\n` +
+    `• Ketik \`.jadibot ${number}\` di chat bot ini\n\n` +
     `> _Notif otomatis — Wily Bot ${ver}_ 🤖`
   )
 }
@@ -1978,7 +1977,7 @@ async function sendInteractiveButton(sock, jid, text, buttonCommand, quotedMsg =
 }
 
 // ── Kirim notif ke owner dengan Quick Reply button "Lanjutkan" ──────────────
-// Button otomatis kirim command tertentu (misal .${JADIBOT_CMD} <nomor>) saat ditekan.
+// Button otomatis kirim command tertentu (misal .jadibot <nomor>) saat ditekan.
 async function sendOwnerNotifWithButton(mainBotSock, text, buttonCommand, excludeNumbers = []) {
   const sock = getActiveMainSock(mainBotSock)
   if (!sock) return
@@ -2197,11 +2196,11 @@ function msgOwnerLogout(number, savedLabel = '') {
     `━━━━━━━━━━━━━━━━━━━━━\n` +
     (savedLabel
       ? `💾 *Sisa waktu tersimpan:* _${savedLabel}_\n` +
-        `🔄 Ketik \`.${JADIBOT_CMD} ${number}\` → waktu otomatis dilanjutkan!\n\n` +
+        `🔄 Ketik \`.jadibot ${number}\` → waktu otomatis dilanjutkan!\n\n` +
         `━━━━━━━━━━━━━━━━━━━━━\n`
       : '') +
     `💡 *Aktifkan Kembali:*\n` +
-    `• Ketik \`.${JADIBOT_CMD} ${number}\` di chat bot\n\n` +
+    `• Ketik \`.jadibot ${number}\` di chat bot\n\n` +
     `> _Notif otomatis — Wily Bot ${ver}_ 🤖`
   )
 }
@@ -2471,7 +2470,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
               `╚══════════════════════╝\n\n` +
               `⚠️ Gagal mendapatkan kode pairing untuk *${maskNumber(number)}*.\n` +
               `Koneksi terputus sebelum kode berhasil dibuat.\n\n` +
-              `💡 Ketik *.${JADIBOT_CMD} ${number}* untuk coba lagi.`
+              `💡 Ketik *.jadibot ${number}* untuk coba lagi.`
             )
           } catch {}
         }
@@ -2528,7 +2527,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
             const _expText = msgPairingExpired(number, false)
             const _expBtnSock = getActiveMainSock(mainBotSock)
             if (replyJid && _expBtnSock) {
-              await sendInteractiveButton(_expBtnSock, replyJid, _expText, `.${JADIBOT_CMD} ${number}`, pairingMsg)
+              await sendInteractiveButton(_expBtnSock, replyJid, _expText, `.jadibot ${number}`, pairingMsg)
             } else {
               await sendReply(_expText)
             }
@@ -2542,7 +2541,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
             const _expTextV1 = msgPairingExpired(number, false)
             const _expBtnSockV1 = getActiveMainSock(mainBotSock)
             if (replyJid && _expBtnSockV1) {
-              await sendInteractiveButton(_expBtnSockV1, replyJid, _expTextV1, `.${JADIBOT_CMD} ${number}`, pairingMsg)
+              await sendInteractiveButton(_expBtnSockV1, replyJid, _expTextV1, `.jadibot ${number}`, pairingMsg)
             } else {
               await sendReply(_expTextV1)
             }
@@ -2570,7 +2569,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
         // Auto-start tetap mengirim laporan monitoring ke owner.
         if (!requesterNumber) {
           try {
-            await sendOwnerNotifWithButton(mainBotSock, msgOwnerPairingExpired(number), `.${JADIBOT_CMD} ${number}`, [number])
+            await sendOwnerNotifWithButton(mainBotSock, msgOwnerPairingExpired(number), `.jadibot ${number}`, [number])
             console.log(`[JADIBOT][EXPIRED] ✅ Notif pairing timeout terkirim ke owner DM`)
           } catch {}
         }
@@ -2812,7 +2811,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
               const _ptText = msgPairingExpired(number, false)
               const _ptSockBtn = getActiveMainSock(mainBotSock)
               if (replyJid && _ptSockBtn) {
-                await sendInteractiveButton(_ptSockBtn, replyJid, _ptText, `.${JADIBOT_CMD} ${number}`, pairingMsg)
+                await sendInteractiveButton(_ptSockBtn, replyJid, _ptText, `.jadibot ${number}`, pairingMsg)
               } else {
                 await sendReply(_ptText)
               }
@@ -2826,7 +2825,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
           // Auto-start tetap mengirim laporan monitoring ke owner.
           if (!requesterNumber) {
             try {
-              await sendOwnerNotifWithButton(mainBotSock, msgOwnerPairingExpired(number), `.${JADIBOT_CMD} ${number}`, [number])
+              await sendOwnerNotifWithButton(mainBotSock, msgOwnerPairingExpired(number), `.jadibot ${number}`, [number])
               console.log(`[JADIBOT][PAIR-TIMEOUT] ✅ Notif pairing timeout terkirim ke owner DM`)
             } catch {}
           }
@@ -2932,7 +2931,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
 
         // Notif realtime logout ke semua owner di config.owners[] + button Lanjutkan
         try {
-          await sendOwnerNotifWithButton(mainBotSock, msgOwnerLogout(number), `.${JADIBOT_CMD} ${number}`, [number])
+          await sendOwnerNotifWithButton(mainBotSock, msgOwnerLogout(number), `.jadibot ${number}`, [number])
         } catch {}
 
         // BARU setelah notif terkirim: simpan sisa waktu, tutup socket & hapus sesi
@@ -3822,7 +3821,7 @@ async function stopJadibot(number, sendReply) {
     `╚══════════════════════╝\n\n` +
     `✅ Jadibot *${maskNumber(number)}* berhasil dihentikan.\n` +
     `🗑️ Sesi telah dihapus.\n\n` +
-    `💡 Ketik *.${JADIBOT_CMD} ${number}* untuk aktifkan kembali.`
+    `💡 Ketik *.jadibot ${number}* untuk aktifkan kembali.`
   )
 }
 

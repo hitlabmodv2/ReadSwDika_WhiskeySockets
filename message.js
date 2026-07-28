@@ -36,7 +36,6 @@ import { exec } from 'child_process';
 import util from 'util';
 
 import { msToTime, loadConfig, saveConfig, getCaseName, getCaseGroups, getAIPersonaName, getAIPersonaGreeting } from './src/helper/utils.js';
-import { JADIBOT_CMD } from './src/helper/jadibotConst.js';
 import { BROWSER_LIST } from './name_perangkat_tertautan.js';
 import { stopAutoCleaner, restartAutoCleaner, cleanStaleSessionFiles, clearOldFiles, clearTmpFolder } from './src/helper/cleaner.js';
 import { getUptimeFormatted, getBotStats } from './src/db/botStats.js';
@@ -1912,7 +1911,8 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 break;
                         }
 
-                        case JADIBOT_CMD: {
+                        case 'jadibot':
+                        case 'jadibot1': {
                                 const { handleJadibot } = _require(path.resolve('./SEMUA_FITUR/jadibot/jadibot-cmd.cjs'));
                                 await handleJadibot({ hisoka, m, query, tolak, logCommand, isMainBot, path, fs, jadibotMap, parseJadibotDuration, startJadibot, maskNumber, getJadibotExpirySummary, getJadibotExpiry, scheduleJadibotExpiry, setPermanentJadibot, removeJadibotExpiry, ensureJadibotExpiry, getLogoutSavedMs, formatRemainingTime });
                                 break;
