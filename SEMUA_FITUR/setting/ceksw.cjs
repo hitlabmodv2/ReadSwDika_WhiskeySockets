@@ -187,7 +187,7 @@ async function handleCeksw({ hisoka, m, query, tolak, logCommand, fs, path, load
                                 const e = topBySW[i];
                                 const active = getActiveSW(e);
                                 const swt = isTracked(e.number) ? ' 🗂️' : '';
-                                text += `${i + 1}. *${e.name || e.number}*${swt} — ${active} SW\n`;
+                                text += `${i + 1}. *${e.number}*${swt} — ${active} SW\n`;
                         }
                 }
 
@@ -197,7 +197,7 @@ async function handleCeksw({ hisoka, m, query, tolak, logCommand, fs, path, load
                 for (let i = 0; i < top10.length; i++) {
                         const e   = top10[i];
                         const swt = isTracked(e.number) ? ' 🗂️' : '';
-                        text += `${i + 1}. ${e.name || e.number}${swt} — ×${e.reactions || 0}\n`;
+                        text += `${i + 1}. ${e.number}${swt} — ×${e.reactions || 0}\n`;
                 }
 
                 // ── Top Startup Retry ──
@@ -210,7 +210,7 @@ async function handleCeksw({ hisoka, m, query, tolak, logCommand, fs, path, load
                         text += `> 📦 ${totalAllRetry} SW  ✅ ${totalSuksesAll} berhasil  ❌ ${totalGagalAll} gagal\n\n`;
                         for (let i = 0; i < topRetry.length; i++) {
                                 const [num, r] = topRetry[i];
-                                const nama = r.name || num;
+                                const nama = num;
                                 let waktu = '';
                                 if (r.lastAt) {
                                         try { waktu = new Date(r.lastAt).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' }); } catch {}
