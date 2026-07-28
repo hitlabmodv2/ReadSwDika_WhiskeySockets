@@ -421,7 +421,6 @@ function buatCaption(data) {
         katInfo.header,
         SEP,
         `📅 _${headerWaktu}_`,
-        url ? `🔗 ${url}` : null,
         SEP,
         ``,
         `*${title || '-'}*`,
@@ -440,6 +439,7 @@ function buatCaption(data) {
         dlBlok     ? `\n${dlBlok}`     : null,
         streamBlok ? `\n${streamBlok}` : null,
         `\n${SEP}`,
+        `🌐 *Source:* \`hentaicop.com\``,
     ];
 
     return baris.filter(b => b !== null && b !== undefined).join('\n');
@@ -489,22 +489,6 @@ async function downloadImageBuffer(url) {
     return null;
 }
 
-// ── CONTEXT INFO HELPER (thumbnail clickable → source) ────────────────────────
-
-function buatCtxInfo(item) {
-    if (!item?.url) return undefined;
-    return {
-        externalAdReply: {
-            title               : item.title || 'HentaiCop',
-            body                : 'hentaicop.com',
-            mediaType           : 1,
-            sourceUrl           : item.url,
-            showAdAttribution   : false,
-            renderLargerThumbnail: false,
-        },
-    };
-}
-
 // ── EXPORT ────────────────────────────────────────────────────────────────────
 
 module.exports = {
@@ -519,7 +503,6 @@ module.exports = {
     simulasi,
     downloadImageBuffer,
     buatProxyUrl,
-    buatCtxInfo,
 };
 
 // ── BUTTON HELPERS ────────────────────────────────────────────────────────────
