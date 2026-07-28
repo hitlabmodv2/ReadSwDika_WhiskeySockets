@@ -165,7 +165,7 @@ function parseDetailSeries(md, url) {
             .replace(/ - Sinopsis[^\n]*/g, '')
             .replace(/\s{2,}/g, ' ')
             .trim()
-            .slice(0, 450);
+            .slice(0, 700);
     }
 
     // ── Daftar episode dari ## Tonton ... ─────────────────────────────────────

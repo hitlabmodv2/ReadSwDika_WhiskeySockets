@@ -326,7 +326,7 @@ function buatCaption(data) {
     const headerWaktu = waktuSekarang();
 
     // ── Sinopsis (> kutip, potong per ~120 karakter biar enak dibaca) ───────────
-    const sinopsisTeks = potongTeks(synopsis, 350);
+    const sinopsisTeks = potongTeks(synopsis, 650);
     let sinopsisBlok = null;
     if (sinopsisTeks) {
         // Pecah jadi baris ~120 karakter di batas spasi
