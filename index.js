@@ -1766,6 +1766,87 @@ async function main() {
                         }
                         /* ================= END AUTO NEKOPOI NOTIF SCHEDULER ================= */
 
+                        /* ================= AUTO HENTAICOP NOTIF SCHEDULER ================= */
+                        if (global.hentaicopnotifInterval) {
+                                clearInterval(global.hentaicopnotifInterval);
+                                global.hentaicopnotifInterval = null;
+                        }
+                        {
+                                const HC_PATH        = path.join(process.cwd(), 'SEMUA_FITUR', 'anime', 'hentaicop-monitor.cjs');
+                                const HC_SCRAPE_PATH = path.join(process.cwd(), 'SEMUA_FITUR', 'anime', 'hentaicop.cjs');
+                                const HC_INTERVAL_MS = 2 * 60 * 1000; // 2 menit
+
+                                const runHentaicopnotif = async () => {
+                                        if (global.hentaicopnotifRunning) return;
+                                        global.hentaicopnotifRunning = true;
+                                        try {
+                                                delete _require.cache[_require.resolve(HC_PATH)];
+                                                try { delete _require.cache[_require.resolve(HC_SCRAPE_PATH)]; } catch (_) {}
+                                                const _hc = _require(HC_PATH);
+
+                                                const daftarGrup = _hc.getEnabledGroups();
+                                                if (!daftarGrup.length) return;
+
+                                                const kontenBaru = await _hc.cariKontenBaru();
+                                                if (!kontenBaru.length) return;
+
+                                                const sudahKirim = new Set();
+                                                const unikList   = kontenBaru.filter(item => {
+                                                        const key = item.id || item.url;
+                                                        if (sudahKirim.has(key)) return false;
+                                                        sudahKirim.add(key);
+                                                        return true;
+                                                });
+
+                                                for (const item of unikList) {
+                                                        const caption   = _hc.buatCaption(item);
+                                                        const urlGambar = item.thumbnail || null;
+
+                                                        let imgBuffer  = null;
+                                                        let imgSendUrl = null;
+                                                        if (urlGambar) {
+                                                                imgBuffer  = await _hc.downloadImageBuffer(urlGambar);
+                                                                if (!imgBuffer) imgSendUrl = _hc.buatProxyUrl(urlGambar);
+                                                        }
+
+                                                        const BATCH = 5;
+                                                        for (let i = 0; i < daftarGrup.length; i += BATCH) {
+                                                                const chunk = daftarGrup.slice(i, i + BATCH);
+                                                                await Promise.allSettled(chunk.map(async jid => {
+                                                                        try {
+                                                                                if (imgBuffer) {
+                                                                                        await hisoka.sendMessage(jid, { image: imgBuffer, mimetype: 'image/jpeg', caption });
+                                                                                } else if (imgSendUrl) {
+                                                                                        await hisoka.sendMessage(jid, { image: { url: imgSendUrl }, caption });
+                                                                                } else {
+                                                                                        await hisoka.sendMessage(jid, { text: caption });
+                                                                                }
+                                                                        } catch (e) {
+                                                                                console.error(`[HentaicopNotif] Gagal kirim ke ${jid}:`, e?.message);
+                                                                        }
+                                                                }));
+                                                                if (i + BATCH < daftarGrup.length) await new Promise(r => setTimeout(r, 1000));
+                                                        }
+
+                                                        _hc.tandaiDanLog(item, daftarGrup);
+                                                        console.log(`[HentaicopNotif] ✅ "${item.title}" [${item.kategori}] terkirim ke ${daftarGrup.length} grup`);
+                                                        await new Promise(r => setTimeout(r, 2000));
+                                                }
+                                        } catch (err) {
+                                                console.error('[HentaicopNotif] Error scheduler:', err?.message);
+                                        } finally {
+                                                global.hentaicopnotifRunning = false;
+                                        }
+                                };
+
+                                // Mulai 90 detik setelah start (setelah nekopoi)
+                                setTimeout(() => {
+                                        runHentaicopnotif();
+                                        global.hentaicopnotifInterval = setInterval(runHentaicopnotif, HC_INTERVAL_MS);
+                                }, 90000);
+                        }
+                        /* =============== END AUTO HENTAICOP NOTIF SCHEDULER =============== */
+
                         /* ===================== AUTO TVONENEWS SCHEDULER ===================== */
                         if (global.tvoneInterval) {
                                 clearInterval(global.tvoneInterval);

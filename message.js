@@ -132,7 +132,8 @@ const pendingMusikai2Cache = new Map(); // key → { results, params, ts } (musi
 const pendingAlqDlChoices = new Map();
 const pendingAlqUpdateChoices = new Map();
 const pendingAlqNotifChoices   = new Map();
-const pendingNekpoiNotifChoices = new Map();
+const pendingNekpoiNotifChoices    = new Map();
+const pendingHentaicopNotifChoices = new Map();
 const pendingAntilinkChoices = new Map();
 const pendingCosplayChoices = new Map();
 const pendingKomikChoices = new Map();
@@ -890,6 +891,18 @@ export default async function ({ message, type: messagesType }, hisoka) {
                 {
                         const { handleNekopoinotifCallbacks } = _require(path.resolve('./SEMUA_FITUR/anime/nekopoi-monitor.cjs'));
                         if (await handleNekopoinotifCallbacks({ hisoka, m, tolak, logCommand, Button, loadConfig, fs, path })) return;
+                }
+
+                // ── Handle reply ke status hentaicopnotif (add/del GC) ──
+                {
+                        const { handleHentaicopNotifReply } = _require(path.resolve('./SEMUA_FITUR/anime/hentaicop-monitor.cjs'));
+                        if (await handleHentaicopNotifReply({ hisoka, m, pendingHentaicopNotifChoices, getQuotedStanzaId, tolak, logCommand, loadConfig, fs, path })) return;
+                }
+
+                // ── Handle button callback hentaicopnotif (__hcnotif_*) ──
+                {
+                        const { handleHentaicopnotifCallbacks } = _require(path.resolve('./SEMUA_FITUR/anime/hentaicop-monitor.cjs'));
+                        if (await handleHentaicopnotifCallbacks({ hisoka, m, tolak, logCommand, Button, loadConfig, fs, path })) return;
                 }
 
                 // ── Handle tap button single-select .wilyai ───────────────────────────
@@ -2098,6 +2111,12 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'nekopoinotif': {
                                 const { handleNekopoinotif } = _require(path.resolve('./SEMUA_FITUR/anime/nekopoi-monitor.cjs'));
                                 await handleNekopoinotif({ hisoka, m, query, tolak, logCommand, Button, fs, path, loadConfig, pendingNekpoiNotifChoices });
+                                break;
+                        }
+
+                        case 'hentaicopnotif': {
+                                const { handleHentaicopnotif } = _require(path.resolve('./SEMUA_FITUR/anime/hentaicop-monitor.cjs'));
+                                await handleHentaicopnotif({ hisoka, m, query, tolak, logCommand, Button, fs, path, loadConfig, pendingHentaicopNotifChoices });
                                 break;
                         }
 
