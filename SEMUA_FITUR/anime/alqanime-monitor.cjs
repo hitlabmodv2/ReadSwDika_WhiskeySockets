@@ -380,6 +380,8 @@ const SEP2 = '┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄';
 
      const label = tipe === 'batch'
          ? '📥 *DOWNLOAD BATCH*'
+         : tipe === 'movie'
+         ? '📥 *DOWNLOAD MOVIE*'
          : `📥 *DOWNLOAD EP ${bersihkanInline(epTerbaru.episode || '?')}*`;
 
      const rows = resolusiList.map(([res, hosts], index) => {
