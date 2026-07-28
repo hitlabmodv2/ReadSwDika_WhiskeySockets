@@ -50,7 +50,7 @@ export function loadConfig() {
 }
 
 export function getBotVersion() {
-        return loadConfig().botVersion || 'V25';
+        return loadConfig().botVersion || 'V27';
 }
 
 export function saveConfig(config) {

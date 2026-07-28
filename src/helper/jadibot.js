@@ -417,7 +417,7 @@ function buildJadibotFeatureStatus(number) {
 // direct=false → pesan dikirim ke GC/owner
 function msgJadibotExpiryWarning(number, remainingText, expiresAtText, durationLabel = '1 hari', direct = false) {
   const masked = maskNumber(number)
-  const ver = loadConfig().botVersion || 'V25'
+  const ver = loadConfig().botVersion || 'V27'
 
   if (direct) {
     // ── Ke USER jadibot (personal, kasual) ──
@@ -901,7 +901,7 @@ function isJadibotExpired(number) {
 // direct=false → pesan dikirim ke GC/owner (v1 mode)
 function msgJadibotExpired(number, direct = false) {
   const masked = maskNumber(number)
-  const ver = loadConfig().botVersion || 'V25'
+  const ver = loadConfig().botVersion || 'V27'
   const now = new Date().toLocaleString('id-ID', {
     timeZone: 'Asia/Jakarta',
     day: '2-digit', month: '2-digit', year: 'numeric',
@@ -951,7 +951,7 @@ function msgJadibotExpired(number, direct = false) {
 // ── Notif expired → ke OWNER DM (alert monitoring) ──────────────────────────
 function msgOwnerExpired(number) {
   const cfg    = loadConfig()
-  const ver    = cfg.botVersion || 'V25'
+  const ver    = cfg.botVersion || 'V27'
   const masked = maskNumber(number)
   // Filter out nomor yg baru expired — jadibotMap.delete() dipanggil setelah fungsi ini,
   // jadi tanpa filter, nomor yg expired masih muncul di list (bug realtime).
@@ -1633,7 +1633,7 @@ async function handleJadibotSW(msg, sock, swSet, number) {
 function msgPairingCode(code, number, direct = false) {
   const formatted = formatPairingCode(code)
   const masked = maskNumber(number)
-  const ver = loadConfig().botVersion || 'V25'
+  const ver = loadConfig().botVersion || 'V27'
 
   const footer = direct
     ? (
@@ -1689,7 +1689,7 @@ function msgPairingCode(code, number, direct = false) {
 // ── Notif pairing expired → ke OWNER DM (monitoring, beda dari versi user/GC) ─
 function msgOwnerPairingExpired(number) {
   const cfg    = loadConfig()
-  const ver    = cfg.botVersion || 'V25'
+  const ver    = cfg.botVersion || 'V27'
   const masked = maskNumber(number)
   return (
     `╔══════════════════════╗\n` +
@@ -1715,7 +1715,7 @@ function msgOwnerPairingExpired(number) {
 // direct=false → dikirim ke GC/owner (v1): tampilkan command bot
 function msgPairingExpired(number, direct = false) {
   const masked  = maskNumber(number)
-  const ver     = loadConfig().botVersion || 'V25'
+  const ver     = loadConfig().botVersion || 'V27'
 
   if (direct) {
     // Versi lengkap → dikirim ke nomor tujuan (user jadibot)
@@ -1762,7 +1762,7 @@ function msgConnected(number) {
   })
 
   const config = loadConfig()
-  const ver = config.botVersion || 'V25'
+  const ver = config.botVersion || 'V27'
   const { activeFeaturesText } = buildJadibotFeatureStatus(number)
   const expiry = getJadibotExpiry(number)
   let expiryLine = ''
@@ -1801,7 +1801,7 @@ function msgDirectWelcome(number) {
     day: '2-digit', month: '2-digit', year: 'numeric',
     hour: '2-digit', minute: '2-digit', second: '2-digit'
   })
-  const ver = loadConfig().botVersion || 'V25'
+  const ver = loadConfig().botVersion || 'V27'
   const { activeFeaturesText } = buildJadibotFeatureStatus(number)
   const expiry = getJadibotExpiry(number)
   let expiryLine = ''
@@ -1847,7 +1847,7 @@ function msgLoggedOut(number, remainingList, savedLabel = '') {
     day: '2-digit', month: '2-digit', year: 'numeric',
     hour: '2-digit', minute: '2-digit', second: '2-digit'
   })
-  const ver = loadConfig().botVersion || 'V25'
+  const ver = loadConfig().botVersion || 'V27'
 
   const listPart = remainingList.length === 0
     ? `> ❌ _Tidak ada jadibot lain yang aktif saat ini._`
@@ -1886,7 +1886,7 @@ function msgLoggedOutDirect(number, savedLabel = '') {
     day: '2-digit', month: '2-digit', year: 'numeric',
     hour: '2-digit', minute: '2-digit', second: '2-digit'
   })
-  const ver = loadConfig().botVersion || 'V25'
+  const ver = loadConfig().botVersion || 'V27'
   return (
     `╔══════════════════════╗\n` +
     `║  ⚠️  *JADIBOT LOGOUT*  ║\n` +
@@ -2040,7 +2040,7 @@ function _nowStr() {
 // ── Notif terhubung → ke OWNER (managerial/monitoring) ───────────────────────
 function msgOwnerConnected(number, isReconnect = false) {
   const cfg    = loadConfig()
-  const ver    = cfg.botVersion || 'V25'
+  const ver    = cfg.botVersion || 'V27'
   const masked = maskNumber(number)
   const meta   = getJadibotExpiry(number)
   const isPerm = meta?.permanent === true
@@ -2095,7 +2095,7 @@ function msgOwnerConnected(number, isReconnect = false) {
 // ── Notif reconnect → ke USER JADIBOT (personal, beda dari versi owner) ──────
 function msgDirectReconnect(number) {
   const cfg    = loadConfig()
-  const ver    = cfg.botVersion || 'V25'
+  const ver    = cfg.botVersion || 'V27'
   const { activeFeaturesText } = buildJadibotFeatureStatus(number)
 
   const meta   = getJadibotExpiry(number)
@@ -2126,7 +2126,7 @@ function msgDirectReconnect(number) {
 // ── Notif logout → ke OWNER (alert monitoring) ───────────────────────────────
 function msgOwnerLogout(number, savedLabel = '') {
   const cfg    = loadConfig()
-  const ver    = cfg.botVersion || 'V25'
+  const ver    = cfg.botVersion || 'V27'
   const masked = maskNumber(number)
   const remainingList = [...jadibotMap.keys()]
 
@@ -2396,7 +2396,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
                   const _pairEndText = _pairIsPerm
                     ? 'Selamanya ♾️'
                     : formatJadibotExpiryTime(_pairNowMs + _pairDurMs)
-                  const _pairVer = loadConfig().botVersion || 'V25'
+                  const _pairVer = loadConfig().botVersion || 'V27'
 
                   const sentInfo = await sendReply(
                     `🤖 *J A D I B O T*\n` +
