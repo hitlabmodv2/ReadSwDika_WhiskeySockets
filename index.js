@@ -2235,38 +2235,6 @@ async function main() {
                                         break;
                                 }
 
-                                case 405: {
-                                        reconnectCount++;
-                                        const MAX_405 = 5;
-                                        const C405 = '\x1b[36m', Y405 = '\x1b[33m', R405 = '\x1b[0m', B405 = '\x1b[1m';
-                                        console.log('');
-                                        console.log(`${C405}════════════════════════════════════${R405}`);
-                                        console.log(`${B405}${Y405}⚠️  WA DISCONNECT 405 — Not Allowed${R405}`);
-                                        console.log(`${C405}════════════════════════════════════${R405}`);
-                                        if (reconnectCount >= MAX_405) {
-                                                console.log(`${Y405}• Sudah ${reconnectCount}x disconnect 405 beruntun${R405}`);
-                                                console.log(`${Y405}• Kemungkinan sesi tidak valid — hapus sesi & pair ulang${R405}`);
-                                                console.log(`${C405}════════════════════════════════════${R405}`);
-                                                console.log('');
-                                                cleanupSocket();
-                                                try { await fs.promises.unlink(sessionFile); } catch {}
-                                                try { await fs.promises.rm(sessionDir, { recursive: true, force: true }); } catch {}
-                                                reconnectCount = 0;
-                                                await delay(3000);
-                                                await main();
-                                        } else {
-                                                const wait405 = Math.min(10 * reconnectCount, 60);
-                                                console.log(`${Y405}• Bisa karena HP aktif / sesi diganti WA${R405}`);
-                                                console.log(`${Y405}• Reconnect dalam ${wait405}s... (Attempt ${reconnectCount}/${MAX_405})${R405}`);
-                                                console.log(`${C405}════════════════════════════════════${R405}`);
-                                                console.log('');
-                                                await delay(wait405 * 1000);
-                                                cleanupSocket();
-                                                await main();
-                                        }
-                                        break;
-                                }
-
                                 case 515:
                                         console.info('\x1b[33mStream error (515). Reconnecting in 5s...\x1b[39m');
                                         await delay(5000);
