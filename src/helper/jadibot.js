@@ -1143,48 +1143,7 @@ function scheduleJadibotExpiry(number, sendReply = null) {
     expireJadibot(number, sendReply)
     return
   }
-  const warningTimers = []
-  for (const threshold of JADIBOT_EXPIRY_WARNING_THRESHOLDS) {
-    const delayMs = remaining - threshold.ms
-    if (delayMs <= 0 || delayMs > MAX_TIMER_MS) continue
-    const warningTimer = setTimeout(async () => {
-      const latest = getJadibotExpiry(number)
-      if (!latest) return
-      const latestRemaining = Number(latest.expiresAt) - Date.now()
-      if (latestRemaining <= 0 || latestRemaining > threshold.ms + 15000) return
-      const durationLabel = latest.durationText || formatDurationMs(Number(latest.durationMs) || DEFAULT_JADIBOT_DURATION_MS)
-      const warningCfg = loadConfig()
-      const warningMode = (warningCfg.jadibotPairingMode || 'v2').toLowerCase()
-      const isDirectWarning = warningMode === 'v2'
-      const warningText = msgJadibotExpiryWarning(
-        number,
-        formatRemainingTime(latestRemaining),
-        formatJadibotExpiryTime(latest.expiresAt),
-        durationLabel,
-        isDirectWarning // direct=true → v2: pakai link owner, direct=false → v1: pakai command bot
-      )
-      if (isDirectWarning) {
-        // V2: kirim warning langsung ke nomor jadibot (via sock jadibot itu sendiri)
-        await sendDirectJadibotNotice(jadibotMap.get(number), number, warningText)
-      } else {
-        // V1: kirim warning ke GC/owner
-        if (sendReply) {
-          try { await sendReply(warningText) } catch {}
-        }
-        // V1: JUGA kirim langsung ke nomor target (biar user tau masa aktif hampir habis)
-        const warningTextDirect = msgJadibotExpiryWarning(
-          number,
-          formatRemainingTime(latestRemaining),
-          formatJadibotExpiryTime(latest.expiresAt),
-          durationLabel,
-          true // direct=true → pakai link owner bukan command
-        )
-        await sendDirectJadibotNotice(jadibotMap.get(number), number, warningTextDirect)
-      }
-    }, delayMs)
-    warningTimers.push(warningTimer)
-  }
-  if (warningTimers.length) expiryWarningTimers.set(number, warningTimers)
+  // Warning timer dihapus — notif cukup 1x saat benar-benar habis (via expireJadibot)
   const timer = setTimeout(() => {
     if (isJadibotExpired(number)) {
       expireJadibot(number, sendReply)

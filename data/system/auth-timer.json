@@ -2,6 +2,26 @@
   "events": [
     {
       "type": "connected",
+      "connectedAt": "2026-08-01T20:41:24.262Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-08-01T20:34:21.466Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-08-01T08:23:02.048Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-08-01T08:15:43.789Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-08-01T08:10:26.098Z"
+    },
+    {
+      "type": "connected",
       "connectedAt": "2026-07-28T11:59:17.052Z"
     },
     {
@@ -179,28 +199,8 @@
     {
       "type": "connected",
       "connectedAt": "2026-07-26T11:46:27.088Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-26T11:45:11.958Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-26T11:42:37.178Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-26T11:07:12.963Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-26T09:50:23.157Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-26T09:36:00.406Z"
     }
   ],
-  "lastUpdated": "2026-07-28T11:59:17.052Z",
+  "lastUpdated": "2026-08-01T20:41:24.262Z",
   "sessionStart": "2026-07-26T07:04:39.420Z"
 }
