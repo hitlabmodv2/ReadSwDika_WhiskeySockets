@@ -115,6 +115,29 @@ function parseDownloadLinks(md) {
         }
     }
 
+    // ── Fallback: Movie / OVA — tidak ada header ### Episode ─────────────────
+    // Halaman movie di alqanime.net tidak pakai "### Episode", sehingga loop
+    // di atas tidak menghasilkan apa-apa. Coba parse seluruh dlContent langsung.
+    if (!episodes.length) {
+        const links = {};
+        const lines = dlContent.split('\n').filter(l => /360p|480p|720p|1080p/i.test(l));
+        for (const line of lines) {
+            const resM = line.match(/^(360p|480p|720p|1080p)/i);
+            if (!resM) continue;
+            const res   = resM[1].toLowerCase();
+            const hosts = [];
+            const lRe   = /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g;
+            let lm;
+            while ((lm = lRe.exec(line)) !== null) {
+                hosts.push({ host: lm[1], url: lm[2] });
+            }
+            if (hosts.length) links[res] = hosts;
+        }
+        if (Object.keys(links).length) {
+            episodes.push({ episode: 'Movie', links });
+        }
+    }
+
     return episodes;
 }
 

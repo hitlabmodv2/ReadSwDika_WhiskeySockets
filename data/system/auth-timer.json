@@ -2,6 +2,30 @@
   "events": [
     {
       "type": "connected",
+      "connectedAt": "2026-07-28T11:59:17.052Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-28T11:51:45.508Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-28T11:43:03.092Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-28T11:23:33.915Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-28T08:14:51.379Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-07-28T07:22:47.219Z"
+    },
+    {
+      "type": "connected",
       "connectedAt": "2026-07-27T21:40:56.710Z"
     },
     {
@@ -175,33 +199,8 @@
     {
       "type": "connected",
       "connectedAt": "2026-07-26T09:36:00.406Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-26T07:49:20.759Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-26T07:40:44.689Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-26T07:18:04.049Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-26T07:05:13.553Z"
-    },
-    {
-      "type": "pairing",
-      "code": "AAAA-AAAA",
-      "number": "6285159438825",
-      "startAt": "2026-07-26T07:04:39.398Z",
-      "expireAt": "2026-07-26T07:07:39.398Z",
-      "durationSeconds": 180,
-      "sessionExpireAt": "2026-07-26T07:07:39.398Z"
     }
   ],
-  "lastUpdated": "2026-07-27T21:40:56.710Z",
+  "lastUpdated": "2026-07-28T11:59:17.052Z",
   "sessionStart": "2026-07-26T07:04:39.420Z"
 }
