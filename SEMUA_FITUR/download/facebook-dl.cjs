@@ -227,7 +227,9 @@ async function handleFacebookDl(hisoka, m, query, ctx) {
     const isApiTitleId = /^\d+$/.test(rawApiTitle.trim()) || /^(video|reel|story)\s+\d{5,}$/i.test(rawApiTitle.trim());
     const pageTitle   = (!isApiTitleId && rawApiTitle) ? rawApiTitle : (parsedMeta.pageTitle || '');
     const mediaType   = isStory ? 'story' : isReel ? 'reel' : parsedMeta.mediaType || 'video';
-    const views       = parsedMeta.views || '';
+    const views       = parsedMeta.views     || '';
+    const reactions   = parsedMeta.reactions || '';
+    const comments    = parsedMeta.comments  || '';
     const quality     = mediaData.quality || '';
     const hashtags    = parsedMeta.hashtags || [];
     const description = parsedMeta.description || '';
@@ -254,12 +256,12 @@ async function handleFacebookDl(hisoka, m, query, ctx) {
     }
 
     // ── AI caption ─────────────────────────────────────────────────────────────
-    let finalCaption = buildFbFallbackCaption({ pageTitle, description, views, quality, mediaType });
+    let finalCaption = buildFbFallbackCaption({ pageTitle, description, views, reactions, comments, quality, mediaType });
 
     if (gemini) {
         try {
             const captionPrompt = buildFbCaptionPrompt({
-                pageTitle, description, views, quality, hashtags, mediaType,
+                pageTitle, description, views, reactions, comments, quality, hashtags, mediaType,
                 visualDesc: fbVisualDesc,
             });
             const aiCaption = await gemini.ask(captionPrompt);
