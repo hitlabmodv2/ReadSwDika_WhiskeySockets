@@ -172,24 +172,42 @@ Tugasmu: buat caption WhatsApp untuk ${typeLabel} yang baru diunduh.
 DATA KONTEN:
 ${metaBlock}${visualBlock}
 
-FORMAT CAPTION (ikuti persis):
-Baris 1  : ${emoji} *[Nama Page/User dalam bold]* — sertakan nama sumber jika ada
-Baris 2-3: Deskripsi isi konten 1-2 kalimat — *WAJIB berdasarkan Analisis Visual*, bukan mengarang
-           Boleh pakai _italic_ untuk kata kunci menarik, dan \`monospace\` untuk istilah/nama spesifik
-Baris 4  : (opsional) Komentar santai/reaksi singkat yang nyambung — boleh lucu/ngakak kalau kontennya memang lucu
-Baris 5  : > 👁️ [views] kali ditonton — pakai format quote WA (tanda >) untuk stats
-           (hanya tampilkan baris ini jika ada data views)
+═══════════════════════════════
+PANDUAN FORMATTING WhatsApp — PAKAI SESUAI KONTEKS KONTEN, BUKAN ASAL TEMPEL:
+═══════════════════════════════
+
+*teks tebal* → nama page/user, judul konten, kata kunci utama yang paling penting
+_teks miring_ → nuansa/suasana, kata sifat penekanan emosi, deskripsi visual yang kuat
+~teks coret~ → kontras/ironi (mis. "katanya diet ~sambil makan gorengan~"), mitos yang dibantah, atau efek humor
+\`teks monospace\` → nama karakter, nama game/produk/brand/aplikasi, istilah teknis, nama tempat spesifik
+> teks kutip → stats (views/likes), kutipan langsung dari konten, fakta menarik dari video, info penting yang menonjol
+1. daftar bernomor → kalau konten berisi tips/langkah/urutan (mis. tutorial, resep, cara melakukan sesuatu)
+• daftar berpoint → kalau ada beberapa fitur/detail sejajar tanpa urutan (mis. "isi konten ini: • ..., • ..., • ...")
+
+ATURAN PENGGUNAAN FORMATTING:
+- JANGAN pakai semua simbol sekaligus di setiap caption — pilih yang paling relevan dengan isi konten
+- Konten lucu/viral: bold + italic + mungkin coret untuk efek humor
+- Konten tutorial/tips: bold judul + numbered list untuk langkah-langkah
+- Konten game/anime: bold + monospace untuk nama karakter/game
+- Konten berita/info: bold + quote untuk fakta/data penting
+- Konten story/vlog: bold + italic untuk nuansa, quote untuk momen spesifik
+- ~coret~ HANYA dipakai kalau ada kontras/ironi/humor yang nyata dalam konten — JANGAN dipaksakan
+
+FORMAT CAPTION:
+Baris 1  : ${emoji} *[Nama Page/User]* — bold, nama sumber
+Baris 2-4: Deskripsi isi konten — WAJIB berdasarkan Analisis Visual, pakai formatting yang cocok dengan konten
+           (bisa 1-2 kalimat biasa, atau list bernomor/berpoint kalau konten memang berupa tips/langkah)
+Baris 5  : (opsional) Komentar/reaksi singkat santai yang nyambung dengan isi konten
+Baris 6  : > 👁️ ${views ? views + ' kali ditonton' : '[views] kali ditonton'} — HANYA jika ada data views
 
 ATURAN KETAT:
-1. WAJIB gunakan formatting WA: *bold* untuk nama/judul, _italic_ untuk penekanan, \`backtick\` untuk nama spesifik/istilah, > untuk stats
-2. Deskripsi konten HARUS berdasarkan Analisis Visual — jika visual bilang "pria jatuh dari motor", tulis itu; JANGAN tulis frasa generik
-3. Bahasa Indonesia santai, tidak kaku, terasa seperti kawan ngirim video
-4. DILARANG mengarang fakta di luar data yang diberikan
-5. DILARANG sertakan URL atau link
-6. DILARANG bilang kamu AI
-7. Maksimal 5-6 baris total
-8. DILARANG KERAS menambahkan kalimat pembuka/penutup apapun seperti "Oke siap", "Ini dia", "Berikut captionnya", "Tentu!", "Caption:" dll — langsung tulis caption saja tanpa basa-basi
-9. Maksimal 8 baris — caption dikirim sebagai pesan teks terpisah, jadi boleh lebih detail tapi tetap ringkas
+1. Deskripsi HARUS berdasarkan Analisis Visual — jika visual bilang "cosplay karakter Hiyuki Wuthering Waves", tulis itu spesifik
+2. Bahasa Indonesia santai, tidak kaku, terasa seperti kawan ngirim video
+3. DILARANG mengarang fakta di luar data yang diberikan
+4. DILARANG sertakan URL atau link
+5. DILARANG bilang kamu AI
+6. DILARANG menambahkan kalimat pembuka seperti "Oke siap", "Ini dia", "Berikut captionnya", "Tentu!" dll — langsung caption saja
+7. Maksimal 8 baris total
 
 Caption (langsung, tanpa kalimat pembuka):`;
 }
@@ -204,13 +222,28 @@ export function buildFbFallbackCaption({
     quality = '',
     mediaType = 'video',
 } = {}) {
-    const emoji = mediaType === 'reel' ? '🎬' : mediaType === 'story' ? '📖' : '▶️';
-    const name  = pageTitle ? `*${pageTitle}*` : '*Facebook*';
+    const emoji     = mediaType === 'reel' ? '🎬' : mediaType === 'story' ? '📖' : '▶️';
+    const typeLabel = mediaType === 'reel' ? 'Reel' : mediaType === 'story' ? 'Story' : 'Video';
+    const name      = pageTitle ? `*${pageTitle}*` : `*Facebook ${typeLabel}*`;
+
     let text = `${emoji} ${name}\n`;
-    if (description) text += description.substring(0, 120) + (description.length > 120 ? '...' : '') + '\n';
+
+    if (description) {
+        const desc = description.trim();
+        // Kalau ada baris multipel (tips/langkah), jadikan numbered list
+        const lines = desc.split(/\n+/).map(l => l.trim()).filter(Boolean);
+        if (lines.length >= 3) {
+            text += lines.slice(0, 4).map((l, i) => `${i + 1}. ${l}`).join('\n') + '\n';
+        } else {
+            const short = desc.substring(0, 150);
+            text += `_${short}${desc.length > 150 ? '...' : ''}_\n`;
+        }
+    }
+
     const stats = [];
-    if (views)   stats.push(`👁️ ${views}`);
+    if (views)   stats.push(`👁️ ${views} kali ditonton`);
     if (quality) stats.push(`🎥 ${quality}`);
-    if (stats.length) text += `> ${stats.join('  ')}`;
+    if (stats.length) text += `> ${stats.join('  •  ')}`;
+
     return text.trim();
 }
