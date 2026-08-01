@@ -77,8 +77,7 @@ export function parseFbMetaHtml(html = '') {
     // Format FB: "90 rb tayangan · 7 rb tanggapan | [konten] | [username]"
     // Bahasa Inggris: "90K views · 7K reactions | [content] | [username]"
     let views     = '';
-    let reactions = '';
-    let comments  = '';
+    let likes     = '';
     let pageTitle = '';
 
     // Normalise spasi di angka: "90 rb" → "90rb"
@@ -89,16 +88,13 @@ export function parseFbMetaHtml(html = '') {
 
     // Pattern views: "90 rb tayangan", "90K views", "1,2M ditonton"
     const viewsM = statsPart.match(/([\d.,]+\s*(?:rb|jt|ribu|juta|K|M)?)\s+(?:tayangan|views|ditonton)/i);
-    // Pattern reactions/likes: "7 rb tanggapan", "7K reactions", "5 rb suka"
-    const reactM = statsPart.match(/([\d.,]+\s*(?:rb|jt|ribu|juta|K|M)?)\s+(?:tanggapan|reaksi|reaction|suka|like)/i);
-    // Pattern comments: "500 komentar", "500 comments"
-    const commM  = statsPart.match(/([\d.,]+\s*(?:rb|jt|ribu|juta|K|M)?)\s+(?:komentar|comments?)/i);
+    // Pattern likes/reactions: "7 rb tanggapan", "7K reactions", "5 rb suka", "7K likes"
+    const likeM  = statsPart.match(/([\d.,]+\s*(?:rb|jt|ribu|juta|K|M)?)\s+(?:tanggapan|reaksi|reaction|suka|like)/i);
 
-    if (viewsM) views     = normCount(viewsM[1]);
-    if (reactM) reactions = normCount(reactM[1]);
-    if (commM)  comments  = normCount(commM[1]);
+    if (viewsM) views = normCount(viewsM[1]);
+    if (likeM)  likes = normCount(likeM[1]);
 
-    const hasStats = !!(viewsM || reactM || commM);
+    const hasStats = !!(viewsM || likeM);
 
     if (hasStats && titleParts.length >= 2) {
         // username = bagian terakhir setelah | terakhir
@@ -132,7 +128,7 @@ export function parseFbMetaHtml(html = '') {
     // Hashtags dari description
     const hashtags = (desc.match(/#\w+/g) || []).slice(0, 5);
 
-    return { pageTitle, description: desc, views, reactions, comments, mediaType, hashtags, hasVideo: !!ogVideo };
+    return { pageTitle, description: desc, views, likes, mediaType, hashtags, hasVideo: !!ogVideo };
 }
 
 /**
@@ -168,8 +164,7 @@ Aturan WAJIB:
  * @param {string} d.pageTitle     - Nama page/user FB
  * @param {string} d.description   - Deskripsi/caption asli dari FB
  * @param {string} d.views         - Views formatted ("90rb")
- * @param {string} d.reactions     - Reactions/likes ("7rb tanggapan")
- * @param {string} d.comments      - Comments count ("500 komentar")
+ * @param {string} d.likes         - Like/reaction count realtime ("7rb")
  * @param {string} d.quality       - Kualitas video ("HD" | "SD")
  * @param {string[]} d.hashtags    - Array hashtag ["#viral", "#lucu"]
  * @param {string} d.mediaType     - "video" | "reel" | "story"
@@ -179,8 +174,7 @@ export function buildFbCaptionPrompt({
     pageTitle = '',
     description = '',
     views = '',
-    reactions = '',
-    comments = '',
+    likes = '',
     quality = '',
     hashtags = [],
     mediaType = 'video',
@@ -193,9 +187,8 @@ export function buildFbCaptionPrompt({
 
     // Build stats string untuk disertakan di data konten
     const statsArr = [];
-    if (views)     statsArr.push(`${views} tayangan`);
-    if (reactions) statsArr.push(`${reactions} tanggapan/reaksi`);
-    if (comments)  statsArr.push(`${comments} komentar`);
+    if (views) statsArr.push(`${views} tayangan`);
+    if (likes) statsArr.push(`${likes} like`);
     const statsLine = statsArr.length ? statsArr.join(' · ') : '';
 
     const parts = [];
@@ -241,8 +234,8 @@ Baris 1  : ${emoji} *[Nama Page/User]* — bold, nama sumber
 Baris 2-4: Deskripsi isi konten — WAJIB berdasarkan Analisis Visual, pakai formatting sesuai konten
            (1-2 kalimat biasa, atau list bernomor/berpoint kalau konten memang tips/langkah)
 Baris 5  : (opsional) Komentar/reaksi singkat santai yang nyambung dengan isi konten
-Baris 6+ : > [stats engagement] — WAJIB tampilkan semua stats yang tersedia dalam format quote:
-           Contoh: > 👁️ 90rb tayangan  •  ❤️ 7rb tanggapan  •  💬 500 komentar
+Baris 6+ : > [stats engagement] — WAJIB tampilkan dalam format quote jika ada datanya:
+           Contoh: > 👁️ 90rb tayangan  •  👍 7rb like
            (hanya tampilkan stats yang memang ada datanya, jangan karang)
 
 ATURAN KETAT:
@@ -264,8 +257,7 @@ export function buildFbFallbackCaption({
     pageTitle = '',
     description = '',
     views = '',
-    reactions = '',
-    comments = '',
+    likes = '',
     quality = '',
     mediaType = 'video',
 } = {}) {
@@ -287,12 +279,11 @@ export function buildFbFallbackCaption({
         }
     }
 
-    // Stats engagement: views, reactions, comments, quality
+    // Stats realtime: views + likes dari og:title FB
     const stats = [];
-    if (views)     stats.push(`👁️ ${views} tayangan`);
-    if (reactions) stats.push(`❤️ ${reactions} tanggapan`);
-    if (comments)  stats.push(`💬 ${comments} komentar`);
-    if (quality)   stats.push(`🎥 ${quality}`);
+    if (views)   stats.push(`👁️ ${views} tayangan`);
+    if (likes)   stats.push(`👍 ${likes} like`);
+    if (quality) stats.push(`🎥 ${quality}`);
     if (stats.length) text += `> ${stats.join('  •  ')}`;
 
     return text.trim();
