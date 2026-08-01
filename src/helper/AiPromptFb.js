@@ -75,12 +75,17 @@ export function parseFbMetaHtml(html = '') {
 
     // Coba ekstrak nama page/user dari title
     // Contoh: "Facebook Video: John Doe" atau "John Doe | Facebook" atau "Watch John Doe's video"
-    const pageTitle = title
+    const rawPageTitle = title
         .replace(/\s*\|\s*facebook/gi, '')
         .replace(/^facebook video[:.]?\s*/gi, '')
         .replace(/^watch\s+/gi, '')
         .replace(/'s video$/gi, '')
         .trim();
+
+    // Buang pageTitle yang ternyata cuma ID angka FB (mis. "Video 17093569669950008" atau "17093569...")
+    // Agar caption tidak menampilkan nomor ID sebagai nama page/user
+    const isIdTitle = /^\d+$/.test(rawPageTitle) || /^(video|reel|story)\s+\d{5,}$/i.test(rawPageTitle);
+    const pageTitle = isIdTitle ? '' : rawPageTitle;
 
     // Views di FB kadang ada di description: "5.2K views"
     const viewsRaw = desc.match(/([\d.,]+[KkMm]?)\s*(?:views|tayangan|ditonton)/i)?.[1] || '';

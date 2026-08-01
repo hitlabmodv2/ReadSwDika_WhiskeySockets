@@ -222,7 +222,10 @@ async function handleFacebookDl(hisoka, m, query, ctx) {
 
     // ── Parse metadata ─────────────────────────────────────────────────────────
     const parsedMeta  = parseFbMetaHtml(metaHtml);
-    const pageTitle   = mediaData.title || parsedMeta.pageTitle || '';
+    // Filter title berupa ID angka FB (mis. "17093569669950008" atau "Video 1709...") → pakai parsedMeta saja
+    const rawApiTitle = mediaData.title || '';
+    const isApiTitleId = /^\d+$/.test(rawApiTitle.trim()) || /^(video|reel|story)\s+\d{5,}$/i.test(rawApiTitle.trim());
+    const pageTitle   = (!isApiTitleId && rawApiTitle) ? rawApiTitle : (parsedMeta.pageTitle || '');
     const mediaType   = isStory ? 'story' : isReel ? 'reel' : parsedMeta.mediaType || 'video';
     const views       = parsedMeta.views || '';
     const quality     = mediaData.quality || '';
