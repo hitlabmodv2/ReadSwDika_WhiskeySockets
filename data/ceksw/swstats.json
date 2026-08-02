@@ -6,7 +6,6 @@
     "reactions": 119,
     "lastSeen": "2026-08-02T14:11:10.885Z",
     "activeSW": {
-      "3EB0692A0FE8F3BB8B61AC": 1785616492939,
       "A52A0E26741FD2CA6718929CDEBEB10A": 1785653436582,
       "A58B447DF7222ABAB145F7DCE7D95AE2": 1785653436630,
       "A5AF6E5116520E1E9159CCBBE9E28D7E": 1785653438890,
@@ -35,16 +34,16 @@
   "6281393564657": {
     "name": "γυς ρου",
     "number": "6281393564657",
-    "reads": 61,
-    "reactions": 61,
-    "lastSeen": "2026-08-02T14:11:09.556Z",
+    "reads": 63,
+    "reactions": 63,
+    "lastSeen": "2026-08-02T21:00:55.396Z",
     "activeSW": {
-      "AC8EC5FB761648A67104A7DCFD7FF9F7": 1785616486342,
-      "AC75A6AA9258E9FDD7C8335BC46622C8": 1785616497371,
       "ACA8701C5AF67FD957FFAC6261BA24AE": 1785653435541,
       "ACFA601146AAC5D43AAE9DF3C52EAD58": 1785653448060,
       "AC595C4C4AD34F7A139E478B973F5FDC": 1785679860436,
-      "AC69D59906633E93AE686FCF6FD8B832": 1785679869556
+      "AC69D59906633E93AE686FCF6FD8B832": 1785679869556,
+      "AC95B999869D2B2ABF451AAC0E4963C3": 1785704449223,
+      "AC35E822AFC1A014266F25DC0E92B6FE": 1785704455396
     }
   },
   "6287768752790": {
@@ -134,7 +133,6 @@
     "reactions": 28,
     "lastSeen": "2026-08-02T14:11:01.085Z",
     "activeSW": {
-      "A5DB11033871707F9E3554272A578071": 1785616489521,
       "A5A10E9645E987AFE76F59BB7369904A": 1785653437969,
       "A5E367ED554A583E8C4EF5C169DFCB34": 1785679861085
     }
@@ -186,7 +184,6 @@
     "reactions": 21,
     "lastSeen": "2026-08-02T15:04:54.607Z",
     "activeSW": {
-      "ACF7749E268B94201E4CBB94B38CD0E1": 1785616485067,
       "ACFCE53F610CCCD0CD23FF24B6EB9479": 1785679853818,
       "ACA22D5FF267465CB8934255AB486132": 1785679856718,
       "AC84CED04A3A2E5EB0D5911F379A363B": 1785679858998,
@@ -321,9 +318,7 @@
     "reads": 15,
     "reactions": 15,
     "lastSeen": "2026-08-01T20:34:48.985Z",
-    "activeSW": {
-      "A51396A4FB4133D14394217A5826B4A7": 1785616488985
-    }
+    "activeSW": {}
   },
   "6282189076619": {
     "name": "F",
@@ -901,6 +896,17 @@
     "lastSeen": "2026-07-21T04:34:53.215Z",
     "activeSW": {}
   },
+  "6285175463174": {
+    "name": "sunshine : Aku lagi sebar Dana Kaget nih ! Yuk, sikat segera sebelum melaya",
+    "number": "6285175463174",
+    "reads": 4,
+    "reactions": 4,
+    "lastSeen": "2026-08-02T21:00:56.309Z",
+    "activeSW": {
+      "A5E1EF1EF348A30DD2FF47A51CA94EEA": 1785704454149,
+      "A5BF6AF42DD766BF295A2D58EEDB1CDB": 1785704456309
+    }
+  },
   "6285823980633": {
     "name": "M RAFLY BUCHORI SETYAWAN",
     "number": "6285823980633",
@@ -1285,14 +1291,6 @@
     "lastSeen": "2026-07-21T02:39:49.776Z",
     "activeSW": {}
   },
-  "6285175463174": {
-    "name": "sunshine : Aku lagi sebar Dana Kaget nih ! Yuk, sikat segera sebelum melaya",
-    "number": "6285175463174",
-    "reads": 2,
-    "reactions": 2,
-    "lastSeen": "2026-07-23T14:29:01.218Z",
-    "activeSW": {}
-  },
   "628569048966": {
     "name": "lan",
     "number": "628569048966",
@@ -1526,12 +1524,12 @@
     "❤️": 8,
     "⏺️⏏️⏹️": 150,
     "🦈": 185,
-    "🐳": 176,
-    "🐙": 195,
+    "🐳": 177,
+    "🐙": 196,
     "🐋": 181,
     "🐟": 221,
-    "🐠": 190,
+    "🐠": 191,
     "🐡": 150,
-    "🐬": 185
+    "🐬": 186
   }
 }
