@@ -6,51 +6,53 @@
  *  Telegram    : @Wilykun1994
  * ───────────────────────────────
  *  Script ini khusus donasi/VIP
- *  Support dari kalian bikin saya
- *  makin semangat update fitur,
- *  fix bug, dan rawat script ini.
- *
- *  Dilarang menjual ulang script ini
- *  Tanpa izin resmi dari developer.
- *  Jika ketahuan = NO UPDATE / NO FIX
- *
- *  Hargai karya, gunakan dengan bijak.
- *  Terima kasih sudah support.
- * ───────────────────────────────
  *
  *  alqanime.cjs — Scraper AlqAnime
- *  Cari & info anime dari alqanime.org, mendukung pencarian
+ *  Cari & info anime dari alqanime.net, mendukung pencarian
+ *
+ *  FIX: fetchMarkdown kini pakai retry + fallback format.
+ *  r.jina.ai kadang EAI_AGAIN (DNS transien) → otomatis retry 2x.
+ *  alqanime.net pakai Cloudflare sehingga direct fetch tidak bisa.
  * ───────────────────────────────
- */
-/**
- * ═══════════════════════════════════════════════════════════════
- *  AlqAnime Scraper
- *  Cari & ambil info anime terbaru dari alqanime.net —
- *  mendukung pencarian judul, daftar episode, dan link download
- *  Sub Indo. Dipakai oleh alqanime-cmd.cjs & alqanime-dl.cjs.
- * ═══════════════════════════════════════════════════════════════
  */
 'use strict';
 
 const axios = require('axios');
 
-const BASE    = 'https://alqanime.net';
-const JINA    = 'https://r.jina.ai';
+const BASE = 'https://alqanime.net';
+const JINA = 'https://r.jina.ai';
 
 // Catatan: jangan tambahkan User-Agent Chrome/Safari ke HEADERS Jina.
 // Jina (r.jina.ai) memblokir request dengan UA browser spesifik → 403.
-// Pakai X-Return-Format: markdown agar dapat teks markdown langsung tanpa JSON parsing.
+// Pakai X-Return-Format: markdown agar dapat teks markdown langsung.
 const HEADERS = {
     'Accept-Language': 'id-ID,id;q=0.9,en;q=0.8',
     'X-Return-Format': 'markdown',
 };
 
-async function fetchMarkdown(url) {
-    const res = await axios.get(`${JINA}/${url}`, {
-        headers: HEADERS,
-        timeout: 30000,
-    });
-    return typeof res.data === 'string' ? res.data : (res.data?.data?.content ?? '');
+// Fetch via r.jina.ai dengan retry otomatis (handle EAI_AGAIN / DNS transien)
+async function fetchMarkdown(url, retries = 3, delayMs = 2000) {
+    let lastErr;
+    for (let attempt = 1; attempt <= retries; attempt++) {
+        try {
+            const res = await axios.get(`${JINA}/${url}`, {
+                headers: HEADERS,
+                timeout: 30000,
+            });
+            return typeof res.data === 'string' ? res.data : (res.data?.data?.content ?? '');
+        } catch (e) {
+            lastErr = e;
+            const isTransient = e.code === 'EAI_AGAIN' || e.code === 'ENOTFOUND' || e.code === 'ETIMEDOUT' || e.code === 'ECONNRESET';
+            if (isTransient && attempt < retries) {
+                console.warn(`[Alqanime] fetchMarkdown gagal (${e.code}), retry ${attempt}/${retries} dalam ${delayMs}ms...`);
+                await new Promise(r => setTimeout(r, delayMs));
+                delayMs *= 1.5; // backoff
+                continue;
+            }
+            throw e;
+        }
+    }
+    throw lastErr;
 }
 
 function parseAnimeCards(md) {
@@ -89,9 +91,7 @@ function parseDownloadLinks(md) {
         const epLabel = epMatch[1].trim();
         const links   = {};
 
-        // Parse per-resolution links: 360p[Host](url)[Host2](url2)
-        const resRegex = /(360p|480p|720p|1080p)/gi;
-        const lines    = block.split('\n').filter(l => /360p|480p|720p|1080p/i.test(l));
+        const lines = block.split('\n').filter(l => /360p|480p|720p|1080p/i.test(l));
 
         for (const line of lines) {
             const resM = line.match(/^(360p|480p|720p|1080p)/i);
@@ -106,7 +106,6 @@ function parseDownloadLinks(md) {
             if (hosts.length) links[res] = hosts;
         }
 
-        // Batch link (episode sebelumnya)
         const batchM = block.match(/360p.*1080p\[([^\]]+)\]\((https?:\/\/[^)]+)\)/);
         if (batchM) links['batch'] = [{ host: batchM[1], url: batchM[2] }];
 
@@ -115,9 +114,7 @@ function parseDownloadLinks(md) {
         }
     }
 
-    // ── Fallback: Movie / OVA — tidak ada header ### Episode ─────────────────
-    // Halaman movie di alqanime.net tidak pakai "### Episode", sehingga loop
-    // di atas tidak menghasilkan apa-apa. Coba parse seluruh dlContent langsung.
+    // Fallback: Movie / OVA
     if (!episodes.length) {
         const links = {};
         const lines = dlContent.split('\n').filter(l => /360p|480p|720p|1080p/i.test(l));
@@ -145,9 +142,7 @@ function parseDetail(md) {
     const titleM  = md.match(/^# ([^\n]+)/m);
     const title   = titleM ? titleM[1].replace(/ - Alqanime$/, '').trim() : '';
 
-    // Poster 200x300 (bukan logo header)
     const thumbM  = md.match(/!\[Image \d+[^\]]*\]\((https:\/\/alqanime\.net\/wp-content\/uploads\/[^)]*-200x300[^)]*)\)/);
-    // Fallback ke gambar besar pertama jika tidak ada 200x300
     const thumbFB = md.match(/!\[Image \d+[^\]]*\]\((https:\/\/alqanime\.net\/wp-content\/uploads\/(?!.*Header)[^)]+\.(?:jpg|png|webp))\)/);
     const thumbnail = thumbM ? thumbM[1] : (thumbFB ? thumbFB[1] : '');
 
@@ -170,25 +165,21 @@ function parseDetail(md) {
     const scoreM = md.match(/Score\s+([\d.]+)/);
     if (scoreM && !info.Score) info.Score = scoreM[1];
 
-    // Judul alternatif (English / Kanji) — baris kosong sebelum **Status:**
     const altM = md.match(/\n\n([^\n#*!\[<\\]{3,})\n\n\*\*Status:/);
     if (altM) info.judulAlt = altM[1].trim();
 
-    // Ambil sinopsis — hanya paragraf pertama sebelum baris notice/emoji
     const synM    = md.match(/## Sinopsis[^\n]*\n\n([^#]+)/);
     let sinopsis = '';
     if (synM) {
         const raw = synM[1].trim();
-        // Potong di baris yang ada icon notice (✴, !, gambar)
         const cutIdx = raw.search(/\n\s*(?:✴|!|#+\s)/);
         sinopsis = (cutIdx > 0 ? raw.slice(0, cutIdx) : raw)
-            .replace(/\r\n/g, '\n')           // normalkan CRLF
-            .replace(/\n{3,}/g, '\n\n')        // 3+ newline → 2 (satu baris kosong)
-            .replace(/([^\n])\n([^\n])/g, '$1 $2') // newline tunggal dalam paragraf → spasi
+            .replace(/\r\n/g, '\n')
+            .replace(/\n{3,}/g, '\n\n')
+            .replace(/([^\n])\n([^\n])/g, '$1 $2')
             .trim();
     }
 
-    // Ambil genre hanya dari konten post, sebelum sidebar genre list
     const postContent = md.split(/### Sukai Kami|### Rekomendasi|### Komentar/)[0];
     const genres = [];
     const genRe  = /\[([^\]]+)\]\(https:\/\/alqanime\.net\/tag\/[^)]+\)/g;
@@ -225,7 +216,7 @@ async function getRilisanTerbaru() {
     return parseAnimeCards(sectionM[1]);
 }
 
-// Fetch homepage 1x, parse semua section sekaligus — tidak ada request ganda
+// Fetch homepage 1x, parse semua section sekaligus
 async function getHomepageData() {
     const md = await fetchMarkdown(BASE);
 
@@ -250,8 +241,6 @@ async function handleAlq({ hisoka, m, query, tolak, logCommand, logError, path, 
                 const input = (query || '').trim();
                 const pfx   = m.prefix || '.';
 
-                /* .alqanime (dengan atau tanpa query) → selalu tampilkan rilisan terbaru realtime */
-                /* .alq [judul] → untuk pencarian spesifik */
                 const isAlqanimeCmd = (m.command || '').toLowerCase() === 'alqanime';
 
                 if (!input || isAlqanimeCmd) {
@@ -307,7 +296,6 @@ async function handleAlq({ hisoka, m, query, tolak, logCommand, logError, path, 
                 text += `━━━━━━━━━━━━━━━━━━━\n🌐 ${results[0].url}`;
 
                 if (detail.thumbnail) {
-                        /* Download gambar — butuh Referer + UA untuk bypass hotlink alqanime.net */
                         const thumbBuf = await axios.get(detail.thumbnail, {
                                 headers: {
                                         ...HEADERS,
@@ -387,9 +375,7 @@ async function handleAlqupdate({ hisoka, m, tolak, logCommand, logError, _requir
                 const showItems = items.slice(0, 15);
                 let text = `🎌 *Rilisan Terbaru — Alqanime*\n`;
                 text += `━━━━━━━━━━━━━━━━━━━\n`;
-                showItems.forEach((a, i) => {
-                        text += `${i + 1}. ${a.title}\n`;
-                });
+                showItems.forEach((a, i) => { text += `${i + 1}. ${a.title}\n`; });
                 text += `━━━━━━━━━━━━━━━━━━━\n`;
                 text += `🌐 alqanime.net\n\n`;
                 text += `📌 *Reply pesan ini:*\n`;
