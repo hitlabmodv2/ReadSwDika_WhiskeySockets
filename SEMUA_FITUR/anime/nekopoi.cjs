@@ -173,9 +173,15 @@ function parseDetailPost(md, url) {
         break;
     }
 
-    // Judul utama dari H1
-    const titleM = md.match(/^# ([^\n]+)/m);
-    const title  = titleM ? titleM[1].replace(/[\d.]+\s+kali\s*$/, '').trim() : '';
+    // Judul utama dari H1 (nekopoi lama) ATAU metadata Jina "Title: ..." (nekopoi baru)
+    const titleM     = md.match(/^# ([^\n]+)/m);
+    const titleMetaM = md.match(/^Title:\s*(.+)/m);
+    let title = '';
+    if (titleM) {
+        title = titleM[1].replace(/[\d.]+\s+kali\s*$/, '').trim();
+    } else if (titleMetaM) {
+        title = titleMetaM[1].trim();
+    }
 
     // View count — posisi H1: "TITLE 1234 kali"
     // atau sebelum tanggal: "1234 kali Senin, 20 Juli 2026"
