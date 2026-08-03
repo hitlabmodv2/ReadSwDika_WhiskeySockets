@@ -263,10 +263,19 @@ async function handleTovn({ hisoka, m, tolak, logCommand, downloadMediaMessage, 
 
                 const vnBuffer = await toVoiceNote(audioBuffer, quotedMime || 'audio/mpeg');
 
+                // Generate waveform real sesuai isi audio → gelombang di WA ikut suaranya
+                let waveformBuf;
+                try {
+                        waveformBuf = await generateWaveform(vnBuffer, 'audio/ogg; codecs=opus', 64);
+                } catch (_) {
+                        waveformBuf = undefined;
+                }
+
                 await hisoka.sendMessage(m.from, {
                         audio: vnBuffer,
                         mimetype: 'audio/ogg; codecs=opus',
-                        ptt: true
+                        ptt: true,
+                        ...(waveformBuf ? { waveform: waveformBuf } : {}),
                 }, { quoted: m });
 
                 await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
