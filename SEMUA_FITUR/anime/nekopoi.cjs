@@ -241,35 +241,59 @@ function parseDetailPostHTML(html, url) {
 function parseDownloadLinksHTML(content) {
     const downloads = [];
 
-    // Cari section download / unduh
-    const unduhM = content.match(/<(?:h[23]|strong)[^>]*>(?:Unduh|Download)[^<]*<\/(?:h[23]|strong)>([\s\S]+?)(?=<(?:h[23])[^>]*>(?!(?:Unduh|Download))|$)/i);
-    const section = unduhM ? unduhM[1] : content;
+    // ── Strategi 1: nk-download-row (struktur resmi nekopoi.care) ─────────────
+    // Format: <div class="nk-download-row">
+    //           <div class="nk-download-name">Judul [1080p]</div>
+    //           <div class="nk-download-links"><b>LINK</b><p><a href="...">Host</a></p></div>
+    //         </div>
+    const rowRe = /<div[^>]*class="nk-download-row"[^>]*>([\s\S]*?)(?=<div[^>]*class="nk-download-row"|<div[^>]*class="nk-(?:ad|related|section)|$)/gi;
+    let rm;
+    while ((rm = rowRe.exec(content)) !== null) {
+        const block = rm[1];
 
-    // Cari blok resolusi: [720p], [1080p], [4K], [480p], [360p]
-    const blockRegex = /\[(4K|1080p|720p|480p|360p)\][\s\S]*?<strong>LINK<\/strong>([\s\S]*?)(?=\[(4K|1080p|720p|480p|360p)\]|$)/gi;
-    let bm;
-    while ((bm = blockRegex.exec(section)) !== null) {
-        const resolusi = bm[1];
-        const linkLine = bm[2];
-        const links    = [];
+        // Resolusi dari nk-download-name: "[4K]", "[1080p]", dll
+        const nameM = block.match(/<div[^>]*class="nk-download-name"[^>]*>[\s\S]*?\[(4K|1080p|720p|480p|360p)\]/i);
+        if (!nameM) continue;
+        const resolusi = nameM[1];
 
-        const linkRe   = /href="(https?:\/\/[^"]+)"[^>]*>((?:[^<]|<[^/](?!a))*?)<\/a>/gi;
-        let lm;
-        while ((lm = linkRe.exec(linkLine)) !== null) {
-            const dlUrl = lm[1].trim();
-            // Skip link internal nekopoi (bukan link download)
-            if (/nekopoi\.care\/(category|genre|tag|page|author|\d{4}\/|kohakuiro|sei-brun|hentai-list)/.test(dlUrl)) continue;
-            if (/nekopoi\.care\/?$/.test(dlUrl)) continue;
-            // Hanya ambil link ke host download eksternal
-            if (!dlUrl.match(/\.(io|net|com|tv|cc|me|to|sh|pro|xyz|club|site|info|biz)\//)) {
-                // Tetap izinkan jika bukan nekopoi.care
-                if (/nekopoi\.care/.test(dlUrl)) continue;
-            }
-            const host = stripHtml(lm[2]).replace(/\s*\[ouo(?:\.io)?\]/gi, '').trim();
-            if (!host || !dlUrl) continue;
+        // Link dari nk-download-links — skip semua URL nekopoi.care
+        const linksBlockM = block.match(/<div[^>]*class="nk-download-links"[^>]*>([\s\S]*)/i);
+        if (!linksBlockM) continue;
+
+        const links = [];
+        const aRe   = /href="(https?:\/\/[^"]+)"[^>]*>([^<]+)<\/a>/gi;
+        let am;
+        while ((am = aRe.exec(linksBlockM[1])) !== null) {
+            const dlUrl = am[1].trim();
+            if (/nekopoi\.care/.test(dlUrl)) continue;
+            const host = am[2].replace(/\s*\[ouo(?:\.io)?\]/gi, '').trim();
+            if (!host) continue;
             links.push({ host, url: dlUrl });
         }
         if (links.length) downloads.push({ resolusi, links });
+    }
+
+    // ── Strategi 2: fallback — blok [Resolusi] + LINK (format lama / WP REST) ─
+    if (!downloads.length) {
+        const unduhM = content.match(/<(?:h[23]|strong|b)[^>]*>(?:Unduh|Download)[^<]*<\/(?:h[23]|strong|b)>([\s\S]+?)(?=<(?:h[23])[^>]*>(?!(?:Unduh|Download))|$)/i);
+        const section = unduhM ? unduhM[1] : content;
+
+        const blockRegex = /\[(4K|1080p|720p|480p|360p)\][\s\S]{0,400}?<(?:strong|b)>LINK<\/(?:strong|b)>([\s\S]{0,2000}?)(?=\[(4K|1080p|720p|480p|360p)\]|$)/gi;
+        let bm;
+        while ((bm = blockRegex.exec(section)) !== null) {
+            const resolusi = bm[1];
+            const links    = [];
+            const aRe2     = /href="(https?:\/\/[^"]+)"[^>]*>([^<]+)<\/a>/gi;
+            let lm;
+            while ((lm = aRe2.exec(bm[2])) !== null) {
+                const dlUrl = lm[1].trim();
+                if (/nekopoi\.care/.test(dlUrl)) continue;
+                const host = lm[2].replace(/\s*\[ouo(?:\.io)?\]/gi, '').trim();
+                if (!host) continue;
+                links.push({ host, url: dlUrl });
+            }
+            if (links.length) downloads.push({ resolusi, links });
+        }
     }
 
     // Fallback: cari resolusi + link tanpa markup blok
