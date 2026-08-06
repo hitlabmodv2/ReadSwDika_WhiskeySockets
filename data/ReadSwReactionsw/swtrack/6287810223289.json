@@ -1,0 +1,44 @@
+{
+  "ACD7E58C8DECD10A1D533CCFF420A03C": {
+    "id": "ACD7E58C8DECD10A1D533CCFF420A03C",
+    "sender": "6287810223289@s.whatsapp.net",
+    "name": "Tenka",
+    "type": "conversation",
+    "arrivedAt": "2026-06-08T07:38:55.539Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🇦🇨",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6287810223289",
+    "resolvedPn": "6287810223289@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6287810223289@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACD7E58C8DECD10A1D533CCFF420A03C",
+      "participant": "270329989578944@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-08T07:39:06.839Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287810223289@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACD7E58C8DECD10A1D533CCFF420A03C",
+        "participant": "270329989578944@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287810223289@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACD7E58C8DECD10A1D533CCFF420A03C",
+        "participant": "6287810223289@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-08T07:39:06.839Z"
+  }
+}

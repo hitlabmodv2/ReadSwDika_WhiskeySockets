@@ -1,0 +1,44 @@
+{
+  "AC0D775B472E0277991A9B887A47AF23": {
+    "id": "AC0D775B472E0277991A9B887A47AF23",
+    "sender": "6289510567905@s.whatsapp.net",
+    "name": "けんじしゆ",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-18T12:51:36.058Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🥤",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6289510567905",
+    "resolvedPn": "6289510567905@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6289510567905@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC0D775B472E0277991A9B887A47AF23",
+      "participant": "122694397853756@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-18T12:51:57.393Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289510567905@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC0D775B472E0277991A9B887A47AF23",
+        "participant": "122694397853756@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289510567905@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC0D775B472E0277991A9B887A47AF23",
+        "participant": "6289510567905@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-18T12:51:57.392Z"
+  }
+}

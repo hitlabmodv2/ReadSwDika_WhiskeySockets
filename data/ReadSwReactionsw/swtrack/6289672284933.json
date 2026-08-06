@@ -1,0 +1,44 @@
+{
+  "ACBD3B66189E6C83FB56F6B6423DD12C": {
+    "id": "ACBD3B66189E6C83FB56F6B6423DD12C",
+    "sender": "6289672284933@s.whatsapp.net",
+    "name": "Durandal",
+    "type": "videoMessage",
+    "arrivedAt": "2026-07-20T03:55:04.019Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐟",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6289672284933",
+    "resolvedPn": "6289672284933@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6289672284933@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACBD3B66189E6C83FB56F6B6423DD12C",
+      "participant": "195584422055991@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-20T03:55:10.345Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289672284933@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACBD3B66189E6C83FB56F6B6423DD12C",
+        "participant": "195584422055991@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289672284933@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACBD3B66189E6C83FB56F6B6423DD12C",
+        "participant": "6289672284933@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-20T03:55:10.345Z"
+  }
+}

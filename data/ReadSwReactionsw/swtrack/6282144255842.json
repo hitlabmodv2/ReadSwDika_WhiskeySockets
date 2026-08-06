@@ -1,0 +1,67 @@
+{
+  "A55B2B4A1192E1A1AA4353B331911ED1": {
+    "id": "A55B2B4A1192E1A1AA4353B331911ED1",
+    "sender": "6282144255842@s.whatsapp.net",
+    "name": "orcaizn (sazzn)",
+    "type": "videoMessage",
+    "arrivedAt": "2026-07-16T03:39:58.286Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐬",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6282144255842",
+    "resolvedPn": "6282144255842@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6282144255842@s.whatsapp.net",
+      "fromMe": false,
+      "id": "A55B2B4A1192E1A1AA4353B331911ED1",
+      "participant": "18799860387840@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-16T03:40:09.473Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282144255842@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A55B2B4A1192E1A1AA4353B331911ED1",
+        "participant": "18799860387840@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282144255842@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A55B2B4A1192E1A1AA4353B331911ED1",
+        "participant": "6282144255842@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-16T03:40:09.473Z"
+  },
+  "A5DC1109119B483BD54F38A8465CE161": {
+    "id": "A5DC1109119B483BD54F38A8465CE161",
+    "sender": "6282144255842@s.whatsapp.net",
+    "name": "orcaizn (sazzn)",
+    "type": "protocolMessage",
+    "arrivedAt": "2026-07-16T03:39:58.543Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "⏺️⏏️⏹️",
+    "source": "group",
+    "number": "6282144255842",
+    "messageKey": {
+      "remoteJid": "120363405980349907@g.us",
+      "fromMe": false,
+      "id": "A5DC1109119B483BD54F38A8465CE161",
+      "participant": "18799860387840@lid",
+      "participantAlt": "6282144255842@s.whatsapp.net",
+      "addressingMode": "lid"
+    },
+    "resolvedPn": "6282144255842@s.whatsapp.net",
+    "updatedAt": "2026-07-16T03:40:19.300Z",
+    "processedAt": "2026-07-16T03:40:19.300Z"
+  }
+}

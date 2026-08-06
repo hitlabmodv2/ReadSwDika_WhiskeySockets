@@ -1,0 +1,67 @@
+{
+  "AC2CA8B3A358A327274EA8C3F3C55F9E": {
+    "id": "AC2CA8B3A358A327274EA8C3F3C55F9E",
+    "sender": "6285925350985@s.whatsapp.net",
+    "name": "ok",
+    "type": "protocolMessage",
+    "arrivedAt": "2026-07-19T05:13:55.748Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐋",
+    "source": "group",
+    "number": "6285925350985",
+    "messageKey": {
+      "remoteJid": "120363427374078962@g.us",
+      "fromMe": false,
+      "id": "AC2CA8B3A358A327274EA8C3F3C55F9E",
+      "participant": "152454628958401@lid",
+      "participantAlt": "6285925350985@s.whatsapp.net",
+      "addressingMode": "lid"
+    },
+    "resolvedPn": "6285925350985@s.whatsapp.net",
+    "updatedAt": "2026-07-19T05:14:11.535Z",
+    "processedAt": "2026-07-19T05:14:11.535Z"
+  },
+  "AC1CC1FF6C2898363249B8EA40326321": {
+    "id": "AC1CC1FF6C2898363249B8EA40326321",
+    "sender": "6285925350985@s.whatsapp.net",
+    "name": "ok",
+    "type": "videoMessage",
+    "arrivedAt": "2026-07-19T05:13:55.936Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐟",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285925350985",
+    "resolvedPn": "6285925350985@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285925350985@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC1CC1FF6C2898363249B8EA40326321",
+      "participant": "152454628958401@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-19T05:14:15.873Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285925350985@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC1CC1FF6C2898363249B8EA40326321",
+        "participant": "152454628958401@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285925350985@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC1CC1FF6C2898363249B8EA40326321",
+        "participant": "6285925350985@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-19T05:14:15.860Z"
+  }
+}

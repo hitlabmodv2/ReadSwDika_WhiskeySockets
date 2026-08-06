@@ -1,0 +1,67 @@
+{
+  "ACE898EE7555D2758A54EFC7C928C6B6": {
+    "id": "ACE898EE7555D2758A54EFC7C928C6B6",
+    "sender": "6281549197829@s.whatsapp.net",
+    "name": ".",
+    "type": "protocolMessage",
+    "arrivedAt": "2026-07-04T06:05:46.344Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "❤️",
+    "source": "group",
+    "number": "6281549197829",
+    "messageKey": {
+      "remoteJid": "120363427374078962@g.us",
+      "fromMe": false,
+      "id": "ACE898EE7555D2758A54EFC7C928C6B6",
+      "participant": "44960153878593@lid",
+      "participantAlt": "6281549197829@s.whatsapp.net",
+      "addressingMode": "lid"
+    },
+    "resolvedPn": "6281549197829@s.whatsapp.net",
+    "updatedAt": "2026-07-04T06:06:02.952Z",
+    "processedAt": "2026-07-04T06:06:02.952Z"
+  },
+  "ACED8785738EA7546EF50454A7E024B4": {
+    "id": "ACED8785738EA7546EF50454A7E024B4",
+    "sender": "6281549197829@s.whatsapp.net",
+    "name": ".",
+    "type": "videoMessage",
+    "arrivedAt": "2026-07-04T06:05:46.346Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "⏺️⏏️⏹️",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6281549197829",
+    "resolvedPn": "6281549197829@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6281549197829@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACED8785738EA7546EF50454A7E024B4",
+      "participant": "44960153878593@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-04T06:05:49.199Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281549197829@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACED8785738EA7546EF50454A7E024B4",
+        "participant": "44960153878593@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281549197829@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACED8785738EA7546EF50454A7E024B4",
+        "participant": "6281549197829@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-04T06:05:49.199Z"
+  }
+}

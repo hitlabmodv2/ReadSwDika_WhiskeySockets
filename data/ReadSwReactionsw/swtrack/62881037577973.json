@@ -1,0 +1,44 @@
+{
+  "ACB21D3996714148B6855F33BD46B1A0": {
+    "id": "ACB21D3996714148B6855F33BD46B1A0",
+    "sender": "62881037577973@s.whatsapp.net",
+    "name": "ghuroba",
+    "type": "imageMessage",
+    "arrivedAt": "2026-07-20T03:52:21.655Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "⏺️⏏️⏹️",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "62881037577973",
+    "resolvedPn": "62881037577973@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "62881037577973@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACB21D3996714148B6855F33BD46B1A0",
+      "participant": "34518920638487@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-20T03:52:31.674Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62881037577973@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACB21D3996714148B6855F33BD46B1A0",
+        "participant": "34518920638487@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62881037577973@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACB21D3996714148B6855F33BD46B1A0",
+        "participant": "62881037577973@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-20T03:52:31.674Z"
+  }
+}

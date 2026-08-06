@@ -1,0 +1,44 @@
+{
+  "ACB93E5C7E3467C4126B85E56A5BAAC4": {
+    "id": "ACB93E5C7E3467C4126B85E56A5BAAC4",
+    "sender": "6285693592697@s.whatsapp.net",
+    "name": "Nasi padang",
+    "type": "videoMessage",
+    "arrivedAt": "2026-07-01T05:24:15.505Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🎳",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285693592697",
+    "resolvedPn": "6285693592697@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285693592697@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACB93E5C7E3467C4126B85E56A5BAAC4",
+      "participant": "196331763200200@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-01T05:24:35.956Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285693592697@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACB93E5C7E3467C4126B85E56A5BAAC4",
+        "participant": "196331763200200@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285693592697@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACB93E5C7E3467C4126B85E56A5BAAC4",
+        "participant": "6285693592697@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-01T05:24:35.955Z"
+  }
+}

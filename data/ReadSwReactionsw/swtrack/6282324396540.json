@@ -1,0 +1,44 @@
+{
+  "AC31C9D4FE6539C572C6745DA02EA80A": {
+    "id": "AC31C9D4FE6539C572C6745DA02EA80A",
+    "sender": "6282324396540@s.whatsapp.net",
+    "name": "darkness `𝐞𝐯𝐞⁵⁵ᵛⁱᵖ",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-12T10:37:22.560Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "♦️",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6282324396540",
+    "resolvedPn": "6282324396540@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6282324396540@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC31C9D4FE6539C572C6745DA02EA80A",
+      "participant": "139750384115836@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-12T10:37:26.961Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282324396540@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC31C9D4FE6539C572C6745DA02EA80A",
+        "participant": "139750384115836@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282324396540@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC31C9D4FE6539C572C6745DA02EA80A",
+        "participant": "6282324396540@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-12T10:37:26.961Z"
+  }
+}
