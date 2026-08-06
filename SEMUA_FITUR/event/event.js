@@ -46,6 +46,7 @@ import { getRandomEmoji, getStatusEmojis, getMode } from '../../src/helper/emoji
 import { getTmpPath } from '../../src/helper/cleaner.js';
 import {
         SW_TRACK_USER_DIR,
+        SW_TRACK_DIR,
         updateSwStats,
         isSwUserTracked,
         loadSwUser,
@@ -60,7 +61,6 @@ import {
         getMediaTypeEmoji,
         getStoryCountToday,
         lookupSwMsgOwner,
-        SW_TRACK_USER_FILE,
 } from '../../src/helper/swtrack.js';
 
 // ── Dedup log "SW dihapus": revoke story bisa terkirim >1x (notify + append,
@@ -159,38 +159,46 @@ export default async function (m, hisoka) {
                                         if (isStatusRevoke && key?.id) {
                                                 try {
                                                         let _handled = false;
-                                                        // ── Fast path: LRU lookup (O(1), tanpa disk scan) ──
+                                                        // ── Fast path: LRU lookup (O(1)) — baca hanya file milik ownerNum ──
                                                         const _lruOwner = lookupSwMsgOwner(key.id, null);
-                                                        if (_lruOwner && fs.existsSync(SW_TRACK_USER_FILE)) {
+                                                        if (_lruOwner) {
                                                                 try {
-                                                                        const _all = JSON.parse(fs.readFileSync(SW_TRACK_USER_FILE, 'utf-8'));
                                                                         const _ownerNum = String(_lruOwner).replace(/[^0-9]/g, '');
-                                                                        if (_all[_ownerNum]?.[key.id]) {
-                                                                                _recentSwRevoke.set(key.id, Date.now());
-                                                                                _handled = true;
-                                                                                if (!_all[_ownerNum][key.id].deleted) {
-                                                                                        _all[_ownerNum][key.id] = { ..._all[_ownerNum][key.id], deleted: true, deletedAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
-                                                                                        const _tmpFp = SW_TRACK_USER_FILE + '.tmp';
-                                                                                        fs.writeFileSync(_tmpFp, JSON.stringify(_all, null, 2), 'utf-8');
-                                                                                        fs.renameSync(_tmpFp, SW_TRACK_USER_FILE);
+                                                                        const _ownerFile = path.join(SW_TRACK_DIR, _ownerNum + '.json');
+                                                                        if (fs.existsSync(_ownerFile)) {
+                                                                                const _userData = JSON.parse(fs.readFileSync(_ownerFile, 'utf-8'));
+                                                                                if (_userData[key.id]) {
+                                                                                        _recentSwRevoke.set(key.id, Date.now());
+                                                                                        _handled = true;
+                                                                                        if (!_userData[key.id].deleted) {
+                                                                                                _userData[key.id] = { ..._userData[key.id], deleted: true, deletedAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+                                                                                                const _tmpFp = _ownerFile + '.tmp';
+                                                                                                fs.writeFileSync(_tmpFp, JSON.stringify(_userData, null, 2), 'utf-8');
+                                                                                                fs.renameSync(_tmpFp, _ownerFile);
+                                                                                        }
                                                                                 }
                                                                         }
                                                                 } catch {}
                                                         }
-                                                        // ── Slow path: scan semua key di single file ──
-                                                        if (!_handled && fs.existsSync(SW_TRACK_USER_FILE)) {
+                                                        // ── Slow path: scan semua file per-nomor di SW_TRACK_DIR ──
+                                                        if (!_handled && fs.existsSync(SW_TRACK_DIR)) {
                                                                 try {
-                                                                        const _all = JSON.parse(fs.readFileSync(SW_TRACK_USER_FILE, 'utf-8'));
-                                                                        for (const _ownerNum of Object.keys(_all)) {
-                                                                                if (_all[_ownerNum]?.[key.id]) {
-                                                                                        _recentSwRevoke.set(key.id, Date.now());
-                                                                                        if (_all[_ownerNum][key.id].deleted) break;
-                                                                                        _all[_ownerNum][key.id] = { ..._all[_ownerNum][key.id], deleted: true, deletedAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
-                                                                                        const _tmpFp = SW_TRACK_USER_FILE + '.tmp';
-                                                                                        fs.writeFileSync(_tmpFp, JSON.stringify(_all, null, 2), 'utf-8');
-                                                                                        fs.renameSync(_tmpFp, SW_TRACK_USER_FILE);
-                                                                                        break;
-                                                                                }
+                                                                        const _swFiles = fs.readdirSync(SW_TRACK_DIR).filter(f => f.endsWith('.json') && f !== 'users.json');
+                                                                        for (const _f of _swFiles) {
+                                                                                const _fp = path.join(SW_TRACK_DIR, _f);
+                                                                                try {
+                                                                                        const _userData = JSON.parse(fs.readFileSync(_fp, 'utf-8'));
+                                                                                        if (_userData[key.id]) {
+                                                                                                _recentSwRevoke.set(key.id, Date.now());
+                                                                                                if (!_userData[key.id].deleted) {
+                                                                                                        _userData[key.id] = { ..._userData[key.id], deleted: true, deletedAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+                                                                                                        const _tmpFp = _fp + '.tmp';
+                                                                                                        fs.writeFileSync(_tmpFp, JSON.stringify(_userData, null, 2), 'utf-8');
+                                                                                                        fs.renameSync(_tmpFp, _fp);
+                                                                                                }
+                                                                                                break;
+                                                                                        }
+                                                                                } catch {}
                                                                         }
                                                                 } catch {}
                                                         }

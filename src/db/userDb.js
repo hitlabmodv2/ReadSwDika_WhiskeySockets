@@ -36,7 +36,20 @@ import path from 'path';
 import fs from 'fs';
 
 const DATA_DIR  = path.join(process.cwd(), 'data');
-const USERS_DIR = path.join(DATA_DIR, 'users');
+const USERS_DIR = path.join(DATA_DIR, 'ReadSwReactionsw', 'users');
+
+// ── Migrasi otomatis: data/users/ → data/ReadSwReactionsw/users/ ──────────────
+// Jalan sekali saat startup, idempoten (tidak dijalankan ulang jika dest sudah ada)
+;(function _migrateUsersDir() {
+    try {
+        const oldDir = path.join(DATA_DIR, 'users');
+        if (!fs.existsSync(oldDir)) return;
+        if (fs.existsSync(USERS_DIR)) return; // sudah dimigrasikan
+        const parent = path.dirname(USERS_DIR);
+        if (!fs.existsSync(parent)) fs.mkdirSync(parent, { recursive: true });
+        fs.renameSync(oldDir, USERS_DIR);
+    } catch {}
+})();
 
 if (!fs.existsSync(USERS_DIR)) fs.mkdirSync(USERS_DIR, { recursive: true });
 

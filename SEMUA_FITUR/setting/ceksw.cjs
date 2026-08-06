@@ -34,10 +34,10 @@ async function handleCeksw({ hisoka, m, query, tolak, logCommand, fs, path, load
                 const _botNum      = jadibotNum || hisoka.user?.id?.split(':')[0] || '';
                 const swStatsPath  = isJadibot
                         ? path.join(process.cwd(), 'data_jadibot', jadibotNum, 'ceksw', 'swstats.json')
-                        : path.join(process.cwd(), 'data', 'ceksw', 'swstats.json');
+                        : path.join(process.cwd(), 'data', 'ReadSwReactionsw', 'ceksw', 'swstats.json');
                 const swTrackDir   = isJadibot
                         ? path.join(process.cwd(), 'data_jadibot', jadibotNum, 'swtrack')
-                        : path.join(process.cwd(), 'data', 'swtrack');
+                        : path.join(process.cwd(), 'data', 'ReadSwReactionsw', 'swtrack');
 
                 const qLower = query ? query.trim().toLowerCase() : '';
 

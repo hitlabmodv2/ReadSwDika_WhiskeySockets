@@ -1080,7 +1080,7 @@ async function main() {
                         const swStartupTime = Date.now(); // Waktu bot connect — untuk filter entry lama vs baru
                         setTimeout(async () => {
                                 try {
-                                        const swTrackDir = path.join(process.cwd(), 'data', 'swtrack');
+                                        const swTrackDir = path.join(process.cwd(), 'data', 'ReadSwReactionsw', 'swtrack');
                                         if (!fs.existsSync(swTrackDir)) return;
                                         const swUserFiles = fs.readdirSync(swTrackDir).filter(f => f.endsWith('.json') && f !== 'users.json');
                                         if (!swUserFiles.length) return;

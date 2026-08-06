@@ -110,8 +110,30 @@ export function initJadibotCekswConfig(jadibotNum) {
         }
 }
 
-// ─── SwStats: data/ceksw/swstats.json ────────────────────────────────────────
-export const SW_STATS_PATH = path.join(process.cwd(), 'data', 'ceksw', 'swstats.json');
+// ─── Base folder semua data Read/SW/React → data/ReadSwReactionsw/ ───────────
+export const SW_BASE_DIR   = path.join(process.cwd(), 'data', 'ReadSwReactionsw');
+
+// ─── SwStats: data/ReadSwReactionsw/ceksw/swstats.json ───────────────────────
+export const SW_STATS_PATH = path.join(SW_BASE_DIR, 'ceksw', 'swstats.json');
+
+// ── Migrasi folder lama → data/ReadSwReactionsw/ (jalan sekali, idempoten) ──
+;(function _migrateToBaseDir() {
+        // Pasangan: [src lama, dest baru]
+        const _pairs = [
+                [path.join(process.cwd(), 'data', 'ceksw'),    path.join(SW_BASE_DIR, 'ceksw')],
+                [path.join(process.cwd(), 'data', 'swtrack'),  path.join(SW_BASE_DIR, 'swtrack')],
+                [path.join(process.cwd(), 'data', 'users'),    path.join(SW_BASE_DIR, 'users')],
+        ];
+        for (const [src, dest] of _pairs) {
+                try {
+                        if (!fs.existsSync(src)) continue;
+                        if (fs.existsSync(dest)) continue; // sudah dimigrasikan
+                        const parent = path.dirname(dest);
+                        if (!fs.existsSync(parent)) fs.mkdirSync(parent, { recursive: true });
+                        fs.renameSync(src, dest);
+                } catch {}
+        }
+})();
 
 const SW_TTL = 24 * 60 * 60 * 1000;
 
@@ -255,12 +277,12 @@ export function pruneSwStats() {
         pruneSwStatsAt(SW_STATS_PATH, 'Bot Utama');
 }
 
-// ─── SwTrack: per-user file tracking di data/swtrack/<nomor>.json ────────────
+// ─── SwTrack: per-user file tracking di data/ReadSwReactionsw/swtrack/<nomor>.json
 // Format per file: { "<msgId>": entry, ... }
 // Satu file per nomor kontak — baca/tulis cepat, tidak ada race condition antar user
-export const SW_TRACK_USER_DIR  = path.join(process.cwd(), 'data', 'swtrack', 'users'); // legacy compat
-export const SW_TRACK_DIR       = path.join(process.cwd(), 'data', 'swtrack');           // dir per-user files
-export const SW_TRACK_USER_FILE = path.join(process.cwd(), 'data', 'swtrack', 'users.json'); // legacy → migrated
+export const SW_TRACK_USER_DIR  = path.join(SW_BASE_DIR, 'swtrack', 'users'); // legacy compat
+export const SW_TRACK_DIR       = path.join(SW_BASE_DIR, 'swtrack');           // dir per-user files
+export const SW_TRACK_USER_FILE = path.join(SW_BASE_DIR, 'swtrack', 'users.json'); // legacy → migrated
 export const SW_ENTRY_TTL_MS = 26 * 60 * 60 * 1000; // 26 jam
 
 // ── Migrasi 1: gabungkan folder users/<num>.json → single users.json (legacy) ──
