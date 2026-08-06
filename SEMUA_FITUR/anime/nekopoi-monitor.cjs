@@ -210,11 +210,11 @@ async function cariKontenBaru() {
         try {
             const detail = await getDetailNekopoi(gagal.url);
             baru.push({
+                ...detail,
                 id      : gagal.id,
                 url     : gagal.url,
                 title   : detail.title || gagal.title,
                 kategori: detail.kategori || gagal.kategori || 'hentai',
-                ...detail,
             });
             console.log(`[NekopoinNotif] 🔄 Retry berhasil: "${gagal.title}"`);
         } catch (e) {
@@ -231,11 +231,11 @@ async function cariKontenBaru() {
         try {
             const detail = await getDetailNekopoi(post.url);
             baru.push({
+                ...detail,
                 id,
                 url     : post.url,
                 title   : detail.title || post.title,
                 kategori: detail.kategori || post.kategori || 'hentai',
-                ...detail,
             });
         } catch (e) {
             console.warn(`[NekopoinNotif] ❌ Gagal fetch detail "${post.title}":`, e?.message);
@@ -269,7 +269,7 @@ async function simulasi(slug) {
     const id     = buatId(post.url);
     const detail = await getDetailNekopoi(post.url);
 
-    const item      = { id, url: post.url, title: detail.title || post.title, kategori: detail.kategori || katSlug, ...detail };
+    const item      = { ...detail, id, url: post.url, title: detail.title || post.title, kategori: detail.kategori || katSlug };
     const caption   = buatCaption(item);
     const urlGambar = item.thumbnail || null;
     return { caption, urlGambar, item };

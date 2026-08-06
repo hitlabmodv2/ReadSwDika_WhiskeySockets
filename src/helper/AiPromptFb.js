@@ -73,18 +73,51 @@ export function parseFbMetaHtml(html = '') {
     const title     = decodeHtml(ogTitle).trim();
     const desc      = decodeHtml(ogDesc).trim();
 
-    // Coba ekstrak nama page/user dari title
-    // Contoh: "Facebook Video: John Doe" atau "John Doe | Facebook" atau "Watch John Doe's video"
-    const pageTitle = title
-        .replace(/\s*\|\s*facebook/gi, '')
-        .replace(/^facebook video[:.]?\s*/gi, '')
-        .replace(/^watch\s+/gi, '')
-        .replace(/'s video$/gi, '')
-        .trim();
+    // ── Parse engagement stats dari og:title ─────────────────────────────────
+    // Format FB: "90 rb tayangan · 7 rb tanggapan | [konten] | [username]"
+    // Bahasa Inggris: "90K views · 7K reactions | [content] | [username]"
+    let views     = '';
+    let likes     = '';
+    let pageTitle = '';
 
-    // Views di FB kadang ada di description: "5.2K views"
-    const viewsRaw = desc.match(/([\d.,]+[KkMm]?)\s*(?:views|tayangan|ditonton)/i)?.[1] || '';
-    const views    = viewsRaw.toUpperCase();
+    // Normalise spasi di angka: "90 rb" → "90rb"
+    const normCount = (s) => s.replace(/(\d)\s+(rb|jt|ribu|juta)/gi, '$1$2').trim();
+
+    const titleParts = title.split(/\s*\|\s*/);
+    const statsPart  = titleParts[0] || '';
+
+    // Pattern views: "90 rb tayangan", "90K views", "1,2M ditonton"
+    const viewsM = statsPart.match(/([\d.,]+\s*(?:rb|jt|ribu|juta|K|M)?)\s+(?:tayangan|views|ditonton)/i);
+    // Pattern likes/reactions: "7 rb tanggapan", "7K reactions", "5 rb suka", "7K likes"
+    const likeM  = statsPart.match(/([\d.,]+\s*(?:rb|jt|ribu|juta|K|M)?)\s+(?:tanggapan|reaksi|reaction|suka|like)/i);
+
+    if (viewsM) views = normCount(viewsM[1]);
+    if (likeM)  likes = normCount(likeM[1]);
+
+    const hasStats = !!(viewsM || likeM);
+
+    if (hasStats && titleParts.length >= 2) {
+        // username = bagian terakhir setelah | terakhir
+        pageTitle = titleParts[titleParts.length - 1].trim();
+    } else {
+        // Fallback: ambil nama dari title dengan strip pattern lama
+        pageTitle = title
+            .replace(/\s*\|\s*facebook/gi, '')
+            .replace(/^facebook video[:.]?\s*/gi, '')
+            .replace(/^watch\s+/gi, '')
+            .replace(/'s video$/gi, '')
+            .trim();
+    }
+
+    // Buang pageTitle yang cuma ID angka FB (mis. "17093569669950008" atau "Video 1709...")
+    const isIdTitle = /^\d+$/.test(pageTitle) || /^(video|reel|story)\s+\d{5,}$/i.test(pageTitle);
+    if (isIdTitle) pageTitle = '';
+
+    // Views fallback: coba dari description kalau og:title tidak ada stats
+    if (!views) {
+        const viewsRaw = desc.match(/([\d.,]+[KkMm]?)\s*(?:views|tayangan|ditonton)/i)?.[1] || '';
+        views = viewsRaw.toUpperCase();
+    }
 
     // Tipe media: video, reel, story
     const mediaType = ogType.includes('video') ? 'video'
@@ -95,7 +128,7 @@ export function parseFbMetaHtml(html = '') {
     // Hashtags dari description
     const hashtags = (desc.match(/#\w+/g) || []).slice(0, 5);
 
-    return { pageTitle, description: desc, views, mediaType, hashtags, hasVideo: !!ogVideo };
+    return { pageTitle, description: desc, views, likes, mediaType, hashtags, hasVideo: !!ogVideo };
 }
 
 /**
@@ -130,7 +163,8 @@ Aturan WAJIB:
  * @param {object} d
  * @param {string} d.pageTitle     - Nama page/user FB
  * @param {string} d.description   - Deskripsi/caption asli dari FB
- * @param {string} d.views         - Views formatted ("5.2K")
+ * @param {string} d.views         - Views formatted ("90rb")
+ * @param {string} d.likes         - Like/reaction count realtime ("7rb")
  * @param {string} d.quality       - Kualitas video ("HD" | "SD")
  * @param {string[]} d.hashtags    - Array hashtag ["#viral", "#lucu"]
  * @param {string} d.mediaType     - "video" | "reel" | "story"
@@ -140,6 +174,7 @@ export function buildFbCaptionPrompt({
     pageTitle = '',
     description = '',
     views = '',
+    likes = '',
     quality = '',
     hashtags = [],
     mediaType = 'video',
@@ -150,10 +185,16 @@ export function buildFbCaptionPrompt({
     const emoji   = isReel ? '🎬' : isStory ? '📖' : '▶️';
     const typeLabel = isReel ? 'Reel Facebook' : isStory ? 'Story Facebook' : 'Video Facebook';
 
+    // Build stats string untuk disertakan di data konten
+    const statsArr = [];
+    if (views) statsArr.push(`${views} tayangan`);
+    if (likes) statsArr.push(`${likes} like`);
+    const statsLine = statsArr.length ? statsArr.join(' · ') : '';
+
     const parts = [];
-    if (pageTitle)   parts.push(`Sumber: ${pageTitle}`);
-    if (views)       parts.push(`Views: ${views}`);
-    if (description) parts.push(`Deskripsi asli: "${description.substring(0, 300)}"`);
+    if (pageTitle)   parts.push(`Nama page/user: ${pageTitle}`);
+    if (statsLine)   parts.push(`Engagement: ${statsLine}`);
+    if (description) parts.push(`Caption asli: "${description.substring(0, 300)}"`);
     if (hashtags.length) parts.push(`Hashtag: ${hashtags.join(' ')}`);
 
     const metaBlock  = parts.map(p => `- ${p}`).join('\n');
@@ -167,24 +208,44 @@ Tugasmu: buat caption WhatsApp untuk ${typeLabel} yang baru diunduh.
 DATA KONTEN:
 ${metaBlock}${visualBlock}
 
-FORMAT CAPTION (ikuti persis):
-Baris 1  : ${emoji} *[Nama Page/User dalam bold]* — sertakan nama sumber jika ada
-Baris 2-3: Deskripsi isi konten 1-2 kalimat — *WAJIB berdasarkan Analisis Visual*, bukan mengarang
-           Boleh pakai _italic_ untuk kata kunci menarik, dan \`monospace\` untuk istilah/nama spesifik
-Baris 4  : (opsional) Komentar santai/reaksi singkat yang nyambung — boleh lucu/ngakak kalau kontennya memang lucu
-Baris 5  : > 👁️ [views] kali ditonton — pakai format quote WA (tanda >) untuk stats
-           (hanya tampilkan baris ini jika ada data views)
+═══════════════════════════════
+PANDUAN FORMATTING WhatsApp — PAKAI SESUAI KONTEKS KONTEN, BUKAN ASAL TEMPEL:
+═══════════════════════════════
+
+*teks tebal* → nama page/user, judul konten, kata kunci utama yang paling penting
+_teks miring_ → nuansa/suasana, kata sifat penekanan emosi, deskripsi visual yang kuat
+~teks coret~ → kontras/ironi (mis. "katanya diet ~sambil makan gorengan~"), mitos yang dibantah, atau efek humor
+\`teks monospace\` → nama karakter, nama game/produk/brand/aplikasi, istilah teknis, nama tempat spesifik
+> teks kutip → stats engagement (views/likes/komentar), kutipan dari konten, fakta menarik
+1. daftar bernomor → konten tips/langkah/urutan (tutorial, resep, cara melakukan sesuatu)
+• daftar berpoint → beberapa detail sejajar tanpa urutan
+
+ATURAN PENGGUNAAN FORMATTING:
+- JANGAN pakai semua simbol sekaligus — pilih yang paling relevan dengan isi konten
+- Konten lucu/viral: bold + italic + mungkin coret untuk efek humor
+- Konten tutorial/tips: bold judul + numbered list untuk langkah-langkah
+- Konten game/anime: bold + monospace untuk nama karakter/game
+- Konten berita/info: bold + quote untuk fakta/data penting
+- Konten story/vlog: bold + italic untuk nuansa, quote untuk momen spesifik
+- ~coret~ HANYA kalau ada kontras/ironi/humor nyata dalam konten — JANGAN dipaksakan
+
+FORMAT CAPTION:
+Baris 1  : ${emoji} *[Nama Page/User]* — bold, nama sumber
+Baris 2-4: Deskripsi isi konten — WAJIB berdasarkan Analisis Visual, pakai formatting sesuai konten
+           (1-2 kalimat biasa, atau list bernomor/berpoint kalau konten memang tips/langkah)
+Baris 5  : (opsional) Komentar/reaksi singkat santai yang nyambung dengan isi konten
+Baris 6+ : > [stats engagement] — WAJIB tampilkan dalam format quote jika ada datanya:
+           Contoh: > 👁️ 90rb tayangan  •  👍 7rb like
+           (hanya tampilkan stats yang memang ada datanya, jangan karang)
 
 ATURAN KETAT:
-1. WAJIB gunakan formatting WA: *bold* untuk nama/judul, _italic_ untuk penekanan, \`backtick\` untuk nama spesifik/istilah, > untuk stats
-2. Deskripsi konten HARUS berdasarkan Analisis Visual — jika visual bilang "pria jatuh dari motor", tulis itu; JANGAN tulis frasa generik
-3. Bahasa Indonesia santai, tidak kaku, terasa seperti kawan ngirim video
-4. DILARANG mengarang fakta di luar data yang diberikan
-5. DILARANG sertakan URL atau link
-6. DILARANG bilang kamu AI
-7. Maksimal 5-6 baris total
-8. DILARANG KERAS menambahkan kalimat pembuka/penutup apapun seperti "Oke siap", "Ini dia", "Berikut captionnya", "Tentu!", "Caption:" dll — langsung tulis caption saja tanpa basa-basi
-9. Maksimal 8 baris — caption dikirim sebagai pesan teks terpisah, jadi boleh lebih detail tapi tetap ringkas
+1. Deskripsi HARUS berdasarkan Analisis Visual — spesifik, bukan frasa generik
+2. Bahasa Indonesia santai, tidak kaku, terasa seperti kawan ngirim video
+3. DILARANG mengarang fakta di luar data yang diberikan
+4. DILARANG sertakan URL atau link
+5. DILARANG bilang kamu AI
+6. DILARANG menambahkan kalimat pembuka seperti "Oke siap", "Ini dia", "Tentu!" dll — langsung caption saja
+7. Maksimal 8 baris total
 
 Caption (langsung, tanpa kalimat pembuka):`;
 }
@@ -196,16 +257,34 @@ export function buildFbFallbackCaption({
     pageTitle = '',
     description = '',
     views = '',
+    likes = '',
     quality = '',
     mediaType = 'video',
 } = {}) {
-    const emoji = mediaType === 'reel' ? '🎬' : mediaType === 'story' ? '📖' : '▶️';
-    const name  = pageTitle ? `*${pageTitle}*` : '*Facebook*';
+    const emoji     = mediaType === 'reel' ? '🎬' : mediaType === 'story' ? '📖' : '▶️';
+    const typeLabel = mediaType === 'reel' ? 'Reel' : mediaType === 'story' ? 'Story' : 'Video';
+    const name      = pageTitle ? `*${pageTitle}*` : `*Facebook ${typeLabel}*`;
+
     let text = `${emoji} ${name}\n`;
-    if (description) text += description.substring(0, 120) + (description.length > 120 ? '...' : '') + '\n';
+
+    if (description) {
+        const desc = description.trim();
+        // Kalau ada baris multipel (tips/langkah), jadikan numbered list
+        const lines = desc.split(/\n+/).map(l => l.trim()).filter(Boolean);
+        if (lines.length >= 3) {
+            text += lines.slice(0, 4).map((l, i) => `${i + 1}. ${l}`).join('\n') + '\n';
+        } else {
+            const short = desc.substring(0, 150);
+            text += `_${short}${desc.length > 150 ? '...' : ''}_\n`;
+        }
+    }
+
+    // Stats realtime: views + likes dari og:title FB
     const stats = [];
-    if (views)   stats.push(`👁️ ${views}`);
+    if (views)   stats.push(`👁️ ${views} tayangan`);
+    if (likes)   stats.push(`👍 ${likes} like`);
     if (quality) stats.push(`🎥 ${quality}`);
-    if (stats.length) text += `> ${stats.join('  ')}`;
+    if (stats.length) text += `> ${stats.join('  •  ')}`;
+
     return text.trim();
 }

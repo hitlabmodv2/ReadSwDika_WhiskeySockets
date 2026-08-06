@@ -8,6 +8,11 @@
  *  nekopoi.cjs — Scraper NekoPoi.care
  *  Scrape konten terbaru dari nekopoi.care per kategori:
  *  Hentai, 2D Animation, 3D Hentai
+ *
+ *  FIX: Tidak lagi memakai r.jina.ai (sering 403 untuk konten dewasa).
+ *  Sekarang memakai:
+ *  - WordPress REST API untuk listing kategori (lebih cepat & stabil)
+ *  - Direct HTML fetch untuk detail post
  * ───────────────────────────────
  */
 'use strict';
@@ -15,14 +20,24 @@
 const axios = require('axios');
 
 const BASE = 'https://nekopoi.care';
-const JINA = 'https://r.jina.ai';
 
-const HEADERS = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-    'Accept': 'text/plain, */*',
+const HEADERS_HTML = {
+    'User-Agent'     : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+    'Accept'         : 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
     'Accept-Language': 'id-ID,id;q=0.9,en;q=0.8',
-    'Referer': 'https://nekopoi.care/',
+    'Referer'        : 'https://nekopoi.care/',
+    'Cache-Control'  : 'no-cache',
 };
+
+const HEADERS_JSON = {
+    'User-Agent'     : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+    'Accept'         : 'application/json, */*;q=0.8',
+    'Accept-Language': 'id-ID,id;q=0.9,en;q=0.8',
+    'Referer'        : 'https://nekopoi.care/',
+};
+
+// Cache category ID supaya tidak fetch ulang tiap kali
+const _catIdCache = {};
 
 // Kategori yang didukung
 const KATEGORI_MAP = {
@@ -31,16 +46,42 @@ const KATEGORI_MAP = {
     '3d-hentai'    : { label: '🧊 3D Hentai',      slug: '3d-hentai',     emoji: '🧊' },
 };
 
-async function fetchMarkdown(url) {
-    const jinaUrl = `${JINA}/${url}`;
-    const res = await axios.get(jinaUrl, {
-        headers: HEADERS,
+// ── HELPER ────────────────────────────────────────────────────────────────────
+
+function stripHtml(str) {
+    return (str || '')
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#(\d+);/g, (_, c) => String.fromCharCode(Number(c)))
+        .replace(/&[a-z]+;/gi, '')
+        .replace(/\s{2,}/g, ' ')
+        .trim();
+}
+
+// ── FETCH LANGSUNG ────────────────────────────────────────────────────────────
+
+async function fetchHtml(url) {
+    const res = await axios.get(url, {
+        headers: HEADERS_HTML,
         timeout: 30000,
     });
     return res.data || '';
 }
 
-// ── Deteksi kategori dari URL ──────────────────────────────────────────────────
+async function fetchJson(url) {
+    const res = await axios.get(url, {
+        headers: HEADERS_JSON,
+        timeout: 30000,
+    });
+    return res.data;
+}
+
+// ── DETEKSI KATEGORI ───────────────────────────────────────────────────────────
+
 function deteksiKategori(url) {
     const u = (url || '').toLowerCase();
     if (/\/l2d-|l2d-sub-indo|-l2d-|\/category\/2d-animation/.test(u)) return '2d-animation';
@@ -48,104 +89,231 @@ function deteksiKategori(url) {
     return 'hentai';
 }
 
-// ── Parse listing kategori ─────────────────────────────────────────────────────
-// Format markdown dari r.jina.ai:
-// *   ## [[4K] Title Sinopsis : ...](URL)
-// *   ## [Title Sinopsis : ...](URL)
-// Judul bisa mengandung [4K], [BATCH], [L2D] dll — pakai greedy [^\n]+ + backtrack
-function parseCategoryListing(md, defaultKategori) {
+// ── LISTING KATEGORI via WordPress REST API ───────────────────────────────────
+
+async function getCategoryId(slug) {
+    if (_catIdCache[slug]) return _catIdCache[slug];
+    const data = await fetchJson(`${BASE}/wp-json/wp/v2/categories?slug=${encodeURIComponent(slug)}&_fields=id,slug`);
+    if (Array.isArray(data) && data.length) {
+        _catIdCache[slug] = data[0].id;
+        return data[0].id;
+    }
+    return null;
+}
+
+async function getCategoryPosts(slug) {
+    // Coba WP REST API dulu (lebih cepat, JSON bersih)
+    try {
+        const catId = await getCategoryId(slug);
+        if (catId) {
+            const posts = await fetchJson(
+                `${BASE}/wp-json/wp/v2/posts?categories=${catId}&per_page=12&_fields=id,title,link,date`
+            );
+            if (Array.isArray(posts) && posts.length) {
+                return posts.map(p => ({
+                    title   : stripHtml(p.title?.rendered || ''),
+                    url     : (p.link || '').replace(/\/+$/, ''),
+                    kategori: deteksiKategori(p.link || '') || slug,
+                    tanggal : p.date ? p.date.split('T')[0] : '',
+                })).filter(p => p.url);
+            }
+        }
+    } catch (e) {
+        console.warn(`[Nekopoi] REST API gagal untuk "${slug}": ${e?.message} — fallback ke HTML`);
+    }
+
+    // Fallback: parse HTML listing langsung
+    const html = await fetchHtml(`${BASE}/category/${slug}/`);
+    return parseCategoryListingHTML(html, slug);
+}
+
+function parseCategoryListingHTML(html, defaultKategori) {
     const results = [];
     const seen    = new Set();
 
-    // Pakai greedy [^\n]+ agar backtrack bisa menemukan ](URL) di akhir baris
-    // Cocok dengan judul yang mengandung [] seperti [4K], [BATCH], [L2D]
-    const regex = /##\s+\[([^\n]+)\]\((https?:\/\/nekopoi\.care\/[^\s)]+)\)/g;
+    // WordPress: <h2 class="entry-title"><a href="URL">Title</a></h2>
+    // atau <h3 class="entry-title"><a href="URL">Title</a></h2>
+    const regex = /<h[23][^>]*>\s*<a[^>]+href="(https?:\/\/nekopoi\.care\/[^"]+)"[^>]*>([\s\S]+?)<\/a>/gi;
     let m;
-    while ((m = regex.exec(md)) !== null) {
-        const url = m[2].trim().replace(/\/+$/, '');
-        // Skip halaman kategori/list/nav
+    while ((m = regex.exec(html)) !== null) {
+        const url = m[1].trim().replace(/\/+$/, '');
         if (seen.has(url)) continue;
-        if (/\/(category|genre|hentai-list|jav-list|jadwal|privacy-policy|2257|random)/.test(url)) continue;
+        if (/\/(category|genre|hentai-list|jav-list|jadwal|privacy-policy|2257|random|tag|author|page)/.test(url)) continue;
         if (url === BASE || url === BASE + '/') continue;
         seen.add(url);
 
-        // Bersihkan judul — strip sinopsis snippet, original title, dll
-        let title = m[1].trim();
-        title = title
-            .replace(/\s+Sinopsis\s*:.*/i, '')       // "Sinopsis : ..."
-            .replace(/\s+Sinopsis\s+.*/i, '')         // "Sinopsis Suatu hari..."
-            .replace(/\s+Original Title\s*:.*/i, '')
-            .replace(/\s+Parody\s*:.*/i, '')
-            .replace(/\s+Producers?\s*:.*/i, '')
-            .replace(/\s+Duration\s*:.*/i, '')
-            .replace(/\s+Genre\s*:.*/i, '')
-            .replace(/\s*Subtitle Indonesia\s*/gi, ' Sub Indo')
-            .replace(/\s{2,}/g, ' ')
-            .trim();
-
-        const detected = deteksiKategori(url);
-        const kategori = (detected !== 'hentai') ? detected : (defaultKategori || 'hentai');
+        const title    = stripHtml(m[2]).trim();
+        const kategori = deteksiKategori(url) || defaultKategori || 'hentai';
         results.push({ title, url, kategori });
     }
     return results;
 }
 
-// ── Parse homepage — ambil "Episode Terbaru" ──────────────────────────────────
-function parseHomepageEpisodeTerbaru(md) {
-    const results = [];
-    const seen    = new Set();
+// ── DETAIL POST via HTML langsung ──────────────────────────────────────────────
 
-    // Cari section "# Episode Terbaru"
-    const sectionM = md.match(/# Episode Terbaru\s*\n([\s\S]*?)(?:\n# [^\n]|\n## Posts pagination|$)/);
-    if (!sectionM) return results;
-
-    const section = sectionM[1];
-    // Tiap post: ## [Title](URL)\nDate
-    const regex = /## \[([^\]]+)\]\((https?:\/\/nekopoi\.care\/[^)]+)\)\s*\n+([^\n]+)/g;
-    let m;
-    while ((m = regex.exec(section)) !== null) {
-        const url = m[2].trim().replace(/\/+$/, '');
-        if (seen.has(url)) continue;
-        seen.add(url);
-        const title    = m[1].trim();
-        const tanggal  = m[3].trim();
-        const kategori = deteksiKategori(url);
-        results.push({ title, url, tanggal, kategori });
+function parseDetailPostHTML(html, url) {
+    // ── Thumbnail ──────────────────────────────────────────────────────────────
+    let thumbnail = null;
+    const thumbRegex = /(?:src|data-src)="(https?:\/\/nekopoi\.care\/wp-content\/uploads\/[^"]+\.(?:jpg|jpeg|png|webp))"/gi;
+    let tm;
+    while ((tm = thumbRegex.exec(html)) !== null) {
+        if (/logo|icon|app\.png|histats|gravatar/i.test(tm[1])) continue;
+        thumbnail = tm[1];
+        break;
     }
-    return results;
+
+    // ── Judul ─────────────────────────────────────────────────────────────────
+    const titleM = html.match(/<h1[^>]*class="[^"]*entry-title[^"]*"[^>]*>([\s\S]+?)<\/h1>/i)
+                || html.match(/<h1[^>]*>([\s\S]+?)<\/h1>/i);
+    const rawTitle = titleM ? stripHtml(titleM[1]) : '';
+    const title = rawTitle.replace(/\s*\d[\d.]*\s*kali\s*$/i, '').trim();
+
+    // ── View count ────────────────────────────────────────────────────────────
+    let viewCount = '';
+    const vcM = (rawTitle || html).match(/(\d[\d.]*)\s*kali/i);
+    if (vcM) viewCount = vcM[1].replace(/\./g, '');
+
+    // ── Tanggal posting ───────────────────────────────────────────────────────
+    // Prioritas 1: format hari Indonesia "Senin, 3 Agustus 2026"
+    // Prioritas 2: atribut datetime="YYYY-MM-DD" di tag <time>
+    const dateIndo = html.match(/((?:Senin|Selasa|Rabu|Kamis|Jumat|Sabtu|Minggu),\s+\d+\s+\w+\s+\d{4})/i);
+    const dateAttr = html.match(/<time[^>]+datetime="(\d{4}-\d{2}-\d{2})[^"]*"/i);
+    const tanggal  = dateIndo
+        ? dateIndo[1].trim()
+        : dateAttr
+            ? dateAttr[1]
+            : '';
+
+    // ── Ambil entry-content ────────────────────────────────────────────────────
+    const contentM = html.match(/<div[^>]*class="[^"]*entry-content[^"]*"[^>]*>([\s\S]+?)(?=<\/div>\s*(?:<div[^>]*class="[^"]*(?:sharedaddy|post-tags|related|navigation)|<footer))/i);
+    const content  = contentM ? contentM[1] : html;
+
+    // Helper: ambil nilai field dari <strong>Nama Field:</strong> value
+    function getField(fieldName) {
+        const r = new RegExp(
+            `<strong>\\s*${fieldName}\\s*:?\\s*<\\/strong>\\s*:?\\s*((?:(?!<strong>)[\\s\\S])*?)(?=<(?:br|p|li|strong|h[1-6]|\/p|\/li|\/div))`,
+            'i'
+        );
+        const fm = content.match(r);
+        if (!fm) return '';
+        return stripHtml(fm[1]).replace(/^[:\s]+/, '').trim();
+    }
+
+    // ── Field-field detail ─────────────────────────────────────────────────────
+    const sinopsisM = content.match(/<strong>Sinopsis\s*:?<\/strong>\s*:?\s*([\s\S]+?)(?=<strong>|<p>\s*<strong>|<\/p>|$)/i);
+    const sinopsis  = sinopsisM ? stripHtml(sinopsisM[1]).trim() : '';
+
+    const genreM    = content.match(/<strong>Genre\s*:?<\/strong>\s*:?\s*([\s\S]+?)(?=<br|<p>|<strong>|<\/p>|$)/i);
+    const genreRaw  = genreM ? genreM[1] : '';
+    const genre     = genreRaw
+        ? [...genreRaw.matchAll(/href="[^"]*">([^<]+)<\/a>/g)].map(x => x[1]).join(', ')
+          || stripHtml(genreRaw).trim()
+        : '';
+
+    const originalTitle = getField('Original Title');
+    const parody        = getField('Parody');
+    const anime         = getField('Anime');
+    const judulJp       = getField('Judul Jepang');
+    const producers     = getField('(?:Producers?|Studio)');
+    const durasi        = getField('Duration');
+    const ukuranRaw     = getField('Size');
+    const ukuran        = ukuranRaw.replace(/\*\*/g, '').trim();
+    const status        = getField('Status');
+    const episode       = getField('Episode');
+    const tayang        = getField('Tayang');
+
+    // ── Download links ────────────────────────────────────────────────────────
+    const downloads = parseDownloadLinksHTML(content);
+
+    // ── Kategori dari URL ─────────────────────────────────────────────────────
+    const kategori = deteksiKategori(url);
+
+    return {
+        title, thumbnail, tanggal, sinopsis, genre,
+        originalTitle, parody,
+        anime, judulJp,
+        producers, durasi, ukuran, status, episode, tayang,
+        kategori, url, downloads, viewCount,
+    };
 }
 
-// ── Parse section # Unduh (download links per resolusi) ───────────────────────
-// Format markdown:
-//   Title [720p]
-//   **LINK**
-//   [Mp4Upload](https://ouo.io/xxx)[Pixeldrain](https://ouo.io/xxx)[Mirror](https://ouo.io/xxx)
-function parseDownloadLinks(md) {
+// ── Parse download links dari HTML ────────────────────────────────────────────
+function parseDownloadLinksHTML(content) {
     const downloads = [];
 
-    // Cari section # Unduh
-    const unduhM = md.match(/# Unduh\s*\n+([\s\S]+?)(?=\n# |\n## |$)/);
-    if (!unduhM) return downloads;
+    // ── Strategi 1: nk-download-row (struktur resmi nekopoi.care) ─────────────
+    // Format: <div class="nk-download-row">
+    //           <div class="nk-download-name">Judul [1080p]</div>
+    //           <div class="nk-download-links"><b>LINK</b><p><a href="...">Host</a></p></div>
+    //         </div>
+    const rowRe = /<div[^>]*class="nk-download-row"[^>]*>([\s\S]*?)(?=<div[^>]*class="nk-download-row"|<div[^>]*class="nk-(?:ad|related|section)|$)/gi;
+    let rm;
+    while ((rm = rowRe.exec(content)) !== null) {
+        const block = rm[1];
 
-    const content = unduhM[1];
+        // Resolusi dari nk-download-name: "[4K]", "[1080p]", dll
+        const nameM = block.match(/<div[^>]*class="nk-download-name"[^>]*>[\s\S]*?\[(4K|1080p|720p|480p|360p)\]/i);
+        if (!nameM) continue;
+        const resolusi = nameM[1];
 
-    // Tiap blok: judul + [Resolusi]\n**LINK**\n[Host](URL)...
-    const blockRegex = /\[(4K|1080p|720p|480p|360p)\]\s*\n+\*\*LINK\*\*\s*\n+([^\n]+)/gi;
-    let m;
-    while ((m = blockRegex.exec(content)) !== null) {
-        const resolusi = m[1].toLowerCase().replace('4k', '4K');
-        const linkLine = m[2];
+        // Link dari nk-download-links — skip semua URL nekopoi.care
+        const linksBlockM = block.match(/<div[^>]*class="nk-download-links"[^>]*>([\s\S]*)/i);
+        if (!linksBlockM) continue;
 
         const links = [];
-        // Host bisa mengandung [ouo] → pakai pola yang izinkan satu level inner bracket
-        const linkRe = /\[((?:[^\[\]]|\[[^\[\]]*\])+)\]\((https?:\/\/[^)]+)\)/g;
-        let lm;
-        while ((lm = linkRe.exec(linkLine)) !== null) {
-            // Bersihkan suffix [ouo], [ouo.io] dll dari nama host
-            const host = lm[1].trim().replace(/\s*\[ouo(?:\.io)?\]/gi, '').trim();
-            links.push({ host, url: lm[2].trim() });
+        const aRe   = /href="(https?:\/\/[^"]+)"[^>]*>([^<]+)<\/a>/gi;
+        let am;
+        while ((am = aRe.exec(linksBlockM[1])) !== null) {
+            const dlUrl = am[1].trim();
+            if (/nekopoi\.care/.test(dlUrl)) continue;
+            const host = am[2].replace(/\s*\[ouo(?:\.io)?\]/gi, '').trim();
+            if (!host) continue;
+            links.push({ host, url: dlUrl });
         }
         if (links.length) downloads.push({ resolusi, links });
+    }
+
+    // ── Strategi 2: fallback — blok [Resolusi] + LINK (format lama / WP REST) ─
+    if (!downloads.length) {
+        const unduhM = content.match(/<(?:h[23]|strong|b)[^>]*>(?:Unduh|Download)[^<]*<\/(?:h[23]|strong|b)>([\s\S]+?)(?=<(?:h[23])[^>]*>(?!(?:Unduh|Download))|$)/i);
+        const section = unduhM ? unduhM[1] : content;
+
+        const blockRegex = /\[(4K|1080p|720p|480p|360p)\][\s\S]{0,400}?<(?:strong|b)>LINK<\/(?:strong|b)>([\s\S]{0,2000}?)(?=\[(4K|1080p|720p|480p|360p)\]|$)/gi;
+        let bm;
+        while ((bm = blockRegex.exec(section)) !== null) {
+            const resolusi = bm[1];
+            const links    = [];
+            const aRe2     = /href="(https?:\/\/[^"]+)"[^>]*>([^<]+)<\/a>/gi;
+            let lm;
+            while ((lm = aRe2.exec(bm[2])) !== null) {
+                const dlUrl = lm[1].trim();
+                if (/nekopoi\.care/.test(dlUrl)) continue;
+                const host = lm[2].replace(/\s*\[ouo(?:\.io)?\]/gi, '').trim();
+                if (!host) continue;
+                links.push({ host, url: dlUrl });
+            }
+            if (links.length) downloads.push({ resolusi, links });
+        }
+    }
+
+    // Fallback: cari resolusi + link tanpa markup blok
+    if (!downloads.length) {
+        const fallbackRe = /\b(4K|1080p|720p|480p|360p)\b[\s\S]{0,200}?href="(https?:\/\/[^"]+)"/gi;
+        const seen = new Set();
+        let fm;
+        while ((fm = fallbackRe.exec(section)) !== null) {
+            const resolusi = fm[1];
+            const linkUrl  = fm[2];
+            const key      = resolusi + '|' + linkUrl;
+            if (seen.has(key)) continue;
+            seen.add(key);
+            const existing = downloads.find(d => d.resolusi === resolusi);
+            if (existing) {
+                existing.links.push({ host: new URL(linkUrl).hostname.replace('www.', ''), url: linkUrl });
+            } else {
+                downloads.push({ resolusi, links: [{ host: new URL(linkUrl).hostname.replace('www.', ''), url: linkUrl }] });
+            }
+        }
     }
 
     // Urutkan: 4K → 1080p → 720p → 480p → 360p
@@ -159,124 +327,46 @@ function parseDownloadLinks(md) {
     return downloads;
 }
 
-// ── Parse halaman detail post ──────────────────────────────────────────────────
-function parseDetailPost(md, url) {
-    // Thumbnail — ambil dari wp-content/uploads, skip logo/app
-    // Pakai regex URL langsung agar tidak terpengaruh [4K] di alt text
-    let thumbnail = null;
-    const thumbRegex = /\]\((https:\/\/nekopoi\.care\/wp-content\/uploads\/[^)"\s]+)\)/g;
-    let tm;
-    while ((tm = thumbRegex.exec(md)) !== null) {
-        const imgUrl = tm[1];
-        if (/logo\.png|app\.png|histats/.test(imgUrl)) continue;
-        thumbnail = imgUrl;
-        break;
-    }
-
-    // Judul utama dari H1
-    const titleM = md.match(/^# ([^\n]+)/m);
-    const title  = titleM ? titleM[1].replace(/[\d.]+\s+kali\s*$/, '').trim() : '';
-
-    // View count — posisi H1: "TITLE 1234 kali"
-    // atau sebelum tanggal: "1234 kali Senin, 20 Juli 2026"
-    let viewCount = '';
-    if (titleM) {
-        const vcM = titleM[1].match(/(\d[\d.]*)\s+kali\s*$/i);
-        if (vcM) viewCount = vcM[1].replace(/\./g, '');
-    }
-    if (!viewCount) {
-        const vcM2 = md.match(/(\d[\d.]*)\s+kali\s+(?:Senin|Selasa|Rabu|Kamis|Jumat|Sabtu|Minggu)/i);
-        if (vcM2) viewCount = vcM2[1].replace(/\./g, '');
-    }
-
-    // Tanggal posting — format: "N kali Senin, 20 Juli 2026" atau standalone
-    const dateM   = md.match(/((?:Senin|Selasa|Rabu|Kamis|Jumat|Sabtu|Minggu),\s+\d+\s+\w+\s+\d{4})/);
-    const tanggal = dateM ? dateM[1].trim() : '';
-
-    // Sinopsis — format bisa **Sinopsis** atau **Sinopsis :**
-    let sinopsis = '';
-    const sinM = md.match(/\*\*Sinopsis\s*:?\*\*\s*\n+([\s\S]+?)(?=\n\n|\*\*Genre|\*\*Anime\s*:|#\s|$)/i);
-    if (sinM) {
-        sinopsis = sinM[1].replace(/\n/g, ' ').replace(/\s{2,}/g, ' ').trim();
-    }
-
-    // Genre — bisa mengandung link [Genre](URL) — strip ke teks saja
-    const genreM  = md.match(/\*\*Genre\s*:?\*\*\s*([^\n]+)/i);
-    const genre   = genreM ? genreM[1].replace(/\[([^\]]+)\]\([^)]+\)/g, '$1').replace(/,\s*/g, ', ').trim() : '';
-
-    // Original Title (biasanya ada di konten 2D / 3D sebagai pengganti anime)
-    const origM       = md.match(/\*\*Original Title\s*:?\*\*\s*([^\n]+)/i);
-    const originalTitle = origM ? origM[1].replace(/\[([^\]]+)\]\([^)]+\)/g, '$1').trim() : '';
-
-    // Parody (anime/game yang di-parody — ada di 2D & 3D)
-    const parodyM = md.match(/\*\*Parody\s*:?\*\*\s*([^\n]+)/i);
-    const parody  = parodyM ? parodyM[1].trim().replace(/^–$/, '') : '';
-
-    // Judul anime (original — field khusus hentai series)
-    const animeM  = md.match(/\*\*Anime\s*:?\*\*\s*([^\n]+)/i);
-    const anime   = animeM ? animeM[1].trim() : '';
-
-    // Judul Jepang
-    const jpM     = md.match(/\*\*Judul Jepang\*\*\s*:\s*([^\n]+)/i);
-    const judulJp = jpM ? jpM[1].trim() : '';
-
-    // Producers / Studio — strip leading colon kalau ada (format: **Producers**: value)
-    const prodM     = md.match(/\*\*(?:Producers?|Studio)\s*:?\*\*\s*:?\s*([^\n]+)/i);
-    const producers = prodM ? prodM[1].trim() : '';
-
-    // Duration
-    const durM    = md.match(/\*\*Duration\s*:?\*\*\s*([^\n]+)/i);
-    const durasi  = durM ? durM[1].trim() : '';
-
-    // Size — strip bold markers
-    const sizeM   = md.match(/\*\*Size\s*:?\*\*\s*([^\n]+)/i);
-    const ukuran  = sizeM ? sizeM[1].replace(/\*\*/g, '').trim() : '';
-
-    // Status
-    const statusM = md.match(/\*\*Status\*\*\s*:\s*([^\n]+)/i);
-    const status  = statusM ? statusM[1].trim() : '';
-
-    // Episode info
-    const epM     = md.match(/\*\*Episode\*\*\s*:\s*([^\n]*)/i);
-    const episode = epM ? epM[1].trim() : '';
-
-    // Tayang
-    const tayangM = md.match(/\*\*Tayang\*\*\s*:\s*([^\n]+)/i);
-    const tayang  = tayangM ? tayangM[1].trim() : '';
-
-    // Download links
-    const downloads = parseDownloadLinks(md);
-
-    // Kategori dari URL
-    const kategori = deteksiKategori(url);
-
-    return {
-        title, thumbnail, tanggal, sinopsis, genre,
-        originalTitle, parody,
-        anime, judulJp,
-        producers, durasi, ukuran, status, episode, tayang,
-        kategori, url, downloads, viewCount,
-    };
-}
-
-// ── API Publik ─────────────────────────────────────────────────────────────────
+// ── Homepage: episode terbaru ─────────────────────────────────────────────────
 
 async function getHomepageData() {
-    const md = await fetchMarkdown(`${BASE}/`);
-    const episodeTerbaru = parseHomepageEpisodeTerbaru(md);
-    return { episodeTerbaru };
+    // Coba WP REST API
+    try {
+        const posts = await fetchJson(
+            `${BASE}/wp-json/wp/v2/posts?per_page=10&_fields=id,title,link,date`
+        );
+        if (Array.isArray(posts) && posts.length) {
+            const episodeTerbaru = posts.map(p => ({
+                title   : stripHtml(p.title?.rendered || ''),
+                url     : (p.link || '').replace(/\/+$/, ''),
+                tanggal : p.date ? p.date.split('T')[0] : '',
+                kategori: deteksiKategori(p.link || ''),
+            })).filter(p => p.url);
+            return { episodeTerbaru };
+        }
+    } catch (e) {
+        console.warn('[Nekopoi] getHomepageData REST API gagal:', e?.message);
+    }
+
+    // Fallback: HTML
+    try {
+        const html = await fetchHtml(`${BASE}/`);
+        const episodeTerbaru = parseCategoryListingHTML(html, 'hentai');
+        return { episodeTerbaru };
+    } catch (e) {
+        console.warn('[Nekopoi] getHomepageData HTML gagal:', e?.message);
+        return { episodeTerbaru: [] };
+    }
 }
 
-async function getCategoryPosts(slug) {
-    // slug: 'hentai' | '2d-animation' | '3d-hentai'
-    const md = await fetchMarkdown(`${BASE}/category/${slug}/`);
-    return parseCategoryListing(md, slug);
-}
+// ── Detail post ────────────────────────────────────────────────────────────────
 
 async function getDetailNekopoi(url) {
-    const md = await fetchMarkdown(url);
-    return parseDetailPost(md, url);
+    const html = await fetchHtml(url);
+    return parseDetailPostHTML(html, url);
 }
+
+// ── EXPORT ────────────────────────────────────────────────────────────────────
 
 module.exports = {
     KATEGORI_MAP,
