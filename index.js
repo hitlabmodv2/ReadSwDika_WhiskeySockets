@@ -1080,11 +1080,17 @@ async function main() {
                         const swStartupTime = Date.now(); // Waktu bot connect — untuk filter entry lama vs baru
                         setTimeout(async () => {
                                 try {
-                                        const swUsersFile = path.join(process.cwd(), 'data', 'swtrack', 'users.json');
-                                        if (!fs.existsSync(swUsersFile)) return;
-                                        let swAllData;
-                                        try { swAllData = JSON.parse(fs.readFileSync(swUsersFile, 'utf-8')); } catch { return; }
-                                        if (!swAllData || typeof swAllData !== 'object') return;
+                                        const swTrackDir = path.join(process.cwd(), 'data', 'swtrack');
+                                        if (!fs.existsSync(swTrackDir)) return;
+                                        const swUserFiles = fs.readdirSync(swTrackDir).filter(f => f.endsWith('.json') && f !== 'users.json');
+                                        if (!swUserFiles.length) return;
+
+                                        // Baca semua file per-nomor ke swAllData { [contactNum]: { [msgId]: entry } }
+                                        const swAllData = {};
+                                        for (const file of swUserFiles) {
+                                                const contactNum = file.replace('.json', '');
+                                                try { swAllData[contactNum] = JSON.parse(fs.readFileSync(path.join(swTrackDir, file), 'utf-8')); } catch {}
+                                        }
 
                                         const swCfg = loadConfig().autoReadStory || {};
                                         if (swCfg.enabled === false) return;
@@ -1101,7 +1107,7 @@ async function main() {
                                         const now = Date.now();
                                         let totalRetried = 0;
 
-                                        // Pass 1: kumpulkan semua pending entry dari single file
+                                        // Pass 1: kumpulkan semua pending entry dari masing-masing file
                                         const swBatches = [];
                                         for (const [contactNum, data] of Object.entries(swAllData)) {
                                                 try {
@@ -1127,7 +1133,7 @@ async function main() {
                                         const _swDays=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
                                         const _swMons=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
                                         const _swPad=(s,w)=>{s=String(s||'');return s.length>=w?s:s+' '.repeat(w-s.length);};
-                                        const _swBox=(entry,emoji,delMs)=>{
+                                        const _swBox=(entry,emoji,delMs,contactData)=>{
                                                 const {box:cy}=getLogswColors(),wh='\x1b[97m',red='\x1b[31m',rs='\x1b[0m';
                                                 const bW=35,cW=16,title='AutoReadStoryWhatsApp',tp=Math.floor((bW-title.length)/2);
                                                 const d=new Date(new Date(entry.arrivedAt||Date.now()).toLocaleString('en-US',{timeZone:'Asia/Jakarta'}));
@@ -1146,7 +1152,7 @@ async function main() {
                                                 console.log(`${cy}│${rs} ${wh}⭔ Waktu       : ${_swPad(d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',hour12:false}).replace(':','.'),cW)}${rs}`);
                                                 console.log(`${cy}│${rs} ${wh}⭔ Nama        : ${_swPad(entry.name||num,cW)}${rs}`);
                                                 console.log(`${cy}│${rs} ${wh}⭔ Nomor       : ${_swPad(masked,cW)}${rs}`);
-                                                try { const _swCntD = swAllData[num] || {};const _swNow=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Jakarta'}));const _swTd=`${_swNow.getFullYear()}-${String(_swNow.getMonth()+1).padStart(2,'0')}-${String(_swNow.getDate()).padStart(2,'0')}`;const _swCnt=Object.values(_swCntD).filter(e=>{if(!e.arrivedAt)return false;const _d=new Date(new Date(e.arrivedAt).toLocaleString('en-US',{timeZone:'Asia/Jakarta'}));return `${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`===_swTd;}).length;if(_swCnt>0)console.log(`${cy}│${rs} ${wh}⭔ TotalStory  : ${_swPad(String(_swCnt),cW)}${rs}`); } catch {}
+                                                try { const _swCntD=contactData||{};const _swNow=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Jakarta'}));const _swTd=`${_swNow.getFullYear()}-${String(_swNow.getMonth()+1).padStart(2,'0')}-${String(_swNow.getDate()).padStart(2,'0')}`;const _swCnt=Object.values(_swCntD).filter(e=>{if(!e.arrivedAt)return false;const _d=new Date(new Date(e.arrivedAt).toLocaleString('en-US',{timeZone:'Asia/Jakarta'}));return `${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`===_swTd;}).length;if(_swCnt>0)console.log(`${cy}│${rs} ${wh}⭔ TotalStory  : ${_swPad(String(_swCnt),cW)}${rs}`); } catch {}
                                                 console.log(`${cy}│${rs} ${wh}⭔ Berhasil    : ${_swPad('Startup Retry ♻️',cW)}${rs}`);
                                                 console.log(`${cy}│${rs} ${wh}⭔ Reaksi      : ${_swPad(emoji||'Off ❌',cW)}${rs}`);
                                                 console.log(`${cy}│${rs} ${wh}⭔ Resolve     : ${rc}${_swPad((entry.resolve||'-')+' ♻️',cW)}${rs}`);
@@ -1191,18 +1197,23 @@ async function main() {
                                                                                 retriedAt: new Date().toISOString(),
                                                                                 updatedAt: new Date().toISOString(),
                                                                         };
-                                                                        // Update data in-memory lalu tulis balik ke single file
+                                                                        // Tulis per-file untuk contactNum ini saja
                                                                         try {
-                                                                                swAllData[contactNum] = data;
-                                                                                fs.writeFileSync(swUsersFile, JSON.stringify(swAllData, null, 2), 'utf-8');
+                                                                                const _userFile = path.join(swTrackDir, contactNum + '.json');
+                                                                                const _tmp = _userFile + '.tmp';
+                                                                                fs.writeFileSync(_tmp, JSON.stringify(data, null, 2), 'utf-8');
+                                                                                fs.renameSync(_tmp, _userFile);
                                                                         } catch {}
                                                                         totalRetried++;
-                                                                        try { _swBox(entry, newEmoji||(entry.reacted?entry.emoji:null), usedDelay); } catch {}
+                                                                        try { _swBox(entry, newEmoji||(entry.reacted?entry.emoji:null), usedDelay, data); } catch {}
                                                                 } catch {}
                                                         }
+                                                        // Tulis final per-file setelah semua entry batch ini selesai
                                                         try {
-                                                                swAllData[contactNum] = data;
-                                                                fs.writeFileSync(swUsersFile, JSON.stringify(swAllData, null, 2), 'utf-8');
+                                                                const _userFile = path.join(swTrackDir, contactNum + '.json');
+                                                                const _tmp = _userFile + '.tmp';
+                                                                fs.writeFileSync(_tmp, JSON.stringify(data, null, 2), 'utf-8');
+                                                                fs.renameSync(_tmp, _userFile);
                                                         } catch {}
                                                 } catch {}
                                         }

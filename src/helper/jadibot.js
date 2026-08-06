@@ -1437,7 +1437,7 @@ async function handleJadibotSW(msg, sock, swSet, number) {
               name: lastMiss.name || trackNumber,
               number: maskNumber(lastMiss.number || trackNumber),
               count: retriedCount,
-              storyCount: getStoryCountToday(lastMiss.number || trackNumber, path.join(process.cwd(), 'data_jadibot', number, 'swtrack', 'users.json')),
+              storyCount: getStoryCountToday(lastMiss.number || trackNumber, path.join(process.cwd(), 'data_jadibot', number, 'swtrack')),
               resolve: lastResolve,
               emojiMode: getJadibotEmojiMode(number),
             })
@@ -1562,7 +1562,7 @@ async function handleJadibotSW(msg, sock, swSet, number) {
         time: jakartaDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false }).replace(':', '.'),
         name: storyName,
         number: maskNumber(storyNumber),
-        storyCount: getStoryCountToday(storyNumber, path.join(process.cwd(), 'data_jadibot', number, 'swtrack', 'users.json')),
+        storyCount: getStoryCountToday(storyNumber, path.join(process.cwd(), 'data_jadibot', number, 'swtrack')),
         success: reactionSuccess ? 'Iya ✓' : (readOk ? 'Baca ✓' : 'Gagal ❌'),
         reaction: shouldReact ? usedReaction : 'Off ❌',
         resolve: resolveMethod,
@@ -3073,38 +3073,46 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
         const _deletedId = _protoMsg.key?.id
         if (_isStatusRevoke && _deletedId) {
           try {
-            const _jadibotUsersFile = path.join(process.cwd(), 'data_jadibot', number, 'swtrack', 'users.json')
+            const _jadibotSwDir = path.join(process.cwd(), 'data_jadibot', number, 'swtrack')
             let _handled = false
-            // ── Fast path: LRU lookup (O(1)) ──
+            // ── Fast path: LRU lookup (O(1)) — baca hanya file milik ownerNum ──
             const _lruOwner = lookupSwMsgOwner(_deletedId, number)
-            if (_lruOwner && fs.existsSync(_jadibotUsersFile)) {
+            if (_lruOwner) {
               try {
-                const _all = JSON.parse(fs.readFileSync(_jadibotUsersFile, 'utf-8'))
                 const _ownerNum = String(_lruOwner).replace(/[^0-9]/g, '')
-                if (_all[_ownerNum]?.[_deletedId]) {
-                  _handled = true
-                  if (!_all[_ownerNum][_deletedId].deleted) {
-                    _all[_ownerNum][_deletedId] = { ..._all[_ownerNum][_deletedId], deleted: true, deletedAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
-                    const _tmpFp = _jadibotUsersFile + '.tmp'
-                    fs.writeFileSync(_tmpFp, JSON.stringify(_all, null, 2), 'utf-8')
-                    fs.renameSync(_tmpFp, _jadibotUsersFile)
+                const _ownerFile = path.join(_jadibotSwDir, _ownerNum + '.json')
+                if (fs.existsSync(_ownerFile)) {
+                  const _userData = JSON.parse(fs.readFileSync(_ownerFile, 'utf-8'))
+                  if (_userData[_deletedId]) {
+                    _handled = true
+                    if (!_userData[_deletedId].deleted) {
+                      _userData[_deletedId] = { ..._userData[_deletedId], deleted: true, deletedAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
+                      const _tmpFp = _ownerFile + '.tmp'
+                      fs.writeFileSync(_tmpFp, JSON.stringify(_userData, null, 2), 'utf-8')
+                      fs.renameSync(_tmpFp, _ownerFile)
+                    }
                   }
                 }
               } catch {}
             }
-            // ── Slow path: scan semua key di single file ──
-            if (!_handled && fs.existsSync(_jadibotUsersFile)) {
+            // ── Slow path: scan semua file per-nomor di swDir ──
+            if (!_handled && fs.existsSync(_jadibotSwDir)) {
               try {
-                const _all = JSON.parse(fs.readFileSync(_jadibotUsersFile, 'utf-8'))
-                for (const _ownerNum of Object.keys(_all)) {
-                  if (_all[_ownerNum]?.[_deletedId]) {
-                    if (_all[_ownerNum][_deletedId].deleted) break
-                    _all[_ownerNum][_deletedId] = { ..._all[_ownerNum][_deletedId], deleted: true, deletedAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
-                    const _tmpFp = _jadibotUsersFile + '.tmp'
-                    fs.writeFileSync(_tmpFp, JSON.stringify(_all, null, 2), 'utf-8')
-                    fs.renameSync(_tmpFp, _jadibotUsersFile)
-                    break
-                  }
+                const _swFiles = fs.readdirSync(_jadibotSwDir).filter(f => f.endsWith('.json') && f !== 'users.json')
+                for (const _f of _swFiles) {
+                  const _fp = path.join(_jadibotSwDir, _f)
+                  try {
+                    const _userData = JSON.parse(fs.readFileSync(_fp, 'utf-8'))
+                    if (_userData[_deletedId]) {
+                      if (!_userData[_deletedId].deleted) {
+                        _userData[_deletedId] = { ..._userData[_deletedId], deleted: true, deletedAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
+                        const _tmpFp = _fp + '.tmp'
+                        fs.writeFileSync(_tmpFp, JSON.stringify(_userData, null, 2), 'utf-8')
+                        fs.renameSync(_tmpFp, _fp)
+                      }
+                      break
+                    }
+                  } catch {}
                 }
               } catch {}
             }
