@@ -2,6 +2,30 @@
   "events": [
     {
       "type": "connected",
+      "connectedAt": "2026-08-06T11:02:48.392Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-08-06T10:58:16.664Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-08-06T10:56:55.830Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-08-06T06:20:46.465Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-08-05T08:35:54.555Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-08-04T05:35:26.353Z"
+    },
+    {
+      "type": "connected",
       "connectedAt": "2026-08-04T02:03:39.698Z"
     },
     {
@@ -175,32 +199,8 @@
     {
       "type": "connected",
       "connectedAt": "2026-07-27T08:14:04.040Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-27T08:11:18.657Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-27T08:10:48.438Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-27T07:55:14.423Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-27T07:39:11.235Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-27T07:29:06.473Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-07-27T07:23:29.176Z"
     }
   ],
-  "lastUpdated": "2026-08-04T02:03:39.700Z",
+  "lastUpdated": "2026-08-06T11:02:48.393Z",
   "sessionStart": "2026-07-26T07:04:39.420Z"
 }
