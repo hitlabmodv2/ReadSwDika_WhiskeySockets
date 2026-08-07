@@ -118,6 +118,7 @@ export function buildMenuUtama({ pushName, isOwner, uptimeStr, tgl, jam, browser
 ├═════════════════════┤
 │ .ping / .p
 │ .info
+│ .getppuser
 │ .infoupdate / .changelog
 │ .owner / .own
 │ .cekhp / .spechp
