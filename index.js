@@ -2173,34 +2173,39 @@ async function main() {
                                 }
 
                                 case DisconnectReason.forbidden: {
-                                        reconnectCount++;
-                                        const MAX_FORBIDDEN = 10;
+                                        // 403 berarti kredensial sesi sudah tidak diterima WA.
+                                        // Jangan retry: retry hanya mengulang 403 dan membuat sesi
+                                        // yang sudah tidak tertaut terlihat masih aktif.
                                         console.log('');
                                         console.log(`${C}════════════════════════════════════${R}`);
-                                        console.log(`${B}${Y}⚠️  FORBIDDEN (403) — RECONNECTING${R}`);
+                                        console.log(`${B}${Y}⚠️  FORBIDDEN (403) — SESI TIDAK TERTAUT${R}`);
+                                        console.log(`${Y}• Sesi utama dihapus realtime${R}`);
+                                        console.log(`${Y}• Tidak ada reconnect attempt${R}`);
+                                        console.log(`${Y}• Menampilkan QR / pairing code baru...${R}`);
                                         console.log(`${C}════════════════════════════════════${R}`);
+                                        console.log('');
 
-                                        if (reconnectCount >= MAX_FORBIDDEN) {
-                                                console.log(`${Y}• Sudah ${reconnectCount}x forbidden — sesi dihapus, mulai pairing ulang...${R}`);
-                                                console.log(`${Y}• Menampilkan QR / pairing code baru...${R}`);
-                                                console.log(`${C}════════════════════════════════════${R}`);
-                                                console.log('');
-                                                cleanupSocket();
-                                                try { await fs.promises.unlink(sessionFile); } catch {}
-                                                try { await fs.promises.rm(sessionDir, { recursive: true, force: true }); } catch {}
-                                                reconnectCount = 0;
-                                                await delay(2000);
-                                                await main();
-                                        } else {
-                                                const waitForbidden = Math.min(10 * reconnectCount, 60);
-                                                console.log(`${Y}• Bukan logout — sesi TIDAK dihapus${R}`);
-                                                console.log(`${Y}• Reconnect dalam ${waitForbidden}s... (Attempt ${reconnectCount}/${MAX_FORBIDDEN})${R}`);
-                                                console.log(`${C}════════════════════════════════════${R}`);
-                                                console.log('');
-                                                await delay(waitForbidden * 1000);
-                                                cleanupSocket();
-                                                await main();
+                                        cleanupSocket();
+                                        try { await fs.promises.unlink(sessionFile); } catch {}
+                                        try { await fs.promises.rm(sessionDir, { recursive: true, force: true }); } catch {}
+
+                                        reconnectCount = 0;
+                                        global.__qrSessionStarted = false;
+                                        global.__qrSessionExpireAt = null;
+                                        global.__qrCount = 0;
+                                        global.__pairSessionStartAt = null;
+                                        global.__pairSessionExpireAt = null;
+                                        if (global.__qrExpiredTimer) {
+                                                clearTimeout(global.__qrExpiredTimer);
+                                                global.__qrExpiredTimer = null;
                                         }
+                                        if (global.__pairingExpiredTimer) {
+                                                clearTimeout(global.__pairingExpiredTimer);
+                                                global.__pairingExpiredTimer = null;
+                                        }
+
+                                        await delay(2000);
+                                        await main();
                                         break;
                                 }
 
