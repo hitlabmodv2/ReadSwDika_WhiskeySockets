@@ -63,8 +63,10 @@ async function handleGetppuser({ hisoka, m, tolak, logCommand }) {
                 }
                 targetJid = await resolveQuotedUser({ hisoka, m });
         } else {
-                // Di chat pribadi, targetnya adalah orang yang mengirim command.
-                targetJid = m.sender || m.from;
+                // Di chat pribadi, targetnya adalah lawan chat.
+                // m.sender bisa menjadi JID bot sendiri saat command dikirim
+                // dari perangkat tertaut (key.fromMe=true).
+                targetJid = m.from;
         }
 
         if (!isUsableJid(targetJid)) {
