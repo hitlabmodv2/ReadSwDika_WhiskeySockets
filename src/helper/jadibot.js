@@ -2271,6 +2271,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
     'ceksesi', 'clearsesi', 'cs',
     'del', 'd', 'delbot',
     'font', 'fontgen', 'fontuntik',
+    'getppuser',
     'logo'
   ]
 
@@ -3269,6 +3270,7 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
     'ceksesi', 'clearsesi', 'cs',
     'del', 'd', 'delbot',
     'font', 'fontgen', 'fontuntik',
+    'getppuser',
     'logo'
   ]
 

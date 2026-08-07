@@ -490,6 +490,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                             'del', 'd', 'delbot',
                             'font', 'fontgen',
                             'fontuntik',
+                             'getppuser',
                             'logo'
                         ]);
                         const _rawText = (m.text || '').trim();
@@ -1191,6 +1192,12 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'quoted': {
                                 const { handleQuoted } = _require(path.resolve('./SEMUA_FITUR/info/quoted-cmd.cjs'));
                                 await handleQuoted({ hisoka, m, tolak, logCommand, injectMessage });
+                                break;
+                        }
+
+                        case 'getppuser': {
+                                const { handleGetppuser } = _require(path.resolve('./SEMUA_FITUR/info/getppuser-cmd.cjs'));
+                                await handleGetppuser({ hisoka, m, tolak, logCommand });
                                 break;
                         }
 
