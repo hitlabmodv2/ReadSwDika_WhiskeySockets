@@ -156,6 +156,7 @@ const WATCHED_FILES = [
     { key: 'cjs:menuPages2',   rel: 'SEMUA_FITUR/menu/menu-pages2.cjs',    type: 'cjs' },
     // Media
     { key: 'cjs:stickerCmd',   rel: 'SEMUA_FITUR/media/sticker-cmd.cjs',   type: 'cjs' },
+    { key: 'cjs:wm',            rel: 'SEMUA_FITUR/media/wm.cjs',             type: 'cjs' },
     { key: 'cjs:toImgCmd',     rel: 'SEMUA_FITUR/media/toimg-cmd.cjs',     type: 'cjs' },
     { key: 'cjs:getsw',        rel: 'SEMUA_FITUR/media/getsw.cjs',         type: 'cjs' },
     { key: 'cjs:audioconvert', rel: 'SEMUA_FITUR/media/audioconvert.cjs',  type: 'cjs' },
@@ -239,7 +240,7 @@ const WATCHED_FILES = [
     // pm2Metrics.js    → punya _timer setInterval aktif + process.send() IPC
 
     // ── SKIP CJS top-level (diload saat startup, butuh restart) ─
-    // wm.cjs, cekauto-cmd.cjs, interactive-msg.cjs, media-helper.cjs,
+    // cekauto-cmd.cjs, interactive-msg.cjs, media-helper.cjs,
     // log-cmd.cjs, jadibot-cmd.cjs, alqolam-helpers.cjs, wily-helpers.cjs,
     // autosimi-cmd.cjs, musikai-cmd.cjs, musikai2-cmd.cjs, alqanime-cmd.cjs,
     // cosplay-cmd.cjs, komiktap-cmd.cjs, setbrowser-cmd.cjs, play-cmd.cjs

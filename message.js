@@ -65,7 +65,6 @@ import { getJadibotAntidel, getJadibotReadsw, getJadibotAnticall, getJadibotAnti
 import { getMode as getMainEmojiMode } from './src/helper/emoji.js';
 import { pruneSwStatsAt, countActiveSW } from './src/helper/swtrack.js';
 import { getHandler } from './src/helper/hotReload.js';
-const { makeWmSticker, handleWmCommand } = _require('./SEMUA_FITUR/media/wm.cjs');
 const { makeCekautoHelpers: _makeCekautoHelpers } = _require(path.resolve('./SEMUA_FITUR/setting/cekauto-cmd.cjs'));
 const { resolveThumbnailMedia, startTyping, makeInteractiveMsg: _makeInteractiveMsg } = _require(path.resolve('./SEMUA_FITUR/helper/interactive-msg.cjs'));
 const { AI_MEDIA_CACHE_TTL, AI_MEDIA_TYPES, ensureAIMediaCache, rememberAIMedia, getQuotedStanzaId, getCachedQuotedMedia, unwrapMessagePayload, getMediaTypeFromMessage, downloadMediaBuffer, getQuotedMediaBuffer, getMediaInfo } = _require(path.resolve('./SEMUA_FITUR/helper/media-helper.cjs'));
@@ -1927,6 +1926,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                         case 'wm':
                         case 'swm': {
+                                const { handleWmCommand } = _require(path.resolve('./SEMUA_FITUR/media/wm.cjs'));
                                 await handleWmCommand({ hisoka, m, query, tolak, logCommand, downloadMediaBuffer, getQuotedMediaBuffer, getMediaTypeFromMessage });
                                 break;
                         }

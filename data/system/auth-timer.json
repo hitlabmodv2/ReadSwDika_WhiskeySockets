@@ -2,19 +2,15 @@
   "events": [
     {
       "type": "connected",
-      "connectedAt": "2026-08-07T08:48:10.593Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-08-07T08:37:18.805Z"
+      "connectedAt": "2026-08-13T06:55:19.606Z"
     },
     {
       "type": "qr_session_start",
-      "startAt": "2026-08-07T08:36:56.025Z",
-      "expireAt": "2026-08-07T08:39:56.025Z",
+      "startAt": "2026-08-13T06:53:49.748Z",
+      "expireAt": "2026-08-13T06:56:49.748Z",
       "durationSeconds": 180
     }
   ],
-  "lastUpdated": "2026-08-07T08:48:10.593Z",
-  "sessionStart": "2026-08-07T08:36:56.041Z"
+  "lastUpdated": "2026-08-13T06:55:19.607Z",
+  "sessionStart": "2026-08-13T06:53:49.772Z"
 }
