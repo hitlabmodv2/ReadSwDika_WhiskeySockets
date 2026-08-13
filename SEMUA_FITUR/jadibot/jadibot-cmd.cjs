@@ -633,7 +633,7 @@ async function handleUpbot({ hisoka, m, query, tolak, logCommand, isMainBot, jad
         const oldCmdLabel = oldCmdInfo?.remaining || 'Tidak ada data';
         const oldCmdExpire = oldCmdInfo?.expiresAtText || '-';
         const _cfg     = loadConfig ? loadConfig() : {}
-        const _ver     = _cfg.botVersion || 'V27'
+        const _ver     = _cfg.botVersion || 'V27.1'
         const _contact = (_cfg.botReply?.sourceUrl) || (_cfg.owners?.[0] ? `https://wa.me/${_cfg.owners[0]}` : 'https://wa.me/6289688206739')
 
         if (upDurationInfo.ms === 'permanent') {
@@ -852,7 +852,7 @@ async function handleDownbot({ hisoka, m, query, tolak, logCommand, isMainBot, j
         if (!downResult.expiredNow) scheduleJadibotExpiry(downNum, downSendReplyFn);
 
         const _dcfg     = loadConfig ? loadConfig() : {}
-        const _dver     = _dcfg.botVersion || 'V27'
+        const _dver     = _dcfg.botVersion || 'V27.1'
         const _dcontact = (_dcfg.botReply?.sourceUrl) || (_dcfg.owners?.[0] ? `https://wa.me/${_dcfg.owners[0]}` : 'https://wa.me/6289688206739')
 
         if (downResult.expiredNow) {
