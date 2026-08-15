@@ -368,16 +368,13 @@ async function _editKey(hisoka, m, sentKey, text) {
     return false;
 }
 
-async function _editFinalOrSend(hisoka, m, sentKey, text) {
-    const edited = await _editKey(hisoka, m, sentKey, text);
-    if (edited) return true;
-
+async function _sendFinalCard(hisoka, m, sentKey, text) {
     try {
         await hisoka.sendMessage(m.from, { text }, { quoted: m });
         return true;
     } catch (err) {
-        console.error('[HENTAIDAD] Gagal menampilkan kartu hasil:', err?.message);
-        return false;
+        console.error('[HENTAIDAD] Gagal kirim kartu hasil, coba edit:', err?.message);
+        return await _editKey(hisoka, m, sentKey, text);
     }
 }
 
@@ -515,7 +512,7 @@ async function _doDownloadAndSend({
         }, { quoted: m });
 
         const elapsedMs = Date.now() - startTime;
-        await _editFinalOrSend(hisoka, m, sentKey, txtFinalCard({
+        await _sendFinalCard(hisoka, m, sentKey, txtFinalCard({
             title, berhasil: total, total: totalImg,
             totalBytes: pdfBytes, elapsedMs, failed,
             isSearch, query, mode: 'pdf',
@@ -548,7 +545,7 @@ async function _doDownloadAndSend({
         }
 
         const elapsedMs = Date.now() - startTime;
-        await _editFinalOrSend(hisoka, m, sentKey, txtFinalCard({
+        await _sendFinalCard(hisoka, m, sentKey, txtFinalCard({
             title, berhasil: total, total: totalImg,
             totalBytes, elapsedMs, failed,
             isSearch, query, mode: 'image',

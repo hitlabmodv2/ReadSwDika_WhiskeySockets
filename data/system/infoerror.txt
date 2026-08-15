@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 14/08/2026, 15.06.18  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 15/08/2026, 08.33.42  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -31,16 +31,16 @@
 │  DETAIL
 │  Sumber      : HENTAIDAD
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 14/08/2026, 15.06.18
-│  Terakhir    : 14/08/2026, 15.06.18
+│  Pertama     : 15/08/2026, 08.33.42
+│  Terakhir    : 15/08/2026, 08.33.42
 │
 │  STACK TRACE (3 baris pertama)
 │  ▶  Error: [HENTAIDAD] Gagal download: Request failed with status code 500
 │     at console.error (file:///home/runner/workspace/index.js:434:27)
-│     at _doDownloadAndSend (/home/runner/workspace/SEMUA_FITUR/anime/hentaidad.cjs:400:38)
+│     at _doDownloadAndSend (/home/runner/workspace/SEMUA_FITUR/anime/hentaidad.cjs:474:38)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 14/08/2026, 15.06.18
+  Terakhir diperbarui: 15/08/2026, 08.33.42
 ════════════════════════════════════════════════════════════════════════
