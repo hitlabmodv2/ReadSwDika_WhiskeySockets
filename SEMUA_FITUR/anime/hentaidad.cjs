@@ -223,7 +223,26 @@ function txtConfirmCaption(chosen, galleryTitle, imageCount, headerPilih) {
     );
 }
 
-function txtDownload(chosen, headerPilih, doneNow, totalImg, batchIdx, totalBatch, mode = 'image') {
+function deliveryModeLabel(mode) {
+    return mode === 'pdf'
+        ? '`2` — 📄 PDF _(1 file PDF)_'
+        : '`1` — 🖼️ Gambar _(album foto)_';
+}
+
+function txtModeHistory(previousModes, currentMode) {
+    if (!Array.isArray(previousModes) || previousModes.length === 0) return '';
+    const previous = previousModes.map(deliveryModeLabel).join(', ');
+    return (
+        `🔁 *Pilihan format diperbarui*\n` +
+        `> ↩️ *Sebelumnya kamu pilih:* ${previous}\n` +
+        `> ➡️ *Sekarang kamu pilih:* ${deliveryModeLabel(currentMode)}\n\n`
+    );
+}
+
+function txtDownload(
+    chosen, headerPilih, doneNow, totalImg, batchIdx, totalBatch,
+    mode = 'image', previousModes = []
+) {
     const judul = fullTitle(chosen.title, `Gallery ${chosen.no}`);
     const modeLabel = mode === 'pdf' ? '📄 PDF' : '🖼️ Gambar / album';
     const batchInfo = totalBatch > 1
@@ -234,31 +253,34 @@ function txtDownload(chosen, headerPilih, doneNow, totalImg, batchIdx, totalBatc
         `${headerPilih}\n\n` +
         `✅ *Dipilih #${chosen.no}:*\n` +
         `_${judul}_\n\n` +
+        txtModeHistory(previousModes, mode) +
         `🎛️ *Format:* ${modeLabel}\n` +
         `⬇️ *Mendownload* \`${doneNow}/${totalImg} gambar\`...` +
         batchInfo
     );
 }
 
-function txtSending(chosen, headerPilih, total) {
+function txtSending(chosen, headerPilih, total, previousModes = []) {
     const judul = fullTitle(chosen.title, `Gallery ${chosen.no}`);
     return (
         `🔞 *HENTAIDAD*\n\n` +
         `${headerPilih}\n\n` +
         `✅ *Dipilih #${chosen.no}:*\n` +
         `_${judul}_\n\n` +
+        txtModeHistory(previousModes, 'image') +
         `📤 *Mengirim* \`${total} gambar\` _dalam 1 album..._\n` +
         `> _Sebentar lagi_`
     );
 }
 
-function txtSendingPdf(chosen, headerPilih, total) {
+function txtSendingPdf(chosen, headerPilih, total, previousModes = []) {
     const judul = fullTitle(chosen.title, `Gallery ${chosen.no}`);
     return (
         `🔞 *HENTAIDAD*\n\n` +
         `${headerPilih}\n\n` +
         `✅ *Dipilih #${chosen.no}:*\n` +
         `_${judul}_\n\n` +
+        txtModeHistory(previousModes, 'pdf') +
         `📄 *Membuat PDF* dari \`${total} gambar\`...\n` +
         `> _Sebentar lagi_`
     );
@@ -398,6 +420,7 @@ async function _doDownloadAndSend({
     sentKey, isSearch, query,
     logError,
     mode, // 'image' | 'pdf'
+    previousModes = [],
 }) {
     const editMain = (text) => _editKey(hisoka, m, sentKey, text);
     const { title, images } = galleryData;
@@ -411,7 +434,9 @@ async function _doDownloadAndSend({
     const allItems   = [];
     let   failed     = 0;
 
-    await editMain(txtDownload(chosen, headerPilih, 0, totalImg, 0, totalBatch, deliveryMode));
+    await editMain(txtDownload(
+        chosen, headerPilih, 0, totalImg, 0, totalBatch, deliveryMode, previousModes
+    ));
 
     for (let i = 0; i < images.length; i += CONCUR) {
         const batchIdx = Math.floor(i / CONCUR) + 1;
@@ -424,7 +449,9 @@ async function _doDownloadAndSend({
             else { failed++; console.error('[HENTAIDAD] Gagal download:', r.reason?.message); }
         }
         const doneNow = Math.min(i + CONCUR, totalImg);
-        await editMain(txtDownload(chosen, headerPilih, doneNow, totalImg, batchIdx, totalBatch, deliveryMode));
+        await editMain(txtDownload(
+            chosen, headerPilih, doneNow, totalImg, batchIdx, totalBatch, deliveryMode, previousModes
+        ));
     }
 
     if (!allItems.length) {
@@ -443,7 +470,7 @@ async function _doDownloadAndSend({
 
     if (isPdf) {
         // ── MODE PDF ────────────────────────────────────────────────────────────
-        await editMain(txtSendingPdf(chosen, headerPilih, total));
+        await editMain(txtSendingPdf(chosen, headerPilih, total, previousModes));
 
         const pdfBuf = await _generatePdf(allItems, title);
         const pdfBytes = pdfBuf.length;
@@ -472,7 +499,7 @@ async function _doDownloadAndSend({
 
     } else {
         // ── MODE GAMBAR (album) ─────────────────────────────────────────────────
-        await editMain(txtSending(chosen, headerPilih, total));
+        await editMain(txtSending(chosen, headerPilih, total, previousModes));
 
         try {
             const parentMsg = await hisoka.sendMessage(
@@ -799,6 +826,7 @@ async function handleHentaidadConfirm({
             sentKey, isSearch, query,
             logError,
             mode,
+            previousModes: [...confirm.sentModes],
         });
         if (delivered) confirm.sentModes.add(mode);
 
