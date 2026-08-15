@@ -223,8 +223,9 @@ function txtConfirmCaption(chosen, galleryTitle, imageCount, headerPilih) {
     );
 }
 
-function txtDownload(chosen, headerPilih, doneNow, totalImg, batchIdx, totalBatch) {
+function txtDownload(chosen, headerPilih, doneNow, totalImg, batchIdx, totalBatch, mode = 'image') {
     const judul = fullTitle(chosen.title, `Gallery ${chosen.no}`);
+    const modeLabel = mode === 'pdf' ? '📄 PDF' : '🖼️ Gambar / album';
     const batchInfo = totalBatch > 1
         ? `\n> _Batch_ \`${batchIdx}/${totalBatch}\` _— sabar ya_`
         : `\n> _Sabar ya, lagi diproses_`;
@@ -233,6 +234,7 @@ function txtDownload(chosen, headerPilih, doneNow, totalImg, batchIdx, totalBatc
         `${headerPilih}\n\n` +
         `✅ *Dipilih #${chosen.no}:*\n` +
         `_${judul}_\n\n` +
+        `🎛️ *Format:* ${modeLabel}\n` +
         `⬇️ *Mendownload* \`${doneNow}/${totalImg} gambar\`...` +
         batchInfo
     );
@@ -298,6 +300,15 @@ function txtBatalkan(chosen, headerPilih) {
         `_#${chosen.no}: ${judul}_\n\n` +
         `> _Ketik_ \`.hentaidad\` _untuk memulai lagi_`
     );
+}
+
+function parseDeliveryMode(rawText) {
+    const raw = String(rawText || '').trim().toLowerCase();
+    if (['1', 'g', 'gambar', 'image', 'images', 'album'].includes(raw)) return 'image';
+    if (['2', 'p', 'pdf', 'dokumen', 'document'].includes(raw)) return 'pdf';
+    if (['3', 'tidak', 'no', 'batal', 'cancel', 'gak', 'ga'].includes(raw)) return 'cancel';
+    if (['ya', 'yes', 'lanjut', 'lanjutkan', 'oke', 'ok'].includes(raw)) return 'image';
+    return null;
 }
 
 // ── Internal: edit pesan by key, silent fail ────────────────────────────────────
@@ -378,7 +389,8 @@ async function _doDownloadAndSend({
 }) {
     const editMain = (text) => _editKey(hisoka, m, sentKey, text);
     const { title, images } = galleryData;
-    const isPdf = mode === 'pdf';
+    const deliveryMode = mode === 'pdf' ? 'pdf' : 'image';
+    const isPdf = deliveryMode === 'pdf';
 
     const totalImg   = images.length;
     const CONCUR     = 8;
@@ -387,7 +399,7 @@ async function _doDownloadAndSend({
     const allItems   = [];
     let   failed     = 0;
 
-    await editMain(txtDownload(chosen, headerPilih, 0, totalImg, 0, totalBatch));
+    await editMain(txtDownload(chosen, headerPilih, 0, totalImg, 0, totalBatch, deliveryMode));
 
     for (let i = 0; i < images.length; i += CONCUR) {
         const batchIdx = Math.floor(i / CONCUR) + 1;
@@ -400,7 +412,7 @@ async function _doDownloadAndSend({
             else { failed++; console.error('[HENTAIDAD] Gagal download:', r.reason?.message); }
         }
         const doneNow = Math.min(i + CONCUR, totalImg);
-        await editMain(txtDownload(chosen, headerPilih, doneNow, totalImg, batchIdx, totalBatch));
+        await editMain(txtDownload(chosen, headerPilih, doneNow, totalImg, batchIdx, totalBatch, deliveryMode));
     }
 
     if (!allItems.length) {
@@ -705,17 +717,12 @@ async function handleHentaidadConfirm({
 
     const raw  = String(m.text || '').trim().toLowerCase();
 
-    // Nilai konfirmasi yang dikenali
-    // 1 = gambar (album), 2 = PDF, 3 = tidak jadi
-    const YES_IMAGE_VALUES = ['1', 'g', 'gambar', 'ya', 'yes', 'lanjut', 'lanjutkan', 'oke', 'ok'];
-    const YES_PDF_VALUES   = ['2', 'p', 'pdf'];
-    const NO_VALUES        = ['3', 'tidak', 'no', 'batal', 'cancel', 'gak', 'ga'];
+    // Nilai konfirmasi yang dikenali:
+    // 1 = gambar (album), 2 = PDF, 3 = tidak jadi.
+    const mode = parseDeliveryMode(raw);
+    const isNo = mode === 'cancel';
 
-    const isYes = YES_IMAGE_VALUES.includes(raw);
-    const isPdf = YES_PDF_VALUES.includes(raw);
-    const isNo  = NO_VALUES.includes(raw);
-
-    if (!isYes && !isPdf && !isNo) return false;
+    if (!mode) return false;
 
     const confirm = pendingHentaidadConfirm.get(m.sender);
 
@@ -764,7 +771,7 @@ async function handleHentaidadConfirm({
             chosen, galleryData, headerPilih,
             sentKey, isSearch, query,
             logError,
-            mode: isPdf ? 'pdf' : 'image',
+            mode,
         });
 
     } catch (err) {
