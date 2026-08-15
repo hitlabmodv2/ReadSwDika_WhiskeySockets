@@ -299,8 +299,11 @@ function txtFinalCard({ title, berhasil, total, totalBytes, elapsedMs, failed, i
     const gagalLine = failed > 0 ? `- ⚠️ *Gagal:* ~${failed} gambar~\n` : '';
     const qShort    = query || '';
     const hintLine  = isSearch
-        ? `\n> 🔎 _Cari lagi:_ \`.hentaidad ${qShort}\`\n> 📋 _Atau_ \`.hentaidad\` _untuk latest_`
-        : `\n> 🔎 _Cari judul:_ \`.hentaidad [judul]\`\n> 📋 _Atau_ \`.hentaidad\` _untuk latest terbaru_`;
+        ? `\n> 🔎 _Cari lagi:_ \`.hentaidad ${qShort}\`\n` +
+          `> 🔁 _Cari judul lain:_ \`.hentaidad [judul]\`\n` +
+          `> 📋 _Ketik_ \`.hentaidad\` _untuk melihat latest_`
+        : `\n> 🔎 _Cari judul:_ \`.hentaidad [judul]\`\n` +
+          `> 📋 _Ketik_ \`.hentaidad\` _untuk melihat latest lagi_`;
     const isPdf     = mode === 'pdf';
 
     return (
