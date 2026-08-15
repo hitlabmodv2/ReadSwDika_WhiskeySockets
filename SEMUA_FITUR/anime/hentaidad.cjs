@@ -149,6 +149,11 @@ function fmtDur(ms) {
     return r > 0 ? `${m} mnt ${r} dtk` : `${m} menit`;
 }
 
+function fullTitle(raw, fallback = 'Untitled Gallery') {
+    const title = String(raw ?? '').replace(/\s+/g, ' ').trim();
+    return title || fallback;
+}
+
 // ── Teks-teks UI ────────────────────────────────────────────────────────────────
 
 function txtLoading(isSearch, query) {
@@ -159,14 +164,14 @@ function txtLoading(isSearch, query) {
 
 function txtList(items, query) {
     const isSearch   = query && query.length > 0;
-    const qShort     = isSearch && query.length > 30 ? query.slice(0, 30) + '…' : query;
+    const qShort     = query || '';
     const headerLine = isSearch
         ? `🔎 *Hasil untuk:* _"${qShort}"_\n_${items.length} galeri ditemukan_`
         : `📋 *Latest Releases* — _${items.length} galeri_`;
 
     let text = `🔞 *HENTAIDAD*\n\n${headerLine}\n\n`;
     for (const it of items) {
-        const judul = it.title.length > 50 ? it.title.slice(0, 50) + '…' : it.title;
+        const judul = fullTitle(it.title, `Gallery ${it.no}`);
         text += `${it.no}. _${judul}_\n`;
     }
     text += `\n> 💬 *Reply* pesan ini dengan *nomor* pilihan\n`;
@@ -191,7 +196,7 @@ function txtNotFound(query) {
 }
 
 function txtDipilih(chosen, headerPilih) {
-    const judul = chosen.title.length > 48 ? chosen.title.slice(0, 48) + '…' : chosen.title;
+    const judul = fullTitle(chosen.title, `Gallery ${chosen.no}`);
     return (
         `🔞 *HENTAIDAD*\n\n` +
         `${headerPilih}\n\n` +
@@ -204,7 +209,7 @@ function txtDipilih(chosen, headerPilih) {
 
 /** Teks caption untuk pesan konfirmasi (thumbnail + reply 1/2/3) */
 function txtConfirmCaption(chosen, galleryTitle, imageCount, headerPilih) {
-    const judul = galleryTitle.length > 52 ? galleryTitle.slice(0, 52) + '…' : galleryTitle;
+    const judul = fullTitle(galleryTitle, fullTitle(chosen.title, `Gallery ${chosen.no}`));
     return (
         `🔞 *HENTAIDAD — Konfirmasi*\n\n` +
         `${headerPilih}\n\n` +
@@ -219,7 +224,7 @@ function txtConfirmCaption(chosen, galleryTitle, imageCount, headerPilih) {
 }
 
 function txtDownload(chosen, headerPilih, doneNow, totalImg, batchIdx, totalBatch) {
-    const judul = chosen.title.length > 48 ? chosen.title.slice(0, 48) + '…' : chosen.title;
+    const judul = fullTitle(chosen.title, `Gallery ${chosen.no}`);
     const batchInfo = totalBatch > 1
         ? `\n> _Batch_ \`${batchIdx}/${totalBatch}\` _— sabar ya_`
         : `\n> _Sabar ya, lagi diproses_`;
@@ -234,7 +239,7 @@ function txtDownload(chosen, headerPilih, doneNow, totalImg, batchIdx, totalBatc
 }
 
 function txtSending(chosen, headerPilih, total) {
-    const judul = chosen.title.length > 48 ? chosen.title.slice(0, 48) + '…' : chosen.title;
+    const judul = fullTitle(chosen.title, `Gallery ${chosen.no}`);
     return (
         `🔞 *HENTAIDAD*\n\n` +
         `${headerPilih}\n\n` +
@@ -246,7 +251,7 @@ function txtSending(chosen, headerPilih, total) {
 }
 
 function txtSendingPdf(chosen, headerPilih, total) {
-    const judul = chosen.title.length > 48 ? chosen.title.slice(0, 48) + '…' : chosen.title;
+    const judul = fullTitle(chosen.title, `Gallery ${chosen.no}`);
     return (
         `🔞 *HENTAIDAD*\n\n` +
         `${headerPilih}\n\n` +
@@ -258,9 +263,9 @@ function txtSendingPdf(chosen, headerPilih, total) {
 }
 
 function txtFinalCard({ title, berhasil, total, totalBytes, elapsedMs, failed, isSearch, query, mode }) {
-    const judul     = title.length > 52 ? title.slice(0, 52) + '…' : title;
+    const judul     = fullTitle(title);
     const gagalLine = failed > 0 ? `- ⚠️ *Gagal:* ~${failed} gambar~\n` : '';
-    const qShort    = query && query.length > 24 ? query.slice(0, 24) + '…' : query;
+    const qShort    = query || '';
     const hintLine  = isSearch
         ? `\n> 🔎 _Cari lagi:_ \`.hentaidad ${qShort}\`\n> 📋 _Atau_ \`.hentaidad\` _untuk latest_`
         : `\n> 🔎 _Cari judul:_ \`.hentaidad [judul]\`\n> 📋 _Atau_ \`.hentaidad\` _untuk latest terbaru_`;
@@ -285,7 +290,7 @@ function txtError(msg) {
 }
 
 function txtBatalkan(chosen, headerPilih) {
-    const judul = chosen.title.length > 48 ? chosen.title.slice(0, 48) + '…' : chosen.title;
+    const judul = fullTitle(chosen.title, `Gallery ${chosen.no}`);
     return (
         `🔞 *HENTAIDAD*\n\n` +
         `${headerPilih}\n\n` +
@@ -401,7 +406,7 @@ async function _doDownloadAndSend({
     if (!allItems.length) {
         await editMain(
             `🔞 *HENTAIDAD*\n\n${headerPilih}\n\n` +
-            `✅ *Dipilih #${chosen.no}:* _${chosen.title.slice(0, 48)}_\n\n` +
+            `✅ *Dipilih #${chosen.no}:* _${fullTitle(chosen.title, `Gallery ${chosen.no}`)}_\n\n` +
             `❌ *Semua gambar gagal didownload*\n` +
             `> _Coba lagi nanti_`
         );
@@ -430,7 +435,7 @@ async function _doDownloadAndSend({
             document : pdfBuf,
             mimetype : 'application/pdf',
             fileName : `${safeName}.pdf`,
-            caption  : `📄 *${title.length > 60 ? title.slice(0, 60) + '…' : title}*\n📸 ${total} halaman`,
+            caption  : `📄 *${fullTitle(title)}*\n📸 ${total} halaman`,
         }, { quoted: m });
 
         const elapsedMs = Date.now() - startTime;
@@ -593,7 +598,7 @@ async function handleHentaidadChoice({
 
     const chosen      = pending.results[idx];
     const headerPilih = pending.isSearch
-        ? `🔎 *Hasil:* _"${(pending.query || '').length > 28 ? pending.query.slice(0, 28) + '…' : pending.query}"_`
+        ? `🔎 *Hasil:* _"${pending.query || ''}"_`
         : `📋 *Latest Releases*`;
 
     const editMain = (text) => _editKey(hisoka, m, pending.sentKey, text);
@@ -619,7 +624,7 @@ async function handleHentaidadChoice({
         if (imageCount === 0) {
             await editMain(
                 `🔞 *HENTAIDAD*\n\n${headerPilih}\n\n` +
-                `✅ *Dipilih #${chosen.no}:* _${chosen.title.slice(0, 48)}_\n\n` +
+                `✅ *Dipilih #${chosen.no}:* _${fullTitle(chosen.title, `Gallery ${chosen.no}`)}_\n\n` +
                 `❌ *Tidak ada gambar ditemukan*\n` +
                 `> _Galeri ini mungkin kosong atau belum tersedia_`
             );
@@ -631,7 +636,7 @@ async function handleHentaidadChoice({
         await editMain(
             `🔞 *HENTAIDAD*\n\n${headerPilih}\n\n` +
             `✅ *Dipilih #${chosen.no}:*\n` +
-            `_${galleryTitle.length > 48 ? galleryTitle.slice(0, 48) + '…' : galleryTitle}_\n\n` +
+            `_${fullTitle(galleryTitle, fullTitle(chosen.title, `Gallery ${chosen.no}`))}_\n\n` +
             `❓ _Menunggu konfirmasi..._`
         );
 
