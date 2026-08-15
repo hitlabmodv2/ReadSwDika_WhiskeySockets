@@ -300,10 +300,9 @@ function txtFinalCard({ title, berhasil, total, totalBytes, elapsedMs, failed, i
     const qShort    = query || '';
     const hintLine  = isSearch
         ? `\n> 🔎 _Cari lagi:_ \`.hentaidad ${qShort}\`\n` +
-          `> 🔁 _Cari judul lain:_ \`.hentaidad [judul]\`\n` +
-          `> 📋 _Ketik_ \`.hentaidad\` _untuk melihat latest_`
+          `> 📋 _Atau_ \`.hentaidad\` _untuk latest_`
         : `\n> 🔎 _Cari judul:_ \`.hentaidad [judul]\`\n` +
-          `> 📋 _Ketik_ \`.hentaidad\` _untuk melihat latest lagi_`;
+          `> 📋 _Atau_ \`.hentaidad\` _untuk latest_`;
     const isPdf     = mode === 'pdf';
 
     return (
