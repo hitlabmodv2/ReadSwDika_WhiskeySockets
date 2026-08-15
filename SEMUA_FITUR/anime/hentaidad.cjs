@@ -369,6 +369,11 @@ async function _editKey(hisoka, m, sentKey, text) {
 }
 
 async function _sendFinalCard(hisoka, m, sentKey, text) {
+    if (sentKey) {
+        const edited = await _editKey(hisoka, m, sentKey, text);
+        if (edited) return true;
+    }
+
     try {
         await hisoka.sendMessage(m.from, { text }, { quoted: m });
         return true;
@@ -443,6 +448,7 @@ async function _doDownloadAndSend({
     logError,
     mode, // 'image' | 'pdf'
     previousModes = [],
+    resultKey = null,
 }) {
     const editMain = (text) => _editKey(hisoka, m, sentKey, text);
     const { title, images } = galleryData;
@@ -512,7 +518,7 @@ async function _doDownloadAndSend({
         }, { quoted: m });
 
         const elapsedMs = Date.now() - startTime;
-        await _sendFinalCard(hisoka, m, sentKey, txtFinalCard({
+        await _sendFinalCard(hisoka, m, resultKey || sentKey, txtFinalCard({
             title, berhasil: total, total: totalImg,
             totalBytes: pdfBytes, elapsedMs, failed,
             isSearch, query, mode: 'pdf',
@@ -545,7 +551,7 @@ async function _doDownloadAndSend({
         }
 
         const elapsedMs = Date.now() - startTime;
-        await _sendFinalCard(hisoka, m, sentKey, txtFinalCard({
+        await _sendFinalCard(hisoka, m, resultKey || sentKey, txtFinalCard({
             title, berhasil: total, total: totalImg,
             totalBytes, elapsedMs, failed,
             isSearch, query, mode: 'image',
@@ -841,12 +847,14 @@ async function handleHentaidadConfirm({
     // ── YA (gambar atau PDF): download + kirim ───────────────────────────────
     try {
         const previousModes = [...confirm.sentModes];
+        let resultKey = null;
         if (previousModes.length > 0) {
-            await hisoka.sendMessage(
+            const switchSent = await hisoka.sendMessage(
                 m.from,
                 { text: txtModeSwitchNotice(previousModes, mode) },
                 { quoted: m }
             );
+            resultKey = switchSent?.key || null;
         }
 
         await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
@@ -858,6 +866,7 @@ async function handleHentaidadConfirm({
             logError,
             mode,
             previousModes,
+            resultKey,
         });
         if (delivered) confirm.sentModes.add(mode);
 
