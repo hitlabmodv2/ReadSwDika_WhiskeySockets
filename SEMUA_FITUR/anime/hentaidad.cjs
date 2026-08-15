@@ -302,6 +302,18 @@ function txtBatalkan(chosen, headerPilih) {
     );
 }
 
+function txtAlreadySent(chosen, headerPilih, mode) {
+    const judul = fullTitle(chosen.title, `Gallery ${chosen.no}`);
+    const modeLabel = mode === 'pdf' ? '📄 PDF' : '🖼️ Gambar / album';
+    return (
+        `🔞 *HENTAIDAD*\n\n` +
+        `${headerPilih}\n\n` +
+        `📌 *${judul}*\n` +
+        `☑️ *${modeLabel} sudah terkirim sebelumnya*\n\n` +
+        `> _Reply pesan konfirmasi dengan format lain jika diperlukan_`
+    );
+}
+
 function parseDeliveryMode(rawText) {
     const raw = String(rawText || '').trim().toLowerCase();
     if (['1', 'g', 'gambar', 'image', 'images', 'album'].includes(raw)) return 'image';
@@ -423,7 +435,7 @@ async function _doDownloadAndSend({
             `> _Coba lagi nanti_`
         );
         await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
-        return;
+        return false;
     }
 
     const total      = allItems.length;
@@ -491,6 +503,8 @@ async function _doDownloadAndSend({
         }));
         await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
     }
+
+    return true;
 }
 
 // ── COMMAND HANDLER UTAMA ──────────────────────────────────────────────────────
@@ -725,6 +739,7 @@ async function handleHentaidadConfirm({
     if (!mode) return false;
 
     const confirm = pendingHentaidadConfirm.get(m.sender);
+    if (!confirm.sentModes) confirm.sentModes = new Set();
 
     // Jika ada confirmMsgId, pastikan user reply ke pesan konfirmasi yang benar
     if (confirm?.confirmMsgId && m.isQuoted) {
@@ -747,32 +762,45 @@ async function handleHentaidadConfirm({
         return true;
     }
 
-    // ── Kunci — hapus dari pending ────────────────────────────────────────────
-    confirm.loading = true;
-    if (confirm.timeout) clearTimeout(confirm.timeout);
-    pendingHentaidadConfirm.delete(m.sender);
-
     const { chosen, galleryData, headerPilih, sentKey, isSearch, query } = confirm;
     const editMain = (text) => _editKey(hisoka, m, sentKey, text);
 
     // ── TIDAK: batalkan ───────────────────────────────────────────────────────
     if (isNo) {
+        if (confirm.timeout) clearTimeout(confirm.timeout);
+        pendingHentaidadConfirm.delete(m.sender);
         try { await hisoka.sendMessage(m.from, { react: { text: '🚫', key: m.key } }); } catch (_) {}
         await editMain(txtBatalkan(chosen, headerPilih));
         return true;
     }
 
+    if (confirm.sentModes.has(mode)) {
+        try {
+            await hisoka.sendMessage(
+                m.from,
+                { text: txtAlreadySent(chosen, headerPilih, mode) },
+                { quoted: m }
+            );
+            await hisoka.sendMessage(m.from, { react: { text: '☑️', key: m.key } });
+        } catch (_) {}
+        return true;
+    }
+
+    // ── Kunci proses, tetapi pertahankan pending agar format lain bisa dipilih ──
+    confirm.loading = true;
+
     // ── YA (gambar atau PDF): download + kirim ───────────────────────────────
     try {
         await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
 
-        await _doDownloadAndSend({
+        const delivered = await _doDownloadAndSend({
             hisoka, m,
             chosen, galleryData, headerPilih,
             sentKey, isSearch, query,
             logError,
             mode,
         });
+        if (delivered) confirm.sentModes.add(mode);
 
     } catch (err) {
         console.error('[HENTAIDAD] Confirm error:', err?.message);
@@ -780,6 +808,8 @@ async function handleHentaidadConfirm({
             logError(err instanceof Error ? err : new Error(String(err?.message || err)), 'hentaidad-confirm');
         await editMain(txtError(err?.message));
         await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
+    } finally {
+        confirm.loading = false;
     }
 
     return true;
