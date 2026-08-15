@@ -239,6 +239,14 @@ function txtModeHistory(previousModes, currentMode) {
     );
 }
 
+function txtModeSwitchNotice(previousModes, currentMode) {
+    return (
+        `🔞 *HENTAIDAD*\n\n` +
+        txtModeHistory(previousModes, currentMode) +
+        `⏳ _Menyiapkan pengiriman ${currentMode === 'pdf' ? 'PDF' : 'album gambar'}..._`
+    );
+}
+
 function txtDownload(
     chosen, headerPilih, doneNow, totalImg, batchIdx, totalBatch,
     mode = 'image', previousModes = []
@@ -818,6 +826,15 @@ async function handleHentaidadConfirm({
 
     // ── YA (gambar atau PDF): download + kirim ───────────────────────────────
     try {
+        const previousModes = [...confirm.sentModes];
+        if (previousModes.length > 0) {
+            await hisoka.sendMessage(
+                m.from,
+                { text: txtModeSwitchNotice(previousModes, mode) },
+                { quoted: m }
+            );
+        }
+
         await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
 
         const delivered = await _doDownloadAndSend({
@@ -826,7 +843,7 @@ async function handleHentaidadConfirm({
             sentKey, isSearch, query,
             logError,
             mode,
-            previousModes: [...confirm.sentModes],
+            previousModes,
         });
         if (delivered) confirm.sentModes.add(mode);
 
