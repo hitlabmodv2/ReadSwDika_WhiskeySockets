@@ -363,7 +363,22 @@ async function _editKey(hisoka, m, sentKey, text) {
         } else {
             await hisoka.sendMessage(m.from, { text }, { quoted: m });
         }
+        return true;
     } catch (_) {}
+    return false;
+}
+
+async function _editFinalOrSend(hisoka, m, sentKey, text) {
+    const edited = await _editKey(hisoka, m, sentKey, text);
+    if (edited) return true;
+
+    try {
+        await hisoka.sendMessage(m.from, { text }, { quoted: m });
+        return true;
+    } catch (err) {
+        console.error('[HENTAIDAD] Gagal menampilkan kartu hasil:', err?.message);
+        return false;
+    }
 }
 
 // ── Kirim pesan konfirmasi: thumbnail + teks (reply 1 = ya, 2 = tidak) ──────────
@@ -500,7 +515,7 @@ async function _doDownloadAndSend({
         }, { quoted: m });
 
         const elapsedMs = Date.now() - startTime;
-        await editMain(txtFinalCard({
+        await _editFinalOrSend(hisoka, m, sentKey, txtFinalCard({
             title, berhasil: total, total: totalImg,
             totalBytes: pdfBytes, elapsedMs, failed,
             isSearch, query, mode: 'pdf',
@@ -533,7 +548,7 @@ async function _doDownloadAndSend({
         }
 
         const elapsedMs = Date.now() - startTime;
-        await editMain(txtFinalCard({
+        await _editFinalOrSend(hisoka, m, sentKey, txtFinalCard({
             title, berhasil: total, total: totalImg,
             totalBytes, elapsedMs, failed,
             isSearch, query, mode: 'image',
