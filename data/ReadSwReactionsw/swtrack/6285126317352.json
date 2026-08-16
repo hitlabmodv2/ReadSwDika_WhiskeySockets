@@ -1,0 +1,67 @@
+{
+  "ACC2458782FA4B759B08D4755513E614": {
+    "id": "ACC2458782FA4B759B08D4755513E614",
+    "sender": "6285126317352@s.whatsapp.net",
+    "name": "m s s",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-23T12:18:04.599Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐺",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285126317352",
+    "resolvedPn": "6285126317352@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285126317352@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACC2458782FA4B759B08D4755513E614",
+      "participant": "137151878590636@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-23T12:18:12.699Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285126317352@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACC2458782FA4B759B08D4755513E614",
+        "participant": "137151878590636@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285126317352@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACC2458782FA4B759B08D4755513E614",
+        "participant": "6285126317352@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-23T12:18:12.699Z"
+  },
+  "ACDD0D18BD0F4448142121EFA2DF3F27": {
+    "id": "ACDD0D18BD0F4448142121EFA2DF3F27",
+    "sender": "6285126317352@s.whatsapp.net",
+    "name": "m s s",
+    "type": "protocolMessage",
+    "arrivedAt": "2026-06-23T12:18:06.572Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐺",
+    "source": "group",
+    "number": "6285126317352",
+    "messageKey": {
+      "remoteJid": "120363424557936431@g.us",
+      "fromMe": false,
+      "id": "ACDD0D18BD0F4448142121EFA2DF3F27",
+      "participant": "137151878590636@lid",
+      "participantAlt": "6285126317352@s.whatsapp.net",
+      "addressingMode": "lid"
+    },
+    "resolvedPn": "6285126317352@s.whatsapp.net",
+    "updatedAt": "2026-06-23T12:18:19.805Z",
+    "processedAt": "2026-06-23T12:18:19.805Z"
+  }
+}

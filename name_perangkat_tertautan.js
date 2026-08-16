@@ -17,6 +17,10 @@
  *  Hargai karya, gunakan dengan bijak.
  *  Terima kasih sudah support.
  * ───────────────────────────────
+ *
+ *  name_perangkat_tertautan.js — Daftar profil perangkat WhatsApp
+ *  Menyediakan pilihan browser/device untuk proses pairing bot
+ * ───────────────────────────────
  */
 /**
  * ─────────────────────────────────────────────

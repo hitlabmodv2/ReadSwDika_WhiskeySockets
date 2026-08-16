@@ -1,0 +1,44 @@
+{
+  "3AE2A18121B346F953A4": {
+    "id": "3AE2A18121B346F953A4",
+    "sender": "6285768785374@s.whatsapp.net",
+    "name": "shern",
+    "type": "videoMessage",
+    "arrivedAt": "2026-06-25T06:03:02.093Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "5️⃣➕3️⃣🟰8️⃣",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285768785374",
+    "resolvedPn": "6285768785374@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285768785374@s.whatsapp.net",
+      "fromMe": false,
+      "id": "3AE2A18121B346F953A4",
+      "participant": "266116593102921@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-06-25T06:03:21.868Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285768785374@s.whatsapp.net",
+        "fromMe": false,
+        "id": "3AE2A18121B346F953A4",
+        "participant": "266116593102921@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285768785374@s.whatsapp.net",
+        "fromMe": false,
+        "id": "3AE2A18121B346F953A4",
+        "participant": "6285768785374@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-06-25T06:03:21.868Z"
+  }
+}

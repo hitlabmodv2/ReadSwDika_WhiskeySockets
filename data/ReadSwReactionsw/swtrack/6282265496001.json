@@ -1,0 +1,46 @@
+{
+  "AC500B6A4273A861158F93F726DF1F0B": {
+    "id": "AC500B6A4273A861158F93F726DF1F0B",
+    "sender": "6282265496001@s.whatsapp.net",
+    "name": "𝙯𝙤𝙧𝙖",
+    "type": "videoMessage",
+    "arrivedAt": "2026-07-20T03:48:25.261Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐋",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6282265496001",
+    "resolvedPn": "6282265496001@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6282265496001@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC500B6A4273A861158F93F726DF1F0B",
+      "participant": "112460027719794@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-20T03:55:57.915Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282265496001@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC500B6A4273A861158F93F726DF1F0B",
+        "participant": "112460027719794@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282265496001@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC500B6A4273A861158F93F726DF1F0B",
+        "participant": "6282265496001@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-20T03:48:31.212Z",
+    "deleted": true,
+    "deletedAt": "2026-07-20T03:55:57.915Z"
+  }
+}

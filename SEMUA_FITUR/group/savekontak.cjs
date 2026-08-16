@@ -6,9 +6,9 @@
  *  Telegram    : @Wilykun1994
  * ───────────────────────────────
  *  Script ini khusus donasi/VIP
- *  Support dari kalian semangatin saya
- *  makin rajin update fitur, fix bug,
- *  dan rawat script ini.
+ *  Support dari kalian bikin saya
+ *  makin semangat update fitur,
+ *  fix bug, dan rawat script ini.
  *
  *  Dilarang menjual ulang script ini
  *  Tanpa izin resmi dari developer.

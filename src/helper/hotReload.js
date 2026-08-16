@@ -5,17 +5,17 @@
  *  WhatsApp    : 6289688206739
  *  Telegram    : @Wilykun1994
  * ───────────────────────────────
- *  Script ini eksklusif untuk member donasi/VIP.
- *  Donasi kalian adalah alasan saya terus semangat
- *  ngoding, benerin bug, dan ngerawat script ini
- *  supaya makin stabil ke depannya.
+ *  Script ini khusus donasi/VIP
+ *  Support dari kalian bikin saya
+ *  makin semangat update fitur,
+ *  fix bug, dan rawat script ini.
  *
- *  Jual beli ulang script ini tanpa izin developer
- *  sangat dilarang. Ketahuan jual ulang tanpa izin?
- *  Siap-siap kena blacklist — NO UPDATE, NO FIX!
+ *  Dilarang menjual ulang script ini
+ *  Tanpa izin resmi dari developer.
+ *  Jika ketahuan = NO UPDATE / NO FIX
  *
- *  Yuk hargai kerja keras developer, pakai dengan
- *  bijak. Makasih banyak buat dukungannya selama ini.
+ *  Hargai karya, gunakan dengan bijak.
+ *  Terima kasih sudah support.
  * ───────────────────────────────
  *
  *  hotReload.js — Hot reload modul tanpa restart
@@ -115,6 +115,7 @@ const WATCHED_FILES = [
     { key: 'cjs:matiCmd',      rel: 'SEMUA_FITUR/info/mati-cmd.cjs',       type: 'cjs' },
     { key: 'cjs:cekjidgc',     rel: 'SEMUA_FITUR/info/cekjidgc.cjs',      type: 'cjs' },
     { key: 'cjs:cekjidgcall',  rel: 'SEMUA_FITUR/info/cekjidgcall.cjs',   type: 'cjs' },
+    { key: 'cjs:getppuser',    rel: 'SEMUA_FITUR/info/getppuser-cmd.cjs', type: 'cjs' },
     // Group
     { key: 'cjs:hidetag',      rel: 'SEMUA_FITUR/group/hidetag.cjs',       type: 'cjs' },
     { key: 'cjs:sematkan',     rel: 'SEMUA_FITUR/group/sematkan.cjs',      type: 'cjs' },
@@ -155,6 +156,7 @@ const WATCHED_FILES = [
     { key: 'cjs:menuPages2',   rel: 'SEMUA_FITUR/menu/menu-pages2.cjs',    type: 'cjs' },
     // Media
     { key: 'cjs:stickerCmd',   rel: 'SEMUA_FITUR/media/sticker-cmd.cjs',   type: 'cjs' },
+    { key: 'cjs:wm',            rel: 'SEMUA_FITUR/media/wm.cjs',             type: 'cjs' },
     { key: 'cjs:toImgCmd',     rel: 'SEMUA_FITUR/media/toimg-cmd.cjs',     type: 'cjs' },
     { key: 'cjs:getsw',        rel: 'SEMUA_FITUR/media/getsw.cjs',         type: 'cjs' },
     { key: 'cjs:audioconvert', rel: 'SEMUA_FITUR/media/audioconvert.cjs',  type: 'cjs' },
@@ -238,7 +240,7 @@ const WATCHED_FILES = [
     // pm2Metrics.js    → punya _timer setInterval aktif + process.send() IPC
 
     // ── SKIP CJS top-level (diload saat startup, butuh restart) ─
-    // wm.cjs, cekauto-cmd.cjs, interactive-msg.cjs, media-helper.cjs,
+    // cekauto-cmd.cjs, interactive-msg.cjs, media-helper.cjs,
     // log-cmd.cjs, jadibot-cmd.cjs, alqolam-helpers.cjs, wily-helpers.cjs,
     // autosimi-cmd.cjs, musikai-cmd.cjs, musikai2-cmd.cjs, alqanime-cmd.cjs,
     // cosplay-cmd.cjs, komiktap-cmd.cjs, setbrowser-cmd.cjs, play-cmd.cjs

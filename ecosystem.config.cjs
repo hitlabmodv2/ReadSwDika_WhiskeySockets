@@ -17,6 +17,10 @@
  *  Hargai karya, gunakan dengan bijak.
  *  Terima kasih sudah support.
  * ───────────────────────────────
+ *
+ *  ecosystem.config.cjs — Konfigurasi proses PM2 untuk Wily Bot
+ *  Menjalankan bot utama dengan auto-restart dan monitoring resource
+ * ───────────────────────────────
  */
 // PM2 Ecosystem Config — Wily Bot (ReadswDika V13)
 // Usage:

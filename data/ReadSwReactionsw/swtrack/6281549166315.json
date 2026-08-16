@@ -1,0 +1,44 @@
+{
+  "AC2C261DF8053F625957E615AEEEA30F": {
+    "id": "AC2C261DF8053F625957E615AEEEA30F",
+    "sender": "6281549166315@s.whatsapp.net",
+    "name": "candra",
+    "type": "videoMessage",
+    "arrivedAt": "2026-07-19T05:14:28.136Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐬",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6281549166315",
+    "resolvedPn": "6281549166315@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6281549166315@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC2C261DF8053F625957E615AEEEA30F",
+      "participant": "215693693821070@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-19T05:14:41.261Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281549166315@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC2C261DF8053F625957E615AEEEA30F",
+        "participant": "215693693821070@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281549166315@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC2C261DF8053F625957E615AEEEA30F",
+        "participant": "6281549166315@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-19T05:14:41.261Z"
+  }
+}

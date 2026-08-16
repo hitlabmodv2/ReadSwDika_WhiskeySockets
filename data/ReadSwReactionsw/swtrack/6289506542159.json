@@ -1,0 +1,67 @@
+{
+  "ACC9084E395C0B6FE7AB86E6D6C223DD": {
+    "id": "ACC9084E395C0B6FE7AB86E6D6C223DD",
+    "sender": "6289506542159@s.whatsapp.net",
+    "name": "Faizz",
+    "type": "protocolMessage",
+    "arrivedAt": "2026-07-20T03:55:00.984Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐠",
+    "source": "group",
+    "number": "6289506542159",
+    "messageKey": {
+      "remoteJid": "120363405980349907@g.us",
+      "fromMe": false,
+      "id": "ACC9084E395C0B6FE7AB86E6D6C223DD",
+      "participant": "233191424143574@lid",
+      "participantAlt": "6289506542159@s.whatsapp.net",
+      "addressingMode": "lid"
+    },
+    "resolvedPn": "6289506542159@s.whatsapp.net",
+    "updatedAt": "2026-07-20T03:55:05.239Z",
+    "processedAt": "2026-07-20T03:55:05.239Z"
+  },
+  "ACF80E93B8F30380E37DD69B0F756C2C": {
+    "id": "ACF80E93B8F30380E37DD69B0F756C2C",
+    "sender": "6289506542159@s.whatsapp.net",
+    "name": "Faizz",
+    "type": "videoMessage",
+    "arrivedAt": "2026-07-20T03:55:00.986Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐬",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6289506542159",
+    "resolvedPn": "6289506542159@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6289506542159@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACF80E93B8F30380E37DD69B0F756C2C",
+      "participant": "233191424143574@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-20T03:55:11.893Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289506542159@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACF80E93B8F30380E37DD69B0F756C2C",
+        "participant": "233191424143574@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289506542159@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACF80E93B8F30380E37DD69B0F756C2C",
+        "participant": "6289506542159@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-20T03:55:11.893Z"
+  }
+}

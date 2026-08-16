@@ -37,13 +37,17 @@ async function makeWmSticker(imageBuffer, { packName = 'Wily Bot', authorName = 
         return await sticker.toBuffer();
 }
 
+function isWmSupportedMedia(type) {
+        return type === 'imageMessage' || type === 'stickerMessage';
+}
+
 async function handleWmCommand({ hisoka, m, query, tolak, logCommand, downloadMediaBuffer, getQuotedMediaBuffer, getMediaTypeFromMessage }) {
         try {
                 const pfxWm = m.prefix || '.';
                 const wmCurrentType = getMediaTypeFromMessage(m);
                 const wmQuotedType  = m.isQuoted ? getMediaTypeFromMessage(m.quoted) : '';
-                const canUseWmCurrent = m.isMedia && wmCurrentType === 'imageMessage';
-                const canUseWmQuoted  = m.isQuoted && wmQuotedType === 'imageMessage';
+                const canUseWmCurrent = m.isMedia && isWmSupportedMedia(wmCurrentType);
+                const canUseWmQuoted  = m.isQuoted && isWmSupportedMedia(wmQuotedType);
 
                 if (!canUseWmCurrent && !canUseWmQuoted) {
                         const helpText =
@@ -55,12 +59,15 @@ async function handleWmCommand({ hisoka, m, query, tolak, logCommand, downloadMe
                                 `│ 📋 *Cara Pakai:*\n` +
                                 `│ • Kirim gambar + caption:\n` +
                                 `│   _${pfxWm}wm NamaPack|NamaAuthor_\n` +
-                                `│ • Reply gambar + ketik:\n` +
+                                `│ • Reply gambar/sticker + ketik:\n` +
                                 `│   _${pfxWm}wm NamaPack|NamaAuthor_\n` +
                                 `│\n` +
                                 `│ 📝 *Contoh:*\n` +
                                 `│   ${pfxWm}wm Bang|Wily\n` +
                                 `│   ${pfxWm}wm Wilybot|Owner\n` +
+                                `│\n` +
+                                `│ ℹ️ Sticker juga bisa diproses\n` +
+                                `│    dengan cara di-reply!\n` +
                                 `│\n` +
                                 `│ ℹ️ Pisahkan Pack & Author\n` +
                                 `│    dengan tanda *|*\n` +

@@ -1,0 +1,46 @@
+{
+  "AC78F8F033D5551ABC6B64918138F5F5": {
+    "id": "AC78F8F033D5551ABC6B64918138F5F5",
+    "sender": "6281243994822@s.whatsapp.net",
+    "name": "Lisa",
+    "type": "videoMessage",
+    "arrivedAt": "2026-07-19T05:14:50.617Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐟",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6281243994822",
+    "resolvedPn": "6281243994822@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6281243994822@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC78F8F033D5551ABC6B64918138F5F5",
+      "participant": "91371201396894@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-07-20T03:49:50.830Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281243994822@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC78F8F033D5551ABC6B64918138F5F5",
+        "participant": "91371201396894@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6281243994822@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC78F8F033D5551ABC6B64918138F5F5",
+        "participant": "6281243994822@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-07-19T05:15:10.892Z",
+    "deleted": true,
+    "deletedAt": "2026-07-20T03:49:50.830Z"
+  }
+}

@@ -34,10 +34,10 @@ async function handleCeksw({ hisoka, m, query, tolak, logCommand, fs, path, load
                 const _botNum      = jadibotNum || hisoka.user?.id?.split(':')[0] || '';
                 const swStatsPath  = isJadibot
                         ? path.join(process.cwd(), 'data_jadibot', jadibotNum, 'ceksw', 'swstats.json')
-                        : path.join(process.cwd(), 'data', 'ceksw', 'swstats.json');
+                        : path.join(process.cwd(), 'data', 'ReadSwReactionsw', 'ceksw', 'swstats.json');
                 const swTrackDir   = isJadibot
-                        ? path.join(process.cwd(), 'data_jadibot', jadibotNum, 'swtrack', 'users')
-                        : path.join(process.cwd(), 'data', 'swtrack', 'users');
+                        ? path.join(process.cwd(), 'data_jadibot', jadibotNum, 'swtrack')
+                        : path.join(process.cwd(), 'data', 'ReadSwReactionsw', 'swtrack');
 
                 const qLower = query ? query.trim().toLowerCase() : '';
 
@@ -115,7 +115,7 @@ async function handleCeksw({ hisoka, m, query, tolak, logCommand, fs, path, load
                 const swRetryMap    = {};
                 try {
                         if (fs.existsSync(swTrackDir)) {
-                                const files = fs.readdirSync(swTrackDir).filter(f => f.endsWith('.json'));
+                                const files = fs.readdirSync(swTrackDir).filter(f => f.endsWith('.json') && f !== 'users.json');
                                 for (const file of files) {
                                         const num = file.replace('.json', '');
                                         swTrackedNums.add(num);

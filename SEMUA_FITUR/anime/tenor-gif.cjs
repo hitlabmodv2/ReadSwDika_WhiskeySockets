@@ -1,6 +1,6 @@
 /**
  * ───────────────────────────────
- *  Base Script : Amane
+ *  Base Script : Bang Dika Ardnt
  *  Recode By   : Bang Wilykun
  *  WhatsApp    : 6289688206739
  *  Telegram    : @Wilykun1994

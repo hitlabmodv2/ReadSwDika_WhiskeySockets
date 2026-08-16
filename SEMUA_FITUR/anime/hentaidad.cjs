@@ -1,8 +1,21 @@
 /**
  * ───────────────────────────────
+ *  Base Script : Bang Dika Ardnt
  *  Recode By   : Bang Wilykun
  *  WhatsApp    : 6289688206739
  *  Telegram    : @Wilykun1994
+ * ───────────────────────────────
+ *  Script ini khusus donasi/VIP
+ *  Support dari kalian bikin saya
+ *  makin semangat update fitur,
+ *  fix bug, dan rawat script ini.
+ *
+ *  Dilarang menjual ulang script ini
+ *  Tanpa izin resmi dari developer.
+ *  Jika ketahuan = NO UPDATE / NO FIX
+ *
+ *  Hargai karya, gunakan dengan bijak.
+ *  Terima kasih sudah support.
  * ───────────────────────────────
  *
  *  hentaidad.cjs — Scraper HentaiDad (18+)
@@ -149,6 +162,11 @@ function fmtDur(ms) {
     return r > 0 ? `${m} mnt ${r} dtk` : `${m} menit`;
 }
 
+function fullTitle(raw, fallback = 'Untitled Gallery') {
+    const title = String(raw ?? '').replace(/\s+/g, ' ').trim();
+    return title || fallback;
+}
+
 // ── Teks-teks UI ────────────────────────────────────────────────────────────────
 
 function txtLoading(isSearch, query) {
@@ -159,14 +177,14 @@ function txtLoading(isSearch, query) {
 
 function txtList(items, query) {
     const isSearch   = query && query.length > 0;
-    const qShort     = isSearch && query.length > 30 ? query.slice(0, 30) + '…' : query;
+    const qShort     = query || '';
     const headerLine = isSearch
         ? `🔎 *Hasil untuk:* _"${qShort}"_\n_${items.length} galeri ditemukan_`
         : `📋 *Latest Releases* — _${items.length} galeri_`;
 
     let text = `🔞 *HENTAIDAD*\n\n${headerLine}\n\n`;
     for (const it of items) {
-        const judul = it.title.length > 50 ? it.title.slice(0, 50) + '…' : it.title;
+        const judul = fullTitle(it.title, `Gallery ${it.no}`);
         text += `${it.no}. _${judul}_\n`;
     }
     text += `\n> 💬 *Reply* pesan ini dengan *nomor* pilihan\n`;
@@ -191,7 +209,7 @@ function txtNotFound(query) {
 }
 
 function txtDipilih(chosen, headerPilih) {
-    const judul = chosen.title.length > 48 ? chosen.title.slice(0, 48) + '…' : chosen.title;
+    const judul = fullTitle(chosen.title, `Gallery ${chosen.no}`);
     return (
         `🔞 *HENTAIDAD*\n\n` +
         `${headerPilih}\n\n` +
@@ -204,7 +222,7 @@ function txtDipilih(chosen, headerPilih) {
 
 /** Teks caption untuk pesan konfirmasi (thumbnail + reply 1/2/3) */
 function txtConfirmCaption(chosen, galleryTitle, imageCount, headerPilih) {
-    const judul = galleryTitle.length > 52 ? galleryTitle.slice(0, 52) + '…' : galleryTitle;
+    const judul = fullTitle(galleryTitle, fullTitle(chosen.title, `Gallery ${chosen.no}`));
     return (
         `🔞 *HENTAIDAD — Konfirmasi*\n\n` +
         `${headerPilih}\n\n` +
@@ -218,8 +236,36 @@ function txtConfirmCaption(chosen, galleryTitle, imageCount, headerPilih) {
     );
 }
 
-function txtDownload(chosen, headerPilih, doneNow, totalImg, batchIdx, totalBatch) {
-    const judul = chosen.title.length > 48 ? chosen.title.slice(0, 48) + '…' : chosen.title;
+function deliveryModeLabel(mode) {
+    return mode === 'pdf'
+        ? '`2` — 📄 PDF _(1 file PDF)_'
+        : '`1` — 🖼️ Gambar _(album foto)_';
+}
+
+function txtModeHistory(previousModes, currentMode) {
+    if (!Array.isArray(previousModes) || previousModes.length === 0) return '';
+    const previous = previousModes.map(deliveryModeLabel).join(', ');
+    return (
+        `🔁 *Pilihan format diperbarui*\n` +
+        `> ↩️ *Sebelumnya kamu pilih:* ${previous}\n` +
+        `> ➡️ *Sekarang kamu pilih:* ${deliveryModeLabel(currentMode)}\n\n`
+    );
+}
+
+function txtModeSwitchNotice(previousModes, currentMode) {
+    return (
+        `🔞 *HENTAIDAD*\n\n` +
+        txtModeHistory(previousModes, currentMode) +
+        `⏳ _Menyiapkan pengiriman ${currentMode === 'pdf' ? 'PDF' : 'album gambar'}..._`
+    );
+}
+
+function txtDownload(
+    chosen, headerPilih, doneNow, totalImg, batchIdx, totalBatch,
+    mode = 'image', previousModes = []
+) {
+    const judul = fullTitle(chosen.title, `Gallery ${chosen.no}`);
+    const modeLabel = mode === 'pdf' ? '📄 PDF' : '🖼️ Gambar / album';
     const batchInfo = totalBatch > 1
         ? `\n> _Batch_ \`${batchIdx}/${totalBatch}\` _— sabar ya_`
         : `\n> _Sabar ya, lagi diproses_`;
@@ -228,42 +274,48 @@ function txtDownload(chosen, headerPilih, doneNow, totalImg, batchIdx, totalBatc
         `${headerPilih}\n\n` +
         `✅ *Dipilih #${chosen.no}:*\n` +
         `_${judul}_\n\n` +
+        txtModeHistory(previousModes, mode) +
+        `🎛️ *Format:* ${modeLabel}\n` +
         `⬇️ *Mendownload* \`${doneNow}/${totalImg} gambar\`...` +
         batchInfo
     );
 }
 
-function txtSending(chosen, headerPilih, total) {
-    const judul = chosen.title.length > 48 ? chosen.title.slice(0, 48) + '…' : chosen.title;
+function txtSending(chosen, headerPilih, total, previousModes = []) {
+    const judul = fullTitle(chosen.title, `Gallery ${chosen.no}`);
     return (
         `🔞 *HENTAIDAD*\n\n` +
         `${headerPilih}\n\n` +
         `✅ *Dipilih #${chosen.no}:*\n` +
         `_${judul}_\n\n` +
+        txtModeHistory(previousModes, 'image') +
         `📤 *Mengirim* \`${total} gambar\` _dalam 1 album..._\n` +
         `> _Sebentar lagi_`
     );
 }
 
-function txtSendingPdf(chosen, headerPilih, total) {
-    const judul = chosen.title.length > 48 ? chosen.title.slice(0, 48) + '…' : chosen.title;
+function txtSendingPdf(chosen, headerPilih, total, previousModes = []) {
+    const judul = fullTitle(chosen.title, `Gallery ${chosen.no}`);
     return (
         `🔞 *HENTAIDAD*\n\n` +
         `${headerPilih}\n\n` +
         `✅ *Dipilih #${chosen.no}:*\n` +
         `_${judul}_\n\n` +
+        txtModeHistory(previousModes, 'pdf') +
         `📄 *Membuat PDF* dari \`${total} gambar\`...\n` +
         `> _Sebentar lagi_`
     );
 }
 
 function txtFinalCard({ title, berhasil, total, totalBytes, elapsedMs, failed, isSearch, query, mode }) {
-    const judul     = title.length > 52 ? title.slice(0, 52) + '…' : title;
+    const judul     = fullTitle(title);
     const gagalLine = failed > 0 ? `- ⚠️ *Gagal:* ~${failed} gambar~\n` : '';
-    const qShort    = query && query.length > 24 ? query.slice(0, 24) + '…' : query;
+    const qShort    = query || '';
     const hintLine  = isSearch
-        ? `\n> 🔎 _Cari lagi:_ \`.hentaidad ${qShort}\`\n> 📋 _Atau_ \`.hentaidad\` _untuk latest_`
-        : `\n> 🔎 _Cari judul:_ \`.hentaidad [judul]\`\n> 📋 _Atau_ \`.hentaidad\` _untuk latest terbaru_`;
+        ? `\n> 🔎 _Cari lagi:_ \`.hentaidad ${qShort}\`\n` +
+          `> 📋 _Atau_ \`.hentaidad\` _untuk latest_`
+        : `\n> 🔎 _Cari judul:_ \`.hentaidad [judul]\`\n` +
+          `> 📋 _Atau_ \`.hentaidad\` _untuk latest_`;
     const isPdf     = mode === 'pdf';
 
     return (
@@ -285,7 +337,7 @@ function txtError(msg) {
 }
 
 function txtBatalkan(chosen, headerPilih) {
-    const judul = chosen.title.length > 48 ? chosen.title.slice(0, 48) + '…' : chosen.title;
+    const judul = fullTitle(chosen.title, `Gallery ${chosen.no}`);
     return (
         `🔞 *HENTAIDAD*\n\n` +
         `${headerPilih}\n\n` +
@@ -293,6 +345,27 @@ function txtBatalkan(chosen, headerPilih) {
         `_#${chosen.no}: ${judul}_\n\n` +
         `> _Ketik_ \`.hentaidad\` _untuk memulai lagi_`
     );
+}
+
+function txtAlreadySent(chosen, headerPilih, mode) {
+    const judul = fullTitle(chosen.title, `Gallery ${chosen.no}`);
+    const modeLabel = mode === 'pdf' ? '📄 PDF' : '🖼️ Gambar / album';
+    return (
+        `🔞 *HENTAIDAD*\n\n` +
+        `${headerPilih}\n\n` +
+        `📌 *${judul}*\n` +
+        `☑️ *${modeLabel} sudah terkirim sebelumnya*\n\n` +
+        `> _Reply pesan konfirmasi dengan format lain jika diperlukan_`
+    );
+}
+
+function parseDeliveryMode(rawText) {
+    const raw = String(rawText || '').trim().toLowerCase();
+    if (['1', 'g', 'gambar', 'image', 'images', 'album'].includes(raw)) return 'image';
+    if (['2', 'p', 'pdf', 'dokumen', 'document'].includes(raw)) return 'pdf';
+    if (['3', 'tidak', 'no', 'batal', 'cancel', 'gak', 'ga'].includes(raw)) return 'cancel';
+    if (['ya', 'yes', 'lanjut', 'lanjutkan', 'oke', 'ok'].includes(raw)) return 'image';
+    return null;
 }
 
 // ── Internal: edit pesan by key, silent fail ────────────────────────────────────
@@ -303,7 +376,24 @@ async function _editKey(hisoka, m, sentKey, text) {
         } else {
             await hisoka.sendMessage(m.from, { text }, { quoted: m });
         }
+        return true;
     } catch (_) {}
+    return false;
+}
+
+async function _sendFinalCard(hisoka, m, sentKey, text) {
+    if (sentKey) {
+        const edited = await _editKey(hisoka, m, sentKey, text);
+        if (edited) return true;
+    }
+
+    try {
+        await hisoka.sendMessage(m.from, { text }, { quoted: m });
+        return true;
+    } catch (err) {
+        console.error('[HENTAIDAD] Gagal kirim kartu hasil, coba edit:', err?.message);
+        return await _editKey(hisoka, m, sentKey, text);
+    }
 }
 
 // ── Kirim pesan konfirmasi: thumbnail + teks (reply 1 = ya, 2 = tidak) ──────────
@@ -370,10 +460,13 @@ async function _doDownloadAndSend({
     sentKey, isSearch, query,
     logError,
     mode, // 'image' | 'pdf'
+    previousModes = [],
+    resultKey = null,
 }) {
     const editMain = (text) => _editKey(hisoka, m, sentKey, text);
     const { title, images } = galleryData;
-    const isPdf = mode === 'pdf';
+    const deliveryMode = mode === 'pdf' ? 'pdf' : 'image';
+    const isPdf = deliveryMode === 'pdf';
 
     const totalImg   = images.length;
     const CONCUR     = 8;
@@ -382,7 +475,9 @@ async function _doDownloadAndSend({
     const allItems   = [];
     let   failed     = 0;
 
-    await editMain(txtDownload(chosen, headerPilih, 0, totalImg, 0, totalBatch));
+    await editMain(txtDownload(
+        chosen, headerPilih, 0, totalImg, 0, totalBatch, deliveryMode, previousModes
+    ));
 
     for (let i = 0; i < images.length; i += CONCUR) {
         const batchIdx = Math.floor(i / CONCUR) + 1;
@@ -395,18 +490,20 @@ async function _doDownloadAndSend({
             else { failed++; console.error('[HENTAIDAD] Gagal download:', r.reason?.message); }
         }
         const doneNow = Math.min(i + CONCUR, totalImg);
-        await editMain(txtDownload(chosen, headerPilih, doneNow, totalImg, batchIdx, totalBatch));
+        await editMain(txtDownload(
+            chosen, headerPilih, doneNow, totalImg, batchIdx, totalBatch, deliveryMode, previousModes
+        ));
     }
 
     if (!allItems.length) {
         await editMain(
             `🔞 *HENTAIDAD*\n\n${headerPilih}\n\n` +
-            `✅ *Dipilih #${chosen.no}:* _${chosen.title.slice(0, 48)}_\n\n` +
+            `✅ *Dipilih #${chosen.no}:* _${fullTitle(chosen.title, `Gallery ${chosen.no}`)}_\n\n` +
             `❌ *Semua gambar gagal didownload*\n` +
             `> _Coba lagi nanti_`
         );
         await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
-        return;
+        return false;
     }
 
     const total      = allItems.length;
@@ -414,7 +511,7 @@ async function _doDownloadAndSend({
 
     if (isPdf) {
         // ── MODE PDF ────────────────────────────────────────────────────────────
-        await editMain(txtSendingPdf(chosen, headerPilih, total));
+        await editMain(txtSendingPdf(chosen, headerPilih, total, previousModes));
 
         const pdfBuf = await _generatePdf(allItems, title);
         const pdfBytes = pdfBuf.length;
@@ -430,11 +527,11 @@ async function _doDownloadAndSend({
             document : pdfBuf,
             mimetype : 'application/pdf',
             fileName : `${safeName}.pdf`,
-            caption  : `📄 *${title.length > 60 ? title.slice(0, 60) + '…' : title}*\n📸 ${total} halaman`,
+            caption  : `📄 *${fullTitle(title)}*\n📸 ${total} halaman`,
         }, { quoted: m });
 
         const elapsedMs = Date.now() - startTime;
-        await editMain(txtFinalCard({
+        await _sendFinalCard(hisoka, m, resultKey || sentKey, txtFinalCard({
             title, berhasil: total, total: totalImg,
             totalBytes: pdfBytes, elapsedMs, failed,
             isSearch, query, mode: 'pdf',
@@ -443,7 +540,7 @@ async function _doDownloadAndSend({
 
     } else {
         // ── MODE GAMBAR (album) ─────────────────────────────────────────────────
-        await editMain(txtSending(chosen, headerPilih, total));
+        await editMain(txtSending(chosen, headerPilih, total, previousModes));
 
         try {
             const parentMsg = await hisoka.sendMessage(
@@ -467,13 +564,15 @@ async function _doDownloadAndSend({
         }
 
         const elapsedMs = Date.now() - startTime;
-        await editMain(txtFinalCard({
+        await _sendFinalCard(hisoka, m, resultKey || sentKey, txtFinalCard({
             title, berhasil: total, total: totalImg,
             totalBytes, elapsedMs, failed,
             isSearch, query, mode: 'image',
         }));
         await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
     }
+
+    return true;
 }
 
 // ── COMMAND HANDLER UTAMA ──────────────────────────────────────────────────────
@@ -593,7 +692,7 @@ async function handleHentaidadChoice({
 
     const chosen      = pending.results[idx];
     const headerPilih = pending.isSearch
-        ? `🔎 *Hasil:* _"${(pending.query || '').length > 28 ? pending.query.slice(0, 28) + '…' : pending.query}"_`
+        ? `🔎 *Hasil:* _"${pending.query || ''}"_`
         : `📋 *Latest Releases*`;
 
     const editMain = (text) => _editKey(hisoka, m, pending.sentKey, text);
@@ -619,7 +718,7 @@ async function handleHentaidadChoice({
         if (imageCount === 0) {
             await editMain(
                 `🔞 *HENTAIDAD*\n\n${headerPilih}\n\n` +
-                `✅ *Dipilih #${chosen.no}:* _${chosen.title.slice(0, 48)}_\n\n` +
+                `✅ *Dipilih #${chosen.no}:* _${fullTitle(chosen.title, `Gallery ${chosen.no}`)}_\n\n` +
                 `❌ *Tidak ada gambar ditemukan*\n` +
                 `> _Galeri ini mungkin kosong atau belum tersedia_`
             );
@@ -631,7 +730,7 @@ async function handleHentaidadChoice({
         await editMain(
             `🔞 *HENTAIDAD*\n\n${headerPilih}\n\n` +
             `✅ *Dipilih #${chosen.no}:*\n` +
-            `_${galleryTitle.length > 48 ? galleryTitle.slice(0, 48) + '…' : galleryTitle}_\n\n` +
+            `_${fullTitle(galleryTitle, fullTitle(chosen.title, `Gallery ${chosen.no}`))}_\n\n` +
             `❓ _Menunggu konfirmasi..._`
         );
 
@@ -700,19 +799,15 @@ async function handleHentaidadConfirm({
 
     const raw  = String(m.text || '').trim().toLowerCase();
 
-    // Nilai konfirmasi yang dikenali
-    // 1 = gambar (album), 2 = PDF, 3 = tidak jadi
-    const YES_IMAGE_VALUES = ['1', 'g', 'gambar', 'ya', 'yes', 'lanjut', 'lanjutkan', 'oke', 'ok'];
-    const YES_PDF_VALUES   = ['2', 'p', 'pdf'];
-    const NO_VALUES        = ['3', 'tidak', 'no', 'batal', 'cancel', 'gak', 'ga'];
+    // Nilai konfirmasi yang dikenali:
+    // 1 = gambar (album), 2 = PDF, 3 = tidak jadi.
+    const mode = parseDeliveryMode(raw);
+    const isNo = mode === 'cancel';
 
-    const isYes = YES_IMAGE_VALUES.includes(raw);
-    const isPdf = YES_PDF_VALUES.includes(raw);
-    const isNo  = NO_VALUES.includes(raw);
-
-    if (!isYes && !isPdf && !isNo) return false;
+    if (!mode) return false;
 
     const confirm = pendingHentaidadConfirm.get(m.sender);
+    if (!confirm.sentModes) confirm.sentModes = new Set();
 
     // Jika ada confirmMsgId, pastikan user reply ke pesan konfirmasi yang benar
     if (confirm?.confirmMsgId && m.isQuoted) {
@@ -735,32 +830,58 @@ async function handleHentaidadConfirm({
         return true;
     }
 
-    // ── Kunci — hapus dari pending ────────────────────────────────────────────
-    confirm.loading = true;
-    if (confirm.timeout) clearTimeout(confirm.timeout);
-    pendingHentaidadConfirm.delete(m.sender);
-
     const { chosen, galleryData, headerPilih, sentKey, isSearch, query } = confirm;
     const editMain = (text) => _editKey(hisoka, m, sentKey, text);
 
     // ── TIDAK: batalkan ───────────────────────────────────────────────────────
     if (isNo) {
+        if (confirm.timeout) clearTimeout(confirm.timeout);
+        pendingHentaidadConfirm.delete(m.sender);
         try { await hisoka.sendMessage(m.from, { react: { text: '🚫', key: m.key } }); } catch (_) {}
         await editMain(txtBatalkan(chosen, headerPilih));
         return true;
     }
 
+    if (confirm.sentModes.has(mode)) {
+        try {
+            await hisoka.sendMessage(
+                m.from,
+                { text: txtAlreadySent(chosen, headerPilih, mode) },
+                { quoted: m }
+            );
+            await hisoka.sendMessage(m.from, { react: { text: '☑️', key: m.key } });
+        } catch (_) {}
+        return true;
+    }
+
+    // ── Kunci proses, tetapi pertahankan pending agar format lain bisa dipilih ──
+    confirm.loading = true;
+
     // ── YA (gambar atau PDF): download + kirim ───────────────────────────────
     try {
+        const previousModes = [...confirm.sentModes];
+        let resultKey = null;
+        if (previousModes.length > 0) {
+            const switchSent = await hisoka.sendMessage(
+                m.from,
+                { text: txtModeSwitchNotice(previousModes, mode) },
+                { quoted: m }
+            );
+            resultKey = switchSent?.key || null;
+        }
+
         await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
 
-        await _doDownloadAndSend({
+        const delivered = await _doDownloadAndSend({
             hisoka, m,
             chosen, galleryData, headerPilih,
             sentKey, isSearch, query,
             logError,
-            mode: isPdf ? 'pdf' : 'image',
+            mode,
+            previousModes,
+            resultKey,
         });
+        if (delivered) confirm.sentModes.add(mode);
 
     } catch (err) {
         console.error('[HENTAIDAD] Confirm error:', err?.message);
@@ -768,6 +889,8 @@ async function handleHentaidadConfirm({
             logError(err instanceof Error ? err : new Error(String(err?.message || err)), 'hentaidad-confirm');
         await editMain(txtError(err?.message));
         await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
+    } finally {
+        confirm.loading = false;
     }
 
     return true;

@@ -417,7 +417,7 @@ function buildJadibotFeatureStatus(number) {
 // direct=false → pesan dikirim ke GC/owner
 function msgJadibotExpiryWarning(number, remainingText, expiresAtText, durationLabel = '1 hari', direct = false) {
   const masked = maskNumber(number)
-  const ver = loadConfig().botVersion || 'V27'
+  const ver = loadConfig().botVersion || 'V27.1'
 
   if (direct) {
     // ── Ke USER jadibot (personal, kasual) ──
@@ -901,7 +901,7 @@ function isJadibotExpired(number) {
 // direct=false → pesan dikirim ke GC/owner (v1 mode)
 function msgJadibotExpired(number, direct = false) {
   const masked = maskNumber(number)
-  const ver = loadConfig().botVersion || 'V27'
+  const ver = loadConfig().botVersion || 'V27.1'
   const now = new Date().toLocaleString('id-ID', {
     timeZone: 'Asia/Jakarta',
     day: '2-digit', month: '2-digit', year: 'numeric',
@@ -951,7 +951,7 @@ function msgJadibotExpired(number, direct = false) {
 // ── Notif expired → ke OWNER DM (alert monitoring) ──────────────────────────
 function msgOwnerExpired(number) {
   const cfg    = loadConfig()
-  const ver    = cfg.botVersion || 'V27'
+  const ver    = cfg.botVersion || 'V27.1'
   const masked = maskNumber(number)
   // Filter out nomor yg baru expired — jadibotMap.delete() dipanggil setelah fungsi ini,
   // jadi tanpa filter, nomor yg expired masih muncul di list (bug realtime).
@@ -1437,7 +1437,7 @@ async function handleJadibotSW(msg, sock, swSet, number) {
               name: lastMiss.name || trackNumber,
               number: maskNumber(lastMiss.number || trackNumber),
               count: retriedCount,
-              storyCount: getStoryCountToday(lastMiss.number || trackNumber, path.join(process.cwd(), 'data_jadibot', number, 'swtrack', 'users.json')),
+              storyCount: getStoryCountToday(lastMiss.number || trackNumber, path.join(process.cwd(), 'data_jadibot', number, 'swtrack')),
               resolve: lastResolve,
               emojiMode: getJadibotEmojiMode(number),
             })
@@ -1562,7 +1562,7 @@ async function handleJadibotSW(msg, sock, swSet, number) {
         time: jakartaDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false }).replace(':', '.'),
         name: storyName,
         number: maskNumber(storyNumber),
-        storyCount: getStoryCountToday(storyNumber, path.join(process.cwd(), 'data_jadibot', number, 'swtrack', 'users.json')),
+        storyCount: getStoryCountToday(storyNumber, path.join(process.cwd(), 'data_jadibot', number, 'swtrack')),
         success: reactionSuccess ? 'Iya ✓' : (readOk ? 'Baca ✓' : 'Gagal ❌'),
         reaction: shouldReact ? usedReaction : 'Off ❌',
         resolve: resolveMethod,
@@ -1592,7 +1592,7 @@ async function handleJadibotSW(msg, sock, swSet, number) {
 function msgPairingCode(code, number, direct = false) {
   const formatted = formatPairingCode(code)
   const masked = maskNumber(number)
-  const ver = loadConfig().botVersion || 'V27'
+  const ver = loadConfig().botVersion || 'V27.1'
 
   const footer = direct
     ? (
@@ -1648,7 +1648,7 @@ function msgPairingCode(code, number, direct = false) {
 // ── Notif pairing expired → ke OWNER DM (monitoring, beda dari versi user/GC) ─
 function msgOwnerPairingExpired(number) {
   const cfg    = loadConfig()
-  const ver    = cfg.botVersion || 'V27'
+  const ver    = cfg.botVersion || 'V27.1'
   const masked = maskNumber(number)
   return (
     `╔══════════════════════╗\n` +
@@ -1674,7 +1674,7 @@ function msgOwnerPairingExpired(number) {
 // direct=false → dikirim ke GC/owner (v1): tampilkan command bot
 function msgPairingExpired(number, direct = false) {
   const masked  = maskNumber(number)
-  const ver     = loadConfig().botVersion || 'V27'
+  const ver     = loadConfig().botVersion || 'V27.1'
 
   if (direct) {
     // Versi lengkap → dikirim ke nomor tujuan (user jadibot)
@@ -1721,7 +1721,7 @@ function msgConnected(number) {
   })
 
   const config = loadConfig()
-  const ver = config.botVersion || 'V27'
+  const ver = config.botVersion || 'V27.1'
   const { activeFeaturesText } = buildJadibotFeatureStatus(number)
   const expiry = getJadibotExpiry(number)
   let expiryLine = ''
@@ -1760,7 +1760,7 @@ function msgDirectWelcome(number) {
     day: '2-digit', month: '2-digit', year: 'numeric',
     hour: '2-digit', minute: '2-digit', second: '2-digit'
   })
-  const ver = loadConfig().botVersion || 'V27'
+  const ver = loadConfig().botVersion || 'V27.1'
   const { activeFeaturesText } = buildJadibotFeatureStatus(number)
   const expiry = getJadibotExpiry(number)
   let expiryLine = ''
@@ -1806,7 +1806,7 @@ function msgLoggedOut(number, remainingList, savedLabel = '') {
     day: '2-digit', month: '2-digit', year: 'numeric',
     hour: '2-digit', minute: '2-digit', second: '2-digit'
   })
-  const ver = loadConfig().botVersion || 'V27'
+  const ver = loadConfig().botVersion || 'V27.1'
 
   const listPart = remainingList.length === 0
     ? `> ❌ _Tidak ada jadibot lain yang aktif saat ini._`
@@ -1845,7 +1845,7 @@ function msgLoggedOutDirect(number, savedLabel = '') {
     day: '2-digit', month: '2-digit', year: 'numeric',
     hour: '2-digit', minute: '2-digit', second: '2-digit'
   })
-  const ver = loadConfig().botVersion || 'V27'
+  const ver = loadConfig().botVersion || 'V27.1'
   return (
     `╔══════════════════════╗\n` +
     `║  ⚠️  *JADIBOT LOGOUT*  ║\n` +
@@ -1999,7 +1999,7 @@ function _nowStr() {
 // ── Notif terhubung → ke OWNER (managerial/monitoring) ───────────────────────
 function msgOwnerConnected(number, isReconnect = false) {
   const cfg    = loadConfig()
-  const ver    = cfg.botVersion || 'V27'
+  const ver    = cfg.botVersion || 'V27.1'
   const masked = maskNumber(number)
   const meta   = getJadibotExpiry(number)
   const isPerm = meta?.permanent === true
@@ -2054,7 +2054,7 @@ function msgOwnerConnected(number, isReconnect = false) {
 // ── Notif reconnect → ke USER JADIBOT (personal, beda dari versi owner) ──────
 function msgDirectReconnect(number) {
   const cfg    = loadConfig()
-  const ver    = cfg.botVersion || 'V27'
+  const ver    = cfg.botVersion || 'V27.1'
   const { activeFeaturesText } = buildJadibotFeatureStatus(number)
 
   const meta   = getJadibotExpiry(number)
@@ -2085,7 +2085,7 @@ function msgDirectReconnect(number) {
 // ── Notif logout → ke OWNER (alert monitoring) ───────────────────────────────
 function msgOwnerLogout(number, savedLabel = '') {
   const cfg    = loadConfig()
-  const ver    = cfg.botVersion || 'V27'
+  const ver    = cfg.botVersion || 'V27.1'
   const masked = maskNumber(number)
   const remainingList = [...jadibotMap.keys()]
 
@@ -2271,6 +2271,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
     'ceksesi', 'clearsesi', 'cs',
     'del', 'd', 'delbot',
     'font', 'fontgen', 'fontuntik',
+    'getppuser',
     'logo'
   ]
 
@@ -2355,7 +2356,7 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
                   const _pairEndText = _pairIsPerm
                     ? 'Selamanya ♾️'
                     : formatJadibotExpiryTime(_pairNowMs + _pairDurMs)
-                  const _pairVer = loadConfig().botVersion || 'V27'
+                  const _pairVer = loadConfig().botVersion || 'V27.1'
 
                   const sentInfo = await sendReply(
                     `🤖 *J A D I B O T*\n` +
@@ -3073,38 +3074,46 @@ async function startJadibot(number, sendReply, mainBotNumber, editMsg = null, se
         const _deletedId = _protoMsg.key?.id
         if (_isStatusRevoke && _deletedId) {
           try {
-            const _jadibotUsersFile = path.join(process.cwd(), 'data_jadibot', number, 'swtrack', 'users.json')
+            const _jadibotSwDir = path.join(process.cwd(), 'data_jadibot', number, 'swtrack')
             let _handled = false
-            // ── Fast path: LRU lookup (O(1)) ──
+            // ── Fast path: LRU lookup (O(1)) — baca hanya file milik ownerNum ──
             const _lruOwner = lookupSwMsgOwner(_deletedId, number)
-            if (_lruOwner && fs.existsSync(_jadibotUsersFile)) {
+            if (_lruOwner) {
               try {
-                const _all = JSON.parse(fs.readFileSync(_jadibotUsersFile, 'utf-8'))
                 const _ownerNum = String(_lruOwner).replace(/[^0-9]/g, '')
-                if (_all[_ownerNum]?.[_deletedId]) {
-                  _handled = true
-                  if (!_all[_ownerNum][_deletedId].deleted) {
-                    _all[_ownerNum][_deletedId] = { ..._all[_ownerNum][_deletedId], deleted: true, deletedAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
-                    const _tmpFp = _jadibotUsersFile + '.tmp'
-                    fs.writeFileSync(_tmpFp, JSON.stringify(_all, null, 2), 'utf-8')
-                    fs.renameSync(_tmpFp, _jadibotUsersFile)
+                const _ownerFile = path.join(_jadibotSwDir, _ownerNum + '.json')
+                if (fs.existsSync(_ownerFile)) {
+                  const _userData = JSON.parse(fs.readFileSync(_ownerFile, 'utf-8'))
+                  if (_userData[_deletedId]) {
+                    _handled = true
+                    if (!_userData[_deletedId].deleted) {
+                      _userData[_deletedId] = { ..._userData[_deletedId], deleted: true, deletedAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
+                      const _tmpFp = _ownerFile + '.tmp'
+                      fs.writeFileSync(_tmpFp, JSON.stringify(_userData, null, 2), 'utf-8')
+                      fs.renameSync(_tmpFp, _ownerFile)
+                    }
                   }
                 }
               } catch {}
             }
-            // ── Slow path: scan semua key di single file ──
-            if (!_handled && fs.existsSync(_jadibotUsersFile)) {
+            // ── Slow path: scan semua file per-nomor di swDir ──
+            if (!_handled && fs.existsSync(_jadibotSwDir)) {
               try {
-                const _all = JSON.parse(fs.readFileSync(_jadibotUsersFile, 'utf-8'))
-                for (const _ownerNum of Object.keys(_all)) {
-                  if (_all[_ownerNum]?.[_deletedId]) {
-                    if (_all[_ownerNum][_deletedId].deleted) break
-                    _all[_ownerNum][_deletedId] = { ..._all[_ownerNum][_deletedId], deleted: true, deletedAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
-                    const _tmpFp = _jadibotUsersFile + '.tmp'
-                    fs.writeFileSync(_tmpFp, JSON.stringify(_all, null, 2), 'utf-8')
-                    fs.renameSync(_tmpFp, _jadibotUsersFile)
-                    break
-                  }
+                const _swFiles = fs.readdirSync(_jadibotSwDir).filter(f => f.endsWith('.json') && f !== 'users.json')
+                for (const _f of _swFiles) {
+                  const _fp = path.join(_jadibotSwDir, _f)
+                  try {
+                    const _userData = JSON.parse(fs.readFileSync(_fp, 'utf-8'))
+                    if (_userData[_deletedId]) {
+                      if (!_userData[_deletedId].deleted) {
+                        _userData[_deletedId] = { ..._userData[_deletedId], deleted: true, deletedAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
+                        const _tmpFp = _fp + '.tmp'
+                        fs.writeFileSync(_tmpFp, JSON.stringify(_userData, null, 2), 'utf-8')
+                        fs.renameSync(_tmpFp, _fp)
+                      }
+                      break
+                    }
+                  } catch {}
                 }
               } catch {}
             }
@@ -3261,6 +3270,7 @@ async function startJadibotQR(number, sendReply, sendImage, mainBotNumber, durat
     'ceksesi', 'clearsesi', 'cs',
     'del', 'd', 'delbot',
     'font', 'fontgen', 'fontuntik',
+    'getppuser',
     'logo'
   ]
 
