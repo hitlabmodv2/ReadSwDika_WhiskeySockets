@@ -5,17 +5,17 @@
  *  WhatsApp    : 6289688206739
  *  Telegram    : @Wilykun1994
  * ───────────────────────────────
- *  Script ini eksklusif untuk member donasi/VIP.
- *  Donasi kalian adalah alasan saya terus semangat
- *  ngoding, benerin bug, dan ngerawat script ini
- *  supaya makin stabil ke depannya.
+ *  Script ini khusus donasi/VIP
+ *  Support dari kalian bikin saya
+ *  makin semangat update fitur,
+ *  fix bug, dan rawat script ini.
  *
- *  Jual beli ulang script ini tanpa izin developer
- *  sangat dilarang. Ketahuan jual ulang tanpa izin?
- *  Siap-siap kena blacklist — NO UPDATE, NO FIX!
+ *  Dilarang menjual ulang script ini
+ *  Tanpa izin resmi dari developer.
+ *  Jika ketahuan = NO UPDATE / NO FIX
  *
- *  Yuk hargai kerja keras developer, pakai dengan
- *  bijak. Makasih banyak buat dukungannya selama ini.
+ *  Hargai karya, gunakan dengan bijak.
+ *  Terima kasih sudah support.
  * ───────────────────────────────
  *
  *  hotReload.js — Hot reload modul tanpa restart

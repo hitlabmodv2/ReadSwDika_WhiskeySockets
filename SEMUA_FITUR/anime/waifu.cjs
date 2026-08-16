@@ -3,7 +3,7 @@
  *  Base Script : Bang Dika Ardnt
  *  Recode By   : Bang Wilykun
  *  WhatsApp    : 6289688206739
- *  Telegram    : @Wilykun1999
+ *  Telegram    : @Wilykun1994
  * ───────────────────────────────
  *  Script ini khusus donasi/VIP
  *  Support dari kalian bikin saya
