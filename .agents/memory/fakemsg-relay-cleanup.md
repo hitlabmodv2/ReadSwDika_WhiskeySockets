@@ -20,3 +20,9 @@ Untuk fake edit pesan orang, `protocolMessage.key` wajib memakai key asli dari p
 **Why:** Percobaan fake edit dapat tercatat sukses di log tetapi tidak menghasilkan perubahan visual atau balasan apa pun ke chat.
 
 **How to apply:** Bungkus relay dengan timeout, tangkap error, dan balas status sukses dengan catatan bahwa server WhatsApp dapat menolak edit pesan milik orang lain.
+
+Identitas pengirim pesan baru divalidasi server WhatsApp; `userJid` atau `participant` pada payload tidak menjadikan bot benar-benar mengirim sebagai akun orang lain. Format mention paling aman dipakai untuk memilih pesan asli terbaru target dari cache, lalu mengirim protocol edit ke key pesan tersebut.
+
+**Why:** Mencoba membuat pesan baru dengan sender palsu tetap tampil sebagai bot atau ditolak server, sehingga hasilnya menyesatkan dan sulit didiagnosis.
+
+**How to apply:** Jangan menjanjikan spoof sender. Jelaskan batasan ini dan gunakan mention sebagai selector pesan target yang benar-benar ada.
