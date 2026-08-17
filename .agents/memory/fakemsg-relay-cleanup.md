@@ -14,3 +14,9 @@ Untuk fake edit pesan orang, `protocolMessage.key` wajib memakai key asli dari p
 **Why:** Key sementara milik bot mengubah target edit menjadi pesan bot, walaupun command dikirim dengan reply ke pesan orang lain.
 
 **How to apply:** Clone `m.quoted.key`, pastikan `remoteJid` tersedia, dan kirim protocol edit tanpa mengirim pesan kosong sementara atau memakai `options.messageId` target.
+
+`relayMessage` yang resolve hanya berarti stanza berhasil diserahkan ke socket, bukan jaminan client WhatsApp menerapkan edit. Handler perlu mengirim status eksplisit dan memakai timeout agar command tidak tampak diam.
+
+**Why:** Percobaan fake edit dapat tercatat sukses di log tetapi tidak menghasilkan perubahan visual atau balasan apa pun ke chat.
+
+**How to apply:** Bungkus relay dengan timeout, tangkap error, dan balas status sukses dengan catatan bahwa server WhatsApp dapat menolak edit pesan milik orang lain.

@@ -28,6 +28,7 @@
 const { delay } = require('@whiskeysockets/baileys');
 
 const MAX_FAKE_MESSAGE_LENGTH = 4096;
+const RELAY_TIMEOUT_MS = 15000;
 
 const FAKEMSG_USAGE = [
         '╭─「 FAKEMSG 」',
@@ -43,6 +44,18 @@ const FAKEMSG_USAGE = [
         '│ Catatan: hasil edit bergantung pada versi WhatsApp.',
         '╰────────────────────',
 ].join('\n');
+
+function withTimeout(promise, timeoutMs) {
+        let timer;
+        const timeout = new Promise((_, reject) => {
+                timer = setTimeout(
+                        () => reject(new Error('Relay WhatsApp timeout setelah 15 detik.')),
+                        timeoutMs
+                );
+        });
+
+        return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
 
 async function handleFakemsg({ hisoka, m, query, tolak, logCommand }) {
         const replacementText = String(query || '').trim();
@@ -88,7 +101,7 @@ async function handleFakemsg({ hisoka, m, query, tolak, logCommand }) {
                 // Key harus memakai pesan asli yang direply. Jika dibuat
                 // `fromMe: true` dengan ID pesan sementara, WA menganggap
                 // targetnya adalah pesan milik bot sendiri.
-                await hisoka.relayMessage(
+                await withTimeout(hisoka.relayMessage(
                         chatJid,
                         {
                                 protocolMessage: {
@@ -102,10 +115,14 @@ async function handleFakemsg({ hisoka, m, query, tolak, logCommand }) {
                                 },
                         },
                         {}
-                );
+                ), RELAY_TIMEOUT_MS);
 
                 await delay(100);
                 logCommand(m, hisoka, 'fakemsg');
+                await m.reply(
+                        '✅ Fake edit sudah dikirim ke pesan target.\n' +
+                        'Jika tampilan pesan belum berubah, kemungkinan server WhatsApp menolak edit pesan milik orang lain.'
+                );
         } catch (error) {
                 console.error('[fakemsg]', error);
                 await tolak(
