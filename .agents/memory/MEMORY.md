@@ -12,3 +12,4 @@
 - [Jadibot timeout dedup](jadibot-timeout-dedup.md) — timer 3 menit dan connection.close harus memakai satu klaim notifikasi atomik
 - [Alqanime caption semantics](alqanime-caption-semantics.md) — format WhatsApp dipakai sesuai makna konten; rilisan aktif tidak memakai coret
 - [Status audience path](status-audience-path.md) — semua media status harus melewati groupStatusV2 agar audience metadata ikut ter-encode
+- [No-prefix command mode](no-prefix-command-mode.md) — hanya command valid yang boleh tanpa prefix; mode false harus tetap mewajibkan prefix

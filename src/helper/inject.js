@@ -574,9 +574,10 @@ async function injectEndMessage(hisoka, WAMessage) {
                 hisoka._commandSetSize = hisoka.loadedCommands.length;
         }
         const _cmdMatch = hisoka._commandSet.has(afterPrefix.toLowerCase());
-        const isCommand =
-                (_cmdMatch && (!!prefix || (!prefix && !hasExtraWords))) ||
-                allowNoPrefix;
+        // Prefix tetap wajib kecuali command tanpa prefix memang diizinkan.
+        // Saat mode no-prefix aktif, batasi ke nama command yang valid dan
+        // satu token saja agar teks percakapan biasa tidak ikut diproses.
+        const isCommand = _cmdMatch && (!!prefix || (allowNoPrefix && !hasExtraWords));
         const query = isCommand
                 ? WAMessage.text.replace(regPrefix, '').replace(afterPrefix, '').trim()
                 : WAMessage.text.trim();
