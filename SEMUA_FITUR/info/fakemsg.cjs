@@ -58,36 +58,112 @@ function withTimeout(promise, timeoutMs) {
         return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
 }
 
-function getMentionedUsers(m) {
+function sameJid(a, b) {
+        if (!a || !b) return false;
+
+        try {
+                if (areJidsSameUser(a, b)) return true;
+        } catch (_) {}
+
+        return jidNormalizedUser(a) === jidNormalizedUser(b);
+}
+
+async function getMentionedUsers(hisoka, m) {
         const mentioned = [
                 ...(Array.isArray(m.mentions) ? m.mentions : []),
                 ...(Array.isArray(m.content?.contextInfo?.mentionedJid) ? m.content.contextInfo.mentionedJid : []),
         ];
 
-        return Array.from(new Set(
-                mentioned
-                        .filter(jid => typeof jid === 'string' && !jid.endsWith('@g.us'))
-                        .map(jidNormalizedUser)
-                        .filter(Boolean)
-        ));
+        const users = [];
+
+        for (const rawJid of mentioned) {
+                if (typeof rawJid !== 'string' || rawJid.endsWith('@g.us')) continue;
+
+                const normalized = jidNormalizedUser(rawJid);
+                if (normalized) users.push(normalized);
+
+                // Pada grup yang memakai LID, mention bisa masih berupa @lid
+                // walaupun pesan target di cache memakai nomor @s.whatsapp.net.
+                // Simpan kedua bentuknya agar lookup tidak gagal hanya karena
+                // Baileys menerima format JID yang berbeda.
+                if (normalized?.endsWith('@lid') && typeof hisoka.resolveLidToPN === 'function') {
+                        const resolved = await hisoka.resolveLidToPN({
+                                remoteJid: m.from,
+                                participant: normalized,
+                        }).catch(() => null);
+                        const resolvedNormalized = jidNormalizedUser(resolved);
+                        if (resolvedNormalized) users.push(resolvedNormalized);
+                }
+        }
+
+        return Array.from(new Set(users));
 }
 
-function findLatestMessageKeyFromUser(hisoka, chatJid, targetJid) {
+function getMessageTimestamp(message) {
+        const timestamp = message?.messageTimestamp || message?.key?.messageTimestamp;
+        const numericTimestamp = Number(timestamp);
+        return Number.isFinite(numericTimestamp) ? numericTimestamp : 0;
+}
+
+function isMessageInChat(message, chatJid) {
+        const key = message?.key;
+        const chatCandidates = [
+                key?.remoteJid,
+                key?.remoteJidAlt,
+                message?.remoteJid,
+                message?.from,
+        ].filter(Boolean);
+
+        return chatCandidates.some(candidate => sameJid(candidate, chatJid));
+}
+
+async function findLatestMessageKeyFromUser(hisoka, chatJid, targetJids) {
         if (!(hisoka.cacheMsg instanceof Map)) return null;
 
-        const cachedMessages = Array.from(hisoka.cacheMsg.values()).reverse();
+        const cachedMessages = Array.from(hisoka.cacheMsg.values())
+                .map((message, index) => ({ message, index }))
+                .sort((a, b) => {
+                        const timestampDiff = getMessageTimestamp(b.message) - getMessageTimestamp(a.message);
+                        return timestampDiff || b.index - a.index;
+                })
+                .map(({ message }) => message);
+
         for (const message of cachedMessages) {
                 const key = message?.key;
-                if (!key?.id || key.remoteJid !== chatJid || key.fromMe) continue;
+                if (!key?.id || key.fromMe || !isMessageInChat(message, chatJid)) continue;
 
-                const participant = key.participant || message.participant;
-                if (participant && areJidsSameUser(participant, targetJid)) {
-                        return {
-                                ...key,
-                                remoteJid: chatJid,
-                                participant,
-                                fromMe: false,
-                        };
+                const participants = [
+                        key.participant,
+                        key.participantAlt,
+                        message.participant,
+                        message.sender,
+                ].filter(Boolean);
+
+                for (const participant of participants) {
+                        const rawParticipant = jidNormalizedUser(participant);
+                        const rawMatches = targetJids.some(targetJid => sameJid(rawParticipant, targetJid));
+
+                        let resolvedParticipant = rawParticipant;
+                        if (!rawMatches && rawParticipant?.endsWith('@lid') && typeof hisoka.resolveLidToPN === 'function') {
+                                resolvedParticipant = jidNormalizedUser(
+                                        await hisoka.resolveLidToPN({
+                                                remoteJid: key.remoteJid || chatJid,
+                                                participant: rawParticipant,
+                                                participantAlt: key.participantAlt,
+                                        }).catch(() => rawParticipant)
+                                );
+                        }
+
+                        if (rawMatches || targetJids.some(targetJid => sameJid(resolvedParticipant, targetJid))) {
+                                // Jangan mengganti remoteJid/fromMe/participant dengan
+                                // versi hasil normalisasi. Protocol edit harus menunjuk
+                                // key persis yang diterima dari WhatsApp.
+                                const originalKey = { ...key };
+                                if (!originalKey.participant && message.participant) {
+                                        originalKey.participant = message.participant;
+                                }
+                                return originalKey;
+                        }
                 }
         }
 
@@ -96,7 +172,7 @@ function findLatestMessageKeyFromUser(hisoka, chatJid, targetJid) {
 
 async function handleFakemsg({ hisoka, m, query, tolak, logCommand }) {
         const rawQuery = String(query || '').trim();
-        const mentionedUsers = getMentionedUsers(m);
+        const mentionedUsers = await getMentionedUsers(hisoka, m);
         const replacementText = rawQuery.replace(/^@\S+\s*/, '').trim();
 
         // `.fakemsg` tanpa argumen harus menjadi help yang bisa dipakai,
@@ -130,8 +206,7 @@ async function handleFakemsg({ hisoka, m, query, tolak, logCommand }) {
         }
 
         const chatJid = m.from;
-        const targetJid = mentionedUsers[0];
-        const targetKey = findLatestMessageKeyFromUser(hisoka, chatJid, targetJid);
+        const targetKey = await findLatestMessageKeyFromUser(hisoka, chatJid, mentionedUsers);
 
         if (!targetKey) {
                 await tolak(

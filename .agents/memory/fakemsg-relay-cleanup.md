@@ -26,3 +26,9 @@ Identitas pengirim pesan baru divalidasi server WhatsApp; `userJid` atau `partic
 **Why:** Mencoba membuat pesan baru dengan sender palsu tetap tampil sebagai bot atau ditolak server, sehingga hasilnya menyesatkan dan sulit didiagnosis.
 
 **How to apply:** Jangan menjanjikan spoof sender. Jelaskan batasan ini dan gunakan mention sebagai selector pesan target yang benar-benar ada.
+
+Untuk memilih pesan berdasarkan mention di grup, bandingkan alias `@lid` dan nomor PN hasil resolusi, tetapi tetap kirim protocol edit memakai key mentah dari cache.
+
+**Why:** Pesan grup dan mention dapat memakai representasi JID berbeda; mencocokkan string langsung membuat pesan target terlihat tidak ada walaupun baru masuk.
+
+**How to apply:** Resolver hanya dipakai saat lookup participant/chat, bukan untuk mengganti `protocolMessage.key` yang diteruskan ke WhatsApp.
