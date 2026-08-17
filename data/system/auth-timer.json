@@ -2,6 +2,10 @@
   "events": [
     {
       "type": "connected",
+      "connectedAt": "2026-08-17T11:36:19.825Z"
+    },
+    {
+      "type": "connected",
       "connectedAt": "2026-08-17T11:31:34.829Z"
     },
     {
@@ -131,6 +135,6 @@
       "durationSeconds": 180
     }
   ],
-  "lastUpdated": "2026-08-17T11:31:34.829Z",
+  "lastUpdated": "2026-08-17T11:36:19.826Z",
   "sessionStart": "2026-08-13T06:53:49.772Z"
 }

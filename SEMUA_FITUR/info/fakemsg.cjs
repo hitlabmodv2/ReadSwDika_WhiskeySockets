@@ -44,22 +44,6 @@ const FAKEMSG_USAGE = [
         '╰────────────────────',
 ].join('\n');
 
-async function deleteTemporaryMessage(hisoka, chatJid, messageId) {
-        if (!hisoka || !chatJid || !messageId) return;
-
-        try {
-                await hisoka.sendMessage(chatJid, {
-                        delete: {
-                                remoteJid: chatJid,
-                                fromMe: true,
-                                id: messageId,
-                        },
-                });
-        } catch (_) {
-                // Pesan sementara boleh sudah hilang atau ditolak server WA.
-        }
-}
-
 async function handleFakemsg({ hisoka, m, query, tolak, logCommand }) {
         const replacementText = String(query || '').trim();
 
@@ -94,57 +78,30 @@ async function handleFakemsg({ hisoka, m, query, tolak, logCommand }) {
         }
 
         const chatJid = m.from;
-        const targetStanzaId = m.quoted.key.id;
-        let temporaryMessageId = null;
-        let protocolMessageId = null;
+        const targetKey = {
+                ...m.quoted.key,
+                remoteJid: m.quoted.key.remoteJid || chatJid,
+                id: m.quoted.key.id,
+        };
 
         try {
-                // Kirim pesan kosong sebagai pesan sementara agar mendapat ID valid
-                // dari relayMessage Baileys.
-                temporaryMessageId = await hisoka.relayMessage(
-                        chatJid,
-                        {
-                                extendedTextMessage: {
-                                        text: '',
-                                        contextInfo: {
-                                                isGroupStatus: true,
-                                        },
-                                },
-                        },
-                        {}
-                );
-
-                if (!temporaryMessageId) {
-                        throw new Error('WhatsApp tidak mengembalikan ID pesan sementara.');
-                }
-
-                // Kirim protocol edit dengan ID pesan target seperti metode asli.
-                // `remoteJid` dipakai karena itu field key yang benar di Baileys.
-                protocolMessageId = await hisoka.relayMessage(
+                // Key harus memakai pesan asli yang direply. Jika dibuat
+                // `fromMe: true` dengan ID pesan sementara, WA menganggap
+                // targetnya adalah pesan milik bot sendiri.
+                await hisoka.relayMessage(
                         chatJid,
                         {
                                 protocolMessage: {
-                                        key: {
-                                                remoteJid: chatJid,
-                                                fromMe: true,
-                                                id: temporaryMessageId,
-                                        },
+                                        key: targetKey,
                                         type: 14,
                                         editedMessage: {
                                                 extendedTextMessage: {
                                                         text: replacementText,
-                                                        contextInfo: {
-                                                                isGroupStatus: false,
-                                                        },
                                                 },
                                         },
                                 },
                         },
-                        {
-                                // Pada Baileys versi ini nilai yang dikembalikan
-                                // menjadi targetStanzaId. Jangan menghapusnya.
-                                messageId: targetStanzaId,
-                        }
+                        {}
                 );
 
                 await delay(100);
@@ -156,18 +113,6 @@ async function handleFakemsg({ hisoka, m, query, tolak, logCommand }) {
                         m,
                         `❌ Fake message gagal diproses: ${error?.message || error}`
                 );
-        } finally {
-                // Hapus hanya pesan sementara. Jangan menghapus targetStanzaId
-                // karena itu adalah pesan yang sedang di-reply oleh owner.
-                const temporaryIds = new Set(
-                        [temporaryMessageId, protocolMessageId]
-                                .filter(Boolean)
-                                .filter(id => id !== targetStanzaId)
-                );
-
-                for (const messageId of temporaryIds) {
-                        await deleteTemporaryMessage(hisoka, chatJid, messageId);
-                }
         }
 }
 
