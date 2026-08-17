@@ -1053,6 +1053,10 @@ async function main() {
                         const autoOnlineLabel = autoOnline2.enabled !== false ? 'ON 🟢 (terlihat online)' : 'OFF 🙈 (stealth)';
 
                         const G = '\x1b[32m', Y = '\x1b[33m', C = '\x1b[36m', R = '\x1b[0m', B = '\x1b[1m';
+                        const _prefixRaw2 = process.env.BOT_PREFIX || '!';
+                        const _prefixClass2 = _prefixRaw2.match(/^\(\?:\[([\s\S]*)\]\)$/);
+                        const _prefixLabel2 = _prefixClass2 ? 'MULTI-PREFIX' : _prefixRaw2;
+                        const _noPrefixLabel2 = process.env.BOT_ALLOWED_NO_PREFIX === 'true' ? 'ON ✅' : 'OFF ❌';
                         const _bKey2   = (global.__activeBrowserKey || 'v1').toLowerCase();
                         const _bInfo2  = BROWSER_LIST.find(b => b.key === _bKey2);
                         const _bLabel2 = _bInfo2
@@ -1066,6 +1070,8 @@ async function main() {
                         console.log(`${C}║${R} ${G}✅${R} Nomor  : ${B}${userId}${R}`);
                         console.log(`${C}║${R} ${G}👤${R} Nama   : ${B}${userName}${R}`);
                         console.log(`${C}║${R} ${Y}🖥️${R} Browser: ${B}${_bLabel2}${R}`);
+                        console.log(`${C}║${R} ${Y}🔤${R} Prefix : ${B}${_prefixLabel2}${R}`);
+                        console.log(`${C}║${R} ${Y}↪️${R} NoPfx  : ${B}${_noPrefixLabel2}${R}`);
                         global.__cmdTotal = commands.length;
                         console.log(`${C}║${R} ${Y}📋${R} Cmd    : ${B}${commands.length} commands${R}`);
                         console.log(`${C}║${R} ${Y}👥${R} Grup   : ${B}${groupCount} grup (admin: ${adminCount})${R}`);
