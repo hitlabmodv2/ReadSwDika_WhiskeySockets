@@ -486,7 +486,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                             'emojidefault', 'emojicustom', 'emojiclear',
                             'ceksesi',
                             'clearsesi', 'cs',
-                             'del', 'd', 'delbot', 'fakemsg',
+                             'del', 'd', 'delbot',
                             'font', 'fontgen',
                             'fontuntik',
                              'getppuser',
@@ -1193,12 +1193,6 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 await handleQuoted({ hisoka, m, tolak, logCommand, injectMessage });
                                 break;
                         }
-
-                         case 'fakemsg': {
-                                 const { handleFakemsg } = _require(path.resolve('./SEMUA_FITUR/info/fakemsg.cjs'));
-                                 await handleFakemsg({ hisoka, m, query, tolak, logCommand });
-                                 break;
-                         }
 
                         case 'getppuser': {
                                 const { handleGetppuser } = _require(path.resolve('./SEMUA_FITUR/info/getppuser-cmd.cjs'));

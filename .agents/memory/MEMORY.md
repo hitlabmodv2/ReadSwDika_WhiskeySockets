@@ -13,4 +13,3 @@
 - [Alqanime caption semantics](alqanime-caption-semantics.md) — format WhatsApp dipakai sesuai makna konten; rilisan aktif tidak memakai coret
 - [Status audience path](status-audience-path.md) — semua media status harus melewati groupStatusV2 agar audience metadata ikut ter-encode
 - [No-prefix command mode](no-prefix-command-mode.md) — hanya command valid yang boleh tanpa prefix; mode false harus tetap mewajibkan prefix
-- [Fake message relay cleanup](fakemsg-relay-cleanup.md) — jangan hapus ID target saat messageId relay dioverride untuk protocol edit

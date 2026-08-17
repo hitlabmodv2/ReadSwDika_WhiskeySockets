@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 15/08/2026, 08.33.42  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 17/08/2026, 11.49.29  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  HENTAIDAD
+│  #001  —  console.error
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [HENTAIDAD] Gagal download: Request failed with status code 500
+│  [31m[HotReload] Tidak bisa watch 'SEMUA_FITUR/info/fakemsg.cjs':[39m ENOENT: no such file or directory, watch '/home/runner/workspace/SEMUA_FITUR/info/fakemsg.cjs'
 │
 │  DETAIL
-│  Sumber      : HENTAIDAD
+│  Sumber      : console.error
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 15/08/2026, 08.33.42
-│  Terakhir    : 15/08/2026, 08.33.42
+│  Pertama     : 17/08/2026, 11.49.29
+│  Terakhir    : 17/08/2026, 11.49.29
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [HENTAIDAD] Gagal download: Request failed with status code 500
+│  ▶  Error: [31m[HotReload] Tidak bisa watch 'SEMUA_FITUR/info/fakemsg.cjs':[39m ENOENT: no such file or directory, watch '/home/runner/workspace/SEMUA_FITUR/info/fakemsg.cjs'
 │     at console.error (file:///home/runner/workspace/index.js:434:27)
-│     at _doDownloadAndSend (/home/runner/workspace/SEMUA_FITUR/anime/hentaidad.cjs:474:38)
+│     at watchFile (file:///home/runner/workspace/src/helper/hotReload.js:326:17)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 15/08/2026, 08.33.42
+  Terakhir diperbarui: 17/08/2026, 11.49.29
 ════════════════════════════════════════════════════════════════════════

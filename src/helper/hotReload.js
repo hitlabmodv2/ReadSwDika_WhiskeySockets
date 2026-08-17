@@ -116,7 +116,6 @@ const WATCHED_FILES = [
     { key: 'cjs:cekjidgc',     rel: 'SEMUA_FITUR/info/cekjidgc.cjs',      type: 'cjs' },
     { key: 'cjs:cekjidgcall',  rel: 'SEMUA_FITUR/info/cekjidgcall.cjs',   type: 'cjs' },
     { key: 'cjs:getppuser',    rel: 'SEMUA_FITUR/info/getppuser-cmd.cjs', type: 'cjs' },
-    { key: 'cjs:fakemsg',    rel: 'SEMUA_FITUR/info/fakemsg.cjs',        type: 'cjs' },
     // Group
     { key: 'cjs:hidetag',      rel: 'SEMUA_FITUR/group/hidetag.cjs',       type: 'cjs' },
     { key: 'cjs:sematkan',     rel: 'SEMUA_FITUR/group/sematkan.cjs',      type: 'cjs' },
