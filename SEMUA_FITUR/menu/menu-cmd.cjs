@@ -105,6 +105,11 @@ async function handleMenu({
                         return;
                 }
 
+                const cfg      = loadConfig();
+                const botReply = cfg.botReply || {};
+                const botName  = botReply.botName     || 'Wily Bot';
+                const ownerNum = botReply.ownerNumber || '';
+                const menuFooter = loadConfig()?.botReply?.footer || '';
                 const uptime   = process.uptime();
                 const uh = Math.floor(uptime / 3600);
                 const um = Math.floor((uptime % 3600) / 60);
@@ -143,28 +148,34 @@ async function handleMenu({
                         fiturAktif: totalCmd,
                         fiturTidakAktif: totalTidakAktif,
                 }) ?? '❌ Menu tidak tersedia, coba lagi.';
-                // Menu utama harus berupa teks murni: interactive kosong dan
-                // externalAdReply dapat membuat WhatsApp Messenger menghilangkan
-                // seluruh pesan. Pecah berdasarkan ukuran UTF-8 agar client lama
-                // tidak gagal merender menu panjang sebagai satu payload.
-                const menuParts = [];
-                let menuPart = '';
-                for (const line of teks.split('\n')) {
-                        const candidate = menuPart ? `${menuPart}\n${line}` : line;
-                        if (menuPart && Buffer.byteLength(candidate, 'utf8') > 3500) {
-                                menuParts.push(menuPart);
-                                menuPart = line;
-                        } else {
-                                menuPart = candidate;
+                const ppUser = await getUserProfilePictureUrl(hisoka, m.sender);
+                const menuCtxInfo = ppUser
+                        ? {
+                                externalAdReply: {
+                                        showAdAttribution: false,
+                                        title: `${botName} Menu`,
+                                        body: `Menu untuk ${m.pushName || 'User'}`,
+                                        thumbnailUrl: ppUser,
+                                        sourceUrl: ownerNum ? `https://wa.me/${ownerNum}` : undefined,
+                                        mediaType: 1,
+                                        renderLargerThumbnail: true
+                                }
                         }
-                }
-                if (menuPart) menuParts.push(menuPart);
-
-                for (let i = 0; i < menuParts.length; i++) {
+                        : {};
+                let menuSent = false;
+                try {
+                        const btnMenu = new Button()
+                                .setBody(teks)
+                                .setFooter(menuFooter)
+                                .setContextInfo(menuCtxInfo);
+                        await btnMenu.run(m.from, hisoka, { quoted: m });
+                        menuSent = true;
+                } catch (_) {}
+                if (!menuSent) {
                         await hisoka.sendMessage(
                                 m.from,
-                                { text: menuParts[i] },
-                                i === 0 ? { quoted: m } : {}
+                                Object.keys(menuCtxInfo).length ? { text: teks, contextInfo: menuCtxInfo } : { text: teks },
+                                { quoted: m }
                         );
                 }
         } catch (error) {
