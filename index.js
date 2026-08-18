@@ -57,6 +57,7 @@ const {
         areJidsSameUser,
         isLidUser,
         fetchLatestBaileysVersion,
+                DEFAULT_CONNECTION_CONFIG,
         useMultiFileAuthState,
         jidNormalizedUser,
         jidDecode,
@@ -568,7 +569,39 @@ async function main() {
         global.__clearSesiInPlace = clearCacheInPlace;
         global.__getSesiReport = getSizeReport;
         global.__mainBotStopFlush = _stopMainFlush;
-        const { version, isLatest } = await fetchLatestBaileysVersion();
+        // Jangan biarkan request pengecekan versi Baileys menggantungkan
+        // startup bot di Pterodactyl. Beberapa network/container dapat
+        // menahan request raw.githubusercontent.com tanpa error maupun
+        // response, sehingga makeWASocket tidak pernah dibuat.
+        const _versionController = new AbortController();
+        const _defaultBaileysVersion = DEFAULT_CONNECTION_CONFIG?.version || [2, 3000, 1043857760];
+        const _versionFetch = fetchLatestBaileysVersion({
+                signal: _versionController.signal,
+        }).catch(error => ({
+                version: _defaultBaileysVersion,
+                isLatest: false,
+                error,
+        }));
+        let _versionTimeoutTimer;
+        const _versionTimeout = new Promise(resolve => {
+                _versionTimeoutTimer = setTimeout(() => resolve({
+                        version: _defaultBaileysVersion,
+                        isLatest: false,
+                        timedOut: true,
+                }), 8000);
+        });
+        const _versionResult = await Promise.race([_versionFetch, _versionTimeout]);
+        clearTimeout(_versionTimeoutTimer);
+        _versionController.abort();
+        const version = Array.isArray(_versionResult?.version)
+                ? _versionResult.version
+                : _defaultBaileysVersion;
+        const isLatest = _versionResult?.isLatest === true;
+        if (_versionResult?.timedOut) {
+                console.warn('\x1b[33m→ Baileys version check timeout 8 detik; lanjut memakai versi bawaan package.\x1b[39m');
+        } else if (_versionResult?.error) {
+                console.warn('\x1b[33m→ Baileys version check gagal; lanjut memakai versi bawaan package:\x1b[39m', _versionResult.error?.message || _versionResult.error);
+        }
 
         console.info(`\x1b[32m→ Baileys  :\x1b[39m v${version.join('.')}${isLatest ? '' : ' (update tersedia)'}`);
 
