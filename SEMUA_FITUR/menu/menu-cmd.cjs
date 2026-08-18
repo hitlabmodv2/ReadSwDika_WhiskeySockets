@@ -105,11 +105,6 @@ async function handleMenu({
                         return;
                 }
 
-                const cfg      = loadConfig();
-                const botReply = cfg.botReply || {};
-                const botName  = botReply.botName     || 'Wily Bot';
-                const ownerNum = botReply.ownerNumber || '';
-                const menuFooter = loadConfig()?.botReply?.footer || '';
                 const uptime   = process.uptime();
                 const uh = Math.floor(uptime / 3600);
                 const um = Math.floor((uptime % 3600) / 60);
@@ -148,30 +143,30 @@ async function handleMenu({
                         fiturAktif: totalCmd,
                         fiturTidakAktif: totalTidakAktif,
                 }) ?? '❌ Menu tidak tersedia, coba lagi.';
-                const ppUser = await getUserProfilePictureUrl(hisoka, m.sender);
-                const menuCtxInfo = ppUser
-                        ? {
-                                externalAdReply: {
-                                        showAdAttribution: false,
-                                        title: `${botName} Menu`,
-                                        body: `Menu untuk ${m.pushName || 'User'}`,
-                                        thumbnailUrl: ppUser,
-                                        sourceUrl: ownerNum ? `https://wa.me/${ownerNum}` : undefined,
-                                        mediaType: 1,
-                                        renderLargerThumbnail: true
-                                }
+                // Menu utama harus berupa teks murni: interactive kosong dan
+                // externalAdReply dapat membuat WhatsApp Messenger menghilangkan
+                // seluruh pesan. Pecah berdasarkan ukuran UTF-8 agar client lama
+                // tidak gagal merender menu panjang sebagai satu payload.
+                const menuParts = [];
+                let menuPart = '';
+                for (const line of teks.split('\n')) {
+                        const candidate = menuPart ? `${menuPart}\n${line}` : line;
+                        if (menuPart && Buffer.byteLength(candidate, 'utf8') > 3500) {
+                                menuParts.push(menuPart);
+                                menuPart = line;
+                        } else {
+                                menuPart = candidate;
                         }
-                        : {};
-                // Menu utama tidak memiliki tombol interaktif. Mengirimnya sebagai
-                // interactiveMessage dengan nativeFlowMessage.buttons kosong membuat
-                // sebagian WhatsApp Messenger menghilangkan seluruh pesan, sementara
-                // WhatsApp Business masih kadang menampilkan body-nya. Pesan teks biasa
-                // paling kompatibel di Messenger, Business, dan versi WA lama.
-                await hisoka.sendMessage(
-                        m.from,
-                        Object.keys(menuCtxInfo).length ? { text: teks, contextInfo: menuCtxInfo } : { text: teks },
-                        { quoted: m }
-                );
+                }
+                if (menuPart) menuParts.push(menuPart);
+
+                for (let i = 0; i < menuParts.length; i++) {
+                        await hisoka.sendMessage(
+                                m.from,
+                                { text: menuParts[i] },
+                                i === 0 ? { quoted: m } : {}
+                        );
+                }
         } catch (error) {
                 if (!isNoSpaceError(error)) throw error;
                 cleanupWritePressure();
