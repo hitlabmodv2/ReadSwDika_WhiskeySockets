@@ -1097,20 +1097,60 @@ async function main() {
                                 : (Array.isArray(global.__activeBrowserArr)
                                         ? `${global.__activeBrowserArr[0]} + ${global.__activeBrowserArr[1]}`
                                         : 'Chrome');
-                        console.log(`${C}╔══════════════════════════════════╗${R}`);
-                        console.log(`${C}║${R}     ${B}${G}🤖  W I L Y  B O T  A K T I F${R}     ${C}║${R}`);
-                        console.log(`${C}╠══════════════════════════════════╣${R}`);
-                        console.log(`${C}║${R} ${G}✅${R} Nomor  : ${B}${userId}${R}`);
-                        console.log(`${C}║${R} ${G}👤${R} Nama   : ${B}${userName}${R}`);
-                        console.log(`${C}║${R} ${Y}🖥️${R} Browser: ${B}${_bLabel2}${R}`);
-                        console.log(`${C}║${R} ${Y}🔤${R} Prefix : ${B}${_prefixLabel2}${R}`);
-                        console.log(`${C}║${R} ${Y}↪️${R} NoPfx  : ${B}${_noPrefixLabel2}${R}`);
+
+                        // Hitung lebar terminal tanpa terpengaruh ANSI color,
+                        // variation selector, atau emoji double-width.
+                        const _ansiPattern = /\x1b\[[0-?]*[ -/]*[@-~]/g;
+                        const _displayWidth = value => {
+                                const plain = String(value).replace(_ansiPattern, '');
+                                let width = 0;
+                                for (const char of plain) {
+                                        const codePoint = char.codePointAt(0);
+                                        if (
+                                                codePoint === 0x200d ||
+                                                (codePoint >= 0x300 && codePoint <= 0x36f) ||
+                                                (codePoint >= 0xfe00 && codePoint <= 0xfe0f)
+                                        ) continue;
+                                        width += codePoint >= 0x1f000 || (codePoint >= 0x2600 && codePoint <= 0x27bf) ? 2 : 1;
+                                }
+                                return width;
+                        };
+
+                        const _statusRows = [
+                                `${G}✅${R} Nomor  : ${B}${userId}${R}`,
+                                `${G}👤${R} Nama   : ${B}${userName}${R}`,
+                                `${Y}🖥️${R} Browser: ${B}${_bLabel2}${R}`,
+                                `${Y}🔤${R} Prefix : ${B}${_prefixLabel2}${R}`,
+                                `${Y}↪️${R} NoPfx  : ${B}${_noPrefixLabel2}${R}`,
+                                `${Y}📋${R} Cmd    : ${B}${commands.length} commands${R}`,
+                                `${Y}👥${R} Grup   : ${B}${groupCount} grup (admin: ${adminCount})${R}`,
+                                `${G}🌐${R} Status : ${B}ONLINE 🟢${R}`,
+                                `${Y}⚡${R} AutoOnl: ${B}${autoOnlineLabel}${R}`,
+                        ];
+                        const _title = `${B}${G}🤖  W I L Y  B O T  A K T I F${R}`;
+                        const _innerWidth = Math.max(
+                                38,
+                                _displayWidth(_title) + 8,
+                                ..._statusRows.map(_displayWidth)
+                        );
+                        const _boxLine = content => {
+                                const padding = Math.max(0, _innerWidth - _displayWidth(content));
+                                return `${C}║${R}${content}${' '.repeat(padding)}${C}║${R}`;
+                        };
+                        const _centerTitle = () => {
+                                const titleWidth = _displayWidth(_title);
+                                const left = Math.max(0, Math.floor((_innerWidth - titleWidth) / 2));
+                                const right = Math.max(0, _innerWidth - titleWidth - left);
+                                return `${C}║${R}${' '.repeat(left)}${_title}${' '.repeat(right)}${C}║${R}`;
+                        };
+                        const _boxBorder = char => `${C}${char.repeat(_innerWidth)}${R}`;
+
+                        console.log(`${C}╔${_boxBorder('═')}╗${R}`);
+                        console.log(_centerTitle());
+                        console.log(`${C}╠${_boxBorder('═')}╣${R}`);
+                        for (const row of _statusRows) console.log(_boxLine(row));
                         global.__cmdTotal = commands.length;
-                        console.log(`${C}║${R} ${Y}📋${R} Cmd    : ${B}${commands.length} commands${R}`);
-                        console.log(`${C}║${R} ${Y}👥${R} Grup   : ${B}${groupCount} grup (admin: ${adminCount})${R}`);
-                        console.log(`${C}║${R} ${G}🌐${R} Status : ${B}ONLINE 🟢${R}`);
-                        console.log(`${C}║${R} ${Y}⚡${R} AutoOnl: ${B}${autoOnlineLabel}${R}`);
-                        console.log(`${C}╚══════════════════════════════════╝${R}`);
+                        console.log(`${C}╚${_boxBorder('═')}╝${R}`);
 
                         // ── SwStats: prune activeSW expired supaya data realtime & akurat ──
                         try { pruneSwStats(); } catch {}
