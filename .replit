@@ -37,7 +37,7 @@ BOT_LOG_MESSAGE = "true"
 BOT_MAX_RETRIES = "3"
 BOT_SESSION_NAME = "hisoka"
 BOT_PREFIX = "(?:[°•π÷×¶∆£¢€¥®™+✓=|/~!?@#%^&.©^])"
-BOT_ALLOWED_NO_PREFIX = "true"
+BOT_ALLOWED_NO_PREFIX = "false"
 
 [deployment]
 deploymentTarget = "cloudrun"
