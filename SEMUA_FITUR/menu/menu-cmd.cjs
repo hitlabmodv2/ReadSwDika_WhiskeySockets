@@ -162,22 +162,16 @@ async function handleMenu({
                                 }
                         }
                         : {};
-                let menuSent = false;
-                try {
-                        const btnMenu = new Button()
-                                .setBody(teks)
-                                .setFooter(menuFooter)
-                                .setContextInfo(menuCtxInfo);
-                        await btnMenu.run(m.from, hisoka, { quoted: m });
-                        menuSent = true;
-                } catch (_) {}
-                if (!menuSent) {
-                        await hisoka.sendMessage(
-                                m.from,
-                                Object.keys(menuCtxInfo).length ? { text: teks, contextInfo: menuCtxInfo } : { text: teks },
-                                { quoted: m }
-                        );
-                }
+                // Menu utama tidak memiliki tombol interaktif. Mengirimnya sebagai
+                // interactiveMessage dengan nativeFlowMessage.buttons kosong membuat
+                // sebagian WhatsApp Messenger menghilangkan seluruh pesan, sementara
+                // WhatsApp Business masih kadang menampilkan body-nya. Pesan teks biasa
+                // paling kompatibel di Messenger, Business, dan versi WA lama.
+                await hisoka.sendMessage(
+                        m.from,
+                        Object.keys(menuCtxInfo).length ? { text: teks, contextInfo: menuCtxInfo } : { text: teks },
+                        { quoted: m }
+                );
         } catch (error) {
                 if (!isNoSpaceError(error)) throw error;
                 cleanupWritePressure();
