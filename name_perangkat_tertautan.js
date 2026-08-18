@@ -35,13 +35,8 @@
  * ─────────────────────────────────────────────
  */
 
-import { Browsers } from '@whiskeysockets/baileys';
-
 export const BROWSER_LIST = [
-        // Gunakan factory resmi Baileys. Elemen ketiga adalah versi OS,
-        // bukan versi Chrome; hardcode Chrome build lama bisa dianggap
-        // sebagai profil browser non-canonical saat pairing/reconnect.
-        { key: 'v1',  label: 'Ubuntu + Chrome',         value: Browsers.ubuntu('Chrome')                  },
+        { key: 'v1',  label: 'Ubuntu + Chrome',         value: ['Ubuntu',   'Chrome',  '124.0.6367.82']      },
         { key: 'v2',  label: 'Windows + Chrome',        value: ['Windows',  'Chrome',  '125.0.6422.141']     },
         { key: 'v3',  label: 'MacOS + Chrome',          value: ['Mac OS',   'Chrome',  '126.0.6478.114']     },
         { key: 'v4',  label: 'Ubuntu + Firefox',        value: ['Ubuntu',   'Firefox', '125.0.1.20240501']   },
