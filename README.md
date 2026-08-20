@@ -30,9 +30,6 @@
 >
 > Dibuat untuk dipakai, dikembangkan, dan dipelajari bersama. **Gratis untuk penggunaan pribadi dan komunitas — jangan diperjualbelikan.**
 
-<div align="center">
-</div>
-
 ---
 
 ## 📋 Daftar Isi
