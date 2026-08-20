@@ -9,22 +9,31 @@ _📅 Rabu, 23 Juli 2026_ 🌙
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
 *1. 🖼️ .getppuser — Ambil Foto Profil Pengguna*
-_Di chat pribadi mengambil 👤 foto profil lawan chat. Di grup, reply 💬 pesan anggota lalu ketik `.getppuser`._
+_Fitur untuk mengambil 👤 *foto profil pengguna*._
+1. Chat pribadi: foto profil lawan chat dikirim otomatis.
+2. Grup: reply 💬 pesan anggota, lalu ketik `.getppuser`.
+> _Catatan: foto profil tetap mengikuti pengaturan privasi WhatsApp._
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🐛 *BUG FIX*
 ━━━━━━━━━━━━━━━━━━━━━━
 *1. 🐛 .ceksw — Username Sekarang Menjadi Mention yang Bisa Diklik*
-_Username 👤 orang yang ditampilkan oleh `.ceksw` sekarang menjadi 🔗 mention yang bisa langsung diklik untuk membuka profil/chat, bukan hanya tampil sebagai teks nama biasa._
+Username 👤 orang yang ditampilkan oleh `.ceksw` sekarang menjadi 🔗 *mention* yang bisa langsung diklik untuk membuka profil/chat.
+- Nama pengguna tampil sebagai mention yang terhubung ke akun.
+- Tap mention untuk membuka profil atau chat.
+- ~Sebelumnya hanya tampil sebagai teks nama biasa.~
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *PERUBAHAN*
 ━━━━━━━━━━━━━━━━━━━━━━
 *1. 🎭 .wm — Bisa Langsung Reply Sticker*
-_Sekarang `.wm` bisa langsung digunakan dengan reply 🖼️ sticker, tidak perlu lewat gambar terlebih dahulu._
+_Sekarang `.wm` bisa langsung digunakan dengan reply 🖼️ *sticker*, tidak perlu lewat gambar terlebih dahulu._
+1. Reply sticker yang ingin diproses.
+2. Ketik command dengan format `Pack|Author`.
 Contoh:
-`.wm wily`
-`.wm Wily|kun`
+- `.wm wily`
+- `.wm Wily|kun`
+> _Gunakan tanda `|` untuk memisahkan nama pack dan author._
 
 ━━━━━━━━━━━━━━━━━━━━━━
 📝 *RINGKASAN SIMPEL*
