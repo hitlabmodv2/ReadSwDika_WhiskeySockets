@@ -57,6 +57,7 @@ const {
         areJidsSameUser,
         isLidUser,
         fetchLatestBaileysVersion,
+                DEFAULT_CONNECTION_CONFIG,
         useMultiFileAuthState,
         jidNormalizedUser,
         jidDecode,
@@ -568,7 +569,39 @@ async function main() {
         global.__clearSesiInPlace = clearCacheInPlace;
         global.__getSesiReport = getSizeReport;
         global.__mainBotStopFlush = _stopMainFlush;
-        const { version, isLatest } = await fetchLatestBaileysVersion();
+        // Jangan biarkan request pengecekan versi Baileys menggantungkan
+        // startup bot di Pterodactyl. Beberapa network/container dapat
+        // menahan request raw.githubusercontent.com tanpa error maupun
+        // response, sehingga makeWASocket tidak pernah dibuat.
+        const _versionController = new AbortController();
+        const _defaultBaileysVersion = DEFAULT_CONNECTION_CONFIG?.version || [2, 3000, 1043857760];
+        const _versionFetch = fetchLatestBaileysVersion({
+                signal: _versionController.signal,
+        }).catch(error => ({
+                version: _defaultBaileysVersion,
+                isLatest: false,
+                error,
+        }));
+        let _versionTimeoutTimer;
+        const _versionTimeout = new Promise(resolve => {
+                _versionTimeoutTimer = setTimeout(() => resolve({
+                        version: _defaultBaileysVersion,
+                        isLatest: false,
+                        timedOut: true,
+                }), 8000);
+        });
+        const _versionResult = await Promise.race([_versionFetch, _versionTimeout]);
+        clearTimeout(_versionTimeoutTimer);
+        _versionController.abort();
+        const version = Array.isArray(_versionResult?.version)
+                ? _versionResult.version
+                : _defaultBaileysVersion;
+        const isLatest = _versionResult?.isLatest === true;
+        if (_versionResult?.timedOut) {
+                console.warn('\x1b[33m→ Baileys version check timeout 8 detik; lanjut memakai versi bawaan package.\x1b[39m');
+        } else if (_versionResult?.error) {
+                console.warn('\x1b[33m→ Baileys version check gagal; lanjut memakai versi bawaan package:\x1b[39m', _versionResult.error?.message || _versionResult.error);
+        }
 
         console.info(`\x1b[32m→ Baileys  :\x1b[39m v${version.join('.')}${isLatest ? '' : ' (update tersedia)'}`);
 
@@ -1053,6 +1086,10 @@ async function main() {
                         const autoOnlineLabel = autoOnline2.enabled !== false ? 'ON 🟢 (terlihat online)' : 'OFF 🙈 (stealth)';
 
                         const G = '\x1b[32m', Y = '\x1b[33m', C = '\x1b[36m', R = '\x1b[0m', B = '\x1b[1m';
+                        const _prefixRaw2 = process.env.BOT_PREFIX || '!';
+                        const _prefixClass2 = _prefixRaw2.match(/^\(\?:\[([\s\S]*)\]\)$/);
+                        const _prefixLabel2 = _prefixClass2 ? 'MULTI-PREFIX' : _prefixRaw2;
+                        const _noPrefixLabel2 = process.env.BOT_ALLOWED_NO_PREFIX === 'true' ? 'ON ✅' : 'OFF ❌';
                         const _bKey2   = (global.__activeBrowserKey || 'v1').toLowerCase();
                         const _bInfo2  = BROWSER_LIST.find(b => b.key === _bKey2);
                         const _bLabel2 = _bInfo2
@@ -1060,18 +1097,60 @@ async function main() {
                                 : (Array.isArray(global.__activeBrowserArr)
                                         ? `${global.__activeBrowserArr[0]} + ${global.__activeBrowserArr[1]}`
                                         : 'Chrome');
-                        console.log(`${C}╔══════════════════════════════════╗${R}`);
-                        console.log(`${C}║${R}     ${B}${G}🤖  W I L Y  B O T  A K T I F${R}     ${C}║${R}`);
-                        console.log(`${C}╠══════════════════════════════════╣${R}`);
-                        console.log(`${C}║${R} ${G}✅${R} Nomor  : ${B}${userId}${R}`);
-                        console.log(`${C}║${R} ${G}👤${R} Nama   : ${B}${userName}${R}`);
-                        console.log(`${C}║${R} ${Y}🖥️${R} Browser: ${B}${_bLabel2}${R}`);
+
+                        // Hitung lebar terminal tanpa terpengaruh ANSI color,
+                        // variation selector, atau emoji double-width.
+                        const _ansiPattern = /\x1b\[[0-?]*[ -/]*[@-~]/g;
+                        const _displayWidth = value => {
+                                const plain = String(value).replace(_ansiPattern, '');
+                                let width = 0;
+                                for (const char of plain) {
+                                        const codePoint = char.codePointAt(0);
+                                        if (
+                                                codePoint === 0x200d ||
+                                                (codePoint >= 0x300 && codePoint <= 0x36f) ||
+                                                (codePoint >= 0xfe00 && codePoint <= 0xfe0f)
+                                        ) continue;
+                                        width += codePoint >= 0x1f000 || (codePoint >= 0x2600 && codePoint <= 0x27bf) ? 2 : 1;
+                                }
+                                return width;
+                        };
+
+                        const _statusRows = [
+                                `${G}✅${R} Nomor  : ${B}${userId}${R}`,
+                                `${G}👤${R} Nama   : ${B}${userName}${R}`,
+                                `${Y}🖥️${R} Browser: ${B}${_bLabel2}${R}`,
+                                `${Y}🔤${R} Prefix : ${B}${_prefixLabel2}${R}`,
+                                `${Y}↪️${R} NoPfx  : ${B}${_noPrefixLabel2}${R}`,
+                                `${Y}📋${R} Cmd    : ${B}${commands.length} commands${R}`,
+                                `${Y}👥${R} Grup   : ${B}${groupCount} grup (admin: ${adminCount})${R}`,
+                                `${G}🌐${R} Status : ${B}ONLINE 🟢${R}`,
+                                `${Y}⚡${R} AutoOnl: ${B}${autoOnlineLabel}${R}`,
+                        ];
+                        const _title = `${B}${G}🤖  W I L Y  B O T  A K T I F${R}`;
+                        const _innerWidth = Math.max(
+                                38,
+                                _displayWidth(_title) + 8,
+                                ..._statusRows.map(_displayWidth)
+                        );
+                        const _boxLine = content => {
+                                const padding = Math.max(0, _innerWidth - _displayWidth(content));
+                                return `${C}║${R}${content}${' '.repeat(padding)}${C}║${R}`;
+                        };
+                        const _centerTitle = () => {
+                                const titleWidth = _displayWidth(_title);
+                                const left = Math.max(0, Math.floor((_innerWidth - titleWidth) / 2));
+                                const right = Math.max(0, _innerWidth - titleWidth - left);
+                                return `${C}║${R}${' '.repeat(left)}${_title}${' '.repeat(right)}${C}║${R}`;
+                        };
+                        const _boxBorder = char => `${C}${char.repeat(_innerWidth)}${R}`;
+
+                        console.log(`${C}╔${_boxBorder('═')}╗${R}`);
+                        console.log(_centerTitle());
+                        console.log(`${C}╠${_boxBorder('═')}╣${R}`);
+                        for (const row of _statusRows) console.log(_boxLine(row));
                         global.__cmdTotal = commands.length;
-                        console.log(`${C}║${R} ${Y}📋${R} Cmd    : ${B}${commands.length} commands${R}`);
-                        console.log(`${C}║${R} ${Y}👥${R} Grup   : ${B}${groupCount} grup (admin: ${adminCount})${R}`);
-                        console.log(`${C}║${R} ${G}🌐${R} Status : ${B}ONLINE 🟢${R}`);
-                        console.log(`${C}║${R} ${Y}⚡${R} AutoOnl: ${B}${autoOnlineLabel}${R}`);
-                        console.log(`${C}╚══════════════════════════════════╝${R}`);
+                        console.log(`${C}╚${_boxBorder('═')}╝${R}`);
 
                         // ── SwStats: prune activeSW expired supaya data realtime & akurat ──
                         try { pruneSwStats(); } catch {}

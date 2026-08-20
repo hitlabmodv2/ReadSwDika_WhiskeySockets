@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 15/08/2026, 08.33.42  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 20/08/2026, 06.53.06  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  HENTAIDAD
+│  #001  —  AlqanimeNotif
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [HENTAIDAD] Gagal download: Request failed with status code 500
+│  [AlqanimeNotif] ❌ Gagal fetch homepage: timeout of 30000ms exceeded
 │
 │  DETAIL
-│  Sumber      : HENTAIDAD
+│  Sumber      : AlqanimeNotif
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 15/08/2026, 08.33.42
-│  Terakhir    : 15/08/2026, 08.33.42
+│  Pertama     : 20/08/2026, 06.53.06
+│  Terakhir    : 20/08/2026, 06.53.06
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [HENTAIDAD] Gagal download: Request failed with status code 500
-│     at console.error (file:///home/runner/workspace/index.js:434:27)
-│     at _doDownloadAndSend (/home/runner/workspace/SEMUA_FITUR/anime/hentaidad.cjs:474:38)
+│  ▶  Error: [AlqanimeNotif] ❌ Gagal fetch homepage: timeout of 30000ms exceeded
+│     at console.error (file:///home/runner/workspace/index.js:435:27)
+│     at Object.cariEpisodeBaru (/home/runner/workspace/SEMUA_FITUR/anime/alqanime-monitor.cjs:220:17)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 15/08/2026, 08.33.42
+  Terakhir diperbarui: 20/08/2026, 06.53.06
 ════════════════════════════════════════════════════════════════════════

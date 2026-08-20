@@ -42,6 +42,10 @@ const FILE_CONFIG = path.join(process.cwd(), 'config.json');
 // ─── GAMBAR MASJID PER WAKTU SHOLAT ──────────────────────────────────────────
 // File lokal di img/sholat/ — ringan, pasti tampil, tidak bergantung URL eksternal
 const IMG_DIR = path.join(process.cwd(), 'img', 'sholat');
+// Batasi gambar yang dikirim agar tetap jelas di HP tetapi tidak berat.
+// `withoutEnlargement` mencegah gambar kecil diperbesar.
+const MAX_IMAGE_WIDTH  = 960;
+const IMAGE_JPEG_QUALITY = 72;
 const GAMBAR_SHOLAT = {
     Subuh   : path.join(IMG_DIR, 'subuh.png'),   // langit fajar masjid
     Zuhur   : path.join(IMG_DIR, 'zuhur.png'),   // masjid siang terang
@@ -255,7 +259,8 @@ function bacaOwner() {
 async function buatGambarOverlay(nama) {
     const filePath = GAMBAR_SHOLAT[nama] || GAMBAR_SHOLAT['Zuhur'];
     return await sharp(filePath)
-        .jpeg({ quality: 85 })
+        .resize({ width: MAX_IMAGE_WIDTH, withoutEnlargement: true })
+        .jpeg({ quality: IMAGE_JPEG_QUALITY, progressive: true, mozjpeg: true })
         .toBuffer();
 }
 

@@ -313,7 +313,7 @@ Setelah proyek dibuat, pergi ke tab **Variables** di Railway dan tambahkan varia
 | `BOT_LOG_MESSAGE` | `true` | Log pesan masuk |
 | `BOT_MAX_RETRIES` | `5` | Maksimal reconnect otomatis |
 | `BOT_PREFIX` | `.` | Prefix command bot |
-| `BOT_ALLOWED_NO_PREFIX` | `true` | Izinkan command tanpa prefix |
+| `BOT_ALLOWED_NO_PREFIX` | `false` | Izinkan command tanpa prefix |
 
 > ⚠️ **`BOT_NUMBER_PAIR` wajib diisi** — ini nomor WhatsApp yang akan dipairing dengan bot.
 

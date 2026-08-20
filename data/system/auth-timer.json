@@ -2,6 +2,106 @@
   "events": [
     {
       "type": "connected",
+      "connectedAt": "2026-08-20T06:34:42.781Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-08-20T06:09:15.730Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-08-18T07:15:29.745Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-08-18T07:11:51.064Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-08-18T07:11:19.633Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-08-18T07:10:41.649Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-08-18T06:43:14.219Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-08-18T06:40:08.905Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-08-18T05:04:42.491Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-08-18T04:51:37.806Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-08-17T14:49:44.961Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-08-17T14:47:14.801Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-08-17T14:45:39.794Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-08-17T11:47:31.616Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-08-17T11:41:32.831Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-08-17T11:38:34.023Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-08-17T11:36:19.825Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-08-17T11:31:34.829Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-08-17T11:29:50.441Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-08-17T11:25:33.109Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-08-17T11:20:06.495Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-08-17T09:54:27.617Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-08-17T09:50:18.231Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-08-17T09:47:23.360Z"
+    },
+    {
+      "type": "connected",
+      "connectedAt": "2026-08-17T09:44:06.709Z"
+    },
+    {
+      "type": "connected",
       "connectedAt": "2026-08-16T13:02:14.718Z"
     },
     {
@@ -99,6 +199,6 @@
       "durationSeconds": 180
     }
   ],
-  "lastUpdated": "2026-08-16T13:02:14.719Z",
+  "lastUpdated": "2026-08-20T06:34:42.782Z",
   "sessionStart": "2026-08-13T06:53:49.772Z"
 }

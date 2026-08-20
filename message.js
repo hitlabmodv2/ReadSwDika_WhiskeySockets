@@ -18,8 +18,8 @@
  *  Terima kasih sudah support.
  * ───────────────────────────────
  *
- *  message.js — Handler utama semua command bot
- *  134 command tersedia, guard jadibot & owner
+ *  message.js — Dispatcher utama semua command bot
+ *  Guard jadibot, owner, callback, dan hot-reload command
  * ───────────────────────────────
  */
 'use strict';
@@ -486,7 +486,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                             'emojidefault', 'emojicustom', 'emojiclear',
                             'ceksesi',
                             'clearsesi', 'cs',
-                            'del', 'd', 'delbot',
+                             'del', 'd', 'delbot',
                             'font', 'fontgen',
                             'fontuntik',
                              'getppuser',
