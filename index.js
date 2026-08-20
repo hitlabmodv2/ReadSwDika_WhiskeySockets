@@ -1737,7 +1737,8 @@ async function main() {
                                                                 }
 
                                                                 _alq.tandaiDanLog(item, daftarGrup);
-                                                                console.log(`[AlqanimeNotif] ✅ Ep ${item.epNum} "${item.judul}" terkirim ke ${daftarGrup.length} grup`);
+                                                                const labelRilisan = _alq.buatLabelRilisan(item);
+                                                                console.log(`[AlqanimeNotif] ✅ ${labelRilisan} "${item.judul}" terkirim ke ${daftarGrup.length} grup`);
                                                                 await new Promise(r => setTimeout(r, 2000));
                                                         }
                                                 }
