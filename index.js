@@ -1098,16 +1098,18 @@ async function main() {
                                         ? `${global.__activeBrowserArr[0]} + ${global.__activeBrowserArr[1]}`
                                         : 'Chrome');
 
+                        const _statusRow = (icon, label, value, color) =>
+                                `${color}${icon}${R} ${label.padEnd(7)}: ${B}${value}${R}`;
                         const _statusRows = [
-                                `${G}✅${R} Nomor  : ${B}${userId}${R}`,
-                                `${G}👤${R} Nama   : ${B}${userName}${R}`,
-                                `${Y}🖥️${R} Browser: ${B}${_bLabel2}${R}`,
-                                `${Y}🔤${R} Prefix : ${B}${_prefixLabel2}${R}`,
-                                `${Y}↪️${R} NoPfx  : ${B}${_noPrefixLabel2}${R}`,
-                                `${Y}📋${R} Cmd    : ${B}${commands.length} commands${R}`,
-                                `${Y}👥${R} Grup   : ${B}${groupCount} grup (admin: ${adminCount})${R}`,
-                                `${G}🌐${R} Status : ${B}ONLINE 🟢${R}`,
-                                `${Y}⚡${R} AutoOnl: ${B}${autoOnlineLabel}${R}`,
+                                _statusRow('✅', 'Nomor',   userId,                  G),
+                                _statusRow('👤', 'Nama',    userName,                G),
+                                _statusRow('🖥️', 'Browser', _bLabel2,                Y),
+                                _statusRow('🔤', 'Prefix',  _prefixLabel2,           Y),
+                                _statusRow('↪️', 'NoPfx',   _noPrefixLabel2,          Y),
+                                _statusRow('📋', 'Cmd',     `${commands.length} commands`, Y),
+                                _statusRow('👥', 'Grup',    `${groupCount} grup (admin: ${adminCount})`, Y),
+                                _statusRow('🌐', 'Status',  'ONLINE 🟢',              G),
+                                _statusRow('⚡', 'AutoOnl', autoOnlineLabel,          Y),
                         ];
                         console.log(`${B}${G}🤖 WILY BOT AKTIF${R}`);
                         console.log('');
