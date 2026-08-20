@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 17/08/2026, 11.49.29  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 20/08/2026, 06.53.06  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  console.error
+│  #001  —  AlqanimeNotif
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [31m[HotReload] Tidak bisa watch 'SEMUA_FITUR/info/fakemsg.cjs':[39m ENOENT: no such file or directory, watch '/home/runner/workspace/SEMUA_FITUR/info/fakemsg.cjs'
+│  [AlqanimeNotif] ❌ Gagal fetch homepage: timeout of 30000ms exceeded
 │
 │  DETAIL
-│  Sumber      : console.error
+│  Sumber      : AlqanimeNotif
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 17/08/2026, 11.49.29
-│  Terakhir    : 17/08/2026, 11.49.29
+│  Pertama     : 20/08/2026, 06.53.06
+│  Terakhir    : 20/08/2026, 06.53.06
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [31m[HotReload] Tidak bisa watch 'SEMUA_FITUR/info/fakemsg.cjs':[39m ENOENT: no such file or directory, watch '/home/runner/workspace/SEMUA_FITUR/info/fakemsg.cjs'
-│     at console.error (file:///home/runner/workspace/index.js:434:27)
-│     at watchFile (file:///home/runner/workspace/src/helper/hotReload.js:326:17)
+│  ▶  Error: [AlqanimeNotif] ❌ Gagal fetch homepage: timeout of 30000ms exceeded
+│     at console.error (file:///home/runner/workspace/index.js:435:27)
+│     at Object.cariEpisodeBaru (/home/runner/workspace/SEMUA_FITUR/anime/alqanime-monitor.cjs:220:17)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 17/08/2026, 11.49.29
+  Terakhir diperbarui: 20/08/2026, 06.53.06
 ════════════════════════════════════════════════════════════════════════
