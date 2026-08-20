@@ -9,19 +9,19 @@ _📅 Rabu, 23 Juli 2026_ 🌙
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
 *1. 🖼️ .getppuser — Ambil Foto Profil Pengguna*
-_Di chat pribadi mengambil foto profil lawan chat. Di grup, reply pesan anggota lalu ketik `.getppuser`._
+_Di chat pribadi mengambil 👤 foto profil lawan chat. Di grup, reply 💬 pesan anggota lalu ketik `.getppuser`._
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🐛 *BUG FIX*
 ━━━━━━━━━━━━━━━━━━━━━━
 *1. 🐛 .ceksw — Username Sekarang Menjadi Mention yang Bisa Diklik*
-_Username orang yang ditampilkan oleh `.ceksw` sekarang bisa langsung diklik untuk membuka profil/chat, bukan hanya tampil sebagai teks nama biasa._
+_Username 👤 orang yang ditampilkan oleh `.ceksw` sekarang menjadi 🔗 mention yang bisa langsung diklik untuk membuka profil/chat, bukan hanya tampil sebagai teks nama biasa._
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *PERUBAHAN*
 ━━━━━━━━━━━━━━━━━━━━━━
 *1. 🎭 .wm — Bisa Langsung Reply Sticker*
-_Sekarang `.wm` bisa langsung digunakan dengan reply sticker, tidak perlu lewat gambar terlebih dahulu._
+_Sekarang `.wm` bisa langsung digunakan dengan reply 🖼️ sticker, tidak perlu lewat gambar terlebih dahulu._
 Contoh:
 `.wm wily`
 `.wm Wily|kun`
