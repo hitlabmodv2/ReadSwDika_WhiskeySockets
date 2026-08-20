@@ -3,7 +3,7 @@ _📅 Rabu, 23 Juli 2026_ 🌙
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V27.1*
 ✨ *1 Fitur Baru*
-🐛 *0 Bug Fix*
+🐛 *1 Bug Fix*
 🚀 *1 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
@@ -14,6 +14,8 @@ _Di chat pribadi mengambil foto profil lawan chat. Di grup, reply pesan anggota 
 ━━━━━━━━━━━━━━━━━━━━━━
 🐛 *BUG FIX*
 ━━━━━━━━━━━━━━━━━━━━━━
+*1. 🐛 .ceksw — Username Sekarang Menjadi Mention yang Bisa Diklik*
+_Username orang yang ditampilkan oleh `.ceksw` sekarang bisa langsung diklik untuk membuka profil/chat, bukan hanya tampil sebagai teks nama biasa._
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *PERUBAHAN*
