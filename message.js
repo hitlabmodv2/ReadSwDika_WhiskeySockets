@@ -1385,7 +1385,12 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 break;
                         }
 
-                        case 'hentaidad':
+                        case 'hentaidad': {
+                                const { handleHentaidad } = _require(path.resolve('./SEMUA_FITUR/anime/hentaidad.cjs'));
+                                await handleHentaidad({ hisoka, m, tolak, logCommand, logError, pendingHentaidadChoices });
+                                break;
+                        }
+
                         case 'hdad': {
                                 const { handleHentaidad } = _require(path.resolve('./SEMUA_FITUR/anime/hentaidad.cjs'));
                                 await handleHentaidad({ hisoka, m, tolak, logCommand, logError, pendingHentaidadChoices });
