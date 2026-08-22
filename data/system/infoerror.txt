@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 20/08/2026, 11.43.59  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 21/08/2026, 14.51.49  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  console.error
+│  #001  —  AlqanimeNotif
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [31m[Groups] Gagal fetch grup:[39m Connection Closed
+│  [AlqanimeNotif] ❌ Gagal fetch homepage: Request failed with status code 503
 │
 │  DETAIL
-│  Sumber      : console.error
+│  Sumber      : AlqanimeNotif
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 20/08/2026, 11.43.59
-│  Terakhir    : 20/08/2026, 11.43.59
+│  Pertama     : 21/08/2026, 14.51.49
+│  Terakhir    : 21/08/2026, 14.51.49
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [31m[Groups] Gagal fetch grup:[39m Connection Closed
+│  ▶  Error: [AlqanimeNotif] ❌ Gagal fetch homepage: Request failed with status code 503
 │     at console.error (file:///home/runner/workspace/index.js:435:27)
-│     at fetchGroupsWithRetry (file:///home/runner/workspace/index.js:1076:65)
+│     at Object.cariEpisodeBaru (/home/runner/workspace/SEMUA_FITUR/anime/alqanime-monitor.cjs:220:17)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 20/08/2026, 11.43.59
+  Terakhir diperbarui: 21/08/2026, 14.51.49
 ════════════════════════════════════════════════════════════════════════
