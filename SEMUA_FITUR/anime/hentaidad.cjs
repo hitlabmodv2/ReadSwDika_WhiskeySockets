@@ -361,8 +361,10 @@ function txtAlreadySent(chosen, headerPilih, mode) {
 
 function parseDeliveryMode(rawText) {
     const raw = String(rawText || '').trim().toLowerCase();
-    if (['1', 'g', 'gambar', 'image', 'images', 'album'].includes(raw)) return 'image';
-    if (['2', 'p', 'pdf', 'dokumen', 'document'].includes(raw)) return 'pdf';
+    // Jangan menerima alias satu huruf. Pesan bebas seperti "p" atau "g"
+    // terlalu mudah terkirim tanpa sengaja dan bukan konfirmasi eksplisit.
+    if (['1', 'gambar', 'image', 'images', 'album'].includes(raw)) return 'image';
+    if (['2', 'pdf', 'dokumen', 'document'].includes(raw)) return 'pdf';
     if (['3', 'tidak', 'no', 'batal', 'cancel', 'gak', 'ga'].includes(raw)) return 'cancel';
     if (['ya', 'yes', 'lanjut', 'lanjutkan', 'oke', 'ok'].includes(raw)) return 'image';
     return null;
