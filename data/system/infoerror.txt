@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 21/08/2026, 14.51.49  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 22/08/2026, 13.44.24  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  AlqanimeNotif
+│  #001  —  NekopoinNotif
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [AlqanimeNotif] ❌ Gagal fetch homepage: Request failed with status code 503
+│  [NekopoinNotif] ❌ Gagal fetch kategori hentai: Request failed with status code 503
 │
 │  DETAIL
-│  Sumber      : AlqanimeNotif
+│  Sumber      : NekopoinNotif
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 21/08/2026, 14.51.49
-│  Terakhir    : 21/08/2026, 14.51.49
+│  Pertama     : 22/08/2026, 13.44.24
+│  Terakhir    : 22/08/2026, 13.44.24
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [AlqanimeNotif] ❌ Gagal fetch homepage: Request failed with status code 503
+│  ▶  Error: [NekopoinNotif] ❌ Gagal fetch kategori hentai: Request failed with status code 503
 │     at console.error (file:///home/runner/workspace/index.js:435:27)
-│     at Object.cariEpisodeBaru (/home/runner/workspace/SEMUA_FITUR/anime/alqanime-monitor.cjs:220:17)
+│     at /home/runner/workspace/SEMUA_FITUR/anime/nekopoi-monitor.cjs:184:25
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 21/08/2026, 14.51.49
+  Terakhir diperbarui: 22/08/2026, 13.44.24
 ════════════════════════════════════════════════════════════════════════
