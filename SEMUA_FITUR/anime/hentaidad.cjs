@@ -373,11 +373,21 @@ async function _editKey(hisoka, m, sentKey, text) {
     try {
         if (sentKey) {
             await hisoka.sendMessage(m.from, { text, edit: sentKey });
+            return true;
         } else {
             await hisoka.sendMessage(m.from, { text }, { quoted: m });
+            return true;
         }
-        return true;
-    } catch (_) {}
+    } catch (editErr) {
+        // Beberapa client WhatsApp tidak langsung menampilkan edit message.
+        // Kirim pesan baru agar hasil tetap terlihat di semua client.
+        try {
+            await hisoka.sendMessage(m.from, { text }, { quoted: m });
+            return true;
+        } catch (fallbackErr) {
+            console.error('[HENTAIDAD] Edit dan fallback kirim gagal:', fallbackErr?.message || editErr?.message);
+        }
+    }
     return false;
 }
 
