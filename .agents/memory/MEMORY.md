@@ -14,3 +14,4 @@
 - [Status audience path](status-audience-path.md) — semua media status harus melewati groupStatusV2 agar audience metadata ikut ter-encode
 - [No-prefix command mode](no-prefix-command-mode.md) — hanya command valid yang boleh tanpa prefix; mode false harus tetap mewajibkan prefix
 - [Command alias registration](command-alias-registration.md) — parser loadedCommands mengenali alias case hanya jika tiap alias punya blok case sendiri
+- [Instagram scraper reliability](instagram-scraper-endpoints.md) — endpoint publik dapat 403, permission error, DNS failure, atau hasil kosong dari server

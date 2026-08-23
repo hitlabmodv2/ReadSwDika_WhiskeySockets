@@ -24,6 +24,10 @@
  */
 'use strict';
 
+const axios = require('axios');
+const cheerio = require('cheerio');
+const FormData = require('form-data');
+
 /**
  * Handler untuk command .ig
  * @param {object} hisoka - bot socket
@@ -99,6 +103,65 @@ async function fetchArchive(url) {
     };
 }
 
+// ── Fallback scraper 3: Savevid (reels, posts, dan stories) ───────────────────
+// Savevid mengembalikan HTML pada ajaxSearch, jadi jangan menganggap response
+// selalu berupa JSON. Beberapa versi endpoint juga memblokir request tanpa
+// User-Agent browser.
+async function fetchSavevid(url) {
+    const browserHeaders = {
+        'User-Agent': 'Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 Chrome/120.0.0.0 Mobile Safari/537.36',
+        'Accept-Language': 'en-US,en;q=0.9',
+    };
+
+    const verifyForm = new FormData();
+    verifyForm.append('url', url);
+    const verify = await axios.post('https://savevid.net/api/userverify', verifyForm, {
+        headers: { ...verifyForm.getHeaders(), ...browserHeaders },
+        timeout: 15000,
+    });
+    const token = verify.data?.token;
+    if (!token) throw new Error('Savevid token tidak tersedia');
+
+    const searchForm = new FormData();
+    searchForm.append('q', url);
+    searchForm.append('t', 'media');
+    searchForm.append('lang', 'en');
+    searchForm.append('v', 'v2');
+    searchForm.append('cftoken', token);
+    const response = await axios.post('https://v3.savevid.net/api/ajaxSearch', searchForm, {
+        headers: { ...searchForm.getHeaders(), ...browserHeaders },
+        timeout: 20000,
+    });
+
+    const html = typeof response.data === 'string'
+        ? response.data
+        : response.data?.data || response.data?.html || '';
+    const $ = cheerio.load(html);
+    const info = [];
+    $('ul.download-box > li, .download-items, .download-items__thumb').each((_, node) => {
+        const link = $(node).find('a[href]').filter((__, a) => {
+            const href = $(a).attr('href') || '';
+            return !/thumbnail|thumb/i.test($(a).attr('class') || '') &&
+                /^https?:\/\//i.test(href);
+        }).first().attr('href');
+        if (link) info.push({ url: link, media_format: /\.(?:jpe?g|png|webp)(?:\?|$)/i.test(link) ? 'image' : 'video' });
+    });
+
+    // Fallback untuk perubahan markup Savevid: ambil semua href media langsung.
+    if (!info.length) {
+        $('a[href]').each((_, a) => {
+            const href = $(a).attr('href') || '';
+            if (/^https?:\/\//i.test(href) && /\.(?:mp4|m3u8|jpe?g|png|webp)(?:\?|$)/i.test(href)) {
+                info.push({ url: href, media_format: /\.(?:jpe?g|png|webp)(?:\?|$)/i.test(href) ? 'image' : 'video' });
+            }
+        });
+    }
+
+    const unique = [...new Map(info.map(item => [item.url, item])).values()];
+    if (!unique.length) throw new Error('Savevid tidak mengembalikan media');
+    return { media_type: unique[0].media_format === 'image' ? 'photo' : 'reel', info: unique };
+}
+
 async function handleInstagramDl(hisoka, m, query, ctx) {
     const {
         gemini, tolak, logCommand, exec, util,
@@ -127,10 +190,11 @@ async function handleInstagramDl(hisoka, m, query, ctx) {
     const loadingMsg = await tolak(hisoka, m, '⏳ Sedang mengunduh dari Instagram...');
 
     // ── Fetch semua sumber secara paralel ────────────────────────────────────
-    const [alwayscodexResult, vdrawResult, archiveResult, metaHtmlResult] = await Promise.allSettled([
+    const [alwayscodexResult, vdrawResult, archiveResult, savevidResult, metaHtmlResult] = await Promise.allSettled([
         fetchAlwayscodex(igUrl),
         fetchVdraw(igUrl),
         fetchArchive(igUrl),
+        fetchSavevid(igUrl),
         fetch(igUrl, {
             signal: AbortSignal.timeout(10000),
             headers: {
@@ -162,6 +226,13 @@ async function handleInstagramDl(hisoka, m, query, ctx) {
     if (!igData && archiveData?.info?.length) {
         igData = archiveData;
         console.log('[IG] ✅ Scraper: archive (fallback)');
+    }
+    if (!igData) {
+        const savevidData = savevidResult.status === 'fulfilled' ? savevidResult.value : null;
+        if (savevidData?.info?.length) {
+            igData = savevidData;
+            console.log('[IG] ✅ Scraper: savevid (fallback)');
+        }
     }
     if (archiveData?._archiveMeta) archiveMeta = archiveData._archiveMeta;
 
