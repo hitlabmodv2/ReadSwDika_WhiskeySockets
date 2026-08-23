@@ -7,7 +7,7 @@ _📅 Rabu, 23 Juli 2026_ 🌙
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V27.1*
 ✨ *2 Fitur Baru*
-🐛 *1 Bug Fix*
+🐛 *2 Bug Fix*
 🚀 *1 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
@@ -35,6 +35,13 @@ Username 👤 orang yang ditampilkan oleh `.ceksw` sekarang menjadi 🔗 *mentio
 - Nama pengguna tampil sebagai mention yang terhubung ke akun.
 - Tap mention untuk membuka profil atau chat.
 - ~Sebelumnya hanya tampil sebagai teks nama biasa.~
+
+*2. 🐛 .ig — Perbaikan Downloader Instagram/Reel*
+Downloader Instagram sekarang memiliki fallback scraper tambahan menggunakan `cakkatrok-instagram-downloader` yang terbukti berhasil mengambil media reel publik.
+- Fallback SnapVideo digunakan jika scraper utama gagal.
+- Mendukung pengambilan video reel dan media Instagram publik.
+- Ditambahkan fallback Savevid untuk mencoba sumber alternatif.
+- ~Sebelumnya `.ig` dapat gagal ketika API downloader utama error atau mengembalikan hasil kosong.~
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *PERUBAHAN*
