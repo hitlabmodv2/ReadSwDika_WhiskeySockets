@@ -66,9 +66,6 @@ function formatChannelInfo(meta, jid, inviteCode = '') {
         text += `🆔 *JID:* \`${jid}\`\n`;
         text += `👥 *Total pengikut:* \`${subscribers}\` orang`;
         if (description) text += `\n📝 *Deskripsi:* _${description}_`;
-        if (inviteCode) {
-                text += `\n🔗 *Link channel:* https://whatsapp.com/channel/${inviteCode}`;
-        }
         text += `\n\n> Data diambil realtime dari metadata WhatsApp.`;
         return text;
 }
