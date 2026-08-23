@@ -27,6 +27,7 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 const FormData = require('form-data');
+const snapInstagram = require('cakkatrok-instagram-downloader');
 
 /**
  * Handler untuk command .ig
@@ -68,6 +69,24 @@ async function fetchAlwayscodex(url) {
     } catch {
         return null;
     }
+}
+
+// ── Fallback scraper: cakkatrok → SnapVideo ───────────────────────────────────
+// Paket ini sudah diuji dengan reel target dan mengembalikan URL CDN video.
+async function fetchCakkatrok(url) {
+    const result = await snapInstagram.media(url);
+    const info = (result?.media || [])
+        .filter(item => item?.url)
+        .map(item => ({
+            url: item.url,
+            media_format: item.type === 'photo' ? 'image' : 'video',
+            title: item.text || '',
+        }));
+    if (!info.length) throw new Error('SnapVideo tidak mengembalikan media');
+    return {
+        media_type: info[0].media_format === 'image' ? 'photo' : 'reel',
+        info,
+    };
 }
 
 // ── Fallback scraper 1: vdraw.ai ──────────────────────────────────────────────
@@ -190,8 +209,9 @@ async function handleInstagramDl(hisoka, m, query, ctx) {
     const loadingMsg = await tolak(hisoka, m, '⏳ Sedang mengunduh dari Instagram...');
 
     // ── Fetch semua sumber secara paralel ────────────────────────────────────
-    const [alwayscodexResult, vdrawResult, archiveResult, savevidResult, metaHtmlResult] = await Promise.allSettled([
+    const [alwayscodexResult, cakkatrokResult, vdrawResult, archiveResult, savevidResult, metaHtmlResult] = await Promise.allSettled([
         fetchAlwayscodex(igUrl),
+        fetchCakkatrok(igUrl),
         fetchVdraw(igUrl),
         fetchArchive(igUrl),
         fetchSavevid(igUrl),
@@ -212,6 +232,14 @@ async function handleInstagramDl(hisoka, m, query, ctx) {
     if (acData?.info?.length) {
         igData = acData;
         console.log('[IG] ✅ Scraper: alwayscodex');
+    }
+
+    if (!igData) {
+        const cakkatrokData = cakkatrokResult.status === 'fulfilled' ? cakkatrokResult.value : null;
+        if (cakkatrokData?.info?.length) {
+            igData = cakkatrokData;
+            console.log('[IG] ✅ Scraper: cakkatrok/SnapVideo (fallback)');
+        }
     }
 
     if (!igData) {
