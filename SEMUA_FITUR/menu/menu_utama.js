@@ -139,6 +139,7 @@ export function buildMenuUtama({ pushName, isOwner, uptimeStr, tgl, jam, browser
 │ .ai / .tanya
 │ .mymemory
 │ .forgetme
+│ .cekjidch
 ├═════════════════════┤
 ║  🎌 *ANIME & MANGA*  
 ├═════════════════════┤
