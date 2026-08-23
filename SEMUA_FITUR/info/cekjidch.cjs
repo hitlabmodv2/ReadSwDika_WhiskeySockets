@@ -23,16 +23,48 @@ function extractChannelJid(input, currentJid = '') {
         return { inviteCode: match[1] };
 }
 
+function firstText(...values) {
+        for (const value of values) {
+                const text = typeof value === 'object' && value !== null
+                        ? (value.text || value.value || '')
+                        : value;
+                if (String(text || '').trim()) return String(text).trim();
+        }
+        return '';
+}
+
+function firstNumber(...values) {
+        for (const value of values) {
+                if (value === null || value === undefined || value === '') continue;
+                const number = Number(value);
+                if (Number.isFinite(number) && number >= 0) return number;
+        }
+        return 0;
+}
+
 function formatChannelInfo(meta, jid) {
-        const name = meta?.name || meta?.subject || '(tanpa nama)';
-        const description = String(meta?.description || '').trim();
-        const subscribers = Number(meta?.subscribers || meta?.subscribersCount || 0);
-        let text = `╭══ 📢 *INFO CHANNEL* ══╮\n│\n`;
-        text += `│ 📛 *Nama :* ${name}\n`;
-        text += `│ 🆔 *JID  :* \`${jid}\`\n`;
-        if (subscribers > 0) text += `│ 👥 *Pengikut :* ${subscribers}\n`;
-        if (description) text += `│ 📝 *Deskripsi :* ${description}\n`;
-        text += `│\n╰════════════════════╯`;
+        const thread = meta?.thread_metadata || meta?.threadMetadata || {};
+        const name = firstText(
+                meta?.name,
+                meta?.subject,
+                thread?.name,
+                thread?.subject
+        ) || '(nama channel tidak tersedia)';
+        const description = firstText(meta?.description, thread?.description);
+        const subscribers = firstNumber(
+                meta?.subscribers,
+                meta?.subscribersCount,
+                meta?.subscribers_count,
+                thread?.subscribers,
+                thread?.subscribersCount,
+                thread?.subscribers_count
+        );
+        let text = `📢 *INFO CHANNEL*\n\n`;
+        text += `📛 *Nama:* _${name}_\n`;
+        text += `🆔 *JID:* \`${jid}\`\n`;
+        text += `👥 *Total pengikut:* \`${subscribers}\` orang`;
+        if (description) text += `\n📝 *Deskripsi:* _${description}_`;
+        text += `\n\n> _Data diambil realtime dari metadata WhatsApp._`;
         return text;
 }
 
