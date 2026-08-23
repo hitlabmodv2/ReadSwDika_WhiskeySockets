@@ -66,6 +66,9 @@ function formatChannelInfo(meta, jid, inviteCode = '') {
         text += `🆔 *JID:* \`${jid}\`\n`;
         text += `👥 *Total pengikut:* \`${subscribers}\` orang`;
         if (description) text += `\n📝 *Deskripsi:* _${description}_`;
+        if (inviteCode) {
+                text += `\n🔗 *Link channel:* https://whatsapp.com/channel/${inviteCode}`;
+        }
         text += `\n\n> Data diambil realtime dari metadata WhatsApp.`;
         return text;
 }
@@ -96,9 +99,9 @@ async function handleCekjidch({ hisoka, m, query, tolak, logCommand, Button }) {
                                 .setBody(body)
                                 .setFooter('Tap tombol di bawah untuk copy JID')
                                 .addCopy('📋 Copy JID Channel', jid, 'copy_jidch')
-                                .run(m.from, hisoka, m);
+                                .run(m.from, hisoka);
                 } else {
-                        await hisoka.sendMessage(m.from, { text: body }, { quoted: m });
+                        await hisoka.sendMessage(m.from, { text: body });
                 }
                 try { await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } }); } catch (_) {}
                 logCommand(m, hisoka, 'cekjidch');
