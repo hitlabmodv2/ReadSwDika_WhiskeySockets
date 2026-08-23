@@ -7,7 +7,10 @@
  */
 'use strict';
 
-const CHANNEL_LINK_RE = /https?:\/\/(?:www\.)?whatsapp\.com\/channel\/([A-Za-z0-9._-]+)/i;
+// Kode invite channel WhatsApp terdiri dari karakter alfanumerik.
+// Membatasi capture di sini mencegah "_", titik, atau tanda baca akhir
+// ikut dianggap bagian dari link saat teks memakai format WhatsApp.
+const CHANNEL_LINK_RE = /https?:\/\/(?:www\.)?whatsapp\.com\/channel\/([A-Za-z0-9]+)/i;
 const CHANNEL_JID_RE = /^([0-9]+(?:\.[0-9]+)?)@newsletter$/i;
 
 function extractChannelJid(input, currentJid = '') {
@@ -18,8 +21,7 @@ function extractChannelJid(input, currentJid = '') {
         const match = text.match(CHANNEL_LINK_RE);
         if (!match) return null;
 
-        // Link invite memakai invite token, bukan JID. Metadata API akan
-        // mengubah token ini menjadi JID channel yang sebenarnya.
+        // Link invite memakai invite token, bukan JID.
         return { inviteCode: match[1] };
 }
 

@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 22/08/2026, 13.46.24  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 23/08/2026, 14.38.35  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  NekopoinNotif
+│  #001  —  console.error
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [NekopoinNotif] ❌ Gagal fetch kategori hentai: Request failed with status code 503
+│  [31m[HotReload] Tidak bisa watch 'SEMUA_FITUR/info/cekjidch.cjs':[39m ENOENT: no such file or directory, watch '/home/runner/workspace/SEMUA_FITUR/info/cekjidch.cjs'
 │
 │  DETAIL
-│  Sumber      : NekopoinNotif
+│  Sumber      : console.error
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 22/08/2026, 13.46.24
-│  Terakhir    : 22/08/2026, 13.46.24
+│  Pertama     : 23/08/2026, 14.38.35
+│  Terakhir    : 23/08/2026, 14.38.35
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [NekopoinNotif] ❌ Gagal fetch kategori hentai: Request failed with status code 503
+│  ▶  Error: [31m[HotReload] Tidak bisa watch 'SEMUA_FITUR/info/cekjidch.cjs':[39m ENOENT: no such file or directory, watch '/home/runner/workspace/SEMUA_FITUR/info/cekjidch.cjs'
 │     at console.error (file:///home/runner/workspace/index.js:435:27)
-│     at /home/runner/workspace/SEMUA_FITUR/anime/nekopoi-monitor.cjs:184:25
+│     at watchFile (file:///home/runner/workspace/src/helper/hotReload.js:326:17)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 22/08/2026, 13.46.24
+  Terakhir diperbarui: 23/08/2026, 14.38.35
 ════════════════════════════════════════════════════════════════════════
