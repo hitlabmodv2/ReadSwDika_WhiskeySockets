@@ -99,9 +99,9 @@ async function handleCekjidch({ hisoka, m, query, tolak, logCommand, Button }) {
                                 .setBody(body)
                                 .setFooter('Tap tombol di bawah untuk copy JID')
                                 .addCopy('📋 Copy JID Channel', jid, 'copy_jidch')
-                                .run(m.from, hisoka);
+                                .run(m.from, hisoka, m);
                 } else {
-                        await hisoka.sendMessage(m.from, { text: body });
+                        await hisoka.sendMessage(m.from, { text: body }, { quoted: m });
                 }
                 try { await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } }); } catch (_) {}
                 logCommand(m, hisoka, 'cekjidch');
