@@ -44,7 +44,7 @@ function firstNumber(...values) {
         return 0;
 }
 
-function formatChannelInfo(meta, jid) {
+function formatChannelInfo(meta, jid, inviteCode = '') {
         const thread = meta?.thread_metadata || meta?.threadMetadata || {};
         const name = firstText(
                 meta?.name,
@@ -66,6 +66,9 @@ function formatChannelInfo(meta, jid) {
         text += `🆔 *JID:* \`${jid}\`\n`;
         text += `👥 *Total pengikut:* \`${subscribers}\` orang`;
         if (description) text += `\n📝 *Deskripsi:* _${description}_`;
+        if (inviteCode) {
+                text += `\n🔗 *Link bersih:* https://whatsapp.com/channel/${inviteCode}`;
+        }
         text += `\n\n> _Data diambil realtime dari metadata WhatsApp._`;
         return text;
 }
@@ -75,18 +78,21 @@ async function resolveChannel(input, currentJid, hisoka) {
         if (!extracted) throw new Error('INVALID_CHANNEL_TARGET');
         if (typeof extracted === 'string') {
                 const meta = await hisoka.newsletterMetadata('jid', extracted);
-                return { jid: extracted, meta };
+                const inviteCode = String(meta?.invite || '')
+                        .replace(/^https?:\/\/(?:www\.)?whatsapp\.com\/channel\//i, '')
+                        .match(/^[A-Za-z0-9]+/)?.[0] || '';
+                return { jid: extracted, meta, inviteCode };
         }
         const meta = await hisoka.newsletterMetadata('invite', extracted.inviteCode);
         const jid = meta?.id || meta?.jid;
         if (!jid || !CHANNEL_JID_RE.test(jid)) throw new Error('CHANNEL_NOT_FOUND');
-        return { jid, meta };
+        return { jid, meta, inviteCode: extracted.inviteCode };
 }
 
 async function handleCekjidch({ hisoka, m, query, tolak, logCommand, Button }) {
         try {
-                const { jid, meta } = await resolveChannel(query, m.from, hisoka);
-                const body = formatChannelInfo(meta, jid);
+                const { jid, meta, inviteCode } = await resolveChannel(query, m.from, hisoka);
+                const body = formatChannelInfo(meta, jid, inviteCode);
                 if (Button) {
                         await new Button()
                                 .setTitle('📢 Info Channel')
