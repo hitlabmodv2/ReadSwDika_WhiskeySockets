@@ -114,7 +114,11 @@ async function handleCekjidch({ hisoka, m, query, tolak, logCommand, Button }) {
         try {
                 const { jid, meta, inviteCode } = await resolveChannel(query, m.from, hisoka);
                 const body = formatChannelInfo(meta, jid, inviteCode);
-                if (Button) {
+                // Native button/message flow belum konsisten didukung di newsletter.
+                // Kirim teks langsung agar command dari dalam channel tetap mendapat
+                // respons, sedangkan chat/grup tetap memakai tombol copy JID.
+                const isNewsletter = m.from?.endsWith('@newsletter');
+                if (Button && !isNewsletter) {
                         await new Button()
                                 .setTitle('📢 Info Channel')
                                 .setBody(body)

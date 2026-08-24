@@ -407,7 +407,8 @@ export default async function ({ message, type: messagesType }, hisoka) {
 
                 // Pesan channel tetap diblokir, kecuali command cekjidch yang memang
                 // dipakai untuk membaca JID channel tempat command tersebut dikirim.
-                if (m.from?.endsWith('@newsletter') && m.command !== 'cekjidch') return;
+                const _isNewsletterCekjidch = m.from?.endsWith('@newsletter') && m.command === 'cekjidch';
+                if (m.from?.endsWith('@newsletter') && !_isNewsletterCekjidch) return;
 
                 // Fire-and-forget — jangan await listenEvent agar command tidak tertunda
                 // listenEvent lakukan network calls (read receipt, react SW, delay) yang tidak
@@ -426,7 +427,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                 }
                 // Blokir SEMUA pesan yang dikirim oleh bot sendiri (fromMe + ID 3EB0)
                 // — bot tidak boleh memproses pesannya sendiri sebagai command apapun
-                if (m.isBot) return;
+                if (m.isBot && !_isNewsletterCekjidch) return;
                 // Blokir pesan dari device lain (sinkronisasi) kecuali ada command
                 if (messagesType === 'append' && !m.command) return;
 
@@ -512,7 +513,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         const _choice = (m.text || '').trim();
                         const _isPlayChoice = _isPendingPlay && (_choice === '1' || _choice === '2');
 
-                        if (m.command && !m.isRealOwner && !_isPlayChoice) {
+                        if (m.command && !m.isRealOwner && !_isPlayChoice && !_isNewsletterCekjidch) {
                             return;
                         }
                 }
