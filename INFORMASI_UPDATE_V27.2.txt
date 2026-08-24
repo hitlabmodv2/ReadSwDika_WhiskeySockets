@@ -7,7 +7,7 @@ _📅 Rabu, 23 Juli 2026_ 🌙
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V27.2*
 ✨ *2 Fitur Baru*
-🐛 *1 Fix Bug*
+🐛 *2 Fix Bug*
 🛠️ *2 Fix Error*
 🚀 *1 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -37,6 +37,14 @@ Username 👤 yang ditampilkan oleh `.ceksw` sekarang menjadi *mention* 🔗 yan
 2. Mention dapat disentuh untuk membuka profil atau chat.
 > _Hasil: identitas pengguna sekarang lebih mudah dibuka dari pesan `.ceksw`._
 ~Sebelumnya username hanya tampil sebagai teks nama biasa.~
+
+*2. 🐛 AutoReadStoryWhatsApp — TotalStory Tidak Realtime*
+Memperbaiki jumlah `TotalStory` yang sebelumnya menghitung waktu story diterima WhatsApp, bukan waktu story selesai diproses.
+1. Story yang datang bersamaan tidak lagi langsung dihitung seluruhnya sebelum delay baca dan reaksi selesai.
+2. Jumlah story sekarang mengikuti story yang sudah selesai dibaca/diproses.
+3. Data lama tetap dapat dihitung menggunakan status baca yang tersimpan.
+> _Hasil: `TotalStory` sekarang lebih akurat dan realtime mengikuti proses AutoReadStoryWhatsApp._
+~Sebelumnya beberapa story dalam satu batch dapat membuat setiap log menampilkan jumlah total yang sama, meskipun belum semuanya selesai diproses.~
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🛠️ *FIX ERROR*
