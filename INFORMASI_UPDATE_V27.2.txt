@@ -7,7 +7,7 @@ _📅 Rabu, 23 Juli 2026_ 🌙
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V27.2*
 ✨ *2 Fitur Baru*
-🐛 *2 Fix Bug*
+🐛 *1 Fix Bug*
 🛠️ *1 Fix Error*
 🚀 *1 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -37,21 +37,16 @@ Username 👤 orang yang ditampilkan oleh `.ceksw` sekarang menjadi 🔗 *mentio
 - Tap mention untuk membuka profil atau chat.
 - ~Sebelumnya hanya tampil sebagai teks nama biasa.~
 
-*2. 🐛 .ig — Perbaikan Downloader Instagram/Reel*
+🛠️ *FIX ERROR*
+━━━━━━━━━━━━━━━━━━━━━━
+*1. 🛠️ .ig — Perbaikan Error Downloader Instagram/Reel*
 Downloader Instagram sekarang memiliki fallback scraper tambahan menggunakan `cakkatrok-instagram-downloader` yang terbukti berhasil mengambil media reel publik.
 - Fallback SnapVideo digunakan jika scraper utama gagal.
 - Mendukung pengambilan video reel dan media Instagram publik.
 - Ditambahkan fallback Savevid untuk mencoba sumber alternatif.
-- ~Sebelumnya `.ig` dapat gagal ketika API downloader utama error atau mengembalikan hasil kosong.~
-
-━━━━━━━━━━━━━━━━━━━━━━
-🛠️ *FIX ERROR*
-━━━━━━━━━━━━━━━━━━━━━━
-*1. 🛠️ Penanganan Error `.ig` Instagram Downloader*
-Memperbaiki error saat API downloader Instagram utama gagal, terkena blokir, atau mengembalikan hasil kosong.
-- `.ig` sekarang mencoba scraper fallback SnapVideo secara otomatis.
 - Timeout dan kegagalan tiap scraper ditangani agar bot tidak crash.
 - Jika semua sumber gagal, bot mengirim pesan error yang jelas kepada pengguna.
+- ~Sebelumnya `.ig` dapat gagal ketika API downloader utama error atau mengembalikan hasil kosong.~
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *PERUBAHAN*
