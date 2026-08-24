@@ -418,7 +418,10 @@ export function extractSwNumber(jid) {
         try { return jidDecode(jid)?.user || null; } catch { return null; }
 }
 
-// Hitung berapa story dari kontak ini yang sudah dibaca hari ini (WIB)
+// Hitung berapa story dari kontak ini yang sudah selesai diproses hari ini (WIB).
+// Gunakan processedAt, bukan arrivedAt: WA sering mengirim beberapa story
+// sekaligus sehingga arrivedAt membuat semua story terlihat sudah dihitung
+// sebelum delay/read/reaction masing-masing selesai.
 // swDir = direktori berisi file per-nomor; default = bot utama, di-override untuk jadibot
 export function getStoryCountToday(number, swDir = SW_TRACK_DIR) {
         try {
@@ -431,8 +434,12 @@ export function getStoryCountToday(number, swDir = SW_TRACK_DIR) {
                 const todayStr = `${nowWib.getFullYear()}-${String(nowWib.getMonth()+1).padStart(2,'0')}-${String(nowWib.getDate()).padStart(2,'0')}`;
                 let count = 0;
                 for (const entry of Object.values(data)) {
-                        if (!entry.arrivedAt) continue;
-                        const entryWib = new Date(new Date(entry.arrivedAt).toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }));
+                        // processedAt tersedia untuk entry yang sudah melewati
+                        // read/reaction. Fallback ke arrivedAt + read menjaga
+                        // hitungan dari data lama sebelum field processedAt ada.
+                        const countAt = entry.processedAt || (entry.read ? entry.arrivedAt : null);
+                        if (!countAt) continue;
+                        const entryWib = new Date(new Date(countAt).toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }));
                         const entryStr = `${entryWib.getFullYear()}-${String(entryWib.getMonth()+1).padStart(2,'0')}-${String(entryWib.getDate()).padStart(2,'0')}`;
                         if (entryStr === todayStr) count++;
                 }
