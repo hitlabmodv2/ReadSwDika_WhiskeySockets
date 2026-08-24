@@ -1024,6 +1024,7 @@ async function handleAlqanimeNotif({ hisoka, m, query, tolak, logCommand, sendCo
                         `│ • ${pfx}alqanimenotif — menu aktifkan/nonaktifkan\n` +
                         `│ • ${pfx}alqanimenotif on — aktifkan GC ini\n` +
                         `│ • ${pfx}alqanimenotif off — nonaktifkan GC ini\n` +
+                         `│ • ${pfx}alqanimenotif add — daftar GC/channel ini\n` +
                         `│ • ${pfx}alqanimenotif status — list semua GC\n` +
                         `│   ↳ Reply status: *add 1,2* — aktifkan\n` +
                         `│   ↳ Reply status: *del 1,2* — nonaktifkan\n` +
@@ -1039,6 +1040,45 @@ async function handleAlqanimeNotif({ hisoka, m, query, tolak, logCommand, sendCo
                         `│ ⏱️ Realtime · cek tiap 1 menit\n` +
                         `╰──────────────────────`
                 );
+                return;
+        }
+
+        // ── ADD — deteksi otomatis GC atau channel dari konteks pesan ─────────────
+        if (sub === 'add') {
+                const currentChannelJid = normalisasiChannelJid(m.from);
+                if (!m.isGroup && !currentChannelJid) {
+                        await tolak(hisoka, m, '❌ Jalankan perintah ini langsung di GC atau channel WhatsApp yang ingin didaftarkan.');
+                        return;
+                }
+                try {
+                        if (currentChannelJid) {
+                                const resolved = await resolveChannelTarget(currentChannelJid, hisoka);
+                                const name = getChannelName(resolved.meta, currentChannelJid);
+                                setChannelEnabled(currentChannelJid, true, {
+                                        name,
+                                        inviteCode: resolved.inviteCode,
+                                });
+                                await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } }).catch(() => {});
+                                await tolak(hisoka, m,
+                                        `✅ *Channel berhasil didaftarkan!*\n\n` +
+                                        `📛 Nama: *${name}*\n` +
+                                        `🆔 JID: \`${currentChannelJid}\`\n` +
+                                        `📢 Notifikasi AlqAnime akan otomatis dikirim ke sini.`);
+                                logCommand(m, hisoka, 'alqanimenotif-add-channel');
+                        } else {
+                                cfgALQ.alqanimenotif.groups[m.from] = { enabled: true, diubahPada: Date.now() };
+                                fs.writeFileSync(cfgPathALQ, JSON.stringify(cfgALQ, null, 2));
+                                await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } }).catch(() => {});
+                                await tolak(hisoka, m,
+                                        `✅ *GC berhasil didaftarkan!*\n\n` +
+                                        `🆔 JID: \`${m.from}\`\n` +
+                                        `📢 Notifikasi AlqAnime akan otomatis dikirim ke GC ini.`);
+                                logCommand(m, hisoka, 'alqanimenotif-add-group');
+                        }
+                } catch (e) {
+                        await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } }).catch(() => {});
+                        await tolak(hisoka, m, '❌ Gagal mendaftarkan tujuan. Pastikan bot dapat mengakses metadata channel atau GC ini.');
+                }
                 return;
         }
 
@@ -1150,6 +1190,14 @@ async function handleAlqanimeNotif({ hisoka, m, query, tolak, logCommand, sendCo
 
         // ── OFF (grup saat ini) ───────────────────────────────────────────────────
         if (sub === 'off') {
+                const currentChannelJid = normalisasiChannelJid(m.from);
+                if (currentChannelJid) {
+                        setChannelEnabled(currentChannelJid, false);
+                        await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } }).catch(() => {});
+                        await tolak(hisoka, m, `✅ Notifikasi AlqAnime dinonaktifkan di channel ini.\n\`${currentChannelJid}\``);
+                        logCommand(m, hisoka, 'alqanimenotif-off-channel');
+                        return;
+                }
                 if (!m.isGroup) { await tolak(hisoka, m, '❌ Perintah ini hanya untuk grup.'); return; }
                 const sebelumnya = cfgALQ.alqanimenotif.groups[m.from]?.enabled === true;
                 cfgALQ.alqanimenotif.groups[m.from] = { enabled: false, diubahPada: Date.now() };
