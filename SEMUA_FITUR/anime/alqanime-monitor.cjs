@@ -130,7 +130,20 @@ async function resolveChannelTarget(input, hisoka) {
 }
 
 function getChannelName(meta, jid) {
-    return String(meta?.name || meta?.subject || meta?.thread_metadata?.name || jid).trim();
+    const ambilTeks = (value, depth = 0) => {
+        if (depth > 3 || value === null || value === undefined) return '';
+        if (typeof value === 'string' || typeof value === 'number') return String(value).trim();
+        if (typeof value !== 'object') return '';
+        for (const key of ['text', 'name', 'subject', 'title', 'value']) {
+            const hasil = ambilTeks(value[key], depth + 1);
+            if (hasil) return hasil;
+        }
+        return '';
+    };
+    return ambilTeks(meta?.name)
+        || ambilTeks(meta?.subject)
+        || ambilTeks(meta?.thread_metadata)
+        || String(jid || '').trim();
 }
 
 function getEnabledChannels() {

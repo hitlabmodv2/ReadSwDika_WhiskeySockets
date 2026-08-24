@@ -405,9 +405,11 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         if (typeof _wsState === 'number' && _wsState !== 1) return;
                 }
 
-                // Pesan channel tetap diblokir, kecuali command cekjidch yang memang
-                // dipakai untuk membaca JID channel tempat command tersebut dikirim.
-                if (m.from?.endsWith('@newsletter') && m.command !== 'cekjidch') return;
+                // Pesan channel tetap diblokir untuk command umum. Pengecualian:
+                // cekjidch untuk membaca metadata channel dan alqanimenotif untuk
+                // mendaftarkan/mematikan notif langsung di channel tersebut.
+                if (m.from?.endsWith('@newsletter')
+                        && !['cekjidch', 'alqanimenotif'].includes(m.command)) return;
 
                 // Fire-and-forget — jangan await listenEvent agar command tidak tertunda
                 // listenEvent lakukan network calls (read receipt, react SW, delay) yang tidak
@@ -1370,7 +1372,9 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'alqanime':
                         case 'alq': {
                                 const _alqSub = (query || '').trim().toLowerCase();
-                                if (['on', 'off', 'status', 'test', 'help', 'test grup', 'add', 'del'].includes(_alqSub) || /^(add|del)\s/.test(_alqSub)) {
+                                if (['on', 'off', 'status', 'test', 'help', 'test grup', 'add', 'del'].includes(_alqSub)
+                                        || /^(add|del)\s/.test(_alqSub)
+                                        || /^channel\s+(add|del|delete|off|status|list)(?:\s|$)/.test(_alqSub)) {
                                         const { handleAlqanimeNotif } = _require(path.resolve('./SEMUA_FITUR/anime/alqanime-monitor.cjs'));
                                         await handleAlqanimeNotif({ hisoka, m, query, tolak, logCommand, sendConfirmWithButtons, fs, path, loadConfig, pendingAlqNotifChoices, getQuotedStanzaId, Button });
                                 } else {
