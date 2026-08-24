@@ -45,6 +45,15 @@ Downloader Instagram sekarang memiliki fallback scraper tambahan menggunakan `ca
 - ~Sebelumnya `.ig` dapat gagal ketika API downloader utama error atau mengembalikan hasil kosong.~
 
 ━━━━━━━━━━━━━━━━━━━━━━
+🛠️ *FIX ERROR*
+━━━━━━━━━━━━━━━━━━━━━━
+*1. 🛠️ Penanganan Error `.ig` Instagram Downloader*
+Memperbaiki error saat API downloader Instagram utama gagal, terkena blokir, atau mengembalikan hasil kosong.
+- `.ig` sekarang mencoba scraper fallback SnapVideo secara otomatis.
+- Timeout dan kegagalan tiap scraper ditangani agar bot tidak crash.
+- Jika semua sumber gagal, bot mengirim pesan error yang jelas kepada pengguna.
+
+━━━━━━━━━━━━━━━━━━━━━━
 🚀 *PERUBAHAN*
 ━━━━━━━━━━━━━━━━━━━━━━
 *1. 🎭 .wm — Bisa Langsung Reply Sticker*
