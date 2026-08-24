@@ -8,7 +8,7 @@ _📅 Rabu, 23 Juli 2026_ 🌙
 🤖 *WILY BOT — V27.2*
 ✨ *2 Fitur Baru*
 🐛 *1 Fix Bug*
-🛠️ *1 Fix Error*
+🛠️ *2 Fix Error*
 🚀 *1 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
@@ -31,23 +31,34 @@ _Fitur untuk mengambil informasi channel/saluran WhatsApp secara realtime._
 ━━━━━━━━━━━━━━━━━━━━━━
 🐛 *BUG FIX*
 ━━━━━━━━━━━━━━━━━━━━━━
-*1. 🐛 .ceksw — Username Sekarang Menjadi Mention yang Bisa Diklik*
-Username 👤 orang yang ditampilkan oleh `.ceksw` sekarang menjadi 🔗 *mention* yang bisa langsung diklik untuk membuka profil/chat.
-- Nama pengguna tampil sebagai mention yang terhubung ke akun.
-- Tap mention untuk membuka profil atau chat.
-- ~Sebelumnya hanya tampil sebagai teks nama biasa.~
+*1. 🐛 `.ceksw` — Username Menjadi Mention yang Bisa Diklik*
+Username 👤 yang ditampilkan oleh `.ceksw` sekarang menjadi *mention* 🔗 yang bisa langsung diklik untuk membuka profil atau chat.
+1. Nama pengguna tampil sebagai mention yang terhubung ke akun.
+2. Mention dapat disentuh untuk membuka profil atau chat.
+> _Hasil: identitas pengguna sekarang lebih mudah dibuka dari pesan `.ceksw`._
+~Sebelumnya username hanya tampil sebagai teks nama biasa.~
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🛠️ *FIX ERROR*
 ━━━━━━━━━━━━━━━━━━━━━━
-*1. 🛠️ .ig — Perbaikan Error Downloader Instagram/Reel*
+*1. 🛠️ `.ig` — Perbaikan Error Downloader Instagram/Reel*
 Downloader Instagram sekarang memiliki fallback scraper tambahan menggunakan `cakkatrok-instagram-downloader` yang terbukti berhasil mengambil media reel publik.
-- Fallback SnapVideo digunakan jika scraper utama gagal.
-- Mendukung pengambilan video reel dan media Instagram publik.
-- Ditambahkan fallback Savevid untuk mencoba sumber alternatif.
-- Timeout dan kegagalan tiap scraper ditangani agar bot tidak crash.
-- Jika semua sumber gagal, bot mengirim pesan error yang jelas kepada pengguna.
-- ~Sebelumnya `.ig` dapat gagal ketika API downloader utama error atau mengembalikan hasil kosong.~
+1. Jika scraper utama gagal, `.ig` mencoba fallback *SnapVideo* secara otomatis.
+2. Media video reel dan media Instagram publik dapat diproses.
+• `cakkatrok-instagram-downloader` digunakan sebagai sumber fallback utama.
+• `Savevid` tetap tersedia sebagai sumber alternatif.
+• Timeout dan kegagalan setiap scraper ditangani agar bot tidak crash.
+> _Hasil: reel publik dapat diunduh selama salah satu sumber mengembalikan media yang valid._
+~Sebelumnya `.ig` dapat gagal ketika API downloader utama error atau mengembalikan hasil kosong.~
+
+*2. 🛠️ `.cekjidch` — Informasi Nama Channel Sudah Tampil*
+Memperbaiki error pada informasi channel WhatsApp agar nama channel dan detail lainnya muncul dengan benar.
+1. Gunakan perintah `.cekjidch` dengan link channel, misalnya `https://whatsapp.com/channel/0029...`.
+2. Bot menampilkan *nama channel*, JID `@newsletter`, dan total pengikut.
+• Link invite dibersihkan otomatis jika memiliki karakter `_` di bagian akhir.
+• Hasil dikirim sebagai reply dan tersedia tombol `Copy JID Channel`.
+> _Hasil: nama channel sekarang sudah muncul dan informasi channel tampil lebih akurat._
+~Sebelumnya informasi channel dapat muncul tanpa nama channel atau tidak lengkap.~
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *PERUBAHAN*
