@@ -19,7 +19,7 @@
  * ───────────────────────────────
  *
  *  alqanime-monitor.cjs — Monitor anime baru AlqAnime
- *  Cek update berkala, kirim notif ke grup & channel yang terdaftar
+ *  Cek update berkala, kirim notif ke grup yang terdaftar
  * ───────────────────────────────
  */
 /**
@@ -104,67 +104,14 @@ function simpanConfig(cfg) {
     try { fs.writeFileSync(FILE_CONFIG, JSON.stringify(cfg, null, 2), 'utf-8'); } catch (_) {}
 }
 
-const CHANNEL_LINK_RE = /https?:\/\/(?:www\.)?whatsapp\.com\/channel\/([A-Za-z0-9]+)/i;
-const CHANNEL_JID_RE  = /^([0-9]+(?:\.[0-9]+)?)@newsletter$/i;
-
-function normalisasiChannelJid(jid) {
-    const value = String(jid || '').trim();
-    return CHANNEL_JID_RE.test(value) ? value : null;
-}
-
-async function resolveChannelTarget(input, hisoka) {
-    const text = String(input || '').trim();
-    const jid = normalisasiChannelJid(text);
-    if (jid) {
-        const meta = await hisoka.newsletterMetadata('jid', jid);
-        return { jid, meta, inviteCode: '' };
-    }
-
-    const match = text.match(CHANNEL_LINK_RE);
-    if (!match) throw new Error('LINK_OR_JID_CHANNEL_INVALID');
-
-    const meta = await hisoka.newsletterMetadata('invite', match[1]);
-    const resolvedJid = normalisasiChannelJid(meta?.id || meta?.jid);
-    if (!resolvedJid) throw new Error('CHANNEL_NOT_FOUND');
-    return { jid: resolvedJid, meta, inviteCode: match[1] };
-}
-
-function getChannelName(meta, jid) {
-    const ambilTeks = (value, depth = 0) => {
-        if (depth > 3 || value === null || value === undefined) return '';
-        if (typeof value === 'string' || typeof value === 'number') return String(value).trim();
-        if (typeof value !== 'object') return '';
-        for (const key of ['text', 'name', 'subject', 'title', 'value']) {
-            const hasil = ambilTeks(value[key], depth + 1);
-            if (hasil) return hasil;
-        }
-        return '';
-    };
-    return ambilTeks(meta?.name)
-        || ambilTeks(meta?.subject)
-        || ambilTeks(meta?.thread_metadata)
-        || String(jid || '').trim();
-}
-
-function getEnabledChannels() {
-    const cfg = bacaConfig();
-    const channels = cfg?.alqanimenotif?.channels || {};
-    return Object.entries(channels)
-        .filter(([, v]) => v?.enabled === true)
-        .map(([jid]) => jid);
-}
-
-// ── PENGATURAN TUJUAN ─────────────────────────────────────────────────────────
+// ── PENGATURAN GRUP ───────────────────────────────────────────────────────────
 
 function getEnabledGroups() {
     const cfg    = bacaConfig();
     const groups = cfg?.alqanimenotif?.groups || {};
-    const enabledGroups = Object.entries(groups)
+    return Object.entries(groups)
         .filter(([, v]) => v?.enabled === true)
         .map(([jid]) => jid);
-    // Nama fungsi dipertahankan agar scheduler lama tetap kompatibel.
-    // Channel @newsletter ikut menjadi tujuan hanya setelah didaftarkan.
-    return [...enabledGroups, ...getEnabledChannels()];
 }
 
 function setGroupEnabled(jid, enabled) {
@@ -172,21 +119,6 @@ function setGroupEnabled(jid, enabled) {
     if (!cfg.alqanimenotif)        cfg.alqanimenotif        = { groups: {} };
     if (!cfg.alqanimenotif.groups) cfg.alqanimenotif.groups = {};
     cfg.alqanimenotif.groups[jid] = { enabled, diubahPada: Date.now() };
-    simpanConfig(cfg);
-}
-
-function setChannelEnabled(jid, enabled, metadata = {}) {
-    const cfg = bacaConfig();
-    if (!cfg.alqanimenotif)        cfg.alqanimenotif        = { groups: {} };
-    if (!cfg.alqanimenotif.channels) cfg.alqanimenotif.channels = {};
-    const old = cfg.alqanimenotif.channels[jid] || {};
-    cfg.alqanimenotif.channels[jid] = {
-        ...old,
-        enabled,
-        name: metadata.name || old.name || jid,
-        inviteCode: metadata.inviteCode || old.inviteCode || null,
-        diubahPada: Date.now(),
-    };
     simpanConfig(cfg);
 }
 
@@ -933,8 +865,6 @@ async function downloadImageBuffer(url) {
 
 module.exports = {
     getEnabledGroups,
-    getEnabledChannels,
-    setChannelEnabled,
     setGroupEnabled,
     cariEpisodeBaru,
     cariPerubahanHangat,
@@ -958,8 +888,7 @@ async function handleAlqanimeNotif({ hisoka, m, query, tolak, logCommand, sendCo
         if (!m.isOwner) { await tolak(hisoka, m, '❌ Hanya owner yang bisa gunakan perintah ini.'); return; }
 
         const cfgPathALQ = path.join(process.cwd(), 'config.json');
-        const rawQuery = String(query || '').trim();
-        const sub = rawQuery.toLowerCase().replace(/\s+/g, ' ');
+        const sub = (query || '').trim().toLowerCase().replace(/\s+/g, ' ');
         const pfx = m.prefix || '.';
 
         const cfgALQ = loadConfig();
@@ -1037,14 +966,9 @@ async function handleAlqanimeNotif({ hisoka, m, query, tolak, logCommand, sendCo
                         `│ • ${pfx}alqanimenotif — menu aktifkan/nonaktifkan\n` +
                         `│ • ${pfx}alqanimenotif on — aktifkan GC ini\n` +
                         `│ • ${pfx}alqanimenotif off — nonaktifkan GC ini\n` +
-                         `│ • ${pfx}alqanimenotif add — daftar GC/channel ini\n` +
                         `│ • ${pfx}alqanimenotif status — list semua GC\n` +
                         `│   ↳ Reply status: *add 1,2* — aktifkan\n` +
                         `│   ↳ Reply status: *del 1,2* — nonaktifkan\n` +
-                        `│ • ${pfx}alqanimenotif channel add <link/JID>\n` +
-                        `│ • ${pfx}alqanimenotif channel del <JID>\n` +
-                        `│ • ${pfx}alqanimenotif channel status\n` +
-                        `│ • ${pfx}alqanimenotif channel test [JID]\n` +
                         `│ • ${pfx}alqanimenotif test — test ke sini\n` +
                         `│ • ${pfx}alqanimenotif test grup — test ke semua GC aktif\n` +
                         `│\n` +
@@ -1054,176 +978,6 @@ async function handleAlqanimeNotif({ hisoka, m, query, tolak, logCommand, sendCo
                         `│ ⏱️ Realtime · cek tiap 1 menit\n` +
                         `╰──────────────────────`
                 );
-                return;
-        }
-
-        // ── ADD — deteksi otomatis GC atau channel dari konteks pesan ─────────────
-        if (sub === 'add') {
-                const currentChannelJid = normalisasiChannelJid(m.from);
-                if (!m.isGroup && !currentChannelJid) {
-                        await tolak(hisoka, m, '❌ Jalankan perintah ini langsung di GC atau channel WhatsApp yang ingin didaftarkan.');
-                        return;
-                }
-                try {
-                        if (currentChannelJid) {
-                                const resolved = await resolveChannelTarget(currentChannelJid, hisoka);
-                                const name = getChannelName(resolved.meta, currentChannelJid);
-                                setChannelEnabled(currentChannelJid, true, {
-                                        name,
-                                        inviteCode: resolved.inviteCode,
-                                });
-                                await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } }).catch(() => {});
-                                await tolak(hisoka, m,
-                                        `✅ *Channel berhasil didaftarkan!*\n\n` +
-                                        `📛 Nama: *${name}*\n` +
-                                        `🆔 JID: \`${currentChannelJid}\`\n` +
-                                        `📢 Notifikasi AlqAnime akan otomatis dikirim ke sini.`);
-                                logCommand(m, hisoka, 'alqanimenotif-add-channel');
-                        } else {
-                                cfgALQ.alqanimenotif.groups[m.from] = { enabled: true, diubahPada: Date.now() };
-                                fs.writeFileSync(cfgPathALQ, JSON.stringify(cfgALQ, null, 2));
-                                await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } }).catch(() => {});
-                                await tolak(hisoka, m,
-                                        `✅ *GC berhasil didaftarkan!*\n\n` +
-                                        `🆔 JID: \`${m.from}\`\n` +
-                                        `📢 Notifikasi AlqAnime akan otomatis dikirim ke GC ini.`);
-                                logCommand(m, hisoka, 'alqanimenotif-add-group');
-                        }
-                } catch (e) {
-                        await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } }).catch(() => {});
-                        await tolak(hisoka, m, '❌ Gagal mendaftarkan tujuan. Pastikan bot dapat mengakses metadata channel atau GC ini.');
-                }
-                return;
-        }
-
-        // ── CHANNEL — daftar tujuan channel WhatsApp secara eksplisit ─────────────
-        // Link invite di-resolve ke JID @newsletter lalu disimpan agar scheduler
-        // hanya mengirim ke channel yang memang sudah diizinkan owner.
-        if (sub === 'channel test' || sub.startsWith('channel test ')) {
-                const targetArg = rawQuery.slice('channel test'.length).trim();
-                const channels = cfgALQ?.alqanimenotif?.channels || {};
-                const targetJid = targetArg
-                        ? normalisasiChannelJid(targetArg)
-                        : Object.entries(channels).find(([, entry]) => entry?.enabled === true)?.[0];
-                if (!targetJid) {
-                        await tolak(hisoka, m,
-                                `❌ JID channel tidak valid atau belum ada channel aktif.\n` +
-                                `Gunakan: *${pfx}alqanimenotif channel test 120363...@newsletter*`);
-                        return;
-                }
-                try {
-                        await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } }).catch(() => {});
-                        await hisoka.sendMessage(targetJid, {
-                                text: '⏳ *Test AlqAnime Channel*\n\nSedang menyiapkan gambar simulasi…',
-                        });
-                        const hasil = await simulasi();
-                        const imgBuffer = hasil.urlGambar ? await downloadImageBuffer(hasil.urlGambar) : null;
-                        const imgUrl = hasil.urlGambar && !imgBuffer ? buatProxyUrl(hasil.urlGambar) : null;
-                        if (imgBuffer) {
-                                await hisoka.sendMessage(targetJid, {
-                                        image: imgBuffer,
-                                        mimetype: 'image/jpeg',
-                                        caption: `🧪 *Test AlqAnime Channel*\n\n${hasil.caption}`,
-                                });
-                        } else if (imgUrl) {
-                                await hisoka.sendMessage(targetJid, {
-                                        image: { url: imgUrl },
-                                        caption: `🧪 *Test AlqAnime Channel*\n\n${hasil.caption}`,
-                                });
-                        } else {
-                                await hisoka.sendMessage(targetJid, {
-                                        text: `🧪 *Test AlqAnime Channel*\n\n${hasil.caption || 'Simulasi berhasil dibuat, tetapi gambar tidak tersedia.'}`,
-                                });
-                        }
-                        await tolak(hisoka, m,
-                                `✅ Test gambar AlqAnime dikirim ke channel:\n\`${targetJid}\`\n\n` +
-                                `Jika postingan tidak terlihat, pastikan bot adalah admin/pengelola channel.`);
-                        await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } }).catch(() => {});
-                        logCommand(m, hisoka, 'alqanimenotif-channel-test');
-                } catch (err) {
-                        console.error('[AlqanimeNotif] channel test error:', err?.stack || err?.message || err);
-                        await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } }).catch(() => {});
-                        await tolak(hisoka, m,
-                                `❌ Gagal mengirim test ke channel.\n` +
-                                `Pastikan bot menjadi admin/pengelola channel.\n` +
-                                `Detail: ${err?.message || err}`);
-                }
-                return;
-        }
-
-        if (sub === 'channel status' || sub === 'channel list') {
-                try {
-                        const channels = cfgALQ?.alqanimenotif?.channels || {};
-                        const entries = Object.entries(channels);
-                        if (!entries.length) {
-                                await tolak(hisoka, m, '📢 Belum ada channel AlqAnime yang terdaftar.\n\nTambahkan dengan:\n' +
-                                        `*${pfx}alqanimenotif channel add <link channel atau JID>*`);
-                                return;
-                        }
-                        let text = `📢 *DAFTAR CHANNEL ALQANIME*\n\n`;
-                        entries.forEach(([jid, entry], index) => {
-                                const state = entry?.enabled === true ? '✅ Aktif' : '❌ Nonaktif';
-                                text += `${index + 1}. ${state}\n   *${entry?.name || jid}*\n   \`${jid}\`\n`;
-                        });
-                        text += `\n> Channel hanya menerima notif setelah didaftarkan owner.`;
-                        await tolak(hisoka, m, text);
-                        logCommand(m, hisoka, 'alqanimenotif-channel-status');
-                } catch (e) {
-                        await tolak(hisoka, m, `❌ Gagal membaca daftar channel: ${e?.message || e}`);
-                }
-                return;
-        }
-
-        const channelMatch = rawQuery.match(/^channel\s+(add|del|delete|off)\s*(.*)$/i);
-        if (channelMatch) {
-                const action = channelMatch[1].toLowerCase();
-                const target = channelMatch[2].trim();
-                if (!target) {
-                        await tolak(hisoka, m, action === 'add'
-                                ? `❌ Masukkan link channel atau JID @newsletter.\nContoh: *${pfx}alqanimenotif channel add https://whatsapp.com/channel/0029...*`
-                                : `❌ Masukkan JID channel.\nContoh: *${pfx}alqanimenotif channel del 120363...@newsletter*`);
-                        return;
-                }
-
-                try {
-                        let jid;
-                        let meta = null;
-                        let inviteCode = '';
-                        if (action === 'add') {
-                                const resolved = await resolveChannelTarget(target, hisoka);
-                                jid = resolved.jid;
-                                meta = resolved.meta;
-                                inviteCode = resolved.inviteCode;
-                                setChannelEnabled(jid, true, {
-                                        name: getChannelName(meta, jid),
-                                        inviteCode,
-                                });
-                                await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } }).catch(() => {});
-                                await tolak(hisoka, m,
-                                        `✅ *Channel berhasil ditambahkan!*\n\n` +
-                                        `📛 Nama: *${getChannelName(meta, jid)}*\n` +
-                                        `🆔 JID: \`${jid}\`\n` +
-                                        `📢 Notifikasi AlqAnime otomatis dikirim ke channel ini.\n\n` +
-                                        `> Konfigurasi tersimpan di \`config.json\`.`);
-                                logCommand(m, hisoka, 'alqanimenotif-channel-add');
-                        } else {
-                                jid = normalisasiChannelJid(target);
-                                if (!jid) {
-                                        await tolak(hisoka, m, '❌ JID channel tidak valid. Gunakan format angka + `@newsletter`.');
-                                        return;
-                                }
-                                setChannelEnabled(jid, false);
-                                await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } }).catch(() => {});
-                                await tolak(hisoka, m, `✅ Channel dinonaktifkan:\n\`${jid}\`\n\nData tetap disimpan agar bisa diaktifkan lagi.`);
-                                logCommand(m, hisoka, 'alqanimenotif-channel-off');
-                        }
-                } catch (e) {
-                        const message = e?.message === 'LINK_OR_JID_CHANNEL_INVALID'
-                                ? '❌ Target tidak valid. Gunakan link WhatsApp channel atau JID berakhiran `@newsletter`.'
-                                : '❌ Gagal mengambil metadata channel. Pastikan link/JID benar dan channel dapat diakses bot.';
-                        await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } }).catch(() => {});
-                        await tolak(hisoka, m, message);
-                }
                 return;
         }
 
@@ -1256,14 +1010,6 @@ async function handleAlqanimeNotif({ hisoka, m, query, tolak, logCommand, sendCo
 
         // ── OFF (grup saat ini) ───────────────────────────────────────────────────
         if (sub === 'off') {
-                const currentChannelJid = normalisasiChannelJid(m.from);
-                if (currentChannelJid) {
-                        setChannelEnabled(currentChannelJid, false);
-                        await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } }).catch(() => {});
-                        await tolak(hisoka, m, `✅ Notifikasi AlqAnime dinonaktifkan di channel ini.\n\`${currentChannelJid}\``);
-                        logCommand(m, hisoka, 'alqanimenotif-off-channel');
-                        return;
-                }
                 if (!m.isGroup) { await tolak(hisoka, m, '❌ Perintah ini hanya untuk grup.'); return; }
                 const sebelumnya = cfgALQ.alqanimenotif.groups[m.from]?.enabled === true;
                 cfgALQ.alqanimenotif.groups[m.from] = { enabled: false, diubahPada: Date.now() };
@@ -1424,22 +1170,10 @@ async function handleAlqanimeNotif({ hisoka, m, query, tolak, logCommand, sendCo
 
         // ── TEST ke sini ──────────────────────────────────────────────────────────
         if (sub === 'test') {
-                const isChannelTarget = m.from?.endsWith('@newsletter');
                 await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
                 try {
-                        // Channel lebih ketat terhadap pengiriman media. Kirim ACK teks
-                        // lebih dulu agar owner mendapat tanda bahwa command diterima.
-                        if (isChannelTarget) {
-                                await hisoka.sendMessage(m.from, {
-                                        text: '⏳ *Test AlqAnime diterima.* Sedang menyiapkan simulasi notifikasi…',
-                                }, { quoted: m });
-                        }
                         const hasil = await simulasi();
-                        if (isChannelTarget) {
-                                await hisoka.sendMessage(m.from, {
-                                        text: `🧪 *Test AlqAnime Channel*\n\n${hasil.caption || 'Simulasi berhasil dibuat.'}\n\n✅ Command dan pengiriman teks channel berhasil.`,
-                                }, { quoted: m });
-                        } else if (hasil.urlGambar) {
+                        if (hasil.urlGambar) {
                                 const imgBuf = await downloadImageBuffer(hasil.urlGambar);
                                 const imgUrl = imgBuf ? null : buatProxyUrl(hasil.urlGambar);
                                 if (imgBuf) {
@@ -1453,7 +1187,6 @@ async function handleAlqanimeNotif({ hisoka, m, query, tolak, logCommand, sendCo
                         await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
                         logCommand(m, hisoka, 'alqanimenotif-test');
                 } catch (err) {
-                        console.error(`[AlqanimeNotif] test ${isChannelTarget ? 'channel' : 'chat'} error:`, err?.stack || err?.message || err);
                         await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
                         await tolak(hisoka, m, `❌ Gagal: ${err?.message || err}`);
                 }

@@ -2,42 +2,6 @@
   "events": [
     {
       "type": "connected",
-      "connectedAt": "2026-08-25T14:17:20.098Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-08-25T14:11:37.056Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-08-25T14:10:06.293Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-08-25T14:09:21.957Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-08-25T14:03:18.234Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-08-24T14:31:04.084Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-08-24T14:27:47.648Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-08-24T14:22:41.612Z"
-    },
-    {
-      "type": "connected",
-      "connectedAt": "2026-08-24T14:14:46.414Z"
-    },
-    {
-      "type": "connected",
       "connectedAt": "2026-08-24T13:55:25.383Z"
     },
     {
@@ -123,6 +87,6 @@
       "durationSeconds": 180
     }
   ],
-  "lastUpdated": "2026-08-25T14:17:20.098Z",
+  "lastUpdated": "2026-08-24T13:55:25.384Z",
   "sessionStart": "2026-08-22T14:03:08.011Z"
 }
