@@ -16,3 +16,4 @@
 - [Command alias registration](command-alias-registration.md) — parser loadedCommands mengenali alias case hanya jika tiap alias punya blok case sendiri
 - [Instagram scraper reliability](instagram-scraper-endpoints.md) — endpoint publik dapat 403, permission error, DNS failure, atau hasil kosong dari server
 - [Story count processing time](story-count-processing-time.md) — TotalStory harus menghitung story selesai diproses, bukan seluruh batch yang baru diterima
+- [Channel command metadata](channel-command-metadata.md) — newsletter command perlu allowlist khusus dan nama metadata harus dinormalisasi dari object

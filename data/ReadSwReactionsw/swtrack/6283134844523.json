@@ -82,5 +82,47 @@
       }
     ],
     "processedAt": "2026-08-24T13:41:18.245Z"
+  },
+  "A5DA06DBD4D4DA16DB3891E1FD39A662": {
+    "id": "A5DA06DBD4D4DA16DB3891E1FD39A662",
+    "sender": "6283134844523@s.whatsapp.net",
+    "name": "Anda Siapa?",
+    "type": "imageMessage",
+    "arrivedAt": "2026-08-24T14:36:06.710Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐬",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6283134844523",
+    "resolvedPn": "6283134844523@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6283134844523@s.whatsapp.net",
+      "fromMe": false,
+      "id": "A5DA06DBD4D4DA16DB3891E1FD39A662",
+      "participant": "239328697536578@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-08-24T14:36:20.410Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283134844523@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A5DA06DBD4D4DA16DB3891E1FD39A662",
+        "participant": "239328697536578@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6283134844523@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A5DA06DBD4D4DA16DB3891E1FD39A662",
+        "participant": "6283134844523@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-08-24T14:36:20.410Z"
   }
 }
