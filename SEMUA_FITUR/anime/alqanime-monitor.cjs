@@ -1371,10 +1371,22 @@ async function handleAlqanimeNotif({ hisoka, m, query, tolak, logCommand, sendCo
 
         // ── TEST ke sini ──────────────────────────────────────────────────────────
         if (sub === 'test') {
+                const isChannelTarget = m.from?.endsWith('@newsletter');
                 await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
                 try {
+                        // Channel lebih ketat terhadap pengiriman media. Kirim ACK teks
+                        // lebih dulu agar owner mendapat tanda bahwa command diterima.
+                        if (isChannelTarget) {
+                                await hisoka.sendMessage(m.from, {
+                                        text: '⏳ *Test AlqAnime diterima.* Sedang menyiapkan simulasi notifikasi…',
+                                }, { quoted: m });
+                        }
                         const hasil = await simulasi();
-                        if (hasil.urlGambar) {
+                        if (isChannelTarget) {
+                                await hisoka.sendMessage(m.from, {
+                                        text: `🧪 *Test AlqAnime Channel*\n\n${hasil.caption || 'Simulasi berhasil dibuat.'}\n\n✅ Command dan pengiriman teks channel berhasil.`,
+                                }, { quoted: m });
+                        } else if (hasil.urlGambar) {
                                 const imgBuf = await downloadImageBuffer(hasil.urlGambar);
                                 const imgUrl = imgBuf ? null : buatProxyUrl(hasil.urlGambar);
                                 if (imgBuf) {
@@ -1388,6 +1400,7 @@ async function handleAlqanimeNotif({ hisoka, m, query, tolak, logCommand, sendCo
                         await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
                         logCommand(m, hisoka, 'alqanimenotif-test');
                 } catch (err) {
+                        console.error(`[AlqanimeNotif] test ${isChannelTarget ? 'channel' : 'chat'} error:`, err?.stack || err?.message || err);
                         await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
                         await tolak(hisoka, m, `❌ Gagal: ${err?.message || err}`);
                 }
