@@ -1374,7 +1374,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 const _alqSub = (query || '').trim().toLowerCase();
                                 if (['on', 'off', 'status', 'test', 'help', 'test grup', 'add', 'del'].includes(_alqSub)
                                         || /^(add|del)\s/.test(_alqSub)
-                                        || /^channel\s+(add|del|delete|off|status|list)(?:\s|$)/.test(_alqSub)) {
+                                        || /^channel\s+(add|del|delete|off|status|list|test)(?:\s|$)/.test(_alqSub)) {
                                         const { handleAlqanimeNotif } = _require(path.resolve('./SEMUA_FITUR/anime/alqanime-monitor.cjs'));
                                         await handleAlqanimeNotif({ hisoka, m, query, tolak, logCommand, sendConfirmWithButtons, fs, path, loadConfig, pendingAlqNotifChoices, getQuotedStanzaId, Button });
                                 } else {

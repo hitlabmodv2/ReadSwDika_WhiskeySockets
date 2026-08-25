@@ -1044,6 +1044,7 @@ async function handleAlqanimeNotif({ hisoka, m, query, tolak, logCommand, sendCo
                         `│ • ${pfx}alqanimenotif channel add <link/JID>\n` +
                         `│ • ${pfx}alqanimenotif channel del <JID>\n` +
                         `│ • ${pfx}alqanimenotif channel status\n` +
+                        `│ • ${pfx}alqanimenotif channel test [JID]\n` +
                         `│ • ${pfx}alqanimenotif test — test ke sini\n` +
                         `│ • ${pfx}alqanimenotif test grup — test ke semua GC aktif\n` +
                         `│\n` +
@@ -1098,6 +1099,39 @@ async function handleAlqanimeNotif({ hisoka, m, query, tolak, logCommand, sendCo
         // ── CHANNEL — daftar tujuan channel WhatsApp secara eksplisit ─────────────
         // Link invite di-resolve ke JID @newsletter lalu disimpan agar scheduler
         // hanya mengirim ke channel yang memang sudah diizinkan owner.
+        if (sub === 'channel test' || sub.startsWith('channel test ')) {
+                const targetArg = rawQuery.slice('channel test'.length).trim();
+                const channels = cfgALQ?.alqanimenotif?.channels || {};
+                const targetJid = targetArg
+                        ? normalisasiChannelJid(targetArg)
+                        : Object.entries(channels).find(([, entry]) => entry?.enabled === true)?.[0];
+                if (!targetJid) {
+                        await tolak(hisoka, m,
+                                `❌ JID channel tidak valid atau belum ada channel aktif.\n` +
+                                `Gunakan: *${pfx}alqanimenotif channel test 120363...@newsletter*`);
+                        return;
+                }
+                try {
+                        await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } }).catch(() => {});
+                        await hisoka.sendMessage(targetJid, {
+                                text: '🧪 *Test AlqAnime Channel*\n\n✅ Pengiriman notifikasi teks ke channel berhasil.',
+                        });
+                        await tolak(hisoka, m,
+                                `✅ Test berhasil dikirim ke channel:\n\`${targetJid}\`\n\n` +
+                                `Jika postingan tidak terlihat, pastikan bot adalah admin/pengelola channel.`);
+                        await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } }).catch(() => {});
+                        logCommand(m, hisoka, 'alqanimenotif-channel-test');
+                } catch (err) {
+                        console.error('[AlqanimeNotif] channel test error:', err?.stack || err?.message || err);
+                        await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } }).catch(() => {});
+                        await tolak(hisoka, m,
+                                `❌ Gagal mengirim test ke channel.\n` +
+                                `Pastikan bot menjadi admin/pengelola channel.\n` +
+                                `Detail: ${err?.message || err}`);
+                }
+                return;
+        }
+
         if (sub === 'channel status' || sub === 'channel list') {
                 try {
                         const channels = cfgALQ?.alqanimenotif?.channels || {};
