@@ -1114,10 +1114,29 @@ async function handleAlqanimeNotif({ hisoka, m, query, tolak, logCommand, sendCo
                 try {
                         await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } }).catch(() => {});
                         await hisoka.sendMessage(targetJid, {
-                                text: '🧪 *Test AlqAnime Channel*\n\n✅ Pengiriman notifikasi teks ke channel berhasil.',
+                                text: '⏳ *Test AlqAnime Channel*\n\nSedang menyiapkan gambar simulasi…',
                         });
+                        const hasil = await simulasi();
+                        const imgBuffer = hasil.urlGambar ? await downloadImageBuffer(hasil.urlGambar) : null;
+                        const imgUrl = hasil.urlGambar && !imgBuffer ? buatProxyUrl(hasil.urlGambar) : null;
+                        if (imgBuffer) {
+                                await hisoka.sendMessage(targetJid, {
+                                        image: imgBuffer,
+                                        mimetype: 'image/jpeg',
+                                        caption: `🧪 *Test AlqAnime Channel*\n\n${hasil.caption}`,
+                                });
+                        } else if (imgUrl) {
+                                await hisoka.sendMessage(targetJid, {
+                                        image: { url: imgUrl },
+                                        caption: `🧪 *Test AlqAnime Channel*\n\n${hasil.caption}`,
+                                });
+                        } else {
+                                await hisoka.sendMessage(targetJid, {
+                                        text: `🧪 *Test AlqAnime Channel*\n\n${hasil.caption || 'Simulasi berhasil dibuat, tetapi gambar tidak tersedia.'}`,
+                                });
+                        }
                         await tolak(hisoka, m,
-                                `✅ Test berhasil dikirim ke channel:\n\`${targetJid}\`\n\n` +
+                                `✅ Test gambar AlqAnime dikirim ke channel:\n\`${targetJid}\`\n\n` +
                                 `Jika postingan tidak terlihat, pastikan bot adalah admin/pengelola channel.`);
                         await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } }).catch(() => {});
                         logCommand(m, hisoka, 'alqanimenotif-channel-test');
