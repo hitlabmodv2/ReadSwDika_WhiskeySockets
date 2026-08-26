@@ -26,6 +26,19 @@
 # ⚙️  Konfigurasi:
 #   Edit variabel USER, REPO, DEFAULT_BRANCH di bawah.
 #
+#
+# 📚 Peta file (cari section dengan komentar ===== ... =====):
+#   1. Config + Telegram token
+#   2. Shared helpers (json / gh_curl / tg keyboard)
+#   3. UI: warna, spinner, progress bar, startup bar
+#   4. Token: generate / manual / validate / expiry
+#   5. Repo setup: pick_repo, ruleset, autopr, startup
+#   6. Commit: classify, issue#, auto PR
+#   7. Git stage/scan + fetch branches
+#   8. Menu utama + aksi branch/repo
+#   9. Upload/push + cleanup + switch repo
+#  10. main_loop + trap
+#
 # ─────────────────────────────────────────────────────────────
 
 USER="hitlabmodv2"
@@ -55,8 +68,101 @@ NM_SKIP_MB=5
 _PUSH_SESSION_NEW=0
 
 # Telegram notifikasi (push.sh only — tidak berhubungan dengan bot WA)
-TG_TOKEN="7603636186:AAHKB27UPqcCZswPiGJJuRBnNXBmk4hJad0"
+TG_TOKEN="7603636186:AAEprtx4pepq3vq5pOKFqUz3Ir6GNfLp05o"
 TG_CHAT_ID="5810736154"
+
+# ─────────────────────────────────────────────────────────────
+#  SHARED HELPERS (rapikan opsi 2 — dipakai ulang di seluruh script)
+# ─────────────────────────────────────────────────────────────
+
+# Escape string → JSON string literal (untuk body Telegram)
+_json_escape() {
+  printf '%s' "$1" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))' 2>/dev/null \
+    || printf '"%s"' "${1//\"/\\\"}"
+}
+
+# Ambil field dari JSON di stdin.
+# Usage:  echo "$json" | _json_get 'd.stargazers_count||0' '?'
+# Expr adalah ekspresi JS dengan variabel `d` = object hasil parse.
+_json_get() {
+  local expr="$1"
+  local fb="${2:-?}"
+  FB="$fb" EXPR="$expr" node -e '
+    const fb = process.env.FB;
+    const expr = process.env.EXPR;
+    try {
+      const d = JSON.parse(require("fs").readFileSync(0, "utf8"));
+      const v = Function("d", "return (" + expr + ")")(d);
+      process.stdout.write(v == null || v === "" ? fb : String(v));
+    } catch (_) {
+      process.stdout.write(fb);
+    }
+  ' 2>/dev/null
+}
+
+# Panjang array JSON dari file. Fallback 0.
+_json_array_len_file() {
+  node -e '
+    try {
+      const d = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"));
+      console.log(Array.isArray(d) ? d.length : 0);
+    } catch (_) { console.log(0); }
+  ' "$1" 2>/dev/null
+}
+
+# URL web GitHub untuk repo saat ini. Argumen opsional: path ("/branches", "/commit/abc", ...).
+_gh_web() {
+  printf 'https://github.com/%s/%s%s' "$USER" "$REPO" "${1:-}"
+}
+
+# URL API repo saat ini. Argumen opsional: path ("/branches", "/commits?...", ...).
+_gh_repo_api() {
+  printf 'https://api.github.com/repos/%s/%s%s' "$REPO_OWNER" "$REPO" "${1:-}"
+}
+
+# curl ke GitHub API dengan header auth standar.
+# Usage:
+#   gh_curl "https://api.github.com/user"
+#   gh_curl --token "$tok" -o out.json -w "%{http_code}" "https://api.github.com/user"
+#   gh_curl --max-time 6 "$(_gh_repo_api)"
+# Semua argumen lain diteruskan ke curl apa adanya.
+gh_curl() {
+  local tok="$TOKEN"
+  if [ "${1:-}" = "--token" ]; then
+    tok="$2"
+    shift 2
+  fi
+  curl -s \
+    -H "Authorization: token ${tok}" \
+    -H "Accept: application/vnd.github+json" \
+    -H "X-GitHub-Api-Version: 2022-11-28" \
+    "$@"
+}
+
+# Tombol inline Telegram: {"text":"...","url":"..."}
+_tg_btn() {
+  printf '{"text":%s,"url":%s}' "$(_json_escape "$1")" "$(_json_escape "$2")"
+}
+
+# Satu baris keyboard: _tg_row btn1 btn2 ...
+_tg_row() {
+  local out="" b
+  for b in "$@"; do
+    [ -n "$out" ] && out="$out,"
+    out="${out}${b}"
+  done
+  printf '[%s]' "$out"
+}
+
+# Keyboard penuh: _tg_keyboard '[{...}]' '[{...}]' ...
+_tg_keyboard() {
+  local out="" r
+  for r in "$@"; do
+    [ -n "$out" ] && out="$out,"
+    out="${out}${r}"
+  done
+  printf '{"inline_keyboard":[%s]}' "$out"
+}
 
 # ===== Kirim notifikasi Telegram (dengan opsional inline button) =====
 # Usage: send_telegram "teks" '{"inline_keyboard":[[...]]}'
@@ -64,10 +170,12 @@ send_telegram() {
   local _text="$1"
   local _markup="${2:-}"
   [ -z "$TG_TOKEN" ] || [ -z "$TG_CHAT_ID" ] && return 0
+  local _text_json
+  _text_json=$(_json_escape "$_text")
   if [ -n "$_markup" ]; then
     curl -s -X POST "https://api.telegram.org/bot${TG_TOKEN}/sendMessage" \
       -H "Content-Type: application/json" \
-      -d "{\"chat_id\":\"${TG_CHAT_ID}\",\"parse_mode\":\"HTML\",\"text\":$(printf '%s' "$_text" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))' 2>/dev/null || printf '"%s"' "$_text"),\"reply_markup\":${_markup}}" \
+      -d "{\"chat_id\":\"${TG_CHAT_ID}\",\"parse_mode\":\"HTML\",\"text\":${_text_json},\"reply_markup\":${_markup}}" \
       >/dev/null 2>&1 &
   else
     curl -s -X POST "https://api.telegram.org/bot${TG_TOKEN}/sendMessage" \
@@ -86,7 +194,7 @@ send_telegram_photo() {
   local _markup="${3:-}"
   [ -z "$TG_TOKEN" ] || [ -z "$TG_CHAT_ID" ] && return 0
   local _cap_json
-  _cap_json=$(printf '%s' "$_caption" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))' 2>/dev/null || printf '"%s"' "$_caption")
+  _cap_json=$(_json_escape "$_caption")
   if [ -n "$_markup" ]; then
     curl -s -X POST "https://api.telegram.org/bot${TG_TOKEN}/sendPhoto" \
       -H "Content-Type: application/json" \
@@ -534,7 +642,10 @@ screen_generate_token() {
   echo "" >&2
   local _ts_tok; _ts_tok=$(date '+%H:%M:%S %d %b %Y')
   local _masked_tok="${input_tok:0:10}****${input_tok: -4}"
-  local _btn_tok1='{"inline_keyboard":[[{"text":"🔑 Kelola Token","url":"https://github.com/settings/tokens"},{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"}],[{"text":"🔒 Security","url":"https://github.com/settings/security"},{"text":"⚙️ Settings","url":"https://github.com/settings/profile"}]]}'
+  local _btn_tok1
+  _btn_tok1=$(_tg_keyboard \
+    "$(_tg_row "$(_tg_btn "🔑 Kelola Token" "https://github.com/settings/tokens")" "$(_tg_btn "📁 Buka Repo" "$(_gh_web)")")" \
+    "$(_tg_row "$(_tg_btn "🔒 Security" "https://github.com/settings/security")" "$(_tg_btn "⚙️ Settings" "https://github.com/settings/profile")")")
   send_telegram_photo "https://w.wallhaven.cc/full/0q/wallhaven-0qe5er.png" "🔐 <b>TOKEN BARU DISIMPAN</b>
 ━━━━━━━━━━━━━━━━━━━━
 👤 <code>${USER}</code>
@@ -579,7 +690,10 @@ screen_manual_token() {
   echo "" >&2
   local _ts_tok2; _ts_tok2=$(date '+%H:%M:%S %d %b %Y')
   local _masked_tok2="${input_tok:0:10}****${input_tok: -4}"
-  local _btn_tok2='{"inline_keyboard":[[{"text":"🔑 Kelola Token","url":"https://github.com/settings/tokens"},{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"}],[{"text":"🔒 Security","url":"https://github.com/settings/security"},{"text":"⚙️ Settings","url":"https://github.com/settings/profile"}]]}'
+  local _btn_tok2
+  _btn_tok2=$(_tg_keyboard \
+    "$(_tg_row "$(_tg_btn "🔑 Kelola Token" "https://github.com/settings/tokens")" "$(_tg_btn "📁 Buka Repo" "$(_gh_web)")")" \
+    "$(_tg_row "$(_tg_btn "🔒 Security" "https://github.com/settings/security")" "$(_tg_btn "⚙️ Settings" "https://github.com/settings/profile")")")
   send_telegram_photo "https://w.wallhaven.cc/full/0q/wallhaven-0qe5yl.jpg" "🔐 <b>TOKEN MANUAL DISIMPAN</b>
 ━━━━━━━━━━━━━━━━━━━━
 👤 <code>${USER}</code>
@@ -703,7 +817,10 @@ setup_token() {
         echo -e "  ${C_DIM}   Silakan pilih opsi 1, 2, atau 3 untuk memasukkan token baru.${C_RESET}" >&2
         echo "" >&2
         local _ts_del; _ts_del=$(date '+%H:%M:%S %d %b %Y')
-        local _btn_tokdel='{"inline_keyboard":[[{"text":"🔑 Buat Token Baru","url":"https://github.com/settings/tokens/new"},{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"}],[{"text":"⚙️ Settings GitHub","url":"https://github.com/settings"},{"text":"🔒 Security","url":"https://github.com/settings/security"}]]}'
+        local _btn_tokdel
+        _btn_tokdel=$(_tg_keyboard \
+          "$(_tg_row "$(_tg_btn "🔑 Buat Token Baru" "https://github.com/settings/tokens/new")" "$(_tg_btn "📁 Buka Repo" "$(_gh_web)")")" \
+          "$(_tg_row "$(_tg_btn "⚙️ Settings GitHub" "https://github.com/settings")" "$(_tg_btn "🔒 Security" "https://github.com/settings/security")")")
         send_telegram_photo "https://w.wallhaven.cc/full/28/wallhaven-28mlj9.jpg" "🗑 <b>TOKEN DIHAPUS</b>
 ━━━━━━━━━━━━━━━━━━━━
 👤 <code>${USER}</code>
@@ -774,7 +891,10 @@ setup_token() {
       local _ts_tok3; _ts_tok3=$(date '+%H:%M:%S %d %b %Y')
       local _masked_tok3="${input_tok3:0:10}****${input_tok3: -4}"
       _save_token_backup "$input_tok3"
-      local _btn_tok3='{"inline_keyboard":[[{"text":"🔑 Kelola Token","url":"https://github.com/settings/tokens"},{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"}],[{"text":"🔒 Security","url":"https://github.com/settings/security"},{"text":"⚙️ Settings","url":"https://github.com/settings/profile"}]]}'
+      local _btn_tok3
+      _btn_tok3=$(_tg_keyboard \
+        "$(_tg_row "$(_tg_btn "🔑 Kelola Token" "https://github.com/settings/tokens")" "$(_tg_btn "📁 Buka Repo" "$(_gh_web)")")" \
+        "$(_tg_row "$(_tg_btn "🔒 Security" "https://github.com/settings/security")" "$(_tg_btn "⚙️ Settings" "https://github.com/settings/profile")")")
       send_telegram_photo "https://w.wallhaven.cc/full/8x/wallhaven-8x9er2.jpg" "🔐 <b>TOKEN DISIMPAN (PASTE)</b>
 ━━━━━━━━━━━━━━━━━━━━
 👤 <code>${USER}</code>
@@ -922,7 +1042,10 @@ setup_token() {
     echo "" >&2
     local _ts_t12; _ts_t12=$(date '+%H:%M:%S %d %b %Y')
     local _masked_t12="${input_tok:0:10}****${input_tok: -4}"
-    local _btn_t12='{"inline_keyboard":[[{"text":"🔑 Kelola Token","url":"https://github.com/settings/tokens"},{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"}],[{"text":"🔒 Security","url":"https://github.com/settings/security"},{"text":"⚙️ Settings","url":"https://github.com/settings/profile"}]]}'
+    local _btn_t12
+    _btn_t12=$(_tg_keyboard \
+      "$(_tg_row "$(_tg_btn "🔑 Kelola Token" "https://github.com/settings/tokens")" "$(_tg_btn "📁 Buka Repo" "$(_gh_web)")")" \
+      "$(_tg_row "$(_tg_btn "🔒 Security" "https://github.com/settings/security")" "$(_tg_btn "⚙️ Settings" "https://github.com/settings/profile")")")
     send_telegram_photo "https://w.wallhaven.cc/full/8x/wallhaven-8xejz2.jpg" "🔐 <b>TOKEN DISIMPAN (INSTRUKSI)</b>
 ━━━━━━━━━━━━━━━━━━━━
 👤 <code>${USER}</code>
@@ -1001,13 +1124,10 @@ validate_token() {
   echo -e "${C_DIM}  🔄 Memvalidasi token ke GitHub...${C_RESET}" >&2
 
   # Simpan headers ke file terpisah agar bisa baca GitHub-Authentication-Token-Expiration
-  http_code=$(curl -s \
+  http_code=$(gh_curl --token "$tok" \
     -o /tmp/_gh_validate.json \
     -D /tmp/_gh_validate_headers.txt \
     -w "%{http_code}" \
-    -H "Authorization: token ${tok}" \
-    -H "Accept: application/vnd.github+json" \
-    -H "X-GitHub-Api-Version: 2022-11-28" \
     "https://api.github.com/user" 2>/dev/null)
 
   case "$http_code" in
@@ -1109,12 +1229,9 @@ pick_repo() {
   echo -e "${C_DIM}  📋 Mengambil daftar repo dari GitHub...${C_RESET}" >&2
 
   local http_code
-  http_code=$(curl -s \
+  http_code=$(gh_curl --token "$tok" \
     -o /tmp/_gh_repos.json \
     -w "%{http_code}" \
-    -H "Authorization: token ${tok}" \
-    -H "Accept: application/vnd.github+json" \
-    -H "X-GitHub-Api-Version: 2022-11-28" \
     "https://api.github.com/user/repos?type=owner&sort=updated&per_page=100" 2>/dev/null)
 
   if [ "$http_code" != "200" ]; then
@@ -1224,10 +1341,8 @@ setup_branch_ruleset() {
 
   # Cek apakah ruleset dengan nama ini sudah ada
   local _existing
-  _existing=$(curl -s --max-time 8 \
-    "https://api.github.com/repos/${REPO_OWNER}/${REPO}/rulesets" \
-    -H "Authorization: token ${TOKEN}" \
-    -H "Accept: application/vnd.github+json" 2>/dev/null)
+  _existing=$(gh_curl --max-time 8 \
+    "https://api.github.com/repos/${REPO_OWNER}/${REPO}/rulesets" 2>/dev/null)
 
   local _found
   _found=$(python3 -c "
@@ -1270,10 +1385,8 @@ print(json.dumps({
   [ -z "$_payload" ] && return 1
 
   local _resp
-  _resp=$(curl -s --max-time 10 \
+  _resp=$(gh_curl --max-time 10 \
     -X POST "https://api.github.com/repos/${REPO_OWNER}/${REPO}/rulesets" \
-    -H "Authorization: token ${TOKEN}" \
-    -H "Accept: application/vnd.github+json" \
     -H "Content-Type: application/json" \
     -d "$_payload" 2>/dev/null)
 
@@ -1500,43 +1613,23 @@ _sbar_sweep 1 8 0.03 "Inisialisasi ..."
 {
   _ts_login=$(TZ=Asia/Jakarta date '+%d %b %Y • %H:%M WIB' 2>/dev/null || date '+%d %b %Y • %H:%M')
 
-  # Ambil info realtime dari GitHub API
-  _gh_base="https://api.github.com/repos/${REPO_OWNER}/${REPO}"
-  _repo_json=$(curl -s --max-time 6 \
-    -H "Authorization: token ${TOKEN}" \
-    -H "Accept: application/vnd.github+json" \
-    -H "X-GitHub-Api-Version: 2022-11-28" \
-    "${_gh_base}" 2>/dev/null)
-  _star=$(echo "$_repo_json" | node -e "try{const d=JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));process.stdout.write(String(d.stargazers_count||0));}catch(e){process.stdout.write('?');}" 2>/dev/null)
-  _fork=$(echo "$_repo_json" | node -e "try{const d=JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));process.stdout.write(String(d.forks_count||0));}catch(e){process.stdout.write('?');}" 2>/dev/null)
-  _vis=$(echo  "$_repo_json" | node -e "try{const d=JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));process.stdout.write(d.private?'🔒 Private':'🌐 Public');}catch(e){process.stdout.write('?');}" 2>/dev/null)
-  _size=$(echo "$_repo_json" | node -e "try{const d=JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));const kb=d.size||0;process.stdout.write(kb>=1024?Math.round(kb/1024)+'MB':kb+'KB');}catch(e){process.stdout.write('?');}" 2>/dev/null)
+  # Ambil info realtime dari GitHub API (helper: gh_curl + _json_get)
+  _repo_json=$(gh_curl --max-time 6 "$(_gh_repo_api)" 2>/dev/null)
+  _star=$(printf '%s' "$_repo_json" | _json_get 'd.stargazers_count||0' '?')
+  _fork=$(printf '%s' "$_repo_json" | _json_get 'd.forks_count||0' '?')
+  _vis=$(printf '%s' "$_repo_json" | _json_get 'd.private?"🔒 Private":"🌐 Public"' '?')
+  _size=$(printf '%s' "$_repo_json" | _json_get '(d.size||0)>=1024?Math.round((d.size||0)/1024)+"MB":(d.size||0)+"KB"' '?')
 
-  # Branch count
-  _br_json=$(curl -s --max-time 5 \
-    -H "Authorization: token ${TOKEN}" \
-    -H "Accept: application/vnd.github+json" \
-    -H "X-GitHub-Api-Version: 2022-11-28" \
-    "${_gh_base}/branches?per_page=100" 2>/dev/null)
-  _br_count=$(echo "$_br_json" | node -e "try{const d=JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));process.stdout.write(String(d.length||0));}catch(e){process.stdout.write('?');}" 2>/dev/null)
+  _br_json=$(gh_curl --max-time 5 "$(_gh_repo_api '/branches?per_page=100')" 2>/dev/null)
+  _br_count=$(printf '%s' "$_br_json" | _json_get 'd.length||0' '?')
 
-  # Commit terakhir di default branch
-  _cm_json=$(curl -s --max-time 5 \
-    -H "Authorization: token ${TOKEN}" \
-    -H "Accept: application/vnd.github+json" \
-    -H "X-GitHub-Api-Version: 2022-11-28" \
-    "${_gh_base}/commits?sha=${DEFAULT_BRANCH}&per_page=1" 2>/dev/null)
-  _last_sha=$(echo "$_cm_json"   | node -e "try{const d=JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));process.stdout.write((d[0]&&d[0].sha?d[0].sha.slice(0,7):'?'));}catch(e){process.stdout.write('?');}" 2>/dev/null)
-  _last_msg=$(echo "$_cm_json"   | node -e "try{const d=JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));process.stdout.write((d[0]&&d[0].commit&&d[0].commit.message?d[0].commit.message.split('\n')[0].slice(0,50):'?'));}catch(e){process.stdout.write('?');}" 2>/dev/null)
-  _last_who=$(echo "$_cm_json"   | node -e "try{const d=JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));process.stdout.write((d[0]&&d[0].commit&&d[0].commit.author?d[0].commit.author.name.slice(0,20):'?'));}catch(e){process.stdout.write('?');}" 2>/dev/null)
+  _cm_json=$(gh_curl --max-time 5 "$(_gh_repo_api "/commits?sha=${DEFAULT_BRANCH}&per_page=1")" 2>/dev/null)
+  _last_sha=$(printf '%s' "$_cm_json" | _json_get 'd[0]&&d[0].sha?d[0].sha.slice(0,7):"?"' '?')
+  _last_msg=$(printf '%s' "$_cm_json" | _json_get 'd[0]&&d[0].commit&&d[0].commit.message?d[0].commit.message.split("\n")[0].slice(0,50):"?"' '?')
+  _last_who=$(printf '%s' "$_cm_json" | _json_get 'd[0]&&d[0].commit&&d[0].commit.author?d[0].commit.author.name.slice(0,20):"?"' '?')
 
-  # Release terakhir
-  _rel_json=$(curl -s --max-time 5 \
-    -H "Authorization: token ${TOKEN}" \
-    -H "Accept: application/vnd.github+json" \
-    -H "X-GitHub-Api-Version: 2022-11-28" \
-    "${_gh_base}/releases?per_page=1" 2>/dev/null)
-  _last_rel=$(echo "$_rel_json"  | node -e "try{const d=JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));process.stdout.write((d[0]&&d[0].tag_name?d[0].tag_name:'Belum ada'));}catch(e){process.stdout.write('?');}" 2>/dev/null)
+  _rel_json=$(gh_curl --max-time 5 "$(_gh_repo_api '/releases?per_page=1')" 2>/dev/null)
+  _last_rel=$(printf '%s' "$_rel_json" | _json_get 'd[0]&&d[0].tag_name?d[0].tag_name:"Belum ada"' '?')
 
   # Ringkasan push history lokal
   _log_total=0; _log_ok=0; _log_fail=0
@@ -1546,7 +1639,11 @@ _sbar_sweep 1 8 0.03 "Inisialisasi ..."
     _log_fail=$(grep -c '| FAIL ' "${PUSH_LOG_FILE}" 2>/dev/null; true)
   fi
 
-  _btn_login='{"inline_keyboard":[[{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"},{"text":"🌿 Branches","url":"https://github.com/'"${USER}"'/'"${REPO}"'/branches"}],[{"text":"📊 Commits","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commits"},{"text":"🚀 Releases","url":"https://github.com/'"${USER}"'/'"${REPO}"'/releases"}],[{"text":"⚙️ Settings","url":"https://github.com/'"${USER}"'/'"${REPO}"'/settings"},{"text":"📈 Insights","url":"https://github.com/'"${USER}"'/'"${REPO}"'/pulse"}]]}'
+  _btn_login=$(_tg_keyboard \
+    "$(_tg_row "$(_tg_btn "📁 Buka Repo" "$(_gh_web)")" "$(_tg_btn "🌿 Branches" "$(_gh_web '/branches')")")" \
+    "$(_tg_row "$(_tg_btn "📊 Commits" "$(_gh_web '/commits')")" "$(_tg_btn "🚀 Releases" "$(_gh_web '/releases')")")" \
+    "$(_tg_row "$(_tg_btn "⚙️ Settings" "$(_gh_web '/settings')")" "$(_tg_btn "📈 Insights" "$(_gh_web '/pulse')")")")
+
   send_telegram_photo "https://w.wallhaven.cc/full/j3/wallhaven-j3k2eq.png" "🟢 <b>SCRIPT AKTIF — LOGIN BERHASIL</b>
 ━━━━━━━━━━━━━━━━━━━━
 👤 <code>${USER}</code>
@@ -1880,10 +1977,8 @@ print(json.dumps({
 
   [ -z "$_payload" ] && { next_commit_no; return; }
 
-  _resp=$(curl -s --max-time 10 \
+  _resp=$(gh_curl --max-time 10 \
     -X POST "https://api.github.com/repos/${REPO_OWNER}/${REPO}/issues" \
-    -H "Authorization: token ${TOKEN}" \
-    -H "Accept: application/vnd.github+json" \
     -H "Content-Type: application/json" \
     -d "$_payload" 2>/dev/null)
 
@@ -1956,10 +2051,8 @@ auto_create_pr() {
 
   # ── Cek base branch ada di remote ────────────────────────────────────────
   local _base_check
-  _base_check=$(curl -s --max-time 6 \
-    "https://api.github.com/repos/${REPO_OWNER}/${REPO}/branches/${_base}" \
-    -H "Authorization: token ${TOKEN}" \
-    -H "Accept: application/vnd.github+json" 2>/dev/null)
+  _base_check=$(gh_curl --max-time 6 \
+    "https://api.github.com/repos/${REPO_OWNER}/${REPO}/branches/${_base}" 2>/dev/null)
   local _base_exists
   _base_exists=$(python3 -c "
 import json,sys
@@ -1974,10 +2067,8 @@ except: print('no')
 
   # ── Cek ada commit beda antara head dan base ──────────────────────────────
   local _compare_json
-  _compare_json=$(curl -s --max-time 6 \
-    "https://api.github.com/repos/${REPO_OWNER}/${REPO}/compare/${_base}...${_head}" \
-    -H "Authorization: token ${TOKEN}" \
-    -H "Accept: application/vnd.github+json" 2>/dev/null)
+  _compare_json=$(gh_curl --max-time 6 \
+    "https://api.github.com/repos/${REPO_OWNER}/${REPO}/compare/${_base}...${_head}" 2>/dev/null)
   local _ahead
   _ahead=$(python3 -c "
 import json,sys
@@ -1991,10 +2082,8 @@ except: print(0)
 
   # ── Cek apakah sudah ada PR open untuk branch ini ──
   local _existing_json
-  _existing_json=$(curl -s --max-time 8 \
-    "https://api.github.com/repos/${REPO_OWNER}/${REPO}/pulls?state=open&head=${REPO_OWNER}:${_head}&base=${_base}" \
-    -H "Authorization: token ${TOKEN}" \
-    -H "Accept: application/vnd.github+json" 2>/dev/null)
+  _existing_json=$(gh_curl --max-time 8 \
+    "https://api.github.com/repos/${REPO_OWNER}/${REPO}/pulls?state=open&head=${REPO_OWNER}:${_head}&base=${_base}" 2>/dev/null)
 
   local _pr_url _pr_no
   _pr_url=$(python3 -c "
@@ -2015,7 +2104,9 @@ except: print('')
   if [ -n "$_pr_url" ]; then
     # PR sudah ada — tampilkan saja
     echo -e "  ${C_CYAN}🔀 PR sudah ada:${C_RESET} ${C_BLUE}${_pr_url}${C_RESET}"
-    local _btn_exist='{"inline_keyboard":[[{"text":"🔀 Lihat PR #'"${_pr_no}"'","url":"'"${_pr_url}"'"},{"text":"📊 All PRs","url":"https://github.com/'"${REPO_OWNER}"'/'"${REPO}"'/pulls"}]]}'
+    local _btn_exist
+    _btn_exist=$(_tg_keyboard \
+      "$(_tg_row "$(_tg_btn "🔀 Lihat PR #${_pr_no}" "${_pr_url}")" "$(_tg_btn "📊 All PRs" "https://github.com/${REPO_OWNER}/${REPO}/pulls")")")
     send_telegram "🔀 <b>PR SUDAH ADA — BRANCH DIUPDATE</b>
 ━━━━━━━━━━━━━━━━━━━━
 📁 <code>${REPO_OWNER}/${REPO}</code>
@@ -2041,10 +2132,8 @@ print(json.dumps({
   [ -z "$_payload" ] && return 1
 
   local _resp
-  _resp=$(curl -s --max-time 10 \
+  _resp=$(gh_curl --max-time 10 \
     -X POST "https://api.github.com/repos/${REPO_OWNER}/${REPO}/pulls" \
-    -H "Authorization: token ${TOKEN}" \
-    -H "Accept: application/vnd.github+json" \
     -H "Content-Type: application/json" \
     -d "$_payload" 2>/dev/null)
 
@@ -2061,7 +2150,10 @@ except: print('')
 
   if [ -n "$_pr_url" ]; then
     echo -e "  ${C_GREEN}🔀 PR baru dibuat:${C_RESET} ${C_BLUE}${_pr_url}${C_RESET}"
-    local _btn_new='{"inline_keyboard":[[{"text":"🔀 Buka PR #'"${_pr_no}"'","url":"'"${_pr_url}"'"},{"text":"✅ Merge PR","url":"'"${_pr_url}"'"}],[{"text":"📊 All PRs","url":"https://github.com/'"${REPO_OWNER}"'/'"${REPO}"'/pulls"},{"text":"📁 Repo","url":"https://github.com/'"${REPO_OWNER}"'/'"${REPO}"'"}]]}'
+    local _btn_new
+    _btn_new=$(_tg_keyboard \
+      "$(_tg_row "$(_tg_btn "🔀 Buka PR #${_pr_no}" "${_pr_url}")" "$(_tg_btn "✅ Merge PR" "${_pr_url}")")" \
+      "$(_tg_row "$(_tg_btn "📊 All PRs" "https://github.com/${REPO_OWNER}/${REPO}/pulls")" "$(_tg_btn "📁 Repo" "https://github.com/${REPO_OWNER}/${REPO}")")")
     send_telegram_photo "https://w.wallhaven.cc/full/pk/wallhaven-pkgq8e.png" "🔀 <b>PULL REQUEST DIBUAT</b>
 ━━━━━━━━━━━━━━━━━━━━
 📁 <code>${REPO_OWNER}/${REPO}</code>
@@ -2442,10 +2534,7 @@ fetch_branches() {
   # ── GitHub API: ambil semua branch (paginasi) ──
   while true; do
     local chunk
-    chunk=$(curl -s \
-      -H "Authorization: token ${TOKEN}" \
-      -H "Accept: application/vnd.github+json" \
-      -H "X-GitHub-Api-Version: 2022-11-28" \
+    chunk=$(gh_curl \
       "https://api.github.com/repos/${REPO_OWNER}/${REPO}/branches?per_page=${per_page}&page=${page}" \
       2>/dev/null)
 
@@ -2498,10 +2587,7 @@ fetch_branches_recent() {
   local tmp_list
   tmp_list=$(mktemp)
   local http_code
-  http_code=$(curl -s -o "$tmp_list" -w "%{http_code}" \
-    -H "Authorization: token ${TOKEN}" \
-    -H "Accept: application/vnd.github+json" \
-    -H "X-GitHub-Api-Version: 2022-11-28" \
+  http_code=$(gh_curl -o "$tmp_list" -w "%{http_code}" \
     "https://api.github.com/repos/${REPO_OWNER}/${REPO}/branches?per_page=100" 2>/dev/null)
 
   if [ "$http_code" != "200" ]; then
@@ -2526,10 +2612,7 @@ fetch_branches_recent() {
   # ── [2] Fetch tanggal commit tiap branch secara PARALEL ──────────────
   local total=${#all_names[@]}
   for (( i=0; i<total; i++ )); do
-    curl -s -o "/tmp/_fbr_${i}_$$.json" \
-      -H "Authorization: token ${TOKEN}" \
-      -H "Accept: application/vnd.github+json" \
-      -H "X-GitHub-Api-Version: 2022-11-28" \
+    gh_curl -o "/tmp/_fbr_${i}_$$.json" \
       "https://api.github.com/repos/${REPO_OWNER}/${REPO}/git/commits/${all_shas[$i]}" \
       2>/dev/null &
   done
@@ -2807,7 +2890,10 @@ console.log(Object.keys(pj.dependencies||{}).length);}catch(e){console.log(0);}
       echo -e "  ${C_DIM}   Coba: npm install <nama-package> atau cek koneksi & install ulang.${C_RESET}"
     fi
     local _tg_status; [ "$_ver_missing_count" = "0" ] && _tg_status="✅ Sukses — semua ${_ver_total} deps terpasang" || _tg_status="⚠️ Partial — ${_ver_ok}/${_ver_total} deps OK, ${_ver_missing_count} missing"
-    local _btn_nm_ok='{"inline_keyboard":[[{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"},{"text":"📦 npm Packages","url":"https://www.npmjs.com/"}],[{"text":"🟢 GitHub Actions","url":"https://github.com/'"${USER}"'/'"${REPO}"'/actions"},{"text":"📜 package.json","url":"https://github.com/'"${USER}"'/'"${REPO}"'/blob/'"${DEFAULT_BRANCH}"'/package.json"}]]}'
+    local _btn_nm_ok
+    _btn_nm_ok=$(_tg_keyboard \
+      "$(_tg_row "$(_tg_btn "📁 Buka Repo" "$(_gh_web)")" "$(_tg_btn "📦 npm Packages" "https://www.npmjs.com/")")" \
+      "$(_tg_row "$(_tg_btn "🟢 GitHub Actions" "$(_gh_web '/actions')")" "$(_tg_btn "📜 package.json" "$(_gh_web '/blob/${DEFAULT_BRANCH}/package.json')")")")
     send_telegram_photo "https://cdn.myanimelist.net/images/anime/1517/100633.jpg" "📦 <b>NODE_MODULES INSTALL SELESAI</b>
 ━━━━━━━━━━━━━━━━━━━━
 👤 <code>${USER}</code>
@@ -2833,7 +2919,10 @@ ${_tg_status}
       done
     fi
     local _nm_err_short; _nm_err_short=$(echo "$_nm_log" | tail -3 | tr '\n' ' ' | cut -c1-120)
-    local _btn_nm_fail='{"inline_keyboard":[[{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"},{"text":"📦 npm Docs","url":"https://docs.npmjs.com/"}],[{"text":"🔍 Troubleshoot","url":"https://docs.npmjs.com/common-errors"},{"text":"📜 package.json","url":"https://github.com/'"${USER}"'/'"${REPO}"'/blob/'"${DEFAULT_BRANCH}"'/package.json"}]]}'
+    local _btn_nm_fail
+    _btn_nm_fail=$(_tg_keyboard \
+      "$(_tg_row "$(_tg_btn "📁 Buka Repo" "$(_gh_web)")" "$(_tg_btn "📦 npm Docs" "https://docs.npmjs.com/")")" \
+      "$(_tg_row "$(_tg_btn "🔍 Troubleshoot" "https://docs.npmjs.com/common-errors")" "$(_tg_btn "📜 package.json" "$(_gh_web '/blob/${DEFAULT_BRANCH}/package.json')")")")
     send_telegram_photo "https://cdn.myanimelist.net/images/anime/1286/99889.jpg" "📦 <b>NPM INSTALL GAGAL</b>
 ━━━━━━━━━━━━━━━━━━━━
 👤 <code>${USER}</code>
@@ -2953,7 +3042,10 @@ action_self_update() {
     echo -e "  ${C_YELLOW}🔄  Jalankan ulang script:  ${C_BOLD}bash push.sh${C_RESET}"
     echo ""
     # ── Notif Telegram: update sukses ────────────────────────────────────
-    local _btn_upd_ok='{"inline_keyboard":[[{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"},{"text":"🔄 Lihat Commits","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commits/'"${DEFAULT_BRANCH}"'"}],[{"text":"📝 push.sh Baru","url":"https://github.com/'"${USER}"'/'"${REPO}"'/blob/'"${DEFAULT_BRANCH}"'/push.sh"},{"text":"🚀 Releases","url":"https://github.com/'"${USER}"'/'"${REPO}"'/releases"}]]}'
+    local _btn_upd_ok
+    _btn_upd_ok=$(_tg_keyboard \
+      "$(_tg_row "$(_tg_btn "📁 Buka Repo" "$(_gh_web)")" "$(_tg_btn "🔄 Lihat Commits" "$(_gh_web "/commits/${DEFAULT_BRANCH}")")")" \
+      "$(_tg_row "$(_tg_btn "📝 push.sh Baru" "$(_gh_web "/blob/${DEFAULT_BRANCH}/push.sh")")" "$(_tg_btn "🚀 Releases" "$(_gh_web '/releases')")")")
     send_telegram_photo "https://cdn.myanimelist.net/images/anime/1337/99013.jpg" "🔄 <b>PUSH SCRIPT BERHASIL DIUPDATE</b>
 ━━━━━━━━━━━━━━━━━━━━
 👤 <code>${USER}</code>
@@ -2971,7 +3063,10 @@ action_self_update() {
     echo ""
     echo -e "  ${C_RED}❌  Gagal mengunduh update. Coba lagi nanti.${C_RESET}"
     # ── Notif Telegram: update gagal ─────────────────────────────────────
-    local _btn_upd_fail='{"inline_keyboard":[[{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"},{"text":"🔄 Coba Lagi","url":"https://github.com/'"${USER}"'/'"${REPO}"'/blob/'"${DEFAULT_BRANCH}"'/push.sh"}],[{"text":"🌐 GitHub Status","url":"https://githubstatus.com/"}]]}'
+    local _btn_upd_fail
+    _btn_upd_fail=$(_tg_keyboard \
+      "$(_tg_row "$(_tg_btn "📁 Buka Repo" "$(_gh_web)")" "$(_tg_btn "🔄 Coba Lagi" "$(_gh_web '/blob/${DEFAULT_BRANCH}/push.sh')")")" \
+      "$(_tg_row "$(_tg_btn "🌐 GitHub Status" "https://githubstatus.com/")")")
     send_telegram_photo "https://cdn.myanimelist.net/images/anime/1286/99889.jpg" "🔄 <b>UPDATE PUSH SCRIPT GAGAL</b>
 ━━━━━━━━━━━━━━━━━━━━
 👤 <code>${USER}</code>
@@ -3233,7 +3328,10 @@ action_view_push_log() {
   _fail=$(grep -c  ' FAIL '    "$PUSH_LOG_FILE" 2>/dev/null; true)
 
   local _ts_vpl; _ts_vpl=$(date '+%H:%M:%S %d %b %Y')
-  local _btn_vpl='{"inline_keyboard":[[{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"},{"text":"📊 Commits","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commits/'"${DEFAULT_BRANCH}"'"}],[{"text":"🟢 GitHub Actions","url":"https://github.com/'"${USER}"'/'"${REPO}"'/actions"},{"text":"📋 Semua Branch","url":"https://github.com/'"${USER}"'/'"${REPO}"'/branches"}]]}'
+  local _btn_vpl
+  _btn_vpl=$(_tg_keyboard \
+    "$(_tg_row "$(_tg_btn "📁 Buka Repo" "$(_gh_web)")" "$(_tg_btn "📊 Commits" "$(_gh_web '/commits/${DEFAULT_BRANCH}')")")" \
+    "$(_tg_row "$(_tg_btn "🟢 GitHub Actions" "$(_gh_web '/actions')")" "$(_tg_btn "📋 Semua Branch" "$(_gh_web '/branches')")")")
   send_telegram_photo "https://cdn.myanimelist.net/images/anime/1337/99013.jpg" "📋 <b>RIWAYAT PUSH DILIHAT</b>
 ━━━━━━━━━━━━━━━━━━━━
 👤 <code>${USER}</code>
@@ -3412,7 +3510,10 @@ action_quick_push() {
     echo -e "  ${C_GREEN}✅ Push berhasil!${C_RESET}"
     echo -e "  ${C_BLUE}🔗 https://github.com/${REPO_OWNER}/${REPO}/tree/${DEFAULT_BRANCH}${C_RESET}"
     log_push_event "$DEFAULT_BRANCH" "OK" "$_msg" "$_changed"
-    local _btn_pushok='{"inline_keyboard":[[{"text":"🔗 Lihat Branch","url":"https://github.com/'"${USER}"'/'"${REPO}"'/tree/'"${DEFAULT_BRANCH}"'"},{"text":"📊 Commits","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commits/'"${DEFAULT_BRANCH}"'"}],[{"text":"🔀 Compare","url":"https://github.com/'"${USER}"'/'"${REPO}"'/compare"},{"text":"📥 Pull Request","url":"https://github.com/'"${USER}"'/'"${REPO}"'/pulls"}]]}'
+    local _btn_pushok
+    _btn_pushok=$(_tg_keyboard \
+      "$(_tg_row "$(_tg_btn "🔗 Lihat Branch" "$(_gh_web "/tree/${DEFAULT_BRANCH}")")" "$(_tg_btn "📊 Commits" "$(_gh_web "/commits/${DEFAULT_BRANCH}")")")" \
+      "$(_tg_row "$(_tg_btn "🔀 Compare" "$(_gh_web '/compare')")" "$(_tg_btn "📥 Pull Request" "$(_gh_web '/pulls')")")")
     local _qp_detail; _qp_detail=$(_build_push_detail 2>/dev/null || true)
     local _qp_sha; _qp_sha=$(git rev-parse HEAD 2>/dev/null || echo "")
     local _msg_tg; _msg_tg=$(tg_linkify_commit "$_msg" "$_qp_sha")
@@ -3427,7 +3528,10 @@ ${_qp_detail}
     echo -e "  ${C_RED}❌ Push gagal.${C_RESET}"
     echo "$_push_out" | tail -5 | sed 's/^/     /'
     log_push_event "$DEFAULT_BRANCH" "FAIL" "$_msg" "$_changed"
-    local _btn_pushfail='{"inline_keyboard":[[{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"},{"text":"🔑 Kelola Token","url":"https://github.com/settings/tokens"}],[{"text":"🐛 Issues","url":"https://github.com/'"${USER}"'/'"${REPO}"'/issues"},{"text":"📋 Action Logs","url":"https://github.com/'"${USER}"'/'"${REPO}"'/actions"}]]}'
+    local _btn_pushfail
+    _btn_pushfail=$(_tg_keyboard \
+      "$(_tg_row "$(_tg_btn "📁 Buka Repo" "$(_gh_web)")" "$(_tg_btn "🔑 Kelola Token" "https://github.com/settings/tokens")")" \
+      "$(_tg_row "$(_tg_btn "🐛 Issues" "$(_gh_web '/issues')")" "$(_tg_btn "📋 Action Logs" "$(_gh_web '/actions')")")")
     send_telegram_photo "https://w.wallhaven.cc/full/l3/wallhaven-l3g62l.jpg" "❌ <b>PUSH GAGAL</b>
 ━━━━━━━━━━━━━━━━━━━━
 📁 <code>${USER}/${REPO}</code>
@@ -3484,7 +3588,7 @@ action_check_token() {
   mini_bar_start "Validasi token ke GitHub ..." 0.04
 
   local api_out
-  api_out=$(curl -s -i \
+  api_out=$(gh_curl -i \
     -H "Authorization: Bearer ${tok}" \
     -H "Accept: application/vnd.github+json" \
     -H "X-GitHub-Api-Version: 2022-11-28" \
@@ -3535,7 +3639,10 @@ action_check_token() {
     [ -n "$rate_remaining" ] && echo -e "  ${C_DIM}Sisa     ${C_RESET}${C_CYAN}${rate_remaining}${C_RESET}"
     [ -n "$rate_reset_fmt" ] && echo -e "  ${C_DIM}Reset    ${C_RESET}${rate_reset_fmt}"
     local _ts_ct; _ts_ct=$(date '+%H:%M:%S %d %b %Y')
-    local _btn_ct='{"inline_keyboard":[[{"text":"🔑 Kelola Token","url":"https://github.com/settings/tokens"},{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"}],[{"text":"🔐 Security","url":"https://github.com/settings/security"},{"text":"👤 Profile","url":"https://github.com/'"${gh_login}"'"}]]}'
+    local _btn_ct
+    _btn_ct=$(_tg_keyboard \
+      "$(_tg_row "$(_tg_btn "🔑 Kelola Token" "https://github.com/settings/tokens")" "$(_tg_btn "📁 Buka Repo" "$(_gh_web)")")" \
+      "$(_tg_row "$(_tg_btn "🔐 Security" "https://github.com/settings/security")" "$(_tg_btn "👤 Profile" "https://github.com/${gh_login}")")")
     send_telegram_photo "https://cdn.myanimelist.net/images/anime/1517/100633.jpg" "🔍 <b>CEK TOKEN — VALID ✅</b>
 ━━━━━━━━━━━━━━━━━━━━
 👤 Login    : <code>${gh_login}</code>
@@ -3554,7 +3661,10 @@ action_check_token() {
     echo ""
     echo -e "  ${C_YELLOW}💡 Pilih opsi 1/2/3 di menu token untuk menyimpan token baru.${C_RESET}"
     local _ts_ct_fail; _ts_ct_fail=$(date '+%H:%M:%S %d %b %Y')
-    local _btn_ct_fail='{"inline_keyboard":[[{"text":"🔑 Buat Token Baru","url":"https://github.com/settings/tokens/new"},{"text":"⚙️ Settings","url":"https://github.com/settings/profile"}],[{"text":"🔐 Security","url":"https://github.com/settings/security"},{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"}]]}'
+    local _btn_ct_fail
+    _btn_ct_fail=$(_tg_keyboard \
+      "$(_tg_row "$(_tg_btn "🔑 Buat Token Baru" "https://github.com/settings/tokens/new")" "$(_tg_btn "⚙️ Settings" "https://github.com/settings/profile")")" \
+      "$(_tg_row "$(_tg_btn "🔐 Security" "https://github.com/settings/security")" "$(_tg_btn "📁 Buka Repo" "$(_gh_web)")")")
     send_telegram_photo "https://cdn.myanimelist.net/images/anime/1286/99889.jpg" "🔍 <b>CEK TOKEN — TIDAK VALID ❌</b>
 ━━━━━━━━━━━━━━━━━━━━
 🔑 Token    : <code>${tok_masked}</code>
@@ -3631,11 +3741,8 @@ action_rename_repo() {
   mini_bar2_start "Rename repo di GitHub ..." "Kirim PATCH ke GitHub API..." 0.05
 
   local api_http
-  api_http=$(curl -s -o /tmp/_gh_rename.json -w "%{http_code}" \
+  api_http=$(gh_curl -o /tmp/_gh_rename.json -w "%{http_code}" \
     -X PATCH \
-    -H "Authorization: token ${TOKEN}" \
-    -H "Accept: application/vnd.github+json" \
-    -H "X-GitHub-Api-Version: 2022-11-28" \
     "https://api.github.com/repos/${REPO_OWNER}/${REPO}" \
     -d "{\"name\":\"${new_name}\"}" 2>/dev/null)
 
@@ -3658,7 +3765,10 @@ action_rename_repo() {
     echo -e "  ${C_DIM}Remote URL lokal sudah diperbarui otomatis.${C_RESET}"
     echo -e "  ${C_DIM}Perubahan nama disimpan permanen di push.sh${C_RESET}"
     local _ts_rr; _ts_rr=$(date '+%H:%M:%S %d %b %Y')
-    local _btn_rr='{"inline_keyboard":[[{"text":"📁 Buka Repo Baru","url":"https://github.com/'"${USER}"'/'"${new_name}"'"},{"text":"⚙️ Settings Repo","url":"https://github.com/'"${USER}"'/'"${new_name}"'/settings"}],[{"text":"🌿 Branches","url":"https://github.com/'"${USER}"'/'"${new_name}"'/branches"},{"text":"📊 Commits","url":"https://github.com/'"${USER}"'/'"${new_name}"'/commits"}]]}'
+    local _btn_rr
+    _btn_rr=$(_tg_keyboard \
+      "$(_tg_row "$(_tg_btn "📁 Buka Repo Baru" "https://github.com/${USER}/${new_name}")" "$(_tg_btn "⚙️ Settings Repo" "https://github.com/${USER}/${new_name}/settings")")" \
+      "$(_tg_row "$(_tg_btn "🌿 Branches" "https://github.com/${USER}/${new_name}/branches")" "$(_tg_btn "📊 Commits" "https://github.com/${USER}/${new_name}/commits")")")
     send_telegram_photo "https://w.wallhaven.cc/full/l3/wallhaven-l3q6eq.png" "✏️ <b>REPO DI-RENAME</b>
 ━━━━━━━━━━━━━━━━━━━━
 👤 <code>${USER}</code>
@@ -3816,10 +3926,7 @@ action_switch_default() {
   # Cek ke GitHub hanya kalau input nama manual (dari list sudah pasti ada)
   if ! echo "$pick" | grep -qE '^[0-9]+$'; then
     local chk_http
-    chk_http=$(curl -s -o /dev/null -w "%{http_code}" \
-      -H "Authorization: token ${TOKEN}" \
-      -H "Accept: application/vnd.github+json" \
-      -H "X-GitHub-Api-Version: 2022-11-28" \
+    chk_http=$(gh_curl -o /dev/null -w "%{http_code}" \
       "https://api.github.com/repos/${REPO_OWNER}/${REPO}/git/ref/heads/${name}" \
       2>/dev/null)
     if [ "$chk_http" != "200" ]; then
@@ -3838,11 +3945,8 @@ action_switch_default() {
 
   # Panggil GitHub API untuk benar-benar ganti default branch di remote
   local api_resp api_http
-  api_resp=$(curl -s -o /tmp/_gh_switch.json -w "%{http_code}" \
+  api_resp=$(gh_curl -o /tmp/_gh_switch.json -w "%{http_code}" \
     -X PATCH \
-    -H "Authorization: token ${TOKEN}" \
-    -H "Accept: application/vnd.github+json" \
-    -H "X-GitHub-Api-Version: 2022-11-28" \
     "https://api.github.com/repos/${REPO_OWNER}/${REPO}" \
     -d "{\"default_branch\":\"${new_default}\"}" 2>/dev/null)
   api_http="${api_resp}"
@@ -3859,7 +3963,10 @@ action_switch_default() {
     echo -e "  ${C_BLUE}🔗 https://github.com/${REPO_OWNER}/${REPO}${C_RESET}"
     echo -e "  ${C_DIM}Perubahan juga disimpan permanen di push.sh${C_RESET}"
     local _ts_sd; _ts_sd=$(date '+%H:%M:%S %d %b %Y')
-    local _btn_sd='{"inline_keyboard":[[{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"},{"text":"🌿 Branches","url":"https://github.com/'"${USER}"'/'"${REPO}"'/branches"}],[{"text":"🔀 New PR","url":"https://github.com/'"${USER}"'/'"${REPO}"'/compare"},{"text":"📊 Compare","url":"https://github.com/'"${USER}"'/'"${REPO}"'/compare/'"${old_default}"'...'"${new_default}"'"}]]}'
+    local _btn_sd
+    _btn_sd=$(_tg_keyboard \
+      "$(_tg_row "$(_tg_btn "📁 Buka Repo" "$(_gh_web)")" "$(_tg_btn "🌿 Branches" "$(_gh_web '/branches')")")" \
+      "$(_tg_row "$(_tg_btn "🔀 New PR" "$(_gh_web '/compare')")" "$(_tg_btn "📊 Compare" "$(_gh_web '/compare/${old_default}...${new_default}')")")")
     send_telegram_photo "https://w.wallhaven.cc/full/pk/wallhaven-pkgq8e.png" "🔀 <b>DEFAULT BRANCH DIUBAH</b>
 ━━━━━━━━━━━━━━━━━━━━
 📁 <code>${USER}/${REPO}</code>
@@ -3951,10 +4058,7 @@ action_list_branches() {
   mini_bar_start "[1/3] Ambil daftar branch ..." 0.05
 
   local http_code
-  http_code=$(curl -s -o "$TMP_LIST" -w "%{http_code}" \
-    -H "Authorization: token ${TOKEN}" \
-    -H "Accept: application/vnd.github+json" \
-    -H "X-GitHub-Api-Version: 2022-11-28" \
+  http_code=$(gh_curl -o "$TMP_LIST" -w "%{http_code}" \
     "https://api.github.com/repos/${REPO_OWNER}/${REPO}/branches?per_page=100" 2>/dev/null)
 
   relogin_if_needed "$http_code" "ambil branch" || return
@@ -3983,7 +4087,10 @@ action_list_branches() {
 
   local _lb_total=${#all_names[@]}
   local _ts_lb; _ts_lb=$(date '+%H:%M:%S %d %b %Y')
-  local _btn_lb='{"inline_keyboard":[[{"text":"📋 Lihat Branches","url":"https://github.com/'"${USER}"'/'"${REPO}"'/branches"},{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"}],[{"text":"🔀 Buat PR","url":"https://github.com/'"${USER}"'/'"${REPO}"'/compare"},{"text":"📊 Commits","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commits/'"${DEFAULT_BRANCH}"'"}]]}'
+  local _btn_lb
+  _btn_lb=$(_tg_keyboard \
+    "$(_tg_row "$(_tg_btn "📋 Lihat Branches" "$(_gh_web '/branches')")" "$(_tg_btn "📁 Buka Repo" "$(_gh_web)")")" \
+    "$(_tg_row "$(_tg_btn "🔀 Buat PR" "$(_gh_web '/compare')")" "$(_tg_btn "📊 Commits" "$(_gh_web '/commits/${DEFAULT_BRANCH}')")")")
   send_telegram_photo "https://cdn.myanimelist.net/images/anime/1935/127974.jpg" "📊 <b>STATUS BRANCH DILIHAT</b>
 ━━━━━━━━━━━━━━━━━━━━
 👤 <code>${USER}</code>
@@ -4017,19 +4124,13 @@ action_list_branches() {
   local def_date="" def_rel="-" def_msg="-"
 
   if [ -n "$def_sha" ]; then
-    curl -s -o "/tmp/_gh_d_def_$$.json" \
-      -H "Authorization: token ${TOKEN}" \
-      -H "Accept: application/vnd.github+json" \
-      -H "X-GitHub-Api-Version: 2022-11-28" \
+    gh_curl -o "/tmp/_gh_d_def_$$.json" \
       "https://api.github.com/repos/${REPO_OWNER}/${REPO}/git/commits/${def_sha}" 2>/dev/null &
   fi
   for (( i=0; i<total_nd; i++ )); do
     local sha="${nd_shas[$i]}"
     [ -z "$sha" ] && continue
-    curl -s -o "/tmp/_gh_d_${i}_$$.json" \
-      -H "Authorization: token ${TOKEN}" \
-      -H "Accept: application/vnd.github+json" \
-      -H "X-GitHub-Api-Version: 2022-11-28" \
+    gh_curl -o "/tmp/_gh_d_${i}_$$.json" \
       "https://api.github.com/repos/${REPO_OWNER}/${REPO}/git/commits/${sha}" 2>/dev/null &
   done
   wait
@@ -4108,10 +4209,7 @@ action_list_branches() {
       page_names+=("$b")
       page_dates+=("${nd_dates[$idx]}")
       page_msgs+=("${nd_msgs[$idx]}")
-      curl -s -o "/tmp/_gh_cmp_${idx}_$$.json" \
-        -H "Authorization: token ${TOKEN}" \
-        -H "Accept: application/vnd.github+json" \
-        -H "X-GitHub-Api-Version: 2022-11-28" \
+      gh_curl -o "/tmp/_gh_cmp_${idx}_$$.json" \
         "https://api.github.com/repos/${REPO_OWNER}/${REPO}/compare/${DEFAULT_BRANCH}...${b_enc}?per_page=1" \
         2>/dev/null &
       pids+=("$!")
@@ -4222,10 +4320,7 @@ action_list_branches() {
             # Hitung ahead/behind untuk branch ini
             local _sel_enc _sel_cmp _sel_behind="" _sel_ahead=""
             _sel_enc=$(printf '%s' "$_sel_name" | sed 's|/|%2F|g')
-            _sel_cmp=$(curl -s \
-              -H "Authorization: token ${TOKEN}" \
-              -H "Accept: application/vnd.github+json" \
-              -H "X-GitHub-Api-Version: 2022-11-28" \
+            _sel_cmp=$(gh_curl \
               "https://api.github.com/repos/${REPO_OWNER}/${REPO}/compare/${DEFAULT_BRANCH}...${_sel_enc}?per_page=1" \
               2>/dev/null)
             _sel_behind=$(printf '%s' "$_sel_cmp" | grep -oE '"behind_by"[[:space:]]*:[[:space:]]*[0-9]+' | head -1 | grep -oE '[0-9]+$')
@@ -4486,11 +4581,8 @@ action_create_repo() {
   mini_bar2_start "Membuat repository di GitHub ..." "Kirim POST ke GitHub API..." 0.05
 
   local resp http_code
-  resp=$(curl -s -w "\n%{http_code}" \
+  resp=$(gh_curl -w "\n%{http_code}" \
     -X POST \
-    -H "Authorization: token ${TOKEN}" \
-    -H "Accept: application/vnd.github+json" \
-    -H "X-GitHub-Api-Version: 2022-11-28" \
     -H "Content-Type: application/json" \
     -d "$payload" \
     "https://api.github.com/user/repos" 2>/dev/null)
@@ -4536,7 +4628,10 @@ action_create_repo() {
     echo -e "  ${C_DIM}▸ Clone dengan:${C_RESET}"
     echo -e "  ${C_BOLD}git clone ${clone_url:-https://github.com/${REPO_OWNER}/${new_repo_name}.git}${C_RESET}"
     local _ts_cr; _ts_cr=$(date '+%H:%M:%S %d %b %Y')
-    local _btn_cr='{"inline_keyboard":[[{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${new_repo_name}"'"},{"text":"⚙️ Settings","url":"https://github.com/'"${USER}"'/'"${new_repo_name}"'/settings"}],[{"text":"📋 Issues","url":"https://github.com/'"${USER}"'/'"${new_repo_name}"'/issues"},{"text":"🌿 Branches","url":"https://github.com/'"${USER}"'/'"${new_repo_name}"'/branches"}]]}'
+    local _btn_cr
+    _btn_cr=$(_tg_keyboard \
+      "$(_tg_row "$(_tg_btn "📁 Buka Repo" "https://github.com/${USER}/${new_repo_name}")" "$(_tg_btn "⚙️ Settings" "https://github.com/${USER}/${new_repo_name}/settings")")" \
+      "$(_tg_row "$(_tg_btn "📋 Issues" "https://github.com/${USER}/${new_repo_name}/issues")" "$(_tg_btn "🌿 Branches" "https://github.com/${USER}/${new_repo_name}/branches")")")
     send_telegram_photo "https://w.wallhaven.cc/full/rd/wallhaven-rd5vz1.jpg" "📦 <b>REPO BARU DIBUAT</b>
 ━━━━━━━━━━━━━━━━━━━━
 👤 <code>${USER}</code>
@@ -4715,11 +4810,8 @@ action_import_repo() {
   name_esc=$(printf '%s' "$imp_repo_name" | sed 's/\\/\\\\/g;s/"/\\"/g')
   local create_payload="{\"name\":\"${name_esc}\",\"private\":${imp_private},\"auto_init\":false}"
 
-  create_resp=$(curl -s -w "\n%{http_code}" \
+  create_resp=$(gh_curl -w "\n%{http_code}" \
     -X POST \
-    -H "Authorization: token ${TOKEN}" \
-    -H "Accept: application/vnd.github+json" \
-    -H "X-GitHub-Api-Version: 2022-11-28" \
     -H "Content-Type: application/json" \
     -d "$create_payload" \
     "https://api.github.com/user/repos" 2>/dev/null)
@@ -4768,11 +4860,8 @@ action_import_repo() {
   imp_payload="${imp_payload}}"
 
   local imp_resp imp_code
-  imp_resp=$(curl -s -w "\n%{http_code}" \
+  imp_resp=$(gh_curl -w "\n%{http_code}" \
     -X PUT \
-    -H "Authorization: token ${TOKEN}" \
-    -H "Accept: application/vnd.github+json" \
-    -H "X-GitHub-Api-Version: 2022-11-28" \
     -H "Content-Type: application/json" \
     -d "$imp_payload" \
     "https://api.github.com/repos/${REPO_OWNER}/${imp_repo_name}/import" 2>/dev/null)
@@ -4815,7 +4904,10 @@ action_import_repo() {
       printf "  ${C_DIM}Info     ${C_RESET}%s\n" "$imp_text"
     echo -e "${C_DIM}  ──────────────────────────────────${C_RESET}"
     local _ts_ir; _ts_ir=$(date '+%H:%M:%S %d %b %Y')
-    local _btn_ir='{"inline_keyboard":[[{"text":"📁 Lihat Repo","url":"https://github.com/'"${USER}"'/'"${imp_repo_name}"'"},{"text":"📊 Status Import","url":"https://github.com/'"${USER}"'/'"${imp_repo_name}"'"}],[{"text":"⚙️ Settings","url":"https://github.com/'"${USER}"'/'"${imp_repo_name}"'/settings"},{"text":"📋 Issues","url":"https://github.com/'"${USER}"'/'"${imp_repo_name}"'/issues"}]]}'
+    local _btn_ir
+    _btn_ir=$(_tg_keyboard \
+      "$(_tg_row "$(_tg_btn "📁 Lihat Repo" "https://github.com/${USER}/${imp_repo_name}")" "$(_tg_btn "📊 Status Import" "https://github.com/${USER}/${imp_repo_name}")")" \
+      "$(_tg_row "$(_tg_btn "⚙️ Settings" "https://github.com/${USER}/${imp_repo_name}/settings")" "$(_tg_btn "📋 Issues" "https://github.com/${USER}/${imp_repo_name}/issues")")")
     send_telegram_photo "https://w.wallhaven.cc/full/rd/wallhaven-rdxk2j.jpg" "📥 <b>IMPORT REPO DIMULAI</b>
 ━━━━━━━━━━━━━━━━━━━━
 👤 <code>${USER}</code>
@@ -4861,10 +4953,7 @@ action_import_repo() {
       sleep 4
       poll_count=$(( poll_count + 1 ))
       local poll_raw poll_pct
-      poll_raw=$(curl -s \
-        -H "Authorization: token ${TOKEN}" \
-        -H "Accept: application/vnd.github+json" \
-        -H "X-GitHub-Api-Version: 2022-11-28" \
+      poll_raw=$(gh_curl \
         "https://api.github.com/repos/${REPO_OWNER}/${imp_repo_name}/import" 2>/dev/null)
       poll_status=$(printf '%s' "$poll_raw" \
         | grep -oE '"status"[[:space:]]*:[[:space:]]*"[^"]*"' | head -1 \
@@ -4899,7 +4988,10 @@ action_import_repo() {
         "$_pfull" "$USER" "$imp_repo_name" >/dev/tty 2>/dev/null
       echo ""
       local _ts_ir2; _ts_ir2=$(date '+%H:%M:%S %d %b %Y')
-      local _btn_ir2='{"inline_keyboard":[[{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${imp_repo_name}"'"},{"text":"📋 Issues","url":"https://github.com/'"${USER}"'/'"${imp_repo_name}"'/issues"}],[{"text":"🌿 Branches","url":"https://github.com/'"${USER}"'/'"${imp_repo_name}"'/branches"},{"text":"📊 Commits","url":"https://github.com/'"${USER}"'/'"${imp_repo_name}"'/commits"}]]}'
+      local _btn_ir2
+      _btn_ir2=$(_tg_keyboard \
+        "$(_tg_row "$(_tg_btn "📁 Buka Repo" "https://github.com/${USER}/${imp_repo_name}")" "$(_tg_btn "📋 Issues" "https://github.com/${USER}/${imp_repo_name}/issues")")" \
+        "$(_tg_row "$(_tg_btn "🌿 Branches" "https://github.com/${USER}/${imp_repo_name}/branches")" "$(_tg_btn "📊 Commits" "https://github.com/${USER}/${imp_repo_name}/commits")")")
       send_telegram_photo "https://cdn.myanimelist.net/images/anime/1517/100633.jpg" "📥 <b>IMPORT REPO SELESAI</b>
 ━━━━━━━━━━━━━━━━━━━━
 👤 <code>${USER}</code>
@@ -5072,10 +5164,7 @@ action_delete_repo() {
   # ── Ambil info repo dulu dari API ───────────────────────────────────────
   mini_bar2_start "Mengambil info repository ..." "Fetch dari GitHub API..." 0.05
   local info_raw info_code
-  info_raw=$(curl -s -w "\n%{http_code}" \
-    -H "Authorization: token ${TOKEN}" \
-    -H "Accept: application/vnd.github+json" \
-    -H "X-GitHub-Api-Version: 2022-11-28" \
+  info_raw=$(gh_curl -w "\n%{http_code}" \
     "https://api.github.com/repos/${del_owner}/${del_repo}" 2>/dev/null)
   info_code=$(printf '%s' "$info_raw" | tail -1)
   local info_body
@@ -5226,11 +5315,8 @@ action_delete_repo() {
   echo ""
   mini_bar2_start "Menghapus ${del_owner}/${del_repo} ..." "Kirim DELETE ke GitHub API..." 0.05
   local del_resp del_code
-  del_resp=$(curl -s -w "\n%{http_code}" \
+  del_resp=$(gh_curl -w "\n%{http_code}" \
     -X DELETE \
-    -H "Authorization: token ${TOKEN}" \
-    -H "Accept: application/vnd.github+json" \
-    -H "X-GitHub-Api-Version: 2022-11-28" \
     "https://api.github.com/repos/${del_owner}/${del_repo}" 2>/dev/null)
   del_code=$(printf '%s' "$del_resp" | tail -1)
   if [ "$del_code" = "204" ]; then
@@ -5257,7 +5343,10 @@ action_delete_repo() {
         echo -e "  ${C_YELLOW}   Ubah variabel REPO di atas script sebelum push berikutnya.${C_RESET}"
       fi
       local _ts_dr; _ts_dr=$(date '+%H:%M:%S %d %b %Y')
-      local _btn_dr='{"inline_keyboard":[[{"text":"👤 Lihat Profile","url":"https://github.com/'"${del_owner}"'"},{"text":"📦 Semua Repo","url":"https://github.com/'"${del_owner}"'?tab=repositories"}],[{"text":"🔑 Kelola Token","url":"https://github.com/settings/tokens"},{"text":"➕ Buat Repo Baru","url":"https://github.com/new"}]]}'
+      local _btn_dr
+      _btn_dr=$(_tg_keyboard \
+        "$(_tg_row "$(_tg_btn "👤 Lihat Profile" "https://github.com/${del_owner}")" "$(_tg_btn "📦 Semua Repo" "https://github.com/${del_owner}?tab=repositories")")" \
+        "$(_tg_row "$(_tg_btn "🔑 Kelola Token" "https://github.com/settings/tokens")" "$(_tg_btn "➕ Buat Repo Baru" "https://github.com/new")")")
       send_telegram_photo "https://w.wallhaven.cc/full/v9/wallhaven-v9jz53.png" "🗑 <b>REPO DIHAPUS</b>
 ━━━━━━━━━━━━━━━━━━━━
 👤 <code>${del_owner}</code>
@@ -5315,10 +5404,7 @@ action_list_repos() {
 
     # Ambil total count dulu (per_page=1 untuk efisiensi)
     local count_raw total_count=0
-    count_raw=$(curl -s \
-      -H "Authorization: token ${TOKEN}" \
-      -H "Accept: application/vnd.github+json" \
-      -H "X-GitHub-Api-Version: 2022-11-28" \
+    count_raw=$(gh_curl \
       "https://api.github.com/user/repos?type=${lr_filter}&per_page=1&page=1" \
       -D - 2>/dev/null)
     # Ambil total dari Link header — atau fallback hitung manual
@@ -5335,10 +5421,7 @@ action_list_repos() {
 
     # Fetch halaman aktual
     local raw_resp http_code
-    raw_resp=$(curl -s -w "\n%{http_code}" \
-      -H "Authorization: token ${TOKEN}" \
-      -H "Accept: application/vnd.github+json" \
-      -H "X-GitHub-Api-Version: 2022-11-28" \
+    raw_resp=$(gh_curl -w "\n%{http_code}" \
       "https://api.github.com/user/repos?type=${lr_filter}&sort=${lr_sort}&direction=desc&per_page=${lr_per_page}&page=${lr_page}" \
       2>/dev/null)
     http_code=$(printf '%s' "$raw_resp" | tail -1)
@@ -5350,7 +5433,10 @@ action_list_repos() {
     if [ "$http_code" = "200" ] && [ "$_lr_notif_sent" = "0" ]; then
       _lr_notif_sent=1
       local _ts_lr; _ts_lr=$(date '+%H:%M:%S %d %b %Y')
-      local _btn_lr='{"inline_keyboard":[[{"text":"👤 Profil GitHub","url":"https://github.com/'"${USER}"'"},{"text":"📦 Semua Repo","url":"https://github.com/'"${USER}"'?tab=repositories"}],[{"text":"➕ Buat Repo Baru","url":"https://github.com/new"},{"text":"📁 Repo Aktif","url":"https://github.com/'"${USER}"'/'"${REPO}"'"}]]}'
+      local _btn_lr
+      _btn_lr=$(_tg_keyboard \
+        "$(_tg_row "$(_tg_btn "👤 Profil GitHub" "https://github.com/${USER}")" "$(_tg_btn "📦 Semua Repo" "https://github.com/${USER}?tab=repositories")")" \
+        "$(_tg_row "$(_tg_btn "➕ Buat Repo Baru" "https://github.com/new")" "$(_tg_btn "📁 Repo Aktif" "$(_gh_web)")")")
       send_telegram_photo "https://w.wallhaven.cc/full/96/wallhaven-96k7j8.jpg" "📋 <b>SEMUA REPO DILIHAT</b>
 ━━━━━━━━━━━━━━━━━━━━
 👤 <code>${USER}</code>
@@ -5727,11 +5813,8 @@ action_rename_branch() {
   mini_bar2_start "Rename branch ..." "Kirim POST ke GitHub API..." 0.05
 
   local api_http
-  api_http=$(curl -s -o /tmp/_gh_renbranch.json -w "%{http_code}" \
+  api_http=$(gh_curl -o /tmp/_gh_renbranch.json -w "%{http_code}" \
     -X POST \
-    -H "Authorization: token ${TOKEN}" \
-    -H "Accept: application/vnd.github+json" \
-    -H "X-GitHub-Api-Version: 2022-11-28" \
     "https://api.github.com/repos/${REPO_OWNER}/${REPO}/branches/${old_name}/rename" \
     -d "{\"new_name\":\"${new_name}\"}" 2>/dev/null)
 
@@ -5742,7 +5825,10 @@ action_rename_branch() {
     echo -e "  ${C_DIM}${old_name}${C_RESET} ${C_BOLD}→${C_RESET} ${C_GREEN}${new_name}${C_RESET}"
     echo -e "  ${C_BLUE}🔗 https://github.com/${REPO_OWNER}/${REPO}/tree/${new_name}${C_RESET}"
     local _ts_rb; _ts_rb=$(date '+%H:%M:%S %d %b %Y')
-    local _btn_rb='{"inline_keyboard":[[{"text":"🌿 Lihat Branch Baru","url":"https://github.com/'"${USER}"'/'"${REPO}"'/tree/'"${new_name}"'"},{"text":"📋 Semua Branches","url":"https://github.com/'"${USER}"'/'"${REPO}"'/branches"}],[{"text":"🔀 Pull Request","url":"https://github.com/'"${USER}"'/'"${REPO}"'/compare/'"${new_name}"'"},{"text":"📊 Commits","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commits/'"${new_name}"'"}]]}'
+    local _btn_rb
+    _btn_rb=$(_tg_keyboard \
+      "$(_tg_row "$(_tg_btn "🌿 Lihat Branch Baru" "$(_gh_web '/tree/${new_name}')")" "$(_tg_btn "📋 Semua Branches" "$(_gh_web '/branches')")")" \
+      "$(_tg_row "$(_tg_btn "🔀 Pull Request" "$(_gh_web '/compare/${new_name}')")" "$(_tg_btn "📊 Commits" "$(_gh_web '/commits/${new_name}')")")")
     send_telegram_photo "https://w.wallhaven.cc/full/vp/wallhaven-vpxgk5.png" "✏️ <b>BRANCH DI-RENAME</b>
 ━━━━━━━━━━━━━━━━━━━━
 📁 <code>${USER}/${REPO}</code>
@@ -5811,10 +5897,7 @@ action_create_branch() {
   # Cek apakah branch sudah ada via GitHub API
   mini_bar2_start "Cek nama branch ..." "Verifikasi ke GitHub API..." 0.015
   local chk_http
-  chk_http=$(curl -s -o /dev/null -w "%{http_code}" \
-    -H "Authorization: token ${TOKEN}" \
-    -H "Accept: application/vnd.github+json" \
-    -H "X-GitHub-Api-Version: 2022-11-28" \
+  chk_http=$(gh_curl -o /dev/null -w "%{http_code}" \
     "https://api.github.com/repos/${REPO_OWNER}/${REPO}/git/ref/heads/${name}" \
     2>/dev/null)
   if [ "$chk_http" = "200" ]; then
@@ -5827,10 +5910,7 @@ action_create_branch() {
   # Ambil SHA tip dari DEFAULT_BRANCH via GitHub API (tidak butuh switch branch lokal)
   mini_bar2_start "Ambil SHA ${DEFAULT_BRANCH} ..." "Fetch commit terbaru dari remote..." 0.015
   local sha_resp sha
-  sha_resp=$(curl -s -o /tmp/_gh_sha.json -w "%{http_code}" \
-    -H "Authorization: token ${TOKEN}" \
-    -H "Accept: application/vnd.github+json" \
-    -H "X-GitHub-Api-Version: 2022-11-28" \
+  sha_resp=$(gh_curl -o /tmp/_gh_sha.json -w "%{http_code}" \
     "https://api.github.com/repos/${REPO_OWNER}/${REPO}/git/ref/heads/${DEFAULT_BRANCH}" \
     2>/dev/null)
   if [ "$sha_resp" != "200" ]; then
@@ -5851,11 +5931,8 @@ action_create_branch() {
   # Buat branch di GitHub via API
   mini_bar2_start "Buat branch ${name} ..." "Kirim POST ke GitHub API..." 0.02
   local create_http
-  create_http=$(curl -s -o /tmp/_gh_create.json -w "%{http_code}" \
+  create_http=$(gh_curl -o /tmp/_gh_create.json -w "%{http_code}" \
     -X POST \
-    -H "Authorization: token ${TOKEN}" \
-    -H "Accept: application/vnd.github+json" \
-    -H "X-GitHub-Api-Version: 2022-11-28" \
     "https://api.github.com/repos/${REPO_OWNER}/${REPO}/git/refs" \
     -d "{\"ref\":\"refs/heads/${name}\",\"sha\":\"${sha}\"}" \
     2>/dev/null)
@@ -5886,7 +5963,10 @@ action_create_branch() {
   push_head_to_branch "$name"
 
   local _ts_cb; _ts_cb=$(date '+%H:%M:%S %d %b %Y')
-  local _btn_cb='{"inline_keyboard":[[{"text":"🌿 Lihat Branch","url":"https://github.com/'"${USER}"'/'"${REPO}"'/tree/'"${name}"'"},{"text":"🔀 Buat PR","url":"https://github.com/'"${USER}"'/'"${REPO}"'/compare/'"${name}"'"}],[{"text":"📁 Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"},{"text":"📊 Commits","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commits/'"${name}"'"}]]}'
+  local _btn_cb
+  _btn_cb=$(_tg_keyboard \
+    "$(_tg_row "$(_tg_btn "🌿 Lihat Branch" "$(_gh_web '/tree/${name}')")" "$(_tg_btn "🔀 Buat PR" "$(_gh_web '/compare/${name}')")")" \
+    "$(_tg_row "$(_tg_btn "📁 Repo" "$(_gh_web)")" "$(_tg_btn "📊 Commits" "$(_gh_web '/commits/${name}')")")")
   send_telegram_photo "https://w.wallhaven.cc/full/x1/wallhaven-x1ppvz.jpg" "🌱 <b>BRANCH BARU DIBUAT + PUSH</b>
 ━━━━━━━━━━━━━━━━━━━━
 📁 <code>${USER}/${REPO}</code>
@@ -6091,7 +6171,10 @@ action_delete_branch() {
       echo -e "  ${C_GREEN}✅ remote terhapus${C_RESET}"
       ok=$((ok + 1))
       local _ts_db; _ts_db=$(date '+%H:%M:%S %d %b %Y')
-      local _btn_db='{"inline_keyboard":[[{"text":"📁 Lihat Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"},{"text":"📋 Semua Branches","url":"https://github.com/'"${USER}"'/'"${REPO}"'/branches"}],[{"text":"📊 Commits","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commits"},{"text":"🌿 Default Branch","url":"https://github.com/'"${USER}"'/'"${REPO}"'/tree/'"${DEFAULT_BRANCH}"'"}]]}'
+      local _btn_db
+      _btn_db=$(_tg_keyboard \
+        "$(_tg_row "$(_tg_btn "📁 Lihat Repo" "$(_gh_web)")" "$(_tg_btn "📋 Semua Branches" "$(_gh_web '/branches')")")" \
+        "$(_tg_row "$(_tg_btn "📊 Commits" "$(_gh_web '/commits')")" "$(_tg_btn "🌿 Default Branch" "$(_gh_web '/tree/${DEFAULT_BRANCH}')")")")
       send_telegram_photo "https://w.wallhaven.cc/full/y8/wallhaven-y8d1lg.png" "🗑 <b>BRANCH DIHAPUS</b>
 ━━━━━━━━━━━━━━━━━━━━
 📁 <code>${USER}/${REPO}</code>
@@ -6421,7 +6504,10 @@ push_head_to_branch() {
     echo -e "  ${C_GREEN}🎉 Sukses!${C_RESET} ${C_BOLD}${branch}${C_RESET} ${C_DIM}(${HEAD_SHA})${C_RESET}"
     echo -e "  ${C_BLUE}🔗 https://github.com/${REPO_OWNER}/${REPO}/tree/${branch}${C_RESET}"
     log_push_event "$branch" "OK" "$_log_msg" "$_log_files"
-    local _btn_pbr='{"inline_keyboard":[[{"text":"🔗 Lihat Branch","url":"https://github.com/'"${USER}"'/'"${REPO}"'/tree/'"${branch}"'"},{"text":"📊 Commits","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commits/'"${branch}"'"}],[{"text":"🔀 Compare","url":"https://github.com/'"${USER}"'/'"${REPO}"'/compare"},{"text":"📥 Pull Request","url":"https://github.com/'"${USER}"'/'"${REPO}"'/pulls"}]]}'
+    local _btn_pbr
+    _btn_pbr=$(_tg_keyboard \
+      "$(_tg_row "$(_tg_btn "🔗 Lihat Branch" "$(_gh_web '/tree/${branch}')")" "$(_tg_btn "📊 Commits" "$(_gh_web '/commits/${branch}')")")" \
+      "$(_tg_row "$(_tg_btn "🔀 Compare" "$(_gh_web '/compare')")" "$(_tg_btn "📥 Pull Request" "$(_gh_web '/pulls')")")")
     local _log_msg_tg; _log_msg_tg=$(tg_linkify_commit "$_log_msg" "$(git rev-parse HEAD 2>/dev/null || echo '')")
     send_telegram_photo "https://w.wallhaven.cc/full/yj/wallhaven-yje2lk.png" "✅ <b>PUSH BERHASIL</b>
 ━━━━━━━━━━━━━━━━━━━━
@@ -6471,7 +6557,10 @@ ${_push_detail}
     echo -e "  ${C_GREEN}🎉 Sukses!${C_RESET} ${C_BOLD}${branch}${C_RESET} ${C_DIM}(${_new_sha} • histori terjaga)${C_RESET}"
     echo -e "  ${C_BLUE}🔗 https://github.com/${REPO_OWNER}/${REPO}/tree/${branch}${C_RESET}"
     log_push_event "$branch" "OK(graft)" "$_log_msg" "$_log_files"
-    local _btn_pgraft='{"inline_keyboard":[[{"text":"🔗 Lihat Branch","url":"https://github.com/'"${USER}"'/'"${REPO}"'/tree/'"${branch}"'"},{"text":"📊 Commits","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commits/'"${branch}"'"}],[{"text":"🔀 Compare","url":"https://github.com/'"${USER}"'/'"${REPO}"'/compare"},{"text":"📥 Pull Request","url":"https://github.com/'"${USER}"'/'"${REPO}"'/pulls"}]]}'
+    local _btn_pgraft
+    _btn_pgraft=$(_tg_keyboard \
+      "$(_tg_row "$(_tg_btn "🔗 Lihat Branch" "$(_gh_web '/tree/${branch}')")" "$(_tg_btn "📊 Commits" "$(_gh_web '/commits/${branch}')")")" \
+      "$(_tg_row "$(_tg_btn "🔀 Compare" "$(_gh_web '/compare')")" "$(_tg_btn "📥 Pull Request" "$(_gh_web '/pulls')")")")
     local _log_msg_tg_g; _log_msg_tg_g=$(tg_linkify_commit "$_log_msg" "${_new_commit:-}")
     send_telegram_photo "https://w.wallhaven.cc/full/yj/wallhaven-yje2lk.png" "✅ <b>PUSH BERHASIL</b>
 ━━━━━━━━━━━━━━━━━━━━
@@ -6496,7 +6585,10 @@ ${_push_detail}
     echo -e "  ${C_GREEN}🎉 Sukses!${C_RESET} ${C_BOLD}${branch}${C_RESET} ${C_DIM}(${HEAD_SHA})${C_RESET}"
     echo -e "  ${C_BLUE}🔗 https://github.com/${REPO_OWNER}/${REPO}/tree/${branch}${C_RESET}"
     log_push_event "$branch" "OK(force)" "$_log_msg" "$_log_files"
-    local _btn_pforce='{"inline_keyboard":[[{"text":"🔗 Lihat Branch","url":"https://github.com/'"${USER}"'/'"${REPO}"'/tree/'"${branch}"'"},{"text":"📊 Commits","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commits/'"${branch}"'"}],[{"text":"⚠️ Security","url":"https://github.com/'"${USER}"'/'"${REPO}"'/security"},{"text":"🔀 Compare","url":"https://github.com/'"${USER}"'/'"${REPO}"'/compare"}]]}'
+    local _btn_pforce
+    _btn_pforce=$(_tg_keyboard \
+      "$(_tg_row "$(_tg_btn "🔗 Lihat Branch" "$(_gh_web '/tree/${branch}')")" "$(_tg_btn "📊 Commits" "$(_gh_web '/commits/${branch}')")")" \
+      "$(_tg_row "$(_tg_btn "⚠️ Security" "$(_gh_web '/security')")" "$(_tg_btn "🔀 Compare" "$(_gh_web '/compare')")")")
     local _log_msg_tg_f; _log_msg_tg_f=$(tg_linkify_commit "$_log_msg" "$(git rev-parse HEAD 2>/dev/null || echo '')")
     send_telegram_photo "https://w.wallhaven.cc/full/yj/wallhaven-yjr3kk.png" "⚡ <b>PUSH BERHASIL (FORCE)</b>
 ━━━━━━━━━━━━━━━━━━━━
@@ -6528,7 +6620,10 @@ ${_push_detail}
     echo ""
     local _tg_ts_secret; _tg_ts_secret=$(date '+%H:%M:%S %d %b %Y')
     local _unblock_btn_url="${unblock_url:-https://github.com/${REPO_OWNER}/${REPO}/security/secret-scanning}"
-    local _btn_secret='{"inline_keyboard":[[{"text":"🔓 Allow Secret","url":"'"${_unblock_btn_url}"'"},{"text":"🔒 Secret Scanning","url":"https://github.com/'"${USER}"'/'"${REPO}"'/security/secret-scanning"}],[{"text":"🔑 Kelola Token","url":"https://github.com/settings/tokens"},{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"}]]}'
+    local _btn_secret
+    _btn_secret=$(_tg_keyboard \
+      "$(_tg_row "$(_tg_btn "🔓 Allow Secret" "${_unblock_btn_url}")" "$(_tg_btn "🔒 Secret Scanning" "$(_gh_web '/security/secret-scanning')")")" \
+      "$(_tg_row "$(_tg_btn "🔑 Kelola Token" "https://github.com/settings/tokens")" "$(_tg_btn "📁 Buka Repo" "$(_gh_web)")")")
     send_telegram_photo "https://w.wallhaven.cc/full/e7/wallhaven-e7k68k.jpg" "🔐 <b>PUSH DITOLAK — SECRET SCANNING</b>
 ━━━━━━━━━━━━━━━━━━━━
 📁 <code>${USER}/${REPO}</code>
@@ -6545,7 +6640,10 @@ ${_push_detail}
     echo ""
     local _tg_ts_reject; _tg_ts_reject=$(date '+%H:%M:%S %d %b %Y')
     local _err_snippet; _err_snippet=$(tail -3 "$push_log" 2>/dev/null | tr '\n' ' ' | sed 's/  */ /g')
-    local _btn_reject='{"inline_keyboard":[[{"text":"📋 Action Logs","url":"https://github.com/'"${USER}"'/'"${REPO}"'/actions"},{"text":"🐛 Issues","url":"https://github.com/'"${USER}"'/'"${REPO}"'/issues"}],[{"text":"🔑 Kelola Token","url":"https://github.com/settings/tokens"},{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"}]]}'
+    local _btn_reject
+    _btn_reject=$(_tg_keyboard \
+      "$(_tg_row "$(_tg_btn "📋 Action Logs" "$(_gh_web '/actions')")" "$(_tg_btn "🐛 Issues" "$(_gh_web '/issues')")")" \
+      "$(_tg_row "$(_tg_btn "🔑 Kelola Token" "https://github.com/settings/tokens")" "$(_tg_btn "📁 Buka Repo" "$(_gh_web)")")")
     send_telegram_photo "https://w.wallhaven.cc/full/x8/wallhaven-x81dxo.jpg" "🚫 <b>PUSH DITOLAK GITHUB</b>
 ━━━━━━━━━━━━━━━━━━━━
 📁 <code>${USER}/${REPO}</code>
@@ -6728,7 +6826,10 @@ action_cleanup_node_modules() {
   echo -e "  ${C_DIM}Push berikutnya ke branch baru akan JAUH lebih kecil.${C_RESET}"
 
   local _ts_cl; _ts_cl=$(date '+%H:%M:%S %d %b %Y')
-  local _btn_cl='{"inline_keyboard":[[{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"},{"text":"🌿 Branches","url":"https://github.com/'"${USER}"'/'"${REPO}"'/branches"}],[{"text":"📊 Commits","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commits/'"${DEFAULT_BRANCH}"'"},{"text":"📈 Insights","url":"https://github.com/'"${USER}"'/'"${REPO}"'/pulse"}]]}'
+  local _btn_cl
+  _btn_cl=$(_tg_keyboard \
+    "$(_tg_row "$(_tg_btn "📁 Buka Repo" "$(_gh_web)")" "$(_tg_btn "🌿 Branches" "$(_gh_web '/branches')")")" \
+    "$(_tg_row "$(_tg_btn "📊 Commits" "$(_gh_web '/commits/${DEFAULT_BRANCH}')")" "$(_tg_btn "📈 Insights" "$(_gh_web '/pulse')")")")
   send_telegram_photo "https://w.wallhaven.cc/full/g7/wallhaven-g7mj5l.jpg" "🧹 <b>HISTORY DIBERSIHKAN</b>
 ━━━━━━━━━━━━━━━━━━━━
 📁 <code>${USER}/${REPO}</code>
@@ -7204,7 +7305,10 @@ action_delete_file_folder() {
           local _ts_del; _ts_del=$(date '+%H:%M:%S %d %b %Y')
           local _del_list_txt; _del_list_txt=$(printf '  • %s\n' "${deleted_list[@]}")
           local _del_commit_sha; _del_commit_sha=$(git rev-parse HEAD 2>/dev/null || echo "")
-          local _btn_del='{"inline_keyboard":[[{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"},{"text":"📊 Commits","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commits/'"${DEFAULT_BRANCH}"'"}],[{"text":"♻️ Lihat Commit Hapus","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commit/'"${_del_commit_sha}"'"},{"text":"🌿 Tree Branch","url":"https://github.com/'"${USER}"'/'"${REPO}"'/tree/'"${DEFAULT_BRANCH}"'"}]]}'
+          local _btn_del
+          _btn_del=$(_tg_keyboard \
+            "$(_tg_row "$(_tg_btn "📁 Buka Repo" "$(_gh_web)")" "$(_tg_btn "📊 Commits" "$(_gh_web '/commits/${DEFAULT_BRANCH}')")")" \
+            "$(_tg_row "$(_tg_btn "♻️ Lihat Commit Hapus" "$(_gh_web '/commit/${_del_commit_sha}')")" "$(_tg_btn "🌿 Tree Branch" "$(_gh_web '/tree/${DEFAULT_BRANCH}')")")")
           send_telegram_photo "https://w.wallhaven.cc/full/v9/wallhaven-v9jz53.png" "🗑 <b>FILE/FOLDER DIHAPUS</b>
 ━━━━━━━━━━━━━━━━━━━━
 📁 <code>${USER}/${REPO}</code>
@@ -7290,11 +7394,14 @@ ${_del_list_txt}
                     local _undo_commit_sha; _undo_commit_sha=$(git rev-parse HEAD 2>/dev/null || echo "")
                     local _btn_u _commit_line_u=""
                     if [ -n "$_undo_commit_sha" ]; then
-                      _btn_u='{"inline_keyboard":[[{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"},{"text":"📊 Commits","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commits/'"${DEFAULT_BRANCH}"'"}],[{"text":"♻️ Lihat Commit Restore","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commit/'"${_undo_commit_sha}"'"},{"text":"🌿 Tree Branch","url":"https://github.com/'"${USER}"'/'"${REPO}"'/tree/'"${DEFAULT_BRANCH}"'"}]]}'
+                      _btn_u=$(_tg_keyboard \
+                        "$(_tg_row "$(_tg_btn "📁 Buka Repo" "$(_gh_web)")" "$(_tg_btn "📊 Commits" "$(_gh_web '/commits/${DEFAULT_BRANCH}')")")" \
+                        "$(_tg_row "$(_tg_btn "♻️ Lihat Commit Restore" "$(_gh_web '/commit/${_undo_commit_sha}')")" "$(_tg_btn "🌿 Tree Branch" "$(_gh_web '/tree/${DEFAULT_BRANCH}')")")")
                       _commit_line_u="
 🔖 Commit: <code>${_undo_commit_sha:0:7}</code>"
                     else
-                      _btn_u='{"inline_keyboard":[[{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"},{"text":"📊 Commits","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commits/'"${DEFAULT_BRANCH}"'"}]]}'
+                      _btn_u=$(_tg_keyboard \
+                        "$(_tg_row "$(_tg_btn "📁 Buka Repo" "$(_gh_web)")" "$(_tg_btn "📊 Commits" "$(_gh_web '/commits/${DEFAULT_BRANCH}')")")")
                     fi
                     send_telegram_photo "https://w.wallhaven.cc/full/v9/wallhaven-v9jz53.png" "♻️ <b>QUICK UNDO — FILE DI-RESTORE</b>
 ━━━━━━━━━━━━━━━━━━━━
@@ -7504,11 +7611,14 @@ action_restore_deleted() {
         local _restore_commit_sha; _restore_commit_sha=$(git rev-parse HEAD 2>/dev/null || echo "")
         local _btn_r _commit_line_r=""
         if [ -n "$_restore_commit_sha" ]; then
-          _btn_r='{"inline_keyboard":[[{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"},{"text":"📊 Commits","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commits/'"${DEFAULT_BRANCH}"'"}],[{"text":"♻️ Lihat Commit Restore","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commit/'"${_restore_commit_sha}"'"},{"text":"🌿 Tree Branch","url":"https://github.com/'"${USER}"'/'"${REPO}"'/tree/'"${DEFAULT_BRANCH}"'"}]]}'
+          _btn_r=$(_tg_keyboard \
+            "$(_tg_row "$(_tg_btn "📁 Buka Repo" "$(_gh_web)")" "$(_tg_btn "📊 Commits" "$(_gh_web '/commits/${DEFAULT_BRANCH}')")")" \
+            "$(_tg_row "$(_tg_btn "♻️ Lihat Commit Restore" "$(_gh_web '/commit/${_restore_commit_sha}')")" "$(_tg_btn "🌿 Tree Branch" "$(_gh_web '/tree/${DEFAULT_BRANCH}')")")")
           _commit_line_r="
 🔖 Commit: <code>${_restore_commit_sha:0:7}</code>"
         else
-          _btn_r='{"inline_keyboard":[[{"text":"📁 Buka Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"},{"text":"📊 Commits","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commits/'"${DEFAULT_BRANCH}"'"}]]}'
+          _btn_r=$(_tg_keyboard \
+            "$(_tg_row "$(_tg_btn "📁 Buka Repo" "$(_gh_web)")" "$(_tg_btn "📊 Commits" "$(_gh_web '/commits/${DEFAULT_BRANCH}')")")")
         fi
         send_telegram_photo "https://w.wallhaven.cc/full/v9/wallhaven-v9jz53.png" "♻️ <b>FILE/FOLDER DI-RESTORE</b>
 ━━━━━━━━━━━━━━━━━━━━
@@ -7572,10 +7682,7 @@ action_releases_tags() {
     mini_bar_start "Mengambil data releases ..." 0.05
     local TMP=/tmp/_gh_rel_$$.json
     local http
-    http=$(curl -s -o "$TMP" -w "%{http_code}" \
-      -H "Authorization: token ${TOKEN}" \
-      -H "Accept: application/vnd.github+json" \
-      -H "X-GitHub-Api-Version: 2022-11-28" \
+    http=$(gh_curl -o "$TMP" -w "%{http_code}" \
       "https://api.github.com/repos/${REPO_OWNER}/${REPO}/releases?per_page=20" 2>/dev/null)
 
     relogin_if_needed "$http" "ambil releases" || return
@@ -7587,7 +7694,7 @@ action_releases_tags() {
     mini_bar_ok "Releases dimuat"
 
     local count
-    count=$(node -e "try{const d=JSON.parse(require('fs').readFileSync('$TMP','utf8'));console.log(d.length);}catch(e){console.log(0);}" 2>/dev/null)
+    count=$(_json_array_len_file "$TMP")
 
     _rt_header
     if [ "$count" = "0" ]; then
@@ -7676,11 +7783,8 @@ action_releases_tags() {
     }))" 2>/dev/null)
 
     local http
-    http=$(curl -s -o "$TMP" -w "%{http_code}" \
+    http=$(gh_curl -o "$TMP" -w "%{http_code}" \
       -X POST \
-      -H "Authorization: token ${TOKEN}" \
-      -H "Accept: application/vnd.github+json" \
-      -H "X-GitHub-Api-Version: 2022-11-28" \
       "https://api.github.com/repos/${REPO_OWNER}/${REPO}/releases" \
       -d "$payload" 2>/dev/null)
 
@@ -7698,7 +7802,10 @@ action_releases_tags() {
       local _tipe_label="Stable"
       [ "$is_pre" = "true" ] && _tipe_label="Pre-release"
       [ "$is_draft" = "true" ] && _tipe_label="Draft"
-      local _btn_rel='{"inline_keyboard":[[{"text":"🚀 Lihat Release","url":"https://github.com/'"${USER}"'/'"${REPO}"'/releases/tag/'"${rtag}"'"},{"text":"🏷️ Semua Tags","url":"https://github.com/'"${USER}"'/'"${REPO}"'/tags"}],[{"text":"📦 Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"},{"text":"📊 Commits","url":"https://github.com/'"${USER}"'/'"${REPO}"'/commits/'"${DEFAULT_BRANCH}"'"}]]}'
+      local _btn_rel
+      _btn_rel=$(_tg_keyboard \
+        "$(_tg_row "$(_tg_btn "🚀 Lihat Release" "$(_gh_web '/releases/tag/${rtag}')")" "$(_tg_btn "🏷️ Semua Tags" "$(_gh_web '/tags')")")" \
+        "$(_tg_row "$(_tg_btn "📦 Repo" "$(_gh_web)")" "$(_tg_btn "📊 Commits" "$(_gh_web '/commits/${DEFAULT_BRANCH}')")")")
       send_telegram_photo "https://w.wallhaven.cc/full/96/wallhaven-96k7j8.jpg" "🚀 <b>RELEASE BARU DIBUAT</b>
 ━━━━━━━━━━━━━━━━━━━━
 📁 <code>${USER}/${REPO}</code>
@@ -7727,10 +7834,7 @@ action_releases_tags() {
     echo -e "  ${C_DIM}▸ Mengambil daftar releases...${C_RESET}"
     local TMP=/tmp/_gh_reldel_$$.json
     local http
-    http=$(curl -s -o "$TMP" -w "%{http_code}" \
-      -H "Authorization: token ${TOKEN}" \
-      -H "Accept: application/vnd.github+json" \
-      -H "X-GitHub-Api-Version: 2022-11-28" \
+    http=$(gh_curl -o "$TMP" -w "%{http_code}" \
       "https://api.github.com/repos/${REPO_OWNER}/${REPO}/releases?per_page=20" 2>/dev/null)
 
     if [ "$http" != "200" ]; then
@@ -7779,18 +7883,17 @@ action_releases_tags() {
 
     echo -e "  ${C_CYAN}▸ Menghapus release...${C_RESET}"
     local del_http
-    del_http=$(curl -s -o /dev/null -w "%{http_code}" \
+    del_http=$(gh_curl -o /dev/null -w "%{http_code}" \
       -X DELETE \
-      -H "Authorization: token ${TOKEN}" \
-      -H "Accept: application/vnd.github+json" \
-      -H "X-GitHub-Api-Version: 2022-11-28" \
       "https://api.github.com/repos/${REPO_OWNER}/${REPO}/releases/${sel_id}" 2>/dev/null)
 
     local _rt_ts; _rt_ts=$(TZ=Asia/Jakarta date '+%d %b %Y • %H:%M WIB' 2>/dev/null || date '+%d %b %Y • %H:%M')
     if [ "$del_http" = "204" ]; then
       echo -e "  ${C_GREEN}✅ Release ${C_BOLD}${sel_tag}${C_RESET}${C_GREEN} berhasil dihapus.${C_RESET}"
       echo -e "  ${C_DIM}   (Tag-nya masih ada — hapus dari submenu Tag jika perlu)${C_RESET}"
-      local _btn_delrel='{"inline_keyboard":[[{"text":"🚀 Semua Releases","url":"https://github.com/'"${USER}"'/'"${REPO}"'/releases"},{"text":"🏷️ Semua Tags","url":"https://github.com/'"${USER}"'/'"${REPO}"'/tags"}]]}'
+      local _btn_delrel
+      _btn_delrel=$(_tg_keyboard \
+        "$(_tg_row "$(_tg_btn "🚀 Semua Releases" "$(_gh_web '/releases')")" "$(_tg_btn "🏷️ Semua Tags" "$(_gh_web '/tags')")")")
       send_telegram_photo "https://w.wallhaven.cc/full/l3/wallhaven-l3q6eq.png" "🗑 <b>RELEASE DIHAPUS</b>
 ━━━━━━━━━━━━━━━━━━━━
 📁 <code>${USER}/${REPO}</code>
@@ -7811,10 +7914,7 @@ action_releases_tags() {
     echo -e "  ${C_DIM}▸ Mengambil data tags dari GitHub...${C_RESET}"
     local TMP=/tmp/_gh_tags_$$.json
     local http
-    http=$(curl -s -o "$TMP" -w "%{http_code}" \
-      -H "Authorization: token ${TOKEN}" \
-      -H "Accept: application/vnd.github+json" \
-      -H "X-GitHub-Api-Version: 2022-11-28" \
+    http=$(gh_curl -o "$TMP" -w "%{http_code}" \
       "https://api.github.com/repos/${REPO_OWNER}/${REPO}/tags?per_page=30" 2>/dev/null)
 
     if [ "$http" != "200" ]; then
@@ -7823,7 +7923,7 @@ action_releases_tags() {
     fi
 
     local count
-    count=$(node -e "try{const d=JSON.parse(require('fs').readFileSync('$TMP','utf8'));console.log(d.length);}catch(e){console.log(0);}" 2>/dev/null)
+    count=$(_json_array_len_file "$TMP")
 
     _rt_header
     if [ "$count" = "0" ]; then
@@ -7865,10 +7965,7 @@ action_releases_tags() {
     echo -e "  ${C_CYAN}▸ Ambil SHA dari ${DEFAULT_BRANCH}...${C_RESET}"
     local SHA_TMP=/tmp/_gh_sharef_$$.json
     local sha_http sha
-    sha_http=$(curl -s -o "$SHA_TMP" -w "%{http_code}" \
-      -H "Authorization: token ${TOKEN}" \
-      -H "Accept: application/vnd.github+json" \
-      -H "X-GitHub-Api-Version: 2022-11-28" \
+    sha_http=$(gh_curl -o "$SHA_TMP" -w "%{http_code}" \
       "https://api.github.com/repos/${REPO_OWNER}/${REPO}/git/ref/heads/${DEFAULT_BRANCH}" 2>/dev/null)
 
     if [ "$sha_http" != "200" ]; then
@@ -7892,11 +7989,8 @@ action_releases_tags() {
 
     local TMP=/tmp/_gh_tagcreate_$$.json
     local http
-    http=$(curl -s -o "$TMP" -w "%{http_code}" \
+    http=$(gh_curl -o "$TMP" -w "%{http_code}" \
       -X POST \
-      -H "Authorization: token ${TOKEN}" \
-      -H "Accept: application/vnd.github+json" \
-      -H "X-GitHub-Api-Version: 2022-11-28" \
       "https://api.github.com/repos/${REPO_OWNER}/${REPO}/git/refs" \
       -d "{\"ref\":\"refs/tags/${tname}\",\"sha\":\"${sha}\"}" 2>/dev/null)
 
@@ -7904,7 +7998,10 @@ action_releases_tags() {
     if [ "$http" = "201" ]; then
       echo -e "  ${C_GREEN}✅ Tag ${C_BOLD}${tname}${C_RESET}${C_GREEN} berhasil dibuat!${C_RESET}"
       echo -e "  ${C_BLUE}🔗 https://github.com/${REPO_OWNER}/${REPO}/releases/tag/${tname}${C_RESET}"
-      local _btn_tag='{"inline_keyboard":[[{"text":"🏷️ Lihat Tag","url":"https://github.com/'"${USER}"'/'"${REPO}"'/releases/tag/'"${tname}"'"},{"text":"📋 Semua Tags","url":"https://github.com/'"${USER}"'/'"${REPO}"'/tags"}],[{"text":"🚀 Buat Release","url":"https://github.com/'"${USER}"'/'"${REPO}"'/releases/new"},{"text":"📦 Repo","url":"https://github.com/'"${USER}"'/'"${REPO}"'"}]]}'
+      local _btn_tag
+      _btn_tag=$(_tg_keyboard \
+        "$(_tg_row "$(_tg_btn "🏷️ Lihat Tag" "$(_gh_web '/releases/tag/${tname}')")" "$(_tg_btn "📋 Semua Tags" "$(_gh_web '/tags')")")" \
+        "$(_tg_row "$(_tg_btn "🚀 Buat Release" "$(_gh_web '/releases/new')")" "$(_tg_btn "📦 Repo" "$(_gh_web)")")")
       send_telegram_photo "https://w.wallhaven.cc/full/o5/wallhaven-o5l5j7.jpg" "🏷️ <b>TAG BARU DIBUAT</b>
 ━━━━━━━━━━━━━━━━━━━━
 📁 <code>${USER}/${REPO}</code>
@@ -7932,10 +8029,7 @@ action_releases_tags() {
     echo -e "  ${C_DIM}▸ Mengambil daftar tags...${C_RESET}"
     local TMP=/tmp/_gh_tagdel_$$.json
     local http
-    http=$(curl -s -o "$TMP" -w "%{http_code}" \
-      -H "Authorization: token ${TOKEN}" \
-      -H "Accept: application/vnd.github+json" \
-      -H "X-GitHub-Api-Version: 2022-11-28" \
+    http=$(gh_curl -o "$TMP" -w "%{http_code}" \
       "https://api.github.com/repos/${REPO_OWNER}/${REPO}/tags?per_page=30" 2>/dev/null)
 
     if [ "$http" != "200" ]; then
@@ -7982,17 +8076,16 @@ action_releases_tags() {
 
     echo -e "  ${C_CYAN}▸ Menghapus tag...${C_RESET}"
     local del_http
-    del_http=$(curl -s -o /dev/null -w "%{http_code}" \
+    del_http=$(gh_curl -o /dev/null -w "%{http_code}" \
       -X DELETE \
-      -H "Authorization: token ${TOKEN}" \
-      -H "Accept: application/vnd.github+json" \
-      -H "X-GitHub-Api-Version: 2022-11-28" \
       "https://api.github.com/repos/${REPO_OWNER}/${REPO}/git/refs/tags/${sel_tag}" 2>/dev/null)
 
     local _rt_ts; _rt_ts=$(TZ=Asia/Jakarta date '+%d %b %Y • %H:%M WIB' 2>/dev/null || date '+%d %b %Y • %H:%M')
     if [ "$del_http" = "204" ]; then
       echo -e "  ${C_GREEN}✅ Tag ${C_BOLD}${sel_tag}${C_RESET}${C_GREEN} berhasil dihapus.${C_RESET}"
-      local _btn_deltag='{"inline_keyboard":[[{"text":"🏷️ Semua Tags","url":"https://github.com/'"${USER}"'/'"${REPO}"'/tags"},{"text":"🚀 Semua Releases","url":"https://github.com/'"${USER}"'/'"${REPO}"'/releases"}]]}'
+      local _btn_deltag
+      _btn_deltag=$(_tg_keyboard \
+        "$(_tg_row "$(_tg_btn "🏷️ Semua Tags" "$(_gh_web '/tags')")" "$(_tg_btn "🚀 Semua Releases" "$(_gh_web '/releases')")")")
       send_telegram_photo "https://w.wallhaven.cc/full/28/wallhaven-28mlj9.jpg" "🗑 <b>TAG DIHAPUS</b>
 ━━━━━━━━━━━━━━━━━━━━
 📁 <code>${USER}/${REPO}</code>
@@ -8035,10 +8128,7 @@ action_switch_repo() {
 
   # Ambil daftar repo milik USER via API (max 100 per halaman, sorted by updated)
   local _sr_raw
-  _sr_raw=$(curl -s \
-    -H "Authorization: token ${TOKEN}" \
-    -H "Accept: application/vnd.github+json" \
-    -H "X-GitHub-Api-Version: 2022-11-28" \
+  _sr_raw=$(gh_curl \
     "https://api.github.com/user/repos?per_page=100&sort=updated&affiliation=owner" 2>/dev/null)
 
   local repos=()
@@ -8195,10 +8285,7 @@ _sr_apply_switch() {
   echo ""
   echo -e "  ${C_CYAN}▸${C_RESET} Memeriksa repo ${C_BOLD}${_new_user}/${_new_repo}${C_RESET} di GitHub..."
   local _check_http
-  _check_http=$(curl -s -o /tmp/_gh_sr_check.json -w "%{http_code}" \
-    -H "Authorization: token ${TOKEN}" \
-    -H "Accept: application/vnd.github+json" \
-    -H "X-GitHub-Api-Version: 2022-11-28" \
+  _check_http=$(gh_curl -o /tmp/_gh_sr_check.json -w "%{http_code}" \
     "https://api.github.com/repos/${_new_user}/${_new_repo}" 2>/dev/null)
 
   if [ "$_check_http" != "200" ]; then
@@ -8249,10 +8336,7 @@ _sr_apply_switch() {
   # Auto-detect DEFAULT_BRANCH dari repo baru via GitHub API
   echo -e "  ${C_CYAN}▸${C_RESET} Mendeteksi default branch repo baru..."
   local _new_default
-  _new_default=$(curl -s \
-    -H "Authorization: token ${TOKEN}" \
-    -H "Accept: application/vnd.github+json" \
-    -H "X-GitHub-Api-Version: 2022-11-28" \
+  _new_default=$(gh_curl \
     "https://api.github.com/repos/${_new_user}/${_new_repo}" 2>/dev/null \
     | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d.get("default_branch",""))' 2>/dev/null)
 
@@ -8298,7 +8382,10 @@ _sr_apply_switch() {
   echo -e "  ${C_DIM}USER, REPO, DEFAULT_BRANCH, REMOTE_URL & upstream tracking diperbarui.${C_RESET}"
 
   local _ts_sr; _ts_sr=$(date '+%H:%M:%S %d %b %Y')
-  local _btn_sr='{"inline_keyboard":[[{"text":"📁 Buka Repo","url":"https://github.com/'"${_new_user}"'/'"${_new_repo}"'"},{"text":"🌿 Branches","url":"https://github.com/'"${_new_user}"'/'"${_new_repo}"'/branches"}],[{"text":"📊 Commits","url":"https://github.com/'"${_new_user}"'/'"${_new_repo}"'/commits"},{"text":"⚙️ Settings","url":"https://github.com/'"${_new_user}"'/'"${_new_repo}"'/settings"}]]}'
+  local _btn_sr
+  _btn_sr=$(_tg_keyboard \
+    "$(_tg_row "$(_tg_btn "📁 Buka Repo" "https://github.com/${_new_user}/${_new_repo}")" "$(_tg_btn "🌿 Branches" "https://github.com/${_new_user}/${_new_repo}/branches")")" \
+    "$(_tg_row "$(_tg_btn "📊 Commits" "https://github.com/${_new_user}/${_new_repo}/commits")" "$(_tg_btn "⚙️ Settings" "https://github.com/${_new_user}/${_new_repo}/settings")")")
   send_telegram_photo "https://w.wallhaven.cc/full/jx/wallhaven-jx8p1y.png" "🔄 <b>REPO AKTIF DIGANTI</b>
 ━━━━━━━━━━━━━━━━━━━━
 👤 <code>${_old_user}/${_old_repo}</code>
@@ -8328,10 +8415,7 @@ prompt_back_or_exit() {
 # ===== Cek token realtime — auto re-login tanpa restart script =====
 check_token_realtime() {
   local http
-  http=$(curl -s -o /dev/null -w "%{http_code}" \
-    -H "Authorization: token ${TOKEN}" \
-    -H "Accept: application/vnd.github+json" \
-    -H "X-GitHub-Api-Version: 2022-11-28" \
+  http=$(gh_curl -o /dev/null -w "%{http_code}" \
     "https://api.github.com/user" 2>/dev/null)
 
   # 200 = valid, 000 = no network (biarkan, bukan salah token)
