@@ -1,13 +1,12 @@
 {
   "name": "wily-bot",
   "version": "27",
-  "main": "./src/index.js",
+  "description": "WhatsApp Bot by Bang Wily - Base dari Bang Dika Ardnt, di recode ulang oleh Bang Wilykun. Script ini KHUSUS untuk Donasi/VIP, tidak untuk diperjualbelikan!",
   "type": "module",
-  "types": "index.d.ts",
+  "main": "./index.js",
   "scripts": {
     "start": "bash start-ptero.sh",
-    "start-pm2": "bash start-ptero.sh",
-    "dev": "node --watch-path=./src --watch-path=./.env src/index.js",
+    "dev": "node --watch-path=./index.js --watch-path=./message.js --watch-path=./src --watch-path=./SEMUA_FITUR --watch-path=./.env index.js",
     "pm2": "pm2 delete wily-bot 2>/dev/null; pm2 start ecosystem.config.cjs && pm2 monit",
     "pm2:stop": "pm2 stop wily-bot",
     "pm2:restart": "pm2 restart wily-bot",
@@ -18,17 +17,17 @@
     "pm2:monit": "pm2 monit",
     "pm2:save": "pm2 save",
     "pm2:startup": "pm2 startup",
+    "validate": "node scripts/validate-cjs.cjs",
     "postinstall": "node scripts/postinstall.js"
   },
   "keywords": [
     "whatsapp-bot",
     "whatsapp",
-    "socketon",
+    "baileys",
     "wilykun"
   ],
   "author": "Bang Wily <6289688206739> | Telegram: @Wilykun1994",
   "license": "MIT",
-  "description": "WhatsApp Bot by Bang Wily - Base dari Bang Dika Ardnt, di recode ulang oleh Bang Wilykun. Script ini KHUSUS untuk Donasi/VIP, tidak untuk diperjualbelikan!",
   "dependencies": {
     "@distube/ytdl-core": "^4.16.12",
     "@google/genai": "^1.52.0",
