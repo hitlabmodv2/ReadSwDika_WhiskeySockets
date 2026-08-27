@@ -1,74 +1,34 @@
-<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=220&section=header&text=WILY%20BOT&fontSize=80&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=WhatsApp%20Multi-Fitur%20%7C%20Powered%20by%20Baileys%20%2B%20Node.js&descAlignY=58&descSize=18&descColor=d4f5e9" />
-
 <div align="center">
 
-<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=700&size=22&pause=900&color=25D366&center=true&vCenter=true&multiline=false&width=750&height=50&lines=%F0%9F%A4%96+Selamat+Datang+di+WILY+BOT!;%E2%9A%A1+Deploy+Sekali%2C+Jalan+Selamanya;%F0%9F%92%AC+185%2B+Command+Siap+Digunakan;%F0%9F%8E%B5+YouTube+%E2%80%A2+TikTok+%E2%80%A2+Instagram+Downloader;%F0%9F%A4%96+Jadibot+Multi-Session+%E2%80%94+Clone+Bot+ke+Nomor+Lain;%F0%9F%9B%A1%EF%B8%8F+Anti-Delete+%E2%80%A2+Anti-Call+%E2%80%A2+Crash+Guard;%F0%9F%94%92+Script+GRATIS+%E2%80%94+Tidak+untuk+Dijual!;%F0%9F%9F%A2+Status%3A+ONLINE+%26+Aktif+Dikembangkan" alt="Typing SVG" />
+# WILY BOT
+
+### WhatsApp Automation Suite · Node.js · Baileys
+
+**Fast to deploy. Easy to extend. Built for real communities.**
 
 <br/>
 
-<img src="https://img.shields.io/badge/Node.js-20%2B-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" />
-<img src="https://img.shields.io/badge/WhatsApp-Baileys-25D366?style=for-the-badge&logo=whatsapp&logoColor=white" />
-<img src="https://img.shields.io/badge/License-FREE-3498DB?style=for-the-badge&logo=opensourceinitiative&logoColor=white" />
-<img src="https://img.shields.io/badge/Status-ONLINE-27AE60?style=for-the-badge&logo=statuspal&logoColor=white" />
-<img src="https://img.shields.io/badge/Platform-Linux%20%7C%20Node-1a1a2e?style=for-the-badge&logo=linux&logoColor=white" />
-
-<br/><br/>
-
-[![Stars](https://img.shields.io/github/stars/hitlabmodv2/ReadSwDika_WhiskeySockets?style=for-the-badge&logo=github&color=FFD700&labelColor=1a1a2e&label=Stars)](https://github.com/hitlabmodv2/ReadSwDika_WhiskeySockets/stargazers)
-[![Forks](https://img.shields.io/github/forks/hitlabmodv2/ReadSwDika_WhiskeySockets?style=for-the-badge&logo=github&color=4A90D9&labelColor=1a1a2e&label=Forks)](https://github.com/hitlabmodv2/ReadSwDika_WhiskeySockets/network/members)
-[![Issues](https://img.shields.io/github/issues/hitlabmodv2/ReadSwDika_WhiskeySockets?style=for-the-badge&logo=github&color=E74C3C&labelColor=1a1a2e&label=Issues)](https://github.com/hitlabmodv2/ReadSwDika_WhiskeySockets/issues)
-[![Last Commit](https://img.shields.io/github/last-commit/hitlabmodv2/ReadSwDika_WhiskeySockets?style=for-the-badge&logo=github&color=2ECC71&labelColor=1a1a2e&label=Updated)](https://github.com/hitlabmodv2/ReadSwDika_WhiskeySockets/commits)
-[![Repo Size](https://img.shields.io/github/repo-size/hitlabmodv2/ReadSwDika_WhiskeySockets?style=for-the-badge&logo=github&color=9B59B6&labelColor=1a1a2e&label=Size)](https://github.com/hitlabmodv2/ReadSwDika_WhiskeySockets)
-
-<br/>
-
-![Visitors](https://komarev.com/ghpvc/?username=hitlabmodv2&color=25D366&style=for-the-badge&label=TOTAL+VIEWS&abbreviated=true)
-[![Watchers](https://img.shields.io/github/watchers/hitlabmodv2/ReadSwDika_WhiskeySockets?style=for-the-badge&logo=github&color=17A589&labelColor=1a1a2e&label=Watchers)](https://github.com/hitlabmodv2/ReadSwDika_WhiskeySockets/watchers)
-
-<br/>
-
-<!-- Skill Icons - Tech Stack Visual 2026 (each icon clickable) -->
-<a href="https://nodejs.org" title="Node.js"><img src="https://skillicons.dev/icons?i=nodejs&theme=dark" /></a>
-<a href="https://developer.mozilla.org/docs/Web/JavaScript" title="JavaScript"><img src="https://skillicons.dev/icons?i=javascript&theme=dark" /></a>
-<a href="https://git-scm.com" title="Git"><img src="https://skillicons.dev/icons?i=git&theme=dark" /></a>
-<a href="https://kernel.org" title="Linux"><img src="https://skillicons.dev/icons?i=linux&theme=dark" /></a>
-<a href="https://docker.com" title="Docker"><img src="https://skillicons.dev/icons?i=docker&theme=dark" /></a>
-<a href="https://github.com/hitlabmodv2/ReadSwDika_WhiskeySockets" title="GitHub Repo"><img src="https://skillicons.dev/icons?i=github&theme=dark" /></a>
-<a href="https://code.visualstudio.com" title="VS Code"><img src="https://skillicons.dev/icons?i=vscode&theme=dark" /></a>
-<a href="https://www.gnu.org/software/bash" title="Bash"><img src="https://skillicons.dev/icons?i=bash&theme=dark" /></a>
-
-<br/><br/>
-
-<!-- GitHub Activity Graph (clickable ke profil GitHub) -->
-<a href="https://github.com/hitlabmodv2" title="GitHub Activity">
-<img src="https://github-readme-activity-graph.vercel.app/graph?username=hitlabmodv2&bg_color=0d1117&color=25D366&line=25D366&point=ffffff&area=true&area_color=128C7E&hide_border=true&radius=8&title_color=25D366" width="100%" />
-</a>
-
-<br/>
-
-<img src="https://capsule-render.vercel.app/api?type=rect&color=gradient&customColorList=6,11,20&height=3" />
-
-<br/>
-
-> 🤖 **WhatsApp Bot multi-fitur berbasis [Baileys](https://github.com/WhiskeySockets/Baileys)**
-> &nbsp;
-> ⚠️ Script ini **GRATIS** — tidak untuk diperjualbelikan!
+[![Node.js](https://img.shields.io/badge/Node.js-20%2B-22C55E?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Baileys](https://img.shields.io/badge/WhatsApp-Baileys-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://github.com/WhiskeySockets/Baileys)
+[![Commands](https://img.shields.io/badge/Commands-290%2B-8B5CF6?style=for-the-badge&logo=probot&logoColor=white)](#-fitur-unggulan)
+[![Status](https://img.shields.io/badge/Status-Active-06B6D4?style=for-the-badge&logo=statuspage&logoColor=white)](#-update-terbaru-v271)
+[![License](https://img.shields.io/badge/License-MIT-F59E0B?style=for-the-badge&logo=opensourceinitiative&logoColor=white)](LICENSE)
 
 <br/>
 
 [![Run on Replit](https://img.shields.io/badge/Run%20on-Replit-F26207?style=for-the-badge&logo=replit&logoColor=white)](https://replit.com/new/github/hitlabmodv2/ReadSwDika_WhiskeySockets)
+[![Deploy on Railway](https://img.shields.io/badge/Deploy%20on-Railway-111827?style=for-the-badge&logo=railway&logoColor=white)](https://railway.com/new/template?template=https://github.com/hitlabmodv2/ReadSwDika_WhiskeySockets)
+[![Deploy on Fly.io](https://img.shields.io/badge/Deploy%20on-Fly.io-7C3AED?style=for-the-badge&logo=fly.io&logoColor=white)](https://fly.io/docs/launch/)
 
-<br/>
+<br/><br/>
 
-[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/new/template?template=https://github.com/hitlabmodv2/ReadSwDika_WhiskeySockets)
-&nbsp;&nbsp;
-[![Deploy on Fly.io](https://img.shields.io/badge/Deploy%20ke-Fly.io-8B5CF6?style=for-the-badge&logo=superfly&logoColor=white)](https://fly.io/docs/launch/)
-
-<br/>
+<img src="https://capsule-render.vercel.app/api?type=rect&color=0d1117&height=2" width="90%" />
 
 </div>
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=80&section=footer&reversal=true" />
+> **WILY BOT** adalah bot WhatsApp multi-fitur untuk komunitas, otomasi grup, downloader media, utilitas admin, AI chat, dan multi-session **Jadibot**.
+>
+> Dibuat untuk dipakai, dikembangkan, dan dipelajari bersama. **Gratis untuk penggunaan pribadi dan komunitas — jangan diperjualbelikan.**
 
 ---
 
@@ -85,7 +45,7 @@
 - [🤖 Jadibot (Multi-Session)](#-jadibot-multi-session)
 - [🛡️ Fitur Keamanan](#️-fitur-keamanan)
 - [❓ Troubleshooting / FAQ](#-troubleshooting--faq)
-- [🆕 Update Terbaru (V25)](#-update-terbaru-v25)
+- [🆕 Update Terbaru (V27.1)](#-update-terbaru-v271)
 - [📝 Kredit](#-kredit)
 
 ---
@@ -997,14 +957,14 @@ File temporary (hasil download) dibersihkan otomatis setiap 6 jam.
 
 ---
 
-## 🆕 Update Terbaru (V25)
+## 🆕 Update Terbaru (V27.1)
 
 <details>
-<summary><b>🔽 Klik untuk lihat detail rilis WILY BOT V25 — 2 Fitur Baru, 10 Bug Fix, 11 Perubahan</b></summary>
+<summary><b>🔽 Klik untuk lihat detail rilis WILY BOT V27.1 — fitur, stabilitas, dan perbaikan terbaru</b></summary>
 
 <br/>
 
-> 📅 Jadwal rilis belum ditentukan — masih dalam tahap pemantauan. Detail lengkap ada di file [`INFORMASI_UPDATE_V25.txt`](./INFORMASI_UPDATE_V25.txt).
+> 📅 Pembaruan aktif 2026. Detail lengkap ada di file [`INFORMASI_UPDATE_V27.1.txt`](./INFORMASI_UPDATE_V27.1.txt).
 
 ### ✨ Fitur Baru
 1. **🔗 AntiLink — Bulk Toggle "off all" / "on all"** — atur AntiLink di semua grup terdaftar sekaligus, khusus owner.
@@ -1035,7 +995,7 @@ File temporary (hasil download) dibersihkan otomatis setiap 6 jam.
 10. Startup script (`start-ptero.sh`) — tampilan konsol dirombak, alias `npm start` ditambahkan.
 11. Workflow Replit — dijalankan lewat `start-ptero.sh` agar perilaku sama dengan produksi Pterodactyl.
 
-> 📄 Lihat isi lengkap tiap perubahan (penyebab bug, detail fix) di [`INFORMASI_UPDATE_V25.txt`](./INFORMASI_UPDATE_V25.txt).
+> 📄 Lihat isi lengkap tiap perubahan (penyebab bug, detail fix) di [`INFORMASI_UPDATE_V27.1.txt`](./INFORMASI_UPDATE_V27.1.txt).
 
 </details>
 

@@ -1,0 +1,86 @@
+📜 *ReadSwDika*
+🔰 *Base Script:* Dika Ardnt
+🛠️ *Recode By:* Bang Wily
+
+📢 *INFORMASI RILIS*
+_📅 Rabu, 23 Juli 2026_ 🌙
+━━━━━━━━━━━━━━━━━━━━━━
+🤖 *WILY BOT — V27.2*
+✨ *2 Fitur Baru*
+🐛 *2 Fix Bug*
+🛠️ *2 Fix Error*
+🚀 *1 Perubahan*
+━━━━━━━━━━━━━━━━━━━━━━
+✨ *FITUR BARU*
+━━━━━━━━━━━━━━━━━━━━━━
+*1. 🖼️ .getppuser — Ambil Foto Profil Pengguna*
+_Fitur untuk mengambil 👤 *foto profil pengguna*._
+1. Chat pribadi: foto profil lawan chat dikirim otomatis.
+2. Grup: reply 💬 pesan anggota, lalu ketik `.getppuser`.
+> _Catatan: foto profil tetap mengikuti pengaturan privasi WhatsApp._
+
+*2. 📢 `.cekjidch` — Cek JID Channel WhatsApp*
+_Fitur untuk mengambil informasi channel/saluran WhatsApp secara realtime._
+1. Gunakan link channel: `.cekjidch https://whatsapp.com/channel/0029...`
+2. Bisa juga ketik `.cekjidch` langsung di dalam channel.
+3. Menampilkan nama channel, JID `@newsletter`, dan total pengikut.
+• Link invite dibersihkan otomatis jika ada karakter `_` di bagian akhir.
+• Hasil dikirim sebagai reply ke pesan command dan tersedia tombol *Copy JID Channel*.
+> _Cek JID channel sekarang lebih mudah dan akurat._
+
+━━━━━━━━━━━━━━━━━━━━━━
+🐛 *BUG FIX*
+━━━━━━━━━━━━━━━━━━━━━━
+*1. 🐛 `.ceksw` — Username Menjadi Mention yang Bisa Diklik*
+Username 👤 yang ditampilkan oleh `.ceksw` sekarang menjadi *mention* 🔗 yang bisa langsung diklik untuk membuka profil atau chat.
+1. Nama pengguna tampil sebagai mention yang terhubung ke akun.
+2. Mention dapat disentuh untuk membuka profil atau chat.
+> _Hasil: identitas pengguna sekarang lebih mudah dibuka dari pesan `.ceksw`._
+~Sebelumnya username hanya tampil sebagai teks nama biasa.~
+
+*2. 🐛 AutoReadStoryWhatsApp — TotalStory Tidak Realtime*
+Memperbaiki jumlah `TotalStory` yang sebelumnya menghitung waktu story diterima WhatsApp, bukan waktu story selesai diproses.
+1. Story yang datang bersamaan tidak lagi langsung dihitung seluruhnya sebelum delay baca dan reaksi selesai.
+2. Jumlah story sekarang mengikuti story yang sudah selesai dibaca/diproses.
+3. Data lama tetap dapat dihitung menggunakan status baca yang tersimpan.
+> _Hasil: `TotalStory` sekarang lebih akurat dan realtime mengikuti proses AutoReadStoryWhatsApp._
+~Sebelumnya beberapa story dalam satu batch dapat membuat setiap log menampilkan jumlah total yang sama, meskipun belum semuanya selesai diproses.~
+
+━━━━━━━━━━━━━━━━━━━━━━
+🛠️ *FIX ERROR*
+━━━━━━━━━━━━━━━━━━━━━━
+*1. 🛠️ `.ig` — Perbaikan Error Downloader Instagram/Reel*
+Downloader Instagram sekarang memiliki fallback scraper tambahan menggunakan `cakkatrok-instagram-downloader` yang terbukti berhasil mengambil media reel publik.
+1. Jika scraper utama gagal, `.ig` mencoba fallback *SnapVideo* secara otomatis.
+2. Media video reel dan media Instagram publik dapat diproses.
+• `cakkatrok-instagram-downloader` digunakan sebagai sumber fallback utama.
+• `Savevid` tetap tersedia sebagai sumber alternatif.
+• Timeout dan kegagalan setiap scraper ditangani agar bot tidak crash.
+> _Hasil: reel publik dapat diunduh selama salah satu sumber mengembalikan media yang valid._
+~Sebelumnya `.ig` dapat gagal ketika API downloader utama error atau mengembalikan hasil kosong.~
+
+*2. 🛠️ `.cekjidch` — Informasi Nama Channel Sudah Tampil*
+Memperbaiki error pada informasi channel WhatsApp agar nama channel dan detail lainnya muncul dengan benar.
+1. Gunakan perintah `.cekjidch` dengan link channel, misalnya `https://whatsapp.com/channel/0029...`.
+2. Bot menampilkan *nama channel*, JID `@newsletter`, dan total pengikut.
+• Link invite dibersihkan otomatis jika memiliki karakter `_` di bagian akhir.
+• Hasil dikirim sebagai reply dan tersedia tombol `Copy JID Channel`.
+> _Hasil: nama channel sekarang sudah muncul dan informasi channel tampil lebih akurat._
+~Sebelumnya informasi channel dapat muncul tanpa nama channel atau tidak lengkap.~
+
+━━━━━━━━━━━━━━━━━━━━━━
+🚀 *PERUBAHAN*
+━━━━━━━━━━━━━━━━━━━━━━
+*1. 🎭 .wm — Bisa Langsung Reply Sticker*
+_Sekarang `.wm` bisa langsung digunakan dengan reply 🖼️ *sticker*, tidak perlu lewat gambar terlebih dahulu._
+1. Reply sticker yang ingin diproses.
+2. Ketik command dengan format `Pack|Author`.
+Contoh:
+- `.wm wily`
+- `.wm Wily|kun`
+> _Gunakan tanda `|` untuk memisahkan nama pack dan author._
+
+━━━━━━━━━━━━━━━━━━━━━━
+📝 *RINGKASAN SIMPEL*
+_(Buat yang mau tau singkatnya aja)_
+━━━━━━━━━━━━━━━━━━━━━━

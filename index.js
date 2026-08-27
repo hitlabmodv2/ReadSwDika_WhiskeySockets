@@ -1085,7 +1085,7 @@ async function main() {
                         const autoOnline2 = config2.autoOnline || {};
                         const autoOnlineLabel = autoOnline2.enabled !== false ? 'ON 🟢 (terlihat online)' : 'OFF 🙈 (stealth)';
 
-                        const G = '\x1b[32m', Y = '\x1b[33m', C = '\x1b[36m', R = '\x1b[0m', B = '\x1b[1m';
+                        const G = '\x1b[32m', Y = '\x1b[33m', R = '\x1b[0m', B = '\x1b[1m';
                         const _prefixRaw2 = process.env.BOT_PREFIX || '!';
                         const _prefixClass2 = _prefixRaw2.match(/^\(\?:\[([\s\S]*)\]\)$/);
                         const _prefixLabel2 = _prefixClass2 ? 'MULTI-PREFIX' : _prefixRaw2;
@@ -1098,59 +1098,24 @@ async function main() {
                                         ? `${global.__activeBrowserArr[0]} + ${global.__activeBrowserArr[1]}`
                                         : 'Chrome');
 
-                        // Hitung lebar terminal tanpa terpengaruh ANSI color,
-                        // variation selector, atau emoji double-width.
-                        const _ansiPattern = /\x1b\[[0-?]*[ -/]*[@-~]/g;
-                        const _displayWidth = value => {
-                                const plain = String(value).replace(_ansiPattern, '');
-                                let width = 0;
-                                for (const char of plain) {
-                                        const codePoint = char.codePointAt(0);
-                                        if (
-                                                codePoint === 0x200d ||
-                                                (codePoint >= 0x300 && codePoint <= 0x36f) ||
-                                                (codePoint >= 0xfe00 && codePoint <= 0xfe0f)
-                                        ) continue;
-                                        width += codePoint >= 0x1f000 || (codePoint >= 0x2600 && codePoint <= 0x27bf) ? 2 : 1;
-                                }
-                                return width;
-                        };
-
+                        const _statusRow = (icon, label, value, color) =>
+                                `${color}${icon}${R} ${label.padEnd(7)}: ${B}${value}${R}`;
                         const _statusRows = [
-                                `${G}✅${R} Nomor  : ${B}${userId}${R}`,
-                                `${G}👤${R} Nama   : ${B}${userName}${R}`,
-                                `${Y}🖥️${R} Browser: ${B}${_bLabel2}${R}`,
-                                `${Y}🔤${R} Prefix : ${B}${_prefixLabel2}${R}`,
-                                `${Y}↪️${R} NoPfx  : ${B}${_noPrefixLabel2}${R}`,
-                                `${Y}📋${R} Cmd    : ${B}${commands.length} commands${R}`,
-                                `${Y}👥${R} Grup   : ${B}${groupCount} grup (admin: ${adminCount})${R}`,
-                                `${G}🌐${R} Status : ${B}ONLINE 🟢${R}`,
-                                `${Y}⚡${R} AutoOnl: ${B}${autoOnlineLabel}${R}`,
+                                _statusRow('✅', 'Nomor',   userId,                  G),
+                                _statusRow('👤', 'Nama',    userName,                G),
+                                _statusRow('🖥️', 'Browser', _bLabel2,                Y),
+                                _statusRow('🔤', 'Prefix',  _prefixLabel2,           Y),
+                                _statusRow('↪️', 'NoPfx',   _noPrefixLabel2,          Y),
+                                _statusRow('📋', 'Cmd',     `${commands.length} commands`, Y),
+                                _statusRow('👥', 'Grup',    `${groupCount} grup (admin: ${adminCount})`, Y),
+                                _statusRow('🌐', 'Status',  'ONLINE 🟢',              G),
+                                _statusRow('⚡', 'AutoOnl', autoOnlineLabel,          Y),
                         ];
-                        const _title = `${B}${G}🤖  W I L Y  B O T  A K T I F${R}`;
-                        const _innerWidth = Math.max(
-                                38,
-                                _displayWidth(_title) + 8,
-                                ..._statusRows.map(_displayWidth)
-                        );
-                        const _boxLine = content => {
-                                const padding = Math.max(0, _innerWidth - _displayWidth(content));
-                                return `${C}║${R}${content}${' '.repeat(padding)}${C}║${R}`;
-                        };
-                        const _centerTitle = () => {
-                                const titleWidth = _displayWidth(_title);
-                                const left = Math.max(0, Math.floor((_innerWidth - titleWidth) / 2));
-                                const right = Math.max(0, _innerWidth - titleWidth - left);
-                                return `${C}║${R}${' '.repeat(left)}${_title}${' '.repeat(right)}${C}║${R}`;
-                        };
-                        const _boxBorder = char => `${C}${char.repeat(_innerWidth)}${R}`;
-
-                        console.log(`${C}╔${_boxBorder('═')}╗${R}`);
-                        console.log(_centerTitle());
-                        console.log(`${C}╠${_boxBorder('═')}╣${R}`);
-                        for (const row of _statusRows) console.log(_boxLine(row));
+                        console.log(`${B}${G}🤖 WILY BOT AKTIF${R}`);
+                        console.log('');
+                        for (const row of _statusRows) console.log(row);
                         global.__cmdTotal = commands.length;
-                        console.log(`${C}╚${_boxBorder('═')}╝${R}`);
+                        console.log('');
 
                         // ── SwStats: prune activeSW expired supaya data realtime & akurat ──
                         try { pruneSwStats(); } catch {}
@@ -1737,7 +1702,8 @@ async function main() {
                                                                 }
 
                                                                 _alq.tandaiDanLog(item, daftarGrup);
-                                                                console.log(`[AlqanimeNotif] ✅ Ep ${item.epNum} "${item.judul}" terkirim ke ${daftarGrup.length} grup`);
+                                                                const labelRilisan = _alq.buatLabelRilisan(item);
+                                                                console.log(`[AlqanimeNotif] ✅ ${labelRilisan} "${item.judul}" terkirim ke ${daftarGrup.length} grup`);
                                                                 await new Promise(r => setTimeout(r, 2000));
                                                         }
                                                 }

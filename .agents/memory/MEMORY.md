@@ -13,3 +13,6 @@
 - [Alqanime caption semantics](alqanime-caption-semantics.md) — format WhatsApp dipakai sesuai makna konten; rilisan aktif tidak memakai coret
 - [Status audience path](status-audience-path.md) — semua media status harus melewati groupStatusV2 agar audience metadata ikut ter-encode
 - [No-prefix command mode](no-prefix-command-mode.md) — hanya command valid yang boleh tanpa prefix; mode false harus tetap mewajibkan prefix
+- [Command alias registration](command-alias-registration.md) — parser loadedCommands mengenali alias case hanya jika tiap alias punya blok case sendiri
+- [Instagram scraper reliability](instagram-scraper-endpoints.md) — endpoint publik dapat 403, permission error, DNS failure, atau hasil kosong dari server
+- [Story count processing time](story-count-processing-time.md) — TotalStory harus menghitung story selesai diproses, bukan seluruh batch yang baru diterima

@@ -31,11 +31,19 @@
 async function getGCInfo(hisoka, groupJid) {
         const meta = await hisoka.groupMetadata(groupJid);
 
-        const namaGrup   = meta?.subject || groupJid;
+        const namaGrup   = String(
+                meta?.subject ||
+                meta?.name ||
+                meta?.groupName ||
+                '(nama grup tidak tersedia)'
+        ).trim();
         const deskripsi  = meta?.desc || '';
         const jidGrup    = groupJid;
         const participants = meta?.participants || [];
-        const totalMember  = participants.length;
+        // groupMetadata() mengambil data terbaru dari WhatsApp. Gunakan
+        // jumlah participants sebagai sumber realtime, dengan size sebagai
+        // fallback bila respons hanya berisi ringkasan metadata.
+        const totalMember  = participants.length || Number(meta?.size) || 0;
 
         const admins = participants
                 .filter(p => p.admin === 'admin' || p.admin === 'superadmin')
@@ -55,13 +63,11 @@ async function getGCInfo(hisoka, groupJid) {
 
         // Format teks info
         let teks = '';
-        teks += `╭══ 🏠 *INFO GRUP* ══╮\n`;
-        teks += `│\n`;
-        teks += `│ 📛 *Nama   :* ${namaGrup}\n`;
-        teks += `│ 🆔 *JID    :* \`${jidGrup}\`\n`;
-        teks += `│ 👥 *Member :* ${totalMember} orang\n`;
-        teks += `│\n`;
-        teks += `╰════════════════════╯`;
+        teks += `🏠 *INFO GRUP*\n\n`;
+        teks += `📛 *Nama:* _${namaGrup}_\n`;
+        teks += `🆔 *JID:* \`${jidGrup}\`\n`;
+        teks += `👥 *Total pengikut:* \`${totalMember}\` orang\n\n`;
+        teks += `> _Data diambil langsung dari metadata grup saat perintah dijalankan._`;
 
         return { teks, namaGrup, jidGrup, totalMember, totalAdmin, admins };
 }

@@ -361,8 +361,10 @@ function txtAlreadySent(chosen, headerPilih, mode) {
 
 function parseDeliveryMode(rawText) {
     const raw = String(rawText || '').trim().toLowerCase();
-    if (['1', 'g', 'gambar', 'image', 'images', 'album'].includes(raw)) return 'image';
-    if (['2', 'p', 'pdf', 'dokumen', 'document'].includes(raw)) return 'pdf';
+    // Jangan menerima alias satu huruf. Pesan bebas seperti "p" atau "g"
+    // terlalu mudah terkirim tanpa sengaja dan bukan konfirmasi eksplisit.
+    if (['1', 'gambar', 'image', 'images', 'album'].includes(raw)) return 'image';
+    if (['2', 'pdf', 'dokumen', 'document'].includes(raw)) return 'pdf';
     if (['3', 'tidak', 'no', 'batal', 'cancel', 'gak', 'ga'].includes(raw)) return 'cancel';
     if (['ya', 'yes', 'lanjut', 'lanjutkan', 'oke', 'ok'].includes(raw)) return 'image';
     return null;
@@ -373,11 +375,21 @@ async function _editKey(hisoka, m, sentKey, text) {
     try {
         if (sentKey) {
             await hisoka.sendMessage(m.from, { text, edit: sentKey });
+            return true;
         } else {
             await hisoka.sendMessage(m.from, { text }, { quoted: m });
+            return true;
         }
-        return true;
-    } catch (_) {}
+    } catch (editErr) {
+        // Beberapa client WhatsApp tidak langsung menampilkan edit message.
+        // Kirim pesan baru agar hasil tetap terlihat di semua client.
+        try {
+            await hisoka.sendMessage(m.from, { text }, { quoted: m });
+            return true;
+        } catch (fallbackErr) {
+            console.error('[HENTAIDAD] Edit dan fallback kirim gagal:', fallbackErr?.message || editErr?.message);
+        }
+    }
     return false;
 }
 

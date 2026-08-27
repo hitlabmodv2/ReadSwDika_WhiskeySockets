@@ -24,6 +24,11 @@
  */
 'use strict';
 
+const axios = require('axios');
+const cheerio = require('cheerio');
+const FormData = require('form-data');
+const snapInstagram = require('cakkatrok-instagram-downloader');
+
 /**
  * Handler untuk command .ig
  * @param {object} hisoka - bot socket
@@ -66,6 +71,24 @@ async function fetchAlwayscodex(url) {
     }
 }
 
+// ── Fallback scraper: cakkatrok → SnapVideo ───────────────────────────────────
+// Paket ini sudah diuji dengan reel target dan mengembalikan URL CDN video.
+async function fetchCakkatrok(url) {
+    const result = await snapInstagram.media(url);
+    const info = (result?.media || [])
+        .filter(item => item?.url)
+        .map(item => ({
+            url: item.url,
+            media_format: item.type === 'photo' ? 'image' : 'video',
+            title: item.text || '',
+        }));
+    if (!info.length) throw new Error('SnapVideo tidak mengembalikan media');
+    return {
+        media_type: info[0].media_format === 'image' ? 'photo' : 'reel',
+        info,
+    };
+}
+
 // ── Fallback scraper 1: vdraw.ai ──────────────────────────────────────────────
 async function fetchVdraw(url) {
     const res = await fetch('https://vdraw.ai/api/v1/instagram/ins-info', {
@@ -99,6 +122,65 @@ async function fetchArchive(url) {
     };
 }
 
+// ── Fallback scraper 3: Savevid (reels, posts, dan stories) ───────────────────
+// Savevid mengembalikan HTML pada ajaxSearch, jadi jangan menganggap response
+// selalu berupa JSON. Beberapa versi endpoint juga memblokir request tanpa
+// User-Agent browser.
+async function fetchSavevid(url) {
+    const browserHeaders = {
+        'User-Agent': 'Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 Chrome/120.0.0.0 Mobile Safari/537.36',
+        'Accept-Language': 'en-US,en;q=0.9',
+    };
+
+    const verifyForm = new FormData();
+    verifyForm.append('url', url);
+    const verify = await axios.post('https://savevid.net/api/userverify', verifyForm, {
+        headers: { ...verifyForm.getHeaders(), ...browserHeaders },
+        timeout: 15000,
+    });
+    const token = verify.data?.token;
+    if (!token) throw new Error('Savevid token tidak tersedia');
+
+    const searchForm = new FormData();
+    searchForm.append('q', url);
+    searchForm.append('t', 'media');
+    searchForm.append('lang', 'en');
+    searchForm.append('v', 'v2');
+    searchForm.append('cftoken', token);
+    const response = await axios.post('https://v3.savevid.net/api/ajaxSearch', searchForm, {
+        headers: { ...searchForm.getHeaders(), ...browserHeaders },
+        timeout: 20000,
+    });
+
+    const html = typeof response.data === 'string'
+        ? response.data
+        : response.data?.data || response.data?.html || '';
+    const $ = cheerio.load(html);
+    const info = [];
+    $('ul.download-box > li, .download-items, .download-items__thumb').each((_, node) => {
+        const link = $(node).find('a[href]').filter((__, a) => {
+            const href = $(a).attr('href') || '';
+            return !/thumbnail|thumb/i.test($(a).attr('class') || '') &&
+                /^https?:\/\//i.test(href);
+        }).first().attr('href');
+        if (link) info.push({ url: link, media_format: /\.(?:jpe?g|png|webp)(?:\?|$)/i.test(link) ? 'image' : 'video' });
+    });
+
+    // Fallback untuk perubahan markup Savevid: ambil semua href media langsung.
+    if (!info.length) {
+        $('a[href]').each((_, a) => {
+            const href = $(a).attr('href') || '';
+            if (/^https?:\/\//i.test(href) && /\.(?:mp4|m3u8|jpe?g|png|webp)(?:\?|$)/i.test(href)) {
+                info.push({ url: href, media_format: /\.(?:jpe?g|png|webp)(?:\?|$)/i.test(href) ? 'image' : 'video' });
+            }
+        });
+    }
+
+    const unique = [...new Map(info.map(item => [item.url, item])).values()];
+    if (!unique.length) throw new Error('Savevid tidak mengembalikan media');
+    return { media_type: unique[0].media_format === 'image' ? 'photo' : 'reel', info: unique };
+}
+
 async function handleInstagramDl(hisoka, m, query, ctx) {
     const {
         gemini, tolak, logCommand, exec, util,
@@ -127,10 +209,12 @@ async function handleInstagramDl(hisoka, m, query, ctx) {
     const loadingMsg = await tolak(hisoka, m, '⏳ Sedang mengunduh dari Instagram...');
 
     // ── Fetch semua sumber secara paralel ────────────────────────────────────
-    const [alwayscodexResult, vdrawResult, archiveResult, metaHtmlResult] = await Promise.allSettled([
+    const [alwayscodexResult, cakkatrokResult, vdrawResult, archiveResult, savevidResult, metaHtmlResult] = await Promise.allSettled([
         fetchAlwayscodex(igUrl),
+        fetchCakkatrok(igUrl),
         fetchVdraw(igUrl),
         fetchArchive(igUrl),
+        fetchSavevid(igUrl),
         fetch(igUrl, {
             signal: AbortSignal.timeout(10000),
             headers: {
@@ -151,6 +235,14 @@ async function handleInstagramDl(hisoka, m, query, ctx) {
     }
 
     if (!igData) {
+        const cakkatrokData = cakkatrokResult.status === 'fulfilled' ? cakkatrokResult.value : null;
+        if (cakkatrokData?.info?.length) {
+            igData = cakkatrokData;
+            console.log('[IG] ✅ Scraper: cakkatrok/SnapVideo (fallback)');
+        }
+    }
+
+    if (!igData) {
         const vd = vdrawResult.status === 'fulfilled' ? vdrawResult.value : null;
         if (vd?.info?.length) {
             igData = vd;
@@ -162,6 +254,13 @@ async function handleInstagramDl(hisoka, m, query, ctx) {
     if (!igData && archiveData?.info?.length) {
         igData = archiveData;
         console.log('[IG] ✅ Scraper: archive (fallback)');
+    }
+    if (!igData) {
+        const savevidData = savevidResult.status === 'fulfilled' ? savevidResult.value : null;
+        if (savevidData?.info?.length) {
+            igData = savevidData;
+            console.log('[IG] ✅ Scraper: savevid (fallback)');
+        }
     }
     if (archiveData?._archiveMeta) archiveMeta = archiveData._archiveMeta;
 

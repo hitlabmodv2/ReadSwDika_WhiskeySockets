@@ -479,6 +479,20 @@ function deteksiTipeEp(titleRaw, episodes, epNum) {
     return { tipe: 'movie', epHeader: movieLabel, isBD };
 }
 
+function buatLabelRilisan(item = {}) {
+    const title = String(item.title || item.judul || '');
+    const infoType = String(item.info?.Tipe || '').trim();
+    const typeText = `${infoType} ${title}`;
+
+    if (Number(item.epNum) > 0) return `Ep ${item.epNum}`;
+    if (/\bOVA\b/i.test(typeText)) return 'OVA';
+    if (/\bOAD\b/i.test(typeText)) return 'OAD';
+    if (/\bONA\b/i.test(typeText)) return 'ONA';
+    if (/\b(?:TV\s*)?Special\b/i.test(typeText)) return 'Special';
+    if (/\bmovie\b|\bfilm\b/i.test(typeText)) return 'Movie';
+    return infoType || 'Special';
+}
+
 // ── Caption GAMBAR — pendek, muat di batas 1024 karakter WhatsApp ────────────
 function buatCaption(data) {
     const {
@@ -857,6 +871,7 @@ module.exports = {
     buatCaption,
     buatCaptionLanjutan,
     buatCaptionGabung,
+    buatLabelRilisan,
     buatCaptionHangat,
     ambilUrlGambar,
     tandaiSudahKirim,
