@@ -882,6 +882,12 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         if (await handleAlqanimeNotifCallbacks({ hisoka, m, tolak, logCommand, Button, loadConfig, fs, path })) return;
                 }
 
+                // ── Handle button callback doujindesu (__doujinnotif_*) ──
+                {
+                        const { handleDoujinNotifCallbacks } = _require(path.resolve('./SEMUA_FITUR/anime/doujindesu-monitor.cjs'));
+                        if (await handleDoujinNotifCallbacks({ hisoka, m, tolak, logCommand, Button, loadConfig, saveConfig })) return;
+                }
+
                 // ── Handle reply ke status nekopoinotif (add/del GC) ──
                 {
                         const { handleNekpoiNotifReply } = _require(path.resolve('./SEMUA_FITUR/anime/nekopoi-monitor.cjs'));
@@ -2120,6 +2126,19 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'animasu': {
                                 const { handleAnimasu } = _require(path.resolve('./SEMUA_FITUR/anime/animasu.cjs'));
                                 await handleAnimasu({ hisoka, m, query, tolak, logCommand, sendConfirmWithButtons, fs, path, loadConfig });
+                                break;
+                        }
+
+                        
+                        case 'doujindesu': {
+                                const { handleDoujinNotif } = _require(path.resolve('./SEMUA_FITUR/anime/doujindesu-monitor.cjs'));
+                                await handleDoujinNotif({ hisoka, m, txt: query, tolak, logCommand, Button, loadConfig, saveConfig });
+                                break;
+                        }
+
+                        case 'doujinnotif': {
+                                const { handleDoujinNotif } = _require(path.resolve('./SEMUA_FITUR/anime/doujindesu-monitor.cjs'));
+                                await handleDoujinNotif({ hisoka, m, txt: query, tolak, logCommand, Button, loadConfig, saveConfig });
                                 break;
                         }
 

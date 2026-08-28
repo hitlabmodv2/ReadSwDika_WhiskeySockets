@@ -184,6 +184,7 @@ const WATCHED_FILES = [
     { key: 'cjs:alqanime',     rel: 'SEMUA_FITUR/anime/alqanime.cjs',      type: 'cjs' },
     { key: 'cjs:alqanimeDl',   rel: 'SEMUA_FITUR/anime/alqanime-dl.cjs',   type: 'cjs' },
     { key: 'cjs:alqanimeMonitor',rel:'SEMUA_FITUR/anime/alqanime-monitor.cjs',type:'cjs'},
+    { key: 'cjs:doujindesuMonitor',rel:'SEMUA_FITUR/anime/doujindesu-monitor.cjs',type:'cjs'},
     { key: 'cjs:nekopoi',        rel: 'SEMUA_FITUR/anime/nekopoi.cjs',            type: 'cjs' },
     { key: 'cjs:nekopoinotif',   rel: 'SEMUA_FITUR/anime/nekopoi-monitor.cjs',  type: 'cjs' },
     { key: 'cjs:hentaicop',      rel: 'SEMUA_FITUR/anime/hentaicop.cjs',        type: 'cjs' },

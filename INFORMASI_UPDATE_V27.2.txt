@@ -6,7 +6,7 @@
 _📅 Rabu, 23 Juli 2026_ 🌙
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V27.2*
-✨ *2 Fitur Baru*
+✨ *3 Fitur Baru*
 🐛 *2 Fix Bug*
 🛠️ *2 Fix Error*
 🚀 *1 Perubahan*
@@ -27,6 +27,19 @@ _Fitur untuk mengambil informasi channel/saluran WhatsApp secara realtime._
 • Link invite dibersihkan otomatis jika ada karakter `_` di bagian akhir.
 • Hasil dikirim sebagai reply ke pesan command dan tersedia tombol *Copy JID Channel*.
 > _Cek JID channel sekarang lebih mudah dan akurat._
+
+*3. 🔞 `.doujinnotif` / `.doujindesu` — Monitor Doujindesu ke PDF*
+_Pantau chapter baru dari `doujindesu.ws` dan kirim otomatis sebagai file PDF lengkap ke grup._
+1. Ketik `.doujinnotif` untuk membuka menu, lalu gunakan tombol *Edit Kategori*.
+2. Pilih kategori secara terpisah: `Doujinshi`, `Manhwa`, `Manga18+`, dan `Eroge`.
+3. Gunakan `.doujinnotif on` untuk mengaktifkan atau `.doujinnotif off` untuk menonaktifkan grup.
+4. Gunakan `.doujinnotif test` untuk menguji scraper, download gambar, PDF, caption, dan thumbnail.
+• Monitor melakukan polling otomatis setiap 60 detik mengikuti empat section rilisan terbaru di situs.
+• Caption PDF menampilkan *judul*, *kategori*, dan *chapter* yang sesuai dengan section sumber.
+• Caption memakai format WhatsApp secara kontekstual: _judul miring_, `nilai penting monospace`, daftar bernomor, bullet, dan quote sumber.
+• PDF memuat seluruh halaman yang tervalidasi dan menyertakan thumbnail kecil untuk preview WhatsApp.
+• Jika satu grup gagal menerima pesan, pengiriman grup tersebut akan dicoba ulang tanpa mengirim duplikat ke grup yang sudah berhasil.
+> _Hasil: notif Doujindesu sekarang lebih akurat, bisa diatur per kategori per grup, dan dikirim sebagai PDF dengan informasi yang jelas._
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🐛 *BUG FIX*

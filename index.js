@@ -1740,6 +1740,41 @@ async function main() {
                                 }, 45000);
                         }
                         /* ================= END AUTO ALQANIME NOTIF SCHEDULER ================= */
+                        /* =================== AUTO DOUJINDESU NOTIF SCHEDULER =================== */
+                        if (global.doujindesuInterval) {
+                                clearInterval(global.doujindesuInterval);
+                                global.doujindesuInterval = null;
+                        }
+                        if (global.doujindesuStartTimeout) {
+                                clearTimeout(global.doujindesuStartTimeout);
+                                global.doujindesuStartTimeout = null;
+                        }
+                        {
+                                const DOUJIN_PATH = path.join(process.cwd(), 'SEMUA_FITUR', 'anime', 'doujindesu-monitor.cjs');
+                                const DOUJIN_INTERVAL_MS = 60 * 1000;
+                                
+                                const runDoujin = async () => {
+                                        if (global.doujindesuRunning) return;
+                                        global.doujindesuRunning = true;
+                                        try {
+                                                delete _require.cache[_require.resolve(DOUJIN_PATH)];
+                                                const doujinMonitor = _require(DOUJIN_PATH);
+                                                await doujinMonitor.processNewChapters(hisoka);
+                                        } catch (err) {
+                                                console.error('[DoujinMonitor] Error scheduler:', err?.message);
+                                        } finally {
+                                                global.doujindesuRunning = false;
+                                        }
+                                };
+
+                                global.doujindesuStartTimeout = setTimeout(() => {
+                                        global.doujindesuStartTimeout = null;
+                                        runDoujin();
+                                        global.doujindesuInterval = setInterval(runDoujin, DOUJIN_INTERVAL_MS);
+                                }, 50000);
+                        }
+                        /* ================= END AUTO DOUJINDESU NOTIF SCHEDULER ================= */
+
 
                         /* =================== AUTO NEKOPOI NOTIF SCHEDULER =================== */
                         if (global.nekopoinotifInterval) {
