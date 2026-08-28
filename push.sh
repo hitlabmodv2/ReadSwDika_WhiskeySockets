@@ -46,7 +46,7 @@ REPO_OWNER="hitlabmodv2"   # Pemilik repo GitHub (untuk URL API)
 REPO="ReadSwDika_WhiskeySockets"
 # DEFAULT_BRANCH di-auto-detect realtime dari GitHub (lihat detect_default_branch).
 # Nilai di sini cuma fallback kalau koneksi ke GitHub bermasalah.
-DEFAULT_BRANCH="ReadSwDika_V39"
+DEFAULT_BRANCH="ReadSwDika_V40"
 
 # Versi script ini — dipakai untuk cek update otomatis
 SCRIPT_VERSION="1.1"
