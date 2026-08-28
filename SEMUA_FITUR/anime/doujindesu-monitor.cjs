@@ -5,16 +5,91 @@ const path = require('path');
 const sharp = require('sharp');
 const PDFDocument = require('pdfkit');
 
+const DIR_DATA = path.join(process.cwd(), 'data', 'doujindesunotif');
+const FILE_DATA = path.join(DIR_DATA, 'state.json');
+fs.mkdirSync(DIR_DATA, { recursive: true });
+
 function loadConfig() {
     const p = path.join(process.cwd(), 'config.json');
-    if (fs.existsSync(p)) return JSON.parse(fs.readFileSync(p));
+    if (fs.existsSync(p)) return JSON.parse(fs.readFileSync(p, 'utf-8'));
     return {};
 }
 
 function saveConfig(cfg) {
     const p = path.join(process.cwd(), 'config.json');
-    fs.writeFileSync(p, JSON.stringify(cfg, null, 2));
+    fs.writeFileSync(p, JSON.stringify(cfg, null, 2), 'utf-8');
 }
+
+function normalizeDoujinData(data = {}) {
+    const deliveries = data?.deliveries && typeof data.deliveries === 'object'
+        && !Array.isArray(data.deliveries)
+        ? data.deliveries
+        : {};
+
+    return {
+        history: Array.isArray(data?.history)
+            ? data.history.filter(link => typeof link === 'string' && link)
+            : [],
+        deliveries: Object.fromEntries(
+            Object.entries(deliveries)
+                .filter(([link, groups]) => link && Array.isArray(groups))
+                .map(([link, groups]) => [link, groups.filter(jid => typeof jid === 'string' && jid)])
+        ),
+    };
+}
+
+function saveDoujinData(data) {
+    try {
+        fs.writeFileSync(FILE_DATA, JSON.stringify(normalizeDoujinData(data), null, 2), 'utf-8');
+    } catch (e) {
+        console.error('[DoujinMonitor] Gagal menyimpan state:', e.message);
+    }
+}
+
+function loadDoujinData() {
+    let data = {};
+    try {
+        if (fs.existsSync(FILE_DATA)) {
+            data = JSON.parse(fs.readFileSync(FILE_DATA, 'utf-8'));
+        }
+    } catch (e) {
+        console.warn('[DoujinMonitor] State rusak, memakai state kosong:', e.message);
+    }
+
+    const cfg = loadConfig();
+    const legacy = cfg?.doujinnotif || {};
+    const hasLegacyHistory = Object.prototype.hasOwnProperty.call(legacy, 'history');
+    const hasLegacyDeliveries = Object.prototype.hasOwnProperty.call(legacy, 'deliveries');
+
+    // Migrasi sekali dari format lama yang masih menaruh state di config.json.
+    // Riwayat digabung, bukan ditimpa, agar chapter yang sudah dikirim tetap aman.
+    if (hasLegacyHistory || hasLegacyDeliveries) {
+        const current = normalizeDoujinData(data);
+        const migrated = normalizeDoujinData({
+            history: [...current.history, ...(Array.isArray(legacy.history) ? legacy.history : [])],
+            deliveries: {
+                ...legacy.deliveries,
+                ...current.deliveries,
+            },
+        });
+        migrated.history = [...new Set(migrated.history)].slice(-500);
+        saveDoujinData(migrated);
+
+        if (cfg.doujinnotif) {
+            delete cfg.doujinnotif.history;
+            delete cfg.doujinnotif.deliveries;
+            saveConfig(cfg);
+        }
+        console.log('[DoujinMonitor] State lama berhasil dipindahkan ke data/doujindesunotif/state.json');
+        return migrated;
+    }
+
+    return normalizeDoujinData(data);
+}
+
+// Jalankan migrasi saat fitur dimuat agar state lama segera keluar dari
+// config.json, termasuk ketika belum ada grup yang sedang aktif.
+loadDoujinData();
 
 function getEnabledGroups() {
     const cfg = loadConfig();
@@ -320,18 +395,14 @@ async function processNewChapters(hisoka) {
     if (!latest.length) return;
 
     let cfg = loadConfig();
-    if (!cfg.doujinnotif) cfg.doujinnotif = { groups: {}, history: [] };
-    if (!Array.isArray(cfg.doujinnotif.history)) cfg.doujinnotif.history = [];
-    if (!cfg.doujinnotif.deliveries || typeof cfg.doujinnotif.deliveries !== 'object') {
-        cfg.doujinnotif.deliveries = {};
-    }
+    const data = loadDoujinData();
 
     // Seperti AlqanimeNotif, scan pertama hanya membuat baseline. Ini
     // mencegah 39+ rilisan lama dari empat kategori dikirim sekaligus saat
     // fitur baru pertama kali diaktifkan.
-    if (cfg.doujinnotif.history.length === 0) {
-        cfg.doujinnotif.history = latest.map(item => item.link).slice(-500);
-        saveConfig(cfg);
+    if (data.history.length === 0) {
+        data.history = latest.map(item => item.link).slice(-500);
+        saveDoujinData(data);
         console.log(`[DoujinMonitor] First run — baseline ${latest.length} chapter dari semua kategori disimpan`);
         return;
     }
@@ -341,17 +412,15 @@ async function processNewChapters(hisoka) {
     const newItems = latest
         .slice()
         .reverse()
-        .filter(item => !cfg.doujinnotif.history.includes(item.link));
+        .filter(item => !data.history.includes(item.link));
     
     for (const item of newItems) {
-        console.log(`[DoujinMonitor] Found new chapter: ${item.title}`);
-
         const targetGroups = groups.filter(jid =>
             getDoujinGroupCategories(cfg.doujinnotif.groups?.[jid]).includes(item.category)
         );
         const delivered = new Set(
-            Array.isArray(cfg.doujinnotif.deliveries[item.link])
-                ? cfg.doujinnotif.deliveries[item.link]
+            Array.isArray(data.deliveries[item.link])
+                ? data.deliveries[item.link]
                 : []
         );
         const pendingGroups = targetGroups.filter(jid => !delivered.has(jid));
@@ -359,12 +428,16 @@ async function processNewChapters(hisoka) {
         // Tidak ada grup aktif yang memilih kategori item ini. Tandai sebagai
         // sudah terlihat agar kategori yang dimatikan tidak diproses berulang.
         if (targetGroups.length === 0) {
-            if (!cfg.doujinnotif.history.includes(item.link)) {
-                cfg.doujinnotif.history.push(item.link);
-                if (cfg.doujinnotif.history.length > 500) {
-                    cfg.doujinnotif.history = cfg.doujinnotif.history.slice(-500);
+            console.log(
+                `[DoujinMonitor] ⏭️ "${item.title}" [${item.categoryLabel}] dilewati — ` +
+                'tidak ada grup aktif untuk kategori ini'
+            );
+            if (!data.history.includes(item.link)) {
+                data.history.push(item.link);
+                if (data.history.length > 500) {
+                    data.history = data.history.slice(-500);
                 }
-                saveConfig(cfg);
+                saveDoujinData(data);
             }
             continue;
         }
@@ -372,12 +445,12 @@ async function processNewChapters(hisoka) {
         // Recovery setelah proses sempat menyimpan delivery state lengkap
         // tetapi belum sempat menambahkan link ke history.
         if (pendingGroups.length === 0) {
-            cfg.doujinnotif.history.push(item.link);
-            delete cfg.doujinnotif.deliveries[item.link];
-            if (cfg.doujinnotif.history.length > 500) {
-                cfg.doujinnotif.history = cfg.doujinnotif.history.slice(-500);
+            data.history.push(item.link);
+            delete data.deliveries[item.link];
+            if (data.history.length > 500) {
+                data.history = data.history.slice(-500);
             }
-            saveConfig(cfg);
+            saveDoujinData(data);
             continue;
         }
         
@@ -440,11 +513,6 @@ async function processNewChapters(hisoka) {
 
         // 4. Persist delivery state/history sebelum cleanup file. Jika ada
         // grup gagal, item tidak dianggap selesai dan akan diretry.
-        cfg = loadConfig();
-        if (!cfg.doujinnotif.history) cfg.doujinnotif.history = [];
-        if (!cfg.doujinnotif.deliveries || typeof cfg.doujinnotif.deliveries !== 'object') {
-            cfg.doujinnotif.deliveries = {};
-        }
         const currentCfg = loadConfig();
         const currentGroups = getEnabledGroups().filter(jid =>
             getDoujinGroupCategories(currentCfg.doujinnotif?.groups?.[jid]).includes(item.category)
@@ -452,17 +520,29 @@ async function processNewChapters(hisoka) {
         const isComplete = allGroupsDelivered &&
             currentGroups.every(jid => delivered.has(jid));
         if (isComplete) {
-            if (!cfg.doujinnotif.history.includes(item.link)) {
-                cfg.doujinnotif.history.push(item.link);
+            if (!data.history.includes(item.link)) {
+                data.history.push(item.link);
             }
-            delete cfg.doujinnotif.deliveries[item.link];
-            if (cfg.doujinnotif.history.length > 500) {
-                cfg.doujinnotif.history = cfg.doujinnotif.history.slice(-500);
+            delete data.deliveries[item.link];
+            if (data.history.length > 500) {
+                data.history = data.history.slice(-500);
             }
         } else {
-            cfg.doujinnotif.deliveries[item.link] = Array.from(delivered);
+            data.deliveries[item.link] = Array.from(delivered);
         }
-        saveConfig(cfg);
+        saveDoujinData(data);
+
+        if (isComplete) {
+            console.log(
+                `[DoujinMonitor] ✅ "${item.title}" [${item.categoryLabel}] ` +
+                `terkirim ke ${delivered.size} grup`
+            );
+        } else {
+            console.warn(
+                `[DoujinMonitor] ⚠️ "${item.title}" [${item.categoryLabel}] ` +
+                `terkirim ke ${delivered.size}/${currentGroups.length} grup — akan retry`
+            );
+        }
         
         // Cleanup PDF
         try { if (fs.existsSync(pdfPath)) fs.unlinkSync(pdfPath); } catch (_) {}
@@ -634,7 +714,7 @@ async function handleDoujinNotif(args) {
     }
 
     const cfg = loadCfg();
-    if (!cfg.doujinnotif) cfg.doujinnotif = { groups: {}, history: [] };
+    if (!cfg.doujinnotif) cfg.doujinnotif = { groups: {} };
     if (!cfg.doujinnotif.groups) cfg.doujinnotif.groups = {};
 
     // Tanpa subcommand → quick-reply menu kontekstual seperti Alqanime.
@@ -775,7 +855,7 @@ async function handleDoujinNotifCallbacks({ hisoka, m, tolak, logCommand, Button
         const key = categoryCallbackMap[txt];
         try {
             const cfg = loadCfg();
-            if (!cfg.doujinnotif) cfg.doujinnotif = { groups: {}, history: [] };
+            if (!cfg.doujinnotif) cfg.doujinnotif = { groups: {} };
             if (!cfg.doujinnotif.groups) cfg.doujinnotif.groups = {};
             const previous = cfg.doujinnotif.groups[m.from] || { enabled: false };
             const categories = getDoujinGroupCategories(previous);
@@ -831,7 +911,7 @@ async function handleDoujinNotifCallbacks({ hisoka, m, tolak, logCommand, Button
     const enabled = txt === '__doujinnotif_on__';
     try {
         const cfg = loadCfg();
-        if (!cfg.doujinnotif) cfg.doujinnotif = { groups: {}, history: [] };
+        if (!cfg.doujinnotif) cfg.doujinnotif = { groups: {} };
         if (!cfg.doujinnotif.groups) cfg.doujinnotif.groups = {};
         const sebelumnya = cfg.doujinnotif.groups[m.from]?.enabled === true;
         const categories = getDoujinGroupCategories(cfg.doujinnotif.groups[m.from]);

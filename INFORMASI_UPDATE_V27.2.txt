@@ -39,7 +39,9 @@ _Pantau chapter baru dari `doujindesu.ws` dan kirim otomatis sebagai file PDF le
 • Caption memakai format WhatsApp secara kontekstual: _judul miring_, `nilai penting monospace`, daftar bernomor, bullet, dan quote sumber.
 • PDF memuat seluruh halaman yang tervalidasi dan menyertakan thumbnail kecil untuk preview WhatsApp.
 • Jika satu grup gagal menerima pesan, pengiriman grup tersebut akan dicoba ulang tanpa mengirim duplikat ke grup yang sudah berhasil.
-> _Hasil: notif Doujindesu sekarang lebih akurat, bisa diatur per kategori per grup, dan dikirim sebagai PDF dengan informasi yang jelas._
+• Status ON/OFF dan kategori grup tetap tersimpan di `config.json`, sedangkan history chapter dan status delivery tersimpan rapi di `data/doujindesunotif/state.json`.
+• Log monitor menampilkan satu baris ringkas berisi judul, kategori, status pengiriman, dan jumlah grup agar tidak spam.
+> _Hasil: notif Doujindesu berjalan realtime berbasis polling 1 menit, sesuai kategori GC, tersimpan aman, dan dikirim sebagai PDF lengkap._
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🐛 *BUG FIX*
