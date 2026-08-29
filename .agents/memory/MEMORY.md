@@ -17,3 +17,4 @@
 - [Instagram scraper reliability](instagram-scraper-endpoints.md) — endpoint publik dapat 403, permission error, DNS failure, atau hasil kosong dari server
 - [Story count processing time](story-count-processing-time.md) — TotalStory harus menghitung story selesai diproses, bukan seluruh batch yang baru diterima
 - [Doujindesu monitor reliability](doujindesu-monitor-reliability.md) — monitor membaca empat blok kategori situs dan delivery harus retry per grup sebelum masuk history
+- [DoujinDesu XXX API](doujindesu-xxx-api.md) — situs baru adalah SPA; gunakan API terenkripsi per jam dan endpoint chapter, bukan parser HTML lama

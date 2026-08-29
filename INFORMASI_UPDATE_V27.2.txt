@@ -29,19 +29,21 @@ _Fitur untuk mengambil informasi channel/saluran WhatsApp secara realtime._
 > _Cek JID channel sekarang lebih mudah dan akurat._
 
 *3. 🔞 `.doujinnotif` / `.doujindesu` — Monitor Doujindesu ke PDF*
-_Pantau chapter baru dari `doujindesu.ws` dan kirim otomatis sebagai file PDF lengkap ke grup._
+_Pantau chapter baru dari `doujin.desu.xxx` dan kirim otomatis sebagai file PDF lengkap ke grup._
 1. Ketik `.doujinnotif` untuk membuka menu, lalu gunakan tombol *Edit Kategori*.
-2. Pilih kategori secara terpisah: `Doujinshi`, `Manhwa`, `Manga18+`, dan `Eroge`.
+2. Pilih kategori secara terpisah: `Manga 18`, `Manhwa 18`, dan `Doujinshi 18`.
 3. Gunakan `.doujinnotif on` untuk mengaktifkan atau `.doujinnotif off` untuk menonaktifkan grup.
 4. Gunakan `.doujinnotif test` untuk menguji scraper, download gambar, PDF, caption, dan thumbnail.
-• Monitor melakukan polling otomatis setiap 60 detik mengikuti empat section rilisan terbaru di situs.
-• Caption PDF menampilkan *judul*, *kategori*, dan *chapter* yang sesuai dengan section sumber.
+• Monitor memakai API situs SPA dan melakukan polling otomatis setiap 60 detik untuk tiga kategori rilisan terbaru.
+• Respons API diproses dengan dekripsi yang sesuai, lalu detail chapter dan URL gambar diambil dari endpoint reader.
+• Caption PDF menampilkan *judul*, *kategori*, dan *chapter* yang sesuai dengan sumber.
 • Caption memakai format WhatsApp secara kontekstual: _judul miring_, `nilai penting monospace`, daftar bernomor, bullet, dan quote sumber.
 • PDF memuat seluruh halaman yang tervalidasi dan menyertakan thumbnail kecil untuk preview WhatsApp.
 • Jika satu grup gagal menerima pesan, pengiriman grup tersebut akan dicoba ulang tanpa mengirim duplikat ke grup yang sudah berhasil.
 • Status ON/OFF dan kategori grup tetap tersimpan di `config.json`, sedangkan history chapter dan status delivery tersimpan rapi di `data/doujindesunotif/state.json`.
+• Saat sumber atau domain berubah, baseline baru dibuat agar chapter lama tidak terkirim massal; konfigurasi kategori lama tetap kompatibel.
 • Log monitor menampilkan satu baris ringkas berisi judul, kategori, status pengiriman, dan jumlah grup agar tidak spam.
-> _Hasil: notif Doujindesu berjalan realtime berbasis polling 1 menit, sesuai kategori GC, tersimpan aman, dan dikirim sebagai PDF lengkap._
+> _Hasil: notif Doujindesu berjalan realtime berbasis polling 1 menit dari `doujin.desu.xxx`, akurat mengikuti tiga kategori, tersimpan aman, dan dikirim sebagai PDF lengkap._
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🐛 *BUG FIX*
@@ -86,14 +88,12 @@ Memperbaiki error pada informasi channel WhatsApp agar nama channel dan detail l
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *PERUBAHAN*
 ━━━━━━━━━━━━━━━━━━━━━━
-*1. 🎭 .wm — Bisa Langsung Reply Sticker*
-_Sekarang `.wm` bisa langsung digunakan dengan reply 🖼️ *sticker*, tidak perlu lewat gambar terlebih dahulu._
-1. Reply sticker yang ingin diproses.
-2. Ketik command dengan format `Pack|Author`.
-Contoh:
-- `.wm wily`
-- `.wm Wily|kun`
-> _Gunakan tanda `|` untuk memisahkan nama pack dan author._
+*1. 🔞 Doujindesu — Penggantian Domain Scraper*
+_Sumber notif Doujindesu dipindahkan dari `doujindesu.ws` ke `doujin.desu.xxx` agar scraper mengikuti situs aktif terbaru._
+1. Scraper lama berbasis halaman HTML diganti dengan API situs SPA.
+2. Data chapter diambil dari tiga kategori: `Manga 18`, `Manhwa 18`, dan `Doujinshi 18`.
+3. Pergantian sumber membuat baseline baru agar chapter lama tidak terkirim massal.
+> _Hasil: notif Doujindesu tetap berjalan sebagai PDF otomatis dengan domain dan sumber data yang lebih akurat._
 
 ━━━━━━━━━━━━━━━━━━━━━━
 📝 *RINGKASAN SIMPEL*

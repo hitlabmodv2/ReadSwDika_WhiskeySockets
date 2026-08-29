@@ -1,9 +1,19 @@
 const axios = require('axios');
-const cheerio = require('cheerio');
 const fs = require('fs');
 const path = require('path');
 const sharp = require('sharp');
 const PDFDocument = require('pdfkit');
+const {
+    DOUJIN_BASE_URL,
+    DOUJIN_CATEGORIES,
+    scrapeLatest,
+    scrapeChapterImages,
+} = require('./doujindesu.cjs');
+const DOUJIN_STATE_SOURCE = 'doujin.desu.xxx-v1';
+const LEGACY_CATEGORY_KEYS = {
+    doujinshi: 'doujinshi18',
+    manhwa: 'manhwa18',
+};
 
 const DIR_DATA = path.join(process.cwd(), 'data', 'doujindesunotif');
 const FILE_DATA = path.join(DIR_DATA, 'state.json');
@@ -27,6 +37,7 @@ function normalizeDoujinData(data = {}) {
         : {};
 
     return {
+        source: data?.source === DOUJIN_STATE_SOURCE ? DOUJIN_STATE_SOURCE : '',
         history: Array.isArray(data?.history)
             ? data.history.filter(link => typeof link === 'string' && link)
             : [],
@@ -97,35 +108,24 @@ function getEnabledGroups() {
     return Object.keys(grps).filter(jid => grps[jid].enabled);
 }
 
-const DOUJIN_BASE_URL = 'https://doujindesu.ws/';
-const DOUJIN_CATEGORY_MATCHERS = [
-    { key: 'doujinshi', label: 'Doujinshi', pattern: /^doujinshi\s+terbaru$/i },
-    { key: 'manhwa', label: 'Manhwa', pattern: /^manhwa(?:\s+18)?\s+terbaru$/i },
-    { key: 'manga18', label: 'Manga18+', pattern: /^manga18\+\s+terbaru$/i },
-    { key: 'eroge', label: 'Eroge', pattern: /^eroge\s+terbaru$/i },
-];
-const DOUJIN_CATEGORY_KEYS = DOUJIN_CATEGORY_MATCHERS.map(category => category.key);
+const DOUJIN_CATEGORY_KEYS = DOUJIN_CATEGORIES.map(category => category.key);
 const DOUJIN_CATEGORY_META = Object.fromEntries(
-    DOUJIN_CATEGORY_MATCHERS.map((category, index) => [
+    DOUJIN_CATEGORIES.map((category, index) => [
         category.key,
         {
             id: `__doujinnotif_kat_${category.key}__`,
-            emoji: ['📚', '📖', '🔞', '🎮'][index],
+            emoji: ['📕', '📗', '📘'][index],
             label: category.label,
         },
     ])
 );
 
-function cariKategoriDoujin(text) {
-    const normalized = String(text || '').replace(/\s+/g, ' ').trim();
-    return DOUJIN_CATEGORY_MATCHERS.find(category => category.pattern.test(normalized)) || null;
-}
-
 function getDoujinGroupCategories(entry) {
     const configured = Array.isArray(entry?.categories)
         ? entry.categories
         : DOUJIN_CATEGORY_KEYS;
-    return DOUJIN_CATEGORY_KEYS.filter(key => configured.includes(key));
+    const normalized = configured.map(key => LEGACY_CATEGORY_KEYS[key] || key);
+    return DOUJIN_CATEGORY_KEYS.filter(key => normalized.includes(key));
 }
 
 function formatDoujinCategories(categories) {
@@ -134,103 +134,6 @@ function formatDoujinCategories(categories) {
     return labels.length ? labels.join(', ') : 'tidak ada';
 }
 
-function ambilChapterDoujin($, card, title) {
-    const fromCard = $(card).find('.epxs, .epx')
-        .map((_, el) => $(el).text().replace(/\s+/g, ' ').trim())
-        .get()
-        .find(Boolean);
-    if (fromCard) return fromCard;
-
-    const fromTitle = String(title || '').match(/\b(?:chapter|ch|episode|ep)\s*[-.#:]?\s*\d+(?:\.\d+)?\b/i);
-    return fromTitle ? fromTitle[0] : '';
-}
-
-function parseDoujinCard($, card, category) {
-    const anchor = $(card).find('a[href]').first();
-    const href = anchor.attr('href');
-    const title = anchor.attr('title') || $(card).find('.tt').first().text().trim();
-    const type = $(card).find('.typename').first().text().replace(/\s+/g, ' ').trim() || category?.label || '';
-    const chapter = ambilChapterDoujin($, card, title);
-    if (!href || !title) return null;
-
-    return {
-        title: String(title).trim(),
-        link: new URL(href, DOUJIN_BASE_URL).href,
-        type,
-        chapter,
-        category: category?.key || 'lainnya',
-        categoryLabel: category?.label || type || 'Lainnya',
-    };
-}
-
-// Scrape latest doujin entries
-async function scrapeLatest() {
-    try {
-        const { data } = await axios.get(DOUJIN_BASE_URL, {
-            timeout: 20000,
-            headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
-        });
-        const $ = cheerio.load(data);
-        const latest = [];
-        const seenLinks = new Set();
-
-        // Ambil setiap blok kategori, bukan lima kartu global yang bisa
-        // membuat salah satu kategori terlewat.
-        $('.bixbox').each((_, section) => {
-            const heading = $(section).find('.releases h2').first().text();
-            const category = cariKategoriDoujin(heading);
-            if (!category) return;
-
-            $(section).find('.listupd .bsx').each((__, card) => {
-                const item = parseDoujinCard($, card, category);
-                // Kartu seri (contoh Eroge tertentu) tidak punya chapter dan
-                // bukan target PDF. Tunggu kartu chapter yang muncul berikutnya.
-                if (!item || !item.chapter || seenLinks.has(item.link)) return;
-                seenLinks.add(item.link);
-                latest.push(item);
-            });
-        });
-
-        // Fallback hanya untuk perubahan markup, tetap deduplikasi dan
-        // membatasi hasil agar scheduler tidak memproses seluruh arsip.
-        if (!latest.length) {
-            $('.bsx').slice(0, 20).each((_, card) => {
-                const item = parseDoujinCard($, card, null);
-                if (!item || !item.chapter || seenLinks.has(item.link)) return;
-                seenLinks.add(item.link);
-                latest.push(item);
-            });
-        }
-        return latest;
-    } catch (e) {
-        console.error('[DoujinMonitor] Error scrapeLatest:', e.message);
-        return [];
-    }
-}
-
-// Extract images from chapter URL using ts_reader
-async function scrapeChapterImages(url) {
-    try {
-        const { data } = await axios.get(url);
-        const html = Buffer.isBuffer(data) ? data.toString('utf8') : String(data || '');
-        const ts_reader = html.match(/ts_reader\.run\(\s*([\s\S]*?)\s*\);/);
-        if (ts_reader) {
-            const config = JSON.parse(ts_reader[1]);
-            const sourceLists = (Array.isArray(config.sources) ? config.sources : [])
-                .map(source => Array.isArray(source?.images) ? source.images : [])
-                .map(images => [...new Set(images
-                    .map(image => String(image || '').trim())
-                    .filter(image => /^https?:\/\//i.test(image)))] )
-                .filter(images => images.length > 0)
-                .sort((a, b) => b.length - a.length);
-            return sourceLists[0] || [];
-        }
-        return [];
-    } catch (e) {
-        console.error('[DoujinMonitor] Error scrapeChapterImages:', e.message);
-        return [];
-    }
-}
 
 // Buat thumbnail ringan untuk preview dokumen PDF di WhatsApp.
 async function buatThumbnail(jpgBuffer) {
@@ -317,7 +220,7 @@ async function downloadDoujinPage(imgUrl, index, label) {
             const resp = await axios.get(imgUrl, {
                 responseType: 'arraybuffer',
                 headers: {
-                    'Referer': 'https://doujindesu.ws/',
+                    'Referer': DOUJIN_BASE_URL,
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
                 },
                 timeout: 15000,
@@ -398,12 +301,17 @@ async function processNewChapters(hisoka) {
     const data = loadDoujinData();
 
     // Seperti AlqanimeNotif, scan pertama hanya membuat baseline. Ini
-    // mencegah 39+ rilisan lama dari empat kategori dikirim sekaligus saat
+    // mencegah seluruh rilisan lama dari tiga kategori dikirim sekaligus saat
     // fitur baru pertama kali diaktifkan.
-    if (data.history.length === 0) {
+    // Ganti sumber harus membuat baseline baru. Kalau history lama langsung
+    // dipakai, semua chapter hasil API baru akan dianggap rilisan baru dan
+    // dikirim sekaligus ke grup.
+    if (data.source !== DOUJIN_STATE_SOURCE || data.history.length === 0) {
+        data.source = DOUJIN_STATE_SOURCE;
         data.history = latest.map(item => item.link).slice(-500);
+        data.deliveries = {};
         saveDoujinData(data);
-        console.log(`[DoujinMonitor] First run — baseline ${latest.length} chapter dari semua kategori disimpan`);
+        console.log(`[DoujinMonitor] Baseline ${latest.length} chapter dari tiga kategori disimpan`);
         return;
     }
 
@@ -673,7 +581,7 @@ function makeDoujinMenuBody({ active, registered, pfx, categories }) {
     if (active) {
         return `╭─「 🔞 *DOUJINDESU NOTIF* 」\n│\n` +
                `│ Status grup ini : ✅ *AKTIF*\n│\n` +
-               `│ Notif chapter baru dari doujindesu.ws\n` +
+               `│ Notif chapter baru dari doujin.desu.xxx\n` +
                `│ otomatis masuk sebagai file PDF.\n│\n` +
                categoryLine +
                `│ Ketik *${pfx}doujindesu off* untuk matikan.\n│\n` +

@@ -41,3 +41,7 @@ BOT_ALLOWED_NO_PREFIX = "false"
 
 [deployment]
 deploymentTarget = "cloudrun"
+
+[[ports]]
+localPort = 5000
+externalPort = 80
