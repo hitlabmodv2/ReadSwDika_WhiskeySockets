@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 28/08/2026, 14.20.37  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 30/08/2026, 07.49.58  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,27 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  DoujinMonitor
+│  #001  —  command:doujinnotif
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [DoujinMonitor] Error scheduler: Unexpected identifier 'axios'
+│  Cannot find module 'pdfkit'
+Require stack:
+- /home/runner/workspace/SEMUA_FITUR/anime/hentaidad.cjs
+- /home/runner/workspace/message.js
 │
 │  DETAIL
-│  Sumber      : DoujinMonitor
+│  Sumber      : command:doujinnotif
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 28/08/2026, 14.20.37
-│  Terakhir    : 28/08/2026, 14.20.37
+│  Pertama     : 30/08/2026, 07.49.58
+│  Terakhir    : 30/08/2026, 07.49.58
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [DoujinMonitor] Error scheduler: Unexpected identifier 'axios'
-│     at console.error (file:///home/runner/workspace/index.js:435:27)
-│     at Timeout.runDoujin [as _onTimeout] (file:///home/runner/workspace/index.js:1764:57)
+│  ▶  Error: Cannot find module 'pdfkit'
+│     Require stack:
+│     - /home/runner/workspace/SEMUA_FITUR/anime/hentaidad.cjs
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 28/08/2026, 14.20.37
+  Terakhir diperbarui: 30/08/2026, 07.49.58
 ════════════════════════════════════════════════════════════════════════

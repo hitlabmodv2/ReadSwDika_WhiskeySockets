@@ -2,12 +2,11 @@ const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
 const sharp = require('sharp');
-const PDFDocument = require('pdfkit');
 const {
     DOUJIN_BASE_URL,
     DOUJIN_CATEGORIES,
     scrapeLatest,
-    scrapeChapterImages,
+    scrapeMangaDetails,
 } = require('./doujindesu.cjs');
 const DOUJIN_STATE_SOURCE = 'doujin.desu.xxx-v1';
 const LEGACY_CATEGORY_KEYS = {
@@ -17,6 +16,9 @@ const LEGACY_CATEGORY_KEYS = {
 
 const DIR_DATA = path.join(process.cwd(), 'data', 'doujindesunotif');
 const FILE_DATA = path.join(DIR_DATA, 'state.json');
+const FILE_LOG = path.join(DIR_DATA, 'log.json');
+const FILE_SERIES_CACHE = path.join(DIR_DATA, 'series_cache.json');
+const SERIES_CACHE_TTL_MS = 60 * 1000;
 fs.mkdirSync(DIR_DATA, { recursive: true });
 
 function loadConfig() {
@@ -35,23 +37,48 @@ function normalizeDoujinData(data = {}) {
         && !Array.isArray(data.deliveries)
         ? data.deliveries
         : {};
+    const retryQueue = data?.retryQueue && typeof data.retryQueue === 'object'
+        && !Array.isArray(data.retryQueue)
+        ? data.retryQueue
+        : {};
+    const history = Array.isArray(data?.history)
+        ? [...new Set(data.history
+            .filter(link => typeof link === 'string' && link)
+            .map(canonicalChapterLink))]
+        : [];
 
     return {
         source: data?.source === DOUJIN_STATE_SOURCE ? DOUJIN_STATE_SOURCE : '',
-        history: Array.isArray(data?.history)
-            ? data.history.filter(link => typeof link === 'string' && link)
-            : [],
+        history,
         deliveries: Object.fromEntries(
             Object.entries(deliveries)
                 .filter(([link, groups]) => link && Array.isArray(groups))
-                .map(([link, groups]) => [link, groups.filter(jid => typeof jid === 'string' && jid)])
+                .map(([link, groups]) => [
+                    canonicalChapterLink(link),
+                    [...new Set(groups.filter(jid => typeof jid === 'string' && jid))],
+                ])
+        ),
+        retryQueue: Object.fromEntries(
+            Object.entries(retryQueue)
+                .filter(([link, value]) => link && value && typeof value === 'object')
+                .map(([link, value]) => [
+                    canonicalChapterLink(link),
+                    {
+                        item: value.item && typeof value.item === 'object' ? value.item : value,
+                        firstFailedAt: Number(value.firstFailedAt) || Date.now(),
+                        lastAttemptAt: Number(value.lastAttemptAt) || 0,
+                    },
+                ])
         ),
     };
 }
 
 function saveDoujinData(data) {
     try {
-        fs.writeFileSync(FILE_DATA, JSON.stringify(normalizeDoujinData(data), null, 2), 'utf-8');
+        const normalized = normalizeDoujinData(data);
+        const temporary = `${FILE_DATA}.tmp`;
+        fs.writeFileSync(temporary, JSON.stringify(normalized, null, 2), 'utf-8');
+        fs.renameSync(temporary, FILE_DATA);
     } catch (e) {
         console.error('[DoujinMonitor] Gagal menyimpan state:', e.message);
     }
@@ -77,11 +104,13 @@ function loadDoujinData() {
     if (hasLegacyHistory || hasLegacyDeliveries) {
         const current = normalizeDoujinData(data);
         const migrated = normalizeDoujinData({
+            source: DOUJIN_STATE_SOURCE,
             history: [...current.history, ...(Array.isArray(legacy.history) ? legacy.history : [])],
             deliveries: {
                 ...legacy.deliveries,
                 ...current.deliveries,
             },
+            retryQueue: current.retryQueue,
         });
         migrated.history = [...new Set(migrated.history)].slice(-500);
         saveDoujinData(migrated);
@@ -96,6 +125,144 @@ function loadDoujinData() {
     }
 
     return normalizeDoujinData(data);
+}
+
+function loadDoujinLog() {
+    try {
+        if (fs.existsSync(FILE_LOG)) {
+            const parsed = JSON.parse(fs.readFileSync(FILE_LOG, 'utf-8'));
+            return {
+                terkirim: Array.isArray(parsed?.terkirim) ? parsed.terkirim : [],
+                gagal: Array.isArray(parsed?.gagal) ? parsed.gagal : [],
+            };
+        }
+    } catch (e) {
+        console.warn('[DoujinMonitor] Log rusak, memakai log kosong:', e.message);
+    }
+    return { terkirim: [], gagal: [] };
+}
+
+function saveDoujinLog(log) {
+    try {
+        const normalized = {
+            terkirim: Array.isArray(log?.terkirim) ? log.terkirim.slice(0, 300) : [],
+            gagal: Array.isArray(log?.gagal) ? log.gagal.slice(0, 300) : [],
+        };
+        const temporary = `${FILE_LOG}.tmp`;
+        fs.writeFileSync(temporary, JSON.stringify(normalized, null, 2), 'utf-8');
+        fs.renameSync(temporary, FILE_LOG);
+    } catch (e) {
+        console.error('[DoujinMonitor] Gagal menyimpan log:', e.message);
+    }
+}
+
+function loadSeriesCache() {
+    try {
+        if (fs.existsSync(FILE_SERIES_CACHE)) {
+            const parsed = JSON.parse(fs.readFileSync(FILE_SERIES_CACHE, 'utf-8'));
+            return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+        }
+    } catch (e) {
+        console.warn('[DoujinMonitor] Cache seri rusak, memakai cache kosong:', e.message);
+    }
+    return {};
+}
+
+function saveSeriesCache(cache) {
+    try {
+        const entries = Object.entries(cache || {})
+            .filter(([slug, value]) => slug && value?.detail && value?.cachedAt)
+            .sort((a, b) => Number(b[1].cachedAt) - Number(a[1].cachedAt))
+            .slice(0, 200);
+        const temporary = `${FILE_SERIES_CACHE}.tmp`;
+        fs.writeFileSync(temporary, JSON.stringify(Object.fromEntries(entries), null, 2), 'utf-8');
+        fs.renameSync(temporary, FILE_SERIES_CACHE);
+    } catch (e) {
+        console.error('[DoujinMonitor] Gagal menyimpan cache seri:', e.message);
+    }
+}
+
+function canonicalChapterLink(value) {
+    const link = String(value || '').trim();
+    return link.replace(/\/+$/, '').toLowerCase();
+}
+
+function getChapterKey(item = {}) {
+    return canonicalChapterLink(item.link || item.id);
+}
+
+function simulasikanPollingChapter(sequence = []) {
+    const seen = new Set();
+    return sequence.filter(item => {
+        const key = getChapterKey(item);
+        if (!key || seen.has(key)) return false;
+        seen.add(key);
+        return true;
+    });
+}
+
+function queueDoujinRetry(data, item, key) {
+    const current = data.retryQueue[key] || {
+        item: {},
+        firstFailedAt: Date.now(),
+        lastAttemptAt: 0,
+    };
+    current.item = { ...current.item, ...item };
+    current.lastAttemptAt = Date.now();
+    data.retryQueue[key] = current;
+}
+
+function addUniqueHistory(data, link) {
+    const key = canonicalChapterLink(link);
+    if (!key) return;
+    data.history = [...new Set([...(data.history || []), key])].slice(-500);
+}
+
+function logDoujinDelivery(item, groups) {
+    const log = loadDoujinLog();
+    const key = getChapterKey(item);
+    const entry = {
+        key,
+        id: String(item.id || ''),
+        title: item.title || 'Doujindesu',
+        chapter: item.chapter || '',
+        category: item.category || '',
+        categoryLabel: item.categoryLabel || item.type || '',
+        link: item.link || '',
+        waktuKirim: new Date().toISOString(),
+        grupCount: groups.length,
+        grupList: [...new Set(groups)],
+    };
+    log.terkirim = [
+        entry,
+        ...log.terkirim.filter(existing => existing?.key !== key),
+    ].slice(0, 300);
+    log.gagal = log.gagal.filter(existing => existing?.key !== key);
+    saveDoujinLog(log);
+}
+
+function logDoujinFailure(item, error, groups = []) {
+    const log = loadDoujinLog();
+    const key = getChapterKey(item);
+    const previous = log.gagal.find(existing => existing?.key === key);
+    const entry = {
+        key,
+        id: String(item.id || ''),
+        title: item.title || 'Doujindesu',
+        chapter: item.chapter || '',
+        category: item.category || '',
+        categoryLabel: item.categoryLabel || item.type || '',
+        link: item.link || '',
+        waktuGagal: new Date().toISOString(),
+        percobaan: Number(previous?.percobaan || 0) + 1,
+        grupList: [...new Set(groups)],
+        error: String(error?.message || error || 'Gagal diproses').slice(0, 500),
+    };
+    log.gagal = [
+        entry,
+        ...log.gagal.filter(existing => existing?.key !== key),
+    ].slice(0, 300);
+    saveDoujinLog(log);
 }
 
 // Jalankan migrasi saat fitur dimuat agar state lama segera keluar dari
@@ -134,42 +301,106 @@ function formatDoujinCategories(categories) {
     return labels.length ? labels.join(', ') : 'tidak ada';
 }
 
-
-// Buat thumbnail ringan untuk preview dokumen PDF di WhatsApp.
-async function buatThumbnail(jpgBuffer) {
-    try {
-        return await sharp(jpgBuffer)
-            .resize({ width: 256, height: 256, fit: 'inside', withoutEnlargement: true })
-            .jpeg({ quality: 78, progressive: true })
-            .toBuffer();
-    } catch (e) {
-        console.warn('[DoujinMonitor] Gagal membuat thumbnail:', e?.message);
-        return null;
+function decodeHtml(value) {
+    let text = String(value || '');
+    const entities = {
+        '&nbsp;': ' ',
+        '&amp;': '&',
+        '&quot;': '"',
+        '&#39;': "'",
+        '&apos;': "'",
+        '&lt;': '<',
+        '&gt;': '>',
+    };
+    // API kadang meng-encode HTML dua kali, misalnya &amp;quot;.
+    // Ulangi beberapa putaran agar caption tidak menampilkan entity mentah.
+    for (let pass = 0; pass < 3; pass++) {
+        const before = text;
+        for (const [entity, replacement] of Object.entries(entities)) {
+            text = text.replaceAll(entity, replacement);
+        }
+        text = text
+            .replace(/&#(\d+);/g, (_, code) => String.fromCodePoint(Number(code)))
+            .replace(/&#x([0-9a-f]+);/gi, (_, code) => String.fromCodePoint(parseInt(code, 16)));
+        if (text === before) break;
     }
+    return text;
 }
 
-function bersihkanNamaFile(value) {
-    return String(value || '')
-        .replace(/[<>:"/\\|?*\u0000-\u001F]+/g, ' - ')
-        .replace(/\s+/g, ' ')
-        .replace(/\s*-\s*/g, ' - ')
-        .trim()
-        .replace(/[. ]+$/, '');
+function bersihkanSynopsis(value) {
+    const plain = decodeHtml(value)
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/<\/(p|div|li|h[1-6])>/gi, '\n')
+        .replace(/<li[^>]*>/gi, '• ')
+        .replace(/<[^>]+>/g, '')
+        .replace(/\r/g, '');
+    const withoutBatchLinks = plain.replace(/\n?\s*Download Batch\b[\s\S]*$/i, '');
+    return withoutBatchLinks
+        .split('\n')
+        .map(line => line.replace(/\s+/g, ' ').trim())
+        .filter(Boolean)
+        .join('\n')
+        .trim();
 }
 
-function buatNamaFilePdf(item = {}, prefix = '') {
-    const judul = bersihkanNamaFile(item.title || item.judul || 'Doujindesu');
-    const chapter = bersihkanNamaFile(item.chapter || '');
-    const judulLower = judul.toLowerCase();
-    const chapterLower = chapter.toLowerCase();
-    const sudahAdaChapter = chapterLower && (
-        judulLower === chapterLower ||
-        judulLower.endsWith(` ${chapterLower}`) ||
-        judulLower.endsWith(`-${chapterLower}`)
-    );
-    const namaDasar = sudahAdaChapter || !chapter ? judul : `${judul} - ${chapter}`;
-    const namaAman = bersihkanNamaFile(namaDasar).slice(0, 150) || 'Doujindesu';
-    return `${prefix}${namaAman}.pdf`;
+function formatList(value, empty = 'N/A') {
+    const list = Array.isArray(value)
+        ? value.map(item => String(item || '').trim()).filter(Boolean)
+        : String(value || '').split(',').map(item => item.trim()).filter(Boolean);
+    return list.length ? list.join(', ') : empty;
+}
+
+function formatNumber(value) {
+    if (value === null || value === undefined || String(value).trim() === '') return 'N/A';
+    const number = Number(value);
+    // Format mengikuti tampilan statistik DoujinDesu di situs sumber.
+    return Number.isFinite(number) ? number.toLocaleString('en-US') : 'N/A';
+}
+
+function normalisasiMetadata(item = {}) {
+    const synopsis = bersihkanSynopsis(item.description || item.synopsis);
+    return {
+        title: String(item.title || item.judul || 'Doujindesu').trim(),
+        type: String(item.seriesType || item.mangaType || '').trim() || 'N/A',
+        status: String(item.status || '').trim() || 'N/A',
+        alternativeTitles: formatList(item.alternativeTitles || item.altTitles),
+        authors: formatList(item.authors || item.author),
+        groups: formatList(item.groups),
+        series: formatList(item.series),
+        characters: formatList(item.characters),
+        genres: formatList(item.genres),
+        rating: item.rating === null || item.rating === undefined || String(item.rating).trim() === ''
+            ? 'N/A'
+            : Number.isFinite(Number(item.rating)) ? Number(item.rating).toFixed(1) : 'N/A',
+        views: formatNumber(item.views),
+        synopsis: synopsis || 'N/A',
+    };
+}
+
+async function enrichDoujinItem(item) {
+    if (!item?.mangaSlug) {
+        throw new Error(`Slug seri tidak tersedia untuk "${item?.title || 'chapter'}"`);
+    }
+    const cache = loadSeriesCache();
+    const cached = cache[item.mangaSlug];
+    let detail;
+    if (cached?.detail && Date.now() - Number(cached.cachedAt) <= SERIES_CACHE_TTL_MS) {
+        detail = cached.detail;
+    } else {
+        // Detail tetap diambil dari endpoint seri yang aktif. Cache hanya
+        // menghindari fetch berulang dalam satu menit saat retry/polling,
+        // bukan menjadi sumber data lama untuk kiriman baru.
+        detail = await scrapeMangaDetails(item.mangaSlug);
+        cache[item.mangaSlug] = {
+            cachedAt: Date.now(),
+            detail,
+        };
+        saveSeriesCache(cache);
+    }
+    if (!detail?.title || !detail.coverUrl) {
+        throw new Error(`Metadata seri "${item.mangaSlug}" tidak lengkap`);
+    }
+    return { ...item, ...detail };
 }
 
 function bersihkanTeksCaption(value) {
@@ -179,12 +410,35 @@ function bersihkanTeksCaption(value) {
         .trim();
 }
 
-function buatCaptionDoujin(item = {}, { isTest = false, pageCount = 0, thumbnailReady = false } = {}) {
+function formatCaptionList(value, fallback = 'N/A') {
+    const values = Array.isArray(value)
+        ? value
+        : String(value || '').split(',');
+    const cleaned = values
+        .map(value => bersihkanTeksCaption(decodeHtml(value)))
+        .filter(Boolean);
+    return (cleaned.length ? cleaned : [fallback])
+        .map(value => `   • ${value}`)
+        .join('\n');
+}
+
+function buatCaptionDoujin(item = {}, {
+    isTest = false,
+    thumbnailReady = false,
+} = {}) {
     const judul = bersihkanTeksCaption(item.title || item.judul || 'Doujindesu');
     const kategori = bersihkanTeksCaption(item.categoryLabel || item.type || 'Lainnya');
-    const tipe = bersihkanTeksCaption(item.type || 'Lainnya');
+    const metadata = normalisasiMetadata(item);
+    const tipe = bersihkanTeksCaption(metadata.type || item.seriesType || item.type || 'Lainnya');
     const chapter = bersihkanTeksCaption(item.chapter || 'Tidak tersedia');
     const link = String(item.link || DOUJIN_BASE_URL);
+    const tanggal = item.createdAt
+        ? new Date(item.createdAt).toLocaleString('id-ID', {
+            dateStyle: 'medium',
+            timeStyle: 'short',
+            timeZone: 'Asia/Jakarta',
+        })
+        : 'Tidak tersedia';
     const header = isTest
         ? '🧪 *DOUJINDESU — TEST SCRAPER*'
         : '🔞 *DOUJINDESU — CHAPTER BARU*';
@@ -192,28 +446,67 @@ function buatCaptionDoujin(item = {}, { isTest = false, pageCount = 0, thumbnail
         ? '> Scraper berhasil menemukan dan memvalidasi chapter ini.'
         : '> Rilisan baru terdeteksi dari situs resmi Doujindesu.';
     const thumbnailLine = thumbnailReady
-        ? '• Thumbnail kecil: ✅ tersedia'
-        : '• Thumbnail kecil: ~tidak tersedia~';
+        ? '• Thumbnail kategori: ✅ cover seri tersedia'
+        : '• Thumbnail kategori: ~cover seri tidak tersedia~';
+    const alternativeTitles = formatCaptionList(
+        item.alternativeTitles || item.altTitles || metadata.alternativeTitles
+    );
+    const authors = formatCaptionList(item.authors || item.author || metadata.authors);
+    const groups = formatCaptionList(item.groups || metadata.groups);
+    const series = formatCaptionList(item.series || metadata.series);
+    const characters = formatCaptionList(item.characters || metadata.characters);
+    const genres = formatCaptionList(item.genres || metadata.genres);
 
     return `${header}\n\n` +
         `${intro}\n\n` +
+        `🔗 *Link chapter realtime:*\n${link}\n\n` +
         `1. *Judul*\n` +
         `   _${judul}_\n` +
         `2. *Kategori*\n` +
         `   \`${kategori}\`\n` +
-        `3. *Chapter*\n` +
+        `3. *Tipe seri*\n` +
+        `   \`${tipe}\`\n` +
+        `4. *Chapter*\n` +
         `   \`${chapter}\`\n\n` +
-        `*Detail file*\n` +
-        `• Format: \`PDF\`\n` +
-        `• Halaman lengkap: \`${pageCount}\`\n` +
-        `${thumbnailLine}\n\n` +
-        `> *Sumber:* ${link}`;
+        `*Series Information*\n` +
+        `⚑ *Type:* \`${tipe}\`\n` +
+        `*Status:* \`${bersihkanTeksCaption(metadata.status)}\`\n` +
+        `*Alternative Titles*\n${alternativeTitles}\n` +
+        `*Authors*\n${authors}\n` +
+        `*Groups*\n${groups}\n` +
+        `*Series*\n${series}\n` +
+        `*Characters*\n${characters}\n` +
+        `*Genres*\n${genres}\n` +
+        `*Rating:* \`${metadata.rating}\`\n` +
+        `*Views:* \`${metadata.views}\`\n` +
+        `*Synopsis*\n   ${bersihkanTeksCaption(metadata.synopsis)}\n\n` +
+        `*Update web:* \`${tanggal}\`\n` +
+        `${thumbnailLine}\n` +
+        `• Metadata seri: ✅ realtime`;
+}
+
+function buatKonteksLinkChapter(item = {}, thumbnail) {
+    const title = bersihkanTeksCaption(item.title || item.judul || 'Doujindesu');
+    const category = bersihkanTeksCaption(item.categoryLabel || item.type || 'Lainnya');
+    const chapter = bersihkanTeksCaption(item.chapter || 'Chapter terbaru');
+    const sourceUrl = String(item.link || DOUJIN_BASE_URL);
+
+    return {
+        externalAdReply: {
+            showAdAttribution: false,
+            title: `${category} — ${title}`,
+            body: `${chapter} • Buka chapter terbaru`,
+            sourceUrl,
+            mediaType: 1,
+            renderLargerThumbnail: true,
+            ...(thumbnail ? { thumbnail } : {}),
+        },
+    };
 }
 
 const MAX_IMAGE_ATTEMPTS = 3;
-const MAX_PDF_PAGE_SIZE = 14000;
 
-async function downloadDoujinPage(imgUrl, index, label) {
+async function downloadDoujinImage(imgUrl, label) {
     let lastError = new Error('Gambar tidak tersedia');
     for (let attempt = 1; attempt <= MAX_IMAGE_ATTEMPTS; attempt++) {
         try {
@@ -237,68 +530,23 @@ async function downloadDoujinPage(imgUrl, index, label) {
         } catch (e) {
             lastError = e;
             if (attempt < MAX_IMAGE_ATTEMPTS) {
-                console.warn(`[DoujinMonitor] ${label} halaman ${index + 1}: retry ${attempt}/${MAX_IMAGE_ATTEMPTS - 1} (${e.message})`);
+                console.warn(`[DoujinMonitor] ${label}: retry ${attempt}/${MAX_IMAGE_ATTEMPTS - 1} (${e.message})`);
             }
         }
     }
 
-    throw new Error(`halaman ${index + 1} gagal setelah ${MAX_IMAGE_ATTEMPTS} percobaan: ${lastError.message}`);
-}
-
-async function downloadDoujinPages(imageUrls, label) {
-    const pages = [];
-    for (let i = 0; i < imageUrls.length; i++) {
-        try {
-            pages.push(await downloadDoujinPage(imageUrls[i], i, label));
-        } catch (e) {
-            return { pages, failedIndex: i, error: e };
-        }
-    }
-    return { pages, failedIndex: -1, error: null };
-}
-
-async function buatPdfDariHalaman(pages, pdfPath) {
-    if (!pages.length) throw new Error('Tidak ada halaman valid untuk PDF');
-
-    const doc = new PDFDocument({ autoFirstPage: false });
-    const writeStream = fs.createWriteStream(pdfPath);
-    doc.pipe(writeStream);
-    const pdfReady = new Promise((resolve, reject) => {
-        writeStream.on('finish', resolve);
-        writeStream.on('error', reject);
-    });
-
-    let pdfThumbnail = null;
-    for (const page of pages) {
-        const scale = Math.min(1, MAX_PDF_PAGE_SIZE / page.width, MAX_PDF_PAGE_SIZE / page.height);
-        const pageWidth = Math.max(1, Math.round(page.width * scale));
-        const pageHeight = Math.max(1, Math.round(page.height * scale));
-
-        doc.addPage({ size: [pageWidth, pageHeight], margin: 0 });
-        // fit mempertahankan rasio dan mencegah sisi gambar terpotong.
-        doc.image(page.jpgBuffer, 0, 0, {
-            fit: [pageWidth, pageHeight],
-            align: 'center',
-            valign: 'center',
-        });
-        if (!pdfThumbnail) pdfThumbnail = await buatThumbnail(page.jpgBuffer);
-    }
-
-    doc.end();
-    await pdfReady;
-    return pdfThumbnail;
+    throw new Error(`${label} gagal setelah ${MAX_IMAGE_ATTEMPTS} percobaan: ${lastError.message}`);
 }
 
 // Check and process new chapters
-async function processNewChapters(hisoka) {
+async function _processNewChapters(hisoka) {
     const groups = getEnabledGroups();
     if (groups.length === 0) return;
 
     const latest = await scrapeLatest();
-    if (!latest.length) return;
-
     let cfg = loadConfig();
     const data = loadDoujinData();
+    if (!latest.length && Object.keys(data.retryQueue || {}).length === 0) return;
 
     // Seperti AlqanimeNotif, scan pertama hanya membuat baseline. Ini
     // mencegah seluruh rilisan lama dari tiga kategori dikirim sekaligus saat
@@ -308,27 +556,44 @@ async function processNewChapters(hisoka) {
     // dikirim sekaligus ke grup.
     if (data.source !== DOUJIN_STATE_SOURCE || data.history.length === 0) {
         data.source = DOUJIN_STATE_SOURCE;
-        data.history = latest.map(item => item.link).slice(-500);
+        data.history = [...new Set(latest.map(item => canonicalChapterLink(item.link)).filter(Boolean))].slice(-500);
         data.deliveries = {};
+        data.retryQueue = {};
         saveDoujinData(data);
         console.log(`[DoujinMonitor] Baseline ${latest.length} chapter dari tiga kategori disimpan`);
         return;
     }
 
-    // Hanya chapter dengan link baru yang diproses. Delivery state dipisah
-    // dari history agar grup yang gagal kirim masih mendapat retry berikutnya.
-    const newItems = latest
+    // Hanya chapter dengan key baru yang diproses. Item yang pernah gagal
+    // tetap masuk dari retryQueue walaupun sudah turun dari daftar terbaru.
+    const currentItems = latest
         .slice()
         .reverse()
-        .filter(item => !data.history.includes(item.link));
+        .filter(item => !data.history.includes(getChapterKey(item)));
+    const retryItems = Object.values(data.retryQueue || {})
+        .map(entry => entry?.item)
+        .filter(item => item && getChapterKey(item) && !data.history.includes(getChapterKey(item)));
+    const itemKeys = new Set();
+    const newItems = [...retryItems, ...currentItems].filter(item => {
+        const key = getChapterKey(item);
+        if (!key || itemKeys.has(key)) return false;
+        itemKeys.add(key);
+        return true;
+    });
     
     for (const item of newItems) {
+        const itemKey = getChapterKey(item);
+        if (!itemKey) continue;
+        if (!data.retryQueue[itemKey]) {
+            queueDoujinRetry(data, item, itemKey);
+            saveDoujinData(data);
+        }
         const targetGroups = groups.filter(jid =>
             getDoujinGroupCategories(cfg.doujinnotif.groups?.[jid]).includes(item.category)
         );
         const delivered = new Set(
-            Array.isArray(data.deliveries[item.link])
-                ? data.deliveries[item.link]
+            Array.isArray(data.deliveries[itemKey])
+                ? data.deliveries[itemKey]
                 : []
         );
         const pendingGroups = targetGroups.filter(jid => !delivered.has(jid));
@@ -340,77 +605,68 @@ async function processNewChapters(hisoka) {
                 `[DoujinMonitor] ⏭️ "${item.title}" [${item.categoryLabel}] dilewati — ` +
                 'tidak ada grup aktif untuk kategori ini'
             );
-            if (!data.history.includes(item.link)) {
-                data.history.push(item.link);
-                if (data.history.length > 500) {
-                    data.history = data.history.slice(-500);
-                }
-                saveDoujinData(data);
-            }
+            addUniqueHistory(data, itemKey);
+            delete data.deliveries[itemKey];
+            delete data.retryQueue[itemKey];
+            saveDoujinData(data);
             continue;
         }
 
         // Recovery setelah proses sempat menyimpan delivery state lengkap
         // tetapi belum sempat menambahkan link ke history.
         if (pendingGroups.length === 0) {
-            data.history.push(item.link);
-            delete data.deliveries[item.link];
-            if (data.history.length > 500) {
-                data.history = data.history.slice(-500);
-            }
+            addUniqueHistory(data, itemKey);
+            delete data.deliveries[itemKey];
+            delete data.retryQueue[itemKey];
             saveDoujinData(data);
             continue;
         }
         
-        // 1. Fetch images
-        const imageUrls = await scrapeChapterImages(item.link);
-        if (!imageUrls || imageUrls.length === 0) {
-            console.log(`[DoujinMonitor] No images found for ${item.title}, skipping.`);
-            continue;
-        }
-
-        // 2. Download semua halaman secara berurutan sebelum membuat PDF.
-        // Jika satu halaman gagal setelah retry, jangan kirim PDF parsial.
-        const hasilDownload = await downloadDoujinPages(imageUrls, item.title);
-        if (hasilDownload.failedIndex >= 0) {
-            console.warn(
-                `[DoujinMonitor] PDF ${item.title} dibatalkan: halaman ` +
-                `${hasilDownload.failedIndex + 1}/${imageUrls.length} tidak lengkap (${hasilDownload.error.message}).`
-            );
-            continue;
-        }
-
-        // 3. Generate PDF
-        const tmpDir = path.join(process.cwd(), 'tmp');
-        fs.mkdirSync(tmpDir, { recursive: true });
-        const pdfPath = path.join(tmpDir, `doujin_${Date.now()}.pdf`);
-        let pdfThumbnail;
+        let enrichedItem;
         try {
-            pdfThumbnail = await buatPdfDariHalaman(hasilDownload.pages, pdfPath);
+            // Detail seri diambil tepat sebelum dikirim agar cover, kategori,
+            // rating, views, dan synopsis tetap mengikuti data terbaru.
+            enrichedItem = await enrichDoujinItem(item);
         } catch (e) {
-            try { if (fs.existsSync(pdfPath)) fs.unlinkSync(pdfPath); } catch (_) {}
-            console.error(`[DoujinMonitor] Gagal membuat PDF ${item.title}:`, e.message);
+            console.warn(`[DoujinMonitor] Metadata "${item.title}" belum tersedia: ${e.message}`);
+            queueDoujinRetry(data, item, itemKey);
+            saveDoujinData(data);
+            logDoujinFailure(item, e, pendingGroups);
             continue;
         }
-        
-        const caption = buatCaptionDoujin(item, {
-            pageCount: imageUrls.length,
-            thumbnailReady: Boolean(pdfThumbnail),
+
+        // Hanya ambil cover seri sebagai thumbnail gambar. Isi halaman chapter
+        // tidak lagi di-fetch dan tidak lagi diproses menjadi dokumen.
+        let cover;
+        try {
+            cover = await downloadDoujinImage(
+                enrichedItem.coverUrl,
+                `${enrichedItem.title} thumbnail ${enrichedItem.categoryLabel}`
+            );
+        } catch (e) {
+            console.warn(`[DoujinMonitor] Thumbnail "${enrichedItem.title}" belum tersedia: ${e.message}`);
+            queueDoujinRetry(data, enrichedItem, itemKey);
+            saveDoujinData(data);
+            logDoujinFailure(enrichedItem, e, pendingGroups);
+            continue;
+        }
+
+        const caption = buatCaptionDoujin(enrichedItem, {
+            thumbnailReady: Boolean(cover?.jpgBuffer),
         });
 
-        // 3. Send PDF to groups. Tandai per grup hanya setelah sendMessage
-        // sukses; kegagalan transient akan dicoba lagi pada polling berikutnya.
+        // Kirim satu gambar cover dengan caption informasi chapter. Tandai per
+        // grup hanya setelah sendMessage sukses agar kegagalan bisa di-retry.
         let allGroupsDelivered = true;
         for (const jid of pendingGroups) {
             try {
-                const documentPayload = {
-                    document: { url: pdfPath },
-                    mimetype: 'application/pdf',
-                    fileName: buatNamaFilePdf(item),
+                const imagePayload = {
+                    image: cover.jpgBuffer,
+                    mimetype: 'image/jpeg',
                     caption,
-                    ...(pdfThumbnail ? { jpegThumbnail: pdfThumbnail } : {}),
+                    contextInfo: buatKonteksLinkChapter(enrichedItem, cover.jpgBuffer),
                 };
-                await hisoka.sendMessage(jid, documentPayload);
+                await hisoka.sendMessage(jid, imagePayload);
                 delivered.add(jid);
             } catch (e) {
                 console.error(`[DoujinMonitor] Gagal kirim ke ${jid}:`, e.message);
@@ -428,37 +684,155 @@ async function processNewChapters(hisoka) {
         const isComplete = allGroupsDelivered &&
             currentGroups.every(jid => delivered.has(jid));
         if (isComplete) {
-            if (!data.history.includes(item.link)) {
-                data.history.push(item.link);
-            }
-            delete data.deliveries[item.link];
-            if (data.history.length > 500) {
-                data.history = data.history.slice(-500);
-            }
+            addUniqueHistory(data, itemKey);
+            delete data.deliveries[itemKey];
+            delete data.retryQueue[itemKey];
         } else {
-            data.deliveries[item.link] = Array.from(delivered);
+            data.deliveries[itemKey] = Array.from(delivered);
+            queueDoujinRetry(data, enrichedItem, itemKey);
         }
         saveDoujinData(data);
 
         if (isComplete) {
+            logDoujinDelivery(enrichedItem, currentGroups);
             console.log(
-                `[DoujinMonitor] ✅ "${item.title}" [${item.categoryLabel}] ` +
+                `[DoujinMonitor] ✅ "${enrichedItem.title}" [${item.categoryLabel}] ` +
                 `terkirim ke ${delivered.size} grup`
             );
         } else {
+            logDoujinFailure(
+                enrichedItem,
+                new Error(`Terkirim ke ${delivered.size}/${currentGroups.length} grup`),
+                currentGroups.filter(jid => !delivered.has(jid))
+            );
             console.warn(
-                `[DoujinMonitor] ⚠️ "${item.title}" [${item.categoryLabel}] ` +
+                `[DoujinMonitor] ⚠️ "${enrichedItem.title}" [${item.categoryLabel}] ` +
                 `terkirim ke ${delivered.size}/${currentGroups.length} grup — akan retry`
             );
         }
-        
-        // Cleanup PDF
-        try { if (fs.existsSync(pdfPath)) fs.unlinkSync(pdfPath); } catch (_) {}
     }
 }
 
+let _doujinProcessingPromise = null;
+
+async function processNewChapters(hisoka) {
+    // Guard kedua di level modul. Scheduler index.js juga punya guard, tetapi
+    // ini mencegah duplikat jika fungsi dipanggil dari test/callback lain.
+    if (_doujinProcessingPromise) {
+        console.log('[DoujinMonitor] ⏭️ Scan sebelumnya masih berjalan');
+        return _doujinProcessingPromise;
+    }
+    _doujinProcessingPromise = _processNewChapters(hisoka);
+    try {
+        return await _doujinProcessingPromise;
+    } finally {
+        _doujinProcessingPromise = null;
+    }
+}
+
+async function simulasiDoujinNotif({ validasi = false } = {}) {
+    const latest = await scrapeLatest();
+    const data = loadDoujinData();
+    const enabledGroups = getEnabledGroups();
+    const currentItems = latest.filter(item => !data.history.includes(getChapterKey(item)));
+    const retryItems = Object.values(data.retryQueue || {})
+        .map(entry => entry?.item)
+        .filter(item => item && getChapterKey(item) && !data.history.includes(getChapterKey(item)));
+    const allPending = [...retryItems, ...currentItems];
+    const seen = new Set();
+    const pending = allPending.filter(item => {
+        const key = getChapterKey(item);
+        if (!key || seen.has(key)) return false;
+        seen.add(key);
+        return true;
+    });
+    const categoryCount = Object.fromEntries(DOUJIN_CATEGORIES.map(category => [
+        category.key,
+        latest.filter(item => item.category === category.key).length,
+    ]));
+    const pollingInput = [
+        { id: 'sim-chapter-20', link: 'https://doujin.desu.xxx/reader/sim-chapter-20', chapter: 'Chapter 20' },
+        { id: 'sim-chapter-20', link: 'https://doujin.desu.xxx/reader/sim-chapter-20', chapter: 'Chapter 20' },
+        { id: 'sim-chapter-21', link: 'https://doujin.desu.xxx/reader/sim-chapter-21', chapter: 'Chapter 21' },
+    ];
+    const pollingOutput = simulasikanPollingChapter(pollingInput);
+    const report = {
+        source: DOUJIN_STATE_SOURCE,
+        fetchedAt: new Date().toISOString(),
+        latestCount: latest.length,
+        uniqueCount: new Set(latest.map(getChapterKey)).size,
+        duplicateCount: latest.length - new Set(latest.map(getChapterKey)).size,
+        categoryCount,
+        enabledGroupCount: enabledGroups.length,
+        pendingCount: pending.length,
+        payloadRules: {
+            sendsDocument: false,
+            sendsChapterPages: false,
+            sendsCategoryThumbnail: true,
+            includesChapterLink: true,
+        },
+        pollingSimulation: {
+            input: pollingInput.map(item => item.chapter),
+            output: pollingOutput.map(item => item.chapter),
+            duplicateSuppressed: pollingInput.length - pollingOutput.length,
+            passed: pollingOutput.map(item => item.chapter).join('|') === 'Chapter 20|Chapter 21',
+        },
+        pending: pending.slice(0, 20).map(item => ({
+            key: getChapterKey(item),
+            id: item.id,
+            title: item.title,
+            chapter: item.chapter,
+            category: item.categoryLabel,
+            thumbnailUrl: item.coverUrl || null,
+            chapterLink: item.link || null,
+            targetGroupCount: enabledGroups.filter(jid =>
+                getDoujinGroupCategories(loadConfig().doujinnotif?.groups?.[jid]).includes(item.category)
+            ).length,
+        })),
+    };
+
+    // Validasi opsional hanya membaca metadata dan cover thumbnail. Tidak ada
+    // sendMessage, tidak mengubah config, history, atau delivery state.
+    if (validasi) {
+        const sample = pending[0] || latest[0];
+        if (sample) {
+            const detail = await enrichDoujinItem(sample);
+            const cover = await downloadDoujinImage(
+                detail.coverUrl,
+                `${detail.title} thumbnail ${detail.categoryLabel}`
+            );
+            const caption = buatCaptionDoujin(detail, {
+                isTest: true,
+                thumbnailReady: Boolean(cover?.jpgBuffer),
+            });
+            report.validation = {
+                key: getChapterKey(detail),
+                title: detail.title,
+                category: detail.categoryLabel,
+                categoryValid: DOUJIN_CATEGORIES.some(category => category.label === detail.categoryLabel),
+                metadataRealtime: Boolean(detail.coverUrl && detail.mangaSlug),
+                thumbnailUrl: detail.coverUrl,
+                thumbnailBytes: cover.jpgBuffer.length,
+                thumbnailReady: Boolean(cover.jpgBuffer.length),
+                chapterLink: detail.link,
+                thumbnailClickUrl: detail.link,
+                clickableThumbnail: true,
+                captionHasCategory: caption.includes(detail.categoryLabel),
+                captionHasChapter: caption.includes(detail.chapter),
+                captionHasChapterLink: caption.includes(detail.link),
+                captionLinkVisibleAtTop: caption.indexOf(detail.link) >= 0 &&
+                    caption.indexOf(detail.link) < 300,
+                sendsWhatsApp: false,
+            };
+        } else {
+            report.validation = { message: 'Tidak ada chapter untuk divalidasi' };
+        }
+    }
+    return report;
+}
+
 async function runDoujinTest({ hisoka, m, tolak }) {
-    await tolak(hisoka, m, '⏳ Sedang menguji scraper Doujindesu...');
+    await tolak(hisoka, m, '⏳ Sedang menyiapkan preview Doujindesu lengkap...');
     try {
         const latest = await scrapeLatest();
         if (!latest.length) {
@@ -467,62 +841,49 @@ async function runDoujinTest({ hisoka, m, tolak }) {
         }
 
         const item = latest[0];
+        const enrichedItem = await enrichDoujinItem(item);
         await tolak(
             hisoka,
             m,
-            `✅ Ditemukan chapter terbaru:\n\nJudul: ${item.title}\nLink: ${item.link}\n\n⏳ Sedang mengunduh dan membuat PDF...`
+            `✅ Ditemukan chapter terbaru:\n\nJudul: ${enrichedItem.title}\nKategori: ${enrichedItem.categoryLabel}\nChapter: ${enrichedItem.chapter}\nLink: ${enrichedItem.link}\n\n⏳ Thumbnail kategori dan informasi lengkap sedang divalidasi...`
         );
 
-        const imageUrls = await scrapeChapterImages(item.link);
-        if (!imageUrls.length) {
-            await tolak(hisoka, m, '❌ Gagal mendapatkan gambar dari chapter tersebut.');
-            return;
-        }
-
-        const tmpDir = path.join(process.cwd(), 'tmp');
-        fs.mkdirSync(tmpDir, { recursive: true });
-        const imageUrlsTest = imageUrls;
-        const hasilDownload = await downloadDoujinPages(imageUrlsTest, 'Test Doujindesu');
-        if (hasilDownload.failedIndex >= 0) {
-            try {
-                await tolak(
-                    hisoka,
-                    m,
-                    `❌ Test dibatalkan: halaman ${hasilDownload.failedIndex + 1}/${imageUrlsTest.length} ` +
-                    `gagal dimuat setelah ${MAX_IMAGE_ATTEMPTS} percobaan. PDF parsial tidak dikirim.`
-                );
-            } catch (_) {}
-            return;
-        }
-
-        const pdfPath = path.join(tmpDir, `test_doujin_${Date.now()}.pdf`);
-        let pdfThumbnail;
-        try {
-            pdfThumbnail = await buatPdfDariHalaman(hasilDownload.pages, pdfPath);
-        } catch (e) {
-            try { if (fs.existsSync(pdfPath)) fs.unlinkSync(pdfPath); } catch (_) {}
-            await tolak(hisoka, m, `❌ PDF test gagal dibuat: ${e.message}`);
-            return;
-        }
-
-        const caption = buatCaptionDoujin(item, {
+        const cover = await downloadDoujinImage(
+            enrichedItem.coverUrl,
+            `${enrichedItem.title} thumbnail ${enrichedItem.categoryLabel}`
+        );
+        const caption = buatCaptionDoujin(enrichedItem, {
             isTest: true,
-            pageCount: imageUrls.length,
-            thumbnailReady: Boolean(pdfThumbnail),
+            thumbnailReady: Boolean(cover?.jpgBuffer),
         });
-
-        try {
-            const documentPayload = {
-                document: { url: pdfPath },
-                mimetype: 'application/pdf',
-                fileName: buatNamaFilePdf(item, 'TEST_'),
-                caption,
-                ...(pdfThumbnail ? { jpegThumbnail: pdfThumbnail } : {}),
-            };
-            await hisoka.sendMessage(m.from, documentPayload);
-        } finally {
-            try { if (fs.existsSync(pdfPath)) fs.unlinkSync(pdfPath); } catch (_) {}
+        const checks = [
+            ['kategori', caption.includes(enrichedItem.categoryLabel)],
+            ['chapter', caption.includes(enrichedItem.chapter)],
+            ['link chapter', caption.includes(enrichedItem.link)],
+            ['link di bagian atas', caption.indexOf(enrichedItem.link) >= 0 &&
+                caption.indexOf(enrichedItem.link) < 300],
+            ['thumbnail', Boolean(cover?.jpgBuffer?.length)],
+            ['format informasi', caption.includes('Link chapter realtime:')],
+        ];
+        const failed = checks.filter(([, passed]) => !passed).map(([name]) => name);
+        if (failed.length) {
+            await tolak(
+                hisoka,
+                m,
+                `❌ Test gagal: ${failed.join(', ')}. Preview tidak dikirim.`
+            );
+            return;
         }
+
+        // Command test memang menampilkan satu preview nyata agar admin bisa
+        // melihat thumbnail dan caption final. Ini tidak mengubah history,
+        // delivery state, retry queue, dan bukan kiriman scheduler otomatis.
+        await hisoka.sendMessage(m.from, {
+            image: cover.jpgBuffer,
+            mimetype: 'image/jpeg',
+            caption,
+            contextInfo: buatKonteksLinkChapter(enrichedItem, cover.jpgBuffer),
+        });
     } catch (e) {
         await tolak(hisoka, m, `❌ Terjadi kesalahan saat tes: ${e.message}`);
     }
@@ -582,7 +943,7 @@ function makeDoujinMenuBody({ active, registered, pfx, categories }) {
         return `╭─「 🔞 *DOUJINDESU NOTIF* 」\n│\n` +
                `│ Status grup ini : ✅ *AKTIF*\n│\n` +
                `│ Notif chapter baru dari doujin.desu.xxx\n` +
-               `│ otomatis masuk sebagai file PDF.\n│\n` +
+               `│ otomatis masuk sebagai gambar thumbnail.\n│\n` +
                categoryLine +
                `│ Ketik *${pfx}doujindesu off* untuk matikan.\n│\n` +
                `╰──────────────────────`;
@@ -668,7 +1029,7 @@ async function handleDoujinNotif(args) {
             `│ Status sebelumnya : ${sebelumnya ? '✅ ON' : '❌ OFF'}\n` +
             `│ Status sekarang   : ${enabled ? '✅ *ON*' : '❌ *OFF*'}\n│\n` +
             (enabled
-                ? `│ Notif chapter baru akan masuk\n│ sebagai file PDF ke grup ini.\n`
+                ? `│ Notif chapter baru akan masuk\n│ sebagai gambar thumbnail.\n`
                 : `│ Notif Doujindesu tidak akan masuk\n│ ke grup ini lagi.\n`) +
             `│ Kategori : ${formatDoujinCategories(categories)}\n` +
             `│\n╰──────────────────────`;
@@ -832,7 +1193,7 @@ async function handleDoujinNotifCallbacks({ hisoka, m, tolak, logCommand, Button
             `│ Status sebelumnya : ${sebelumnya ? '✅ ON' : '❌ OFF'}\n` +
             `│ Status sekarang   : ${enabled ? '✅ *ON*' : '❌ *OFF*'}\n│\n` +
             (enabled
-                ? `│ Berhasil diaktifkan di grup ini.\n│ Notif akan dikirim sebagai PDF.\n`
+                ? `│ Berhasil diaktifkan di grup ini.\n│ Notif dikirim sebagai gambar thumbnail.\n`
                 : `│ Berhasil dinonaktifkan di grup ini.\n`) +
             `│ Kategori : ${formatDoujinCategories(categories)}\n` +
             `│\n╰──────────────────────`;
@@ -853,5 +1214,10 @@ async function handleDoujinNotifCallbacks({ hisoka, m, tolak, logCommand, Button
 module.exports = {
     handleDoujinNotif,
     handleDoujinNotifCallbacks,
-    processNewChapters
+    processNewChapters,
+    simulasiDoujinNotif,
+    simulasikanPollingChapter,
+    normalisasiMetadata,
+    buatKonteksLinkChapter,
+    buatCaptionDoujin,
 };

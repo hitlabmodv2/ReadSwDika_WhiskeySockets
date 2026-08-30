@@ -3,13 +3,13 @@ name: Doujindesu monitor reliability
 description: External markup and delivery guarantees relevant to the Doujindesu chapter monitor
 ---
 
-The Doujindesu homepage currently exposes four release sections: Doujinshi Terbaru, Manhwa Terbaru, Manga18+ Terbaru, and Eroge Terbaru. Eroge may include series cards without a chapter; those are not chapter notifications.
+The current DoujinDesu API exposes three monitored release categories: Manga 18, Manhwa 18, and Doujinshi 18. Each category is fetched independently and may fail without invalidating the other categories.
 
-**Why:** The monitor must follow the site's release sections rather than assuming one global card list, and a series landing page is not a downloadable chapter.
+**Why:** The monitor must follow the site's current API categories rather than assuming one global card list or relying on the older four-section site layout.
 
-**How to apply:** Keep category parsing scoped to each release block, validate chapter/image data before creating a PDF, and persist delivery status per group so transient send failures are retried before the item is considered historical.
+**How to apply:** Keep category parsing independent, validate chapter/image data before creating a PDF, and persist delivery status per group so transient send failures are retried before the item is considered historical.
 
-Category selection is per WhatsApp group. Existing group records without a categories field remain backward-compatible and mean all four categories; the category menu stores an ordered subset for future changes.
+Category selection is per WhatsApp group. Existing group records without a categories field remain backward-compatible and mean all three categories; the category menu stores an ordered subset for future changes.
 
 **Why:** Different groups may want different release types, while older configurations must not silently stop receiving notifications after the feature gains category controls.
 
