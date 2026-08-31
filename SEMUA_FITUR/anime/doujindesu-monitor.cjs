@@ -8,7 +8,10 @@ const {
     scrapeLatest,
     scrapeMangaDetails,
 } = require('./doujindesu.cjs');
-const DOUJIN_STATE_SOURCE = 'doujin.desu.xxx-v1';
+// Naikkan versi ketika bentuk data/aturan pemilihan chapter berubah.
+// Versi v2 memakai satu chapter terbaru per seri, sehingga history v1 tidak
+// boleh dianggap sepenuhnya kompatibel untuk mendeteksi rilisan baru.
+const DOUJIN_STATE_SOURCE = 'doujin.desu.xxx-v2-latest-per-series';
 const LEGACY_CATEGORY_KEYS = {
     doujinshi: 'doujinshi18',
     manhwa: 'manhwa18',
@@ -485,25 +488,6 @@ function buatCaptionDoujin(item = {}, {
         `• Metadata seri: ✅ realtime`;
 }
 
-function buatKonteksLinkChapter(item = {}, thumbnail) {
-    const title = bersihkanTeksCaption(item.title || item.judul || 'Doujindesu');
-    const category = bersihkanTeksCaption(item.categoryLabel || item.type || 'Lainnya');
-    const chapter = bersihkanTeksCaption(item.chapter || 'Chapter terbaru');
-    const sourceUrl = String(item.link || DOUJIN_BASE_URL);
-
-    return {
-        externalAdReply: {
-            showAdAttribution: false,
-            title: `${category} — ${title}`,
-            body: `${chapter} • Buka chapter terbaru`,
-            sourceUrl,
-            mediaType: 1,
-            renderLargerThumbnail: true,
-            ...(thumbnail ? { thumbnail } : {}),
-        },
-    };
-}
-
 const MAX_IMAGE_ATTEMPTS = 3;
 
 async function downloadDoujinImage(imgUrl, label) {
@@ -556,7 +540,13 @@ async function _processNewChapters(hisoka) {
     // dikirim sekaligus ke grup.
     if (data.source !== DOUJIN_STATE_SOURCE || data.history.length === 0) {
         data.source = DOUJIN_STATE_SOURCE;
-        data.history = [...new Set(latest.map(item => canonicalChapterLink(item.link)).filter(Boolean))].slice(-500);
+        // Baseline hanya mendaftarkan hasil scan saat ini. History lama tetap
+        // dipertahankan agar chapter yang pernah terkirim tidak bisa terkirim
+        // ulang jika kembali muncul di respons API.
+        data.history = [...new Set([
+            ...(data.history || []),
+            ...latest.map(item => canonicalChapterLink(item.link)).filter(Boolean),
+        ])].slice(-500);
         data.deliveries = {};
         data.retryQueue = {};
         saveDoujinData(data);
@@ -664,7 +654,6 @@ async function _processNewChapters(hisoka) {
                     image: cover.jpgBuffer,
                     mimetype: 'image/jpeg',
                     caption,
-                    contextInfo: buatKonteksLinkChapter(enrichedItem, cover.jpgBuffer),
                 };
                 await hisoka.sendMessage(jid, imagePayload);
                 delivered.add(jid);
@@ -815,8 +804,6 @@ async function simulasiDoujinNotif({ validasi = false } = {}) {
                 thumbnailBytes: cover.jpgBuffer.length,
                 thumbnailReady: Boolean(cover.jpgBuffer.length),
                 chapterLink: detail.link,
-                thumbnailClickUrl: detail.link,
-                clickableThumbnail: true,
                 captionHasCategory: caption.includes(detail.categoryLabel),
                 captionHasChapter: caption.includes(detail.chapter),
                 captionHasChapterLink: caption.includes(detail.link),
@@ -882,7 +869,6 @@ async function runDoujinTest({ hisoka, m, tolak }) {
             image: cover.jpgBuffer,
             mimetype: 'image/jpeg',
             caption,
-            contextInfo: buatKonteksLinkChapter(enrichedItem, cover.jpgBuffer),
         });
     } catch (e) {
         await tolak(hisoka, m, `❌ Terjadi kesalahan saat tes: ${e.message}`);
@@ -1218,6 +1204,5 @@ module.exports = {
     simulasiDoujinNotif,
     simulasikanPollingChapter,
     normalisasiMetadata,
-    buatKonteksLinkChapter,
     buatCaptionDoujin,
 };

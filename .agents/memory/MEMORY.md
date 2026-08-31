@@ -19,3 +19,4 @@
 - [Doujindesu monitor reliability](doujindesu-monitor-reliability.md) — monitor membaca empat blok kategori situs dan delivery harus retry per grup sebelum masuk history
 - [DoujinDesu XXX API](doujindesu-xxx-api.md) — situs baru adalah SPA; gunakan API terenkripsi per jam dan endpoint chapter, bukan parser HTML lama
 - [DoujinDesu series metadata](doujindesu-series-metadata.md) — endpoint detail seri diperlukan untuk cover akurat dan metadata realtime di halaman info PDF
+- [DoujinDesu state versioning](doujindesu-state-versioning.md) — bump source saat identitas atau aturan pemilihan chapter berubah agar restart tidak mengirim history API massal

@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 30/08/2026, 07.49.58  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 31/08/2026, 04.15.46  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,27 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  command:doujinnotif
+│  #001  —  DoujinMonitor
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  Cannot find module 'pdfkit'
-Require stack:
-- /home/runner/workspace/SEMUA_FITUR/anime/hentaidad.cjs
-- /home/runner/workspace/message.js
+│  [DoujinMonitor] Error scheduler: buatKonteksLinkChapter is not defined
 │
 │  DETAIL
-│  Sumber      : command:doujinnotif
+│  Sumber      : DoujinMonitor
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 30/08/2026, 07.49.58
-│  Terakhir    : 30/08/2026, 07.49.58
+│  Pertama     : 31/08/2026, 04.15.46
+│  Terakhir    : 31/08/2026, 04.15.46
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: Cannot find module 'pdfkit'
-│     Require stack:
-│     - /home/runner/workspace/SEMUA_FITUR/anime/hentaidad.cjs
+│  ▶  Error: [DoujinMonitor] Error scheduler: buatKonteksLinkChapter is not defined
+│     at console.error (file:///home/runner/workspace/index.js:435:27)
+│     at Timeout.runDoujin [as _onTimeout] (file:///home/runner/workspace/index.js:1764:57)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 30/08/2026, 07.49.58
+  Terakhir diperbarui: 31/08/2026, 04.15.46
 ════════════════════════════════════════════════════════════════════════

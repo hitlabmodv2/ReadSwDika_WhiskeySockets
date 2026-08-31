@@ -38,7 +38,7 @@ _Pantau chapter terbaru dari `doujin.desu.xxx` dan kirim informasi lengkap beser
 • Respons API diproses dengan dekripsi yang sesuai, lalu detail chapter dan URL gambar diambil dari endpoint reader.
 • Caption informasi menampilkan *judul*, *kategori*, *chapter*, tanggal update web, metadata seri, dan link chapter.
 • Caption memakai format WhatsApp secara kontekstual: _judul miring_, `nilai penting monospace`, daftar bernomor, bullet, dan quote sumber.
-• Pesan dikirim sebagai gambar thumbnail cover seri dengan link preview yang menunjuk ke chapter realtime.
+• Pesan dikirim sebagai gambar thumbnail cover seri biasa; link chapter realtime dicantumkan jelas di caption.
 • Jika satu grup gagal menerima pesan, pengiriman grup tersebut akan dicoba ulang tanpa mengirim duplikat ke grup yang sudah berhasil.
 • Status ON/OFF dan kategori grup tetap tersimpan di `config.json`, sedangkan history chapter dan status delivery tersimpan rapi di `data/doujindesunotif/state.json`.
 • Saat sumber atau domain berubah, baseline baru dibuat agar chapter lama tidak terkirim massal; konfigurasi kategori lama tetap kompatibel.
@@ -116,7 +116,7 @@ Setiap perubahan chapter mengirim satu gambar thumbnail cover dengan:
 • informasi seri lengkap;
 • kategori dan chapter terbaru;
 • tanggal update dari web;
-• link chapter realtime yang sama dengan link thumbnail.
+• link chapter realtime yang dicantumkan jelas di caption.
 
 Chapter lama tidak dikirim ulang, dan command `.doujinnotif test` menampilkan satu preview lengkap.
 
@@ -124,7 +124,7 @@ Chapter lama tidak dikirim ulang, dan command `.doujinnotif test` menampilkan sa
 🔄 *PATCH AKURASI — 30 Agustus 2026*
 ━━━━━━━━━━━━━━━━━━━━━━
 *1. 🔗 Link Chapter Realtime*
-Link chapter dipindahkan ke bagian paling atas caption agar langsung terlihat. Link preview thumbnail memakai `sourceUrl` yang sama dengan link chapter.
+Link chapter dipindahkan ke bagian paling atas caption agar langsung terlihat. Thumbnail tetap menjadi gambar biasa tanpa link preview clickable.
 
 *2. 🖼️ Preview Test Lengkap*
 `.doujinnotif test` sekarang mengirim satu preview gambar thumbnail dengan caption informasi lengkap. Validasi internal tetap tidak mengirim WhatsApp.
@@ -137,6 +137,7 @@ Link chapter dipindahkan ke bagian paling atas caption agar langsung terlihat. L
 • Thumbnail dan link chapter: valid
 • Simulasi `Chapter 20 → Chapter 20 → Chapter 21`: hanya `Chapter 20 → Chapter 21`
 • PDF dan halaman chapter: tidak digunakan
+• Versi state dinaikkan saat aturan latest-per-series berubah agar chapter lama tidak terkirim massal setelah restart
 
 > _Status: perubahan scraper dan preview sudah divalidasi tanpa pengiriman WhatsApp oleh simulasi._
 ━━━━━━━━━━━━━━━━━━━━━━
