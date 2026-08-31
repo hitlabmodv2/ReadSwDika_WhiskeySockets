@@ -6,8 +6,8 @@
 _📅 Rabu, 23 Juli 2026_ 🌙
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V27.2*
-✨ *2 Fitur Baru*
-🐛 *2 Fix Bug*
+✨ *3 Fitur Baru*
+🐛 *3 Fix Bug*
 🛠️ *2 Fix Error*
 🚀 *1 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -28,6 +28,23 @@ _Fitur untuk mengambil informasi channel/saluran WhatsApp secara realtime._
 • Hasil dikirim sebagai reply ke pesan command dan tersedia tombol *Copy JID Channel*.
 > _Cek JID channel sekarang lebih mudah dan akurat._
 
+*3. 🔞 `.doujinnotif` / `.doujindesu` — Monitor Doujindesu Realtime*
+_Pantau chapter terbaru dari `doujin.desu.xxx` dan kirim informasi lengkap beserta thumbnail cover ke grup._
+1. Ketik `.doujinnotif` untuk membuka menu, lalu gunakan tombol *Edit Kategori*.
+2. Pilih kategori secara terpisah: `Manga 18`, `Manhwa 18`, dan `Doujinshi 18`.
+3. Gunakan `.doujinnotif on` untuk mengaktifkan atau `.doujinnotif off` untuk menonaktifkan grup.
+4. Gunakan `.doujinnotif test` untuk menguji scraper, metadata, thumbnail, caption, dan link chapter.
+• Monitor memakai API situs SPA dan melakukan polling otomatis setiap 60 detik untuk tiga kategori rilisan terbaru.
+• Respons API diproses dengan dekripsi yang sesuai, lalu detail chapter dan URL gambar diambil dari endpoint reader.
+• Caption informasi menampilkan *judul*, *kategori*, *chapter*, tanggal update web, metadata seri, dan link chapter.
+• Caption memakai format WhatsApp secara kontekstual: _judul miring_, `nilai penting monospace`, daftar bernomor, bullet, dan quote sumber.
+• Pesan dikirim sebagai gambar thumbnail cover seri biasa; link chapter realtime dicantumkan jelas di caption.
+• Jika satu grup gagal menerima pesan, pengiriman grup tersebut akan dicoba ulang tanpa mengirim duplikat ke grup yang sudah berhasil.
+• Status ON/OFF dan kategori grup tetap tersimpan di `config.json`, sedangkan history chapter dan status delivery tersimpan rapi di `data/doujindesunotif/state.json`.
+• Saat sumber atau domain berubah, baseline baru dibuat agar chapter lama tidak terkirim massal; konfigurasi kategori lama tetap kompatibel.
+• Log monitor menampilkan satu baris ringkas berisi judul, kategori, status pengiriman, dan jumlah grup agar tidak spam.
+> _Hasil: notif Doujindesu berjalan realtime berbasis polling 1 menit, mengikuti tiga kategori, tidak mengulang chapter lama, dan mengirim thumbnail serta link chapter terbaru._
+
 ━━━━━━━━━━━━━━━━━━━━━━
 🐛 *BUG FIX*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -45,6 +62,16 @@ Memperbaiki jumlah `TotalStory` yang sebelumnya menghitung waktu story diterima 
 3. Data lama tetap dapat dihitung menggunakan status baca yang tersimpan.
 > _Hasil: `TotalStory` sekarang lebih akurat dan realtime mengikuti proses AutoReadStoryWhatsApp._
 ~Sebelumnya beberapa story dalam satu batch dapat membuat setiap log menampilkan jumlah total yang sama, meskipun belum semuanya selesai diproses.~
+
+*3. 🔞 `.doujinnotif` — Latest Chapter, Metadata, dan Thumbnail Lebih Akurat*
+Memperbaiki notifikasi DoujinDesu agar selalu memakai chapter terbaru dan informasi seri dari halaman detail sumber.
+1. Endpoint `/manga` sekarang dipilih satu chapter terbaru per seri berdasarkan waktu update, dengan nomor chapter sebagai fallback.
+2. Metadata `Type`, `Status`, `Alternative Titles`, `Authors`, `Groups`, `Series`, `Characters`, dan `Genres` diambil dari endpoint detail seri.
+3. `Rating`, `Views`, `Synopsis`, cover, dan link chapter mengikuti item realtime yang sama.
+• Tidak ada lagi pengambilan halaman chapter atau pembuatan dokumen PDF.
+• Jika metadata, cover, atau gambar gagal diambil, item tetap pending agar bisa dicoba ulang pada polling berikutnya.
+> _Hasil: notifikasi Doujindesu menampilkan informasi lengkap, thumbnail kategori yang sesuai, dan link chapter realtime tanpa mengulang chapter lama._
+~Sebelumnya beberapa chapter historis dari satu seri dapat ikut diproses sebagai rilisan baru.~
 
 ━━━━━━━━━━━━━━━━━━━━━━
 🛠️ *FIX ERROR*
@@ -71,16 +98,46 @@ Memperbaiki error pada informasi channel WhatsApp agar nama channel dan detail l
 ━━━━━━━━━━━━━━━━━━━━━━
 🚀 *PERUBAHAN*
 ━━━━━━━━━━━━━━━━━━━━━━
-*1. 🎭 .wm — Bisa Langsung Reply Sticker*
-_Sekarang `.wm` bisa langsung digunakan dengan reply 🖼️ *sticker*, tidak perlu lewat gambar terlebih dahulu._
-1. Reply sticker yang ingin diproses.
-2. Ketik command dengan format `Pack|Author`.
-Contoh:
-- `.wm wily`
-- `.wm Wily|kun`
-> _Gunakan tanda `|` untuk memisahkan nama pack dan author._
+*1. 🔞 Doujindesu — Penggantian Domain Scraper*
+_Sumber notif Doujindesu dipindahkan dari `doujindesu.ws` ke `doujin.desu.xxx` agar scraper mengikuti situs aktif terbaru._
+1. Scraper lama berbasis halaman HTML diganti dengan API situs SPA.
+2. Data chapter diambil dari tiga kategori: `Manga 18`, `Manhwa 18`, dan `Doujinshi 18`.
+3. Pergantian sumber membuat baseline baru agar chapter lama tidak terkirim massal.
+> _Hasil: notif Doujindesu berjalan otomatis dengan domain, kategori, thumbnail, dan link chapter yang lebih akurat._
 
 ━━━━━━━━━━━━━━━━━━━━━━
 📝 *RINGKASAN SIMPEL*
 _(Buat yang mau tau singkatnya aja)_
+━━━━━━━━━━━━━━━━━━━━━━
+🔞 *Doujindesu* memantau tiga kategori secara realtime setiap 60 detik:
+`Manga 18`, `Manhwa 18`, dan `Doujinshi 18`.
+
+Setiap perubahan chapter mengirim satu gambar thumbnail cover dengan:
+• informasi seri lengkap;
+• kategori dan chapter terbaru;
+• tanggal update dari web;
+• link chapter realtime yang dicantumkan jelas di caption.
+
+Chapter lama tidak dikirim ulang, dan command `.doujinnotif test` menampilkan satu preview lengkap.
+
+━━━━━━━━━━━━━━━━━━━━━━
+🔄 *PATCH AKURASI — 30 Agustus 2026*
+━━━━━━━━━━━━━━━━━━━━━━
+*1. 🔗 Link Chapter Realtime*
+Link chapter dipindahkan ke bagian paling atas caption agar langsung terlihat. Thumbnail tetap menjadi gambar biasa tanpa link preview clickable.
+
+*2. 🖼️ Preview Test Lengkap*
+`.doujinnotif test` sekarang mengirim satu preview gambar thumbnail dengan caption informasi lengkap. Validasi internal tetap tidak mengirim WhatsApp.
+
+*3. 🧪 Hasil Simulasi*
+• Total item terbaru: `72`
+• Item unik: `72`
+• Duplikat: `0`
+• Kategori: `24` item per kategori
+• Thumbnail dan link chapter: valid
+• Simulasi `Chapter 20 → Chapter 20 → Chapter 21`: hanya `Chapter 20 → Chapter 21`
+• PDF dan halaman chapter: tidak digunakan
+• Versi state dinaikkan saat aturan latest-per-series berubah agar chapter lama tidak terkirim massal setelah restart
+
+> _Status: perubahan scraper dan preview sudah divalidasi tanpa pengiriman WhatsApp oleh simulasi._
 ━━━━━━━━━━━━━━━━━━━━━━

@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 23/08/2026, 14.38.35  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 31/08/2026, 04.15.46  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  console.error
+│  #001  —  DoujinMonitor
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [31m[HotReload] Tidak bisa watch 'SEMUA_FITUR/info/cekjidch.cjs':[39m ENOENT: no such file or directory, watch '/home/runner/workspace/SEMUA_FITUR/info/cekjidch.cjs'
+│  [DoujinMonitor] Error scheduler: buatKonteksLinkChapter is not defined
 │
 │  DETAIL
-│  Sumber      : console.error
+│  Sumber      : DoujinMonitor
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 23/08/2026, 14.38.35
-│  Terakhir    : 23/08/2026, 14.38.35
+│  Pertama     : 31/08/2026, 04.15.46
+│  Terakhir    : 31/08/2026, 04.15.46
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [31m[HotReload] Tidak bisa watch 'SEMUA_FITUR/info/cekjidch.cjs':[39m ENOENT: no such file or directory, watch '/home/runner/workspace/SEMUA_FITUR/info/cekjidch.cjs'
+│  ▶  Error: [DoujinMonitor] Error scheduler: buatKonteksLinkChapter is not defined
 │     at console.error (file:///home/runner/workspace/index.js:435:27)
-│     at watchFile (file:///home/runner/workspace/src/helper/hotReload.js:326:17)
+│     at Timeout.runDoujin [as _onTimeout] (file:///home/runner/workspace/index.js:1764:57)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 23/08/2026, 14.38.35
+  Terakhir diperbarui: 31/08/2026, 04.15.46
 ════════════════════════════════════════════════════════════════════════
