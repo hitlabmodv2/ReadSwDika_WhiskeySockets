@@ -40,5 +40,47 @@
       }
     ],
     "processedAt": "2026-09-23T09:28:51.712Z"
+  },
+  "AC430631E0E878E425D7E99AA383C0E1": {
+    "id": "AC430631E0E878E425D7E99AA383C0E1",
+    "sender": "62895359467829@s.whatsapp.net",
+    "name": "Tisna",
+    "type": "videoMessage",
+    "arrivedAt": "2026-09-23T11:46:12.405Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐬",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "62895359467829",
+    "resolvedPn": "62895359467829@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "62895359467829@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC430631E0E878E425D7E99AA383C0E1",
+      "participant": "198689532428341@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-09-23T11:46:31.274Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62895359467829@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC430631E0E878E425D7E99AA383C0E1",
+        "participant": "198689532428341@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62895359467829@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC430631E0E878E425D7E99AA383C0E1",
+        "participant": "62895359467829@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-09-23T11:46:31.273Z"
   }
 }

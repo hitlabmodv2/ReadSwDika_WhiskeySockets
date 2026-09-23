@@ -3,13 +3,13 @@
 🛠️ *Recode By:* Bang Wily
 
 📢 *INFORMASI RILIS*
-_📅 Rabu, 23 September 2026_ 🌙
+_📅 Sabtu malam, 26 September 2026_ 🌙
 ━━━━━━━━━━━━━━━━━━━━━━
 🤖 *WILY BOT — V27.3*
 ✨ *1 Fitur Baru*
 🐛 *0 Fix Bug*
 🛠️ *2 Fix Error*
-🚀 *7 Perubahan*
+🚀 *8 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -91,4 +91,10 @@ Menu `.setbrowser` dan `.aturbrowser` sekarang menyediakan button single-select 
 • Nomor V13–V16 dipertahankan agar konfigurasi browser pengguna yang sudah ada tetap kompatibel.
 • Konfigurasi lama yang masih menunjuk V12 memakai fallback aman V1 sampai browser baru dipilih.
 > Profil iPhone tidak lagi digunakan karena pairing code-nya ditolak oleh WhatsApp.
+
+*8. 🖼️ `.smeme` ditambahkan ke daftar menu*
+• `.smeme [teks]` sekarang tercantum pada menu utama bot.
+• User jadibot juga dapat melihat `.smeme [teks]` pada menu jadibot.
+• Menu fallback mode hemat storage turut mencantumkan command ini.
+> Informasi menu `.smeme` sekarang konsisten untuk bot utama dan user jadibot.
 ━━━━━━━━━━━━━━━━━━━━━━
