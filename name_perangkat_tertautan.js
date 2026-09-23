@@ -35,25 +35,33 @@
  * ─────────────────────────────────────────────
  */
 
+import { Browsers } from '@whiskeysockets/baileys';
+
 export const BROWSER_LIST = [
-        { key: 'v1',  label: 'Ubuntu + Chrome',         value: ['Ubuntu',   'Chrome',  '124.0.6367.82']      },
-        { key: 'v2',  label: 'Windows + Chrome',        value: ['Windows',  'Chrome',  '125.0.6422.141']     },
-        { key: 'v3',  label: 'MacOS + Chrome',          value: ['Mac OS',   'Chrome',  '126.0.6478.114']     },
-        { key: 'v4',  label: 'Ubuntu + Firefox',        value: ['Ubuntu',   'Firefox', '125.0.1.20240501']   },
-        { key: 'v5',  label: 'Windows + Firefox',       value: ['Windows',  'Firefox', '126.0.0.20240603']   },
-        { key: 'v6',  label: 'MacOS + Firefox',         value: ['Mac OS',   'Firefox', '127.0.0.20240617']   },
-        { key: 'v7',  label: 'Ubuntu + Safari',         value: ['Ubuntu',   'Safari',  '617.2.4.4.9.1']      },
-        { key: 'v8',  label: 'MacOS + Safari',          value: ['Mac OS',   'Safari',  '619.2.8.12.8.1']     },
-        { key: 'v9',  label: 'Windows + Edge',          value: ['Windows',  'Edge',    '124.0.2478.67']      },
-        { key: 'v10', label: 'Ubuntu + Edge',           value: ['Ubuntu',   'Edge',    '125.0.2535.51']      },
-        { key: 'v11', label: 'Android + Chrome Mobile', value: ['Android',  'Chrome',  '125.0.6422.165']     },
-        { key: 'v12', label: 'iPhone + Safari Mobile',  value: ['iPhone',   'Safari',  '619.2.8.12.8.1']     },
+        // Elemen ketiga adalah versi OS dari profil resmi Baileys,
+        // bukan versi Chrome/Firefox/Safari.
+        { key: 'v1',  label: 'Ubuntu + Chrome',         value: Browsers.ubuntu('Chrome')                  },
+        { key: 'v2',  label: 'Windows + Chrome',        value: Browsers.windows('Chrome')                 },
+        { key: 'v3',  label: 'MacOS + Chrome',          value: Browsers.macOS('Chrome')                   },
+        { key: 'v4',  label: 'Ubuntu + Firefox',        value: Browsers.ubuntu('Firefox')                 },
+        { key: 'v5',  label: 'Windows + Firefox',       value: Browsers.windows('Firefox')                },
+        { key: 'v6',  label: 'MacOS + Firefox',         value: Browsers.macOS('Firefox')                  },
+        { key: 'v7',  label: 'Ubuntu + Safari',         value: Browsers.ubuntu('Safari')                  },
+        { key: 'v8',  label: 'MacOS + Safari',          value: Browsers.macOS('Safari')                   },
+        { key: 'v9',  label: 'Windows + Edge',          value: Browsers.windows('Edge')                   },
+        { key: 'v10', label: 'Ubuntu + Edge',           value: Browsers.ubuntu('Edge')                    },
+        { key: 'v11', label: 'Android + Chrome Mobile', value: Browsers.android('Chrome')                 },
+        { key: 'v12', label: 'iPhone + Safari Mobile',  value: ['iPhone', 'Safari', '17.5.1']             },
+        { key: 'v13', label: 'Windows + Opera',         value: Browsers.windows('Opera')                   },
+        { key: 'v14', label: 'MacOS + Edge',            value: Browsers.macOS('Edge')                      },
+        { key: 'v15', label: 'Ubuntu + Opera',          value: Browsers.ubuntu('Opera')                    },
+        { key: 'v16', label: 'MacOS + Opera',           value: Browsers.macOS('Opera')                     },
 ];
 
 export function getBrowserDevice(cfg) {
         const selected = (cfg?.browserDevice?.selected || 'v1').toLowerCase();
         const found = BROWSER_LIST.find(b => b.key === selected);
-        return found ? found.value : BROWSER_LIST[0].value;
+        return found ? [...found.value] : [...BROWSER_LIST[0].value];
 }
 
 export default getBrowserDevice;

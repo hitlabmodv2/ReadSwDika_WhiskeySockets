@@ -24,7 +24,9 @@
  */
 'use strict';
 
-async function handleAturBrowser({ hisoka, m, query, tolak, logCommand, loadConfig, isMainBot, BROWSER_LIST, listAturBrowserMap, pendingAturBrowser }) {
+const { sendBrowserConfirm } = require('./setbrowser-cmd.cjs');
+
+async function handleAturBrowser({ hisoka, m, query, tolak, logCommand, loadConfig, isMainBot, BROWSER_LIST, listAturBrowserMap, pendingAturBrowser, Button }) {
         if (!isMainBot(hisoka)) return;
         if (!m.isOwner) return;
         try {
@@ -44,33 +46,55 @@ async function handleAturBrowser({ hisoka, m, query, tolak, logCommand, loadConf
                         const listTeks   = BROWSER_LIST.map(b =>
                                 `│ ${b.key === currentKey ? '✅' : '▪️'} *${b.key.toUpperCase()}* — ${b.label}`
                         ).join('\n');
-                        const listMsg = await tolak(hisoka, m,
+                        const _activeLabel = global.__activeBrowserArr && global.__activeBrowserArr.length >= 2
+                                ? `${global.__activeBrowserArr[0]} + ${global.__activeBrowserArr[1]} (${global.__activeBrowserArr[2] || ''})`.trim()
+                                : (BROWSER_LIST.find(b => b.key === currentKey) || BROWSER_LIST[0]).label;
+                        const listBody =
                                 `╭═══════════════════════════╮\n` +
                                 `║  🖥️  *ATUR BROWSER BOT*  🖥️  ║\n` +
                                 `╚═══════════════════════════╝\n\n` +
-                                `📱 *Browser Aktif Saat Ini:*\n` +
-                                `✅ *${global.__activeBrowserArr && global.__activeBrowserArr.length >= 2 ? `${global.__activeBrowserArr[0]} + ${global.__activeBrowserArr[1]} (${global.__activeBrowserArr[2] || ''})`.trim() : (BROWSER_LIST.find(b => b.key === currentKey) || BROWSER_LIST[0]).label}*\n\n` +
+                                `📱 *Browser aktif saat ini:*\n` +
+                                `✅ *${_activeLabel}*\n\n` +
+                                `Pilih perangkat dari tombol di bawah.\n` +
+                                `Bot lama tetap aktif sampai perangkat baru berhasil terhubung.\n\n` +
+                                `📲 *${_abHasPairNum ? 'Pairing code' : 'QR Code'} akan dikirim ke chat ini setelah pilihan dikonfirmasi.*`;
+                        const listFallback =
+                                `${listBody}\n\n` +
                                 `📋 *Pilihan Browser:*\n` +
                                 `${listTeks}\n\n` +
-                                `📌 *Cara ganti:*\n` +
-                                `↩️ *Reply pesan ini* dengan *v2* untuk pilih\n` +
-                                `*.setbrowser v2* — ketik manual\n` +
-                                `*.setbrowser v2 ya* — langsung ganti tanpa konfirmasi\n\n` +
-                                `┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n` +
-                                `╭─────────────────────────╮\n` +
-                                `│  ⚠️  *HARAP BACA DULU!*  ⚠️  │\n` +
-                                `╰─────────────────────────╯\n` +
-                                `ℹ️ *Cara kerja (tanpa downtime):*\n` +
-                                `  • Koneksi baru dibuka di background\n` +
-                                `  • *${_abHasPairNum ? 'Pairing code' : 'QR Code'} dikirim ke chat ini*\n` +
-                                `  • Bot lama tetap aktif sampai terhubung\n` +
-                                `  • Session lama dihapus setelah sukses\n\n` +
-                                `🔁 Yang perlu kamu lakukan:\n` +
-                                `  • Buka *WhatsApp* di HP kamu\n` +
-                                `  • Masuk ke *Perangkat Tertaut*\n` +
-                                `  • ${_abHasPairNum ? 'Input *pairing code* yang dikirim bot' : 'Scan *QR Code* yang dikirim bot'}\n\n` +
-                                `〽️ *Lanjutkan hanya jika siap!*`
-                        );
+                                `📌 *Cara manual:*\n` +
+                                `Reply pesan ini dengan *v2*, atau ketik *.setbrowser v2*.\n\n` +
+                                `⚠️ Ketik *.setbrowser* lagi untuk menampilkan menu.`;
+                        let listMsg;
+                        try {
+                                if (typeof Button !== 'function') throw new Error('Button builder tidak tersedia');
+                                const _browserBtn = new Button()
+                                        .setBody(listBody)
+                                        .setFooter('Pilih satu perangkat tertaut')
+                                        .addSelection('🖥️ Pilih Browser');
+                                _browserBtn.makeSections('Profil V1–V6');
+                                BROWSER_LIST.slice(0, 6).forEach(b => {
+                                        _browserBtn.makeRow(
+                                                b.key.toUpperCase(),
+                                                `${b.key === currentKey ? '✅ ' : ''}${b.label}`,
+                                                b.value.join(' | '),
+                                                b.key
+                                        );
+                                });
+                                _browserBtn.makeSections('Profil V7–V16');
+                                BROWSER_LIST.slice(6).forEach(b => {
+                                        _browserBtn.makeRow(
+                                                b.key.toUpperCase(),
+                                                `${b.key === currentKey ? '✅ ' : ''}${b.label}`,
+                                                b.value.join(' | '),
+                                                b.key
+                                        );
+                                });
+                                listMsg = await _browserBtn.run(m.from, hisoka, m);
+                        } catch (buttonError) {
+                                console.warn('[AturBrowser] single_select gagal, memakai fallback teks:', buttonError?.message || buttonError);
+                                listMsg = await tolak(hisoka, m, listFallback);
+                        }
                         listAturBrowserMap.set(m.sender, { keyId: listMsg?.key?.id, expiresAt: Date.now() + 120000 });
                         return;
                 }
@@ -126,21 +150,10 @@ async function handleAturBrowser({ hisoka, m, query, tolak, logCommand, loadConf
                 }
 
                 pendingAturBrowser.delete(m.sender);
-                const konfirmMsg = await tolak(hisoka, m,
-                        `╭══════════════════════════╮\n` +
-                        `║  ⚠️  *KONFIRMASI GANTI BROWSER*  ⚠️  ║\n` +
-                        `╰══════════════════════════╯\n\n` +
-                        `🖥️ *Pilihan:* ${pilihan.label}\n` +
-                        `📦 *Detail:* ${pilihan.value.join(' | ')}\n\n` +
-                        `ℹ️ *Proses (tanpa downtime):*\n` +
-                        `• Koneksi baru dibuka dengan browser baru\n` +
-                        `• *${!!(process.env.BOT_NUMBER_PAIR || config?.botNumber || '').replace(/[^0-9]/g, '') ? 'Pairing code' : 'QR Code'} dikirim ke chat ini*\n` +
-                        `• Bot lama tetap aktif sampai terhubung\n` +
-                        `• Session lama dihapus *setelah* koneksi baru berhasil\n\n` +
-                        `✅ *Reply pesan ini* dengan *ya* untuk lanjut\n` +
-                        `❌ *Reply pesan ini* dengan *tidak* untuk batal\n\n` +
-                        `⏳ *Berlaku 30 detik...*`
-                );
+                const konfirmMsg = await sendBrowserConfirm({
+                        hisoka, m, Button, pilihan, config,
+                        fallbackReply: text => tolak(hisoka, m, text),
+                });
                 const _abTimer = setTimeout(() => {
                         if (pendingAturBrowser.has(m.sender)) {
                                 pendingAturBrowser.delete(m.sender);

@@ -2,9 +2,9 @@
   "botVersion": "V27.1",
   "botNumber": "6285159438825",
   "browserDevice": {
-    "selected": "v1"
+    "selected": "v9"
   },
-  "pairedBrowserKey": "v1",
+  "pairedBrowserKey": "v9",
   "pairingCode": "AAAAAAAA",
   "jadibotPairingMode": "v2",
   "cekswTracking": true,
@@ -13,8 +13,8 @@
     "6289688206739"
   ],
   "sticker": {
-    "pack": "Alamak",
-    "author": "Anda Siapa?"
+    "pack": "Punya",
+    "author": "Bang Wily"
   },
   "autoOnline": {
     "enabled": false,
@@ -179,7 +179,7 @@
         "diubahPada": 1782833367834
       },
       "120363429458957352@g.us": {
-        "enabled": true,
+        "enabled": false,
         "diubahPada": 1785704566171
       }
     }
@@ -243,7 +243,7 @@
         "diubahPada": 1784730444711
       },
       "120363429458957352@g.us": {
-        "enabled": true,
+        "enabled": false,
         "diubahPada": 1785704596393
       }
     },
@@ -256,7 +256,7 @@
   "doujinnotif": {
     "groups": {
       "120363428460360783@g.us": {
-        "enabled": true,
+        "enabled": false,
         "updatedAt": 1787901894172
       }
     }
