@@ -81,7 +81,7 @@ async function handleAturBrowser({ hisoka, m, query, tolak, logCommand, loadConf
                                                 b.key
                                         );
                                 });
-                                _browserBtn.makeSections('Profil V7–V16');
+                                _browserBtn.makeSections('Profil V7–V11 & V13–V16');
                                 BROWSER_LIST.slice(6).forEach(b => {
                                         _browserBtn.makeRow(
                                                 b.key.toUpperCase(),

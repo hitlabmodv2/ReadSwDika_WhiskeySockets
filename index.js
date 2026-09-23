@@ -729,8 +729,9 @@ async function main() {
                 // Menu harus tampilkan pairedBrowserKey agar sesuai dengan yang WA tampilkan
                 {
                         const _cfg0 = loadConfig();
-                        const _pairedKey = (_cfg0.pairedBrowserKey || _cfg0.browserDevice?.selected || 'v1').toLowerCase();
-                        const _pairedInfo = BROWSER_LIST.find(b => b.key === _pairedKey) || BROWSER_LIST[0];
+                        const _pairedCandidate = (_cfg0.pairedBrowserKey || _cfg0.browserDevice?.selected || 'v1').toLowerCase();
+                        const _pairedInfo = BROWSER_LIST.find(b => b.key === _pairedCandidate) || BROWSER_LIST[0];
+                        const _pairedKey = _pairedInfo.key;
                         global.__activeBrowserKey = _pairedKey;
                         global.__activeBrowserArr = _pairedInfo.value; // ['Ubuntu','Chrome','136.x.x']
                 }

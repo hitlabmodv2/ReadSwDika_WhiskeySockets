@@ -51,7 +51,7 @@ export const BROWSER_LIST = [
         { key: 'v9',  label: 'Windows + Edge',          value: Browsers.windows('Edge')                   },
         { key: 'v10', label: 'Ubuntu + Edge',           value: Browsers.ubuntu('Edge')                    },
         { key: 'v11', label: 'Android + Chrome Mobile', value: Browsers.android('Chrome')                 },
-        { key: 'v12', label: 'iPhone + Safari Mobile',  value: ['iPhone', 'Safari', '17.5.1']             },
+        // V12 sengaja tidak digunakan: WhatsApp menolak pairing code untuk profil iPhone.
         { key: 'v13', label: 'Windows + Opera',         value: Browsers.windows('Opera')                   },
         { key: 'v14', label: 'MacOS + Edge',            value: Browsers.macOS('Edge')                      },
         { key: 'v15', label: 'Ubuntu + Opera',          value: Browsers.ubuntu('Opera')                    },

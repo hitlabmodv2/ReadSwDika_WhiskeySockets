@@ -124,5 +124,28 @@
       }
     ],
     "processedAt": "2026-09-23T09:45:29.279Z"
+  },
+  "ACE8EFC42CF68092039155DDE8A96ECB": {
+    "id": "ACE8EFC42CF68092039155DDE8A96ECB",
+    "sender": "6285283487456@s.whatsapp.net",
+    "name": "Juliansah",
+    "type": "videoMessage",
+    "arrivedAt": "2026-09-23T10:12:02.291Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285283487456",
+    "resolvedPn": "6285283487456@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285283487456@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACE8EFC42CF68092039155DDE8A96ECB",
+      "participant": "117183887728800@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-09-23T10:12:02.291Z"
   }
 }
