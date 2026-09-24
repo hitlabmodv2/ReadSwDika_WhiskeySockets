@@ -146,7 +146,7 @@
       "participant": "12442939724000@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-09-23T11:13:15.074Z",
+    "updatedAt": "2026-09-24T04:24:48.486Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
@@ -165,7 +165,9 @@
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-09-23T11:13:15.074Z"
+    "processedAt": "2026-09-23T11:13:15.074Z",
+    "deleted": true,
+    "deletedAt": "2026-09-24T04:24:48.486Z"
   },
   "22f20d55-ab64-4431-815d-0f493a84f1bc": {
     "id": "22f20d55-ab64-4431-815d-0f493a84f1bc",
@@ -292,5 +294,47 @@
       }
     ],
     "processedAt": "2026-09-23T11:46:20.978Z"
+  },
+  "A5E469D4382E9928C55242DF41D8CD08": {
+    "id": "A5E469D4382E9928C55242DF41D8CD08",
+    "sender": "6285150762138@s.whatsapp.net",
+    "name": "design",
+    "type": "videoMessage",
+    "arrivedAt": "2026-09-24T04:24:48.487Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐳",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285150762138",
+    "resolvedPn": "6285150762138@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285150762138@s.whatsapp.net",
+      "fromMe": false,
+      "id": "A5E469D4382E9928C55242DF41D8CD08",
+      "participant": "12442939724000@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-09-24T04:25:03.158Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285150762138@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A5E469D4382E9928C55242DF41D8CD08",
+        "participant": "12442939724000@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285150762138@s.whatsapp.net",
+        "fromMe": false,
+        "id": "A5E469D4382E9928C55242DF41D8CD08",
+        "participant": "6285150762138@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-09-24T04:25:03.157Z"
   }
 }

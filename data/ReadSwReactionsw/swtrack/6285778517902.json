@@ -1,13 +1,13 @@
 {
-  "ACEA63BCBEF1B1F8249A27D7247A2975": {
-    "id": "ACEA63BCBEF1B1F8249A27D7247A2975",
+  "AC1B5ECACC75B5E4EC9515B820FA21D9": {
+    "id": "AC1B5ECACC75B5E4EC9515B820FA21D9",
     "sender": "6285778517902@s.whatsapp.net",
     "name": "Stephanie Floriska",
-    "type": "videoMessage",
-    "arrivedAt": "2026-07-03T10:54:41.543Z",
+    "type": "imageMessage",
+    "arrivedAt": "2026-09-24T04:24:48.430Z",
     "read": true,
     "reacted": true,
-    "emoji": "⏺️⏏️⏹️",
+    "emoji": "🐡",
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6285778517902",
@@ -16,17 +16,17 @@
       "remoteJid": "status@broadcast",
       "remoteJidAlt": "6285778517902@s.whatsapp.net",
       "fromMe": false,
-      "id": "ACEA63BCBEF1B1F8249A27D7247A2975",
+      "id": "AC1B5ECACC75B5E4EC9515B820FA21D9",
       "participant": "178701056626923@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-07-03T10:54:55.550Z",
+    "updatedAt": "2026-09-24T04:24:57.316Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6285778517902@s.whatsapp.net",
         "fromMe": false,
-        "id": "ACEA63BCBEF1B1F8249A27D7247A2975",
+        "id": "AC1B5ECACC75B5E4EC9515B820FA21D9",
         "participant": "178701056626923@lid",
         "addressingMode": "lid"
       },
@@ -34,11 +34,11 @@
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6285778517902@s.whatsapp.net",
         "fromMe": false,
-        "id": "ACEA63BCBEF1B1F8249A27D7247A2975",
+        "id": "AC1B5ECACC75B5E4EC9515B820FA21D9",
         "participant": "6285778517902@s.whatsapp.net",
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-07-03T10:54:55.550Z"
+    "processedAt": "2026-09-24T04:24:57.316Z"
   }
 }
