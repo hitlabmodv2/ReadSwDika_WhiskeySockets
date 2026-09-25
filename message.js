@@ -937,7 +937,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                 if (await handleKomiktapChoice({ hisoka, m, pendingKomikChoices, getJadibotChoiceKey, getQuotedStanzaId, tolak, logError })) return;
 
                 // ── Handle reply ke pesan list .setbrowser → setbrowser-cmd.cjs ──
-                if (await handleSetbrowserListReply({ hisoka, m, listAturBrowserMap, pendingAturBrowser, isMainBot, loadConfig, getQuotedStanzaId, BROWSER_LIST, logCommand })) return;
+                if (await handleSetbrowserListReply({ hisoka, m, listAturBrowserMap, pendingAturBrowser, isMainBot, loadConfig, getQuotedStanzaId, BROWSER_LIST, logCommand, Button })) return;
 
                 // ── Handle reply ke pesan konfirmasi .setbrowser → setbrowser-cmd.cjs ──
                 if (await handleSetbrowserConfirmReply({ hisoka, m, pendingAturBrowser, isMainBot, loadConfig, getQuotedStanzaId, BROWSER_LIST, logCommand })) return;
@@ -1813,7 +1813,7 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 'aturbrowser':
                         case 'setbrowser': {
                                 const { handleAturBrowser } = _require(path.resolve('./SEMUA_FITUR/setting/aturbrowser.cjs'));
-                                await handleAturBrowser({ hisoka, m, query, tolak, logCommand, isMainBot, loadConfig, BROWSER_LIST, listAturBrowserMap, pendingAturBrowser });
+                                await handleAturBrowser({ hisoka, m, query, tolak, logCommand, isMainBot, loadConfig, BROWSER_LIST, listAturBrowserMap, pendingAturBrowser, Button });
                                 break;
                         }
 
@@ -1912,6 +1912,12 @@ export default async function ({ message, type: messagesType }, hisoka) {
                         case 's': {
                                 const { handleSticker } = _require(path.resolve('./SEMUA_FITUR/media/sticker-cmd.cjs'));
                                 await handleSticker({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, getMediaTypeFromMessage, downloadMediaBuffer, getQuotedMediaBuffer, unwrapMessagePayload, exec, util, path, fs });
+                                break;
+                        }
+
+                        case 'smeme': {
+                                const { handleSmeme } = _require(path.resolve('./SEMUA_FITUR/media/smeme.cjs'));
+                                await handleSmeme({ hisoka, m, query, tolak, logCommand, loadConfig, getMediaTypeFromMessage, downloadMediaBuffer, getQuotedMediaBuffer });
                                 break;
                         }
 

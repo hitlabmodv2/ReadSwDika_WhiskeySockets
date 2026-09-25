@@ -67,6 +67,7 @@ export function buildMenuUtama({ pushName, isOwner, uptimeStr, tgl, jam, browser
 │ .s / .sticker
 │ .wm / .swm
 │ .toimg
+│ .smeme [teks]
 │ .tovn
 │ .tomp3
 │ .stickerly

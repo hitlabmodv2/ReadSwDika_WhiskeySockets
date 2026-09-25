@@ -73,7 +73,10 @@ const silentLogger = pino({ level: 'silent' });
  */
 async function sendCopyButton(sock, jid, title, body, footer, copyCode, copyLabel) {
     try {
-        const msg = generateWAMessageFromContent(jid, {
+        // Buat content baru pada setiap tahap. Pesan final me-reply pesan
+        // sementara miliknya sendiri, seperti Button.selfReply(), tanpa
+        // mengirim pesan sementara tersebut ke WhatsApp.
+        const makeContent = () => ({
             interactiveMessage: {
                 body:   { text: body },
                 footer: { text: footer },
@@ -91,7 +94,22 @@ async function sendCopyButton(sock, jid, title, body, footer, copyCode, copyLabe
                     }]
                 }
             }
-        }, {});
+        });
+        const messageOptions = { userJid: sock.user?.id };
+        const selfReplyMessage = generateWAMessageFromContent(
+            jid,
+            makeContent(),
+            messageOptions
+        );
+        const msg = generateWAMessageFromContent(
+            jid,
+            makeContent(),
+            {
+                ...messageOptions,
+                quoted: selfReplyMessage,
+                messageId: selfReplyMessage.key.id,
+            }
+        );
         await sock.relayMessage(msg.key.remoteJid, msg.message, {
             messageId: msg.key.id,
             additionalNodes: [{

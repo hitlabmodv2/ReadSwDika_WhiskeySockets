@@ -201,12 +201,16 @@ export function buildFbCaptionPrompt({
     const visualBlock = visualDesc
         ? `\nAnalisis Visual (PRIORITAS UTAMA — dari AI Vision):\n"${visualDesc.substring(0, 600)}"`
         : '';
+    const contentBasis = visualDesc
+        ? 'Deskripsikan isi konten berdasarkan Analisis Visual yang diberikan.'
+        : 'Analisis visual tidak tersedia. Gunakan hanya caption asli dan metadata. Jika tidak cukup informasi, jangan tebak adegan video; buat caption netral.';
 
     return `Kamu adalah Wily, asisten bot WhatsApp yang cerdas, natural, dan sedikit bercanda.
 Tugasmu: buat caption WhatsApp untuk ${typeLabel} yang baru diunduh.
 
 DATA KONTEN:
 ${metaBlock}${visualBlock}
+Panduan isi: ${contentBasis}
 
 ═══════════════════════════════
 PANDUAN FORMATTING WhatsApp — PAKAI SESUAI KONTEKS KONTEN, BUKAN ASAL TEMPEL:
@@ -231,7 +235,7 @@ ATURAN PENGGUNAAN FORMATTING:
 
 FORMAT CAPTION:
 Baris 1  : ${emoji} *[Nama Page/User]* — bold, nama sumber
-Baris 2-4: Deskripsi isi konten — WAJIB berdasarkan Analisis Visual, pakai formatting sesuai konten
+Baris 2-4: ${visualDesc ? 'Deskripsi isi konten berdasarkan Analisis Visual, pakai formatting sesuai konten' : 'Deskripsi singkat hanya dari metadata yang tersedia; jangan menebak isi visual'}
            (1-2 kalimat biasa, atau list bernomor/berpoint kalau konten memang tips/langkah)
 Baris 5  : (opsional) Komentar/reaksi singkat santai yang nyambung dengan isi konten
 Baris 6+ : > [stats engagement] — WAJIB tampilkan dalam format quote jika ada datanya:
@@ -239,7 +243,7 @@ Baris 6+ : > [stats engagement] — WAJIB tampilkan dalam format quote jika ada 
            (hanya tampilkan stats yang memang ada datanya, jangan karang)
 
 ATURAN KETAT:
-1. Deskripsi HARUS berdasarkan Analisis Visual — spesifik, bukan frasa generik
+1. Jika Analisis Visual tersedia, deskripsi harus berdasar padanya; jika tidak, jangan mengarang adegan yang tidak ada di metadata
 2. Bahasa Indonesia santai, tidak kaku, terasa seperti kawan ngirim video
 3. DILARANG mengarang fakta di luar data yang diberikan
 4. DILARANG sertakan URL atau link

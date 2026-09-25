@@ -38,6 +38,9 @@ const path  = require('path');
 
 const SIGNUP_URL = 'https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key=AIzaSyAxof8_SbpDcww38NEQRhNh0Pzvbphh-IQ';
 const GEMINI_BASE_URL = 'https://firebasevertexai.googleapis.com/v1beta/projects/gemmy-ai-bdc03/models';
+const ISH_CHAT_URL = 'https://openai.junioralive.workers.dev/v1/chat/completions';
+const ISH_CHAT_MODEL = 'gpt-oss-120b';
+const ISH_CHAT_PROXY_KEY = 'ish-7f9e2c1b-5c8a-4b0f-9a7d-1e5c3b2a9f74';
 
 const TOKEN_CACHE_FILE = path.join(process.cwd(), 'data', 'gemini', 'tokens_scrape.json');
 fs.mkdirSync(path.join(process.cwd(), 'data', 'gemini'), { recursive: true });
@@ -215,8 +218,91 @@ class Gemini {
         return this._formatForWhatsApp(text);
     }
 
+    async _callIshChatFallback({ contents, config = {} }) {
+        const messages = [];
+        const systemInstruction = config.systemInstruction;
+
+        if (systemInstruction) {
+            const parts = typeof systemInstruction === 'string'
+                ? [{ text: systemInstruction }]
+                : systemInstruction.parts;
+            const systemText = Array.isArray(parts)
+                ? parts.map(part => typeof part?.text === 'string' ? part.text : '').filter(Boolean).join('\n')
+                : '';
+            if (systemText) messages.push({ role: 'system', content: systemText });
+        }
+
+        for (const item of contents) {
+            if (!item || typeof item !== 'object') {
+                throw new Error('Ish Chat fallback only supports text conversations.');
+            }
+
+            const role = item.role === 'model' ? 'assistant' : item.role;
+            if (!['user', 'assistant', 'system'].includes(role)) {
+                throw new Error('Ish Chat fallback cannot convert this Gemini message role.');
+            }
+
+            const parts = Array.isArray(item.parts) ? item.parts : [];
+            if (parts.some(part => part?.inlineData || part?.fileData || part?.functionCall || part?.functionResponse)) {
+                throw new Error('Ish Chat fallback only supports text; image and tool messages stay on Gemini.');
+            }
+
+            const text = parts
+                .map(part => typeof part?.text === 'string' ? part.text : '')
+                .filter(Boolean)
+                .join('\n');
+            if (text) messages.push({ role, content: text });
+        }
+
+        if (!messages.some(message => message.role === 'user')) {
+            throw new Error('Ish Chat fallback received no user text.');
+        }
+
+        const { data } = await axios.post(ISH_CHAT_URL, {
+            model: ISH_CHAT_MODEL,
+            messages,
+            stream: false,
+            ...(typeof config.temperature === 'number' ? { temperature: config.temperature } : {}),
+            ...(typeof config.topP === 'number' ? { top_p: config.topP } : {}),
+            ...(Number.isInteger(config.maxOutputTokens) ? { max_tokens: config.maxOutputTokens } : {}),
+            ...(Array.isArray(config.stopSequences) && config.stopSequences.length
+                ? { stop: config.stopSequences }
+                : {}),
+        }, {
+            headers: {
+                'content-type': 'application/json',
+                origin: 'https://ish.chat',
+                referer: 'https://ish.chat/',
+                'user-agent': 'Mozilla/5.0 (Linux; Android 15; SM-F958 Build/AP3A.240905.015) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.6723.86 Mobile Safari/537.36',
+                'x-proxy-key': ISH_CHAT_PROXY_KEY,
+            },
+            timeout: 30000,
+        });
+
+        const text = data?.choices?.[0]?.message?.content;
+        if (typeof text !== 'string' || !text.trim()) {
+            throw new Error('Ish Chat returned an empty response.');
+        }
+        return this._formatForWhatsApp(text.trim());
+    }
+
     async chat({ contents, model = 'gemini-3.1-pro-preview', ...config }) {
         if (!Array.isArray(contents)) throw new Error('Contents must be an array.');
+
+        let ishPrimaryError = null;
+        try {
+            const result = await this._callIshChatFallback({ contents, config });
+            console.log(`[Gemini] ✅ Berhasil menggunakan provider utama Ish Chat (${ISH_CHAT_MODEL})`);
+            return result;
+        } catch (err) {
+            ishPrimaryError = err;
+            const reason = err?.message || String(err);
+            if (/only supports text|cannot convert|no user text/i.test(reason)) {
+                console.log('[Gemini] ℹ️ Ish Chat dilewati untuk konten nonteks; lanjut ke Gemini');
+            } else {
+                console.warn(`[Gemini] ⚠️ Provider utama Ish Chat gagal; lanjut ke fallback Gemini: ${reason}`);
+            }
+        }
 
         const requestedModel = model;
         const modelChain     = [requestedModel, ...FALLBACK_MODELS.filter(m => m !== requestedModel)];
@@ -290,7 +376,11 @@ class Gemini {
             }
         }
 
-        console.error(`[Gemini] ❌ Semua model gagal. Chain: [${modelChain.join(' → ')}]. Error terakhir:`, lastErr?.message);
+        console.error(
+            `[Gemini] ❌ Provider utama Ish Chat dan seluruh model Gemini gagal. Ish Chat: ${ishPrimaryError?.message || 'dilewati'}; ` +
+            `chain: [${modelChain.join(' → ')}]. Error Gemini terakhir:`,
+            lastErr?.message
+        );
 
         if (lastErr?.response?.data) {
             const body = lastErr.response.data;

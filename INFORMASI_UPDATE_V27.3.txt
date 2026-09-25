@@ -1,0 +1,107 @@
+📜 *ReadSwDika*
+🔰 *Base Script:* Dika Ardnt
+🛠️ *Recode By:* Bang Wily
+
+📢 *INFORMASI RILIS*
+_📅 Sabtu malam, 26 September 2026_ 🌙
+━━━━━━━━━━━━━━━━━━━━━━
+🤖 *WILY BOT — V27.3*
+✨ *1 Fitur Baru*
+🐛 *0 Fix Bug*
+🛠️ *2 Fix Error*
+🚀 *9 Perubahan*
+━━━━━━━━━━━━━━━━━━━━━━
+✨ *FITUR BARU*
+━━━━━━━━━━━━━━━━━━━━━━
+*1. 🖼️ `.smeme` — Membuat Sticker Meme*
+_Membuat sticker meme dari gambar atau sticker dengan teks custom._
+~Sebelumnya pembuatan sticker meme harus dilakukan secara manual.~
+1. Kirim *gambar atau sticker* dengan caption `.smeme teks`.
+2. Reply gambar atau sticker, lalu ketik `.smeme teks atas|teks bawah`.
+3. Jika hanya memakai satu teks, teks ditempatkan sebagai *teks bawah*.
+• Mendukung *emoji berwarna* dan emoji gabungan.
+• WM/watermark _pack_ dan _author_ dapat diatur melalui `config.json`.
+• Format dua teks menggunakan pemisah `|` di antara teks atas dan teks bawah.
+> _Hasil: gambar atau sticker dapat diubah menjadi sticker meme dengan teks yang rapi._
+━━━━━━━━━━━━━━━━━━━━━━
+🐛 *BUG FIX*
+━━━━━━━━━━━━━━━━━━━━━━
+_Belum ada bug fix terpisah pada bagian ini._
+━━━━━━━━━━━━━━━━━━━━━━
+🛠️ *FIX ERROR*
+━━━━━━━━━━━━━━━━━━━━━━
+*1. 🖥️ Profil perangkat `.setbrowser` V1–V11 dan V13–V16*
+~Sebagian pilihan perangkat memakai tuple browser yang tidak sesuai format Baileys dan dapat menyebabkan error saat proses koneksi.~
+• Profil desktop sekarang menggunakan factory resmi Baileys untuk Ubuntu, Windows, dan MacOS.
+• Profil Android memakai urutan `Chrome | Android | versi`.
+• Profil iPhone/Safari Mobile dihapus setelah pairing code ditolak oleh WhatsApp.
+> Semua 15 profil yang tersedia lolos simulasi payload koneksi offline.
+
+*2. 🔌 Import modul `Browsers` pada `name_perangkat_tertautan.js`*
+~Bot sebelumnya crash dengan `ReferenceError: Browsers is not defined` sebelum socket WhatsApp dibuat, lalu masuk loop restart.~
+• Import `Browsers` dari Baileys dipulihkan.
+• Semua 15 profil yang tersedia berhasil dimuat kembali.
+• Profil aktif V9 berhasil menghasilkan `Windows | Edge | 10.0.22631`.
+> Workflow bot kembali berjalan normal tanpa crash startup.
+━━━━━━━━━━━━━━━━━━━━━━
+🚀 *PERUBAHAN*
+━━━━━━━━━━━━━━━━━━━━━━
+*1. 🖥️ Menu pilihan browser dengan single-select*
+Menu `.setbrowser` dan `.aturbrowser` sekarang menyediakan button single-select untuk memilih V1–V11 dan V13–V16.
+• Pilihan dibagi menjadi dua section agar daftar tetap rapi.
+• Reply teks dan input manual tetap tersedia sebagai fallback.
+> Browser dapat dipilih langsung melalui tombol tanpa harus mengetik kode versi.
+
+*2. ✅ Konfirmasi ganti browser dengan quick-reply*
+• Tombol `✅ Ya, Lanjutkan` menjalankan proses switch.
+• Tombol `❌ Tidak, Batalkan` membersihkan pending state tanpa menjalankan switch.
+• Pesan konfirmasi memakai `selfReply()` agar konteks reply bot tetap jelas.
+> Konfirmasi browser sekarang lebih cepat dan tidak mudah salah ketik.
+
+*3. 📋 Tombol salin pairing code*
+• Pesan pairing code memakai tombol `cta_copy` untuk menyalin kode otomatis.
+• Pesan pairing code dibuat sebagai self-reply tanpa mengirim pesan sementara ganda.
+• Informasi pairing memakai format WhatsApp yang sesuai: tebal, miring, kode, daftar bernomor, bullet, dan quote.
+> Pairing code lebih mudah disalin dan alurnya tetap memiliki konteks pesan bot.
+
+*4. 🔄 Verifikasi sinkronisasi history dan pergantian browser*
+• `syncFullHistory: true` tetap aktif pada socket bot utama.
+• Full history digunakan saat perangkat/session baru melakukan sinkronisasi awal, bukan untuk memutar ulang seluruh history setiap reconnect.
+• Saat bot offline, pesan yang tertunda tetap menunggu pengiriman ketika bot tersambung kembali.
+• Event full history tidak diteruskan sebagai command baru ke handler pesan.
+• Pergantian browser melalui `.aturbrowser` atau `.setbrowser` tetap menyimpan browser baru lalu melakukan restart internal.
+> Sinkronisasi history dan pergantian profil browser sudah diperiksa tanpa mengubah session secara manual.
+
+*5. 🧭 Profil perangkat V13 — Windows + Opera*
+• Menggunakan factory resmi Baileys: `Browsers.windows('Opera')`.
+• Tipe platform Opera dikenali oleh Baileys, bukan fallback ke Chrome.
+• V13 otomatis tersedia pada menu `.setbrowser` dan `.aturbrowser`.
+> Profil V13 siap dipakai untuk menampilkan identitas browser Opera pada perangkat tertaut.
+
+*6. 🧭 Profil perangkat tambahan V14–V16*
+• V14 memakai `Browsers.macOS('Edge')`.
+• V15 memakai `Browsers.ubuntu('Opera')`.
+• V16 memakai `Browsers.macOS('Opera')`.
+• Semua memakai factory resmi Baileys dan tipe platform `EDGE` atau `OPERA`.
+> Pilihan icon browser yang dikenali Baileys sekarang lebih banyak tanpa memakai nama browser palsu.
+
+*7. 📱 Profil iPhone/Safari Mobile dihapus*
+• Profil V12 dihapus dari `name_perangkat_tertautan.js`.
+• Menu browser tidak lagi menawarkan V12.
+• Nomor V13–V16 dipertahankan agar konfigurasi browser pengguna yang sudah ada tetap kompatibel.
+• Konfigurasi lama yang masih menunjuk V12 memakai fallback aman V1 sampai browser baru dipilih.
+> Profil iPhone tidak lagi digunakan karena pairing code-nya ditolak oleh WhatsApp.
+
+*8. 🖼️ `.smeme` ditambahkan ke daftar menu*
+• `.smeme [teks]` sekarang tercantum pada menu utama bot.
+• User jadibot juga dapat melihat `.smeme [teks]` pada menu jadibot.
+• Menu fallback mode hemat storage turut mencantumkan command ini.
+> Informasi menu `.smeme` sekarang konsisten untuk bot utama dan user jadibot.
+
+*9. 🌐 `.online` — Pilihan interval lebih lengkap*
+• Tombol single-select `.online` sekarang menyediakan interval `10`, `30`, `60`, `120`, `300`, `400`, `500`, `600`, dan `900` detik.
+• Pilihan baru `400`, `500`, `600`, dan `900` detik membantu mengurangi frekuensi pengiriman ulang serta penggunaan resource.
+• Perintah manual `.online set [detik]` sekarang menerima nilai `10–900` detik.
+• Nilai di bawah 10 atau di atas 900 detik tetap ditolak agar konfigurasi tetap aman dan konsisten.
+> Pengaturan `.online` untuk bot utama dan jadibot memakai pilihan interval serta batas validasi yang sama.
+━━━━━━━━━━━━━━━━━━━━━━

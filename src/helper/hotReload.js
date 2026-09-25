@@ -157,6 +157,7 @@ const WATCHED_FILES = [
     { key: 'cjs:menuPages2',   rel: 'SEMUA_FITUR/menu/menu-pages2.cjs',    type: 'cjs' },
     // Media
     { key: 'cjs:stickerCmd',   rel: 'SEMUA_FITUR/media/sticker-cmd.cjs',   type: 'cjs' },
+    { key: 'cjs:smeme',        rel: 'SEMUA_FITUR/media/smeme.cjs',         type: 'cjs' },
     { key: 'cjs:wm',            rel: 'SEMUA_FITUR/media/wm.cjs',             type: 'cjs' },
     { key: 'cjs:toImgCmd',     rel: 'SEMUA_FITUR/media/toimg-cmd.cjs',     type: 'cjs' },
     { key: 'cjs:getsw',        rel: 'SEMUA_FITUR/media/getsw.cjs',         type: 'cjs' },

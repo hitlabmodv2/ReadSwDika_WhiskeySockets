@@ -2,9 +2,9 @@
   "botVersion": "V27.1",
   "botNumber": "6285159438825",
   "browserDevice": {
-    "selected": "v1"
+    "selected": "v13"
   },
-  "pairedBrowserKey": "v1",
+  "pairedBrowserKey": "v13",
   "pairingCode": "AAAAAAAA",
   "jadibotPairingMode": "v2",
   "cekswTracking": true,
@@ -13,12 +13,12 @@
     "6289688206739"
   ],
   "sticker": {
-    "pack": "Alamak",
-    "author": "Anda Siapa?"
+    "pack": "Punya",
+    "author": "Bang Wily"
   },
   "autoOnline": {
     "enabled": false,
-    "intervalSeconds": 10
+    "intervalSeconds": 900
   },
   "autoTyping": {
     "enabled": false,
@@ -57,8 +57,8 @@
     "whitelist": []
   },
   "antiTagSW": {
-    "enabled": false,
-    "maxWarnings": 10
+    "enabled": true,
+    "maxWarnings": 1
   },
   "antiLink": {
     "enabled": false,
@@ -179,7 +179,7 @@
         "diubahPada": 1782833367834
       },
       "120363429458957352@g.us": {
-        "enabled": true,
+        "enabled": false,
         "diubahPada": 1785704566171
       }
     }
@@ -194,8 +194,8 @@
   },
   "cekautoTimestamps": {
     "antiTagSWGrup": {
-      "120363192554714254@g.us": 1780053321950,
-      "120363383540766761@g.us": 1780045065239,
+      "120363192554714254@g.us": 1790333518215,
+      "120363383540766761@g.us": 1790333419083,
       "120363419402989015@g.us": 1780053301175
     },
     "welcome": {
@@ -243,7 +243,7 @@
         "diubahPada": 1784730444711
       },
       "120363429458957352@g.us": {
-        "enabled": true,
+        "enabled": false,
         "diubahPada": 1785704596393
       }
     },
@@ -256,7 +256,7 @@
   "doujinnotif": {
     "groups": {
       "120363428460360783@g.us": {
-        "enabled": true,
+        "enabled": false,
         "updatedAt": 1787901894172
       }
     }

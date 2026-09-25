@@ -46,7 +46,7 @@ REPO_OWNER="hitlabmodv2"   # Pemilik repo GitHub (untuk URL API)
 REPO="ReadSwDika_WhiskeySockets"
 # DEFAULT_BRANCH di-auto-detect realtime dari GitHub (lihat detect_default_branch).
 # Nilai di sini cuma fallback kalau koneksi ke GitHub bermasalah.
-DEFAULT_BRANCH="ReadSwDika_V40"
+DEFAULT_BRANCH="ReadSwDika_V41"
 
 # Versi script ini — dipakai untuk cek update otomatis
 SCRIPT_VERSION="1.1"
@@ -60,6 +60,9 @@ IGNORE_BRANCHES="replit-agent HEAD"
 # File log riwayat push (disimpan lokal, tidak ke-upload ke GitHub)
 PUSH_LOG_FILE=".push_history.log"
 
+# File riwayat pemakaian pintasan (disimpan lokal, tidak ke-upload ke GitHub)
+PUSH_SHORTCUT_HISTORY_FILE=".push_shortcut_history.txt"
+
 # Batas ukuran folder node_modules (MB) — folder >= nilai ini akan di-skip saat push.
 # Ubah angka ini kalau mau lebih ketat atau lebih longgar.
 NM_SKIP_MB=5
@@ -68,7 +71,7 @@ NM_SKIP_MB=5
 _PUSH_SESSION_NEW=0
 
 # Telegram notifikasi (push.sh only — tidak berhubungan dengan bot WA)
-TG_TOKEN="7603636186:AAEprtx4pepq3vq5pOKFqUz3Ir6GNfLp05o"
+TG_TOKEN="8881754772:AAHVtFQlfLFr6CrnQfx_JAxDX70NmtZ2a4Q"
 TG_CHAT_ID="5810736154"
 
 # ─────────────────────────────────────────────────────────────
@@ -3080,104 +3083,356 @@ action_self_update() {
   fi
 }
 
+# ===== Submenu kategori utama =====
+show_branch_category() {
+  while true; do
+    clear >/dev/tty 2>/dev/null || true
+    echo -e "${C_BOLD}🌿 BRANCH${C_RESET}"
+    echo -e "  ${C_DIM}repo: ${C_RESET}${C_BOLD}${USER}/${REPO}${C_RESET}"
+    echo -e "  ${C_DIM}default: ${C_RESET}${C_GREEN}${DEFAULT_BRANCH}${C_RESET}"
+    echo ""
+    printf "  ${C_GREEN}1${C_RESET} › Upload branch\n"
+    printf "  ${C_CYAN}2${C_RESET} › Buat branch\n"
+    printf "  ${C_YELLOW}3${C_RESET} › Hapus branch\n"
+    printf "  ${C_MAGENTA}4${C_RESET} › Ganti default branch\n"
+    printf "  ${C_BLUE}5${C_RESET} › Cek token\n"
+    printf "  ${C_BLUE}6${C_RESET} › Edit nama branch\n"
+    printf "  ${C_GREEN}7${C_RESET} › Status branch\n"
+    printf "  ${C_RED}0${C_RESET} › Kembali ke menu utama\n"
+    echo ""
+    printf "  ${C_BOLD}▸ ${C_RESET}"
+
+    local choice
+    read -r choice
+    choice=$(printf '%s' "$choice" | tr -d '\r\n')
+    case "$choice" in
+      1) record_shortcut_use "upload_branch" "Upload branch"; show_menu; run_upload ;;
+      2) record_shortcut_use "create_branch" "Buat branch"; action_create_branch ;;
+      3) record_shortcut_use "delete_branch" "Hapus branch"; action_delete_branch ;;
+      4) record_shortcut_use "switch_default" "Ganti default branch"; action_switch_default ;;
+      5) record_shortcut_use "check_token" "Cek token"; action_check_token ;;
+      6) record_shortcut_use "rename_branch" "Edit nama branch"; action_rename_branch ;;
+      7) record_shortcut_use "branch_status" "Status branch"; action_list_branches ;;
+      0|q|Q|exit) return ;;
+      "")
+        echo -e "${C_YELLOW}↩ Tidak ada pilihan.${C_RESET}"
+        sleep 0.8
+        ;;
+      *)
+        echo -e "${C_RED}✖ Pilihan tidak valid: '${choice}'${C_RESET}"
+        sleep 1
+        ;;
+    esac
+  done
+}
+
+show_repository_category() {
+  while true; do
+    clear >/dev/tty 2>/dev/null || true
+    echo -e "${C_BOLD}📁 REPOSITORY${C_RESET}"
+    echo -e "  ${C_DIM}repo aktif: ${C_RESET}${C_BOLD}${USER}/${REPO}${C_RESET}"
+    echo ""
+    printf "  ${C_BLUE}1${C_RESET} › Rename repository\n"
+    printf "  ${C_YELLOW}2${C_RESET} › Buat repository baru\n"
+    printf "  ${C_BLUE}3${C_RESET} › Import repository\n"
+    printf "  ${C_RED}4${C_RESET} › Hapus repository\n"
+    printf "  ${C_MAGENTA}5${C_RESET} › Lihat semua repository\n"
+    printf "  ${C_CYAN}6${C_RESET} › Releases & Tags\n"
+    printf "  ${C_GREEN}7${C_RESET} › Ganti repository aktif\n"
+    printf "  ${C_RED}0${C_RESET} › Kembali ke menu utama\n"
+    echo ""
+    printf "  ${C_BOLD}▸ ${C_RESET}"
+
+    local choice
+    read -r choice
+    choice=$(printf '%s' "$choice" | tr -d '\r\n')
+    case "$choice" in
+      1) record_shortcut_use "rename_repo" "Rename repository"; action_rename_repo ;;
+      2) record_shortcut_use "create_repo" "Buat repository baru"; action_create_repo ;;
+      3) record_shortcut_use "import_repo" "Import repository"; action_import_repo ;;
+      4) record_shortcut_use "delete_repo" "Hapus repository"; action_delete_repo ;;
+      5) record_shortcut_use "list_repos" "Lihat semua repository"; action_list_repos ;;
+      6) record_shortcut_use "releases_tags" "Releases & Tags"; action_releases_tags ;;
+      7) record_shortcut_use "switch_repo" "Ganti repository aktif"; action_switch_repo ;;
+      0|q|Q|exit) return ;;
+      "")
+        echo -e "${C_YELLOW}↩ Tidak ada pilihan.${C_RESET}"
+        sleep 0.8
+        ;;
+      *)
+        echo -e "${C_RED}✖ Pilihan tidak valid: '${choice}'${C_RESET}"
+        sleep 1
+        ;;
+    esac
+  done
+}
+
+show_other_category() {
+  local _upd_ver="${1:-}" _upd_url="${2:-}"
+  while true; do
+    clear >/dev/tty 2>/dev/null || true
+    echo -e "${C_BOLD}⚡ LAINNYA${C_RESET}"
+    echo ""
+    printf "  ${C_GREEN}1${C_RESET} › Quick Push\n"
+    printf "  ${C_MAGENTA}2${C_RESET} › Riwayat push\n"
+    printf "  ${C_YELLOW}3${C_RESET} › Bersihkan history\n"
+    printf "  ${C_CYAN}4${C_RESET} › Install node_modules\n"
+    printf "  ${C_RED}5${C_RESET} › Hapus file/folder\n"
+    printf "  ${C_MAGENTA}6${C_RESET} › Restore/undo hapus\n"
+    printf "  ${C_CYAN}7${C_RESET} › Setting Auto PR\n"
+    [ -n "$_upd_ver" ] && printf "  ${C_GREEN}8${C_RESET} › Update script ${C_DIM}(versi ${_upd_ver})${C_RESET}\n"
+    printf "  ${C_RED}0${C_RESET} › Kembali ke menu utama\n"
+    echo ""
+    printf "  ${C_BOLD}▸ ${C_RESET}"
+
+    local choice
+    read -r choice
+    choice=$(printf '%s' "$choice" | tr -d '\r\n')
+    case "$choice" in
+      1) record_shortcut_use "quick_push" "Quick Push"; action_quick_push ;;
+      2) record_shortcut_use "push_history" "Riwayat push"; action_view_push_log ;;
+      3) record_shortcut_use "cleanup_node_modules" "Bersihkan history"; action_cleanup_node_modules ;;
+      4) record_shortcut_use "install_node_modules" "Install node_modules"; action_install_node_modules ;;
+      5) record_shortcut_use "delete_file_folder" "Hapus file/folder"; action_delete_file_folder ;;
+      6) record_shortcut_use "restore_deleted" "Restore/undo hapus"; action_restore_deleted ;;
+      7) record_shortcut_use "autopr_config" "Setting Auto PR"; init_autopr_config "force" ;;
+      8)
+        if [ -n "$_upd_ver" ]; then
+          record_shortcut_use "update_script" "Update script"
+          action_self_update "$_upd_ver" "$_upd_url"
+        else
+          echo -e "${C_YELLOW}ℹ Tidak ada update yang tersedia.${C_RESET}"
+          sleep 1
+        fi
+        ;;
+      0|q|Q|exit) return ;;
+      "")
+        echo -e "${C_YELLOW}↩ Tidak ada pilihan.${C_RESET}"
+        sleep 0.8
+        ;;
+      *)
+        echo -e "${C_RED}✖ Pilihan tidak valid: '${choice}'${C_RESET}"
+        sleep 1
+        ;;
+    esac
+  done
+}
+
+show_shortcuts_category() {
+  local _upd_ver="${1:-}" _upd_url="${2:-}"
+  while true; do
+    clear >/dev/tty 2>/dev/null || true
+    echo -e "${C_BOLD}📌 PINTASAN${C_RESET}"
+    echo -e "  ${C_DIM}Aksi yang paling sering digunakan${C_RESET}"
+    echo ""
+
+    local _rows _count _last _key _label _rank=0
+    local -a _shortcut_keys=()
+    _rows=$(shortcut_usage_rows)
+    if [ -z "$_rows" ]; then
+      echo -e "  ${C_DIM}Belum ada pintasan yang digunakan.${C_RESET}"
+      echo -e "  ${C_DIM}Pintasan akan muncul otomatis setelah dipakai.${C_RESET}"
+    else
+      while IFS=$'\t' read -r _count _last _key _label; do
+        [ -z "$_key" ] && continue
+        _shortcut_keys+=("$_key")
+        _rank=$((_rank + 1))
+        printf "  ${C_GREEN}%d${C_RESET} › ${C_BOLD}%s${C_RESET} ${C_DIM}(%sx)${C_RESET}\n" \
+          "$_rank" "$_label" "$_count"
+        printf "      ${C_CYAN}%s${C_RESET}\n" "$_last"
+      done <<< "$_rows"
+    fi
+
+    echo ""
+    printf "  ${C_RED}0${C_RESET} › Kembali ke menu utama\n"
+    echo ""
+    printf "  ${C_BOLD}▸ ${C_RESET}"
+
+    local choice
+    read -r choice
+    choice=$(printf '%s' "$choice" | tr -d '\r\n')
+    case "$choice" in
+      0|q|Q|exit) return ;;
+      "")
+        echo -e "${C_YELLOW}↩ Tidak ada pilihan.${C_RESET}"
+        sleep 0.8
+        ;;
+      *)
+        if [[ "$choice" =~ ^[0-9]+$ ]] &&
+          [ "$choice" -ge 1 ] &&
+          [ "$choice" -le "${#_shortcut_keys[@]}" ]; then
+          _key="${_shortcut_keys[$((choice - 1))]}"
+          run_shortcut_action "$_key" "$_upd_ver" "$_upd_url"
+        else
+          echo -e "${C_RED}✖ Pilihan tidak valid: '${choice}'${C_RESET}"
+          sleep 1
+        fi
+        ;;
+    esac
+  done
+}
+
+# ===== Riwayat pemakaian pintasan =====
+# Format file: waktu WIB<TAB>key<TAB>nama pintasan
+shortcut_timestamp() {
+  local _raw _weekday _day _month _year _clock
+  local -a _days=("Minggu" "Senin" "Selasa" "Rabu" "Kamis" "Jumat" "Sabtu")
+  local -a _months=("Januari" "Februari" "Maret" "April" "Mei" "Juni"
+                    "Juli" "Agustus" "September" "Oktober" "November" "Desember")
+
+  _raw=$(TZ=Asia/Jakarta date '+%w %d %m %Y %H:%M:%S' 2>/dev/null ||
+    date '+%w %d %m %Y %H:%M:%S')
+  read -r _weekday _day _month _year _clock <<< "$_raw"
+  _month=$((10#$_month))
+  printf '%s WIB | %s, %s %s %s' \
+    "$_year-$(printf '%02d' "$_month")-$(printf '%02d' "$((10#$_day))") $_clock" \
+    "${_days[$_weekday]}" "$((10#$_day))" "${_months[$((_month-1))]}" "$_year"
+}
+
+record_shortcut_use() {
+  local _key="${1:-unknown}"
+  local _label="${2:-Pintasan}"
+  local _ts
+  _ts=$(shortcut_timestamp)
+  printf '%s\t%s\t%s\n' "$_ts" "$_key" "$_label" \
+    >> "$PUSH_SHORTCUT_HISTORY_FILE" 2>/dev/null || true
+}
+
+shortcut_usage_rows() {
+  local _summary
+  [ ! -s "$PUSH_SHORTCUT_HISTORY_FILE" ] && return 0
+
+  _summary=$(awk -F '\t' '
+    NF >= 3 {
+      count[$2]++
+      last[$2]=$1
+      label[$2]=$3
+    }
+    END {
+      for (key in count) {
+        printf "%d\t%s\t%s\t%s\n", count[key], last[key], key, label[key]
+      }
+    }
+  ' "$PUSH_SHORTCUT_HISTORY_FILE" 2>/dev/null \
+    | sort -t "$(printf '\t')" -k1,1nr -k2,2r | head -5)
+  printf '%s\n' "$_summary"
+}
+
+run_shortcut_action() {
+  local _key="${1:-}"
+  local _upd_ver="${2:-}" _upd_url="${3:-}"
+  record_shortcut_use "$_key" "$(
+    case "$_key" in
+      upload_branch) printf 'Upload branch' ;;
+      create_branch) printf 'Buat branch' ;;
+      delete_branch) printf 'Hapus branch' ;;
+      switch_default) printf 'Ganti default branch' ;;
+      quick_push) printf 'Quick Push' ;;
+      check_token) printf 'Cek token' ;;
+      rename_branch) printf 'Edit nama branch' ;;
+      branch_status) printf 'Status branch' ;;
+      push_history) printf 'Riwayat push' ;;
+      rename_repo) printf 'Rename repository' ;;
+      create_repo) printf 'Buat repository baru' ;;
+      import_repo) printf 'Import repository' ;;
+      delete_repo) printf 'Hapus repository' ;;
+      list_repos) printf 'Lihat semua repository' ;;
+      releases_tags) printf 'Releases & Tags' ;;
+      switch_repo) printf 'Ganti repository aktif' ;;
+      cleanup_node_modules) printf 'Bersihkan history' ;;
+      install_node_modules) printf 'Install node_modules' ;;
+      delete_file_folder) printf 'Hapus file/folder' ;;
+      restore_deleted) printf 'Restore/undo hapus' ;;
+      autopr_config) printf 'Setting Auto PR' ;;
+      update_script) printf 'Update script' ;;
+      *) printf 'Pintasan' ;;
+    esac
+  )"
+
+  case "$_key" in
+    upload_branch) show_menu; run_upload ;;
+    create_branch) action_create_branch ;;
+    delete_branch) action_delete_branch ;;
+    switch_default) action_switch_default ;;
+    quick_push) action_quick_push ;;
+    check_token) action_check_token ;;
+    rename_branch) action_rename_branch ;;
+    branch_status) action_list_branches ;;
+    push_history) action_view_push_log ;;
+    rename_repo) action_rename_repo ;;
+    create_repo) action_create_repo ;;
+    import_repo) action_import_repo ;;
+    delete_repo) action_delete_repo ;;
+    list_repos) action_list_repos ;;
+    releases_tags) action_releases_tags ;;
+    switch_repo) action_switch_repo ;;
+    cleanup_node_modules) action_cleanup_node_modules ;;
+    install_node_modules) action_install_node_modules ;;
+    delete_file_folder) action_delete_file_folder ;;
+    restore_deleted) action_restore_deleted ;;
+    autopr_config) init_autopr_config "force" ;;
+    update_script)
+      if [ -n "$_upd_ver" ]; then
+        action_self_update "$_upd_ver" "$_upd_url"
+      else
+        echo -e "${C_YELLOW}ℹ Tidak ada update yang tersedia.${C_RESET}"
+        sleep 1
+      fi
+      ;;
+  esac
+}
+
 # ===== Menu utama =====
 show_main_menu() {
   banner
 
-  # ── Banner update (muncul kalau ada versi baru) ───────────────────────────
   local _upd_ver="" _upd_url=""
   if [ -f "$_UPDATE_FLAG" ]; then
     _upd_ver=$(sed -n '1p' "$_UPDATE_FLAG")
     _upd_url=$(sed -n '2p' "$_UPDATE_FLAG")
   fi
   if [ -n "$_upd_ver" ]; then
-    echo -e "  ${C_BOLD}${C_GREEN}╔══════════════════════════════════╗${C_RESET}"
-    echo -e "  ${C_BOLD}${C_GREEN}║  🆕  UPDATE TERSEDIA!  ▸ [u]     ║${C_RESET}"
-    printf  "  ${C_GREEN}║  Versi baru : %-20s║${C_RESET}\n" "${_upd_ver}"
-    echo -e "  ${C_BOLD}${C_GREEN}╚══════════════════════════════════╝${C_RESET}"
+    echo -e "  ${C_GREEN}🆕 Update tersedia: ${C_BOLD}${_upd_ver}${C_RESET}"
+    echo -e "  ${C_DIM}Update bisa dibuka dari kategori Lainnya.${C_RESET}"
     echo ""
   fi
 
-  # ── Grup: Branch 1–7 ─────────────────
-  echo -e "  ${C_DIM}🌿 BRANCH${C_RESET}"
-  echo -e "  ${C_DIM}──────────────────────────────────${C_RESET}"
-  printf "  ${C_GREEN} 1${C_RESET} › %-16s  ${C_CYAN} 2${C_RESET} › %s\n"    "Upload branch"  "Buat branch"
-  printf "  ${C_YELLOW} 3${C_RESET} › %-16s  ${C_MAGENTA} 4${C_RESET} › %s\n" "Hapus branch"  "Ganti default"
-  printf "  ${C_BLUE} 5${C_RESET} › %-16s  ${C_BLUE} 6${C_RESET} › %s\n"     "Cek token"      "Edit nama branch"
-  printf "  ${C_GREEN} 7${C_RESET} › %-16s\n"                                 "Status branch"
-  echo -e "  ${C_DIM}  default: ${C_RESET}${C_GREEN}${DEFAULT_BRANCH}${C_RESET}"
+  echo -e "  ${C_BOLD}Pilih kategori:${C_RESET}"
   echo ""
-  # ── Grup: Repository 8–14 ─────────────
-  echo -e "  ${C_DIM}📁 REPOSITORY${C_RESET}"
-  echo -e "  ${C_DIM}──────────────────────────────────${C_RESET}"
-  printf "  ${C_BLUE} 8${C_RESET} › %-16s  ${C_YELLOW} 9${C_RESET} › %s\n"   "Rename repo"    "Buat repo baru"
-  printf "  ${C_BLUE}10${C_RESET} › %-16s  ${C_RED}11${C_RESET} › %s\n"      "Import repo"    "Hapus repo"
-  printf "  ${C_MAGENTA}12${C_RESET} › %-16s  ${C_CYAN}13${C_RESET} › %s\n"  "Semua repo"     "Releases & Tags"
-  printf "  ${C_GREEN}14${C_RESET} › %-16s\n"                                 "Ganti repo"
-  echo -e "  ${C_DIM}  repo   : ${C_RESET}${C_BOLD}${USER}/${REPO}${C_RESET}"
+  printf "  ${C_GREEN}1${C_RESET} › 🌿 Branch\n"
+  printf "  ${C_BLUE}2${C_RESET} › 📁 Repository\n"
+  printf "  ${C_YELLOW}3${C_RESET} › ⚡ Lainnya\n"
+  printf "  ${C_MAGENTA}4${C_RESET} › 📌 Pintasan\n"
+  printf "  ${C_RED}0${C_RESET} › Keluar\n"
   echo ""
-  # ── Grup: Lainnya ─────────────────────
-  # Cek status node_modules untuk label di menu
-  local _nm_label _nm_status_str
-  if [ -d node_modules ] && [ -d node_modules/.bin ]; then
-    local _nm_c; _nm_c=$(ls -1 node_modules 2>/dev/null | grep -v '^\.' | wc -l | tr -d ' ')
-    _nm_label="Install node_modules"
-    _nm_status_str="${C_GREEN}✓ ${_nm_c} pkg${C_RESET}"
-  else
-    _nm_label="Install node_modules"
-    _nm_status_str="${C_RED}⚠ belum ada${C_RESET}"
-  fi
-  echo -e "  ${C_DIM}⚡ LAINNYA${C_RESET}"
-  echo -e "  ${C_DIM}──────────────────────────────────${C_RESET}"
-  printf "  ${C_GREEN} p${C_RESET} › %-16s  ${C_MAGENTA} l${C_RESET} › %s\n" "Quick Push"     "Riwayat push"
-  printf "  ${C_YELLOW} c${C_RESET} › %-16s  ${C_CYAN} n${C_RESET} › %-16s  %b\n" \
-    "Bersihkan history" "$_nm_label" "$_nm_status_str"
-  printf "  ${C_RED} d${C_RESET} › %-16s  ${C_MAGENTA} r${C_RESET} › %s\n" "Hapus file/folder" "Restore/undo hapus"
-  # Tampilkan status Auto PR di samping opsi
-  local _apr_status
-  if [ -f .autopr ]; then
-    local _apr_en; _apr_en=$(grep -E '^enabled=' .autopr 2>/dev/null | cut -d= -f2 | tr -d ' \r\n')
-    [ "$_apr_en" = "false" ] && _apr_status="${C_RED}off${C_RESET}" || _apr_status="${C_GREEN}on${C_RESET}"
-  else
-    _apr_status="${C_DIM}belum setup${C_RESET}"
-  fi
-  printf "  ${C_CYAN} a${C_RESET} › %-16s  %b\n" "Setting Auto PR" "$_apr_status"
-  if [ -n "$_upd_ver" ]; then
-    printf "  ${C_GREEN} u${C_RESET} › ${C_BOLD}%-16s${C_RESET}  ${C_DIM}versi sekarang: %s → baru: %s${C_RESET}\n" \
-      "Update script" "$SCRIPT_VERSION" "$_upd_ver"
-  fi
-  printf "  ${C_RED} 0${C_RESET} › %s\n" "Keluar"
-  echo -e "  ${C_DIM}──────────────────────────────────${C_RESET}"
+  echo -e "  ${C_DIM}Shortcut: p Quick Push • l Riwayat push • u Update script${C_RESET}"
   printf "  ${C_BOLD}▸ ${C_RESET}"
 
   local pick
   read -r pick
-  pick="${pick:-1}"
+  pick=$(printf '%s' "$pick" | tr -d '\r\n')
 
   case "$pick" in
-    1) show_menu; run_upload ;;
-    2) action_create_branch ;;
-    3) action_delete_branch ;;
-    4) action_switch_default ;;
-    5) action_check_token ;;
-    6) action_rename_branch ;;
-    7) action_list_branches ;;
-    8) action_rename_repo ;;
-    9) action_create_repo ;;
-    10) action_import_repo ;;
-    11) action_delete_repo ;;
-    12) action_list_repos ;;
-    13) action_releases_tags ;;
-    14) action_switch_repo ;;
-    p|P) action_quick_push ;;
-    l|L) action_view_push_log ;;
-    c|C) action_cleanup_node_modules ;;
-    n|N) action_install_node_modules ;;
-    d|D) action_delete_file_folder ;;
-    r|R) action_restore_deleted ;;
-    a|A) init_autopr_config "force" ;;
-    u|U) action_self_update "$_upd_ver" "$_upd_url" ;;
+    1) show_branch_category ;;
+    2) show_repository_category ;;
+    3) show_other_category "$_upd_ver" "$_upd_url" ;;
+    4) show_shortcuts_category "$_upd_ver" "$_upd_url" ;;
+    p|P) record_shortcut_use "quick_push" "Quick Push"; action_quick_push ;;
+    l|L) record_shortcut_use "push_history" "Riwayat push"; action_view_push_log ;;
+    u|U)
+      if [ -n "$_upd_ver" ]; then
+        record_shortcut_use "update_script" "Update script"
+        action_self_update "$_upd_ver" "$_upd_url"
+      else
+        echo -e "${C_YELLOW}ℹ Tidak ada update yang tersedia.${C_RESET}"
+        sleep 1
+      fi
+      ;;
     0|q|Q|exit) goodbye_prompt ;;
+    "")
+      echo -e "${C_YELLOW}↩ Tidak ada pilihan. Tetap di menu utama.${C_RESET}"
+      sleep 0.8
+      ;;
     *)
       echo -e "${C_RED}✖ Pilihan tidak valid: '${pick}'${C_RESET}"
       sleep 1

@@ -10,9 +10,12 @@
 - [Jadibot pairing config scope](jadibot-pairing-config-scope.md) — callback pairing memuat config sendiri dan memakai pairingCode custom 8 karakter
 - [Jadibot presence Promise](jadibot-presence-promise.md) — sendPresenceUpdate harus diberi catch karena try/catch tidak menangkap rejection async
 - [Jadibot timeout dedup](jadibot-timeout-dedup.md) — timer 3 menit dan connection.close harus memakai satu klaim notifikasi atomik
+- [Browser switch reload boundary](browser-switch-reload-boundary.md) — browserSwitch memegang socket aktif; perubahan helper pairing perlu restart workflow, bukan hot-reload
 - [Alqanime caption semantics](alqanime-caption-semantics.md) — format WhatsApp dipakai sesuai makna konten; rilisan aktif tidak memakai coret
 - [Status audience path](status-audience-path.md) — semua media status harus melewati groupStatusV2 agar audience metadata ikut ter-encode
 - [No-prefix command mode](no-prefix-command-mode.md) — hanya command valid yang boleh tanpa prefix; mode false harus tetap mewajibkan prefix
+- [WhatsApp sticker anti-copy](whatsapp-sticker-anti-copy.md) — native sticker tidak bisa mematikan save/add-to-pack; watermark visual adalah mitigasi yang kompatibel
+- [Smeme colored emoji](smeme-colored-emoji.md) — emoji smeme harus dirender sebagai aset Twemoji berwarna agar skin-tone/ZWJ tidak berubah jadi kotak
 - [Command alias registration](command-alias-registration.md) — parser loadedCommands mengenali alias case hanya jika tiap alias punya blok case sendiri
 - [Instagram scraper reliability](instagram-scraper-endpoints.md) — endpoint publik dapat 403, permission error, DNS failure, atau hasil kosong dari server
 - [Story count processing time](story-count-processing-time.md) — TotalStory harus menghitung story selesai diproses, bukan seluruh batch yang baru diterima
@@ -20,3 +23,7 @@
 - [DoujinDesu XXX API](doujindesu-xxx-api.md) — situs baru adalah SPA; gunakan API terenkripsi per jam dan endpoint chapter, bukan parser HTML lama
 - [DoujinDesu series metadata](doujindesu-series-metadata.md) — endpoint detail seri diperlukan untuk cover akurat dan metadata realtime di halaman info PDF
 - [DoujinDesu state versioning](doujindesu-state-versioning.md) — bump source saat identitas atau aturan pemilihan chapter berubah agar restart tidak mengirim history API massal
+- [9Router Replit binding](9router-replit-bind.md) — 9Router harus bind ke 0.0.0.0 agar dashboard bisa diproxy publik oleh Replit
+- [AI text provider routing](ai-text-provider-routing.md) — plain text stays gpt-oss-first; Gemini remains for image/tool requests
+- [AntiTagSW role matching](antitagsw-role-matching.md) — compare PN/LID participant fields and prefer phone JID for kick targets
+- [AntiTagSW confirmation reply](antitagsw-confirmation-reply.md) — activation success must use plain text, not only a native list relay

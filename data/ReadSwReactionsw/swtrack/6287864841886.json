@@ -1,0 +1,44 @@
+{
+  "AC848930920C594A63DD2DEE04FA94AC": {
+    "id": "AC848930920C594A63DD2DEE04FA94AC",
+    "sender": "6287864841886@s.whatsapp.net",
+    "name": "Mas Dyy",
+    "type": "imageMessage",
+    "arrivedAt": "2026-09-25T10:56:29.655Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐳",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6287864841886",
+    "resolvedPn": "6287864841886@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6287864841886@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC848930920C594A63DD2DEE04FA94AC",
+      "participant": "69132145979405@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-09-25T10:56:34.304Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287864841886@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC848930920C594A63DD2DEE04FA94AC",
+        "participant": "69132145979405@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6287864841886@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC848930920C594A63DD2DEE04FA94AC",
+        "participant": "6287864841886@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-09-25T10:56:34.304Z"
+  }
+}

@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 31/08/2026, 04.15.46  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 23/09/2026, 08.11.38  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -26,21 +26,21 @@
 │  #001  —  DoujinMonitor
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [DoujinMonitor] Error scheduler: buatKonteksLinkChapter is not defined
+│  [DoujinMonitor] Gagal kirim ke 120363428460360783@g.us: forbidden
 │
 │  DETAIL
 │  Sumber      : DoujinMonitor
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 31/08/2026, 04.15.46
-│  Terakhir    : 31/08/2026, 04.15.46
+│  Pertama     : 23/09/2026, 08.11.38
+│  Terakhir    : 23/09/2026, 08.11.38
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [DoujinMonitor] Error scheduler: buatKonteksLinkChapter is not defined
+│  ▶  Error: [DoujinMonitor] Gagal kirim ke 120363428460360783@g.us: forbidden
 │     at console.error (file:///home/runner/workspace/index.js:435:27)
-│     at Timeout.runDoujin [as _onTimeout] (file:///home/runner/workspace/index.js:1764:57)
+│     at _processNewChapters (/home/runner/workspace/SEMUA_FITUR/anime/doujindesu-monitor.cjs:661:25)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 31/08/2026, 04.15.46
+  Terakhir diperbarui: 23/09/2026, 08.11.38
 ════════════════════════════════════════════════════════════════════════
