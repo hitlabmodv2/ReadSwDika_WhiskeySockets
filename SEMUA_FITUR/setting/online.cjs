@@ -20,7 +20,7 @@
  *
  *  online.cjs — Auto online command handler
  *  Perintah .online untuk aktifkan/nonaktifkan status kehadiran selalu online
- *  Menggunakan single_select button dengan section Mode + Interval 10-300 detik
+ *  Menggunakan single_select button dengan section Mode + Interval 10-900 detik
  * ───────────────────────────────
  */
 'use strict';
@@ -49,6 +49,10 @@ const _INTERVAL_PRESETS = [
     { sec: 60,  desc: 'Cukup jarang — hemat, tetap stabil' },
     { sec: 120, desc: 'Jarang — hemat resource' },
     { sec: 300, desc: 'Paling jarang — paling hemat' },
+    { sec: 400, desc: 'Sangat jarang — lebih hemat resource' },
+    { sec: 500, desc: 'Ekstra jarang — hemat resource' },
+    { sec: 600, desc: 'Setiap 10 menit — sangat hemat' },
+    { sec: 900, desc: 'Setiap 15 menit — paling hemat' },
 ];
 
 // ── Helper bangun body status ────────────────────────────────────────────────
@@ -149,7 +153,7 @@ async function _sendFallback(tolak, hisoka, m, bodyText, pref) {
         `1. \`${pref}online on\` — Terlihat online\n` +
         `2. \`${pref}online off\` — Terlihat offline (stealth)\n` +
         `3. \`${pref}online set <detik>\` — Atur interval kirim ulang\n` +
-        `   _(10-300 detik, makin kecil makin stabil tapi lebih boros)_\n\n` +
+        `   _(10-900 detik, makin kecil makin stabil tapi lebih boros)_\n\n` +
         `> 💡 _Tips: pakai tombol di atas biar lebih_\n` +
         `> _cepat & tidak salah ketik perintah._`
     );
@@ -211,8 +215,8 @@ async function handleOnline({ hisoka, m, query, tolak, logCommand, loadConfig, s
                 }
             } else if (args[0] === 'set' && args[1]) {
                 const seconds = parseInt(args[1]);
-                if (isNaN(seconds) || seconds < 10 || seconds > 300) {
-                    await tolak(hisoka, m, '❌ Interval harus antara *10-300 detik*'); return;
+                if (isNaN(seconds) || seconds < 10 || seconds > 900) {
+                    await tolak(hisoka, m, '❌ Interval harus antara *10-900 detik*'); return;
                 }
                 const autoOnline = getAO();
                 if (autoOnline.intervalSeconds === seconds) {
@@ -285,8 +289,8 @@ async function handleOnline({ hisoka, m, query, tolak, logCommand, loadConfig, s
             }
         } else if (args[0] === 'set' && args[1]) {
             const seconds = parseInt(args[1]);
-            if (isNaN(seconds) || seconds < 10 || seconds > 300) {
-                await tolak(hisoka, m, '❌ Interval harus antara *10-300 detik*'); return;
+            if (isNaN(seconds) || seconds < 10 || seconds > 900) {
+                await tolak(hisoka, m, '❌ Interval harus antara *10-900 detik*'); return;
             }
             const autoOnline = getAOMain();
             if (autoOnline.intervalSeconds === seconds) {

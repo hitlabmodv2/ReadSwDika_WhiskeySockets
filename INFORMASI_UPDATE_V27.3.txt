@@ -9,7 +9,7 @@ _📅 Sabtu malam, 26 September 2026_ 🌙
 ✨ *1 Fitur Baru*
 🐛 *0 Fix Bug*
 🛠️ *2 Fix Error*
-🚀 *8 Perubahan*
+🚀 *9 Perubahan*
 ━━━━━━━━━━━━━━━━━━━━━━
 ✨ *FITUR BARU*
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -97,4 +97,11 @@ Menu `.setbrowser` dan `.aturbrowser` sekarang menyediakan button single-select 
 • User jadibot juga dapat melihat `.smeme [teks]` pada menu jadibot.
 • Menu fallback mode hemat storage turut mencantumkan command ini.
 > Informasi menu `.smeme` sekarang konsisten untuk bot utama dan user jadibot.
+
+*9. 🌐 `.online` — Pilihan interval lebih lengkap*
+• Tombol single-select `.online` sekarang menyediakan interval `10`, `30`, `60`, `120`, `300`, `400`, `500`, `600`, dan `900` detik.
+• Pilihan baru `400`, `500`, `600`, dan `900` detik membantu mengurangi frekuensi pengiriman ulang serta penggunaan resource.
+• Perintah manual `.online set [detik]` sekarang menerima nilai `10–900` detik.
+• Nilai di bawah 10 atau di atas 900 detik tetap ditolak agar konfigurasi tetap aman dan konsisten.
+> Pengaturan `.online` untuk bot utama dan jadibot memakai pilihan interval serta batas validasi yang sama.
 ━━━━━━━━━━━━━━━━━━━━━━

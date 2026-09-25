@@ -23,3 +23,7 @@
 - [DoujinDesu XXX API](doujindesu-xxx-api.md) — situs baru adalah SPA; gunakan API terenkripsi per jam dan endpoint chapter, bukan parser HTML lama
 - [DoujinDesu series metadata](doujindesu-series-metadata.md) — endpoint detail seri diperlukan untuk cover akurat dan metadata realtime di halaman info PDF
 - [DoujinDesu state versioning](doujindesu-state-versioning.md) — bump source saat identitas atau aturan pemilihan chapter berubah agar restart tidak mengirim history API massal
+- [9Router Replit binding](9router-replit-bind.md) — 9Router harus bind ke 0.0.0.0 agar dashboard bisa diproxy publik oleh Replit
+- [AI text provider routing](ai-text-provider-routing.md) — plain text stays gpt-oss-first; Gemini remains for image/tool requests
+- [AntiTagSW role matching](antitagsw-role-matching.md) — compare PN/LID participant fields and prefer phone JID for kick targets
+- [AntiTagSW confirmation reply](antitagsw-confirmation-reply.md) — activation success must use plain text, not only a native list relay

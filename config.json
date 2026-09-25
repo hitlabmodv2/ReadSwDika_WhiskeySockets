@@ -18,7 +18,7 @@
   },
   "autoOnline": {
     "enabled": false,
-    "intervalSeconds": 10
+    "intervalSeconds": 900
   },
   "autoTyping": {
     "enabled": false,
@@ -57,8 +57,8 @@
     "whitelist": []
   },
   "antiTagSW": {
-    "enabled": false,
-    "maxWarnings": 10
+    "enabled": true,
+    "maxWarnings": 1
   },
   "antiLink": {
     "enabled": false,
@@ -194,8 +194,8 @@
   },
   "cekautoTimestamps": {
     "antiTagSWGrup": {
-      "120363192554714254@g.us": 1780053321950,
-      "120363383540766761@g.us": 1780045065239,
+      "120363192554714254@g.us": 1790333518215,
+      "120363383540766761@g.us": 1790333419083,
       "120363419402989015@g.us": 1780053301175
     },
     "welcome": {

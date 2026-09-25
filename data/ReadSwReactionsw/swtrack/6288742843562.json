@@ -1,0 +1,44 @@
+{
+  "AC378D803BFDBB816B48480BFCD7A572": {
+    "id": "AC378D803BFDBB816B48480BFCD7A572",
+    "sender": "6288742843562@s.whatsapp.net",
+    "name": "Jju, sä oot mun ❤️💐",
+    "type": "videoMessage",
+    "arrivedAt": "2026-09-25T09:05:27.473Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐳",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6288742843562",
+    "resolvedPn": "6288742843562@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6288742843562@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC378D803BFDBB816B48480BFCD7A572",
+      "participant": "201215426228311@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-09-25T09:05:40.256Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6288742843562@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC378D803BFDBB816B48480BFCD7A572",
+        "participant": "201215426228311@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6288742843562@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC378D803BFDBB816B48480BFCD7A572",
+        "participant": "6288742843562@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-09-25T09:05:40.256Z"
+  }
+}

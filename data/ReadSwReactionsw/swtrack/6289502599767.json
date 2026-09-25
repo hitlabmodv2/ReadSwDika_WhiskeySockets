@@ -1,0 +1,46 @@
+{
+  "AC6A591CAF95A60818952BB1280F8116": {
+    "id": "AC6A591CAF95A60818952BB1280F8116",
+    "sender": "6289502599767@s.whatsapp.net",
+    "name": "~𝒶𝓁𝓎𝒶𝒶",
+    "type": "videoMessage",
+    "arrivedAt": "2026-09-24T13:53:19.914Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐋",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6289502599767",
+    "resolvedPn": "6289502599767@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6289502599767@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC6A591CAF95A60818952BB1280F8116",
+      "participant": "180075228098603@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-09-25T09:05:27.494Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289502599767@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC6A591CAF95A60818952BB1280F8116",
+        "participant": "180075228098603@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289502599767@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC6A591CAF95A60818952BB1280F8116",
+        "participant": "6289502599767@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-09-24T13:53:41.554Z",
+    "deleted": true,
+    "deletedAt": "2026-09-25T09:05:27.494Z"
+  }
+}

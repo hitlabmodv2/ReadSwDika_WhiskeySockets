@@ -41,7 +41,11 @@
 import axios from 'axios';
 import https from 'https';
 import path from 'path';
+import { createRequire } from 'module';
 import { kvGet, kvSet, kvMigrateFromJSON, kvMigrateKey } from '../db/datadb.js';
+
+const require = createRequire(import.meta.url);
+const { gemini: textProvider } = require('../../SEMUA_FITUR/ai/gemini.cjs');
 
 kvMigrateFromJSON('ai/gemini_tokens', path.join(process.cwd(), 'data', 'gemini_tokens.json'));
 kvMigrateKey('gemini_tokens', 'ai/gemini_tokens');
@@ -107,6 +111,33 @@ const FALLBACK_MODELS = [
 
 const AUTO_ROTATE_EVERY  = 5;   // rotate token tiap N request (proaktif)
 const REQUEST_TIMEOUT_MS = 30000;
+const TEXT_PROVIDER_CONFIG_KEYS = new Set([
+    'temperature',
+    'topP',
+    'maxOutputTokens',
+    'stopSequences',
+    'systemInstruction',
+]);
+
+function isPlainTextRequest(contents, config) {
+    if (!Array.isArray(contents) || contents.length === 0) return false;
+    if (Object.keys(config).some(key => !TEXT_PROVIDER_CONFIG_KEYS.has(key))) return false;
+
+    let hasUserText = false;
+    for (const item of contents) {
+        if (!item || typeof item !== 'object') return false;
+        const role = item.role === 'model' ? 'assistant' : item.role;
+        if (!['user', 'assistant', 'system'].includes(role) || !Array.isArray(item.parts)) return false;
+
+        for (const part of item.parts) {
+            if (!part || typeof part !== 'object') return false;
+            if (part.inlineData || part.fileData || part.functionCall || part.functionResponse) return false;
+            if (typeof part.text !== 'string') return false;
+            if (role === 'user' && part.text.trim()) hasUserText = true;
+        }
+    }
+    return hasUserText;
+}
 
 class Gemini {
     constructor() {
@@ -227,6 +258,16 @@ class Gemini {
      */
     async chat({ contents, model = DEFAULT_MODEL, ...config }) {
         if (!Array.isArray(contents)) throw new Error('Contents harus berupa array.');
+
+        // Gunakan provider teks yang sudah dipakai fitur Facebook: gpt-oss-120b
+        // lebih dulu, dengan fallback Gemini di wrapper CJS. Vision/tool/config
+        // Gemini tetap melewati endpoint ESM di bawah.
+        if (isPlainTextRequest(contents, config)) {
+            const tStart = Date.now();
+            const text = await textProvider.chat({ contents, model, ...config });
+            geminiTiming(`[AI Text] gpt-oss-first wrapper • ${Date.now() - tStart}ms`);
+            return text;
+        }
 
         const modelChain = [model, ...FALLBACK_MODELS.filter(m => m !== model)];
         const tStart     = Date.now();

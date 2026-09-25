@@ -105,6 +105,36 @@ const MEDIA_CAPTION_TYPES = [
 ];
 
 /**
+ * Rapikan pesan AntiTagSW ke format WhatsApp yang lebih mudah dibaca.
+ * Hanya menghapus bingkai dekoratif fitur ini; isi, markdown WhatsApp,
+ * daftar, command, ID kode, dan kutipan tetap dipertahankan.
+ */
+function formatAntiTagText(text) {
+    if (typeof text !== 'string') return text;
+
+    return text
+        .split('\n')
+        .map(line => {
+            const trimmed = line.trim();
+
+            // Pertahankan isi judul, buang bingkai kiri/kanannya.
+            const title = trimmed.match(/^[╭┌].*?〔\s*(.*?)\s*〕.*[╮]?$/);
+            if (title) return title[1];
+
+            // Hapus garis penutup dan garis dekoratif yang berdiri sendiri.
+            if (/^[╰└].*$/.test(trimmed)) return '';
+            if (/^[◈⬛─━═—_]+$/.test(trimmed)) return '';
+            if (/^[│┃]?\s*[─━═—_]{3,}\s*[│┃]?$/.test(trimmed)) return '';
+
+            // Hapus garis vertikal dekoratif dari awal baris.
+            return line.replace(/^\s*[│┃]\s?/, '');
+        })
+        .join('\n')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim();
+}
+
+/**
  * Deteksi apakah pesan mengandung tag grup lewat caption / reply
  * Cek contextInfo.groupJid atau contextInfo.mentionedJid yang berisi @g.us
  */
@@ -360,8 +390,8 @@ export default async function handleAntiTagSW(message, hisoka) {
         const botJid = jidNormalizedUser(hisoka.user?.id || '');
         if (areJidsSameUser(senderJid, botJid)) return;
 
-        const botNumber = botJid.split('@')[0];
-        const senderNumberClean = senderJid.split('@')[0];
+        const botNumber = botJid.split('@')[0].split(':')[0];
+        const senderNumberClean = senderJid.split('@')[0].split(':')[0];
         function loadBotAdminFile() {
             return kvGet('botadmin/botadmin', {});
         }
@@ -370,12 +400,24 @@ export default async function handleAntiTagSW(message, hisoka) {
             try { kvSet('botadmin/botadmin', data); } catch (_) {}
         }
 
-        function findParticipant(participants, targetNumber) {
+        function findParticipant(participants, targetJids = [], targetNumbers = []) {
+            const jids = targetJids.filter(Boolean).map(j => jidNormalizedUser(j));
+            const numbers = targetNumbers.filter(Boolean).map(n => String(n).split('@')[0].split(':')[0]);
+
             return participants?.find(p => {
-                const rawJid = p.jid || p.phoneNumber || p.id || '';
-                const pNum = rawJid.split('@')[0].split(':')[0];
-                return pNum === targetNumber;
-            });
+                // Baileys bisa mengisi participant dengan id @lid, jid PN,
+                // phoneNumber, atau kombinasi beberapa field sekaligus.
+                const candidates = [p?.id, p?.jid, p?.phoneNumber, p?.lid].filter(Boolean);
+                return candidates.some(candidate => {
+                    const candidateText = String(candidate);
+                    if (jids.some(target => {
+                        try { return areJidsSameUser(candidateText, target); } catch (_) { return false; }
+                    })) return true;
+
+                    const candidateNumber = candidateText.split('@')[0].split(':')[0];
+                    return numbers.includes(candidateNumber);
+                });
+            }) || null;
         }
 
         // Selalu fetch live groupMetadata agar status admin bot akurat (realtime)
@@ -384,7 +426,7 @@ export default async function handleAntiTagSW(message, hisoka) {
         try {
             groupMeta = await hisoka.groupMetadata(remoteJid);
             if (groupMeta) hisoka.groups?.write(remoteJid, groupMeta);
-            const botP = findParticipant(groupMeta?.participants, botNumber);
+            const botP = findParticipant(groupMeta?.participants, [botJid], [botNumber]);
             isAdmin = !!botP?.admin;
             // Update cache
             const botAdminData = loadBotAdminFile();
@@ -398,7 +440,7 @@ export default async function handleAntiTagSW(message, hisoka) {
             }
             groupMeta = hisoka.groups?.read(remoteJid) || null;
             if (groupMeta) {
-                const botP = findParticipant(groupMeta?.participants, botNumber);
+                const botP = findParticipant(groupMeta?.participants, [botJid], [botNumber]);
                 isAdmin = !!botP?.admin;
             }
         }
@@ -406,19 +448,39 @@ export default async function handleAntiTagSW(message, hisoka) {
         // Deteksi tipe konten
         const [contentLabel, contentEmoji] = detectStatusContentType(message);
         const tagMethod = isTagStatus ? 'Status WA' : isCaptionTag ? 'Caption/Reply' : 'Tidak Diketahui';
+        let senderActionJid = senderJid;
 
         if (groupMeta?.participants) {
-            const senderParticipant = findParticipant(groupMeta.participants, senderNumberClean);
+            const rawSenderJid = message.key?.participant || message.participant || '';
+            const senderParticipant = findParticipant(
+                groupMeta.participants,
+                [senderJid, rawSenderJid],
+                [senderNumberClean]
+            );
             if (senderParticipant?.admin) {
                 // Admin bebas tag status — balas tapi tanpa warning/kick
                 try {
                     await hisoka.sendMessage(remoteJid, {
-                        text: `👑 *Admin* ${isLid ? '_(ID tidak dikenal / LID)_' : '@' + senderNumber} melakukan tag grup via status.\n✅ Admin *diizinkan* — tidak ada peringatan.`,
+                        text: `*👑 ADMIN DIIZINKAN*\n\n` +
+                            `• Nama/ID: ${isLid ? '_(ID tidak dikenal / LID)_' : '@' + senderNumber}\n` +
+                            `• Status: *Admin*\n\n` +
+                            `> Tag grup melalui status diperbolehkan untuk admin.`,
                         contextInfo: { mentionedJid: isLid ? [] : [senderJid] }
                     }, { quoted: message });
                 } catch (_) {}
                 return;
             }
+
+            // Untuk operasi remove, prioritaskan phoneNumber dari metadata.
+            // Mengirim @lid mentah sering membuat groupParticipantsUpdate
+            // gagal walaupun akun tersebut sudah ditemukan dengan benar.
+            senderActionJid = senderParticipant?.phoneNumber
+                || (senderParticipant?.id && !String(senderParticipant.id).includes('@lid') ? senderParticipant.id : null)
+                || senderJid;
+            if (senderActionJid && !String(senderActionJid).includes('@')) {
+                senderActionJid = `${senderActionJid}@s.whatsapp.net`;
+            }
+            senderActionJid = senderActionJid ? jidNormalizedUser(senderActionJid) : senderJid;
         }
 
         console.log(`\x1b[33m[AntiTagSW] Terdeteksi! Type: ${msgType} | Metode: ${tagMethod} | Sender: ${senderNumber} | BotAdmin: ${isAdmin}\x1b[39m`);
@@ -476,38 +538,30 @@ export default async function handleAntiTagSW(message, hisoka) {
             const _pelanggarLabel = isLid ? `👤 *Pelanggar* ﹕_(ID tidak dikenal / akun privat)_\n` : `👤 *Pelanggar* ﹕@${senderNumber}\n`;
             const _mentionList = isLid ? [] : [senderJid];
             const kickMsg =
-                `⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛\n` +
-                `✦ ⛔ *ANTI-TAG STATUS* ⛔ ✦\n` +
-                `⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛\n` +
+                `*⛔ ANTI-TAG STATUS*\n` +
                 `\n` +
                 _pelanggarLabel +
-                `🕐 *Waktu*     ﹕${timeStr} • ${dateStr}\n` +
-                `${contentEmoji} *Konten*   ﹕${contentLabel}\n` +
-                `📡 *Metode*    ﹕${tagMethod}\n` +
+                `🕐 *Waktu:* ${timeStr} • ${dateStr}\n` +
+                `${contentEmoji} *Konten:* ${contentLabel}\n` +
+                `📡 *Metode:* ${tagMethod}\n` +
                 `\n` +
-                `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
-                `  📊 *STATISTIK GRUP*\n` +
-                `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
-                `👥 *Total Member*  ﹕ ${stats.totalMembers} orang\n` +
-                `🛡️ *Total Admin*   ﹕ ${stats.totalAdmins} orang\n` +
-                `🙋 *Member Biasa* ﹕ ${stats.totalMembers_} orang\n` +
-                `📈 *Rasio Admin*   ﹕ ${stats.adminPct}%\n` +
-                `     [${stats.adminBar}]\n` +
-                `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
+                `*📊 STATISTIK GRUP*\n` +
+                `• Total member: *${stats.totalMembers}* orang\n` +
+                `• Total admin: *${stats.totalAdmins}* orang\n` +
+                `• Member biasa: *${stats.totalMembers_}* orang\n` +
+                `• Rasio admin: *${stats.adminPct}%*\n` +
+                `  ${stats.adminBar}\n` +
                 `\n` +
-                `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
-                `  ⚠️ *PELANGGARAN*\n` +
-                `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
-                `🚫 Mentag grup lewat *${tagMethod}*\n` +
+                `*⚠️ PELANGGARAN*\n` +
+                `> 🚫 Mentag grup lewat *${tagMethod}*\n` +
                 `\n` +
-                `🔴 *Peringatan* ﹕ ◆◆◆ ${maxWarnings}/${maxWarnings}\n` +
-                `${kickStatusLine}\n` +
-                `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
+                `🔴 *Peringatan:* ${maxWarnings}/${maxWarnings}\n` +
+                `• ${kickStatusLine}\n` +
                 `\n` +
                 `_Jangan ulangi perbuatan ini di grup lain!_ 😤`;
 
             await hisoka.sendMessage(remoteJid, {
-                text: kickMsg,
+                text: formatAntiTagText(kickMsg),
                 contextInfo: { mentionedJid: _mentionList }
             }, { quoted: message });
 
@@ -531,12 +585,12 @@ export default async function handleAntiTagSW(message, hisoka) {
                 }
 
                 try {
-                    await hisoka.groupParticipantsUpdate(remoteJid, [senderJid], 'remove');
+                    await hisoka.groupParticipantsUpdate(remoteJid, [senderActionJid || senderJid], 'remove');
                     console.log(`\x1b[31m[AntiTagSW] ✓ Kicked ${senderNumber} dari ${remoteJid}\x1b[39m`);
                 } catch (kickErr) {
                     console.error('\x1b[31m[AntiTagSW] Gagal kick:\x1b[39m', kickErr.message);
                     await hisoka.sendMessage(remoteJid, {
-                        text: `❌ Gagal kick ${isLid ? '_(ID tidak dikenal / LID)_' : '@' + senderNumber}. Pastikan bot adalah admin grup.`,
+                        text: `❌ *Gagal mengeluarkan anggota.*\n> ${isLid ? '_(ID tidak dikenal / LID)_' : '@' + senderNumber} — pastikan bot adalah admin grup.`,
                         contextInfo: { mentionedJid: _mentionList }
                     });
                 }
@@ -551,37 +605,29 @@ export default async function handleAntiTagSW(message, hisoka) {
                 : `💡 Sisa *${maxWarnings - newWarn}x* lagi sebelum di-kick!`;
 
             const warnMsg =
-                `⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛\n` +
-                `✦ ⚠️ *ANTI-TAG STATUS* ⚠️ ✦\n` +
-                `⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛\n` +
+                `*⚠️ ANTI-TAG STATUS*\n` +
                 `\n` +
                 _pelanggarLabel +
-                `🕐 *Waktu*     ﹕${timeStr} • ${dateStr}\n` +
-                `${contentEmoji} *Konten*   ﹕${contentLabel}\n` +
-                `📡 *Metode*    ﹕${tagMethod}\n` +
+                `🕐 *Waktu:* ${timeStr} • ${dateStr}\n` +
+                `${contentEmoji} *Konten:* ${contentLabel}\n` +
+                `📡 *Metode:* ${tagMethod}\n` +
                 `${deleteInfo}` +
                 `\n` +
-                `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
-                `  📊 *STATISTIK GRUP*\n` +
-                `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
-                `👥 *Total Member*  ﹕ ${stats.totalMembers} orang\n` +
-                `🛡️ *Total Admin*   ﹕ ${stats.totalAdmins} orang\n` +
-                `🙋 *Member Biasa* ﹕ ${stats.totalMembers_} orang\n` +
-                `📈 *Rasio Admin*   ﹕ ${stats.adminPct}%\n` +
-                `     [${stats.adminBar}]\n` +
-                `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
+                `*📊 STATISTIK GRUP*\n` +
+                `• Total member: *${stats.totalMembers}* orang\n` +
+                `• Total admin: *${stats.totalAdmins}* orang\n` +
+                `• Member biasa: *${stats.totalMembers_}* orang\n` +
+                `• Rasio admin: *${stats.adminPct}%*\n` +
+                `  ${stats.adminBar}\n` +
                 `\n` +
-                `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
-                `  🚫 *PERINGATAN*\n` +
-                `◈━━━━━━━━━━━━━━━━━━━━━━━◈\n` +
-                `🔴 Dilarang mentag grup via *${tagMethod}*!\n` +
+                `*🚫 PERINGATAN*\n` +
+                `> 🔴 *Peringatan:* dilarang mentag grup via *${tagMethod}*!\n` +
                 `\n` +
-                `📊 *Progress* ﹕ ${stats.warnBar} ${newWarn}/${maxWarnings}\n` +
-                `${nextWarnInfo}\n` +
-                `◈━━━━━━━━━━━━━━━━━━━━━━━◈`;
+                `📊 *Progress:* ${stats.warnBar} ${newWarn}/${maxWarnings}\n` +
+                `> ${nextWarnInfo}`;
 
             await hisoka.sendMessage(remoteJid, {
-                text: warnMsg,
+                text: formatAntiTagText(warnMsg),
                 contextInfo: { mentionedJid: _mentionList }
             }, { quoted: message });
 
@@ -655,46 +701,37 @@ export function getWarnings(groupId) {
 }
 
 // ── Merged from antitagsw.cjs ──────────────────────────────────────────────────
-export async function handleAntitagsw({ hisoka, m, query, tolak, logCommand, loadConfig, saveConfig, toggleAntiTagSW, saveCekautoTimestamp, sendConfirmWithButtons, isAntiTagSWEnabled, getAllAntiTagSWGroups, getWarnings, resetWarnings, kvGet, Button, clearAntiTagSWLog, getAntiTagSWLog, resolveLidFromContacts }) {
-        if (!m.isGroup) return tolak(hisoka, m, '❌ Fitur ini hanya bisa digunakan di grup!');
-        if (!m.isAdmin && !m.isOwner) return tolak(hisoka, m, '❌ Hanya admin grup atau owner bot yang bisa menggunakan perintah ini!');
+export async function handleAntitagsw({ hisoka, m, query, tolak: rawTolak, logCommand, loadConfig, saveConfig, toggleAntiTagSW, saveCekautoTimestamp, sendConfirmWithButtons, isAntiTagSWEnabled, getAllAntiTagSWGroups, getWarnings, resetWarnings, kvGet, Button, clearAntiTagSWLog, getAntiTagSWLog, resolveLidFromContacts }) {
+        const tolak = (bot, message, text) => rawTolak(bot, message, formatAntiTagText(text));
+        if (!m.isGroup) return tolak(hisoka, m, '❌ *`.antitagsw` hanya bisa digunakan di grup.*');
+        if (!m.isAdmin && !m.isOwner) return tolak(hisoka, m, '❌ *Akses ditolak.* _Hanya admin grup atau owner bot yang bisa menggunakan perintah ini._');
 
         const arg = (query || '').trim().toLowerCase();
 
         if (arg === 'global on') {
-                if (!m.isOwner) return tolak(hisoka, m, '❌ Hanya owner bot yang bisa mengubah pengaturan global!');
+                if (!m.isOwner) return tolak(hisoka, m, '❌ *Akses ditolak.* _Hanya owner bot yang bisa mengubah pengaturan global._');
                 const config = loadConfig();
                 if (!config.antiTagSW) config.antiTagSW = {};
                 config.antiTagSW.enabled = true;
                 saveConfig(config);
                 await tolak(hisoka, m,
-                        `╭───〔 *🌐 ANTITAGSW GLOBAL* 〕───╮\n` +
-                        `│\n` +
-                        `│ ✅ *Global AntiTagSW DIAKTIFKAN!*\n` +
-                        `│\n` +
-                        `│ ℹ️ Sekarang admin grup bisa\n` +
-                        `│    mengaktifkan fitur ini di\n` +
-                        `│    masing-masing grup.\n` +
-                        `│\n` +
-                        `╰────────────────────────────────────╯`
+                        `*🌐 ANTITAGSW GLOBAL*\n\n` +
+                        `✅ *Global AntiTagSW diaktifkan!*\n\n` +
+                        `_Sekarang admin grup dapat mengaktifkan fitur ini di grup masing-masing._\n` +
+                        `> Gunakan \`.antitagsw on\` untuk mengaktifkan proteksi grup.`
                 );
                 logCommand(m, hisoka, 'antitagsw global on');
         } else if (arg === 'global off') {
-                if (!m.isOwner) return tolak(hisoka, m, '❌ Hanya owner bot yang bisa mengubah pengaturan global!');
+                if (!m.isOwner) return tolak(hisoka, m, '❌ *Akses ditolak.* _Hanya owner bot yang bisa mengubah pengaturan global._');
                 const config = loadConfig();
                 if (!config.antiTagSW) config.antiTagSW = {};
                 config.antiTagSW.enabled = false;
                 saveConfig(config);
                 await tolak(hisoka, m,
-                        `╭───〔 *🌐 ANTITAGSW GLOBAL* 〕───╮\n` +
-                        `│\n` +
-                        `│ 🔴 *Global AntiTagSW DINONAKTIFKAN!*\n` +
-                        `│\n` +
-                        `│ ℹ️ Fitur ini tidak akan aktif\n` +
-                        `│    di semua grup meskipun sudah\n` +
-                        `│    di-on per grup.\n` +
-                        `│\n` +
-                        `╰────────────────────────────────────╯`
+                        `*🌐 ANTITAGSW GLOBAL*\n\n` +
+                        `🔴 *Global AntiTagSW dinonaktifkan!*\n\n` +
+                        `_Proteksi tidak akan berjalan di grup mana pun sampai fitur global diaktifkan kembali._\n` +
+                        `> Gunakan \`.antitagsw global on\` untuk mengaktifkannya lagi.`
                 );
                 logCommand(m, hisoka, 'antitagsw global off');
         } else if (arg === 'on') {
@@ -702,7 +739,7 @@ export async function handleAntitagsw({ hisoka, m, query, tolak, logCommand, loa
                 let globalAutoEnabled = false;
                 if (!config.antiTagSW?.enabled) {
                         if (!m.isOwner) {
-                                return tolak(hisoka, m, '❌ Fitur AntiTagSW dinonaktifkan secara global oleh owner bot.\nMinta owner aktifkan dengan perintah: *.antitagsw global on*');
+                                return tolak(hisoka, m, '❌ *AntiTagSW sedang dinonaktifkan secara global.*\n> Minta owner menjalankan \`.antitagsw global on\` terlebih dahulu.');
                         }
                         if (!config.antiTagSW) config.antiTagSW = {};
                         config.antiTagSW.enabled = true;
@@ -711,55 +748,44 @@ export async function handleAntitagsw({ hisoka, m, query, tolak, logCommand, loa
                 }
                 toggleAntiTagSW(m.from, true);
                 saveCekautoTimestamp('antiTagSWGrup', m.from);
-                await sendConfirmWithButtons(hisoka, m,
-                        `╭───〔 *✅ ANTI-TAG SEMUA WARGA* 〕───╮\n` +
-                        `│\n` +
-                        `│ 🟢 *Fitur AntiTagSW AKTIF!*\n` +
-                        (globalAutoEnabled ? `│ 🌐 *Global juga diaktifkan otomatis!*\n` : '') +
-                        `│\n` +
-                        `│ ⚙️ Konfigurasi:\n` +
-                        `│ • Maks. warning: *${config.antiTagSW?.maxWarnings ?? 3}x*\n` +
-                        `│\n` +
-                        `│ ℹ️ Anggota yang mentag grup lewat\n` +
-                        `│    STATUS akan diperingatkan & dikick!\n` +
-                        `│\n` +
-                        `╰────────────────────────────────────╯`,
-                        [{ text: '➕ Aktifkan Semua Grup', id: '__addallgrp__antiTagSWGrup' }]
+                // Gunakan reply teks biasa untuk konfirmasi utama. Pesan
+                // native list kadang di-ack Baileys tetapi tidak tampil di
+                // beberapa client WhatsApp, sehingga command terlihat diam.
+                await tolak(hisoka, m,
+                        `*✅ ANTI-TAG SEMUA WARGA*\n\n` +
+                        `🟢 *Fitur AntiTagSW aktif!*\n` +
+                        (globalAutoEnabled ? `🌐 *Global juga diaktifkan otomatis!*\n` : '') +
+                        `\n` +
+                        `*⚙️ KONFIGURASI*\n` +
+                        `• Maks. warning: *${config.antiTagSW?.maxWarnings ?? 3}x*\n\n` +
+                        `_Anggota yang mentag grup lewat status akan diperingatkan dan dikeluarkan setelah batas tercapai._\n` +
+                        `> Status fitur: *AKTIF*`
                 );
                 logCommand(m, hisoka, 'antitagsw on');
         } else if (arg === 'off') {
                 toggleAntiTagSW(m.from, false);
                 await tolak(hisoka, m,
-                        `╭───〔 *❌ ANTI-TAG SEMUA WARGA* 〕───╮\n` +
-                        `│\n` +
-                        `│ 🔴 *Fitur AntiTagSW NONAKTIF!*\n` +
-                        `│\n` +
-                        `│ ℹ️ Semua warning di grup ini\n` +
-                        `│    juga telah direset.\n` +
-                        `│\n` +
-                        `╰────────────────────────────────────╯`
+                        `*❌ ANTI-TAG SEMUA WARGA*\n\n` +
+                        `🔴 *Fitur AntiTagSW ~NONAKTIF~.*\n\n` +
+                        `_Semua warning di grup ini juga sudah direset._\n` +
+                        `> Gunakan \`.antitagsw on\` untuk mengaktifkannya kembali.`
                 );
                 logCommand(m, hisoka, 'antitagsw off');
         } else if (arg === 'reset') {
                 resetWarnings(m.from);
-                await tolak(hisoka, m, '✅ Semua warning AntiTagSW di grup ini telah direset!');
+                await tolak(hisoka, m, '✅ *Semua warning AntiTagSW di grup ini sudah direset.*\n> Status pelanggaran kembali bersih.');
                 logCommand(m, hisoka, 'antitagsw reset');
 
         } else if (arg.startsWith('warn')) {
-                if (!m.isOwner) return tolak(hisoka, m, '❌ Hanya owner yang bisa mengubah batas warning!');
+                if (!m.isOwner) return tolak(hisoka, m, '❌ *Akses ditolak.* _Hanya owner yang bisa mengubah batas warning._');
                 const warnNum = parseInt((arg.replace(/^warn\s*/, '') || '').trim(), 10);
                 if (!warnNum || isNaN(warnNum) || warnNum < 1 || warnNum > 100) {
                         return tolak(hisoka, m,
-                                `╭───〔 *⚠️ ANTITAGSW WARN* 〕───╮\n` +
-                                `│\n` +
-                                `│ ❌ Angka tidak valid!\n` +
-                                `│\n` +
-                                `│ 📌 Format: *.antitagsw warn <angka>*\n` +
-                                `│ 📌 Contoh: *.antitagsw warn 5*\n` +
-                                `│\n` +
-                                `│ ℹ️ Angka valid: *1 - 100*\n` +
-                                `│\n` +
-                                `╰────────────────────────────────────╯`
+                                `*⚠️ ANTITAGSW WARN*\n\n` +
+                                `❌ *Angka tidak valid.*\n\n` +
+                                `*Format:* \`.antitagsw warn <angka>\`\n` +
+                                `*Contoh:* \`.antitagsw warn 5\`\n\n` +
+                                `> Angka yang valid: *1–100*.`
                         );
                 }
                 const config = loadConfig();
@@ -768,26 +794,19 @@ export async function handleAntitagsw({ hisoka, m, query, tolak, logCommand, loa
                 config.antiTagSW.maxWarnings = warnNum;
                 saveConfig(config);
                 await tolak(hisoka, m,
-                        `╭───〔 *⚠️ ANTITAGSW WARN* 〕───╮\n` +
-                        `│\n` +
-                        `│ ✅ Batas warning berhasil diubah!\n` +
-                        `│\n` +
-                        `│ 📊 Sebelum : *${oldMax}x*\n` +
-                        `│ 📊 Sekarang: *${warnNum}x*\n` +
-                        `│\n` +
-                        `│ ℹ️ Anggota akan dikick setelah\n` +
-                        `│    melanggar sebanyak *${warnNum}x*\n` +
-                        `│\n` +
-                        `│ 💾 Tersimpan ke config.json\n` +
-                        `│\n` +
-                        `╰────────────────────────────────────╯`
+                        `*⚠️ ANTITAGSW WARN*\n\n` +
+                        `✅ *Batas warning berhasil diubah.*\n\n` +
+                        `• Sebelumnya: *${oldMax}x*\n` +
+                        `• Sekarang: *${warnNum}x*\n\n` +
+                        `_Anggota akan dikeluarkan setelah melanggar sebanyak ${warnNum}x._\n` +
+                        `> Konfigurasi tersimpan di \`config.json\`.`
                 );
                 logCommand(m, hisoka, `antitagsw warn ${warnNum}`);
 
         } else if (arg === 'add') {
                 const config = loadConfig();
                 if (!config.antiTagSW?.enabled) {
-                        if (!m.isOwner) return tolak(hisoka, m, '❌ Fitur AntiTagSW dinonaktifkan secara global.\nMinta owner aktifkan dulu: *.antitagsw global on*');
+                        if (!m.isOwner) return tolak(hisoka, m, '❌ *AntiTagSW sedang dinonaktifkan secara global.*\n> Minta owner menjalankan \`.antitagsw global on\` terlebih dahulu.');
                         if (!config.antiTagSW) config.antiTagSW = {};
                         config.antiTagSW.enabled = true;
                         saveConfig(config);
@@ -795,36 +814,24 @@ export async function handleAntitagsw({ hisoka, m, query, tolak, logCommand, loa
                 const alreadyAdded = isAntiTagSWEnabled(m.from);
                 toggleAntiTagSW(m.from, true);
                 await tolak(hisoka, m,
-                        `╭───〔 *✅ ANTI-TAG SEMUA WARGA* 〕───╮\n` +
-                        `│\n` +
-                        `│ ${alreadyAdded ? '🔄 Grup ini *sudah terdaftar* sebelumnya.' : '➕ Grup ini berhasil *ditambahkan!*'}\n` +
-                        `│\n` +
-                        `│ 🌐 Global   : 🟢 Aktif\n` +
-                        `│ 📌 Grup ini : 🟢 *Aktif*\n` +
-                        `│\n` +
-                        `│ ⚙️ Konfigurasi:\n` +
-                        `│ • Maks. warning: *${config.antiTagSW?.maxWarnings ?? 3}x*\n` +
-                        `│\n` +
-                        `│ ℹ️ Anggota yang mentag grup lewat\n` +
-                        `│    STATUS akan diperingatkan & dikick!\n` +
-                        `│\n` +
-                        `╰────────────────────────────────────╯`
+                        `*✅ ANTI-TAG SEMUA WARGA*\n\n` +
+                        `${alreadyAdded ? '🔄 *Grup ini sudah terdaftar sebelumnya.*' : '➕ *Grup berhasil ditambahkan.*'}\n\n` +
+                        `• Global: 🟢 *Aktif*\n` +
+                        `• Grup ini: 🟢 *Aktif*\n` +
+                        `• Maks. warning: *${config.antiTagSW?.maxWarnings ?? 3}x*\n\n` +
+                        `_Tag grup lewat status akan dipantau dan diproses sesuai batas warning._\n` +
+                        `> Gunakan \`.antitagsw status\` untuk melihat detail.`
                 );
                 logCommand(m, hisoka, 'antitagsw add');
 
         } else if (arg === 'list') {
-                if (!m.isOwner && !m.isAdmin) return tolak(hisoka, m, '❌ Hanya owner atau admin yang bisa melihat daftar ini!');
+                if (!m.isOwner && !m.isAdmin) return tolak(hisoka, m, '❌ *Akses ditolak.* _Hanya owner atau admin yang bisa melihat daftar AntiTagSW._');
                 const allGroups = getAllAntiTagSWGroups();
                 if (!allGroups.length) {
                         return tolak(hisoka, m,
-                                `╭───〔 *📋 DAFTAR ANTITAGSW* 〕───╮\n` +
-                                `│\n` +
-                                `│ ❌ Belum ada grup yang terdaftar.\n` +
-                                `│\n` +
-                                `│ Gunakan *.antitagsw add* di grup\n` +
-                                `│ yang ingin diaktifkan.\n` +
-                                `│\n` +
-                                `╰────────────────────────────────────╯`
+                                `*📋 DAFTAR ANTITAGSW*\n\n` +
+                                `❌ _Belum ada grup yang terdaftar._\n\n` +
+                                `> Gunakan \`.antitagsw add\` di grup yang ingin diaktifkan.`
                         );
                 }
 
@@ -873,32 +880,26 @@ export async function handleAntitagsw({ hisoka, m, query, tolak, logCommand, loa
                 for (let i = 0; i < grupInfoList.length; i++) {
                         const { gid, namaGrup, totalMember, totalAdmin, totalWarned, botIsAdmin } = grupInfoList[i];
                         listBaris +=
-                                `│ *${i + 1}.* ${namaGrup}\n` +
-                                `│    🆔 \`${gid}\`\n` +
-                                `│    👥 Anggota : *${totalMember}* | 🛡️ Admin: *${totalAdmin}*\n` +
-                                `│    🤖 Bot Admin: ${botIsAdmin ? '✅ Ya' : '❌ Bukan'}\n` +
-                                `│    ⚠️ Warned  : *${totalWarned} orang*\n` +
-                                `│\n`;
+                                `${i + 1}. *${namaGrup}*\n` +
+                                `   • ID: \`${gid}\`\n` +
+                                `   • Anggota: *${totalMember}* | Admin: *${totalAdmin}*\n` +
+                                `   • Bot admin: ${botIsAdmin ? '✅ Ya' : '❌ Bukan'}\n` +
+                                `   • Member warned: *${totalWarned} orang*\n\n`;
                 }
 
                 const listText =
-                        `╭───〔 *📋 DAFTAR ANTITAGSW* 〕───╮\n` +
-                        `│\n` +
-                        `│ 🟢 Total aktif: *${allGroups.length} grup*\n` +
-                        `│\n` +
+                        `*📋 DAFTAR ANTITAGSW*\n\n` +
+                        `🟢 Total aktif: *${allGroups.length} grup*\n\n` +
                         listBaris +
-                        `│ ─────────────────────────────────\n` +
-                        `│ 🗑️ *Cara hapus:*\n` +
-                        `│ Reply pesan ini dengan nomor urut\n` +
-                        `│ Contoh: *1* atau *1,2* atau *1,2,3*\n` +
-                        `│\n` +
-                        `│ Ketik *semua* → hapus semua grup\n` +
-                        `│ Ketik *reset* → reset warning semua\n` +
-                        `│\n` +
-                        `╰────────────────────────────────────╯`;
+                        `*🗑️ CARA HAPUS*\n` +
+                        `1. Reply pesan ini dengan nomor grup.\n` +
+                        `2. Contoh: \`1\`, \`1,2\`, atau \`1,2,3\`.\n` +
+                        `3. Ketik \`semua\` untuk menghapus semua grup.\n` +
+                        `4. Ketik \`reset\` untuk mereset semua warning.\n\n` +
+                        `> Nomor grup mengikuti urutan daftar di atas.`;
 
                 if (!global.__antiTagSWListSessions) global.__antiTagSWListSessions = new Map();
-                const sentList = await hisoka.sendMessage(m.from, { text: listText }, { quoted: m }).catch(() => null);
+                const sentList = await hisoka.sendMessage(m.from, { text: formatAntiTagText(listText) }, { quoted: m }).catch(() => null);
                 if (sentList?.key?.id) {
                         global.__antiTagSWListSessions.set(sentList.key.id, {
                                 groups: grupInfoList,
@@ -914,14 +915,14 @@ export async function handleAntitagsw({ hisoka, m, query, tolak, logCommand, loa
                 const logSub = arg.slice(3).trim();
 
                 if (logSub === 'clear all') {
-                        if (!m.isOwner) return tolak(hisoka, m, '❌ Hanya owner yang bisa clear semua log!');
+                        if (!m.isOwner) return tolak(hisoka, m, '❌ *Akses ditolak.* _Hanya owner yang bisa menghapus semua log._');
                         clearAntiTagSWLog();
-                        return tolak(hisoka, m, '✅ Semua log AntiTagSW berhasil dihapus!');
+                        return tolak(hisoka, m, '✅ *Semua log AntiTagSW berhasil dihapus.*\n> Riwayat pelanggaran seluruh grup sudah dibersihkan.');
                 }
 
                 if (logSub === 'clear') {
                         clearAntiTagSWLog(m.from);
-                        return tolak(hisoka, m, '✅ Log AntiTagSW grup ini berhasil dihapus!');
+                        return tolak(hisoka, m, '✅ *Log AntiTagSW grup ini berhasil dihapus.*\n> Riwayat pelanggaran grup ini sudah dibersihkan.');
                 }
 
                 const showAll = (logSub === 'all') && m.isOwner;
@@ -929,17 +930,14 @@ export async function handleAntitagsw({ hisoka, m, query, tolak, logCommand, loa
 
                 if (!rawLogs.length) {
                         return tolak(hisoka, m,
-                                `╭───〔 *📜 LOG ANTITAGSW* 〕───╮\n` +
-                                `│\n` +
-                                `│ ℹ️ Belum ada riwayat pelanggaran${showAll ? '' : ' di grup ini'}.\n` +
-                                `│\n` +
-                                `│ 📋 Sub-perintah:\n` +
-                                `│ • *.antitagsw log*       → Log grup ini\n` +
-                                (m.isOwner ? `│ • *.antitagsw log all*   → Semua grup\n` : '') +
-                                `│ • *.antitagsw log clear* → Hapus log grup ini\n` +
-                                (m.isOwner ? `│ • *.antitagsw log clear all* → Hapus semua\n` : '') +
-                                `│\n` +
-                                `╰────────────────────────────────────╯`
+                                `*📜 LOG ANTITAGSW*\n\n` +
+                                `ℹ️ _Belum ada riwayat pelanggaran${showAll ? '' : ' di grup ini'}._\n\n` +
+                                `*📋 SUB-PERINTAH*\n` +
+                                `• \`.antitagsw log\` → log grup ini\n` +
+                                (m.isOwner ? `• \`.antitagsw log all\` → log semua grup\n` : '') +
+                                `• \`.antitagsw log clear\` → hapus log grup ini\n` +
+                                (m.isOwner ? `• \`.antitagsw log clear all\` → hapus semua log\n` : '') +
+                                `\n> Gunakan command di atas sesuai kebutuhan.`
                         );
                 }
 
@@ -974,13 +972,10 @@ export async function handleAntitagsw({ hisoka, m, query, tolak, logCommand, loa
 
                         const GRUP_PER_MSG = 5;
                         const header =
-                                `╭───〔 *📜 LOG ANTITAGSW — SEMUA GRUP* 〕───╮\n` +
-                                `│\n` +
-                                `│ 🏘️ Jumlah grup: *${uniqueGids.length}*\n` +
-                                `│ 📊 Total log  : *${rawLogs.length}*\n` +
-                                `│ 🟡 Warn: *${totalWarn}* | 🔴 Kick: *${totalKick}*\n` +
-                                `│\n` +
-                                `╰────────────────────────────────────╯`;
+                                `*📜 LOG ANTITAGSW — SEMUA GRUP*\n\n` +
+                                `• Jumlah grup: *${uniqueGids.length}*\n` +
+                                `• Total log: *${rawLogs.length}*\n` +
+                                `• Warn: *${totalWarn}* | Kick: *${totalKick}*`;
 
                         for (let gi = 0; gi < uniqueGids.length; gi += GRUP_PER_MSG) {
                                 const batch = uniqueGids.slice(gi, gi + GRUP_PER_MSG);
@@ -990,19 +985,17 @@ export async function handleAntitagsw({ hisoka, m, query, tolak, logCommand, loa
                                         const gWarn = byGid[gid].filter(l => l.action === 'warn').length;
                                         const gKick = byGid[gid].filter(l => l.action === 'kick').length;
                                         batchTxt +=
-                                                `┌─〔 *🏘️ ${namaGrupCache[gid]}* 〕\n` +
-                                                `│ 📊 Total: *${byGid[gid].length}* | 🟡 ${gWarn} warn | 🔴 ${gKick} kick\n` +
-                                                `│ (${logs.length} terbaru)\n` +
-                                                `│\n`;
+                                                `*🏘️ ${namaGrupCache[gid]}*\n` +
+                                                `• Total: *${byGid[gid].length}* | Warn: *${gWarn}* | Kick: *${gKick}*\n` +
+                                                `_Menampilkan ${logs.length} log terbaru._\n\n`;
                                         for (let i = 0; i < logs.length; i++) {
                                                 const l = logs[i];
                                                 batchTxt +=
-                                                        `│ *${i + 1}.* ${_fmtAction(l)}\n` +
-                                                        `│    👤 ${l.senderJid?.includes('@lid') ? (r=>r?('@'+r.number+(r.name?' ('+r.name+')':'')):'⚠️ ID tidak dikenal (LID)')(resolveLidFromContacts(l.senderJid)) : '@'+l.senderNum}\n` +
-                                                        `│    📡 ${l.method || '-'} • 🕐 ${_fmtWaktu(l.ts)}\n` +
-                                                        `│\n`;
+                                                        `${i + 1}. ${_fmtAction(l)}\n` +
+                                                        `   • Pengguna: ${l.senderJid?.includes('@lid') ? (r=>r?('@'+r.number+(r.name?' ('+r.name+')':'')):'⚠️ ID tidak dikenal (LID)')(resolveLidFromContacts(l.senderJid)) : '@'+l.senderNum}\n` +
+                                                        `   • Metode: *${l.method || '-'}* • Waktu: _${_fmtWaktu(l.ts)}_\n\n`;
                                         }
-                                        batchTxt += `└────────────────────────────────\n\n`;
+                                                batchTxt += `\n`;
                                 }
                                 const finalTxt = gi === 0 ? header + '\n\n' + batchTxt.trim() : batchTxt.trim();
                                 await tolak(hisoka, m, finalTxt);
@@ -1015,26 +1008,22 @@ export async function handleAntitagsw({ hisoka, m, query, tolak, logCommand, loa
                         for (let i = 0; i < recentLogs.length; i++) {
                                 const l = recentLogs[i];
                                 logBaris +=
-                                        `│ *${i + 1}.* ${_fmtAction(l)}\n` +
-                                        `│    👤 ${l.senderJid?.includes('@lid') ? (r=>r?('@'+r.number+(r.name?' ('+r.name+')':'')):'⚠️ ID tidak dikenal (LID)')(resolveLidFromContacts(l.senderJid)) : '@'+l.senderNum}\n` +
-                                        `│    📡 ${l.method || '-'} • 🕐 ${_fmtWaktu(l.ts)}\n` +
-                                        `│\n`;
+                                        `${i + 1}. ${_fmtAction(l)}\n` +
+                                        `   • Pengguna: ${l.senderJid?.includes('@lid') ? (r=>r?('@'+r.number+(r.name?' ('+r.name+')':'')):'⚠️ ID tidak dikenal (LID)')(resolveLidFromContacts(l.senderJid)) : '@'+l.senderNum}\n` +
+                                        `   • Metode: *${l.method || '-'}* • Waktu: _${_fmtWaktu(l.ts)}_\n\n`;
                         }
                         await tolak(hisoka, m,
-                                `╭───〔 *📜 LOG ANTITAGSW* 〕───╮\n` +
-                                `│\n` +
-                                `│ 📊 Total log grup ini: *${rawLogs.length}*\n` +
-                                `│ 🟡 Warn: *${totalWarn}* | 🔴 Kick: *${totalKick}*\n` +
-                                `│ (Tampil 25 terbaru)\n` +
-                                `│\n` +
+                                `*📜 LOG ANTITAGSW*\n\n` +
+                                `• Total log grup ini: *${rawLogs.length}*\n` +
+                                `• Warn: *${totalWarn}* | Kick: *${totalKick}*\n` +
+                                `_Menampilkan 25 log terbaru._\n\n` +
                                 logBaris +
-                                `│ 📋 Sub-perintah:\n` +
-                                `│ • *.antitagsw log*       → Log grup ini\n` +
-                                (m.isOwner ? `│ • *.antitagsw log all*   → Semua grup\n` : '') +
-                                `│ • *.antitagsw log clear* → Hapus log grup ini\n` +
-                                (m.isOwner ? `│ • *.antitagsw log clear all* → Hapus semua\n` : '') +
-                                `│\n` +
-                                `╰────────────────────────────────────╯`
+                                `*📋 SUB-PERINTAH*\n` +
+                                `• \`.antitagsw log\` → log grup ini\n` +
+                                (m.isOwner ? `• \`.antitagsw log all\` → log semua grup\n` : '') +
+                                `• \`.antitagsw log clear\` → hapus log grup ini\n` +
+                                (m.isOwner ? `• \`.antitagsw log clear all\` → hapus semua log\n` : '') +
+                                `\n> Gunakan command sesuai kebutuhan.`
                         );
                 }
                 logCommand(m, hisoka, 'antitagsw log');
@@ -1050,42 +1039,36 @@ export async function handleAntitagsw({ hisoka, m, query, tolak, logCommand, loa
                 if (isEnabled) {
                         grupStatus = '🟢 Aktif';
                 } else if (globalEnabled) {
-                        grupStatus = '🔴 Nonaktif *(belum ditambahkan)*';
+                        grupStatus = '🔴 ~Nonaktif~ _(belum ditambahkan)_';
                 } else {
-                        grupStatus = '🔴 Nonaktif';
+                        grupStatus = '🔴 ~Nonaktif~';
                 }
 
                 const hintAdd = globalEnabled && !isEnabled
-                        ? `│ 💡 Ketik *.antitagsw add* untuk\n│    mengaktifkan di grup ini!\n│\n`
+                        ? `> 💡 Ketik \`.antitagsw add\` untuk mengaktifkan di grup ini!\n\n`
                         : '';
 
                 let statusText =
-                        `╭───〔 *ℹ️ ANTI-TAG SEMUA WARGA* 〕───╮\n` +
-                        `│\n` +
-                        `│ 🌐 Global   : ${globalEnabled ? '🟢 Aktif' : '🔴 Nonaktif'}\n` +
-                        `│ 📌 Grup ini : ${grupStatus}\n` +
-                        `│\n` +
-                        `│ ⚙️ Konfigurasi:\n` +
-                        `│ • Maks. warning: *${config.antiTagSW?.maxWarnings ?? 3}x*\n` +
-                        `│ • Member warned: *${totalWarned} orang*\n` +
-                        `│\n` +
-                        `│ ℹ️ Mendeteksi tag grup via STATUS\n` +
-                        `│\n` +
+                        `*ℹ️ ANTI-TAG SEMUA WARGA*\n\n` +
+                        `• Global: ${globalEnabled ? '🟢 *Aktif*' : '🔴 ~Nonaktif~'}\n` +
+                        `• Grup ini: ${grupStatus}\n\n` +
+                        `*⚙️ KONFIGURASI*\n` +
+                        `• Maks. warning: *${config.antiTagSW?.maxWarnings ?? 3}x*\n` +
+                        `• Member warned: *${totalWarned} orang*\n\n` +
+                        `> ℹ️ Mendeteksi tag grup melalui status WhatsApp.\n\n` +
                         hintAdd +
-                        `│ 📋 Cara penggunaan:\n` +
-                        `│ • *.antitagsw add*      → Tambah grup ini\n` +
-                        `│ • *.antitagsw on*       → Aktifkan\n` +
-                        `│ • *.antitagsw off*      → Nonaktifkan\n` +
-                        `│ • *.antitagsw reset*    → Reset warning\n` +
-                        `│ • *.antitagsw list*     → Daftar grup aktif\n` +
-                        `│ • *.antitagsw log*      → Riwayat pelanggaran\n` +
+                        `*📋 CARA PENGGUNAAN*\n` +
+                        `• \`.antitagsw add\` → tambah grup ini\n` +
+                        `• \`.antitagsw on\` → aktifkan\n` +
+                        `• \`.antitagsw off\` → nonaktifkan\n` +
+                        `• \`.antitagsw reset\` → reset warning\n` +
+                        `• \`.antitagsw list\` → daftar grup aktif\n` +
+                        `• \`.antitagsw log\` → riwayat pelanggaran\n` +
                         (m.isOwner ?
-                        `│ • *.antitagsw warn <n>* → Set maks warning\n` +
-                        `│ • *.antitagsw log all*  → Log semua grup\n` +
-                        `│ • *.antitagsw global on*  → Aktifkan global\n` +
-                        `│ • *.antitagsw global off* → Nonaktifkan global\n` : '') +
-                        `│\n` +
-                        `╰────────────────────────────────────╯`;
+                        `• \`.antitagsw warn <n>\` → atur batas warning\n` +
+                        `• \`.antitagsw log all\` → lihat semua grup\n` +
+                        `• \`.antitagsw global on\` → aktifkan global\n` +
+                        `• \`.antitagsw global off\` → nonaktifkan global\n` : '');
 
                 await tolak(hisoka, m, statusText);
         }
@@ -1095,7 +1078,8 @@ export async function handleAntitagsw({ hisoka, m, query, tolak, logCommand, loa
 // Menangani semua callback interaktif AntiTagSW (button reply, session reply).
 // @returns {boolean} true jika pesan sudah ditangani
 // ──────────────────────────────────────────────────────────────────────────────
-export async function handleAntitagswCallbacks({ hisoka, m, tolak, toggleAntiTagSW, resetWarnings, getAllAntiTagSWGroups }) {
+export async function handleAntitagswCallbacks({ hisoka, m, tolak: rawTolak, toggleAntiTagSW, resetWarnings, getAllAntiTagSWGroups }) {
+        const tolak = (bot, message, text) => rawTolak(bot, message, formatAntiTagText(text));
         // ── Reply-based session delete (dari .antitagsw list) ─────────────────────
         if (global.__antiTagSWListSessions?.size && m.quoted?.key?.id && (m.isOwner || m.isAdmin)) {
                 const sessId = m.quoted.key.id;
@@ -1110,24 +1094,20 @@ export async function handleAntitagswCallbacks({ hisoka, m, tolak, toggleAntiTag
                                                 const total = sessGroups.length;
                                                 for (const g of sessGroups) toggleAntiTagSW(g.gid, false);
                                                 await tolak(hisoka, m,
-                                                        `╭───〔 *🗑️ HAPUS SEMUA* 〕───╮\n` +
-                                                        `│\n` +
-                                                        `│ ✅ Semua grup dihapus!\n` +
-                                                        `│ 🗑️ Total: *${total} grup*\n` +
-                                                        `│ ⚠️ Semua warning juga direset.\n` +
-                                                        `│\n` +
-                                                        `╰────────────────────────────────────╯`
+                                                        `*🗑️ HAPUS SEMUA GRUP*\n\n` +
+                                                        `✅ *Semua grup berhasil dihapus.*\n` +
+                                                        `• Total: *${total} grup*\n` +
+                                                        `• Semua warning juga direset.\n\n` +
+                                                        `> Daftar AntiTagSW sekarang kosong.`
                                                 );
                                         } else if (rawReply === 'reset') {
                                                 for (const g of sessGroups) resetWarnings(g.gid);
                                                 await tolak(hisoka, m,
-                                                        `╭───〔 *🔄 RESET WARNING* 〕───╮\n` +
-                                                        `│\n` +
-                                                        `│ ✅ Warning direset!\n` +
-                                                        `│ 📊 Total: *${sessGroups.length} grup*\n` +
-                                                        `│ 🟢 Grup tetap terdaftar.\n` +
-                                                        `│\n` +
-                                                        `╰────────────────────────────────────╯`
+                                                        `*🔄 RESET WARNING*\n\n` +
+                                                        `✅ *Warning berhasil direset.*\n` +
+                                                        `• Total: *${sessGroups.length} grup*\n` +
+                                                        `• Grup tetap terdaftar.\n\n` +
+                                                        `_Pengaturan AntiTagSW tidak berubah._`
                                                 );
                                         } else {
                                                 const nums = rawReply.split(/[,\s]+/)
@@ -1136,9 +1116,10 @@ export async function handleAntitagswCallbacks({ hisoka, m, tolak, toggleAntiTag
                                                 const uniq = [...new Set(nums)];
                                                 if (!uniq.length) {
                                                         await tolak(hisoka, m,
-                                                                `❌ Nomor tidak valid!\n` +
-                                                                `Masukkan angka 1-${sessGroups.length}, contoh: *1* atau *1,2,3*\n` +
-                                                                `Atau ketik *semua* / *reset*`
+                                                                `❌ *Nomor tidak valid.*\n` +
+                                                                `> Masukkan angka 1–${sessGroups.length}.\n` +
+                                                                `Contoh: \`1\` atau \`1,2,3\`.\n` +
+                                                                `Ketik \`semua\` atau \`reset\` sesuai kebutuhan.`
                                                         );
                                                 } else {
                                                         const dihapus = [];
@@ -1149,22 +1130,17 @@ export async function handleAntitagswCallbacks({ hisoka, m, tolak, toggleAntiTag
                                                                         dihapus.push(`${n}. *${g.namaGrup}*`);
                                                                 }
                                                         }
-                                                        const listDihapus = dihapus.map(d => `│ ✅ ${d}`).join('\n');
+                                                        const listDihapus = dihapus.map(d => `• ✅ ${d}`).join('\n');
                                                         await tolak(hisoka, m,
-                                                                `╭───〔 *🗑️ ANTITAGSW REMOVED* 〕───╮\n` +
-                                                                `│\n` +
-                                                                `│ ✅ *${dihapus.length} grup* berhasil dihapus!\n` +
-                                                                `│\n` +
+                                                                `*🗑️ ANTITAGSW REMOVED*\n\n` +
+                                                                `✅ *${dihapus.length} grup berhasil dihapus.*\n\n` +
                                                                 listDihapus + `\n` +
-                                                                `│\n` +
-                                                                `│ ⚠️ Warning di grup tersebut direset.\n` +
-                                                                `│\n` +
-                                                                `╰────────────────────────────────────╯`
+                                                                `\n⚠️ _Warning di grup tersebut juga direset._`
                                                         );
                                                 }
                                         }
                                 } catch (e) {
-                                        await tolak(hisoka, m, `❌ Gagal proses: ${e.message}`);
+                                        await tolak(hisoka, m, `❌ *Gagal memproses permintaan.*\n> Detail: \`${e.message}\``);
                                 }
                                 return true;
                         }
@@ -1182,19 +1158,14 @@ export async function handleAntitagswCallbacks({ hisoka, m, tolak, toggleAntiTag
                                 try { const mt = await hisoka.groupMetadata(targetGid); namaGrup = mt?.subject || targetGid; } catch { try { namaGrup = hisoka.groups?.read(targetGid)?.subject || targetGid; } catch {} }
                                 toggleAntiTagSW(targetGid, false);
                                 await tolak(hisoka, m,
-                                        `╭───〔 *🗑️ ANTITAGSW REMOVED* 〕───╮\n` +
-                                        `│\n` +
-                                        `│ ✅ Grup berhasil dihapus!\n` +
-                                        `│\n` +
-                                        `│ 📌 *${namaGrup}*\n` +
-                                        `│ 🆔 \`${targetGid}\`\n` +
-                                        `│\n` +
-                                        `│ ⚠️ Warning di grup ini juga direset.\n` +
-                                        `│\n` +
-                                        `╰────────────────────────────────────╯`
+                                        `*🗑️ ANTITAGSW REMOVED*\n\n` +
+                                        `✅ *Grup berhasil dihapus.*\n` +
+                                        `• Nama: *${namaGrup}*\n` +
+                                        `• ID: \`${targetGid}\`\n\n` +
+                                        `> Warning di grup ini juga sudah direset.`
                                 );
                         } catch (e) {
-                                await tolak(hisoka, m, `❌ Gagal hapus grup: ${e.message}`);
+                                await tolak(hisoka, m, `❌ *Gagal menghapus grup.*\n> Detail: \`${e.message}\``);
                         }
                         return true;
                 }
@@ -1208,20 +1179,14 @@ export async function handleAntitagswCallbacks({ hisoka, m, tolak, toggleAntiTag
                         const total = allG.length;
                         for (const gid of allG) toggleAntiTagSW(gid, false);
                         await tolak(hisoka, m,
-                                `╭───〔 *🗑️ ANTITAGSW HAPUS SEMUA* 〕───╮\n` +
-                                `│\n` +
-                                `│ ✅ Semua grup berhasil dihapus!\n` +
-                                `│\n` +
-                                `│ 🗑️ Total dihapus: *${total} grup*\n` +
-                                `│ ⚠️ Semua warning juga direset.\n` +
-                                `│\n` +
-                                `│ 💡 Gunakan *.antitagsw add* untuk\n` +
-                                `│    mendaftarkan ulang grup.\n` +
-                                `│\n` +
-                                `╰────────────────────────────────────╯`
+                                `*🗑️ ANTITAGSW HAPUS SEMUA*\n\n` +
+                                `✅ *Semua grup berhasil dihapus.*\n` +
+                                `• Total dihapus: *${total} grup*\n` +
+                                `• Semua warning juga direset.\n\n` +
+                                `> Gunakan \`.antitagsw add\` untuk mendaftarkan ulang grup.`
                         );
                 } catch (e) {
-                        await tolak(hisoka, m, `❌ Gagal hapus semua: ${e.message}`);
+                        await tolak(hisoka, m, `❌ *Gagal menghapus semua grup.*\n> Detail: \`${e.message}\``);
                 }
                 return true;
         }
@@ -1232,17 +1197,14 @@ export async function handleAntitagswCallbacks({ hisoka, m, tolak, toggleAntiTag
                         const allG = getAllAntiTagSWGroups();
                         for (const gid of allG) resetWarnings(gid);
                         await tolak(hisoka, m,
-                                `╭───〔 *🔄 ANTITAGSW RESET SEMUA* 〕───╮\n` +
-                                `│\n` +
-                                `│ ✅ Semua warning berhasil direset!\n` +
-                                `│\n` +
-                                `│ 📊 Total grup direset: *${allG.length} grup*\n` +
-                                `│ 🟢 Grup tetap terdaftar di AntiTagSW.\n` +
-                                `│\n` +
-                                `╰────────────────────────────────────╯`
+                                `*🔄 ANTITAGSW RESET SEMUA*\n\n` +
+                                `✅ *Semua warning berhasil direset.*\n` +
+                                `• Total grup direset: *${allG.length} grup*\n` +
+                                `• Grup tetap terdaftar di AntiTagSW.\n\n` +
+                                `_Data pelanggaran sudah dibersihkan tanpa menghapus grup dari daftar._`
                         );
                 } catch (e) {
-                        await tolak(hisoka, m, `❌ Gagal reset semua: ${e.message}`);
+                        await tolak(hisoka, m, `❌ *Gagal mereset semua warning.*\n> Detail: \`${e.message}\``);
                 }
                 return true;
         }
