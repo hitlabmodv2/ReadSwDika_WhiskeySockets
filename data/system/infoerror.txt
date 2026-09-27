@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 31/08/2026, 04.15.46  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 27/09/2026, 10.49.00  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  DoujinMonitor
+│  #001  —  CEKIDFF
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [DoujinMonitor] Error scheduler: buatKonteksLinkChapter is not defined
+│  [CEKIDFF] Error: PLAYER_NOT_FOUND
 │
 │  DETAIL
-│  Sumber      : DoujinMonitor
+│  Sumber      : CEKIDFF
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 31/08/2026, 04.15.46
-│  Terakhir    : 31/08/2026, 04.15.46
+│  Pertama     : 27/09/2026, 10.49.00
+│  Terakhir    : 27/09/2026, 10.49.00
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [DoujinMonitor] Error scheduler: buatKonteksLinkChapter is not defined
+│  ▶  Error: [CEKIDFF] Error: PLAYER_NOT_FOUND
 │     at console.error (file:///home/runner/workspace/index.js:435:27)
-│     at Timeout.runDoujin [as _onTimeout] (file:///home/runner/workspace/index.js:1764:57)
+│     at handleCekidff (/home/runner/workspace/SEMUA_FITUR/tools/cekidff.cjs:145:17)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 31/08/2026, 04.15.46
+  Terakhir diperbarui: 27/09/2026, 10.49.00
 ════════════════════════════════════════════════════════════════════════

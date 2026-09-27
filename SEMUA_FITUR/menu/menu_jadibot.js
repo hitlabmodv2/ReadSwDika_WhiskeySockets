@@ -87,6 +87,7 @@ export function getMenuJadibotBody() {
 ├➤ *.sticker / .s*
 ├➤ *.wm / .swm [Pack|Author]*
 ├➤ *.toimg*
+├➤ *.smeme [teks]*
 ╰➤ *.hd / .remini*
 
 ╭─「 🔤 *FONT & LOGO* 」

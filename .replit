@@ -18,6 +18,10 @@ author = "agent"
 task = "workflow.run"
 args = "WhatsApp Bot"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "9Router"
+
 [[workflows.workflow]]
 name = "WhatsApp Bot"
 author = "agent"
@@ -25,6 +29,17 @@ author = "agent"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "bash start-ptero.sh"
+
+[workflows.workflow.metadata]
+outputType = "console"
+
+[[workflows.workflow]]
+name = "9Router"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "bash -c 'while true; do if ! curl -sf http://127.0.0.1:20128/ >/dev/null 2>&1; then 9router --host 0.0.0.0 --port 20128 --no-browser --tray >/tmp/9router.log 2>&1 & sleep 4; fi; sleep 10; done'"
 
 [workflows.workflow.metadata]
 outputType = "console"
@@ -40,8 +55,13 @@ BOT_PREFIX = "(?:[°•π÷×¶∆£¢€¥®™+✓=|/~!?@#%^&.©^])"
 BOT_ALLOWED_NO_PREFIX = "false"
 
 [deployment]
-deploymentTarget = "cloudrun"
+deploymentTarget = "vm"
+run = ["npm", "run", "start"]
 
 [[ports]]
 localPort = 5000
+externalPort = 3000
+
+[[ports]]
+localPort = 20128
 externalPort = 80

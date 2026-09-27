@@ -1,0 +1,128 @@
+{
+  "AC13C1DC178F6270D4B3755884C9B514": {
+    "id": "AC13C1DC178F6270D4B3755884C9B514",
+    "sender": "6285703470436@s.whatsapp.net",
+    "name": "FARID",
+    "type": "conversation",
+    "arrivedAt": "2026-09-27T09:46:30.965Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐋",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285703470436",
+    "resolvedPn": "6285703470436@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285703470436@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC13C1DC178F6270D4B3755884C9B514",
+      "participant": "248206579503211@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-09-27T09:46:38.132Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285703470436@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC13C1DC178F6270D4B3755884C9B514",
+        "participant": "248206579503211@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285703470436@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC13C1DC178F6270D4B3755884C9B514",
+        "participant": "6285703470436@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-09-27T09:46:38.132Z"
+  },
+  "AC17ADB4CAEB446E42B06C55CCDD403C": {
+    "id": "AC17ADB4CAEB446E42B06C55CCDD403C",
+    "sender": "6285703470436@s.whatsapp.net",
+    "name": "FARID",
+    "type": "videoMessage",
+    "arrivedAt": "2026-09-27T09:46:31.564Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐳",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285703470436",
+    "resolvedPn": "6285703470436@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285703470436@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC17ADB4CAEB446E42B06C55CCDD403C",
+      "participant": "248206579503211@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-09-27T09:46:47.208Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285703470436@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC17ADB4CAEB446E42B06C55CCDD403C",
+        "participant": "248206579503211@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285703470436@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC17ADB4CAEB446E42B06C55CCDD403C",
+        "participant": "6285703470436@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-09-27T09:46:47.208Z"
+  },
+  "AC07B2C1E333CCCA33C82D2B3478102C": {
+    "id": "AC07B2C1E333CCCA33C82D2B3478102C",
+    "sender": "6285703470436@s.whatsapp.net",
+    "name": "FARID",
+    "type": "videoMessage",
+    "arrivedAt": "2026-09-27T09:46:36.353Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐠",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6285703470436",
+    "resolvedPn": "6285703470436@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6285703470436@s.whatsapp.net",
+      "fromMe": false,
+      "id": "AC07B2C1E333CCCA33C82D2B3478102C",
+      "participant": "248206579503211@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-09-27T09:46:45.347Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285703470436@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC07B2C1E333CCCA33C82D2B3478102C",
+        "participant": "248206579503211@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6285703470436@s.whatsapp.net",
+        "fromMe": false,
+        "id": "AC07B2C1E333CCCA33C82D2B3478102C",
+        "participant": "6285703470436@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-09-27T09:46:45.347Z"
+  }
+}

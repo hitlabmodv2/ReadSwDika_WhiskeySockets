@@ -157,6 +157,7 @@ const WATCHED_FILES = [
     { key: 'cjs:menuPages2',   rel: 'SEMUA_FITUR/menu/menu-pages2.cjs',    type: 'cjs' },
     // Media
     { key: 'cjs:stickerCmd',   rel: 'SEMUA_FITUR/media/sticker-cmd.cjs',   type: 'cjs' },
+    { key: 'cjs:smeme',        rel: 'SEMUA_FITUR/media/smeme.cjs',         type: 'cjs' },
     { key: 'cjs:wm',            rel: 'SEMUA_FITUR/media/wm.cjs',             type: 'cjs' },
     { key: 'cjs:toImgCmd',     rel: 'SEMUA_FITUR/media/toimg-cmd.cjs',     type: 'cjs' },
     { key: 'cjs:getsw',        rel: 'SEMUA_FITUR/media/getsw.cjs',         type: 'cjs' },
@@ -214,6 +215,7 @@ const WATCHED_FILES = [
     { key: 'cjs:tempmail',     rel: 'SEMUA_FITUR/tools/tempmail.cjs',      type: 'cjs' },
     { key: 'cjs:tmail',        rel: 'SEMUA_FITUR/tools/tmail.cjs',         type: 'cjs' },
     { key: 'cjs:cekhp',        rel: 'SEMUA_FITUR/tools/cekhp.cjs',         type: 'cjs' },
+    { key: 'cjs:cekidff',      rel: 'SEMUA_FITUR/tools/cekidff.cjs',       type: 'cjs' },
     { key: 'cjs:bandingkanhp', rel: 'SEMUA_FITUR/tools/bandingkanhp.cjs',  type: 'cjs' },
     { key: 'cjs:an1game',      rel: 'SEMUA_FITUR/tools/an1game.cjs',       type: 'cjs' },
     { key: 'cjs:screenshot',   rel: 'SEMUA_FITUR/tools/screenshot.cjs',    type: 'cjs' },

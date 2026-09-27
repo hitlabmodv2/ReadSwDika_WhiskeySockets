@@ -24,6 +24,49 @@
  */
 'use strict';
 
+function buildBrowserConfirmText(pilihan, hasPairingCode) {
+        return (
+                `╭─「 ⚠️ *KONFIRMASI GANTI BROWSER* 」\n` +
+                `╰────────────────────────────\n\n` +
+                `🖥️ *Pilihan:* ${pilihan.label}\n` +
+                `🔑 *Kode:* \`${pilihan.key}\`\n` +
+                `📦 *Profil:* \`${pilihan.value.join(' | ')}\`\n\n` +
+                `📋 *Proses yang akan dilakukan:*\n` +
+                `1. Koneksi baru dibuka dengan profil tersebut.\n` +
+                `2. ${hasPairingCode ? 'Pairing code' : 'QR Code'} dikirim ke chat ini.\n` +
+                `3. Bot lama tetap aktif sampai koneksi baru berhasil.\n` +
+                `4. Session lama dihapus setelah koneksi baru sukses.\n\n` +
+                `✅ *Lanjutkan hanya jika kamu siap.*\n` +
+                `• Jangan tutup bot selama proses berlangsung.\n` +
+                `• ${hasPairingCode ? 'Masukkan pairing code' : 'Scan QR Code'} dari perangkat tertaut WhatsApp.\n\n` +
+                `> _Proses ini berjalan tanpa mematikan bot lama terlebih dahulu._\n\n` +
+                `⏳ _Konfirmasi berlaku selama 30 detik._`
+        );
+}
+
+/**
+ * Kirim konfirmasi ganti browser dengan quick-reply.
+ * selfReply() dipakai agar pesan interaktif punya konteks reply yang jelas
+ * ketika user menekan tombol Ya/Tidak.
+ */
+async function sendBrowserConfirm({ hisoka, m, Button, pilihan, config, fallbackReply }) {
+        const hasPairingCode = !!(process.env.BOT_NUMBER_PAIR || config?.botNumber || '').replace(/[^0-9]/g, '');
+        const body = buildBrowserConfirmText(pilihan, hasPairingCode);
+        try {
+                if (typeof Button !== 'function') throw new Error('Button builder tidak tersedia');
+                return await new Button()
+                        .selfReply()
+                        .setBody(body)
+                        .setFooter('Pilih tindakan di bawah')
+                        .addReply('✅ Ya, Lanjutkan', 'ya')
+                        .addReply('❌ Tidak, Batalkan', 'tidak')
+                        .run(m.from, hisoka, m);
+        } catch (error) {
+                console.warn('[SetBrowser] quick-reply gagal, memakai fallback teks:', error?.message || error);
+                return await fallbackReply(body + `\n\n*Balas dengan:* \`ya\` atau \`tidak\``);
+        }
+}
+
 /**
  * Handle reply ke pesan list .setbrowser (pilih browser).
  * Dipanggil dari message.js sebelum switch-case.
@@ -33,7 +76,7 @@ async function handleSetbrowserListReply({
         hisoka, m,
         listAturBrowserMap, pendingAturBrowser,
         isMainBot, loadConfig, getQuotedStanzaId,
-        BROWSER_LIST, logCommand,
+        BROWSER_LIST, logCommand, Button,
 }) {
         if (!(isMainBot(hisoka) && m.isOwner && m.isQuoted && !m.prefix && listAturBrowserMap.has(m.sender))) return false;
 
@@ -53,21 +96,10 @@ async function handleSetbrowserListReply({
         }
         listAturBrowserMap.delete(m.sender);
         pendingAturBrowser.delete(m.sender);
-        const _labKonfirmMsg = await m.reply(
-                `╭══════════════════════════╮\n` +
-                `║  ⚠️  *KONFIRMASI GANTI BROWSER*  ⚠️  ║\n` +
-                `╰══════════════════════════╯\n\n` +
-                `🖥️ *Pilihan:* ${_labPilihan.label}\n` +
-                `📦 *Detail:* ${_labPilihan.value.join(' | ')}\n\n` +
-                `ℹ️ *Proses (tanpa downtime):*\n` +
-                `• Koneksi baru dibuka dengan browser baru\n` +
-                `• *${!!(process.env.BOT_NUMBER_PAIR || loadConfig()?.botNumber || '').replace(/[^0-9]/g, '') ? 'Pairing code' : 'QR Code'} dikirim ke chat ini*\n` +
-                `• Bot lama tetap aktif sampai terhubung\n` +
-                `• Session lama dihapus *setelah* koneksi baru berhasil\n\n` +
-                `✅ *Reply pesan ini* dengan *ya* untuk lanjut\n` +
-                `❌ *Reply pesan ini* dengan *tidak* untuk batal\n\n` +
-                `⏳ *Berlaku 30 detik...*`
-        );
+        const _labKonfirmMsg = await sendBrowserConfirm({
+                hisoka, m, Button, pilihan: _labPilihan, config: _labConfig,
+                fallbackReply: text => m.reply(text),
+        });
         const _labTimer = setTimeout(() => {
                 if (pendingAturBrowser.has(m.sender)) {
                         pendingAturBrowser.delete(m.sender);
@@ -134,4 +166,9 @@ async function handleSetbrowserConfirmReply({
         return false;
 }
 
-module.exports = { handleSetbrowserListReply, handleSetbrowserConfirmReply };
+module.exports = {
+        buildBrowserConfirmText,
+        sendBrowserConfirm,
+        handleSetbrowserListReply,
+        handleSetbrowserConfirmReply,
+};

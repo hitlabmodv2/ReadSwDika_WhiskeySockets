@@ -1,0 +1,44 @@
+{
+  "ACF99BFF4399D872F744FE2AA03E33A9": {
+    "id": "ACF99BFF4399D872F744FE2AA03E33A9",
+    "sender": "6282288511707@s.whatsapp.net",
+    "name": "Fey",
+    "type": "videoMessage",
+    "arrivedAt": "2026-09-27T13:44:15.513Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐟",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6282288511707",
+    "resolvedPn": "6282288511707@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6282288511707@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACF99BFF4399D872F744FE2AA03E33A9",
+      "participant": "26293806596318@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-09-27T13:44:29.415Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282288511707@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACF99BFF4399D872F744FE2AA03E33A9",
+        "participant": "26293806596318@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6282288511707@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACF99BFF4399D872F744FE2AA03E33A9",
+        "participant": "6282288511707@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-09-27T13:44:29.415Z"
+  }
+}

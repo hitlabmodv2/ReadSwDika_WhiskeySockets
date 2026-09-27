@@ -199,6 +199,7 @@ async function handleMenu({
                                 `.rvo2\n` +
                                 `.s\n` +
                                 `.toimg\n` +
+                                `.smeme [teks]\n` +
                                 `.stickerly\n` +
                                 `.listgroup\n` +
                                 `.allunduh\n` +

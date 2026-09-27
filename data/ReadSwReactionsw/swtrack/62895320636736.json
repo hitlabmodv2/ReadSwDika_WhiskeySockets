@@ -1,0 +1,44 @@
+{
+  "ACDBF62E5B34140F2A2A9BE320C048DE": {
+    "id": "ACDBF62E5B34140F2A2A9BE320C048DE",
+    "sender": "62895320636736@s.whatsapp.net",
+    "name": "Agin",
+    "type": "imageMessage",
+    "arrivedAt": "2026-09-27T10:15:16.369Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐬",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "62895320636736",
+    "resolvedPn": "62895320636736@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "62895320636736@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACDBF62E5B34140F2A2A9BE320C048DE",
+      "participant": "99591785570357@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-09-27T10:15:32.233Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62895320636736@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACDBF62E5B34140F2A2A9BE320C048DE",
+        "participant": "99591785570357@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "62895320636736@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACDBF62E5B34140F2A2A9BE320C048DE",
+        "participant": "62895320636736@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-09-27T10:15:32.232Z"
+  }
+}

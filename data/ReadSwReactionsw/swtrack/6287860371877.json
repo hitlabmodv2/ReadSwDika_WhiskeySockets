@@ -1,55 +1,36 @@
 {
-  "3EB0B358D7E9603A98A2FD": {
-    "id": "3EB0B358D7E9603A98A2FD",
+  "ACA87F6FC2B0D2FDDE6DE7CD13480C47": {
+    "id": "ACA87F6FC2B0D2FDDE6DE7CD13480C47",
     "sender": "6287860371877@s.whatsapp.net",
     "name": "Fuma Kotaro",
-    "type": "conversation",
-    "arrivedAt": "2026-06-11T05:25:48.696Z",
+    "type": "protocolMessage",
+    "arrivedAt": "2026-09-27T09:47:17.031Z",
     "read": true,
     "reacted": true,
-    "emoji": "🐇",
-    "resolve": "PN langsung ✓",
-    "source": "status",
+    "emoji": "🐟",
+    "source": "group",
     "number": "6287860371877",
-    "resolvedPn": "6287860371877@s.whatsapp.net",
     "messageKey": {
-      "remoteJid": "status@broadcast",
-      "remoteJidAlt": "6287860371877@s.whatsapp.net",
+      "remoteJid": "120363192554714254@g.us",
       "fromMe": false,
-      "id": "3EB0B358D7E9603A98A2FD",
+      "id": "ACA87F6FC2B0D2FDDE6DE7CD13480C47",
       "participant": "200356231442552@lid",
+      "participantAlt": "6287860371877@s.whatsapp.net",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-11T05:26:04.604Z",
-    "receiptKeys": [
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6287860371877@s.whatsapp.net",
-        "fromMe": false,
-        "id": "3EB0B358D7E9603A98A2FD",
-        "participant": "200356231442552@lid",
-        "addressingMode": "lid"
-      },
-      {
-        "remoteJid": "status@broadcast",
-        "remoteJidAlt": "6287860371877@s.whatsapp.net",
-        "fromMe": false,
-        "id": "3EB0B358D7E9603A98A2FD",
-        "participant": "6287860371877@s.whatsapp.net",
-        "addressingMode": "lid"
-      }
-    ],
-    "processedAt": "2026-06-11T05:26:04.604Z"
+    "resolvedPn": "6287860371877@s.whatsapp.net",
+    "updatedAt": "2026-09-27T09:47:36.969Z",
+    "processedAt": "2026-09-27T09:47:36.969Z"
   },
-  "3EB0BD86E1915935E2EDD0": {
-    "id": "3EB0BD86E1915935E2EDD0",
+  "AC6FE8C57F7F497A3B591816646123F1": {
+    "id": "AC6FE8C57F7F497A3B591816646123F1",
     "sender": "6287860371877@s.whatsapp.net",
     "name": "Fuma Kotaro",
-    "type": "conversation",
-    "arrivedAt": "2026-06-11T05:25:53.066Z",
-    "read": true,
-    "reacted": true,
-    "emoji": "🧉",
+    "type": "videoMessage",
+    "arrivedAt": "2026-09-27T09:47:17.034Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6287860371877",
@@ -58,17 +39,42 @@
       "remoteJid": "status@broadcast",
       "remoteJidAlt": "6287860371877@s.whatsapp.net",
       "fromMe": false,
-      "id": "3EB0BD86E1915935E2EDD0",
+      "id": "AC6FE8C57F7F497A3B591816646123F1",
       "participant": "200356231442552@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-06-11T05:26:06.776Z",
+    "updatedAt": "2026-09-27T09:47:17.253Z",
+    "deleted": true,
+    "deletedAt": "2026-09-27T09:47:17.253Z"
+  },
+  "ACAD7AA032B4F096EC7F7D3EE03F7A3A": {
+    "id": "ACAD7AA032B4F096EC7F7D3EE03F7A3A",
+    "sender": "6287860371877@s.whatsapp.net",
+    "name": "Fuma Kotaro",
+    "type": "videoMessage",
+    "arrivedAt": "2026-09-27T11:22:04.791Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐠",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6287860371877",
+    "resolvedPn": "6287860371877@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6287860371877@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACAD7AA032B4F096EC7F7D3EE03F7A3A",
+      "participant": "200356231442552@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-09-27T11:22:59.038Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6287860371877@s.whatsapp.net",
         "fromMe": false,
-        "id": "3EB0BD86E1915935E2EDD0",
+        "id": "ACAD7AA032B4F096EC7F7D3EE03F7A3A",
         "participant": "200356231442552@lid",
         "addressingMode": "lid"
       },
@@ -76,11 +82,36 @@
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6287860371877@s.whatsapp.net",
         "fromMe": false,
-        "id": "3EB0BD86E1915935E2EDD0",
+        "id": "ACAD7AA032B4F096EC7F7D3EE03F7A3A",
         "participant": "6287860371877@s.whatsapp.net",
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-06-11T05:26:06.776Z"
+    "processedAt": "2026-09-27T11:22:19.551Z",
+    "deleted": true,
+    "deletedAt": "2026-09-27T11:22:59.038Z"
+  },
+  "AC25ACFE281CD00D20C4F108D05A3B74": {
+    "id": "AC25ACFE281CD00D20C4F108D05A3B74",
+    "sender": "6287860371877@s.whatsapp.net",
+    "name": "Fuma Kotaro",
+    "type": "protocolMessage",
+    "arrivedAt": "2026-09-27T11:22:05.210Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐬",
+    "source": "group",
+    "number": "6287860371877",
+    "messageKey": {
+      "remoteJid": "120363192554714254@g.us",
+      "fromMe": false,
+      "id": "AC25ACFE281CD00D20C4F108D05A3B74",
+      "participant": "200356231442552@lid",
+      "participantAlt": "6287860371877@s.whatsapp.net",
+      "addressingMode": "lid"
+    },
+    "resolvedPn": "6287860371877@s.whatsapp.net",
+    "updatedAt": "2026-09-27T11:22:15.054Z",
+    "processedAt": "2026-09-27T11:22:15.054Z"
   }
 }

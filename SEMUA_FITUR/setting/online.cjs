@@ -19,8 +19,8 @@
  * ───────────────────────────────
  *
  *  online.cjs — Auto online command handler
- *  Perintah .online untuk aktifkan/nonaktifkan status kehadiran selalu online
- *  Menggunakan single_select button dengan section Mode + Interval 10-300 detik
+ *  Perintah .online untuk aktifkan status online sementara lalu otomatis offline
+ *  Menggunakan single_select button dengan 5 section: Mode, Detik, Menit, Jam, Hari
  * ───────────────────────────────
  */
 'use strict';
@@ -42,27 +42,102 @@ function _fancy(text) {
     }
 }
 
-// ── Preset interval populer ─────────────────────────────────────────────────
-const _INTERVAL_PRESETS = [
-    { sec: 10,  desc: 'Paling sering — sangat stabil, agak boros' },
-    { sec: 30,  desc: '🔰 Default — seimbang, aman dan stabil' },
-    { sec: 60,  desc: 'Cukup jarang — hemat, tetap stabil' },
-    { sec: 120, desc: 'Jarang — hemat resource' },
-    { sec: 300, desc: 'Paling jarang — paling hemat' },
+const _MIN_DURATION_SECONDS = 5;
+const _MAX_DURATION_SECONDS = 7 * 24 * 60 * 60;
+
+// ── Preset durasi: tiap unit punya section sendiri di single-select ──────────
+const _DURATION_SECTIONS = [
+    {
+        title: '⏱️ Durasi Detik',
+        unit: 's',
+        options: [
+            { value: 5,  desc: 'Online sebentar lalu otomatis offline' },
+            { value: 10, desc: 'Online singkat lalu otomatis offline' },
+            { value: 30, desc: '🔰 Default — seimbang dan stabil' },
+        ],
+    },
+    {
+        title: '⏱️ Durasi Menit',
+        unit: 'm',
+        options: [
+            { value: 1,  desc: 'Online selama 1 menit' },
+            { value: 5,  desc: 'Online selama 5 menit' },
+            { value: 10, desc: 'Online selama 10 menit' },
+        ],
+    },
+    {
+        title: '⏱️ Durasi Jam',
+        unit: 'h',
+        options: [
+            { value: 1,  desc: 'Online selama 1 jam' },
+            { value: 6,  desc: 'Online selama 6 jam' },
+            { value: 12, desc: 'Online selama 12 jam' },
+        ],
+    },
+    {
+        title: '⏱️ Durasi Hari',
+        unit: 'd',
+        options: [
+            { value: 1, desc: 'Online selama 1 hari' },
+            { value: 3, desc: 'Online selama 3 hari' },
+            { value: 7, desc: 'Online selama 7 hari' },
+        ],
+    },
 ];
+
+function _durationSeconds(autoOnline) {
+    const value = Number(autoOnline?.durationSeconds ?? autoOnline?.intervalSeconds ?? 30);
+    return Number.isFinite(value) && value >= _MIN_DURATION_SECONDS
+        ? Math.min(Math.floor(value), _MAX_DURATION_SECONDS)
+        : 30;
+}
+
+function _formatDuration(totalSeconds) {
+    let remaining = Math.max(0, Math.floor(Number(totalSeconds) || 0));
+    const days = Math.floor(remaining / 86400);
+    remaining %= 86400;
+    const hours = Math.floor(remaining / 3600);
+    remaining %= 3600;
+    const minutes = Math.floor(remaining / 60);
+    const seconds = remaining % 60;
+    const parts = [];
+    if (days) parts.push(`${days} hari`);
+    if (hours) parts.push(`${hours} jam`);
+    if (minutes) parts.push(`${minutes} menit`);
+    if (seconds || !parts.length) parts.push(`${seconds} detik`);
+    return parts.join(' ');
+}
+
+function _parseDuration(raw) {
+    const match = String(raw || '').trim().toLowerCase()
+        .match(/^(\d+)(s|sec|secs|detik|m|min|mins|menit|h|hr|hrs|jam|d|day|days|hari)?$/);
+    if (!match) return null;
+    const amount = Number(match[1]);
+    if (!Number.isSafeInteger(amount) || amount <= 0) return null;
+    const unit = match[2] || 's';
+    const multiplier = /^(m|min|mins|menit)$/.test(unit)
+        ? 60
+        : /^(h|hr|hrs|jam)$/.test(unit)
+            ? 3600
+            : /^(d|day|days|hari)$/.test(unit)
+                ? 86400
+                : 1;
+    const seconds = amount * multiplier;
+    return seconds >= _MIN_DURATION_SECONDS && seconds <= _MAX_DURATION_SECONDS ? seconds : null;
+}
 
 // ── Helper bangun body status ────────────────────────────────────────────────
 function _buildBody({ isJadibot, jadibotNum, autoOnline, running }) {
     const statusIcon = autoOnline.enabled ? '✅' : '🙈';
-    const statusText = autoOnline.enabled ? '*Online* (terlihat online)' : '*Offline* (tersembunyi/stealth)';
-    const interval    = autoOnline.intervalSeconds || 30;
+    const statusText = autoOnline.enabled ? '*Online* (akan otomatis offline)' : '*Offline* (siap online)';
+    const duration    = _durationSeconds(autoOnline);
     const jadibotNote = isJadibot ? `\n> ⚙️ _Setting khusus jadibot +${jadibotNum}_` : '';
 
     return (
         `╭═══『 🟢 ${_fancy(`AUTO ONLINE${isJadibot ? ' JADIBOT' : ''}`)} 』═══╮\n` +
         `│\n` +
         `│ ${statusIcon} *Status   :* ${statusText}\n` +
-        `│ ⏱️ *Interval :* \`${interval} detik\`\n` +
+        `│ ⏱️ *Durasi   :* \`${_formatDuration(duration)}\`\n` +
         (isJadibot ? '' : `│ 🔄 *Running :* ${running ? '✅ Ya' : '❌ Tidak'}\n`) +
         `│\n` +
         `│ ℹ️ _Mode Online: kontak bisa lihat online_\n` +
@@ -116,18 +191,24 @@ async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, autoOnli
                     `${pref}online off`
                 )
 
-                // ── Section 2: Interval populer ──────────────────────────
-                .makeSections(`⏱️ ${_fancy('Interval Populer')}`);
-
-            for (const p of _INTERVAL_PRESETS) {
-                const aktif = isPreset(p.sec);
-                btn.makeRow(
-                    markInt(p.sec) + `${p.sec} detik`,
-                    _fancy(`Set Interval ${p.sec} Detik`),
-                    aktif ? activeDesc(p.desc) : p.desc,
-                    `${pref}online set ${p.sec}`
-                );
-            }
+                // ── Section 2-5: Durasi per satuan waktu ────────────────
+                for (const section of _DURATION_SECTIONS) {
+                    btn.makeSections(_fancy(section.title));
+                    for (const option of section.options) {
+                        const seconds = option.value * (
+                            section.unit === 'm' ? 60
+                                : section.unit === 'h' ? 3600
+                                    : section.unit === 'd' ? 86400 : 1
+                        );
+                        const aktif = _durationSeconds(autoOnline) === seconds;
+                        btn.makeRow(
+                            (aktif ? '✓ ' : '') + `${option.value} ${section.unit === 's' ? 'detik' : section.unit === 'm' ? 'menit' : section.unit === 'h' ? 'jam' : 'hari'}`,
+                            _fancy(`Online ${_formatDuration(seconds)}`),
+                            aktif ? activeDesc(`${_formatDuration(seconds)}, lalu otomatis offline`) : option.desc,
+                            `${pref}online set ${option.value}${section.unit}`
+                        );
+                    }
+                }
 
             // ── Auto-delete pesan sebelumnya → kirim baru → simpan key ───
             await _deleteLastMsg(hisoka, m.from);
@@ -148,8 +229,8 @@ async function _sendFallback(tolak, hisoka, m, bodyText, pref) {
         `*Penggunaan:*\n` +
         `1. \`${pref}online on\` — Terlihat online\n` +
         `2. \`${pref}online off\` — Terlihat offline (stealth)\n` +
-        `3. \`${pref}online set <detik>\` — Atur interval kirim ulang\n` +
-        `   _(10-300 detik, makin kecil makin stabil tapi lebih boros)_\n\n` +
+        `3. \`${pref}online set <durasi>\` — Online lalu otomatis offline\n` +
+        `   _Contoh: \`${pref}online set 30s\`, \`${pref}online set 5m\`, \`${pref}online set 2h\`, \`${pref}online set 1d\`_\n\n` +
         `> 💡 _Tips: pakai tombol di atas biar lebih_\n` +
         `> _cepat & tidak salah ketik perintah._`
     );
@@ -171,7 +252,7 @@ async function handleOnline({ hisoka, m, query, tolak, logCommand, loadConfig, s
             if (!m.isOwner && !_isJadibotUser) return;
 
             const jadibotNum = getJadibotNumber(hisoka);
-            const getAO = () => getJadibotAutoOnline(jadibotNum) || { enabled: false, intervalSeconds: 30 };
+            const getAO = () => getJadibotAutoOnline(jadibotNum) || { enabled: false, durationSeconds: 30 };
 
             // ── Tanpa argumen → status + selection button ────────────────
             if (args.length === 0) {
@@ -192,7 +273,7 @@ async function handleOnline({ hisoka, m, query, tolak, logCommand, loadConfig, s
                 if (autoOnline.enabled) {
                     await _notifSudahAktif(autoOnline, 'Mode Online');
                 } else {
-                    const newAO = { ...autoOnline, enabled: true };
+                    const newAO = { ...autoOnline, enabled: true, startedAt: Date.now() };
                     setJadibotUserSetting(jadibotNum, 'autoOnline', newAO);
                     startJadibotAutoOnline(hisoka, jadibotNum);
                     const body = `✅ *Diaktifkan! Terlihat Online*\n\n` + _buildBody({ isJadibot: true, jadibotNum, autoOnline: newAO });
@@ -203,25 +284,25 @@ async function handleOnline({ hisoka, m, query, tolak, logCommand, loadConfig, s
                 if (!autoOnline.enabled) {
                     await _notifSudahAktif(autoOnline, 'Mode Offline');
                 } else {
-                    const newAO = { ...autoOnline, enabled: false };
+                    const newAO = { ...autoOnline, enabled: false, startedAt: null };
                     setJadibotUserSetting(jadibotNum, 'autoOnline', newAO);
                     startJadibotAutoOnline(hisoka, jadibotNum);
                     const body = `🙈 *Dinonaktifkan! Mode Stealth Aktif*\n\n` + _buildBody({ isJadibot: true, jadibotNum, autoOnline: newAO });
                     await _sendSelection(hisoka, m, Button, tolak, body, pref, newAO);
                 }
             } else if (args[0] === 'set' && args[1]) {
-                const seconds = parseInt(args[1]);
-                if (isNaN(seconds) || seconds < 10 || seconds > 300) {
-                    await tolak(hisoka, m, '❌ Interval harus antara *10-300 detik*'); return;
+                const seconds = _parseDuration(args[1]);
+                if (!seconds) {
+                    await tolak(hisoka, m, '❌ Durasi tidak valid. Gunakan *5 detik sampai 7 hari*, contoh: `30s`, `5m`, `2h`, `1d`'); return;
                 }
                 const autoOnline = getAO();
-                if (autoOnline.intervalSeconds === seconds) {
-                    await _notifSudahAktif(autoOnline, `Interval ${seconds} Detik`);
+                if (_durationSeconds(autoOnline) === seconds) {
+                    await _notifSudahAktif(autoOnline, `Durasi ${_formatDuration(seconds)}`);
                 } else {
-                    const newAO = { ...autoOnline, intervalSeconds: seconds };
+                    const newAO = { ...autoOnline, durationSeconds: seconds, intervalSeconds: seconds, startedAt: autoOnline.enabled ? Date.now() : null };
                     setJadibotUserSetting(jadibotNum, 'autoOnline', newAO);
                     if (newAO.enabled) startJadibotAutoOnline(hisoka, jadibotNum);
-                    const body = `✅ *Interval diset ke ${seconds} detik*\n\n` + _buildBody({ isJadibot: true, jadibotNum, autoOnline: newAO });
+                    const body = `✅ *Durasi diset ke ${_formatDuration(seconds)}*\n\n` + _buildBody({ isJadibot: true, jadibotNum, autoOnline: newAO });
                     await _sendSelection(hisoka, m, Button, tolak, body, pref, newAO);
                 }
             } else {
@@ -235,7 +316,7 @@ async function handleOnline({ hisoka, m, query, tolak, logCommand, loadConfig, s
         // ═══════════════════════════ MODE BOT UTAMA ═════════════════════════
         if (!m.isOwner) return;
 
-        const getAOMain = () => loadConfig().autoOnline || { enabled: false, intervalSeconds: 30 };
+        const getAOMain = () => loadConfig().autoOnline || { enabled: false, durationSeconds: 30 };
         const saveAOMain = (newVal) => { const cfg = loadConfig(); cfg.autoOnline = newVal; saveConfig(cfg); };
         const isRunning  = () => !!global.autoOnlineInterval;
 
@@ -258,7 +339,7 @@ async function handleOnline({ hisoka, m, query, tolak, logCommand, loadConfig, s
             if (autoOnline.enabled) {
                 await _notifSudahAktifMain(autoOnline, 'Mode Online');
             } else {
-                const newAO = { ...autoOnline, enabled: true };
+                const newAO = { ...autoOnline, enabled: true, startedAt: Date.now() };
                 saveAOMain(newAO);
                 if (global.startAutoOnline) global.startAutoOnline();
                 else if (global.hisokaClient) global.hisokaClient.sendPresenceUpdate('available');
@@ -270,7 +351,7 @@ async function handleOnline({ hisoka, m, query, tolak, logCommand, loadConfig, s
             if (!autoOnline.enabled) {
                 await _notifSudahAktifMain(autoOnline, 'Mode Offline');
             } else {
-                const newAO = { ...autoOnline, enabled: false };
+                const newAO = { ...autoOnline, enabled: false, startedAt: null };
                 saveAOMain(newAO);
                 if (global.startAutoOnline) {
                     global.startAutoOnline();
@@ -284,18 +365,18 @@ async function handleOnline({ hisoka, m, query, tolak, logCommand, loadConfig, s
                 await _sendSelection(hisoka, m, Button, tolak, body, pref, newAO);
             }
         } else if (args[0] === 'set' && args[1]) {
-            const seconds = parseInt(args[1]);
-            if (isNaN(seconds) || seconds < 10 || seconds > 300) {
-                await tolak(hisoka, m, '❌ Interval harus antara *10-300 detik*'); return;
+            const seconds = _parseDuration(args[1]);
+            if (!seconds) {
+                await tolak(hisoka, m, '❌ Durasi tidak valid. Gunakan *5 detik sampai 7 hari*, contoh: `30s`, `5m`, `2h`, `1d`'); return;
             }
             const autoOnline = getAOMain();
-            if (autoOnline.intervalSeconds === seconds) {
-                await _notifSudahAktifMain(autoOnline, `Interval ${seconds} Detik`);
+            if (_durationSeconds(autoOnline) === seconds) {
+                await _notifSudahAktifMain(autoOnline, `Durasi ${_formatDuration(seconds)}`);
             } else {
-                const newAO = { ...autoOnline, intervalSeconds: seconds };
+                const newAO = { ...autoOnline, durationSeconds: seconds, intervalSeconds: seconds, startedAt: autoOnline.enabled ? Date.now() : null };
                 saveAOMain(newAO);
                 if (newAO.enabled && global.startAutoOnline) global.startAutoOnline();
-                const body = `✅ *Interval diset ke ${seconds} detik*\n\n` + _buildBody({ isJadibot: false, autoOnline: newAO, running: isRunning() });
+                const body = `✅ *Durasi diset ke ${_formatDuration(seconds)}*\n\n` + _buildBody({ isJadibot: false, autoOnline: newAO, running: isRunning() });
                 await _sendSelection(hisoka, m, Button, tolak, body, pref, newAO);
             }
         } else {

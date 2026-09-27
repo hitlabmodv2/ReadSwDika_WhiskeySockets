@@ -24,6 +24,10 @@
  */
 'use strict';
 
+// Caption .fb memakai wrapper yang mencoba Ish Chat (gpt-oss-120b) lebih dulu,
+// lalu model Gemini jika provider utama gagal. Gemini ESM dari ctx tetap dipakai untuk vision.
+const { gemini: captionAi } = require('../ai/gemini.cjs');
+
 /**
  * Handler untuk command .fb / .facebook / .fbdl
  * @param {object} hisoka - bot socket
@@ -83,20 +87,25 @@ async function fetchArchiveFb(url) {
         const data = await res.json();
         if (!data?.status || !data?.result?.media?.length) return null;
 
-        const mediaList = data.result.media;
-        const hdMedia   = mediaList.find(item =>
-            item.quality && (item.quality.toLowerCase().includes('hd') || item.quality.toLowerCase().includes('high'))
-        );
+        // API mengembalikan URL sebagai string pada beberapa respons, bukan selalu object.
+        const mediaList = data.result.media
+            .map(item => typeof item === 'string' ? { url: item } : item)
+            .filter(item => typeof item?.url === 'string' && item.url.startsWith('https://'));
+        if (!mediaList.length) return null;
+
+        const hdMedia = mediaList.find(item => {
+            const quality = String(item.quality || '').toLowerCase();
+            return quality.includes('hd') || quality.includes('high') || Number.parseInt(quality, 10) >= 480;
+        });
         const best = hdMedia || mediaList[0];
-        if (!best?.url) return null;
 
         return {
             url      : best.url,
-            quality  : hdMedia ? 'HD' : 'SD',
+            quality  : hdMedia ? 'HD' : best.quality || 'SD',
             isHD     : !!hdMedia,
             isVideo  : true,
             title    : data.result.metadata?.title || '',
-            thumbnail: data.result.metadata?.thumbnail || data.result.thumbnail || null,
+            thumbnail: data.result.metadata?.thumbnail || data.result.metadata?.image || data.result.thumbnail || null,
             _source  : 'archive',
         };
     } catch (e) {
@@ -222,10 +231,11 @@ async function handleFacebookDl(hisoka, m, query, ctx) {
 
     // ── Parse metadata ─────────────────────────────────────────────────────────
     const parsedMeta  = parseFbMetaHtml(metaHtml);
-    // Filter title berupa ID angka FB (mis. "17093569669950008" atau "Video 1709...") → pakai parsedMeta saja
+    // Filter title berupa ID angka atau judul generik dari API → pakai metadata Facebook.
     const rawApiTitle = mediaData.title || '';
     const isApiTitleId = /^\d+$/.test(rawApiTitle.trim()) || /^(video|reel|story)\s+\d{5,}$/i.test(rawApiTitle.trim());
-    const pageTitle   = (!isApiTitleId && rawApiTitle) ? rawApiTitle : (parsedMeta.pageTitle || '');
+    const isGenericApiTitle = /^facebook(?:\s+video)?(?:\.\.\.|…)?$/i.test(rawApiTitle.trim());
+    const pageTitle   = (!isApiTitleId && !isGenericApiTitle && rawApiTitle) ? rawApiTitle : (parsedMeta.pageTitle || '');
     const mediaType   = isStory ? 'story' : isReel ? 'reel' : parsedMeta.mediaType || 'video';
     const views       = parsedMeta.views || '';
     const likes       = parsedMeta.likes  || '';
@@ -257,15 +267,17 @@ async function handleFacebookDl(hisoka, m, query, ctx) {
     // ── AI caption ─────────────────────────────────────────────────────────────
     let finalCaption = buildFbFallbackCaption({ pageTitle, description, views, likes, quality, mediaType });
 
-    if (gemini) {
+    if (captionAi?.ask) {
         try {
             const captionPrompt = buildFbCaptionPrompt({
                 pageTitle, description, views, likes, quality, hashtags, mediaType,
                 visualDesc: fbVisualDesc,
             });
-            const aiCaption = await gemini.ask(captionPrompt);
+            const aiCaption = await captionAi.ask(captionPrompt);
             if (aiCaption?.trim()) finalCaption = aiCaption.trim();
-        } catch (_) {}
+        } catch (e) {
+            console.warn('[FB] Caption AI gagal; memakai caption fallback:', e?.message || e);
+        }
     }
 
     // ── Kirim video ────────────────────────────────────────────────────────────
