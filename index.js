@@ -63,6 +63,7 @@ const {
         jidDecode,
         downloadMediaMessage,
         getContentType,
+         isJidGroup,
         generateWAMessageFromContent,
         prepareWAMessageMedia,
         proto,
@@ -76,7 +77,7 @@ import JSONDB from './src/db/json.js';
 import { kvGet, kvSet, kvMigrateFromJSON, kvMigrateKey } from './src/db/datadb.js';
 import { initBotStats, getUptime as getBotUptime, getBotStats } from './src/db/botStats.js';
 import { startPm2Metrics } from './src/metrics/pm2Metrics.js';
-import { injectClient } from './src/helper/inject.js';
+import { injectClient, injectMessage } from './src/helper/inject.js';
 import { getCaseName, loadConfig, saveConfig } from './src/helper/utils.js';
 import { getStatusEmojis, getRandomEmoji } from './src/helper/emoji.js';
 import { MemoryMonitor } from './src/helper/memoryMonitor.js';
@@ -724,6 +725,55 @@ async function main() {
         );
                 hisoka.isMainBot = true;
                 hisoka.botNumber = null;
+                let mainSocketOpen = false;
+                const pendingHistoryStories = [];
+                const historyStoryIds = new Set();
+
+                const isHistoricalStory = (message) => {
+                        if (!message?.message || message.key?.fromMe && message.key?.remoteJid === 'status@broadcast') return false;
+                        const remoteJid = message.key?.remoteJid;
+                        if (remoteJid === 'status@broadcast') return true;
+                        if (!isJidGroup(remoteJid)) return false;
+                        return !!(
+                                message.message?.groupStatusMessageV2 ||
+                                message.message?.groupStatusMentionMessage ||
+                                message.message?.groupMentionedMessage ||
+                                Object.values(message.message).some(value => value?.contextInfo?.isGroupStatus)
+                        );
+                };
+
+                const processHistoricalStory = async (message) => {
+                        if (!isHistoricalStory(message)) return;
+
+                        const messageId = message.key?.id;
+                        if (messageId) {
+                                if (historyStoryIds.has(messageId)) return;
+                                historyStoryIds.add(messageId);
+                        }
+
+                        if (!mainSocketOpen) {
+                                pendingHistoryStories.push(message);
+                                return;
+                        }
+
+                        try {
+                                const eventHandler = getHandler('event');
+                                if (typeof eventHandler !== 'function') return;
+                                const preparedMessage = await injectMessage(hisoka, message);
+                                await eventHandler(preparedMessage, hisoka);
+                        } catch (error) {
+                                console.error('\x1b[31m[HistoryStory] Gagal memproses story tersinkron:\x1b[39m', error?.message || String(error));
+                        }
+                };
+
+                // Full history Baileys dikirim melalui messaging-history.set,
+                // bukan messages.upsert. Ambil hanya story/status agar pesan
+                // chat lama tidak dianggap command baru setelah bot menyala.
+                hisoka.ev.on('messaging-history.set', ({ messages = [] } = {}) => {
+                        for (const message of messages) {
+                                processHistoricalStory(message).catch(() => {});
+                        }
+                });
                 // pairedBrowserKey = browser yang terdaftar di WA Perangkat Tertaut (set saat pairing, bukan reconnect)
                 // browserDevice.selected = browser yang ingin dipakai Baileys untuk reconnect (bisa beda)
                 // Menu harus tampilkan pairedBrowserKey agar sesuai dengan yang WA tampilkan
@@ -972,6 +1022,14 @@ async function main() {
                 }
 
                 if (connection === 'open') {
+                        mainSocketOpen = true;
+                        if (pendingHistoryStories.length) {
+                                const queuedHistoryStories = pendingHistoryStories.splice(0);
+                                for (const message of queuedHistoryStories) {
+                                        processHistoricalStory(message).catch(() => {});
+                                }
+                                console.log(`\x1b[36m[HistoryStory]\x1b[39m ${queuedHistoryStories.length} story history menunggu diproses setelah bot online`);
+                        }
                         // Batalkan timer expired (QR / pairing) saat bot berhasil konek
                         if (global.__qrExpiredTimer) {
                                 clearTimeout(global.__qrExpiredTimer);

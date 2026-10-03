@@ -40,106 +40,91 @@ const _PFX_RETRY       = 'waifu_retry_';  // waifu_retry_{idx}_{mode} — coba l
 const _PFX_SEARCH_NEXT = 'waifu_srch_';  // waifu_srch_{mode}_{keyword+encoded} — search lagi
 const CONFIG_PATH = path.join(process.cwd(), 'config.json');
 
-// ── Tag list ───────────────────────────────────────────────────────────────────
-// API: tbib.org (gelbooru-based, tidak pakai Cloudflare, selalu bisa diakses)
-// Format URL: https://tbib.org/images/{directory}/{image}
-
-// Safe tags — konten aman (rating:safe) — count real dari tbib.org
+// ── Tag list dari waifu.im API v6 ──────────────────────────────────────────────
+// Safe tags
 const SAFE_TAGS = [
-    { label: '🧕 Waifu',          slug: '1girl rating:safe',              count: 4278481 },
-    { label: '💃 Dress',           slug: 'dress rating:safe',              count: 1102668 },
-    { label: '💫 Twintails',       slug: 'twintails rating:safe',          count: 653335  },
-    { label: '🩱 Swimsuit',        slug: 'swimsuit rating:safe',           count: 600652  },
-    { label: '🏫 School Uniform',  slug: 'school_uniform rating:safe',     count: 549907  },
-    { label: '👙 Bikini',          slug: 'bikini rating:safe',             count: 482045  },
-    { label: '👓 Kacamata',        slug: 'glasses rating:safe',            count: 327354  },
-    { label: '👘 Kimono',          slug: 'kimono rating:safe',             count: 172580  },
-    { label: '🌑 Dark Skin',       slug: 'dark_skin rating:safe',          count: 167327  },
-    { label: '👕 Uniform',         slug: 'uniform rating:safe',            count: 155167  },
-    { label: '✨ Genshin Impact',  slug: 'genshin_impact rating:safe',     count: 128804  },
-    { label: '👗 Maid',            slug: 'maid rating:safe',               count: 114971  },
-    { label: '🐱 Cat Girl',        slug: 'cat_girl rating:safe',           count: 64269   },
-    { label: '😈 Demon Girl',      slug: 'demon_girl rating:safe',         count: 59330   },
-    { label: '🧝 Elf',             slug: 'elf rating:safe',                count: 44137   },
-    { label: '🎀 Gothic Lolita',   slug: 'gothic_lolita rating:safe',      count: 15312   },
-    { label: '🤳 Selfie',          slug: 'selfie rating:safe',             count: 15980   },
-    { label: '💀 Mori Calliope',   slug: 'mori_calliope rating:safe',      count: 7752    },
-    { label: '💙 Rem (Re:Zero)',   slug: 'rem_(re:zero) rating:safe',      count: 7298    },
-    { label: '🍊 Nami (One Piece)',slug: 'nami_(one_piece) rating:safe',   count: 6177    },
-    { label: '🌸 Kamisato Ayaka',  slug: 'kamisato_ayaka rating:safe',     count: 3174    },
+    { label: '🎲 Random Safe',     slug: '',                   count: 4278 },
+    { label: '🧕 Waifu',           slug: 'waifu',              count: 4278 },
+    { label: '👗 Maid',            slug: 'maid',               count: 273  },
+    { label: '🎌 Genshin Impact',  slug: 'genshin-impact',     count: 84   },
+    { label: '⚔️ Raiden Shogun',   slug: 'raiden-shogun',      count: 69   },
+    { label: '🎀 Marin Kitagawa',  slug: 'marin-kitagawa',     count: 47   },
+    { label: '💀 Mori Calliope',   slug: 'mori-calliope',      count: 26   },
+    { label: '❄️ Kamisato Ayaka',  slug: 'kamisato-ayaka',     count: 14   },
+    { label: '💙 Rem',             slug: 'rem',                count: 12   },
+    { label: '🍊 Nami',            slug: 'nami',               count: 1    },
 ];
 
-// NSFW tags — konten dewasa 18+ (rating:explicit) — count real dari tbib.org
+// NSFW tags
 const NSFW_TAGS = [
-    { label: '🔞 Nipples',         slug: 'nipples rating:explicit',                  count: 2038285 },
-    { label: '🌶️ Nude/Ero',       slug: 'nude rating:explicit',                     count: 1715697 },
-    { label: '💦 Cum',             slug: 'cum rating:explicit',                      count: 1252162 },
-    { label: '🍈 Large Breasts',   slug: 'large_breasts rating:explicit',            count: 492133  },
-    { label: '👄 Oral',            slug: 'oral rating:explicit',                     count: 482597  },
-    { label: '🍑 Ass',             slug: 'ass rating:explicit',                      count: 297261  },
-    { label: '👭 Group Sex',       slug: 'group_sex rating:explicit',                count: 202376  },
-    { label: '⛓️ Bondage',        slug: 'bondage rating:explicit',                  count: 184006  },
-    { label: '🐙 Tentacles',       slug: 'tentacles rating:explicit',                count: 96845   },
-    { label: '😵 Ahegao',          slug: 'ahegao rating:explicit',                   count: 86537   },
-    { label: '💦 Paizuri',         slug: 'paizuri rating:explicit',                  count: 74287   },
-    { label: '⚧ Futanari',        slug: 'futanari rating:explicit',                  count: 57965   },
-    { label: '🩷 Yuri',            slug: 'yuri rating:explicit',                     count: 55759   },
-    { label: '👊 Gangbang',        slug: 'gangbang rating:explicit',                 count: 52317   },
-    { label: '👕 Uniform 18+',     slug: 'uniform rating:explicit',                  count: 36873   },
-    { label: '👗 Maid 18+',        slug: 'maid rating:explicit',                     count: 20234   },
-    { label: '🍈 Oppai',           slug: 'oppai rating:explicit',                    count: 10153   },
-    { label: '👩 MILF',            slug: 'milf rating:explicit',                     count: 9602    },
+    { label: '🎲 Random NSFW',     slug: '',                   count: 4200 },
+    { label: '🔞 Ero',             slug: 'ero',                count: 3014 },
+    { label: '📚 Ecchi',           slug: 'ecchi',              count: 2138 },
+    { label: '🍈 Oppai',           slug: 'oppai',              count: 1084 },
+    { label: '🔥 Hentai',          slug: 'hentai',             count: 883  },
+    { label: '👩 MILF',            slug: 'milf',              count: 468  },
+    { label: '👕 Uniform',         slug: 'uniform',            count: 448  },
+    { label: '🍑 Ass',             slug: 'ass',                count: 414  },
+    { label: '👗 Maid 18+',        slug: 'maid',               count: 273  },
+    { label: '🤳 Selfies',         slug: 'selfies',            count: 181  },
+    { label: '💦 Paizuri',         slug: 'paizuri',            count: 146  },
+    { label: '👄 Oral',            slug: 'oral',               count: 145  },
 ];
 
-// ── Ambil token waifu.im dari config.json ─────────────────────────────────────
-// Cara dapat token: https://www.waifu.im/dashboard (login → Generate Token)
-// Simpan di config.json: { "waifu": { "token": "TOKEN_KAMU_DISINI" } }
+const WAIFU_API_BASE = 'https://api.waifu.im/images';
 
-const WAIFU_TOKEN = 'lPcSc1Fh55RUQ6g3PSzm2YxCEVTUxhlsiRMSVajHCN8';
-
-function _getWaifuToken() {
-    try {
-        const cfg = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf-8'));
-        return cfg?.waifu?.token || WAIFU_TOKEN;
-    } catch (_) { return WAIFU_TOKEN; }
+// ── Update fetcher ke endpoint resmi waifu.im
+async function _fetchWaifu(tags, isNsfw) {
+    let url = `${WAIFU_API_BASE}?isNsfw=${isNsfw ? 'true' : 'false'}&limit=1`;
+    if (tags) {
+        url += `&included_tags=${encodeURIComponent(tags)}`;
+    }
+    const data = await _httpGetJson(url);
+    if (!data?.items?.length) throw new Error('Tidak ada gambar ditemukan di waifu.im');
+    return _normalizeWaifuIm(data.items[0]);
 }
 
-// ── HTTP helpers ───────────────────────────────────────────────────────────────
+// ── Normalize data dari waifu.im API v6
+function _normalizeWaifuIm(item) {
+    const ext = item.extension || '.jpg';
+    return {
+        url:        item.url,
+        extension:  ext,
+        is_nsfw:    item.isNsfw,
+        artists:    item.artists?.map(a => a.name) || [],
+        source:     item.source,
+        tags:       item.tags || [],
+        width:      item.width,
+        height:     item.height,
+        score:      0, // waifu.im API tidak kirim score
+        uploadedAt: item.uploadedAt ? item.uploadedAt.split('T')[0] : null,
+        postId:     item.id,
+        owner:      null,
+        rating:     item.isNsfw ? 'explicit' : 'safe',
+    };
+}
 
-function _httpGetJson(url, token) {
+function _httpGetJson(url) {
     return new Promise((resolve, reject) => {
         const headers = {
             'User-Agent':      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
             'Accept':          'application/json, text/plain, */*',
             'Accept-Language': 'en-US,en;q=0.9',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Referer':         'https://www.waifu.im/',
-            'Origin':          'https://www.waifu.im',
             'Connection':      'keep-alive',
         };
-        if (token) headers['Authorization'] = `Bearer ${token}`;
 
         const req = https.get(url, { headers }, (res) => {
-            const zlib    = require('zlib');
-            const enc     = res.headers['content-encoding'];
-            let   stream  = res;
-            let   raw     = '';
-
-            if (enc === 'gzip')    stream = res.pipe(zlib.createGunzip());
-            else if (enc === 'deflate') stream = res.pipe(zlib.createInflate());
-            else if (enc === 'br') stream = res.pipe(zlib.createBrotliDecompress());
-
-            stream.on('data', d => raw += d);
-            stream.on('end', () => {
+            let raw = '';
+            res.on('data', d => raw += d);
+            res.on('end', () => {
                 if (res.statusCode !== 200) {
-                    // Attach statusCode ke error agar bisa dideteksi untuk fallback
                     const err = new Error(`HTTP ${res.statusCode}`);
                     err.statusCode = res.statusCode;
                     return reject(err);
                 }
                 try { resolve(JSON.parse(raw)); } catch (_) { reject(new Error('JSON parse error')); }
             });
-            stream.on('error', reject);
+            res.on('error', reject);
         });
         req.on('error', reject);
         req.setTimeout(12000, () => { req.destroy(); reject(new Error('Timeout')); });
@@ -147,7 +132,6 @@ function _httpGetJson(url, token) {
 }
 
 function _downloadBuffer(url) {
-    // Support http:// dan https:// — pilih module sesuai protokol
     const http = require('http');
     const transport = url.startsWith('http://') ? http : https;
 
@@ -156,8 +140,6 @@ function _downloadBuffer(url) {
             headers: {
                 'User-Agent':      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
                 'Accept':          'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
-                'Accept-Language': 'en-US,en;q=0.9',
-                'Referer':         'https://tbib.org/',
             },
         }, (res) => {
             if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
@@ -174,207 +156,17 @@ function _downloadBuffer(url) {
     });
 }
 
-// ── Helper: cek apakah error perlu fallback (403, 401, timeout, dll) ──────────
-function _needsFallback(err) {
-    if (!err) return false;
-    const code = err.statusCode;
-    const msg  = err.message || '';
-    return code === 403 || code === 401 || code === 429 || code === 503
-        || msg.includes('403') || msg.includes('401')
-        || msg.includes('Timeout') || msg.includes('ECONNREFUSED')
-        || msg.includes('ENOTFOUND');
-}
 
 // ── Helper: build gelbooru-style params ────────────────────────────────────────
-function _booruParams(tags, pid = 0) {
-    return new URLSearchParams({ page: 'dapi', s: 'post', q: 'index', json: '1', tags, limit: '10', pid: String(pid) });
+function _buildWaifuUrl(slug, isNsfw) {
+    const params = new URLSearchParams({
+        included_tags: slug,
+        isNsfw: isNsfw ? 'true' : 'false',
+        limit: '1',
+    });
+    return `${WAIFU_API_BASE}?${params.toString()}`;
 }
 
-// ── Filter 2D anime: exclude konten 3D / real / cosplay ───────────────────────
-// Standar tag negatif booru (-tag = exclude). Dipasang di semua sumber.
-const _ANIME_EXCLUDE = '-3d -realistic -photorealistic -photo -cosplay -real_person -live_action';
-
-function _animeSlug(slug) {
-    return `${slug} ${_ANIME_EXCLUDE}`;
-}
-
-function _cleanSlug(slug) {
-    // Hapus rating tag (untuk sumber yang tidak pakai sistem rating tbib)
-    return slug.replace(/\brating:\S+/g, '').trim();
-}
-
-// ── Fetch gambar — chain: tbib.org → safebooru.org (safe) / xbooru.com (nsfw) ──
-// Semua sumber tidak perlu auth/API key.
-// Fallback otomatis jika IP VPS/Pterodactyl diblok (403/401).
-//
-// Hasil test dari Replit (simulasi IP datacenter):
-//   tbib.org     → 200 (blok di banyak VPS)
-//   safebooru.org→ 200 ✅ fallback safe
-//   xbooru.com   → 200 ✅ fallback nsfw
-//   rule34.xxx   → 401 minta auth ❌
-//   gelbooru.com → 401 minta auth ❌
-
-async function _fetchWaifu(slug, isNsfw) {
-    const pid      = Math.floor(Math.random() * 20);
-    const filtered = _animeSlug(slug); // tambah filter 2D anime
-
-    // ── Sumber 1: tbib.org ──────────────────────────────────────────────────────
-    try {
-        const data = await _tryBooru(
-            `https://tbib.org/index.php?${_booruParams(filtered, pid)}`,
-            `https://tbib.org/index.php?${_booruParams(filtered, 0)}`,
-        );
-        if (data?.length) return _normalizeTbib(data[Math.floor(Math.random() * data.length)]);
-    } catch (err) {
-        if (!_needsFallback(err)) throw err;
-        // IP diblok → coba sumber berikutnya
-    }
-
-    // ── Sumber 2 (fallback): safebooru.org (safe) / xbooru.com (nsfw) ──────────
-    return isNsfw ? _fetchXbooru(slug) : _fetchSafebooru(slug);
-}
-
-// ── safebooru.org — safe only, tanpa auth ──────────────────────────────────────
-async function _fetchSafebooru(slug) {
-    // Hapus rating tag + tambah filter 2D
-    const base      = _cleanSlug(slug);
-    const filtered  = _animeSlug(base);
-    const pid       = Math.floor(Math.random() * 20);
-
-    const data = await _tryBooru(
-        `https://safebooru.org/index.php?${_booruParams(filtered, pid)}`,
-        `https://safebooru.org/index.php?${_booruParams(filtered, 0)}`,
-    );
-    if (!data?.length) throw new Error('Tidak ada gambar ditemukan (tbib.org & safebooru.org)');
-    return _normalizeSafebooru(data[Math.floor(Math.random() * data.length)]);
-}
-
-// ── xbooru.com — nsfw, tanpa auth, gelbooru-compatible ────────────────────────
-async function _fetchXbooru(slug) {
-    // Hapus rating tag + tambah filter 2D
-    const base     = _cleanSlug(slug);
-    const filtered = _animeSlug(base);
-    const pid      = Math.floor(Math.random() * 20);
-
-    const data = await _tryBooru(
-        `https://xbooru.com/index.php?${_booruParams(filtered, pid)}`,
-        `https://xbooru.com/index.php?${_booruParams(filtered, 0)}`,
-    );
-    if (!data?.length) throw new Error('Tidak ada gambar ditemukan (tbib.org & xbooru.com)');
-    return _normalizeXbooru(data[Math.floor(Math.random() * data.length)]);
-}
-
-// ── Generic: coba url1 → url2 jika kosong/error ────────────────────────────────
-async function _tryBooru(url1, url2) {
-    let data = [];
-    try {
-        const raw = await _httpGetJson(url1);
-        data = Array.isArray(raw) ? raw : (raw?.post || []);
-    } catch (err) {
-        if (!_needsFallback(err) && !err.message?.includes('JSON')) throw err;
-    }
-    if (!data.length) {
-        const raw2 = await _httpGetJson(url2);
-        data = Array.isArray(raw2) ? raw2 : (raw2?.post || []);
-    }
-    return data;
-}
-
-// ── Normalize safebooru.org (sama seperti tbib, beda base URL) ─────────────────
-function _normalizeSafebooru(item) {
-    const imageFile = item.image || (item.hash + '.jpg');
-    const url       = `https://safebooru.org/images/${item.directory}/${imageFile}`;
-    const ext       = imageFile.split('.').pop()?.toLowerCase() || 'jpg';
-
-    let uploadedAt = null;
-    if (item.change) {
-        const d = new Date(item.change * 1000);
-        const pad = n => String(n).padStart(2, '0');
-        uploadedAt = `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
-    }
-
-    return {
-        url,
-        extension:  '.' + ext,
-        is_nsfw:    false,
-        artists:    [],
-        source:     null,
-        tags:       (item.tags || '').split(' ').slice(0, 5).map(n => ({ name: n })),
-        width:      item.width  || null,
-        height:     item.height || null,
-        score:      Number(item.score) || 0,
-        uploadedAt,
-        postId:     item.id    || null,
-        owner:      item.owner || null,
-        rating:     'safe',
-    };
-}
-
-// ── Normalize xbooru.com (file_url-based, gelbooru-compatible) ────────────────
-function _normalizeXbooru(item) {
-    // xbooru kadang kasih http:// — paksa https agar _downloadBuffer tidak error
-    const url = (item.file_url || '').replace(/^http:\/\//i, 'https://');
-    const ext = url.split('.').pop()?.split('?')[0]?.toLowerCase() || 'jpg';
-
-    const ratingMap = { s: 'safe', q: 'questionable', e: 'explicit', g: 'general' };
-    const rating    = ratingMap[item.rating] || item.rating || 'explicit';
-
-    let uploadedAt = null;
-    if (item.change || item.created_at) {
-        try {
-            const d = item.change ? new Date(item.change * 1000) : new Date(item.created_at);
-            const pad = n => String(n).padStart(2, '0');
-            uploadedAt = `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
-        } catch (_) {}
-    }
-
-    return {
-        url,
-        extension:  '.' + ext,
-        is_nsfw:    true,
-        artists:    [],
-        source:     item.source || null,
-        tags:       (item.tags || '').split(' ').slice(0, 5).map(n => ({ name: n })),
-        width:      item.width  || null,
-        height:     item.height || null,
-        score:      Number(item.score) || 0,
-        uploadedAt,
-        postId:     item.id    || null,
-        owner:      item.owner || null,
-        rating,
-    };
-}
-
-function _normalizeTbib(item) {
-    const imageFile = item.image || (item.hash + '.jpg');
-    const url       = `https://tbib.org/images/${item.directory}/${imageFile}`;
-    const ext       = imageFile.split('.').pop()?.toLowerCase() || 'jpg';
-
-    // Format tanggal dari Unix timestamp `change`
-    let uploadedAt = null;
-    if (item.change) {
-        const d = new Date(item.change * 1000);
-        const pad = n => String(n).padStart(2, '0');
-        uploadedAt = `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
-    }
-
-    return {
-        url,
-        extension:   '.' + ext,
-        is_nsfw:     item.rating === 'explicit' || item.rating === 'questionable',
-        artists:     [],
-        source:      null,
-        tags:        (item.tags || '').split(' ').slice(0, 5).map(n => ({ name: n })),
-        // Metadata tambahan
-        width:       item.width       || null,
-        height:      item.height      || null,
-        score:       (item.score !== null && item.score !== undefined) ? Number(item.score) : 0,
-        uploadedAt:  uploadedAt,
-        postId:      item.id          || null,
-        owner:       item.owner       || null,
-        rating:      item.rating      || null,
-    };
-}
 
 // ── Config helpers ─────────────────────────────────────────────────────────────
 
@@ -431,7 +223,7 @@ async function _sendImageResult(hisoka, m, Button, pendingWaifuChoices, getJadib
         ? imgData.rating.charAt(0).toUpperCase() + imgData.rating.slice(1)
         : '?';
     const postUrl   = imgData.postId
-        ? `https://tbib.org/index.php?page=post&s=view&id=${imgData.postId}`
+        ? `https://www.waifu.im/gallery?image_id=${imgData.postId}`
         : null;
 
     const body =
@@ -441,16 +233,14 @@ async function _sendImageResult(hisoka, m, Button, pendingWaifuChoices, getJadib
         `│ 🔒 Mode      : ${modeLabel}\n` +
         `│ 📐 Ukuran    : ${dimStr}\n` +
         `│ 💾 File      : ${fileSize} (.${ext})\n` +
-        `│ ⭐ Score     : ${scoreStr}\n` +
         `│ 📅 Upload    : ${dateStr}\n` +
         `│ 🏷️  Rating    : ${ratingStr}\n` +
-        (postUrl ? `│ 🔗 Post ID   : #${imgData.postId}\n` : '') +
         `│\n` +
         `╰──────────────────────`;
 
     const btn = new Button()
         .setBody(body)
-        .setFooter('🖼️ tbib.org • WilyBot')
+        .setFooter('🖼️ waifu.im • WilyBot')
         .addSelection('📋 Pilih Aksi');
 
     if (ext === 'gif') {
@@ -507,7 +297,7 @@ async function _sendErrorButton(hisoka, m, Button, pendingWaifuChoices, getJadib
             `│\n` +
             `╰──────────────────────`
         )
-        .setFooter('🖼️ tbib.org • WilyBot')
+        .setFooter('🖼️ waifu.im • WilyBot')
         .addSelection('🔄 Pilih Aksi');
 
     btn.makeSections('🔄 Aksi');
@@ -549,11 +339,11 @@ async function _sendModeButton(m, hisoka, Button, pendingWaifuChoices, getJadibo
             `│ 🔞 *NSFW 18+* — konten dewasa\n` +
             `│${modeInfo}\n` +
             `│\n` +
-            `│ 🌐 Source: tbib.org\n` +
+            `│ 🌐 Source: waifu.im\n` +
             `│\n` +
             `╰──────────────────────`
         )
-        .setFooter('🖼️ tbib.org • WilyBot')
+        .setFooter('🖼️ waifu.im • WilyBot')
         .addSelection('🖼️ Pilih Mode');
 
     btn.makeSections('🔒 Mode Gambar');
@@ -594,7 +384,7 @@ async function _sendCharButton(m, hisoka, Button, pendingWaifuChoices, getJadibo
             `│\n` +
             `╰──────────────────────`
         )
-        .setFooter('🖼️ tbib.org • WilyBot')
+        .setFooter('🖼️ waifu.im • WilyBot')
         .addSelection('🎌 Pilih Kategori');
 
     btn.makeSections(isNsfw ? '🔞 Kategori NSFW 18+' : '✅ Karakter / Kategori Safe');
@@ -657,7 +447,7 @@ async function _doFetchAndSend(hisoka, m, Button, pendingWaifuChoices, getJadibo
 
     const loadMsg = await hisoka.sendMessage(
         m.from,
-        { text: `⏳ Mengambil gambar *${chosen.label}* dari tbib.org...` },
+        { text: `⏳ Mengambil gambar *${chosen.label}* dari waifu.im...` },
         { quoted: m }
     ).catch(() => null);
 
@@ -696,22 +486,44 @@ async function _doFetchAndSend(hisoka, m, Button, pendingWaifuChoices, getJadibo
 
 // ── Helper: search keyword langsung + kirim gambar ────────────────────────────
 
+// ── Smart tag matcher untuk waifu.im API ────────────────────────────────────────
+function _matchWaifuTag(keyword) {
+    const kw = keyword.toLowerCase().trim();
+    const allTags = [...SAFE_TAGS, ...NSFW_TAGS];
+    
+    // 1. Exact match slug atau label
+    const exact = allTags.find(t => {
+        if (!t.slug) return false; // Skip random tags
+        return t.slug === kw || t.label.toLowerCase().includes(kw);
+    });
+    if (exact) return exact.slug;
+
+    // 2. Partial match slug
+    const partial = allTags.find(t => {
+        if (!t.slug) return false;
+        return t.slug.includes(kw) || kw.includes(t.slug);
+    });
+    if (partial) return partial.slug;
+
+    // 3. Fallback default
+    return 'waifu';
+}
+
 async function _doSearchAndSend(hisoka, m, Button, pendingWaifuChoices, getJadibotChoiceKey, tolak, logCommand, {
     keyword, mode,
 }) {
-    const isNsfw    = mode === 'nsfw';
-    const ratingTag = isNsfw ? 'rating:explicit' : 'rating:safe';
-    const slug      = keyword + ' ' + ratingTag;
+    const isNsfw  = mode === 'nsfw';
+    const matchedSlug = _matchWaifuTag(keyword);
 
     const loadMsg = await hisoka.sendMessage(
         m.from,
-        { text: `⏳ Mencari *${keyword}* di tbib.org (mode: ${isNsfw ? 'NSFW' : 'Safe'})...` },
+        { text: `⏳ Mencari *${keyword}* (tag: ${matchedSlug}) di waifu.im (mode: ${isNsfw ? 'NSFW' : 'Safe'})...` },
         { quoted: m }
     ).catch(() => null);
 
     let imgData;
     try {
-        imgData = await _fetchWaifu(slug, isNsfw);
+        imgData = await _fetchWaifu(matchedSlug, isNsfw);
     } catch (err) {
         if (loadMsg?.key) try { await hisoka.sendMessage(m.from, { delete: loadMsg.key }); } catch (_) {}
         await _sendSearchErrorButton(hisoka, m, Button, pendingWaifuChoices, getJadibotChoiceKey, {
@@ -770,16 +582,14 @@ async function _sendSearchResult(hisoka, m, Button, pendingWaifuChoices, getJadi
         `│ 🔒 Mode      : ${modeLabel}\n` +
         `│ 📐 Ukuran    : ${dimStr}\n` +
         `│ 💾 File      : ${fileSize} (.${ext})\n` +
-        `│ ⭐ Score     : ${scoreStr}\n` +
         `│ 📅 Upload    : ${dateStr}\n` +
         `│ 🏷️  Rating    : ${ratingStr}\n` +
-        (imgData.postId ? `│ 🔗 Post ID   : #${imgData.postId}\n` : '') +
         `│\n` +
         `╰──────────────────────`;
 
     const btn = new Button()
         .setBody(body)
-        .setFooter('🔍 tbib.org • WilyBot')
+        .setFooter('🔍 waifu.im • WilyBot')
         .addSelection('📋 Pilih Aksi');
 
     if (ext === 'gif') {
@@ -834,7 +644,7 @@ async function _sendSearchErrorButton(hisoka, m, Button, pendingWaifuChoices, ge
             `│\n` +
             `╰──────────────────────`
         )
-        .setFooter('🔍 tbib.org • WilyBot')
+        .setFooter('🔍 waifu.im • WilyBot')
         .addSelection('📋 Pilih Aksi');
 
     btn.makeSections('🔄 Aksi');

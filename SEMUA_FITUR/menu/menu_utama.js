@@ -156,6 +156,7 @@ export function buildMenuUtama({ pushName, isOwner, uptimeStr, tgl, jam, browser
 │ .komikinfo
 │ .komikget / .komikdl
 │ .komikupdate
+│ .animquote
 ├═════════════════════┤
 ║   🔞 *KONTEN 18+*   
 ├═════════════════════┤

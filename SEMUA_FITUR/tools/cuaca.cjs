@@ -446,16 +446,16 @@ function formatWeatherReport(result) {
     const [condition, emoji] = weatherInfo(item.weatherCode);
     const arrow = windDirectionArrow(item.windDirection);
     const windStr = Number.isFinite(Number(item.windSpeed)) ? ` • 💨${formatNumber(item.windSpeed, ' km/j', 0)}${arrow}` : '';
-    return `│  ↳ ${formatTime(item.time)} » ${emoji} ${condition}\n│     🌡️${formatNumber(item.temperature, '°C')} • 🌧️${formatNumber(item.rainProbability, '%')}${windStr}`;
-  }).join('\n') || '│  ↳ -';
+    return `${formatTime(item.time)} WIB — ${emoji} *${condition}*\n   • Suhu: \`${formatNumber(item.temperature, '°C')}\` • Hujan: \`${formatNumber(item.rainProbability, '%')}\`${windStr}`;
+  }).join('\n') || '• _Data per jam tidak tersedia._';
 
   const forecast = (result.forecast || []).slice(0, 4).map(item => {
     const arrow = windDirectionArrow(item.windDirDominant);
     const sunshineMins = Number.isFinite(Number(item.sunshineDuration)) ? Math.round(Number(item.sunshineDuration) / 60) : null;
     const sunshineStr = sunshineMins !== null ? ` • ☀️${sunshineMins}mnt` : '';
     const windStr = Number.isFinite(Number(item.windSpeedMax)) ? `\n│     💨${formatNumber(item.windSpeedMax, ' km/j', 0)}${arrow} • 💧${formatNumber(item.precipitationSum, ' mm', 1)}${sunshineStr}` : '';
-    return `│  ↳ ${item.date} » ${item.emoji} ${item.condition}\n│     🌡️${formatNumber(item.minTemp, '°C')}-${formatNumber(item.maxTemp, '°C')} • 🌧️${formatNumber(item.rainProbability, '%')}${windStr}`;
-  }).join('\n') || '│  ↳ -';
+    return `*${item.date}* — ${item.emoji} *${item.condition}*\n   • Suhu: \`${formatNumber(item.minTemp, '°C')} – ${formatNumber(item.maxTemp, '°C')}\` • Hujan: \`${formatNumber(item.rainProbability, '%')}\`${windStr.replace(/^\\n│\s+/, '\n   • ')}`;
+  }).join('\n') || '• _Prakiraan harian tidak tersedia._';
 
   const humNote = humidityLevel(c.humidity);
   const visNote = visibilityLabel(c.visibility);
@@ -465,55 +465,53 @@ function formatWeatherReport(result) {
 
   const alerts = weatherAlerts(c, today);
   const alertBlock = alerts.length
-    ? `│\n│ ⚠️ *Peringatan Cuaca*\n${alerts.map(a => `│  ▸ ${a}`).join('\n')}\n`
+    ? `\n*Peringatan cuaca*\n${alerts.map(alert => `> ⚠️ ${alert}`).join('\n')}\n`
     : '';
 
   const sunshineToday = Number.isFinite(Number(today.sunshineDuration)) ? Math.round(Number(today.sunshineDuration) / 60) : null;
-  const sunshineTodayStr = sunshineToday !== null ? `\n│  ▸ Sinar Matahari : ${sunshineToday} menit` : '';
+  const sunshineTodayStr = sunshineToday !== null ? `\n• *Sinar matahari:* \`${sunshineToday} menit\`` : '';
 
-  return `╭─「 🌦️ *CUACA REALTIME* 」
-├────────────────────────
-│
-│ 📍 *Lokasi*
-│  ↳ ${result.location.name}
-│  ↳ ${result.location.latitude.toFixed(4)}, ${result.location.longitude.toFixed(4)}
-│  ↳ Zona Waktu : ${result.location.timezone}
-│
-│ 🕒 *Update Realtime*
-│  ↳ ${formatTime(c.time)} WIB • ${period}
-│
-│ ${c.emoji} *Kondisi Sekarang*
-│  ▸ Cuaca      : ${c.condition}
-│  ▸ Suhu       : ${formatNumber(c.temperature, '°C')} (Terasa ${formatNumber(c.apparentTemperature, '°C')})
-│  ▸ Titik Embun: ${formatNumber(c.dewPoint, '°C')}
-│  ▸ Kelembapan : ${formatNumber(c.humidity, '%')} ${humNote}
-│  ▸ Awan       : ${formatNumber(c.cloudCover, '%')}
-│  ▸ Hujan      : ${formatNumber(c.precipitation, ' mm', 1)}
-│  ▸ Angin      : ${formatNumber(c.windSpeed, ' km/jam', 1)} ${windArrow} (${windDirection(c.windDirection)})
-│  ▸ Hembusan   : ${formatNumber(c.windGusts, ' km/jam', 1)}
-│  ▸ Tekanan    : ${formatNumber(c.pressureMsl, ' hPa', 1)}
-│  ▸ Visibilitas: ${visStr}
-│
-│ 🌅 *Hari Ini*
-│  ▸ Min / Max  : ${formatNumber(today.minTemp, '°C')} - ${formatNumber(today.maxTemp, '°C')}
-│  ▸ Terasa     : ${formatNumber(today.apparentMin, '°C')} - ${formatNumber(today.apparentMax, '°C')}
-│  ▸ Hujan      : ${formatNumber(today.rainProbability, '%')}
-│  ▸ Total Hujan: ${formatNumber(today.precipitationSum, ' mm', 1)}
-│  ▸ UV Index   : ${formatNumber(today.uvIndex, '', 1)} — ${uvLevel(today.uvIndex)}
-│  ▸ Angin Max  : ${formatNumber(today.windSpeedMax, ' km/jam', 0)} ${windDirectionArrow(today.windDirDominant)} (${windDirection(today.windDirDominant)})
-│  ▸ Hembusan   : ${formatNumber(today.windGustsMax, ' km/jam', 0)}${sunshineTodayStr}
-│  ▸ Sunrise    : ${formatTime(today.sunrise)} WIB
-│  ▸ Sunset     : ${formatTime(today.sunset)} WIB
-│
-${alertBlock}│ ⏱️ *Beberapa Jam Ke Depan*
+  return `*🌦️ CUACA REALTIME*
+_Pembaruan data dari Open-Meteo_
+
+*📍 Lokasi*
+1. *Daerah:* ${result.location.name}
+2. *Koordinat:* \`${result.location.latitude.toFixed(4)}, ${result.location.longitude.toFixed(4)}\`
+3. *Zona waktu:* \`${result.location.timezone}\`
+
+*🕒 Waktu pembaruan*
+> \`${formatTime(c.time)} WIB\` • ${period}
+
+*${c.emoji} Kondisi sekarang*
+• *Cuaca:* ${c.condition}
+• *Suhu:* \`${formatNumber(c.temperature, '°C')}\` _(terasa ${formatNumber(c.apparentTemperature, '°C')})_
+• *Titik embun:* \`${formatNumber(c.dewPoint, '°C')}\`
+• *Kelembapan:* \`${formatNumber(c.humidity, '%')}\` ${humNote}
+• *Awan:* \`${formatNumber(c.cloudCover, '%')}\`
+• *Hujan:* \`${formatNumber(c.precipitation, ' mm', 1)}\`
+• *Angin:* \`${formatNumber(c.windSpeed, ' km/jam', 1)} ${windArrow}\` (${windDirection(c.windDirection)})
+• *Hembusan:* \`${formatNumber(c.windGusts, ' km/jam', 1)}\`
+• *Tekanan:* \`${formatNumber(c.pressureMsl, ' hPa', 1)}\`
+• *Visibilitas:* \`${visStr}\`
+
+*🌅 Hari ini*
+• *Suhu minimum–maksimum:* \`${formatNumber(today.minTemp, '°C')} – ${formatNumber(today.maxTemp, '°C')}\`
+• *Suhu terasa:* \`${formatNumber(today.apparentMin, '°C')} – ${formatNumber(today.apparentMax, '°C')}\`
+• *Peluang hujan:* \`${formatNumber(today.rainProbability, '%')}\`
+• *Total hujan:* \`${formatNumber(today.precipitationSum, ' mm', 1)}\`
+• *UV Index:* \`${formatNumber(today.uvIndex, '', 1)}\` — ${uvLevel(today.uvIndex)}
+• *Angin maksimum:* \`${formatNumber(today.windSpeedMax, ' km/jam', 0)} ${windDirectionArrow(today.windDirDominant)}\` (${windDirection(today.windDirDominant)})
+• *Hembusan maksimum:* \`${formatNumber(today.windGustsMax, ' km/jam', 0)}\`${sunshineTodayStr}
+• *Matahari terbit:* \`${formatTime(today.sunrise)} WIB\`
+• *Matahari terbenam:* \`${formatTime(today.sunset)} WIB\`
+${alertBlock}
+*⏱️ Beberapa jam ke depan*
 ${nextHours}
-│
-│ 📅 *Prakiraan 4 Hari*
+
+*📅 Prakiraan 4 hari*
 ${forecast}
-│
-╰────────────────────────
-│ 🔄 Sumber: Open-Meteo • Realtime
-╰────────────────────────`;
+
+> _Sumber: Open-Meteo • Data realtime._`;
 }
 
 function tileCoords(lat, lon, zoom) {

@@ -14,6 +14,8 @@ const os = require('os');
 const path = require('path');
 const { spawn } = require('child_process');
 const WebSocket = require('ws');
+const sharp = require('sharp');
+const QRCode = require('qrcode');
 
 const LOOKUP_TIMEOUT_MS = 9000;
 const REGION_TIMEOUT_MS = 3500;
@@ -66,6 +68,64 @@ function htmlText(value) {
     );
 }
 
+const STAT_LABELS_ID = {
+    Matches: 'Pertandingan',
+    Wins: 'Menang',
+    'Win rate': 'Win rate',
+    Kills: 'Kill',
+    Deaths: 'Kematian',
+    'K/D': 'K/D',
+    Headshots: 'Headshot',
+    Damage: 'Damage',
+    'Most kills (match)': 'Kill terbanyak (match)',
+    Knockdowns: 'Knockdown',
+    Revives: 'Revive',
+    'Top finishes': 'Finis teratas',
+    'Distance (m)': 'Jarak (m)',
+    'Survival time': 'Waktu bertahan',
+    MVP: 'MVP',
+    Assists: 'Assist',
+    'Double kills': 'Double kill',
+    'Triple kills': 'Triple kill',
+    'Quad kills': 'Quad kill'
+};
+
+function formatAccountCreatedAt(value) {
+    const text = htmlText(value);
+    const match = text.match(
+        /^(January|February|March|April|May|June|July|August|September|October|November|December)\s+(\d{1,2}),\s+(\d{4})(?:\s+(\d{2}:\d{2}:\d{2}))?$/i
+    );
+    if (!match) return text || null;
+
+    const month = match[1];
+    const day = match[2];
+    const year = match[3];
+    const time = match[4] ? `, ${match[4]}` : '';
+    return `${day} ${month} ${year}${time}`;
+}
+
+function extractFullStats(html) {
+    const stats = [];
+    const cardPattern = /<div class=["']perfil-stats-card["'][^>]*>[\s\S]*?<h3[^>]*class=["']perfil-stats-mode["'][^>]*>([^<]+)<\/h3>[\s\S]*?<div class=["']perfil-stats-grid["'][^>]*>([\s\S]*?)(?=<\/div>\s*<\/div>\s*(?:<div class=["']perfil-stats-card["']|<\/div>\s*<div><button))/gi;
+    const itemPattern = /<div class=["']perfil-stats-item["'][^>]*>[\s\S]*?<span[^>]*class=["']perfil-stats-label["'][^>]*>([^<]+)<\/span>\s*<span[^>]*class=["']perfil-stats-value["'][^>]*>([^<]+)<\/span>\s*<\/div>/gi;
+
+    for (const cardMatch of html.matchAll(cardPattern)) {
+        const mode = htmlText(cardMatch[1]);
+        const items = [];
+        for (const itemMatch of cardMatch[2].matchAll(itemPattern)) {
+            const label = htmlText(itemMatch[1]);
+            items.push({
+                label,
+                labelId: STAT_LABELS_ID[label] || label,
+                value: htmlText(itemMatch[2])
+            });
+        }
+        if (mode && items.length) stats.push({ mode, items });
+    }
+
+    return stats;
+}
+
 function xmlEscape(value) {
     return String(value ?? '')
         .replace(/&/g, '&amp;')
@@ -91,9 +151,13 @@ function extractCardData(html, uid) {
     const likesMatch = html.match(
         /class=["'][^"']*perfil-chip-likes[^"']*["'][^>]*>\s*♥\s*([^<]+)/i
     );
-    const createdMatch = html.match(
-        /<strong>\s*Akun dibuat pada\s*<\/strong>\s*<span>([^<]+)<\/span>/i
-    );
+    const createdMatch =
+        html.match(
+            /<strong>\s*Akun dibuat pada\s*<\/strong>\s*<span>([^<]+)<\/span>/i
+        ) ||
+        html.match(
+            /<strong>\s*Account created on\s*<\/strong>\s*<span>([^<]+)<\/span>/i
+        );
     const stats = [...html.matchAll(
         /<div class=["']ffc-stat["']>\s*<span class=["']ffc-stat-num["']>([^<]+)<\/span>\s*<span class=["']ffc-stat-lbl["']>([^<]+)<\/span>/gi
     )].slice(0, 3).map(match => ({
@@ -114,8 +178,9 @@ function extractCardData(html, uid) {
         rankName: htmlText(rankMatch?.[2]) || null,
         rankPoints: htmlText(rankMatch?.[3]) || null,
         likes: htmlText(likesMatch?.[1]) || null,
-        createdAt: htmlText(createdMatch?.[1]) || null,
+        createdAt: formatAccountCreatedAt(createdMatch?.[1]),
         stats,
+        fullStats: extractFullStats(html),
         equipment
     };
 }
@@ -200,291 +265,147 @@ async function requestHtml(url, timeout = LOOKUP_TIMEOUT_MS) {
     return response.data;
 }
 
-function findChromium() {
-    const candidates = [
-        process.env.CHROMIUM_PATH,
-        '/repl/tools/bin/chromium',
-        'chromium',
-        'chromium-browser',
-        'google-chrome'
-    ].filter(Boolean);
+async function requestImageData(url) {
+    if (!url) return null;
 
-    for (const candidate of candidates) {
-        if (candidate.startsWith('/') && fs.existsSync(candidate)) return candidate;
-        if (!candidate.startsWith('/')) {
-            try {
-                const resolved = require('child_process').execFileSync(
-                    'which',
-                    [candidate],
-                    { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }
-                ).trim();
-                if (resolved) return resolved;
-            } catch {}
-        }
+    const parsed = new URL(url, 'https://www.freefiremania.com.br');
+    const allowedHosts = new Set([
+        'www.freefiremania.com.br',
+        'dl.dir.freefiremobile.com'
+    ]);
+    if (parsed.protocol !== 'https:' || !allowedHosts.has(parsed.hostname)) {
+        return null;
     }
 
-    const error = new Error('Chromium tidak tersedia untuk mengunduh kartu resmi.');
-    error.code = 'CARD_BROWSER_UNAVAILABLE';
-    throw error;
-}
-
-function waitForDevToolsUrl(browser, timeoutMs) {
-    return new Promise((resolve, reject) => {
-        let output = '';
-        let settled = false;
-        const timer = setTimeout(() => {
-            if (settled) return;
-            settled = true;
-            reject(new Error('Chromium tidak membuka DevTools tepat waktu.'));
-        }, timeoutMs);
-
-        const onData = chunk => {
-            output += chunk.toString();
-            const match = output.match(/DevTools listening on (ws:\/\/[^\s]+)/);
-            if (!match || settled) return;
-            settled = true;
-            clearTimeout(timer);
-            resolve(match[1]);
-        };
-
-        browser.stdout?.on('data', onData);
-        browser.stderr?.on('data', onData);
-        browser.once('error', error => {
-            if (settled) return;
-            settled = true;
-            clearTimeout(timer);
-            reject(error);
-        });
-        browser.once('exit', (code, signal) => {
-            if (settled) return;
-            settled = true;
-            clearTimeout(timer);
-            reject(new Error(`Chromium berhenti sebelum siap (${code ?? signal}).`));
-        });
+    const response = await axios.get(parsed.href, {
+        timeout: FREEFIREMANIA_TIMEOUT_MS,
+        responseType: 'arraybuffer',
+        headers: {
+            'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+            'Referer': 'https://www.freefiremania.com.br/',
+            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/131 Safari/537.36'
+        },
+        validateStatus: () => true
     });
+
+    if (response.status < 200 || response.status >= 300) return null;
+    return Buffer.from(response.data);
 }
 
-async function getDevToolsTarget(browserWsUrl) {
-    const endpoint = new URL(browserWsUrl);
-    endpoint.protocol = endpoint.protocol === 'wss:' ? 'https:' : 'http:';
-    endpoint.pathname = '/json/list';
-    endpoint.search = '';
-
-    const deadline = Date.now() + 5000;
-    while (Date.now() < deadline) {
-        try {
-            const response = await axios.get(endpoint.href, { timeout: 1000 });
-            const target = response.data.find(item => item.type === 'page');
-            if (target?.webSocketDebuggerUrl) return target.webSocketDebuggerUrl;
-        } catch {}
-        await new Promise(resolve => setTimeout(resolve, 100));
-    }
-
-    throw new Error('Target halaman Chromium tidak ditemukan.');
-}
-
-function createCdpClient(webSocketUrl) {
-    return new Promise((resolve, reject) => {
-        const socket = new WebSocket(webSocketUrl);
-        const pending = new Map();
-        let sequence = 0;
-        let closed = false;
-
-        const failPending = error => {
-            for (const { reject: rejectPending } of pending.values()) {
-                rejectPending(error);
-            }
-            pending.clear();
-        };
-
-        socket.once('open', () => resolve({
-            send(method, params = {}) {
-                if (closed) return Promise.reject(new Error('Koneksi Chromium sudah ditutup.'));
-                const id = ++sequence;
-                return new Promise((resolveCommand, rejectCommand) => {
-                    pending.set(id, { resolve: resolveCommand, reject: rejectCommand });
-                    socket.send(JSON.stringify({ id, method, params }));
-                });
-            },
-            close() {
-                closed = true;
-                failPending(new Error('Koneksi Chromium ditutup.'));
-                socket.close();
-            }
-        }));
-        socket.on('message', raw => {
-            const message = JSON.parse(raw.toString());
-            if (!message.id || !pending.has(message.id)) return;
-            const command = pending.get(message.id);
-            pending.delete(message.id);
-            if (message.error) {
-                command.reject(new Error(`${message.error.message} (${message.error.code})`));
-            } else {
-                command.resolve(message.result);
-            }
-        });
-        socket.on('close', () => {
-            closed = true;
-            failPending(new Error('Koneksi Chromium tertutup.'));
-        });
-        socket.on('error', error => {
-            if (!socket.readyState) reject(error);
-            failPending(error);
-        });
-    });
-}
-
-async function evaluateCdp(cdp, expression) {
-    const result = await cdp.send('Runtime.evaluate', {
-        expression,
-        returnByValue: true,
-        awaitPromise: true
-    });
-    if (result.exceptionDetails) {
-        throw new Error(result.exceptionDetails.text || 'Evaluasi halaman gagal.');
-    }
-    return result.result?.value;
-}
-
-async function waitForOfficialCardPage(cdp, uid) {
-    const url = `https://www.freefiremania.com.br/profile/${encodeURIComponent(uid)}.html`;
-    await cdp.send('Page.enable');
-    await cdp.send('Runtime.enable');
-    await cdp.send('Network.enable');
-    await cdp.send('Network.setUserAgentOverride', {
-        userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
-    });
-    await cdp.send('Page.addScriptToEvaluateOnNewDocument', {
-        source: 'Object.defineProperty(navigator, "webdriver", { get: () => undefined });'
-    });
-    await cdp.send('Page.navigate', { url });
-
-    const deadline = Date.now() + FREEFIREMANIA_CARD_TIMEOUT_MS;
-    while (Date.now() < deadline) {
-        const state = await evaluateCdp(
-            cdp,
-            `JSON.stringify({
-                title: document.title,
-                hasCard: !!document.getElementById('ffShareCard'),
-                hasButton: !!document.getElementById('ffCardBtn'),
-                nickname: document.getElementById('perfil-jogador-title')?.textContent?.trim() || '',
-                uidText: document.querySelector('.perfil-api-id')?.textContent?.trim() || '',
-                chips: [...document.querySelectorAll('.perfil-chip')].map(node => node.textContent.trim())
-            })`
-        );
-        const parsed = JSON.parse(state || '{}');
-        if (parsed.hasCard && parsed.hasButton) {
-            const returnedUid = (parsed.uidText.match(/\d{6,15}/) || [])[0] || '';
-            const region = parsed.chips
-                .map(chip => chip.match(/^Region:\s*(.+)$/i)?.[1]?.trim())
-                .find(Boolean) || null;
-            const levelText = parsed.chips
-                .map(chip => chip.match(/^Level\s+(\d+)$/i)?.[1])
-                .find(Boolean);
-            const profile = {
-                uid: returnedUid,
-                nickname: cleanText(parsed.nickname),
-                region: cleanText(region),
-                level: levelText ? Number(levelText) : null,
-                isBanned: null,
-                source: 'freefiremania'
-            };
-
-            if (profile.uid !== uid || !profile.nickname) {
-                const error = new Error('Profil resmi tidak cocok dengan UID yang diminta.');
-                error.code = 'PLAYER_NOT_FOUND';
-                throw error;
-            }
-            return profile;
-        }
-        if (/Attention Required|Cloudflare/i.test(parsed.title || '')) {
-            const error = new Error('Website resmi menampilkan verifikasi Cloudflare.');
-            error.code = 'CARD_PAGE_BLOCKED';
-            throw error;
-        }
-        await new Promise(resolve => setTimeout(resolve, 500));
-    }
-
-    throw new Error('Kartu resmi tidak selesai dimuat tepat waktu.');
-}
-
-async function captureOfficialFreeFireCard(uid) {
-    const chromium = findChromium();
-    const downloadDir = fs.mkdtempSync(path.join(os.tmpdir(), 'wily-ff-card-'));
-    const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'wily-ff-browser-'));
-    const browser = spawn(chromium, [
-        '--headless=new',
-        '--no-sandbox',
-        '--disable-gpu',
-        '--disable-dev-shm-usage',
-        '--disable-background-networking',
-        '--disable-features=Translate,BackForwardCache',
-        '--disable-blink-features=AutomationControlled',
-        '--remote-allow-origins=*',
-        '--remote-debugging-port=0',
-        `--user-data-dir=${userDataDir}`,
-        '--window-size=1200,2200',
-        'about:blank'
-    ], { stdio: ['ignore', 'pipe', 'pipe'] });
-
-    let cdp;
+async function imageDataUri(url) {
     try {
-        const browserWsUrl = await waitForDevToolsUrl(browser, 8000);
-        const pageWsUrl = await getDevToolsTarget(browserWsUrl);
-        cdp = await createCdpClient(pageWsUrl);
-        await cdp.send('Browser.setDownloadBehavior', {
-            behavior: 'allow',
-            downloadPath: downloadDir
-        });
-        const profile = await waitForOfficialCardPage(cdp, uid);
-        await evaluateCdp(cdp, `document.getElementById('ffCardBtn').click()`);
-
-        const deadline = Date.now() + FREEFIREMANIA_CARD_TIMEOUT_MS;
-        while (Date.now() < deadline) {
-            const files = fs.readdirSync(downloadDir)
-                .filter(file => file.endsWith('.png'))
-                .map(file => path.join(downloadDir, file));
-            if (files.length) {
-                return {
-                    buffer: fs.readFileSync(files[0]),
-                    profile
-                };
-            }
-            await new Promise(resolve => setTimeout(resolve, 500));
-        }
-
-        throw new Error('Website resmi tidak menghasilkan file kartu.');
-    } finally {
-        cdp?.close();
-        if (browser.exitCode === null && !browser.killed) {
-            browser.kill('SIGTERM');
-            await Promise.race([
-                new Promise(resolve => browser.once('exit', resolve)),
-                new Promise(resolve => setTimeout(resolve, 1500))
-            ]);
-        }
-        if (browser.exitCode === null) {
-            browser.kill('SIGKILL');
-            await new Promise(resolve => browser.once('exit', resolve));
-        }
-
-        for (const temporaryDir of [downloadDir, userDataDir]) {
-            for (let attempt = 0; attempt < 5; attempt++) {
-                try {
-                    fs.rmSync(temporaryDir, { recursive: true, force: true });
-                    break;
-                } catch (error) {
-                    if (error.code !== 'ENOTEMPTY' || attempt === 4) throw error;
-                    await new Promise(resolve => setTimeout(resolve, 200));
-                }
-            }
-        }
+        const buffer = await requestImageData(url);
+        if (!buffer) return null;
+        const png = await sharp(buffer).png().toBuffer();
+        return `data:image/png;base64,${png.toString('base64')}`;
+    } catch {
+        return null;
     }
 }
 
-async function downloadOfficialFreeFireCard(uid) {
-    const result = await captureOfficialFreeFireCard(uid);
-    return result.buffer;
+function svgImage(uri, x, y, width, height, radius = 0) {
+    if (!uri) {
+        return `<rect x="${x}" y="${y}" width="${width}" height="${height}" rx="${radius}" fill="#17233d"/>`;
+    }
+
+    const clipId = `clip-${x}-${y}`;
+    return `
+        <clipPath id="${clipId}">
+            <rect x="${x}" y="${y}" width="${width}" height="${height}" rx="${radius}"/>
+        </clipPath>
+        <image href="${uri}" x="${x}" y="${y}" width="${width}" height="${height}"
+            preserveAspectRatio="xMidYMid slice" clip-path="url(#${clipId})"/>`;
+}
+
+async function buildFreeFireCard(profile) {
+    if (profile?.source !== 'freefiremania' || !profile.card) return null;
+
+    const card = profile.card;
+    const [avatar, banner, rank] = await Promise.all([
+        imageDataUri(card.avatarUrl),
+        imageDataUri(card.bannerUrl),
+        imageDataUri(card.rankUrl)
+    ]);
+    const qr = await QRCode.toDataURL(card.profileUrl, {
+        width: 180,
+        margin: 1,
+        color: { dark: '#10203b', light: '#ffffff' }
+    });
+
+    const nicknameSize = Math.max(
+        24,
+        Math.min(50, Math.floor(760 / Math.max(profile.nickname.length, 1) * 1.8))
+    );
+    const stats = card.stats.length
+        ? card.stats
+        : [{ value: '-', label: 'K/D' }, { value: '-', label: 'Win rate' }, { value: '-', label: 'Kill' }];
+    const equipment = card.equipment.length
+        ? card.equipment
+        : [{ name: 'Profil Free Fire' }, { name: 'Realtime' }];
+    const statBlocks = stats.map((stat, index) => {
+        const x = 58 + index * 267;
+        return `
+            <rect x="${x}" y="730" width="240" height="110" rx="18" fill="#172642" stroke="#2c4269"/>
+            <text x="${x + 120}" y="778" text-anchor="middle" fill="#f8c85c" font-size="32" font-weight="700">${xmlEscape(stat.value)}</text>
+            <text x="${x + 120}" y="813" text-anchor="middle" fill="#b8c6dc" font-size="18">${xmlEscape(stat.label)}</text>`;
+    }).join('');
+    const equipmentBlocks = equipment.map((item, index) => {
+        const x = 58 + index * 400;
+        return `
+            <rect x="${x}" y="875" width="365" height="66" rx="16" fill="#172642"/>
+            <text x="${x + 182}" y="916" text-anchor="middle" fill="#e7eefb" font-size="20">${xmlEscape(item.name)}</text>`;
+    }).join('');
+
+    const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="900" height="1160" viewBox="0 0 900 1160">
+      <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#0b1224"/>
+          <stop offset="55%" stop-color="#132442"/>
+          <stop offset="100%" stop-color="#271b3d"/>
+        </linearGradient>
+        <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#f8c85c"/>
+          <stop offset="100%" stop-color="#f58b55"/>
+        </linearGradient>
+      </defs>
+      <rect width="900" height="1160" rx="38" fill="url(#bg)"/>
+      <rect x="26" y="26" width="848" height="1108" rx="28" fill="none" stroke="#385377" stroke-width="2"/>
+      <text x="58" y="84" fill="#f8c85c" font-size="22" font-weight="700" letter-spacing="4">FREE FIRE PROFILE</text>
+      <text x="842" y="84" text-anchor="end" fill="#a9bad5" font-size="18">REALTIME</text>
+      ${svgImage(banner, 58, 124, 190, 190, 28)}
+      ${svgImage(avatar, 80, 146, 146, 146, 22)}
+      <circle cx="225" cy="292" r="28" fill="url(#accent)" stroke="#0b1224" stroke-width="6"/>
+      <text x="225" y="301" text-anchor="middle" fill="#111a2c" font-size="18" font-weight="700">${xmlEscape(profile.level ?? '-')}</text>
+      <text x="282" y="178" fill="#f4f7ff" font-size="${nicknameSize}" font-weight="700">${xmlEscape(profile.nickname)}</text>
+      <text x="282" y="220" fill="#b8c6dc" font-size="24">UID ${xmlEscape(profile.uid)}</text>
+      <rect x="282" y="246" width="116" height="42" rx="21" fill="#203a61"/>
+      <text x="340" y="274" text-anchor="middle" fill="#f8c85c" font-size="22" font-weight="700">${xmlEscape(profile.region || '-')}</text>
+      <text x="58" y="365" fill="#8398b8" font-size="18">REGION</text>
+      <text x="58" y="402" fill="#f4f7ff" font-size="28" font-weight="700">${xmlEscape(profile.region || 'Tidak tersedia')}</text>
+      <text x="300" y="365" fill="#8398b8" font-size="18">LEVEL</text>
+      <text x="300" y="402" fill="#f4f7ff" font-size="28" font-weight="700">${xmlEscape(profile.level ?? '-')}</text>
+      <text x="520" y="365" fill="#8398b8" font-size="18">LIKES</text>
+      <text x="520" y="402" fill="#f4f7ff" font-size="28" font-weight="700">${xmlEscape(card.likes || '-')}</text>
+      <rect x="58" y="440" width="784" height="2" fill="url(#accent)"/>
+      <text x="58" y="490" fill="#8398b8" font-size="18">ACCOUNT CREATED</text>
+      <text x="58" y="528" fill="#f4f7ff" font-size="25">${xmlEscape(card.createdAt || 'Tidak tersedia')}</text>
+      ${rank ? `${svgImage(rank, 58, 566, 92, 92, 16)}
+        <text x="178" y="604" fill="#f4f7ff" font-size="26" font-weight="700">${xmlEscape(card.rankName || 'Rank')}</text>
+        <text x="178" y="640" fill="#b8c6dc" font-size="20">${xmlEscape(card.rankPoints || '')}</text>` : ''}
+      <text x="58" y="694" fill="#f8c85c" font-size="20" font-weight="700" letter-spacing="2">BATTLE STATS</text>
+      ${statBlocks}
+      <text x="58" y="860" fill="#f8c85c" font-size="20" font-weight="700" letter-spacing="2">EQUIPMENT</text>
+      ${equipmentBlocks}
+      <rect x="58" y="984" width="180" height="120" rx="12" fill="#fff"/>
+      <image href="${qr}" x="68" y="994" width="100" height="100"/>
+      <text x="270" y="1022" fill="#b8c6dc" font-size="18">PROFILE SOURCE</text>
+      <text x="270" y="1058" fill="#f4f7ff" font-size="24" font-weight="700">FreeFireMania</text>
+      <text x="270" y="1092" fill="#8398b8" font-size="17">Scan QR untuk membuka profil UID</text>
+      <text x="842" y="1110" text-anchor="end" fill="#687fa5" font-size="16">freefiremania.com.br</text>
+    </svg>`;
+
+    return sharp(Buffer.from(svg)).png().toBuffer();
 }
 
 function parseFreeFireManiaProfile(html, requestedUid) {
@@ -626,37 +547,52 @@ function buildCekidffProgress(uid, status, step) {
 *Status:* _${status}_
 
 1. *Validasi UID* ✅
-2. *Buka website resmi* ${step >= 2 ? '✅' : '⏳'}
-3. *Ambil kartu realtime* ${step >= 3 ? '✅' : '⏳'}
+2. *Buka profil resmi* ${step >= 2 ? '✅' : '⏳'}
+3. *Baca statistik realtime* ${step >= 3 ? '✅' : '⏳'}
+4. *Siapkan kartu profil* ${step >= 4 ? '✅' : '⏳'}
 
-• Gambar diambil dari tombol kartu resmi
-• Hasil data dikirim sebagai caption
+• Data diambil langsung dari FreeFireMania
+• Semua statistik dikirim di caption gambar
 
 > _Mohon tunggu, bot sedang memproses._`;
 }
 
 function buildCekidffCaption(profile) {
+    const card = profile.card || {};
     const lines = [
         '*FF PLAYER INFO*',
-        '_Profil berhasil diverifikasi dari halaman resmi._',
+        '_Profil dan statistik diambil realtime dari halaman resmi._',
         '',
         '*Identitas pemain*',
         `1. *Nick:* \`${escapeWhatsApp(profile.nickname)}\``,
         `2. *UID:* \`${profile.uid}\``,
         '3. *Game:* `Garena Free Fire`',
         `4. *Region:* \`${escapeWhatsApp(profile.region || 'Tidak tersedia')}\``,
+        profile.level != null
+            ? `5. *Level:* \`${profile.level}\``
+            : '5. *Level:* _Tidak tersedia_',
+        card.createdAt
+            ? `6. *Akun dibuat pada:* \`${escapeWhatsApp(card.createdAt)}\``
+            : '6. *Akun dibuat pada:* _Tidak tersedia_',
+        card.likes
+            ? `7. *Likes:* \`${escapeWhatsApp(card.likes)}\``
+            : null,
         '',
-        '*Data tambahan*',
-        profile.level != null ? `• *Level:* \`${profile.level}\`` : '• *Level:* _Tidak tersedia_',
-        profile.isBanned != null
-            ? `• *Status:* ${profile.isBanned ? '`Banned`' : '`Aktif`'}`
-            : '• *Status:* _Tidak dikembalikan halaman_',
-        '• *Sumber:* `FreeFireMania`',
+        '*Statistik realtime*'
+    ].filter(line => line !== null);
+
+    for (const modeStats of card.fullStats || []) {
+        lines.push('', `*${escapeWhatsApp(modeStats.mode)}*`);
+        for (const item of modeStats.items) {
+            lines.push(`• *${escapeWhatsApp(item.labelId)}:* \`${escapeWhatsApp(item.value)}\``);
+        }
+    }
+
+    lines.push(
         '',
-        '*Metode gambar:* ~Dibuat oleh bot~ → *Diambil dari website resmi*',
-        '',
-        '> _Kartu diambil saat perintah dijalankan dan data ditaruh di caption._'
-    ];
+        '*Sumber data:* `FreeFireMania`',
+        '> _Angka statistik dibaca saat perintah dijalankan._'
+    );
 
     return lines.join('\n');
 }
@@ -695,31 +631,39 @@ async function handleCekidff({ hisoka, m, query, tolak }) {
         await hisoka.sendMessage(m.from, { react: { text: '⏳', key: m.key } });
         loadingMsg = await hisoka.sendMessage(
             m.from,
-            { text: buildCekidffProgress(uid, 'Menyiapkan proses realtime...', 1) },
+            { text: buildCekidffProgress(uid, 'Membuka profil resmi...', 2) },
             { quoted: m }
         ).catch(() => null);
 
         let frame = 0;
         const progressSteps = [
-            ['Membuka halaman profil resmi...', 2],
-            ['Membaca data pemain dari website...', 2],
-            ['Mengambil kartu resmi dengan tombol Download card...', 3]
+            ['Membaca identitas akun realtime...', 3],
+            ['Membaca statistik Solo, Duo, Squad, dan Clash Squad...', 3],
+            ['Menyiapkan kartu profil...', 4]
         ];
         progressTimer = setInterval(() => {
             const [status, step] = progressSteps[frame++ % progressSteps.length];
             editProgress(buildCekidffProgress(uid, status, step)).catch(() => {});
         }, 2200);
 
-        const { profile, buffer: cardBuffer } = await captureOfficialFreeFireCard(uid);
+        const profile = await lookupFreeFirePlayer(uid);
+        const cardBuffer = profile.source === 'freefiremania'
+            ? await buildFreeFireCard(profile)
+            : null;
         clearInterval(progressTimer);
         progressTimer = null;
-        await editProgress(buildCekidffProgress(uid, 'Kartu resmi siap dikirim.', 3));
+        await editProgress(buildCekidffProgress(uid, 'Data realtime siap dikirim.', 4));
 
-        await hisoka.sendMessage(
-            m.from,
-            { image: cardBuffer, caption: buildCekidffCaption(profile) },
-            { quoted: m }
-        );
+        const caption = buildCekidffCaption(profile);
+        if (cardBuffer) {
+            await hisoka.sendMessage(
+                m.from,
+                { image: cardBuffer, caption },
+                { quoted: m }
+            );
+        } else {
+            await hisoka.sendMessage(m.from, { text: caption }, { quoted: m });
+        }
         await hisoka.sendMessage(m.from, { react: { text: '✅', key: m.key } });
 
     } catch (e) {
@@ -728,11 +672,7 @@ async function handleCekidff({ hisoka, m, query, tolak }) {
         await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } });
         const message = e.code === 'PLAYER_NOT_FOUND'
             ? '❌ *UID tidak ditemukan.*\n> _Profil resmi tidak cocok dengan UID yang diminta._'
-            : e.code === 'CARD_PAGE_BLOCKED'
-                ? '❌ *Website resmi meminta verifikasi.*\n> _Kartu belum bisa diambil, coba lagi nanti._'
-                : e.code === 'CARD_BROWSER_UNAVAILABLE'
-                    ? '❌ *Browser kartu resmi tidak tersedia di server.*'
-                    : '❌ *Layanan Free Fire sedang tidak tersedia.*\n> _Coba ulangi beberapa saat lagi._';
+            : '❌ *Layanan Free Fire sedang tidak tersedia.*\n> _Coba ulangi beberapa saat lagi._';
         if (loadingMsg?.key) {
             await editProgress(message);
         } else {
@@ -745,5 +685,7 @@ module.exports = {
     handleCekidff,
     lookupFreeFirePlayer,
     normalizeUid,
-    downloadOfficialFreeFireCard
+    buildFreeFireCard,
+    buildCekidffCaption,
+    buildCekidffProgress
 };

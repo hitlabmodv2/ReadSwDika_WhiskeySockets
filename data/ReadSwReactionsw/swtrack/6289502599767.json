@@ -1,13 +1,13 @@
 {
-  "AC1389B8D38903AE3C36768AC4FE3CB3": {
-    "id": "AC1389B8D38903AE3C36768AC4FE3CB3",
+  "AC8584CF2952C935613EDF1F317D1680": {
+    "id": "AC8584CF2952C935613EDF1F317D1680",
     "sender": "6289502599767@s.whatsapp.net",
-    "name": "~𝒶𝓁𝓎𝒶𝒶",
-    "type": "videoMessage",
-    "arrivedAt": "2026-09-27T09:46:31.348Z",
-    "read": true,
-    "reacted": true,
-    "emoji": "🐡",
+    "name": "~𝒶𝓁𝓎𝒶𝒶🍓",
+    "type": "imageMessage",
+    "arrivedAt": "2026-10-02T14:00:10.604Z",
+    "read": false,
+    "reacted": false,
+    "emoji": null,
     "resolve": "PN langsung ✓",
     "source": "status",
     "number": "6289502599767",
@@ -16,17 +16,42 @@
       "remoteJid": "status@broadcast",
       "remoteJidAlt": "6289502599767@s.whatsapp.net",
       "fromMe": false,
-      "id": "AC1389B8D38903AE3C36768AC4FE3CB3",
+      "id": "AC8584CF2952C935613EDF1F317D1680",
       "participant": "180075228098603@lid",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-09-27T09:47:03.009Z",
+    "updatedAt": "2026-10-02T14:00:20.969Z",
+    "deleted": true,
+    "deletedAt": "2026-10-02T14:00:20.969Z"
+  },
+  "ACB10A07F06BA8829E2A9665557DCE53": {
+    "id": "ACB10A07F06BA8829E2A9665557DCE53",
+    "sender": "6289502599767@s.whatsapp.net",
+    "name": "~𝒶𝓁𝓎𝒶𝒶🍓",
+    "type": "videoMessage",
+    "arrivedAt": "2026-10-03T06:15:54.881Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐠",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6289502599767",
+    "resolvedPn": "6289502599767@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6289502599767@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACB10A07F06BA8829E2A9665557DCE53",
+      "participant": "180075228098603@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-10-03T06:16:05.803Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6289502599767@s.whatsapp.net",
         "fromMe": false,
-        "id": "AC1389B8D38903AE3C36768AC4FE3CB3",
+        "id": "ACB10A07F06BA8829E2A9665557DCE53",
         "participant": "180075228098603@lid",
         "addressingMode": "lid"
       },
@@ -34,11 +59,55 @@
         "remoteJid": "status@broadcast",
         "remoteJidAlt": "6289502599767@s.whatsapp.net",
         "fromMe": false,
-        "id": "AC1389B8D38903AE3C36768AC4FE3CB3",
+        "id": "ACB10A07F06BA8829E2A9665557DCE53",
         "participant": "6289502599767@s.whatsapp.net",
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-09-27T09:47:03.008Z"
+    "processedAt": "2026-10-03T06:15:59.509Z",
+    "deleted": true,
+    "deletedAt": "2026-10-03T06:16:05.803Z"
+  },
+  "ACC2B0104F0FB4D5BFF865293DE760B3": {
+    "id": "ACC2B0104F0FB4D5BFF865293DE760B3",
+    "sender": "6289502599767@s.whatsapp.net",
+    "name": "~𝒶𝓁𝓎𝒶𝒶🍓",
+    "type": "videoMessage",
+    "arrivedAt": "2026-10-03T06:16:06.008Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🦈",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "6289502599767",
+    "resolvedPn": "6289502599767@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "remoteJidAlt": "6289502599767@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ACC2B0104F0FB4D5BFF865293DE760B3",
+      "participant": "180075228098603@lid",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-10-03T06:16:17.912Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289502599767@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACC2B0104F0FB4D5BFF865293DE760B3",
+        "participant": "180075228098603@lid",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "remoteJidAlt": "6289502599767@s.whatsapp.net",
+        "fromMe": false,
+        "id": "ACC2B0104F0FB4D5BFF865293DE760B3",
+        "participant": "6289502599767@s.whatsapp.net",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-10-03T06:16:17.912Z"
   }
 }

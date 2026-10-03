@@ -19,6 +19,7 @@
 - [Command alias registration](command-alias-registration.md) — parser loadedCommands mengenali alias case hanya jika tiap alias punya blok case sendiri
 - [Instagram scraper reliability](instagram-scraper-endpoints.md) — endpoint publik dapat 403, permission error, DNS failure, atau hasil kosong dari server
 - [Story count processing time](story-count-processing-time.md) — TotalStory harus menghitung story selesai diproses, bukan seluruh batch yang baru diterima
+- [Group story sender identity](group-story-sender-identity.md) — linked story GC bisa membawa LID; resolve ke PN dan abaikan paket kontrol sebelum baca/log
 - [Doujindesu monitor reliability](doujindesu-monitor-reliability.md) — monitor membaca empat blok kategori situs dan delivery harus retry per grup sebelum masuk history
 - [DoujinDesu XXX API](doujindesu-xxx-api.md) — situs baru adalah SPA; gunakan API terenkripsi per jam dan endpoint chapter, bukan parser HTML lama
 - [DoujinDesu series metadata](doujindesu-series-metadata.md) — endpoint detail seri diperlukan untuk cover akurat dan metadata realtime di halaman info PDF
@@ -29,3 +30,7 @@
 - [AI text provider routing](ai-text-provider-routing.md) — plain text stays gpt-oss-first; Gemini remains for image/tool requests
 - [AntiTagSW role matching](antitagsw-role-matching.md) — compare PN/LID participant fields and prefer phone JID for kick targets
 - [AntiTagSW confirmation reply](antitagsw-confirmation-reply.md) — activation success must use plain text, not only a native list relay
+- [Anime quote source](animquote-source.md) — quote generator menyimpan dataset di script.js, bukan API; parser perlu cache, fallback, dan filter aman
+- [NovaMail provider behavior](novamail-provider.md) — restore memakai query mailbox dan upstream bisa mengirim HTTP 500 untuk rate-limit 429
+- [NovaMail auto verification](novamail-autoverify.md) — auto-open hanya HTTPS verification URL dari allowlist; signup, reset, login, dan redirect asing ditolak
+- [WhatsApp Channel post reactions](whatsapp-channel-reactions.md) — reaction post memakai newsletterReactMessage dari Baileys; uji live terpisah karena v7 pernah melaporkan error 479

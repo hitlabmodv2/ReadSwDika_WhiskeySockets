@@ -38,6 +38,7 @@ const axios       = require('axios');
 const cheerio     = require('cheerio');
 const sharp       = require('sharp');
 const PDFDocument = require('pdfkit');
+const { translate } = require('google-translate-api-x');
 
 
 const BASE    = 'https://hentaidad.com';
@@ -55,6 +56,19 @@ async function fetchHtml(url) {
     return res.data;
 }
 
+// ── TRANSLATE KE BAHASA INDONESIA (google-translate-api-x, gratis, no API key) ──
+
+async function translateToIndo(text) {
+    if (!text) return '';
+    try {
+        const res = await translate(text, { to: 'id', from: 'en' });
+        return res.text || text;
+    } catch (e) {
+        console.warn('[Hentaidad] Translate gagal, pakai teks asli:', e?.message);
+        return text; // fallback ke bahasa Inggris
+    }
+}
+
 function cleanTitle(raw) {
     return raw
         .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
@@ -68,21 +82,37 @@ async function _scrapeCards(url, fallbackLabel) {
     const html  = await fetchHtml(url);
     const $     = cheerio.load(html);
     const items = [];
-    $('article.post-card').each((i, el) => {
-        const link   = $(el).find('a[href]').first();
-        const href   = link.attr('href') || '';
-        const imgEl  = $(el).find('img').first();
-        const alt    = imgEl.attr('alt') || '';
+    
+    // Coba selector berbeda untuk tangkap hasil search
+    let selector = 'article.post-card, a.archive-card-link';
+    let elements = $(selector);
+    
+    // Filter dan ambil elemen gambar yang punya alt text
+    elements.each((i, el) => {
+        const $el    = $(el);
+        const href   = $el.attr('href') || '';
+        const imgEl  = $el.find('img').first();
+        const alt    = $el.find('h2.archive-card-title').text() || imgEl.attr('alt') || $el.text() || '';
         const thumb  = imgEl.attr('src') || imgEl.attr('data-src') || imgEl.attr('data-lazy-src') || '';
-        if (!href) return;
-        const title = cleanTitle(alt) || `${fallbackLabel} ${i + 1}`;
+        
+        // Ambil metadata
+        const $meta  = $el.find('.archive-card-meta');
+        const date   = $meta.find('time').text().trim() || '';
+        const views  = $meta.find('span').text().trim() || '';
+        
+        if (!href || !alt.trim()) return;
+        
+        const title = cleanTitle(alt) || `${fallbackLabel} ${items.length + 1}`;
         items.push({
-            no    : i + 1,
+            no    : items.length + 1,
             title,
             href  : href.startsWith('http') ? href : BASE + href,
             thumb : thumb.startsWith('http') ? thumb : (thumb ? BASE + thumb : ''),
+            date,
+            views,
         });
     });
+    
     return items;
 }
 
@@ -94,31 +124,57 @@ async function scrapeSearch(query) {
     return _scrapeCards(`${BASE}/search?q=${encodeURIComponent(query)}`, 'Result');
 }
 
-/** Scrape halaman galeri — return title + daftar URL gambar */
+/** Scrape halaman galeri — return title + daftar URL gambar + metadata lengkap */
 async function scrapeGallery(href) {
     const url  = href.startsWith('http') ? href : BASE + href;
     const html = await fetchHtml(url);
     const $    = cheerio.load(html);
 
     const title  = $('h1').first().text().trim() || 'Untitled Gallery';
+    const $meta  = $('.post-meta');
+    const date   = $meta.find('time').text().trim() || '';
+    const spans  = $meta.find('span').map((_, el) => $(el).text().trim()).get();
+    const views  = spans[0] || '';
+    const countStr = spans[1] || '';
+    const rating   = spans[2] || '18+';
+
+    // Ambil description + auto translate Indonesia
+    const rawDesc = $('.post-description, .post-content > p').first().text().trim() || '';
+    const cleanDesc = rawDesc.replace(/^Description/i, '').slice(0, 300).replace(/\n+/g, ' ').trim();
+    const description = cleanDesc ? await translateToIndo(cleanDesc) : '';
+
+    // Ambil tags + translate ke Indonesia
+    const tags = [];
+    $('.post-tags a, .tag').each((_, el) => {
+        const tag = $(el).text().trim();
+        if (tag && tag.length < 50 && !tag.match(/^(Gallery|Uncensored|Ai Generated|Hentai|Malth)$/i)) {
+            tags.push(tag);
+        }
+    });
+    const tagsEn = tags.slice(0, 5);
+    const tagsId = tagsEn.length > 0 ? await translateToIndo(tagsEn.join(', ')) : '';
+    const relatedTags = tagsId.split(',').map(t => t.trim()).filter(Boolean);
+
     const images = [];
     const seen   = new Set();
-    const addSrc = (src) => { if (src && !seen.has(src)) { seen.add(src); images.push(src); } };
+    const addSrc = (src) => {
+        if (!src) return;
+        if (src.includes('-thumb.webp') || src.includes('/thumbnails/')) return;
+        if (!seen.has(src)) {
+            seen.add(src);
+            images.push(src.startsWith('http') ? src : BASE + src);
+        }
+    };
 
-    $('.gallery-item img').each((_, el) => {
+    $('.gallery-item img, .post-gallery img').each((_, el) => {
         addSrc($(el).attr('src') || $(el).attr('data-src') || '');
     });
     if (!images.length) {
-        $('img[src*="/content/images/"], img[data-src*="/content/images/"]').each((_, el) => {
+        $('img[src*="/content/images/"], img[data-src*="/content/images/"], img[src*="/uploads/galleries/"]').each((_, el) => {
             addSrc($(el).attr('src') || $(el).attr('data-src') || '');
         });
     }
-    if (!images.length) {
-        $('img[src*="/uploads/galleries/"], img[data-src*="/uploads/galleries/"]').each((_, el) => {
-            addSrc($(el).attr('src') || $(el).attr('data-src') || '');
-        });
-    }
-    return { title, images };
+    return { title, images, date, views, countStr, rating, description, relatedTags };
 }
 
 async function downloadImage(url, referer) {
@@ -185,7 +241,10 @@ function txtList(items, query) {
     let text = `🔞 *HENTAIDAD*\n\n${headerLine}\n\n`;
     for (const it of items) {
         const judul = fullTitle(it.title, `Gallery ${it.no}`);
-        text += `${it.no}. _${judul}_\n`;
+        const date  = it.date ? `📅 ${it.date}` : '';
+        const views = it.views ? `👁️ ${it.views}` : '';
+        const meta  = date || views ? ` (${[date, views].filter(Boolean).join(' • ')})` : '';
+        text += `${it.no}. _${judul}_${meta}\n`;
     }
     text += `\n> 💬 *Reply* pesan ini dengan *nomor* pilihan\n`;
     text += isSearch
@@ -221,14 +280,30 @@ function txtDipilih(chosen, headerPilih) {
 }
 
 /** Teks caption untuk pesan konfirmasi (thumbnail + reply 1/2/3) */
-function txtConfirmCaption(chosen, galleryTitle, imageCount, headerPilih) {
-    const judul = fullTitle(galleryTitle, fullTitle(chosen.title, `Gallery ${chosen.no}`));
+function txtConfirmCaption(chosen, galleryData, headerPilih) {
+    const judul = fullTitle(galleryData.title, fullTitle(chosen.title, `Gallery ${chosen.no}`));
+    const date  = galleryData.date   ? `- 📅 *Tanggal:* \`${galleryData.date}\`\n` : '';
+    const views = galleryData.views  ? `- 👁️ *Views:* \`${galleryData.views}\`\n`  : '';
+    const count = galleryData.countStr ? `- 📸 *Jumlah:* \`${galleryData.countStr}\`\n` : `- 📸 *Jumlah:* \`${galleryData.images.length}\`\n`;
+    const rate  = galleryData.rating ? `- 🔞 *Rating:* \`${galleryData.rating}\`\n` : '';
+    
+    let descLine = '';
+    if (galleryData.description && galleryData.description.length > 20) {
+        descLine = `\n📝 *Description:*\n_${galleryData.description}_\n`;
+    }
+    
+    let tagsLine = '';
+    if (galleryData.relatedTags && galleryData.relatedTags.length > 0) {
+        tagsLine = `\n🏷️ *Related Tags:*\n_${galleryData.relatedTags.join(', ')}_\n`;
+    }
+
     return (
         `🔞 *HENTAIDAD — Konfirmasi*\n\n` +
         `${headerPilih}\n\n` +
         `📌 *${judul}*\n` +
-        `- 📸 *Jumlah gambar:* \`${imageCount}\`\n\n` +
-        `❓ _Pilih format pengiriman:_\n\n` +
+        date + views + count + rate +
+        descLine + tagsLine +
+        `\n❓ _Pilih format pengiriman:_\n\n` +
         `> *Reply pesan ini:*\n` +
         `> *1* — 🖼️ Gambar _(album foto)_\n` +
         `> *2* — 📄 PDF _(1 file PDF)_\n` +
@@ -747,7 +822,7 @@ async function handleHentaidadChoice({
         );
 
         // ── Kirim pesan konfirmasi: thumbnail + info + 2 tombol ───────────────
-        const captionText = txtConfirmCaption(chosen, galleryTitle, imageCount, headerPilih);
+        const captionText = txtConfirmCaption(chosen, galleryData, headerPilih);
         const { sent: confirmSent } = await _sendConfirmMsg(hisoka, m, captionText, thumbBuf);
 
         // ── Simpan ke pendingHentaidadConfirm ─────────────────────────────────

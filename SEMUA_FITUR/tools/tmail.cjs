@@ -18,15 +18,15 @@
  *  Terima kasih sudah support.
  * ───────────────────────────────
  *
- *  tmail.cjs — Temporary email (.tmail)
- *  Buat & cek email sementara via Guerrilla Mail API
+ *  tmail.cjs — NovaMail adapter untuk Temporary email (.tmail)
+ *  Buat & cek email sementara via webnovamail.netlify.app
  * ───────────────────────────────
  */
 /**
  * ═══════════════════════════════════════════════════════════════
- *  Temporary Email (.tmail) via Guerrilla Mail
- *  Buat & pantau inbox email sementara menggunakan Guerrilla
- *  Mail API — AI (Gemini) secara otomatis memilih & tampilkan
+ *  Temporary Email (.tmail) via NovaMail
+ *  Buat & pantau inbox email sementara menggunakan NovaMail API —
+ *  AI (Gemini) secara otomatis memilih & tampilkan
  *  link verifikasi paling penting dari email masuk.
  * ═══════════════════════════════════════════════════════════════
  */
@@ -35,8 +35,10 @@
 const axios = require('axios');
 const path = require('path');
 
-const BASE_URL = 'https://tmail.etokom.com';
-const DEFAULT_DOMAINS = ['t.etokom.com', 'us.seebestdeals.com', 'gift4zone.top'];
+const PROVIDER = 'novamail';
+const BASE_URL = 'https://webnovamail.netlify.app';
+// NovaMail hanya mengekspos pilihan domain acak pada endpoint publiknya.
+const DEFAULT_DOMAINS = ['random'];
 
 const UA = 'Mozilla/5.0 (Linux; Android 10; SM-G960F) AppleWebKit/537.36 ' +
   '(KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36';
@@ -57,9 +59,8 @@ class TmailEtokom {
   constructor(opts = {}) {
     this.baseURL = opts.baseURL || BASE_URL;
     this.cookies = new Map();
-    this.token = null;
     this.mailbox = null;
-    this.emailToken = null;
+    this.restoreHint = null;
     this.lastSeenIds = new Set();
     this.analyze = opts.analyze !== false; // default ON
     this.aiTimeout = opts.aiTimeout || 25000;
@@ -71,6 +72,7 @@ class TmailEtokom {
       headers: {
         'user-agent': UA,
         'accept-language': 'en-US,en;q=0.9,id;q=0.8',
+        'accept': 'application/json, text/plain, */*',
       },
     });
 
@@ -114,63 +116,73 @@ class TmailEtokom {
     return [...this.cookies.entries()].map(([k, v]) => `${k}=${v}`).join('; ');
   }
 
-  async init(force = false) {
-    if (this.token && !force) return this.token;
-    const { data } = await this.client.get('/');
-    const m = String(data).match(/<meta[^>]+name=["']csrf-token["'][^>]+content=["']([^"']+)["']/i);
-    if (!m) throw new Error('Gagal mengambil CSRF token dari halaman utama.');
-    this.token = m[1];
-    return this.token;
-  }
-
-  _form(extra = {}) {
-    const params = new URLSearchParams();
-    params.append('_token', this.token);
-    for (const [k, v] of Object.entries(extra)) {
-      if (Array.isArray(v)) {
-        for (const item of v) params.append(`${k}[]`, item);
-      } else if (v !== undefined && v !== null) {
-        params.append(k, String(v));
-      }
+  async _request(method, endpoint, body) {
+    let res;
+    try {
+      res = await this.client.request({
+        method,
+        url: endpoint,
+        data: body,
+        headers: body ? { 'content-type': 'application/json' } : undefined,
+        validateStatus: () => true,
+      });
+    } catch (err) {
+      throw new Error(`NovaMail tidak bisa dihubungi: ${err.message}`);
     }
-    return params;
+
+    const responseError = res.data && typeof res.data === 'object' ? res.data.error : null;
+    const upstreamBusy = typeof responseError === 'string' && /\(429\)|rate.?limit|busy|sibuk/i.test(responseError);
+    if (res.status === 429 || upstreamBusy) {
+      const retryAfter = Number(res.headers['retry-after'] || 30);
+      const err = new Error(responseError || `NovaMail sedang rate limit. Coba lagi dalam ${retryAfter} detik.`);
+      err.retryAfter = Math.max(1, retryAfter) * 1000;
+      err.status = 429;
+      throw err;
+    }
+    if (res.status < 200 || res.status >= 400) {
+      const err = new Error(responseError || `NovaMail mengembalikan HTTP ${res.status}.`);
+      err.status = res.status;
+      throw err;
+    }
+    return res.data;
   }
 
-  async _post(path, extra = {}) {
-    await this.init();
-    const headers = {
-      'X-Requested-With': 'XMLHttpRequest',
-      'X-CSRF-TOKEN': this.token,
-      'Accept': 'application/json, text/javascript, */*; q=0.01',
-      'Content-Type': 'application/x-www-form-urlencoded',
-    };
-    const xsrf = this.cookies.get('XSRF-TOKEN');
-    if (xsrf) headers['X-XSRF-TOKEN'] = decodeURIComponent(xsrf);
-
-    const res = await this.client.post(path, this._form(extra), { headers });
-    return res.data;
+  _data(payload) {
+    if (!payload || payload.success !== true || !payload.data) {
+      throw new Error((payload && payload.error) || 'Respons NovaMail tidak valid.');
+    }
+    return payload.data;
   }
 
   _absorbState(data) {
     if (data && typeof data === 'object') {
       if (data.mailbox) this.mailbox = data.mailbox;
-      if (data.email_token) this.emailToken = data.email_token;
     }
     return data;
   }
 
-  /** Buat (atau ambil) email default acak */
+  _normalizeData(data) {
+    if (!data || typeof data !== 'object') return data;
+    return {
+      ...data,
+      messages: Array.isArray(data.messages)
+        ? data.messages.map((message) => this._normalizeMessage(message))
+        : [],
+    };
+  }
+
+  /** Buat (atau ambil) email acak dari session NovaMail. */
   async create() {
-    const data = await this._post('/get_messages', { captcha: '' });
+    const payload = await this._request('GET', '/api/messages');
+    const data = this._normalizeData(this._data(payload));
     return this._absorbState(data);
   }
 
   /** Serialisasi state penting buat disimpan ke file (per user) */
   serialize() {
     return {
+      provider: PROVIDER,
       mailbox: this.mailbox,
-      token: this.token,
-      emailToken: this.emailToken,
       cookies: [...this.cookies.entries()],
       savedAt: Date.now(),
     };
@@ -179,9 +191,14 @@ class TmailEtokom {
   /** Restore state dari objek hasil serialize() */
   restore(state) {
     if (!state || typeof state !== 'object') return this;
-    if (state.mailbox) this.mailbox = state.mailbox;
-    if (state.token) this.token = state.token;
-    if (state.emailToken) this.emailToken = state.emailToken;
+    // State lama berasal dari provider berbeda dan tidak boleh dipakai ulang.
+    if (state.provider !== PROVIDER) return this;
+    if (state.mailbox) {
+      this.mailbox = state.mailbox;
+      // NovaMail menyediakan restore hint khusus untuk session yang hilang
+      // setelah proses bot restart/serverless berpindah instance.
+      this.restoreHint = state.mailbox;
+    }
     if (Array.isArray(state.cookies)) {
       this.cookies = new Map(state.cookies);
     }
@@ -191,54 +208,73 @@ class TmailEtokom {
   /** Ganti ke alamat email custom (name + domain) */
   async change(name, domain = DEFAULT_DOMAINS[0]) {
     if (!name || !String(name).trim()) throw new Error('Nama email diperlukan.');
-    if (!domain) throw new Error('Domain diperlukan.');
-    if (!this.token) await this.create();
-    const data = await this._post('/change', {
+    const normalizedDomain = String(domain || DEFAULT_DOMAINS[0]).trim().toLowerCase();
+    if (!DEFAULT_DOMAINS.includes(normalizedDomain)) {
+      throw new Error('NovaMail hanya mendukung domain random.');
+    }
+    const payload = await this._request('POST', '/api/change', {
       name: String(name).trim().toLowerCase(),
-      domain: String(domain).trim().toLowerCase(),
+      domain: normalizedDomain,
     });
+    const data = this._normalizeData(this._data(payload));
     return this._absorbState(data);
   }
 
-  /** Pilih email dari history */
-  async select(name, domain) {
-    if (!this.token) await this.create();
-    const data = await this._post('/change_email', { name, domain });
+  /** Hapus mailbox/session aktif lalu buat mailbox acak baru. */
+  async delete() {
+    const payload = await this._request('POST', '/api/delete');
+    const data = this._normalizeData(this._data(payload));
+    this.lastSeenIds.clear();
     return this._absorbState(data);
   }
 
   /** Ambil daftar pesan (inbox) terbaru */
   async inbox() {
-    const data = await this._post('/get_messages', { captcha: '' });
+    const endpoint = this.restoreHint
+      ? `/api/messages?restore=${encodeURIComponent(this.restoreHint)}`
+      : '/api/messages';
+    this.restoreHint = null;
+    const payload = await this._request('GET', endpoint);
+    const data = this._normalizeData(this._data(payload));
     return this._absorbState(data);
   }
 
-  /** Lihat detail pesan (otomatis ambil konten iframe juga) */
-  async view(id) {
+  /** Lihat detail pesan dan normalkan respons NovaMail ke format bot. */
+  async view(id, opts = {}) {
     if (!id) throw new Error('Message ID diperlukan.');
-    await this.init();
-    const { data: html } = await this.client.get(`/view/${encodeURIComponent(id)}`, {
-      headers: { Accept: 'text/html,application/xhtml+xml' },
-    });
-    const parsed = this._parseView(String(html), id);
-
-    // Kalau body diembed lewat iframe src, fetch lagi isi iframe-nya
-    if (!parsed.bodyHtml && parsed.iframeSrc) {
-      try {
-        const { data: frameHtml } = await this.client.get(parsed.iframeSrc, {
-          headers: { Accept: 'text/html,application/xhtml+xml' },
-        });
-        parsed.bodyHtml = String(frameHtml);
-        parsed.bodyText = stripHtml(parsed.bodyHtml);
-      } catch (_) {}
+    const payload = await this._request('GET', `/api/view/${encodeURIComponent(id)}`);
+    if (!payload || payload.success !== true) {
+      throw new Error((payload && payload.error) || 'Isi email tidak tersedia.');
     }
+    const parsed = this._normalizeMessage({
+      ...(payload.message || {}),
+      ...payload,
+      id,
+    });
 
-    parsed.links = extractLinks(parsed.bodyHtml || '');
-
-    if (this.analyze) {
+    if (this.analyze && opts.analyze !== false) {
       parsed.ai = await this._enrichWithAI(parsed);
     }
     return parsed;
+  }
+
+  _normalizeMessage(message = {}) {
+    const id = String(message.id || message.message_id || message.uid || '');
+    const rawBody = message.body_html || message.html || message.body || message.text || '';
+    const bodyHtml = /<([a-z][\s\S]*?)>/i.test(String(rawBody)) ? String(rawBody) : null;
+    const bodyText = message.body_text || message.text || (bodyHtml ? stripHtml(bodyHtml) : String(rawBody));
+    return {
+      id,
+      from: message.from || message.from_email || message.from_name || null,
+      from_email: message.from_email || null,
+      to: message.to || this.mailbox || null,
+      subject: message.subject || message.title || null,
+      date: message.date || message.created_at || message.received_at || null,
+      bodyHtml,
+      bodyText: bodyText || '',
+      links: mergeLinks(message.links, extractLinks(bodyHtml || bodyText)),
+      url: `${this.baseURL}/api/view/${encodeURIComponent(id)}`,
+    };
   }
 
   /** Analisa pakai Gemini — kembalikan { code, primaryUrl, primaryLabel, summary } atau null */
@@ -327,21 +363,37 @@ class TmailEtokom {
     const timeout = Math.max(interval, opts.timeout || 5 * 60 * 1000);
     const onTick = typeof opts.onTick === 'function' ? opts.onTick : null;
     const start = Date.now();
+    let lastError = null;
 
-    if (!this.mailbox) await this.create();
+    if (!this.mailbox) {
+      try { await this.create(); } catch (e) {
+        return { mailbox: this.mailbox, messages: [], error: e.message };
+      }
+    }
     // baseline
-    const first = await this.inbox();
+    let first;
+    try { first = await this.inbox(); } catch (e) {
+      return { mailbox: this.mailbox, messages: [], error: e.message };
+    }
     for (const m of first.messages || []) this.lastSeenIds.add(m.id);
 
+    let nextDelay = interval;
     while (Date.now() - start < timeout) {
-      await new Promise((r) => setTimeout(r, interval));
+      await new Promise((r) => setTimeout(r, nextDelay));
+      nextDelay = interval;
       let data;
       try {
         data = await this.inbox();
       } catch (e) {
+        lastError = e;
         if (onTick) onTick({ error: e.message });
+        if (e.retryAfter) {
+          const remaining = Math.max(interval, timeout - (Date.now() - start));
+          nextDelay = Math.min(Math.max(interval, e.retryAfter), remaining);
+        }
         continue;
       }
+      lastError = null;
       const fresh = (data.messages || []).filter((m) => !this.lastSeenIds.has(m.id));
       for (const m of (data.messages || [])) this.lastSeenIds.add(m.id);
       if (onTick) onTick({ mailbox: data.mailbox, total: (data.messages || []).length, fresh: fresh.length });
@@ -352,7 +404,12 @@ class TmailEtokom {
         return { mailbox: data.mailbox, messages: detailed };
       }
     }
-    return { mailbox: this.mailbox, messages: [], timeout: true };
+    return {
+      mailbox: this.mailbox,
+      messages: [],
+      timeout: true,
+      error: lastError ? lastError.message : null,
+    };
   }
 
   /**
@@ -365,21 +422,37 @@ class TmailEtokom {
     const onMessage = typeof opts.onMessage === 'function' ? opts.onMessage : () => {};
     const onTick = typeof opts.onTick === 'function' ? opts.onTick : null;
     const start = Date.now();
+    let lastError = null;
 
-    if (!this.mailbox) await this.create();
-    const first = await this.inbox();
+    if (!this.mailbox) {
+      try { await this.create(); } catch (e) {
+        return { mailbox: this.mailbox, total: 0, error: e.message };
+      }
+    }
+    let first;
+    try { first = await this.inbox(); } catch (e) {
+      return { mailbox: this.mailbox, total: 0, error: e.message };
+    }
     for (const m of first.messages || []) this.lastSeenIds.add(m.id);
 
     let totalReceived = 0;
+    let nextDelay = interval;
     while (Date.now() - start < timeout) {
-      await new Promise((r) => setTimeout(r, interval));
+      await new Promise((r) => setTimeout(r, nextDelay));
+      nextDelay = interval;
       let data;
       try {
         data = await this.inbox();
       } catch (e) {
+        lastError = e;
         if (onTick) onTick({ error: e.message });
+        if (e.retryAfter) {
+          const remaining = Math.max(interval, timeout - (Date.now() - start));
+          nextDelay = Math.min(Math.max(interval, e.retryAfter), remaining);
+        }
         continue;
       }
+      lastError = null;
       const fresh = (data.messages || []).filter((m) => !this.lastSeenIds.has(m.id));
       for (const m of (data.messages || [])) this.lastSeenIds.add(m.id);
       if (onTick) onTick({ mailbox: data.mailbox, total: (data.messages || []).length, fresh: fresh.length });
@@ -391,7 +464,12 @@ class TmailEtokom {
         try { await onMessage(merged); } catch (_) {}
       }
     }
-    return { mailbox: this.mailbox, total: totalReceived, timeout: true };
+    return {
+      mailbox: this.mailbox,
+      total: totalReceived,
+      timeout: true,
+      error: lastError ? lastError.message : null,
+    };
   }
 
   static get domains() {
@@ -414,25 +492,65 @@ function decodeHtmlEntities(s) {
 
 function extractLinks(html) {
   if (!html) return [];
+  // Sebagian email HTML dikirim sebagai quoted-printable: href=3D"https://...".
+  const source = decodeQuotedPrintable(String(html));
   const out = [];
   const seen = new Set();
-  const re = /<a\b[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
+  const re = /<a\b[^>]*href\s*=\s*(?:"([^"]+)"|'([^']+)'|([^\s>]+))[^>]*>([\s\S]*?)<\/a>/gi;
   let m;
-  while ((m = re.exec(html)) !== null) {
-    const url = decodeHtmlEntities(m[1].trim());
+  while ((m = re.exec(source)) !== null) {
+    const url = decodeHtmlEntities((m[1] || m[2] || m[3] || '').trim());
     if (!/^https?:\/\//i.test(url)) continue;
-    const label = cleanText(m[2]) || '';
+    const label = cleanText(m[4]) || '';
     if (seen.has(url)) continue;
     seen.add(url);
     out.push({ url, text: label });
   }
   // Plain-text fallback URLs (kalau body cuma teks)
   const plainRe = /(https?:\/\/[^\s<>"')]+)/gi;
-  while ((m = plainRe.exec(html)) !== null) {
+  while ((m = plainRe.exec(source)) !== null) {
     const url = decodeHtmlEntities(m[1].replace(/[.,;:!?)]+$/, ''));
     if (seen.has(url)) continue;
     seen.add(url);
     out.push({ url, text: '' });
+  }
+  return out;
+}
+
+function decodeQuotedPrintable(value) {
+  return String(value || '')
+    .replace(/=\r?\n/g, '')
+    // Decode only common URL-safe quoted-printable markers. A broad =HH
+    // replacement would corrupt normal query strings such as =ABC123.
+    .replace(/=3D/gi, '=')
+    .replace(/=3F/gi, '?')
+    .replace(/=26/gi, '&')
+    .replace(/=2F/gi, '/')
+    .replace(/=22/gi, '"')
+    .replace(/=20/gi, ' ');
+}
+
+function normalizeLinkEntry(entry) {
+  if (typeof entry === 'string') {
+    return { url: decodeHtmlEntities(decodeQuotedPrintable(entry).trim()), text: '' };
+  }
+  if (!entry || typeof entry !== 'object') return null;
+  const rawUrl = entry.url || entry.href || entry.link || entry.uri;
+  if (!rawUrl) return null;
+  return {
+    url: decodeHtmlEntities(decodeQuotedPrintable(String(rawUrl)).trim()),
+    text: cleanText(entry.text || entry.label || entry.title || ''),
+  };
+}
+
+function mergeLinks(rawLinks, extracted) {
+  const out = [];
+  const seen = new Set();
+  for (const entry of [...(Array.isArray(rawLinks) ? rawLinks : []), ...(extracted || [])]) {
+    const link = normalizeLinkEntry(entry);
+    if (!link || !/^https?:\/\//i.test(link.url) || seen.has(link.url)) continue;
+    seen.add(link.url);
+    out.push(link);
   }
   return out;
 }

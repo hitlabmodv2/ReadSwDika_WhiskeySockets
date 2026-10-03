@@ -401,7 +401,7 @@ async function handleSimi({ hisoka, m, query, tolak, logCommand, loadConfig, sav
     try {
         const config   = loadConfig();
         const autoSimi = config.autoSimi || { enabled: false };
-        const args     = query ? query.split(' ') : [];
+        const args     = String(query || '').trim().toLowerCase().split(/\s+/).filter(Boolean);
         if (args.length === 0) {
             let text = `╭═══『 *🤖 WILY AI AUTO* 』═══╮\n│\n│ *Status:* ${autoSimi.enabled ? '✅ Aktif' : '❌ Nonaktif'}\n│ *AI Engine:* Gemini Vision (Gratis)\n│ *Mode:* Grup & Private Chat\n│ *Trigger:* Mention bot / Reply pesan bot\n│\n│ *Kemampuan AI:*\n│ ✅ Analisis gambar & sticker\n│ ✅ Baca teks di dalam gambar\n│ ✅ Tahu judul anime/film/series\n│ ✅ Kenali karakter anime/game\n│ ✅ Ingat nama pengguna\n│ ✅ Ngobrol santai & cerdas\n│\n│ *Perintah Manual AI:*\n│ .wily [pertanyaan]\n│ .wily (reply gambar/sticker)\n│\n│ *Pengaturan:*\n│ .simi on  - Aktifkan\n│ .simi off - Nonaktifkan\n│\n╰══════════════════════════╯`;
             await tolak(hisoka, m, text);

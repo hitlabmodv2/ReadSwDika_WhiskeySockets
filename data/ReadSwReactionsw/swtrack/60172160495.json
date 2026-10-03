@@ -1,10 +1,10 @@
 {
-  "AC9B0FFA03220870042C1CF38321A936": {
-    "id": "AC9B0FFA03220870042C1CF38321A936",
+  "ACFC1CDE2D7CC12DBDC0B152D088DE8A": {
+    "id": "ACFC1CDE2D7CC12DBDC0B152D088DE8A",
     "sender": "60172160495@s.whatsapp.net",
     "name": "Aldysensei",
-    "type": "imageMessage",
-    "arrivedAt": "2026-09-27T09:46:31.934Z",
+    "type": "videoMessage",
+    "arrivedAt": "2026-10-02T13:59:06.495Z",
     "read": true,
     "reacted": true,
     "emoji": "🦈",
@@ -15,17 +15,17 @@
     "messageKey": {
       "remoteJid": "status@broadcast",
       "fromMe": false,
-      "id": "AC9B0FFA03220870042C1CF38321A936",
+      "id": "ACFC1CDE2D7CC12DBDC0B152D088DE8A",
       "participant": "67066115670033@lid",
       "participantUsername": "aldysensei",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-09-27T09:46:42.289Z",
+    "updatedAt": "2026-10-02T13:59:26.397Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
         "fromMe": false,
-        "id": "AC9B0FFA03220870042C1CF38321A936",
+        "id": "ACFC1CDE2D7CC12DBDC0B152D088DE8A",
         "participant": "67066115670033@lid",
         "participantUsername": "aldysensei",
         "addressingMode": "lid"
@@ -33,20 +33,62 @@
       {
         "remoteJid": "status@broadcast",
         "fromMe": false,
-        "id": "AC9B0FFA03220870042C1CF38321A936",
+        "id": "ACFC1CDE2D7CC12DBDC0B152D088DE8A",
         "participant": "60172160495@s.whatsapp.net",
         "participantUsername": "aldysensei",
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-09-27T09:46:42.289Z"
+    "processedAt": "2026-10-02T13:59:26.397Z"
   },
-  "AC1623ADA4428FDBBCDDB760CC48F339": {
-    "id": "AC1623ADA4428FDBBCDDB760CC48F339",
+  "AC06C5BFB163642C5B242864222EA187": {
+    "id": "AC06C5BFB163642C5B242864222EA187",
     "sender": "60172160495@s.whatsapp.net",
     "name": "Aldysensei",
-    "type": "imageMessage",
-    "arrivedAt": "2026-09-27T09:46:31.935Z",
+    "type": "videoMessage",
+    "arrivedAt": "2026-10-03T06:15:55.030Z",
+    "read": true,
+    "reacted": true,
+    "emoji": "🐠",
+    "resolve": "PN langsung ✓",
+    "source": "status",
+    "number": "60172160495",
+    "resolvedPn": "60172160495@s.whatsapp.net",
+    "messageKey": {
+      "remoteJid": "status@broadcast",
+      "fromMe": false,
+      "id": "AC06C5BFB163642C5B242864222EA187",
+      "participant": "67066115670033@lid",
+      "participantUsername": "aldysensei",
+      "addressingMode": "lid"
+    },
+    "updatedAt": "2026-10-03T06:16:04.349Z",
+    "receiptKeys": [
+      {
+        "remoteJid": "status@broadcast",
+        "fromMe": false,
+        "id": "AC06C5BFB163642C5B242864222EA187",
+        "participant": "67066115670033@lid",
+        "participantUsername": "aldysensei",
+        "addressingMode": "lid"
+      },
+      {
+        "remoteJid": "status@broadcast",
+        "fromMe": false,
+        "id": "AC06C5BFB163642C5B242864222EA187",
+        "participant": "60172160495@s.whatsapp.net",
+        "participantUsername": "aldysensei",
+        "addressingMode": "lid"
+      }
+    ],
+    "processedAt": "2026-10-03T06:16:04.349Z"
+  },
+  "ACC5B798727C54D4290D6F73F2D516BE": {
+    "id": "ACC5B798727C54D4290D6F73F2D516BE",
+    "sender": "60172160495@s.whatsapp.net",
+    "name": "Aldysensei",
+    "type": "videoMessage",
+    "arrivedAt": "2026-10-03T06:31:42.433Z",
     "read": true,
     "reacted": true,
     "emoji": "🐡",
@@ -57,17 +99,17 @@
     "messageKey": {
       "remoteJid": "status@broadcast",
       "fromMe": false,
-      "id": "AC1623ADA4428FDBBCDDB760CC48F339",
+      "id": "ACC5B798727C54D4290D6F73F2D516BE",
       "participant": "67066115670033@lid",
       "participantUsername": "aldysensei",
       "addressingMode": "lid"
     },
-    "updatedAt": "2026-09-27T09:46:41.154Z",
+    "updatedAt": "2026-10-03T06:31:52.059Z",
     "receiptKeys": [
       {
         "remoteJid": "status@broadcast",
         "fromMe": false,
-        "id": "AC1623ADA4428FDBBCDDB760CC48F339",
+        "id": "ACC5B798727C54D4290D6F73F2D516BE",
         "participant": "67066115670033@lid",
         "participantUsername": "aldysensei",
         "addressingMode": "lid"
@@ -75,12 +117,12 @@
       {
         "remoteJid": "status@broadcast",
         "fromMe": false,
-        "id": "AC1623ADA4428FDBBCDDB760CC48F339",
+        "id": "ACC5B798727C54D4290D6F73F2D516BE",
         "participant": "60172160495@s.whatsapp.net",
         "participantUsername": "aldysensei",
         "addressingMode": "lid"
       }
     ],
-    "processedAt": "2026-09-27T09:46:41.154Z"
+    "processedAt": "2026-10-03T06:31:52.058Z"
   }
 }

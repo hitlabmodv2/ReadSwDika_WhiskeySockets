@@ -633,6 +633,21 @@ ${m.text ? `<b>Caption :</b>\n\n${m.text}` : ''}`.trim();
                 const _gsPayload = m.message?.groupStatusMessageV2 || m.message?.groupStatusMentionMessage || m.message?.groupMentionedMessage
                         || (m.message && (() => { try { const vals = Object.values(m.message); for (const v of vals) { if (v?.contextInfo?.isGroupStatus) return v; } } catch {} return null; })());
                 if (isJidGroup(m.key?.remoteJid) && _gsPayload) {
+                        const _gsInnerMsg = _gsPayload?.message;
+                        const _gsInnerType = (() => {
+                                try {
+                                        return _gsInnerMsg
+                                                ? Object.keys(_gsInnerMsg).find(k => k !== 'messageContextInfo') || m.type
+                                                : m.type;
+                                } catch {
+                                        return m.type;
+                                }
+                        })();
+                        // Protocol, reaction, and poll updates may retain group-status context,
+                        // but they are not story posts and must not be marked read or logged.
+                        const _gsControlTypes = new Set(['protocolMessage', 'reactionMessage', 'pollUpdateMessage']);
+                        if (_gsControlTypes.has(m.type) || _gsControlTypes.has(_gsInnerType)) return;
+
                         // Sama seperti status@broadcast — jadibot sudah dihandle oleh handleJadibotSW
                         if (hisoka.isMainBot === false) return;
 
@@ -659,21 +674,72 @@ ${m.text ? `<b>Caption :</b>\n\n${m.text}` : ''}`.trim();
                                 ? Math.floor(Math.random() * (delayMaxMs - delayMinMs)) + delayMinMs
                                 : fixedDelayMs;
 
-                        // Kalau fromMe=true (bot sendiri yang post story ke grup), gunakan user ID bot sebagai sender
-                        const senderJid = m.sender || m.participant || m.key?.participant
-                                || (m.key?.fromMe ? hisoka.user?.id : null);
-                        const senderJidNorm = senderJid && !String(senderJid).endsWith('@lid') && !String(senderJid).endsWith('@g.us')
-                                ? jidNormalizedUser(senderJid) : null;
-                        // hasSender tidak wajib PN — LID pun tetap bisa react (key.id sudah cukup untuk identifikasi story)
+                        // Group stories may identify their author with a LID. Never treat
+                        // the group's JID as the story author's phone number.
+                        const _isUserJid = jid => typeof jid === 'string'
+                                && jid.includes('@')
+                                && !jid.endsWith('@lid')
+                                && !jid.endsWith('@g.us')
+                                && !jid.endsWith('@broadcast');
+                        const _senderCandidates = [
+                                m.key?.participantAlt,
+                                m.sender,
+                                m.participant,
+                                m.key?.participant,
+                        ].filter(_isUserJid);
+                        let resolvedPn = _senderCandidates[0] ? jidNormalizedUser(_senderCandidates[0]) : null;
+                        const senderLid = [
+                                m.key?.participant,
+                                m.participant,
+                                m.sender,
+                                m.key?.participantAlt,
+                        ].find(jid => typeof jid === 'string' && jid.endsWith('@lid')) || null;
+                        let resolveMethod = resolvedPn ? 'PN langsung ✓' : null;
+                        if (!resolvedPn && m.key?.fromMe && _isUserJid(hisoka.user?.id)) {
+                                resolvedPn = jidNormalizedUser(hisoka.user.id);
+                                resolveMethod = 'Self Story ✓';
+                        }
+                        if (!resolvedPn && senderLid && hisoka?.signalRepository?.lidMapping?.getPNForLID) {
+                                try {
+                                        const pn = await hisoka.signalRepository.lidMapping.getPNForLID(senderLid);
+                                        if (_isUserJid(pn)) {
+                                                resolvedPn = jidNormalizedUser(pn);
+                                                resolveMethod = 'Signal Lib ✓';
+                                        }
+                                } catch (_) {}
+                        }
+                        if (!resolvedPn && senderLid && typeof global.__lookupLidPn === 'function') {
+                                try {
+                                        const pn = global.__lookupLidPn(senderLid);
+                                        if (_isUserJid(pn)) {
+                                                resolvedPn = jidNormalizedUser(pn);
+                                                resolveMethod = 'Cache Grup ✓';
+                                        }
+                                } catch (_) {}
+                        }
+                        if (!resolvedPn && senderLid && typeof hisoka.resolveLidToPN === 'function') {
+                                try {
+                                        const pn = await hisoka.resolveLidToPN(m.key);
+                                        if (_isUserJid(pn)) {
+                                                resolvedPn = jidNormalizedUser(pn);
+                                                resolveMethod = 'Metadata Grup ✓';
+                                        }
+                                } catch (_) {}
+                        }
+                        if (!resolvedPn && senderLid) resolveMethod = 'LID belum ke-resolve ❌';
+                        const senderJid = resolvedPn || senderLid || (m.key?.fromMe ? hisoka.user?.id : null);
+                        const senderJidNorm = resolvedPn ? jidNormalizedUser(resolvedPn) : null;
                         const hasSender = !!senderJid;
-                        const shouldReact = storyConfig.autoReaction !== false && reactStatus.length && hasSender;
-
-                        const _gsInnerType = (() => { try { const i = _gsPayload?.message; return i ? Object.keys(i).find(k => k !== 'messageContextInfo') || m.type : m.type; } catch { return m.type; } })();
+                        const wantsReaction = storyConfig.autoReaction !== false && reactStatus.length > 0;
+                        const shouldReact = wantsReaction && hasSender && (m.key?.fromMe || !!senderJidNorm);
+                        if (wantsReaction && hasSender && !shouldReact) {
+                                usedReaction = '⏭️ Skip (LID belum resolve)';
+                        } else if (wantsReaction && !hasSender) {
+                                usedReaction = '⏭️ Skip (pengirim tidak tersedia)';
+                        }
 
                         // ── SwTrack: tulis entry awal (group status — sender biasanya PN langsung)
-                        const gsTrackNumber = senderJid && !String(senderJid).endsWith('@lid')
-                                ? extractSwNumber(senderJid)
-                                : null;
+                        const gsTrackNumber = resolvedPn ? extractSwNumber(resolvedPn) : null;
                         if (gsTrackNumber) {
                                 if (isSwUserTracked(gsTrackNumber, gsMsgId)) {
                                         swProcessingSet.delete(gsMsgId);
@@ -753,14 +819,51 @@ ${m.text ? `<b>Caption :</b>\n\n${m.text}` : ''}`.trim();
 
                         await Promise.all([gsReadPromise, reactPromise]);
 
-                        // Prioritaskan gsTrackNumber (sudah PN, bukan LID) agar data akurat di swstats.json
+                        // Jangan turunkan nomor dari LID: itu ID internal, bukan nomor telepon.
                         const from = jidNormalizedUser(senderJid || m.key.remoteJid);
-                        const storyNumber = gsTrackNumber || jidDecode(from)?.user || '';
-                        const storyName = m.pushName || hisoka.getName(from, true) || storyNumber;
-                        const groupName = hisoka.getName(m.key.remoteJid) || m.key.remoteJid;
+                        const storyNumber = gsTrackNumber || (resolvedPn ? extractSwNumber(resolvedPn) : '');
+                        const _pushName = String(m.pushName || '').trim();
+                        const _lidNameDigits = senderLid?.split('@')[0].split(':')[0] || '';
+                        const _validPushName = _pushName
+                                && !/^(unknown|null|undefined)$/i.test(_pushName)
+                                && !(_lidNameDigits && _pushName === _lidNameDigits)
+                                ? _pushName
+                                : null;
+                        const _contactName = resolvedPn
+                                ? (hisoka.getName(resolvedPn, true) || hisoka.getName(resolvedPn))
+                                : null;
+                        const storyName = _validPushName
+                                || (_contactName && !/^(unknown|null|undefined)$/i.test(String(_contactName).trim()) ? _contactName : null)
+                                || storyNumber
+                                || (senderLid ? 'Nama belum tersedia' : 'Nama tidak tersedia');
+                        const _groupJid = m.key.remoteJid;
+                        const _isRealGroupName = name => {
+                                const value = String(name || '').trim();
+                                return value
+                                        && value !== _groupJid
+                                        && value !== _groupJid.split('@')[0]
+                                        && !/^\d+$/.test(value);
+                        };
+                        let groupName = [
+                                m.groupSubject,
+                                hisoka.groups?.read?.(_groupJid)?.subject,
+                                global.__mainBotGroups?.read?.(_groupJid)?.subject,
+                        ].find(_isRealGroupName) || null;
+                        if (!groupName && typeof hisoka.groupMetadata === 'function') {
+                                try {
+                                        const metadata = await hisoka.groupMetadata(_groupJid);
+                                        groupName = _isRealGroupName(metadata?.subject) ? metadata.subject : null;
+                                        if (metadata && hisoka.groups?.write) {
+                                                try { await hisoka.groups.write(_groupJid, metadata); } catch (_) {}
+                                        }
+                                } catch (_) {}
+                        }
+                        groupName ||= 'Grup tidak diketahui';
 
                         const gsReactionSuccess = shouldReact && usedReaction !== '❌ Gagal';
-                        updateSwStats(storyNumber, storyName, gsReactionSuccess, gsReactionSuccess ? usedReaction : null, gsMsgId);
+                        if (storyNumber) {
+                                updateSwStats(storyNumber, storyName, gsReactionSuccess, gsReactionSuccess ? usedReaction : null, gsMsgId);
+                        }
 
                         // ── SwTrack: update hasil handler 2 ──
                         if (gsTrackNumber) {
@@ -784,9 +887,7 @@ ${m.text ? `<b>Caption :</b>\n\n${m.text}` : ''}`.trim();
                                 storyDebounce.set(debounceKeyGs, { time: nowGs, count: 1 });
 
                                 const delaySeconds = (delayMs / 1000).toFixed(1);
-                                const innerMsg = _gsPayload?.message;
-                                const innerType = innerMsg ? Object.keys(innerMsg).find(k => k !== 'messageContextInfo') : null;
-                                const _baseType = getMediaTypeEmoji(innerType);
+                                const _baseType = getMediaTypeEmoji(_gsInnerType);
                                 const mediaType = [_baseType[0] + ' GC', _baseType[1]];
                                 const greeting = getGreeting();
 
@@ -797,7 +898,7 @@ ${m.text ? `<b>Caption :</b>\n\n${m.text}` : ''}`.trim();
                                 const dateStr = `${jakartaDate.getDate()} ${monthNames[jakartaDate.getMonth()]} ${jakartaDate.getFullYear()}`;
                                 const timeStr = jakartaDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false }).replace(':', '.');
 
-                                const mode = shouldReact ? 'Read+Reaction ✓' : 'Read Only 👁️';
+                                const mode = wantsReaction ? 'Read+Reaction ✓' : 'Read Only 👁️';
 
                                 logStoryView({
                                         botId: hisoka.isMainBot ? null : (hisoka.user.name || maskNumber(botIdGs)),
@@ -808,13 +909,14 @@ ${m.text ? `<b>Caption :</b>\n\n${m.text}` : ''}`.trim();
                                         date: dateStr,
                                         time: timeStr,
                                         name: storyName,
-                                        number: maskNumber(storyNumber),
-                                        storyCount: getStoryCountToday(storyNumber),
-                                        success: gsReactionSuccess ? 'Grup SW ✓' : (shouldReact ? 'Baca ✓' : 'Baca ✓'),
-                                        reaction: shouldReact ? usedReaction : 'Off ❌',
+                                        number: storyNumber ? maskNumber(storyNumber) : (senderLid ? 'LID belum resolve' : 'Nomor tidak tersedia'),
+                                        storyCount: storyNumber ? getStoryCountToday(storyNumber) : 0,
+                                        success: gsReactionSuccess ? 'Grup SW ✓' : 'Baca ✓',
+                                        reaction: wantsReaction ? usedReaction : 'Off ❌',
                                         delaySeconds,
                                         mode,
                                         groupName,
+                                        resolve: resolveMethod,
                                         emojiMode: getMode(),
                                 });
 

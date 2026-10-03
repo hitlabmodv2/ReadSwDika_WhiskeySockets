@@ -203,6 +203,7 @@ const WATCHED_FILES = [
     { key: 'cjs:hentaidad',    rel: 'SEMUA_FITUR/anime/hentaidad.cjs',     type: 'cjs' },
     { key: 'cjs:pixiv',        rel: 'SEMUA_FITUR/anime/pixiv.cjs',         type: 'cjs' },
     { key: 'cjs:pixivr18',     rel: 'SEMUA_FITUR/anime/pixivr18.cjs',      type: 'cjs' },
+    { key: 'cjs:animquote',    rel: 'SEMUA_FITUR/anime/animquote.cjs',     type: 'cjs' },
     // AI
     { key: 'cjs:imageEdit',    rel: 'SEMUA_FITUR/ai/imageEdit.cjs',        type: 'cjs' },
     { key: 'cjs:wilycmd',      rel: 'SEMUA_FITUR/ai/wilycmd.cjs',          type: 'cjs' },
