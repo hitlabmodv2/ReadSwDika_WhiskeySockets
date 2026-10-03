@@ -33,6 +33,9 @@
 'use strict';
 
 const axios = require('axios');
+const https = require('https');
+
+const httpsAgent = new https.Agent({ keepAlive: true, maxSockets: 8, timeout: 30000 });
 
 // Analisis pakai metadata (title + tags + author) via API teks — tidak perlu kirim gambar
 // Retry otomatis 3x dengan jeda, fallback endpoint gemini-flash jika gemini gagal
@@ -57,17 +60,17 @@ async function analyzeIllustration({ title, tags, author } = {}) {
                 try {
                     if (attempt > 0) await new Promise(r => setTimeout(r, 1200 * attempt));
                     const res = await Promise.race([
-                        fetch(`${ep}?teks=${encoded}`),
+                        axios.get(`${ep}?teks=${encoded}`, { httpsAgent, timeout: 12000 }),
                         new Promise((_, rej) => setTimeout(() => rej(new Error('AI timeout')), 12000)),
                     ]);
-                    const json = await res.json();
+                    const json = res.data;
                     if (json?.status && json?.result) return String(json.result).trim();
                 } catch (_) {}
             }
         }
         return null;
     } catch (e) {
-        console.error('[Pixiv] AI gagal:', e.message);
+        console.error('[Pixiv] AI gagal:', e.message, e.stack);
         return null;
     }
 }
@@ -91,7 +94,7 @@ async function pixivSearch(query, { safe = true, page = 1 } = {}) {
     const mode = safe ? 'safe' : 'all';
     const url = `${BASE}/ajax/search/illustrations/${encoded}?word=${encoded}&order=date_d&mode=${mode}&p=${page}&s_mode=s_tag_full&type=illust&lang=en`;
 
-    const { data } = await axios.get(url, { headers: HEADERS, timeout: 15000 });
+    const { data } = await axios.get(url, { headers: HEADERS, httpsAgent, timeout: 15000 });
 
     if (data?.error) throw new Error(data.message || 'Pixiv API error');
 
@@ -99,7 +102,7 @@ async function pixivSearch(query, { safe = true, page = 1 } = {}) {
 
     if (!results.length) {
         const url2 = `${BASE}/ajax/search/illustrations/${encoded}?word=${encoded}&order=date_d&mode=${mode}&p=${page}&s_mode=s_tag&type=illust&lang=en`;
-        const { data: data2 } = await axios.get(url2, { headers: HEADERS, timeout: 15000 });
+        const { data: data2 } = await axios.get(url2, { headers: HEADERS, httpsAgent, timeout: 15000 });
         results = data2?.body?.illust?.data || [];
     }
 
@@ -114,6 +117,7 @@ async function pixivSearch(query, { safe = true, page = 1 } = {}) {
 async function pixivDetail(id) {
     const { data } = await axios.get(`${BASE}/ajax/illust/${id}`, {
         headers: HEADERS,
+        httpsAgent,
         timeout: 12000
     });
     if (data?.error) throw new Error(data.message || 'Gagal mengambil detail karya.');
@@ -127,6 +131,7 @@ async function pixivDownloadImage(imageUrl) {
             'Referer': 'https://www.pixiv.net/',
         },
         responseType: 'arraybuffer',
+        httpsAgent,
         timeout: 30000
     });
     return Buffer.from(data);
@@ -272,12 +277,21 @@ async function handlePixiv({ hisoka, m, query, tolak, logCommand, logError }) {
                 );
 
                 if (imgCount > 1) {
-                        const images     = await pixivFetchMultiple(realQuery, { safe: true, count: imgCount });
-                        const albumItems = images.map((img, i) => ({ image: img.buffer, caption: formatPixivCaption(img, { index: i, total: images.length }) }));
+                        const images = await pixivFetchMultiple(realQuery, { safe: true, count: imgCount });
                         if (loadMsg?.key) { try { await hisoka.sendMessage(m.from, { delete: loadMsg.key }); } catch (_) {} }
                         try {
-                                await hisoka.sendMessage(m.from, { albumMessage: albumItems }, { quoted: m });
-                        } catch (_) {
+                                const parentMsg = await hisoka.sendMessage(
+                                        m.from,
+                                        { album: { expectedImageCount: images.length, expectedVideoCount: 0 } },
+                                        { quoted: m }
+                                );
+                                for (let i = 0; i < images.length; i++) {
+                                        const buf = images[i].buffer;
+                                        const caption = formatPixivCaption(images[i], { index: i, total: images.length });
+                                        await hisoka.sendMessage(m.from, { image: buf, albumParentKey: parentMsg.key, caption }, { quoted: m });
+                                }
+                        } catch (albumErr) {
+                                console.error('[Pixiv] Album error:', albumErr?.message);
                                 for (let i = 0; i < images.length; i++) {
                                         await hisoka.sendMessage(m.from, { image: images[i].buffer, caption: formatPixivCaption(images[i], { index: i, total: images.length }) }, { quoted: i === 0 ? m : undefined });
                                 }
@@ -294,6 +308,8 @@ async function handlePixiv({ hisoka, m, query, tolak, logCommand, logError }) {
                 logCommand(m, hisoka, 'pixiv');
         } catch (error) {
                 console.error('\x1b[31m[Pixiv] Error:\x1b[39m', error.message);
+                console.error('[Pixiv] Stack:', error.stack);
+                console.error('[Pixiv] Full Error:', JSON.stringify(error, null, 2));
                 logError(error, 'command:pixiv');
                 await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } }).catch(() => {});
                 await tolak(hisoka, m,

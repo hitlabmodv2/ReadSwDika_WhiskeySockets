@@ -1197,6 +1197,7 @@ async function main() {
 
                                         const swCfg = loadConfig().autoReadStory || {};
                                         if (swCfg.enabled === false) return;
+                                        const shouldReact = swCfg.autoReaction !== false;
                                         const reactEmojis = getStatusEmojis();
                                         const useRandom = swCfg.randomDelay !== false;
                                         const dMin = swCfg.delayMinMs || 1000;
@@ -1244,10 +1245,11 @@ async function main() {
                                                 const num=(entry.number||(entry.resolvedPn||'').split('@')[0])||'-';
                                                 const masked=num.length>6?num.slice(0,4)+'****'+num.slice(-3):num;
                                                 const rc=(entry.resolve||'').includes('❌')?red:wh;
+                                                const modeStr = shouldReact ? 'Read+Reaction ✓' : 'Read Only 👁️';
                                                 console.log(`${cy}┌${'═'.repeat(bW)}┐${rs}`);
                                                 console.log(`${cy}║${' '.repeat(tp)}${wh}${title}${rs}${cy}${' '.repeat(bW-tp-title.length)}║${rs}`);
                                                 console.log(`${cy}├${'═'.repeat(bW)}┤${rs}`);
-                                                console.log(`${cy}│${rs} ${wh}⭔ Mode        : ${_swPad('Read+Reaction ✓',cW)}${rs}`);
+                                                console.log(`${cy}│${rs} ${wh}⭔ Mode        : ${_swPad(modeStr,cW)}${rs}`);
                                                 console.log(`${cy}│${rs} ${wh}⭔ TipeStory   : ${_swPad(entry.type||'Teks 📝',cW)}${rs}`);
                                                 console.log(`${cy}│${rs} ${wh}⭔ Selamat     : ${_swPad(greeting,cW)}${rs}`);
                                                 console.log(`${cy}│${rs} ${wh}⭔ Hari        : ${_swPad(_swDays[d.getDay()]+' 🔁',cW)}${rs}`);
@@ -1280,7 +1282,7 @@ async function main() {
                                                                         }
                                                                         const mPn = entry.resolvedPn;
                                                                         let newEmoji = null;
-                                                                        if (!entry.reacted && mPn && entry.messageKey) {
+                                                                        if (shouldReact && !entry.reacted && mPn && entry.messageKey) {
                                                                                 newEmoji = reactEmojis.length
                                                                                         ? reactEmojis[Math.floor(Math.random() * reactEmojis.length)]
                                                                                         : '❤️';

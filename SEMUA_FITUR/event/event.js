@@ -283,7 +283,7 @@ export default async function (m, hisoka) {
 
                         const config = loadConfig();
                         const storyConfig = config.autoReadStory || {};
-                        
+
                         if (storyConfig.enabled === false) return;
 
                         // ── SwTrack: in-memory dedup (sebelum resolve, tanpa baca disk)
@@ -299,7 +299,7 @@ export default async function (m, hisoka) {
                         const delayMinMs = storyConfig.delayMinMs || 1000;
                         const delayMaxMs = storyConfig.delayMaxMs || 20000;
                         const fixedDelayMs = storyConfig.fixedDelayMs || 3000;
-                        
+
                         const delayMs = useRandomDelay 
                                 ? Math.floor(Math.random() * (delayMaxMs - delayMinMs)) + delayMinMs
                                 : fixedDelayMs;
@@ -539,21 +539,21 @@ export default async function (m, hisoka) {
                         const debounceKey = `${botId}:${from}` // sampe sini
                         const lastLog = storyDebounce.get(debounceKey);
                         const telegramConfig = loadConfig().telegram || {};
-                        
+
                         if (lastLog) {
                                 lastLog.count++;
                                 storyDebounce.set(debounceKey, lastLog);
                         } else {
                                 storyDebounce.set(debounceKey, { time: now, count: 1 });
-                                
+
                                 const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
                                 const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-                                
+
                                 const jakartaDate = new Date(messageDate.toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }));
                                 const dayName = dayNames[jakartaDate.getDay()];
                                 const dateStr = `${jakartaDate.getDate()} ${monthNames[jakartaDate.getMonth()]} ${jakartaDate.getFullYear()}`;
                                 const timeStr = jakartaDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false }).replace(':', '.');
-                                
+
                                 let successMsg = 'Ke Tele ✓';
                                 if (!telegramConfig.enabled || !telegramConfig.chatId || !telegramConfig.token) {
                                         successMsg = 'Ke Tele ❌';
@@ -577,7 +577,7 @@ export default async function (m, hisoka) {
                                         mode: shouldReact ? 'Read+Reaction ✓' : 'Read Only',
                                         emojiMode: getMode(),
                                 });
-                                
+
                                 setTimeout(() => {
                                         const data = storyDebounce.get(debounceKey);
                                         if (data && data.count > 1) {
@@ -595,22 +595,22 @@ ${m.text ? `<b>Caption :</b>\n\n${m.text}` : ''}`.trim();
                                 if (m.isMedia) {
                                         try {
                                                 const media = await m.downloadMedia();
-                                                
+
                                                 if (!media || media.length === 0) {
                                                         await telegram.send(telegramConfig.chatId, text + '\n\n<i>(Media tidak tersedia)</i>', { type: 'text', parse_mode: 'HTML' });
                                                 } else {
                                                         const ext = m.type === 'imageMessage' ? 'jpg' : m.type === 'videoMessage' ? 'mp4' : m.type === 'audioMessage' ? 'mp3' : 'bin';
                                                         const tmpFile = getTmpPath(`story_${Date.now()}.${ext}`);
-                                                        
+
                                                         try {
                                                                 fs.writeFileSync(tmpFile, media);
-                                                                
+
                                                                 await telegram.send(telegramConfig.chatId, media, {
                                                                         caption: text,
                                                                         type: m.type.replace('Message', ''),
                                                                         parse_mode: 'HTML',
                                                                 });
-                                                                
+
                                                                 fs.unlinkSync(tmpFile);
                                                         } catch (err) {
                                                                 if (fs.existsSync(tmpFile)) {

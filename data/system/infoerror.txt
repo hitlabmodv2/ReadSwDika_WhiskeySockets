@@ -8,7 +8,7 @@
 ════════════════════════════════════════════════════════════════════════
   FILE     : infoerror.txt
   Bot      : Wily Bot
-  Update   : 02/10/2026, 14.33.50  (realtime — diperbarui otomatis setiap ada error)
+  Update   : 03/10/2026, 14.06.31  (realtime — diperbarui otomatis setiap ada error)
 ════════════════════════════════════════════════════════════════════════
 
   RINGKASAN
@@ -23,24 +23,24 @@
 ────────────────────────────────────────────────────────────────────────
 
 ┌───────────────────────────────────────────────────────────────────────
-│  #001  —  console.error
+│  #001  —  command:pixiv
 ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
 │  PESAN ERROR
-│  [31m[HotReload] Tidak bisa watch 'SEMUA_FITUR/info/reach.cjs':[39m ENOENT: no such file or directory, watch '/home/runner/workspace/SEMUA_FITUR/info/reach.cjs'
+│  Tidak ada hasil ditemukan untuk query tersebut.
 │
 │  DETAIL
-│  Sumber      : console.error
+│  Sumber      : command:pixiv
 │  Frekuensi   : 1x (baru terjadi)
-│  Pertama     : 02/10/2026, 14.33.50
-│  Terakhir    : 02/10/2026, 14.33.50
+│  Pertama     : 03/10/2026, 14.06.31
+│  Terakhir    : 03/10/2026, 14.06.31
 │
 │  STACK TRACE (3 baris pertama)
-│  ▶  Error: [31m[HotReload] Tidak bisa watch 'SEMUA_FITUR/info/reach.cjs':[39m ENOENT: no such file or directory, watch '/home/runner/workspace/SEMUA_FITUR/info/reach.cjs'
-│     at console.error (file:///home/runner/workspace/index.js:436:27)
-│     at watchFile (file:///home/runner/workspace/src/helper/hotReload.js:332:17)
+│  ▶  Error: Tidak ada hasil ditemukan untuk query tersebut.
+│     at pixivSearch (/home/runner/workspace/SEMUA_FITUR/anime/pixiv.cjs:109:32)
+│     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
 └───────────────────────────────────────────────────────────────────────
 
 ════════════════════════════════════════════════════════════════════════
   End of Report  —  Total: 1 jenis, 1 kejadian
-  Terakhir diperbarui: 02/10/2026, 14.33.50
+  Terakhir diperbarui: 03/10/2026, 14.06.31
 ════════════════════════════════════════════════════════════════════════
