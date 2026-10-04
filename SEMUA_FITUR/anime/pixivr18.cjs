@@ -18,348 +18,250 @@
  *  Terima kasih sudah support.
  * ───────────────────────────────
  *
- *  pixivr18.cjs — Scraper Pixiv R18 (18+)
- *  Ambil ilustrasi konten dewasa dari Pixiv dengan filter R18
+ *  pixivr18.cjs — NSFW Image Search (18+)
+ *  Backend: nHentai (100% NSFW guaranteed)
+ *  Command tetap .pixivr18 tapi pakai nHentai API
  * ───────────────────────────────
- */
-/**
- * ═══════════════════════════════════════════════════════════════
- *  Pixiv R18 Scraper (18+)
- *  Ambil ilustrasi konten dewasa dari Pixiv dengan filter R18
- *  aktif — fitur khusus grup dewasa, memerlukan aktifasi owner.
- * ═══════════════════════════════════════════════════════════════
  */
 'use strict';
 
 const axios = require('axios');
-const https = require('https');
 
-// Analisis pakai metadata (title + tags + author) via API teks — tidak perlu kirim gambar
-// Retry otomatis 3x dengan jeda, fallback endpoint gemini-flash jika gemini gagal
-const AI_ENDPOINTS = [
-    'https://api.alwayscodex.my.id/api/ai/gemini',
-    'https://api.alwayscodex.my.id/api/ai/gemini-flash',
-];
-async function analyzeIllustration({ title, tags, author } = {}) {
-    try {
-        const tagStr = (tags || []).slice(0, 8).join(', ');
-        const prompt =
-            `Judul: ${title || '-'}. Artist: ${author || '-'}. Tags: ${tagStr || '-'}.\n` +
-            `Berikan analisis singkat WAJIB dalam Bahasa Indonesia, persis 3 baris format ini:\n` +
-            `🎭 Karakter: <nama> (<seri>) atau "Tidak dikenali"\n` +
-            `🎨 Gaya: <art style singkat, max 8 kata>\n` +
-            `✨ Detail: <suasana/detail menonjol, max 12 kata>\n` +
-            `Hanya 3 baris itu. Jangan tambah kalimat lain.`;
-        const encoded = encodeURIComponent(prompt);
-
-        for (const ep of AI_ENDPOINTS) {
-            for (let attempt = 0; attempt < 2; attempt++) {
-                try {
-                    if (attempt > 0) await new Promise(r => setTimeout(r, 1200 * attempt));
-                    const res = await Promise.race([
-                        fetch(`${ep}?teks=${encoded}`),
-                        new Promise((_, rej) => setTimeout(() => rej(new Error('AI timeout')), 12000)),
-                    ]);
-                    const json = await res.json();
-                    if (json?.status && json?.result) return String(json.result).trim();
-                } catch (_) {}
-            }
-        }
-        return null;
-    } catch (e) {
-        console.error('[PixivR18] AI gagal:', e.message);
-        return null;
-    }
-}
-
-const BASE = 'https://www.pixiv.net';
-const IMG_BASE = 'https://i.pximg.net';
+const BASE = 'https://nhentai.to';
+const CDN_LIST = ['https://t.nhentai.net', 'https://i.nhentai.net', 'https://i7.nhentai.net'];
+const EXT_MAP = { j: 'jpg', p: 'png', g: 'gif' };
 
 const HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-    'Accept': 'application/json',
-    'Accept-Language': 'en-US,en;q=0.9,ja;q=0.8',
-    'Referer': 'https://www.pixiv.net/',
-    'Origin': 'https://www.pixiv.net',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+    'Accept-Language': 'en-US,en;q=0.9',
+    'Referer': 'https://nhentai.to/',
 };
 
-const httpsAgent = new https.Agent({ keepAlive: true, maxSockets: 8, timeout: 30000 });
+async function fetchHtml(url) {
+    const res = await axios.get(url, { headers: HEADERS, timeout: 20000, maxRedirects: 5 });
+    return res.data;
+}
 
-const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-
-async function withRetry(fn, { tries = 3, delay = 600, label = '' } = {}) {
-    let lastErr;
-    for (let i = 0; i < tries; i++) {
-        try { return await fn(); }
-        catch (e) {
-            lastErr = e;
-            if (i < tries - 1) await sleep(delay * (i + 1));
-        }
+function parseGalleryJson(html) {
+    const start = html.indexOf('N.gallery({');
+    if (start === -1) throw new Error('Data gallery tidak ditemukan');
+    const braceStart = html.indexOf('{', start);
+    let depth = 0, i = braceStart;
+    while (i < html.length) {
+        if (html[i] === '{') depth++;
+        else if (html[i] === '}') { depth--; if (depth === 0) break; }
+        i++;
     }
-    if (label) console.error(`[PixivR18] ${label} gagal setelah ${tries}x:`, lastErr?.message);
-    throw lastErr;
+    const raw = html.slice(braceStart, i + 1);
+    const clean = raw.replace(/,(\s*[}\]])/g, '$1');
+    return JSON.parse(clean);
 }
 
-let warmedUp = false;
-async function warmUp() {
-    if (warmedUp) return;
-    try {
-        await axios.get(`${BASE}/ajax/top/illust?mode=all&lang=en`, {
-            headers: HEADERS, httpsAgent, timeout: 8000,
-        });
-    } catch (_) {}
-    warmedUp = true;
+function detectCoverUrl(html) {
+    const m = html.match(/src="(https?:\/\/[^"]+\/galleries\/\d+\/cover\.[^"]+)"/) ||
+              html.match(/data-src="(https?:\/\/[^"]+\/galleries\/\d+\/cover\.[^"]+)"/);
+    return m ? m[1] : null;
 }
 
-async function pixivR18Search(query, { page = 1 } = {}) {
-    if (!query || !String(query).trim()) throw new Error('Query diperlukan.');
-    const q = encodeURIComponent(String(query).trim());
-
-    // Coba exact tag dulu, fallback ke partial
-    for (const s_mode of ['s_tag_full', 's_tag', 's_tc']) {
-        const url = `${BASE}/ajax/search/illustrations/${q}?word=${q}&order=date_d&mode=r18&p=${page}&s_mode=${s_mode}&type=illust&lang=en`;
-        try {
-            const { data } = await withRetry(
-                () => axios.get(url, { headers: HEADERS, httpsAgent, timeout: 15000 }),
-                { tries: 3, delay: 700, label: `search(${s_mode})` }
-            );
-            if (data?.error) continue;
-            const results = data?.body?.illust?.data || [];
-            if (results.length) return results;
-        } catch (_) {}
-    }
-    throw new Error('Tidak ada hasil R18 ditemukan untuk query tersebut.');
+async function nhentaiSearch(query, page = 1) {
+    const html = await fetchHtml(`${BASE}/search/?q=${encodeURIComponent(query)}&page=${page}`);
+    const matches = [...html.matchAll(/href="\/g\/(\d+)\/"/g)];
+    return [...new Set(matches.map(m => m[1]))];
 }
 
-async function pixivR18Detail(id) {
-    try {
-        const { data } = await withRetry(
-            () => axios.get(`${BASE}/ajax/illust/${id}`, { headers: HEADERS, httpsAgent, timeout: 12000 }),
-            { tries: 2, delay: 500 }
-        );
-        if (!data?.error) return data?.body || null;
-    } catch (_) {}
-    return null;
+async function nhentaiGallery(id) {
+    const html = await fetchHtml(`${BASE}/g/${id}/`);
+    const data = parseGalleryJson(html);
+    const coverUrl = detectCoverUrl(html);
+    return { ...data, coverUrl };
 }
 
-async function pixivDownloadImage(imageUrl) {
-    const { data } = await withRetry(
-        () => axios.get(imageUrl, {
-            headers: { ...HEADERS, 'Referer': 'https://www.pixiv.net/' },
-            responseType: 'arraybuffer',
-            httpsAgent,
-            timeout: 30000,
-        }),
-        { tries: 3, delay: 800, label: `download` }
-    );
-    return Buffer.from(data);
-}
-
-// Bangun URL gambar dari thumbnail URL dengan kualitas yang diinginkan
-function buildImageUrl(thumbUrl, quality = 'regular') {
-    if (!thumbUrl) return null;
-    const map = {
-        small:   'c/540x540_70/img-master',
-        regular: 'c/600x1200_90/img-master',
-        large:   'img-master',
-    };
-    const seg = map[quality] || map.regular;
-    return thumbUrl
-        .replace(/https:\/\/i\.pximg\.net\/[^/]+\/img-master/, `${IMG_BASE}/${seg}/img-master`)
-        .replace(/c\/\d+x\d+[^/]*\/img-master/, seg);
-}
-
-function shufflePickN(arr, n) {
-    const copy = [...arr];
-    for (let i = copy.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [copy[i], copy[j]] = [copy[j], copy[i]];
-    }
-    return copy.slice(0, n);
-}
-
-async function fetchOnePick(pick) {
-    let imgUrl = null;
-    let detail = null;
-
-    detail = await pixivR18Detail(pick.id);
-    if (detail?.urls) {
-        imgUrl = detail.urls.regular || detail.urls.small || detail.urls.thumb;
-    }
-
-    // Fallback: bangun dari thumbnail
-    if (!imgUrl && pick.url) {
-        imgUrl = buildImageUrl(pick.url, 'regular');
-    }
-    if (!imgUrl) throw new Error(`Tidak dapat URL gambar untuk ID ${pick.id}`);
-
-    const buffer = await pixivDownloadImage(imgUrl);
-
-    return {
-        id: pick.id,
-        title: pick.title || '(no title)',
-        author: pick.userName || 'Unknown',
-        authorId: pick.userId,
-        tags: (pick.tags || []).slice(0, 8),
-        views: detail?.viewCount ?? '-',
-        likes: detail?.likeCount ?? '-',
-        bookmarks: detail?.bookmarkCount ?? pick.bookmarkCount ?? '-',
-        xRestrict: pick.xRestrict,
-        pageUrl: `${BASE}/artworks/${pick.id}`,
-        buffer,
-    };
-}
-
-async function pixivR18Fetch(query, { index = 0 } = {}) {
-    await warmUp();
-    const results = await pixivR18Search(query);
-    const randomIndex = Math.floor(Math.random() * Math.min(results.length, 20));
-    const pick = results[(index + randomIndex) % results.length];
-    const data = await fetchOnePick(pick);
-    data.totalResults = results.length;
-    data.aiInfo = await analyzeIllustration(data);
-    return data;
-}
-
-async function pixivR18FetchMultiple(query, { count = 3 } = {}) {
-    const want = Math.min(Math.max(1, count), 10);
-
-    await warmUp();
-
-    // Kumpulkan banyak hasil dari beberapa halaman supaya pool besar
-    let pool = [];
-    for (let p = 1; p <= 3 && pool.length < want * 4; p++) {
-        try {
-            const r = await pixivR18Search(query, { page: p });
-            pool = pool.concat(r);
-        } catch (_) { break; }
-    }
-    if (!pool.length) throw new Error('Tidak ada hasil R18 ditemukan.');
-
-    // Dedupe by id
-    const seen = new Set();
-    pool = pool.filter(x => { if (seen.has(x.id)) return false; seen.add(x.id); return true; });
-
-    // Acak urutan
-    const queue = shufflePickN(pool, pool.length);
-
-    const successful = [];
-    const usedIds = new Set();
-    let cursor = 0;
-
-    // Coba batch paralel sampai dapat `want` gambar atau habis kandidat
-    while (successful.length < want && cursor < queue.length) {
-        const remaining = want - successful.length;
-        const batch = queue.slice(cursor, cursor + remaining).filter(x => !usedIds.has(x.id));
-        cursor += remaining;
-        if (!batch.length) continue;
-
-        batch.forEach(x => usedIds.add(x.id));
-        const settled = await Promise.allSettled(batch.map(p => fetchOnePick(p)));
-        for (const r of settled) {
-            if (r.status === 'fulfilled' && successful.length < want) {
-                successful.push(r.value);
-            } else if (r.status === 'rejected') {
-                console.error('[PixivR18] fetch gagal:', r.reason?.message || r.reason);
+async function downloadImage(mediaId, pageNum, hintExt = 'jpg') {
+    const ext = EXT_MAP[hintExt] || hintExt;
+    const errors = [];
+    
+    for (const cdn of CDN_LIST) {
+        for (const tryExt of [ext, 'jpg', 'png']) {
+            try {
+                const url = `${cdn}/galleries/${mediaId}/${pageNum}.${tryExt}`;
+                const res = await axios.get(url, {
+                    headers: { ...HEADERS, Referer: BASE },
+                    responseType: 'arraybuffer',
+                    timeout: 15000,
+                    maxRedirects: 3,
+                });
+                return Buffer.from(res.data);
+            } catch (e) {
+                errors.push(`${cdn}/${pageNum}.${tryExt}: ${e.message}`);
             }
         }
     }
-
-    if (!successful.length) throw new Error('Gagal mengunduh semua gambar dari Pixiv R18.');
-
-    // Analisa AI semua gambar paralel (non-blocking jika gagal)
-    const aiResults = await Promise.all(successful.map(s => analyzeIllustration(s)));
-    successful.forEach((s, i) => { s.aiInfo = aiResults[i]; });
-
-    return successful;
+    throw new Error(`Gagal download image ${pageNum}: ${errors.join('; ')}`);
 }
 
-function formatPixivR18Caption(data, { index = null, total = null } = {}) {
+async function fetchNSFWImages(query, count = 5) {
+    const wantCount = Math.min(Math.max(1, count), 10);
+    
+    // Fetch dari multiple pages untuk dapat pool lebih besar
+    let allIds = [];
+    for (let p = 1; p <= 2; p++) {
+        try {
+            const ids = await nhentaiSearch(query, p);
+            allIds = allIds.concat(ids);
+            if (allIds.length >= wantCount * 3) break;
+        } catch (e) {
+            console.error(`[NSFW] Search page ${p} error:`, e.message);
+        }
+    }
+    
+    if (!allIds.length) throw new Error('Tidak ada hasil NSFW ditemukan.');
+    
+    // Dedupe
+    const uniqueIds = [...new Set(allIds)];
+    const results = [];
+    
+    // Proses gallery secara paralel dengan batas concurrency
+    const concurrency = 3;
+    const batches = [];
+    for (let i = 0; i < uniqueIds.length && results.length < wantCount; i += concurrency) {
+        batches.push(uniqueIds.slice(i, i + concurrency));
+    }
+    
+    for (const batch of batches) {
+        if (results.length >= wantCount) break;
+        
+        const promises = batch.map(async (id) => {
+            try {
+                const gallery = await nhentaiGallery(id);
+                const mediaId = gallery.media_id;
+                const pages = gallery.images?.pages || [];
+                const pageCount = pages.length;
+                
+                if (!pageCount || !mediaId) return null;
+                
+                // Ambil 1-2 halaman random
+                const randomPageIdx = Math.floor(Math.random() * Math.min(pageCount, 15));
+                const page = pages[randomPageIdx];
+                const hintExt = page?.t || 'j';
+                
+                const buffer = await downloadImage(mediaId, randomPageIdx + 1, hintExt);
+                
+                return {
+                    id,
+                    title: gallery.title?.english || gallery.title?.pretty || 'Untitled',
+                    tags: (gallery.tags || []).map(t => t.name).slice(0, 8),
+                    url: `${BASE}/g/${id}/`,
+                    buffer,
+                    pageNum: randomPageIdx + 1,
+                    totalPages: pageCount,
+                };
+            } catch (e) {
+                console.error(`[NSFW] Gallery ${id} error:`, e.message);
+                return null;
+            }
+        });
+        
+        const settled = await Promise.allSettled(promises);
+        for (const s of settled) {
+            if (s.status === 'fulfilled' && s.value && results.length < wantCount) {
+                results.push(s.value);
+            }
+        }
+    }
+    
+    if (!results.length) throw new Error('Gagal mengunduh gambar NSFW.');
+    return results;
+}
+
+function formatNSFWCaption(data, { index = null, total = null } = {}) {
     const numPrefix = (index !== null && total !== null) ? `🖼️ *${index + 1} dari ${total}*\n` : '';
     const lines = [
         `${numPrefix}🔞 *${data.title}*`,
-        `👤 *Artist:* ${data.author}`,
+        `📄 *Page:* ${data.pageNum} / ${data.totalPages}`,
         ``,
-    ];
-    if (data.aiInfo) {
-        lines.push(`🤖 *AI Analisis:*`, data.aiInfo, ``);
-    }
-    lines.push(
         `🏷️ *Tags:* ${data.tags.length ? data.tags.map(t => `#${t}`).join(' ') : '-'}`,
         ``,
-        `👁️ *Views:* ${data.views}    ❤️ *Likes:* ${data.likes}    🔖 *Bookmarks:* ${data.bookmarks}`,
-        ``,
-        `🔗 ${data.pageUrl}`,
-    );
+        `🔗 ${data.url}`,
+    ];
     return lines.join('\n');
 }
 
-module.exports = { pixivR18Fetch, pixivR18FetchMultiple, pixivR18Search, formatPixivR18Caption };
+module.exports = { fetchNSFWImages, formatNSFWCaption };
 
 // ── COMMAND HANDLER ────────────────────────────────────────────────────────────
 
 async function handlePixiv18({ hisoka, m, query, tolak, logCommand, logError }) {
-        try {
-                const input = (query || '').trim();
-                const pfx   = m.prefix || '.';
+    try {
+        const input = (query || '').trim();
+        const pfx = m.prefix || '.';
 
-                if (!input) {
-                        await tolak(hisoka, m,
-                                `╭─「 🔞 *PIXIV R18 SEARCH* 」\n│\n│ Cari ilustrasi R18 dari Pixiv.\n│\n│ *Format:*\n│ • ${pfx}pixivr18 <query>\n│ • ${pfx}pixivr18 <query>,<jumlah>\n│\n│ *Contoh 1 gambar:*\n│ • ${pfx}pixivr18 megumin\n│ • ${pfx}pixivr18 rem re:zero\n│\n│ *Contoh banyak gambar (max 10):*\n│ • ${pfx}pixivr18 megumin,5\n│ • ${pfx}pixivr18 naruto,10\n│\n│ ⚠️ Konten dewasa (R18). 18+ only.\n╰──────────────────────`
-                        );
-                        logCommand(m, hisoka, m.command || 'pixivr18');
-                        return;
-                }
-
-                let realQuery = input;
-                let imgCount  = 1;
-                const lastComma = input.lastIndexOf(',');
-                if (lastComma !== -1) {
-                        const maybeNum = input.slice(lastComma + 1).trim();
-                        if (/^\d+$/.test(maybeNum)) {
-                                imgCount  = Math.min(Math.max(1, parseInt(maybeNum)), 10);
-                                realQuery = input.slice(0, lastComma).trim();
-                        }
-                }
-                if (!realQuery) { await tolak(hisoka, m, `❌ Query kosong. Contoh: *.pixivr18 megumin,5*`); return; }
-
-                await hisoka.sendMessage(m.from, { react: { text: '🔍', key: m.key } });
-
-                const loadMsg = await tolak(hisoka, m,
-                        imgCount > 1
-                                ? `🔍 Mencari *${imgCount} ilustrasi R18* "${realQuery}" dari Pixiv...`
-                                : `🔍 Mencari ilustrasi R18 *${realQuery}* di Pixiv...`
-                );
-
-                if (imgCount > 1) {
-                        const images     = await pixivR18FetchMultiple(realQuery, { count: imgCount });
-                        const albumItems = images.map((img, i) => ({ image: img.buffer, caption: formatPixivR18Caption(img, { index: i, total: images.length }) }));
-                        if (loadMsg?.key) { try { await hisoka.sendMessage(m.from, { delete: loadMsg.key }); } catch (_) {} }
-                        try {
-                                await hisoka.sendMessage(m.from, { albumMessage: albumItems }, { quoted: m });
-                        } catch (_) {
-                                for (let i = 0; i < images.length; i++) {
-                                        await hisoka.sendMessage(m.from, { image: images[i].buffer, caption: formatPixivR18Caption(images[i], { index: i, total: images.length }) }, { quoted: i === 0 ? m : undefined });
-                                }
-                        }
-                } else {
-                        const randomIndex = Math.floor(Math.random() * 10);
-                        const data    = await pixivR18Fetch(realQuery, { index: randomIndex });
-                        const caption = formatPixivR18Caption(data);
-                        if (loadMsg?.key) { try { await hisoka.sendMessage(m.from, { delete: loadMsg.key }); } catch (_) {} }
-                        await hisoka.sendMessage(m.from, { image: data.buffer, caption }, { quoted: m });
-                }
-
-                await hisoka.sendMessage(m.from, { react: { text: '🔞', key: m.key } });
-                logCommand(m, hisoka, m.command || 'pixivr18');
-        } catch (error) {
-                console.error('\x1b[31m[PixivR18] Error:\x1b[39m', error.message);
-                logError(error, 'command:pixivr18');
-                await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } }).catch(() => {});
-                await tolak(hisoka, m,
-                        `❌ *Gagal mencari di Pixiv R18.*\n\n_${error.message}_\n\nContoh:\n• *.pixivr18 megumin* — 1 gambar\n• *.pixivr18 megumin,5* — 5 gambar sekaligus`
-                );
+        if (!input) {
+            await tolak(hisoka, m,
+                `╭─「 🔞 *NSFW IMAGE SEARCH* 」\n│\n│ Cari gambar NSFW (100% R18).\n│\n│ *Format:*\n│ • ${pfx}pixivr18 <query>\n│ • ${pfx}pixivr18 <query>,<jumlah>\n│\n│ *Contoh 1 gambar:*\n│ • ${pfx}pixivr18 yuri\n│ • ${pfx}pixivr18 maid\n│\n│ *Contoh banyak gambar (max 10):*\n│ • ${pfx}pixivr18 schoolgirl,5\n│ • ${pfx}pixivr18 catgirl,10\n│\n│ ⚠️ Konten dewasa (R18). 18+ only.\n╰──────────────────────`
+            );
+            logCommand(m, hisoka, m.command || 'pixivr18');
+            return;
         }
+
+        let realQuery = input;
+        let imgCount = 1;
+        const lastComma = input.lastIndexOf(',');
+        if (lastComma !== -1) {
+            const maybeNum = input.slice(lastComma + 1).trim();
+            if (/^\d+$/.test(maybeNum)) {
+                imgCount = Math.min(Math.max(1, parseInt(maybeNum)), 10);
+                realQuery = input.slice(0, lastComma).trim();
+            }
+        }
+        if (!realQuery) { await tolak(hisoka, m, `❌ Query kosong. Contoh: *.pixivr18 yuri,5*`); return; }
+
+        await hisoka.sendMessage(m.from, { react: { text: '🔍', key: m.key } });
+
+        const loadMsg = await tolak(hisoka, m,
+            imgCount > 1
+                ? `🔍 Mencari *${imgCount} gambar NSFW* "${realQuery}"...`
+                : `🔍 Mencari gambar NSFW *${realQuery}*...`
+        );
+
+        const images = await fetchNSFWImages(realQuery, imgCount);
+
+        if (loadMsg?.key) { try { await hisoka.sendMessage(m.from, { delete: loadMsg.key }); } catch (_) {} }
+
+        if (images.length > 1) {
+            try {
+                const parentMsg = await hisoka.sendMessage(
+                    m.from,
+                    { album: { expectedImageCount: images.length, expectedVideoCount: 0 } },
+                    { quoted: m }
+                );
+                for (let i = 0; i < images.length; i++) {
+                    const buf = images[i].buffer;
+                    const caption = formatNSFWCaption(images[i], { index: i, total: images.length });
+                    await hisoka.sendMessage(m.from, { image: buf, albumParentKey: parentMsg.key, caption }, { quoted: m });
+                }
+            } catch (albumErr) {
+                console.error('[NSFW] Album error:', albumErr?.message);
+                for (let i = 0; i < images.length; i++) {
+                    await hisoka.sendMessage(m.from, { image: images[i].buffer, caption: formatNSFWCaption(images[i], { index: i, total: images.length }) }, { quoted: i === 0 ? m : undefined });
+                }
+            }
+        } else {
+            const caption = formatNSFWCaption(images[0]);
+            await hisoka.sendMessage(m.from, { image: images[0].buffer, caption }, { quoted: m });
+        }
+
+        await hisoka.sendMessage(m.from, { react: { text: '🔞', key: m.key } });
+        logCommand(m, hisoka, m.command || 'pixivr18');
+    } catch (error) {
+        console.error('\x1b[31m[NSFW] Error:\x1b[39m', error.message);
+        console.error('[NSFW] Stack:', error.stack);
+        logError(error, 'command:pixivr18');
+        await hisoka.sendMessage(m.from, { react: { text: '❌', key: m.key } }).catch(() => {});
+        await tolak(hisoka, m,
+            `❌ *Gagal mencari gambar NSFW.*\n\n_${error.message}_\n\nContoh:\n• *.pixivr18 yuri* — 1 gambar\n• *.pixivr18 yuri,5* — 5 gambar sekaligus`
+        );
+    }
 }
 
 module.exports.handlePixiv18 = handlePixiv18;

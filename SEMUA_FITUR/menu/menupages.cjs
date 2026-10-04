@@ -72,7 +72,7 @@ cekhp/spechp/infohp | bandingkan
 cuaca | ba/bluearchive
 genius/carilagu | geniusdetail
 whatsmusik/wmusik | infomusik/infolirik
-speedtest/speed | musikai/aimusik | musikai2/aimusik2
+speedtest/speed
 pixiv | pixivr18
 
 「 🤖 *AI CHAT* 」

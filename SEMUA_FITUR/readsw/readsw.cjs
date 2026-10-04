@@ -61,7 +61,8 @@ function _getReactionModeLabel(isJadibot, jadibotNum, getMainEmojiMode, getJadib
 // ── Helper bangun body status ──────────────────────────────────────────────────
 function _buildBody(cfg, isJadibot, jadibotNum, getMainEmojiMode, getJadibotEmojiMode) {
     let statusIcon, statusText, modeText;
-    if (!cfg.enabled) {
+    const isEnabled = cfg.enabled !== false;
+    if (!isEnabled) {
         statusIcon = '❌'; statusText = 'Nonaktif'; modeText = '-';
     } else if (cfg.autoReaction !== false) {
         statusIcon = '✅'; statusText = 'Aktif'; modeText = 'Read + Reaksi 💬';
@@ -73,11 +74,12 @@ function _buildBody(cfg, isJadibot, jadibotNum, getMainEmojiMode, getJadibotEmoj
     const delayMax   = (cfg.delayMaxMs   || 20000) / 1000;
     const fixedDelay = (cfg.fixedDelayMs || 3000)  / 1000;
     const isRandom   = cfg.randomDelay !== false;
-    const delayInfo  = cfg.enabled
+    const delayInfo  = isEnabled
         ? (isRandom ? `${delayMin}-${delayMax}s (acak)` : `${fixedDelay}s (tetap)`)
         : '-';
 
-    const reactionMode = cfg.enabled && cfg.autoReaction !== false
+    const reactionEnabled = isEnabled && cfg.autoReaction !== false;
+    const reactionMode = reactionEnabled
         ? _getReactionModeLabel(isJadibot, jadibotNum, getMainEmojiMode, getJadibotEmojiMode)
         : '-';
 
@@ -89,7 +91,7 @@ function _buildBody(cfg, isJadibot, jadibotNum, getMainEmojiMode, getJadibotEmoj
         `│ ${statusIcon} *Status    :* ${statusText}\n` +
         `│ 🎭 *Mode      :* ${modeText}\n` +
         `│ ⏱️ *Delay     :* ${delayInfo}\n` +
-        `│ 💬 *Reaksi    :* ${cfg.autoReaction !== false ? '✅ Aktif' : '❌ Nonaktif'}\n` +
+        `│ 💬 *Reaksi    :* ${reactionEnabled ? '✅ Aktif' : '❌ Nonaktif'}\n` +
         `│ 🎨 *ModeReaksi:* ${reactionMode}\n` +
         `│\n` +
         `╰═════════════════════════╯` +
@@ -121,13 +123,13 @@ async function _sendSelection(hisoka, m, Button, tolak, bodyText, pref, cfg) {
         let sent = false;
         try {
             // ── tanda ✓ Mode ─────────────────────────────────────────────
-            const modeAktif = !cfg.enabled ? 'off'
+            const modeAktif = cfg.enabled === false ? 'off'
                 : cfg.autoReaction !== false ? 'on' : 'false';
             const isMode   = (key) => key === modeAktif;
             const markMode = (key) => isMode(key) ? '✓ ' : '';
 
             // ── tanda ✓ Delay Tetap & Acak ───────────────────────────────
-            const isRandom    = cfg.randomDelay === true;
+            const isRandom    = cfg.randomDelay !== false;
             const fixedMs     = cfg.fixedDelayMs || 3000;
             const isFixed     = (i)      => !isRandom && fixedMs === i * 1000;
             const isPreset    = (preset) => isRandom &&

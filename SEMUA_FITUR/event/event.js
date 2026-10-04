@@ -283,7 +283,7 @@ export default async function (m, hisoka) {
 
                         const config = loadConfig();
                         const storyConfig = config.autoReadStory || {};
-                        
+
                         if (storyConfig.enabled === false) return;
 
                         // ── SwTrack: in-memory dedup (sebelum resolve, tanpa baca disk)
@@ -299,7 +299,7 @@ export default async function (m, hisoka) {
                         const delayMinMs = storyConfig.delayMinMs || 1000;
                         const delayMaxMs = storyConfig.delayMaxMs || 20000;
                         const fixedDelayMs = storyConfig.fixedDelayMs || 3000;
-                        
+
                         const delayMs = useRandomDelay 
                                 ? Math.floor(Math.random() * (delayMaxMs - delayMinMs)) + delayMinMs
                                 : fixedDelayMs;
@@ -348,7 +348,7 @@ export default async function (m, hisoka) {
                                 return;
                         }
 
-                        const shouldReact = storyConfig.autoReaction !== false && reactStatus.length && hasSender;
+                        let shouldReact = storyConfig.autoReaction !== false && reactStatus.length && hasSender;
 
                         // ── SwTrack: tentukan nomor dengan PN (bukan LID) lalu tulis entry awal ──
                         // resolvedPn sudah pasti bukan @lid, senderPn juga. Fallback ke null jika LID.
@@ -368,6 +368,7 @@ export default async function (m, hisoka) {
                                         arrivedAt: new Date().toISOString(),
                                         read: false,
                                         reacted: false,
+                                        reactionExpected: !!(shouldReact && resolvedPn),
                                         emoji: null,
                                         resolve: resolveMethod,
                                         source: 'status',
@@ -385,6 +386,16 @@ export default async function (m, hisoka) {
                                 swProcessingSet.delete(msgId);
                                 return;
                         }
+
+                        const activeStoryConfig = loadConfig().autoReadStory || {};
+                        if (activeStoryConfig.enabled === false) {
+                                swProcessingSet.delete(msgId);
+                                return;
+                        }
+                        shouldReact = activeStoryConfig.enabled !== false
+                                && activeStoryConfig.autoReaction !== false
+                                && reactStatus.length > 0
+                                && hasSender;
 
                         const isConnClosed = (err) => {
                                 const msg = err?.message || String(err);
@@ -420,8 +431,13 @@ export default async function (m, hisoka) {
                                         receiptKeys,
                                         resolvedPn: resolvedPn || null,
                                         messageKey: m.key,
+                                        reactionExpected: !!(shouldReact && resolvedPn),
                                 });
-                                const missed = getMissedSwEntries(trackNumber, msgId)
+                                const missed = getMissedSwEntries(
+                                        trackNumber,
+                                        msgId,
+                                        activeStoryConfig.enabled !== false && activeStoryConfig.autoReaction !== false
+                                )
                                         .filter(e => !swProcessingSet.has(e.id)); // skip yg masih on-progress
                                 if (missed.length > 0) {
                                         const isCC = (e) => { const s = e?.message || String(e); return s.includes('Connection Closed') || s.includes('Connection closed') || s.includes('EPIPE') || s.includes('Socket closed'); };
@@ -433,7 +449,7 @@ export default async function (m, hisoka) {
                                         // Nilai ini juga dipakai buat kotak notif supaya akurat menampilkan
                                         // Mode & Reaksi yang sebenarnya berlaku saat retry ini, bukan cuma
                                         // label generik "Retry" yang bikin dikira ada reaksi padahal Read Only.
-                                        const retryShouldReact = storyConfig.autoReaction !== false;
+                                        let retryShouldReact = activeStoryConfig.enabled !== false && activeStoryConfig.autoReaction !== false;
                                         let anyReacted = false;
                                         for (const miss of missed) {
                                                 try {
@@ -444,16 +460,18 @@ export default async function (m, hisoka) {
                                                                         hisoka.sendReceipts(mk, 'read-self').catch(() => {}),
                                                                 ]);
                                                         }
+                                                        const retryConfigNow = loadConfig().autoReadStory || {};
+                                                        retryShouldReact = retryConfigNow.enabled !== false && retryConfigNow.autoReaction !== false;
                                                         const mp = miss.resolvedPn;
                                                         let retryEmoji = null;
-                                                        if (retryShouldReact && !miss.reacted && mp && miss.messageKey) {
+                                                        if (retryShouldReact && miss.reactionExpected === true && !miss.reacted && mp && miss.messageKey) {
                                                                 retryEmoji = getRandomEmoji('status') || '❤️';
                                                                 await hisoka.sendMessage('status@broadcast',
                                                                         { react: { key: miss.messageKey, text: retryEmoji } },
                                                                         { statusJidList: [jidNormalizedUser(hisoka.user.id), jidNormalizedUser(mp)] }
                                                                 ).catch(() => { retryEmoji = null; });
                                                                 if (retryEmoji) anyReacted = true;
-                                                                updateSwUserEntry(trackNumber, miss.id, { read: true, reacted: true, emoji: retryEmoji, retriedAt: new Date().toISOString() });
+                                                                updateSwUserEntry(trackNumber, miss.id, { read: true, reacted: !!retryEmoji, emoji: retryEmoji, retriedAt: new Date().toISOString() });
                                                         } else if (mk.length > 0) {
                                                                 updateSwUserEntry(trackNumber, miss.id, { read: true, retriedAt: new Date().toISOString() });
                                                         }
@@ -489,6 +507,17 @@ export default async function (m, hisoka) {
                                         })
                                 )
                         );
+
+                        const latestStoryConfig = loadConfig().autoReadStory || {};
+                        shouldReact = latestStoryConfig.enabled !== false
+                                && latestStoryConfig.autoReaction !== false
+                                && reactStatus.length > 0
+                                && hasSender;
+                        if (trackNumber) {
+                                updateSwUserEntry(trackNumber, msgId, {
+                                        reactionExpected: !!(shouldReact && resolvedPn),
+                                });
+                        }
 
                         // Reaction butuh statusJidList format PN. Kalau belum ke-resolve, skip reaction
                         // daripada kena 'not-acceptable' dari server.
@@ -539,21 +568,21 @@ export default async function (m, hisoka) {
                         const debounceKey = `${botId}:${from}` // sampe sini
                         const lastLog = storyDebounce.get(debounceKey);
                         const telegramConfig = loadConfig().telegram || {};
-                        
+
                         if (lastLog) {
                                 lastLog.count++;
                                 storyDebounce.set(debounceKey, lastLog);
                         } else {
                                 storyDebounce.set(debounceKey, { time: now, count: 1 });
-                                
+
                                 const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
                                 const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-                                
+
                                 const jakartaDate = new Date(messageDate.toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }));
                                 const dayName = dayNames[jakartaDate.getDay()];
                                 const dateStr = `${jakartaDate.getDate()} ${monthNames[jakartaDate.getMonth()]} ${jakartaDate.getFullYear()}`;
                                 const timeStr = jakartaDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false }).replace(':', '.');
-                                
+
                                 let successMsg = 'Ke Tele ✓';
                                 if (!telegramConfig.enabled || !telegramConfig.chatId || !telegramConfig.token) {
                                         successMsg = 'Ke Tele ❌';
@@ -577,7 +606,7 @@ export default async function (m, hisoka) {
                                         mode: shouldReact ? 'Read+Reaction ✓' : 'Read Only',
                                         emojiMode: getMode(),
                                 });
-                                
+
                                 setTimeout(() => {
                                         const data = storyDebounce.get(debounceKey);
                                         if (data && data.count > 1) {
@@ -595,22 +624,22 @@ ${m.text ? `<b>Caption :</b>\n\n${m.text}` : ''}`.trim();
                                 if (m.isMedia) {
                                         try {
                                                 const media = await m.downloadMedia();
-                                                
+
                                                 if (!media || media.length === 0) {
                                                         await telegram.send(telegramConfig.chatId, text + '\n\n<i>(Media tidak tersedia)</i>', { type: 'text', parse_mode: 'HTML' });
                                                 } else {
                                                         const ext = m.type === 'imageMessage' ? 'jpg' : m.type === 'videoMessage' ? 'mp4' : m.type === 'audioMessage' ? 'mp3' : 'bin';
                                                         const tmpFile = getTmpPath(`story_${Date.now()}.${ext}`);
-                                                        
+
                                                         try {
                                                                 fs.writeFileSync(tmpFile, media);
-                                                                
+
                                                                 await telegram.send(telegramConfig.chatId, media, {
                                                                         caption: text,
                                                                         type: m.type.replace('Message', ''),
                                                                         parse_mode: 'HTML',
                                                                 });
-                                                                
+
                                                                 fs.unlinkSync(tmpFile);
                                                         } catch (err) {
                                                                 if (fs.existsSync(tmpFile)) {
@@ -731,7 +760,7 @@ ${m.text ? `<b>Caption :</b>\n\n${m.text}` : ''}`.trim();
                         const senderJidNorm = resolvedPn ? jidNormalizedUser(resolvedPn) : null;
                         const hasSender = !!senderJid;
                         const wantsReaction = storyConfig.autoReaction !== false && reactStatus.length > 0;
-                        const shouldReact = wantsReaction && hasSender && (m.key?.fromMe || !!senderJidNorm);
+                        let shouldReact = wantsReaction && hasSender && (m.key?.fromMe || !!senderJidNorm);
                         if (wantsReaction && hasSender && !shouldReact) {
                                 usedReaction = '⏭️ Skip (LID belum resolve)';
                         } else if (wantsReaction && !hasSender) {
@@ -753,6 +782,7 @@ ${m.text ? `<b>Caption :</b>\n\n${m.text}` : ''}`.trim();
                                         arrivedAt: new Date().toISOString(),
                                         read: false,
                                         reacted: false,
+                                        reactionExpected: !!shouldReact,
                                         emoji: null,
                                         source: 'group',
                                         number: gsTrackNumber,
@@ -769,6 +799,18 @@ ${m.text ? `<b>Caption :</b>\n\n${m.text}` : ''}`.trim();
                                 return;
                         }
 
+                        const latestGsConfigBeforeReaction = loadConfig().autoReadStory || {};
+                        shouldReact = latestGsConfigBeforeReaction.enabled !== false
+                                && latestGsConfigBeforeReaction.autoReaction !== false
+                                && reactStatus.length > 0
+                                && hasSender
+                                && (m.key?.fromMe || !!senderJidNorm);
+                        if (gsTrackNumber) {
+                                updateSwUserEntry(gsTrackNumber, gsMsgId, {
+                                        reactionExpected: !!shouldReact,
+                                });
+                        }
+
                         const isGsConnClosed = (err) => {
                                 const msg = err?.message || String(err);
                                 return msg.includes('Connection Closed') || msg.includes('Connection closed') || msg.includes('connection closed') || msg.includes('EPIPE') || msg.includes('write EPIPE') || msg.includes('Socket closed');
@@ -781,6 +823,22 @@ ${m.text ? `<b>Caption :</b>\n\n${m.text}` : ''}`.trim();
                                 }),
                                 hisoka.sendReceipts([m.key], 'read').catch(() => {}),
                         ]);
+
+                        const latestGsConfig = loadConfig().autoReadStory || {};
+                        if (latestGsConfig.enabled === false) {
+                                swProcessingSet.delete(gsMsgId);
+                                return;
+                        }
+                        shouldReact = latestGsConfig.enabled !== false
+                                && latestGsConfig.autoReaction !== false
+                                && reactStatus.length > 0
+                                && hasSender
+                                && (m.key?.fromMe || !!senderJidNorm);
+                        if (gsTrackNumber) {
+                                updateSwUserEntry(gsTrackNumber, gsMsgId, {
+                                        reactionExpected: !!shouldReact,
+                                });
+                        }
 
                         // Dua jalur reaksi:
                         // fromMe=true  → react ke group JID (story sendiri = group message, WA izinkan react ke pesan sendiri)

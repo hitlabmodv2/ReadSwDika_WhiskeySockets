@@ -73,8 +73,9 @@ const { normalizeJadibotNumber } = _require(path.resolve('./SEMUA_FITUR/jadibot/
 const { formatAlqLinkMsg, pickBestAlqLink, getAllAlqLinksByPriority } = _require(path.resolve('./SEMUA_FITUR/anime/alqolam-helpers.cjs'));
 const { detectImageSearchQuery, extractImageCount, cleanImageTitle, makeWilyHelpers: _makeWilyHelpers } = _require(path.resolve('./SEMUA_FITUR/ai/wily-helpers.cjs'));
 const { handleAutoSimi } = _require(path.resolve('./SEMUA_FITUR/ai/autosimi-cmd.cjs'));
-const { handleMusicAICallbacks } = _require(path.resolve('./SEMUA_FITUR/music/musikai-cmd.cjs'));
-const { handleMusicAI2Callbacks } = _require(path.resolve('./SEMUA_FITUR/music/musikai2-cmd.cjs'));
+// ─── musikai & musikai2 dihentikan (backend API tidak lagi gratis, memerlukan pembayaran) ───
+// const { handleMusicAICallbacks } = _require(path.resolve('./SEMUA_FITUR/music/musikai-cmd.cjs'));
+// const { handleMusicAI2Callbacks } = _require(path.resolve('./SEMUA_FITUR/music/musikai2-cmd.cjs'));
 const { handleAlqUpdateChoice, handleAlqDlChoice } = _require(path.resolve('./SEMUA_FITUR/anime/alqanime-cmd.cjs'));
 const { handleCosplayChoice, sendCosplayImages: _sendCosplayImages } = _require(path.resolve('./SEMUA_FITUR/anime/cosplay-cmd.cjs'));
 const { handleKomiktapChoice } = _require(path.resolve('./SEMUA_FITUR/anime/komiktap-cmd.cjs'));
@@ -126,8 +127,7 @@ const {
 // ── AntiTagSW callbacks (button/session reply) — imported from antitagsw.js ──
 
 const pendingPlayChoices = new Map();
-const pendingMusikaiCache  = new Map(); // key → { results, params, ts }
-const pendingMusikai2Cache = new Map(); // key → { results, params, ts } (musikai2)
+// musikai cache dihapus (fitur dihentikan karena backend tidak lagi gratis)
 const pendingAlqDlChoices = new Map();
 const pendingAlqUpdateChoices = new Map();
 const pendingAlqNotifChoices   = new Map();
@@ -975,18 +975,9 @@ export default async function ({ message, type: messagesType }, hisoka) {
                 // ─── AntiLink status reply (add/del GC via .antilink status) ─────────
                 if (await _handleAntilinkStatusReplyFn({ hisoka, m, pendingAntilinkChoices, getQuotedStanzaId, tolak, logCommand })) return;
 
-                // ─── MusicAI callbacks → musikai-cmd.cjs & musikai2-cmd.cjs ──────────
-                if (await handleMusicAICallbacks({ hisoka, m,
-                        pendingMusikaiCache, generateWAMessageFromContent,
-                        sendAudioWithButtons, sendConfirmWithButtons,
-                        logCommand, logError, tolak,
-                })) return;
-
-                if (await handleMusicAI2Callbacks({ hisoka, m,
-                        pendingMusikai2Cache, generateWAMessageFromContent,
-                        sendAudioWithButtons, sendConfirmWithButtons,
-                        logCommand, logError, tolak,
-                })) return;
+                // ─── MusicAI callbacks DIHENTIKAN (backend API tidak lagi gratis) ────
+                // if (await handleMusicAICallbacks({ hisoka, m, ... })) return;
+                // if (await handleMusicAI2Callbacks({ hisoka, m, ... })) return;
                 // ──────────────────────────────────────────────────────────────────────
 
                 // ── Handle konfirmasi .mati / .restart (button quick reply) ───────────
@@ -1507,15 +1498,10 @@ export default async function ({ message, type: messagesType }, hisoka) {
                                 break;
                         }
                         case 'musikai':
-                        case 'aimusik': {
-                                const { handleMusikaiCmd } = _require(path.resolve('./SEMUA_FITUR/music/musikai-cmd.cjs'));
-                                await handleMusikaiCmd({ hisoka, m, query, tolak, logCommand, logError, sendConfirmWithButtons, pendingMusikaiCache, generateWAMessageFromContent, sendAudioWithButtons });
-                                break;
-                        }
+                        case 'aimusik':
                         case 'musikai2':
                         case 'aimusik2': {
-                                const { handleMusikai2Cmd } = _require(path.resolve('./SEMUA_FITUR/music/musikai2-cmd.cjs'));
-                                await handleMusikai2Cmd({ hisoka, m, query, tolak, logCommand, logError, sendConfirmWithButtons, pendingMusikai2Cache, sendAudioWithButtons });
+                                await tolak(hisoka, m, `❌ *Fitur ${m.command} dihentikan sementara*\n\nBackend API ChatMusicPro sudah tidak lagi gratis dan memerlukan pembayaran.\n\nFitur ini akan diaktifkan kembali jika ada alternatif backend yang gratis.`);
                                 break;
                         }
 

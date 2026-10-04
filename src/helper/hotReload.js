@@ -178,8 +178,6 @@ const WATCHED_FILES = [
     { key: 'cjs:genius',       rel: 'SEMUA_FITUR/music/genius.cjs',        type: 'cjs' },
     { key: 'cjs:infomusik',    rel: 'SEMUA_FITUR/music/infomusik.cjs',     type: 'cjs' },
     { key: 'cjs:whatsmusik',   rel: 'SEMUA_FITUR/music/whatsmusik.cjs',    type: 'cjs' },
-    { key: 'cjs:chatmusic',    rel: 'SEMUA_FITUR/music/chatmusic.cjs',     type: 'cjs' },
-    { key: 'cjs:chatmusic2',   rel: 'SEMUA_FITUR/music/chatmusic2.cjs',    type: 'cjs' },
     { key: 'cjs:whatgenre',    rel: 'SEMUA_FITUR/music/whatgenre.cjs',     type: 'cjs' },
     // Anime
     { key: 'cjs:alqanime',     rel: 'SEMUA_FITUR/anime/alqanime.cjs',      type: 'cjs' },

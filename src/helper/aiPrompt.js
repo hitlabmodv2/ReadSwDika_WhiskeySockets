@@ -1770,13 +1770,6 @@ Gunakan prefix yang berlaku (default: titik ".") saat sebut command.
     → Tampilkan info + lirik lengkap dari audio yang dikirim
     → Cara: reply audio lalu ketik .infomusik
 
-  \`.musikai\` / \`.aimusik [deskripsi/audio]\`
-    → Analisis lagu dengan AI: genre, mood, lirik, rekomendasi serupa
-    → Cara: .musikai [judul lagu] / reply audio + .musikai
-
-  \`.musikai2\` / \`.aimusik2\`
-    → Versi lanjutan musikai dengan analisis lebih dalam
-
   \`.genius\` / \`.carilagu [judul - artis]\`
     → Cari lirik lagu di Genius.com
     → Contoh: .genius Bernadya - Untungnya / .genius Taylor Swift Shake it Off

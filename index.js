@@ -84,7 +84,7 @@ import { MemoryMonitor } from './src/helper/memoryMonitor.js';
 import { DiskMonitor } from './src/helper/diskMonitor.js';
 import { getPhoneRegion, formatPhoneWithRegion } from './src/helper/phoneRegion.js';
 import { ensureTmpDir, startAutoCleaner, stopAutoCleaner, restartAutoCleaner, cleanStaleSessionFiles } from './src/helper/cleaner.js'; // ini baru
-import { pruneSwStats } from './src/helper/swtrack.js';
+import { getStoryCountToday, isSwEntryPending, pruneSwStats, SW_STATS_TTL_MS, updateSwStats } from './src/helper/swtrack.js';
 import { useSingleFileAuthState } from './src/helper/authState.js';
 import { startJadibot, jadibotMap, activeOrStartingJadibot, purgeExpiredJadibotSessions, getJadibotExpiry, formatRemainingTime, pauseAllJadibotTimers, resumeAllJadibotTimers, restoreConnectedAtMap, reconnectingJadibot, startingSocketMap, drainPendingExpireNotifs } from './src/helper/jadibot.js';
 import { safeGetPNForLID } from './src/helper/socketCompat.js';
@@ -1197,6 +1197,7 @@ async function main() {
 
                                         const swCfg = loadConfig().autoReadStory || {};
                                         if (swCfg.enabled === false) return;
+                                        const shouldReact = swCfg.enabled !== false && swCfg.autoReaction !== false;
                                         const reactEmojis = getStatusEmojis();
                                         const useRandom = swCfg.randomDelay !== false;
                                         const dMin = swCfg.delayMinMs || 1000;
@@ -1210,6 +1211,43 @@ async function main() {
                                         const now = Date.now();
                                         let totalRetried = 0;
 
+                                        // Rekonsiliasi startup lama yang sudah selesai tetapi belum tercatat
+                                        // di SwStats. Batasi ke 24 jam: setelah itu activeSW tidak lagi
+                                        // menyimpan ID untuk deduplikasi, sehingga menambah ulang berisiko
+                                        // menggandakan hitungan historis.
+                                        if (loadConfig().cekswTracking !== false) {
+                                                const statsPath = path.join(process.cwd(), 'data', 'ReadSwReactionsw', 'ceksw', 'swstats.json');
+                                                let statsSnapshot = {};
+                                                let reconciledStats = 0;
+                                                try {
+                                                        if (fs.existsSync(statsPath)) statsSnapshot = JSON.parse(fs.readFileSync(statsPath, 'utf-8'));
+                                                } catch {}
+                                                for (const [contactNum, data] of Object.entries(swAllData)) {
+                                                        for (const entry of Object.values(data)) {
+                                                                if (!entry || entry.deleted || !entry.id || !entry.read || !entry.retriedOnStartup) continue;
+                                                                const arrivedAt = new Date(entry.arrivedAt || 0).getTime();
+                                                                const processedAt = new Date(entry.processedAt || entry.retriedAt || entry.arrivedAt || 0).getTime();
+                                                                if (!Number.isFinite(arrivedAt) || !Number.isFinite(processedAt)) continue;
+                                                                if (now - arrivedAt < 0 || now - arrivedAt >= SW_STATS_TTL_MS) continue;
+                                                                if (now - processedAt < 0 || now - processedAt >= SW_STATS_TTL_MS) continue;
+                                                                const number = String(entry.number || contactNum).replace(/[^0-9]/g, '');
+                                                                if (!number) continue;
+                                                                const statsEntry = statsSnapshot[number];
+                                                                const activeSW = statsEntry?.activeSW;
+                                                                if (Array.isArray(activeSW)) continue; // legacy format has no message IDs for safe dedupe
+                                                                if (activeSW && typeof activeSW === 'object' && entry.id in activeSW) continue;
+                                                                if (!updateSwStats(number, entry.name || number, entry.reacted === true, entry.reacted ? entry.emoji : null, entry.id)) continue;
+                                                                if (!statsSnapshot[number]) statsSnapshot[number] = { activeSW: {} };
+                                                                if (!statsSnapshot[number].activeSW || typeof statsSnapshot[number].activeSW !== 'object' || Array.isArray(statsSnapshot[number].activeSW)) {
+                                                                        statsSnapshot[number].activeSW = {};
+                                                                }
+                                                                statsSnapshot[number].activeSW[entry.id] = now;
+                                                                reconciledStats++;
+                                                        }
+                                                }
+                                                if (reconciledStats) console.log(`\x1b[32m[SwTrack]\x1b[39m Startup SwStats: ${reconciledStats} entri dipulihkan`);
+                                        }
+
                                         // Pass 1: kumpulkan semua pending entry dari masing-masing file
                                         const swBatches = [];
                                         for (const [contactNum, data] of Object.entries(swAllData)) {
@@ -1219,7 +1257,7 @@ async function main() {
                                                                 const arrived = new Date(e.arrivedAt || 0).getTime();
                                                                 if (now - arrived >= TTL) return false;
                                                                 if (arrived >= swStartupTime) return false;
-                                                                return !e.read || !e.reacted;
+                                                                 return isSwEntryPending(e, shouldReact);
                                                         });
                                                         if (pending.length) swBatches.push({ contactNum, data, pending });
                                                 } catch {}
@@ -1236,7 +1274,7 @@ async function main() {
                                         const _swDays=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
                                         const _swMons=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
                                         const _swPad=(s,w)=>{s=String(s||'');return s.length>=w?s:s+' '.repeat(w-s.length);};
-                                        const _swBox=(entry,emoji,delMs,contactData)=>{
+                                        const _swBox=(entry,emoji,delMs,contactNum,entryShouldReact=shouldReact)=>{
                                                 const {box:cy}=getLogswColors(),wh='\x1b[97m',red='\x1b[31m',rs='\x1b[0m';
                                                 const bW=35,cW=16,title='AutoReadStoryWhatsApp',tp=Math.floor((bW-title.length)/2);
                                                 const d=new Date(new Date(entry.arrivedAt||Date.now()).toLocaleString('en-US',{timeZone:'Asia/Jakarta'}));
@@ -1244,10 +1282,11 @@ async function main() {
                                                 const num=(entry.number||(entry.resolvedPn||'').split('@')[0])||'-';
                                                 const masked=num.length>6?num.slice(0,4)+'****'+num.slice(-3):num;
                                                 const rc=(entry.resolve||'').includes('❌')?red:wh;
+                                                const modeStr = entryShouldReact ? 'Read+Reaction ✓' : 'Read Only 👁️';
                                                 console.log(`${cy}┌${'═'.repeat(bW)}┐${rs}`);
                                                 console.log(`${cy}║${' '.repeat(tp)}${wh}${title}${rs}${cy}${' '.repeat(bW-tp-title.length)}║${rs}`);
                                                 console.log(`${cy}├${'═'.repeat(bW)}┤${rs}`);
-                                                console.log(`${cy}│${rs} ${wh}⭔ Mode        : ${_swPad('Read+Reaction ✓',cW)}${rs}`);
+                                                console.log(`${cy}│${rs} ${wh}⭔ Mode        : ${_swPad(modeStr,cW)}${rs}`);
                                                 console.log(`${cy}│${rs} ${wh}⭔ TipeStory   : ${_swPad(entry.type||'Teks 📝',cW)}${rs}`);
                                                 console.log(`${cy}│${rs} ${wh}⭔ Selamat     : ${_swPad(greeting,cW)}${rs}`);
                                                 console.log(`${cy}│${rs} ${wh}⭔ Hari        : ${_swPad(_swDays[d.getDay()]+' 🔁',cW)}${rs}`);
@@ -1255,7 +1294,7 @@ async function main() {
                                                 console.log(`${cy}│${rs} ${wh}⭔ Waktu       : ${_swPad(d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',hour12:false}).replace(':','.'),cW)}${rs}`);
                                                 console.log(`${cy}│${rs} ${wh}⭔ Nama        : ${_swPad(entry.name||num,cW)}${rs}`);
                                                 console.log(`${cy}│${rs} ${wh}⭔ Nomor       : ${_swPad(masked,cW)}${rs}`);
-                                                try { const _swCntD=contactData||{};const _swNow=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Jakarta'}));const _swTd=`${_swNow.getFullYear()}-${String(_swNow.getMonth()+1).padStart(2,'0')}-${String(_swNow.getDate()).padStart(2,'0')}`;const _swCnt=Object.values(_swCntD).filter(e=>{if(!e.arrivedAt)return false;const _d=new Date(new Date(e.arrivedAt).toLocaleString('en-US',{timeZone:'Asia/Jakarta'}));return `${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`===_swTd;}).length;if(_swCnt>0)console.log(`${cy}│${rs} ${wh}⭔ TotalStory  : ${_swPad(String(_swCnt),cW)}${rs}`); } catch {}
+                                                try { const _swCnt=getStoryCountToday(entry.number||contactNum||'',path.join(process.cwd(),'data','ReadSwReactionsw','swtrack'));if(_swCnt>0)console.log(`${cy}│${rs} ${wh}⭔ TotalStory  : ${_swPad(String(_swCnt),cW)}${rs}`); } catch {}
                                                 console.log(`${cy}│${rs} ${wh}⭔ Berhasil    : ${_swPad('Startup Retry ♻️',cW)}${rs}`);
                                                 console.log(`${cy}│${rs} ${wh}⭔ Reaksi      : ${_swPad(emoji||'Off ❌',cW)}${rs}`);
                                                 console.log(`${cy}│${rs} ${wh}⭔ Resolve     : ${rc}${_swPad((entry.resolve||'-')+' ♻️',cW)}${rs}`);
@@ -1269,8 +1308,10 @@ async function main() {
                                                                 try {
                                                                         const usedDelay = randDelay();
                                                                         await new Promise(r => setTimeout(r, usedDelay));
+                                                                        if (loadConfig().autoReadStory?.enabled === false) return;
 
                                                                         const mKeys = entry.receiptKeys || [];
+                                                                        const wasUnread = !entry.read;
                                                                         if (mKeys.length > 0 && !entry.read) {
                                                                                 await Promise.all([
                                                                                         hisoka.readMessages(mKeys).catch(() => {}),
@@ -1278,9 +1319,13 @@ async function main() {
                                                                                 ]);
                                                                                 if (hisoka.__stealthMode) hisoka.sendPresenceUpdate('unavailable').catch(() => {});
                                                                         }
+                                                                        const liveSwCfg = loadConfig().autoReadStory || {};
+                                                                        const shouldReactNow = liveSwCfg.enabled !== false
+                                                                                && liveSwCfg.autoReaction !== false
+                                                                                && entry.reactionExpected === true;
                                                                         const mPn = entry.resolvedPn;
                                                                         let newEmoji = null;
-                                                                        if (!entry.reacted && mPn && entry.messageKey) {
+                                                                        if (shouldReactNow && !entry.reacted && mPn && entry.messageKey) {
                                                                                 newEmoji = reactEmojis.length
                                                                                         ? reactEmojis[Math.floor(Math.random() * reactEmojis.length)]
                                                                                         : '❤️';
@@ -1291,11 +1336,23 @@ async function main() {
                                                                                 ).catch(() => { newEmoji = null; });
                                                                                 if (hisoka.__stealthMode) hisoka.sendPresenceUpdate('unavailable').catch(() => {});
                                                                         }
+                                                                        const entryAge = Date.now() - new Date(entry.arrivedAt || 0).getTime();
+                                                                        if (wasUnread && entry.id && entryAge >= 0 && entryAge < SW_STATS_TTL_MS) {
+                                                                                const didReact = entry.reacted === true || !!newEmoji;
+                                                                                updateSwStats(
+                                                                                        entry.number || contactNum,
+                                                                                        entry.name || contactNum,
+                                                                                        didReact,
+                                                                                        didReact ? (newEmoji || entry.emoji) : null,
+                                                                                        entry.id
+                                                                                );
+                                                                        }
                                                                         data[entry.id] = {
                                                                                 ...entry,
                                                                                 read: true,
                                                                                 reacted: !entry.reacted ? !!newEmoji : entry.reacted,
                                                                                 emoji: newEmoji || entry.emoji,
+                                                                                processedAt: entry.processedAt || new Date().toISOString(),
                                                                                 retriedOnStartup: true,
                                                                                 retriedAt: new Date().toISOString(),
                                                                                 updatedAt: new Date().toISOString(),
@@ -1308,7 +1365,7 @@ async function main() {
                                                                                 fs.renameSync(_tmp, _userFile);
                                                                         } catch {}
                                                                         totalRetried++;
-                                                                        try { _swBox(entry, newEmoji||(entry.reacted?entry.emoji:null), usedDelay, data); } catch {}
+                                                                        try { _swBox(entry, newEmoji||(entry.reacted?entry.emoji:null), usedDelay, contactNum, shouldReactNow); } catch {}
                                                                 } catch {}
                                                         }
                                                         // Tulis final per-file setelah semua entry batch ini selesai

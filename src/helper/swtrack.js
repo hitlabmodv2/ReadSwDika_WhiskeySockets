@@ -35,6 +35,8 @@
 import fs from 'fs';
 import path from 'path';
 import { createRequire } from 'module';
+import { isSwEntryPending } from './swtrack-pending.js';
+export { isSwEntryPending };
 const _require = createRequire(import.meta.url);
 const { jidDecode } = _require('@whiskeysockets/baileys');
 
@@ -135,7 +137,8 @@ export const SW_STATS_PATH = path.join(SW_BASE_DIR, 'ceksw', 'swstats.json');
         }
 })();
 
-const SW_TTL = 24 * 60 * 60 * 1000;
+export const SW_STATS_TTL_MS = 24 * 60 * 60 * 1000;
+const SW_TTL = SW_STATS_TTL_MS;
 
 // Helper: migrate activeSW lama (array timestamps) → object {msgId: timestamp}
 // Lama: [ts1, ts2, ...]  →  Baru: { "msgid-ts1": ts1, "msgid-ts2": ts2 }
@@ -172,14 +175,14 @@ export function countActiveSW(activeSW) {
 // Core writer — bisa pakai path custom (untuk jadibot) atau default (bot utama)
 // msgId opsional — dipakai untuk deduplikasi (story yang sama tidak dihitung 2x)
 export function updateSwStatsAt(statsPath, number, name, reacted, emoji, msgId) {
-        if (!number || !statsPath) return;
+        if (!number || !statsPath) return false;
         // Cek config per-jadibot jika statsPath ada di data_jadibot/
         const _normPath = statsPath.replace(/\\/g, '/');
         const _jbMatch  = _normPath.match(/data_jadibot\/([^/]+)\/ceksw/);
         if (_jbMatch) {
-                if (loadJadibotCekswConfig(_jbMatch[1]).cekswTracking === false) return;
+                if (loadJadibotCekswConfig(_jbMatch[1]).cekswTracking === false) return false;
         } else {
-                if (loadConfig().cekswTracking === false) return;
+                if (loadConfig().cekswTracking === false) return false;
         }
         try {
                 let stats = {};
@@ -228,12 +231,13 @@ export function updateSwStatsAt(statsPath, number, name, reacted, emoji, msgId) 
                 );
                 if (_emojiStats) sorted._emojiStats = _emojiStats;
                 atomicWriteFileSync(statsPath, JSON.stringify(sorted, null, 2));
-        } catch {}
+                return true;
+        } catch { return false; }
 }
 
 // Shortcut untuk bot utama (path default)
 export function updateSwStats(number, name, reacted, emoji, msgId) {
-        updateSwStatsAt(SW_STATS_PATH, number, name, reacted, emoji, msgId);
+        return updateSwStatsAt(SW_STATS_PATH, number, name, reacted, emoji, msgId);
 }
 
 // ─── SwStats: pruning activeSW yang expired — generik, bisa dipakai bot utama & jadibot ──
@@ -400,14 +404,14 @@ export function updateSwUserEntry(number, msgId, patch) {
         } catch {}
 }
 
-export function getMissedSwEntries(number, excludeId) {
+export function getMissedSwEntries(number, excludeId, reactionEnabled = true) {
         try {
                 const data = loadSwUser(number);
                 const cutoff = Date.now() - SW_ENTRY_TTL_MS;
                 return Object.values(data).filter(e => {
                         if (!e || e.id === excludeId || e.deleted) return false;
                         if (new Date(e.arrivedAt || 0).getTime() < cutoff) return false;
-                        return !e.read || !e.reacted;
+                        return isSwEntryPending(e, reactionEnabled);
                 });
         } catch {}
         return [];
@@ -532,14 +536,14 @@ export function createSwTracker(usersFile) {
                                 _save(number, data);
                         } catch {}
                 },
-                getMissedSwEntries(number, excludeId) {
+                getMissedSwEntries(number, excludeId, reactionEnabled = true) {
                         try {
                                 const data = _load(number);
                                 const cutoff = Date.now() - TTL;
                                 return Object.values(data).filter(e => {
                                         if (!e || e.id === excludeId || e.deleted) return false;
                                         if (new Date(e.arrivedAt || 0).getTime() < cutoff) return false;
-                                        return !e.read || !e.reacted;
+                                        return isSwEntryPending(e, reactionEnabled);
                                 });
                         } catch {}
                         return [];

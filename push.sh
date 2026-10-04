@@ -46,7 +46,7 @@ REPO_OWNER="hitlabmodv2"   # Pemilik repo GitHub (untuk URL API)
 REPO="ReadSwDika_WhiskeySockets"
 # DEFAULT_BRANCH di-auto-detect realtime dari GitHub (lihat detect_default_branch).
 # Nilai di sini cuma fallback kalau koneksi ke GitHub bermasalah.
-DEFAULT_BRANCH="ReadSwDika_V42"
+DEFAULT_BRANCH="ReadSwDika_V43"
 
 # Versi script ini — dipakai untuk cek update otomatis
 SCRIPT_VERSION="1.3"
@@ -2524,17 +2524,20 @@ preview_staged_confirm() {
   done
 
   # Prompt compact satu baris langsung setelah header
-  printf "  ${C_GREEN}y${C_RESET} › push  ${C_RED}0${C_RESET} › batal  ${C_DIM}────────────${C_RESET}  ${C_BOLD}▸ ${C_RESET}"
+  printf "  ${C_GREEN}y/1${C_RESET} › lanjut push  ${C_RED}0${C_RESET} › batal  ${C_DIM}────────────${C_RESET}  ${C_BOLD}▸ ${C_RESET}"
 
   local _ans
   read -r _ans </dev/tty
   echo ""
   _ans=$(echo "$_ans" | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]')
-  if [ "$_ans" != "y" ]; then
+  case "$_ans" in
+    y|1|yes|push) ;;
+    *)
     echo -e "  ${C_YELLOW}↩ Dibatalkan — tidak ada yang di-commit.${C_RESET}"
     sleep 1
     return 1
-  fi
+    ;;
+  esac
   return 0
 }
 
@@ -7060,6 +7063,12 @@ run_upload() {
   local count=${#SELECTED_BRANCHES[@]}
   local ok=0 fail=0
 
+  if [ "$count" -eq 0 ]; then
+    echo -e "${C_RED}❌ Tidak ada branch tujuan yang dipilih; upload dibatalkan.${C_RESET}"
+    prompt_back_or_exit
+    return 1
+  fi
+
   if [ "$count" -gt 1 ]; then
     echo ""
     echo -e "${C_MAGENTA}▶ Mode multi-branch${C_RESET} ${C_DIM}(${count} branch tujuan • konten sama untuk semua)${C_RESET}"
@@ -7068,7 +7077,8 @@ run_upload() {
   echo ""
   # Commit perubahan pending di branch SEKARANG (cuma sekali).
   if ! commit_pending_changes; then
-    echo -e "${C_RED}❌ Commit gagal, batal push.${C_RESET}"
+    echo -e "${C_RED}❌ Commit dibatalkan atau gagal; upload tidak dilanjutkan.${C_RESET}"
+    prompt_back_or_exit
     return 1
   fi
 

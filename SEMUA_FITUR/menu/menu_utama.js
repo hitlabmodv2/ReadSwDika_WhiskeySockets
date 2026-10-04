@@ -130,8 +130,6 @@ export function buildMenuUtama({ pushName, isOwner, uptimeStr, tgl, jam, browser
 │ .geniusdetail
 │ .whatsmusik / .wmusik
 │ .infomusik / .infolirik
-│ .musikai / .aimusik
-│ .musikai2 / .aimusik2
 │ .speedtest / .speed
 │ .pixiv / .pixivr18
 ├═════════════════════┤

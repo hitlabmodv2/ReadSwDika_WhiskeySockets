@@ -1,0 +1,17 @@
+📜 *ReadSW — Patch 4 Oktober 2026*
+📢 *INFORMASI PERBAIKAN*
+_📅 Minggu, 4 Oktober 2026_
+━━━━━━━━━━━━━━━━━━━━━━
+🤖 *WILY BOT* — `V27.4`
+✨ *0 Fitur Baru*
+🔧 *1 Bug/Error Fix*
+🚀 *0 Perubahan*
+━━━━━━━━━━━━━━━━━━━━━━
+🐛 *BUG FIX*
+━━━━━━━━━━━━━━━━━━━━━━
+1. *READSW — Startup Retry Berulang di Mode Read Only*
+   ~Sebelumnya, status yang sudah dibaca tetapi tidak direaksikan tetap dianggap pending, sehingga diproses ulang setiap restart.~
+   • Status `read:true` hanya menunggu reaksi jika mode reaksi aktif.
+   • Aturan yang sama dipakai oleh startup retry, bot utama, dan jadibot.
+   • Mode dibaca ulang sebelum retry mengirim reaksi; startup memperbarui SwStats dengan deduplikasi dan menyimpan `processedAt` untuk hitungan `TotalStory`.
+> _Hasil: status Read Only yang sudah dibaca tidak lagi masuk antrean retry pada restart berikutnya._

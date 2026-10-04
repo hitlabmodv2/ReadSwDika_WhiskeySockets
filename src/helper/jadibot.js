@@ -1328,7 +1328,7 @@ async function handleJadibotSW(msg, sock, swSet, number) {
       return
     }
 
-    const shouldReact = storyConfig.autoReaction !== false && reactStatus.length && hasSender
+    let shouldReact = storyConfig.autoReaction !== false && reactStatus.length && hasSender
 
     // ── SwTrack: tulis entry awal ke folder jadibot ──
     const trackNumber = resolvedPn
@@ -1348,6 +1348,7 @@ async function handleJadibotSW(msg, sock, swSet, number) {
         arrivedAt: new Date().toISOString(),
         read: false,
         reacted: false,
+        reactionExpected: !!(shouldReact && (isGroupStatus ? (msg.key?.fromMe || senderJidNorm) : resolvedPn)),
         emoji: null,
         resolve: resolveMethod,
         source: isGroupStatus ? 'group' : 'status',
@@ -1363,6 +1364,22 @@ async function handleJadibotSW(msg, sock, swSet, number) {
     if (trackNumber && tracker.isSwUserDeleted(trackNumber, msgId)) {
       swSet.delete(msgId)
       return
+    }
+
+    const activeStoryConfig = getJadibotReadsw(number)
+    if (activeStoryConfig.enabled === false) {
+      swSet.delete(msgId)
+      return
+    }
+    shouldReact = activeStoryConfig.enabled !== false
+      && activeStoryConfig.autoReaction !== false
+      && reactStatus.length > 0
+      && hasSender
+      && (isGroupStatus ? (msg.key?.fromMe || !!senderJidNorm) : !!resolvedPn)
+    if (trackNumber) {
+      tracker.updateSwUserEntry(trackNumber, msgId, {
+        reactionExpected: !!(shouldReact && (isGroupStatus ? (msg.key?.fromMe || senderJidNorm) : resolvedPn)),
+      })
     }
 
     const isConnClosed = (err) => {
@@ -1396,7 +1413,11 @@ async function handleJadibotSW(msg, sock, swSet, number) {
         tracker.updateSwUserEntry(trackNumber, msgId, { receiptKeys, resolvedPn: resolvedPn || null, messageKey: msg.key })
 
         // ── Auto-retry SW sebelumnya yang terlewat (belum dibaca/direact) ──
-        const missed = tracker.getMissedSwEntries(trackNumber, msgId)
+        const missed = tracker.getMissedSwEntries(
+          trackNumber,
+          msgId,
+          activeStoryConfig.enabled !== false && activeStoryConfig.autoReaction !== false
+        )
           .filter(e => !swSet.has(e.id)) // skip yang masih on-progress
         if (missed.length > 0) {
           let retriedCount = 0
@@ -1412,16 +1433,17 @@ async function handleJadibotSW(msg, sock, swSet, number) {
               // retry-nya jalan, jadibot sudah dipindah ke Read Only, jangan
               // tetap kirim reaksi (data harus ikut kondisi realtime, bukan
               // kondisi lama waktu story itu pertama masuk).
-              const retryShouldReact = storyConfig.autoReaction !== false
+              const retryStoryConfig = getJadibotReadsw(number)
+              const retryShouldReact = retryStoryConfig.enabled !== false && retryStoryConfig.autoReaction !== false
               let retryEmoji = null
-              if (retryShouldReact && !miss.reacted && mp && miss.messageKey) {
+              if (retryShouldReact && miss.reactionExpected === true && !miss.reacted && mp && miss.messageKey) {
                 retryEmoji = getJadibotRandomEmoji(number) || '❤️'
                 await sock.sendMessage(
                   'status@broadcast',
                   { react: { key: miss.messageKey, text: retryEmoji } },
                   { statusJidList: [jidNormalizedUser(sock.user.id), jidNormalizedUser(mp)] }
                 ).catch(() => { retryEmoji = null })
-                tracker.updateSwUserEntry(trackNumber, miss.id, { read: true, reacted: true, emoji: retryEmoji, retriedAt: new Date().toISOString() })
+                tracker.updateSwUserEntry(trackNumber, miss.id, { read: true, reacted: !!retryEmoji, emoji: retryEmoji, retriedAt: new Date().toISOString() })
               } else if (mk.length > 0) {
                 tracker.updateSwUserEntry(trackNumber, miss.id, { read: true, retriedAt: new Date().toISOString() })
               }
@@ -1465,6 +1487,18 @@ async function handleJadibotSW(msg, sock, swSet, number) {
     }
 
     // ── Reaction ──
+    const latestReactionConfig = getJadibotReadsw(number)
+    shouldReact = latestReactionConfig.enabled !== false
+      && latestReactionConfig.autoReaction !== false
+      && reactStatus.length > 0
+      && hasSender
+      && (isGroupStatus ? (msg.key?.fromMe || !!senderJidNorm) : !!resolvedPn)
+    if (trackNumber) {
+      tracker.updateSwUserEntry(trackNumber, msgId, {
+        reactionExpected: !!(shouldReact && (isGroupStatus ? (msg.key?.fromMe || senderJidNorm) : resolvedPn)),
+      })
+    }
+
     if (isStatusBroadcast && shouldReact && resolvedPn) {
       await sock.sendMessage(
         'status@broadcast',
